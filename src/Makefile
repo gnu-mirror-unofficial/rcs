@@ -1,4 +1,4 @@
-# $Id: Makefile,v 5.16 1991/10/07 17:32:46 eggert Exp $
+# $Id: Makefile,v 5.16.0.1 1993/03/25 04:36:22 eggert Exp $
 # Copyright (C) 1982, 1988, 1989 Walter Tichy
 # Copyright 1990, 1991 by Paul Eggert
 #   Distributed under license by the Free Software Foundation, Inc.
@@ -77,6 +77,9 @@ default :: all
 #DIFF3 = /usr/5lib/diff3prog# other aliases for traditional diff3
 #DIFF3 = /usr/lib/diff3prog
 #DIFF3 = /usr/lib/rdiff3
+
+ DIFF3_A = 1# GNU diff 2.1 or later
+#DIFF3_A = 0# all other diffs
 
  DIFF3_BIN = 1# GNU diff
 #DIFF3_BIN = 0# traditional diff
@@ -165,7 +168,7 @@ conf.h : conf.sh Makefile
 	$(REMOVE) a.*
 	CC='$(CC)' CFLAGS='$(CFLAGS)' \
 	COMPAT2='$(COMPAT2)' \
-	DIFF3='$(DIFF3)' DIFF3_BIN='$(DIFF3_BIN)' \
+	DIFF3='$(DIFF3)' DIFF3_A='$(DIFF3_A)' DIFF3_BIN='$(DIFF3_BIN)' \
 	DIFF='$(DIFF)' DIFF_FLAGS='$(DIFF_FLAGS)' DIFF_L='$(DIFF_L)' \
 	DIFF_SUCCESS='$(DIFF_SUCCESS)' DIFF_FAILURE='$(DIFF_FAILURE)' DIFF_TROUBLE='$(DIFF_TROUBLE)' \
 	ED='$(ED)' \

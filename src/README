@@ -1,6 +1,6 @@
 RCS configuration instructions
 
-	$Id: README,v 1.5 1991/10/07 17:32:46 eggert Exp $
+	$Id: README,v 1.5.0.1 1993/03/25 04:24:14 eggert Exp $
 
 	Copyright 1991 by Paul Eggert
 	Distributed under license by the Free Software Foundation, Inc.
@@ -109,6 +109,10 @@ With GNU diff, this is simply its user-visible diff3 program.
 With traditional diff3, this is not the user-visible diff3 program;
 instead, it this is the name of the undocumented diff3 auxiliary program,
 whose name is /usr/lib/diff3 or /usr/5lib/rdiff3prog or something similar.
+
+DIFF3_A is 1 if your diff3 has an -A option, 0 otherwise.
+This option is available in GNU diff 2.1 and later; it generates better
+quality diff3 output, but RCS is not yet ready for it.
 
 DIFF3_BIN is 1 if DIFF3 is the user-visible GNU diff3 program (see DIFF3).
 Before setting this to 1, make sure your diff3 understands -a, -L, and and -m;

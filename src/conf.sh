@@ -1,6 +1,6 @@
 #!/bin/sh
 # Output RCS compile-time configuration.
-Id='$Id: conf.sh,v 5.14 1991/11/20 18:21:10 eggert Exp $'
+Id='$Id: conf.sh,v 5.14.0.1 1993/03/25 04:24:49 eggert Exp $'
 #	Copyright 1990, 1991 by Paul Eggert
 #	Distributed under license by the Free Software Foundation, Inc.
 
@@ -35,6 +35,7 @@ Id='$Id: conf.sh,v 5.14 1991/11/20 18:21:10 eggert Exp $'
 : ${CFLAGS=-O}
 : ${COMPAT2=0}
 : ${DIFF3=${RCSPREFIX}diff3}
+: ${DIFF3_A=1}
 : ${DIFF3_BIN=1}
 : ${DIFF=${RCSPREFIX}diff}
 : ${DIFF_FLAGS=-an}
@@ -1250,6 +1251,8 @@ echo "#define DIFF \"${DIFF}\" /* name of 'diff' program */"
 
 : DIFF3
 echo "#define DIFF3 \"${DIFF3}\" /* name of 'diff3' program */"
+
+echo "#define DIFF3_A $DIFF3_A /* Does diff3 have an -A option?  */"
 
 echo "#define DIFF3_BIN $DIFF3_BIN /* Is diff3 user-visible (not the /usr/lib auxiliary)?  */"
 

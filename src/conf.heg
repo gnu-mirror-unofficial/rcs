@@ -1,6 +1,6 @@
 /* example RCS compile-time configuration */
 
-	/* $Id: conf.heg,v 1.8 1991/11/20 18:21:09 eggert Exp $ */
+	/* $Id: conf.heg,v 1.8.0.1 1993/03/25 04:22:46 eggert Exp $ */
 
 /*
  * This example RCS compile-time configuration describes a host that conforms
@@ -195,6 +195,7 @@ typedef void *malloc_type; /* type returned by malloc() */
 #define DATEFORM "%.2d.%.2d.%.2d.%.2d.%.2d.%.2d" /* e.g. 01.01.01.01.01.01 */
 #define DIFF "/usr/local/bin/diff" /* name of 'diff' program */
 #define DIFF3 "/usr/local/bin/diff3" /* name of 'diff3' program */
+#define DIFF3_A 1 /* Does diff3 have an -A option?  */
 #define DIFF3_BIN 1 /* Is diff3 user-visible (not the /usr/lib auxiliary)?  */
 #define DIFF_FLAGS , "-an" /* Make diff output suitable for RCS.  */
 #define DIFF_L 1 /* Does diff -L work? */

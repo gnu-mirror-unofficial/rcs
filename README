@@ -1,4 +1,4 @@
-This directory contains complete sources for RCS version 5.6.
+This directory contains complete sources for RCS version 5.6.0.1.
 
 RCS, the Revision Control System, manages multiple revisions of files.
 RCS can store, retrieve, log, identify, and merge revisions.
@@ -31,7 +31,7 @@ Report problems and direct all questions to:
 
 */
 
-$Id: README,v 5.16 1991/11/03 01:09:19 eggert Exp $
+$Id: README,v 5.16.0.1 1993/03/25 04:27:12 eggert Exp $
 
 
 Installation notes:
@@ -72,6 +72,11 @@ RCS compatibility notes:
   an older RCS version's `ci -k' may insist on two-digit years.
   Fix this with `co -V4', or by editing the working file.
 
+
+Features new to RCS version 5.6.0.1 include:
+
+  A new DIFF3_A configuration flag for GNU diff3 2.1 and later;
+  see src/README.
 
 Features new to RCS version 5.6 include:
 

@@ -27,7 +27,7 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
-libId(mergerId, "$Id: merger.c,v 1.3 1991/08/20 23:05:00 eggert Exp $")
+libId(mergerId, "$Id: merger.c,v 1.3.0.1 1993/03/25 04:25:07 eggert Exp $")
 
 	static char const *
 normalize_arg(s, b)
@@ -81,7 +81,13 @@ merge(tostdout, label, argv)
 		t = maketemp(0);
 	s = run(
 		(char*)0, t,
-		DIFF3, "-am", "-L", label[0], "-L", label[1],
+#		if DIFF3_A
+			/* GNU diff 2.1 or later.  We turn off -A for now.  */
+			DIFF3, "-amE", "-L", label[0], "-L", "", "-L", label[1],
+#		else
+			/* GNU diff 2.0 or earlier */
+			DIFF3, "-am", "-L", label[0], "-L", label[1],
+#		endif
 		a[0], a[1], a[2], (char*)0
 	);
 	switch (s) {
