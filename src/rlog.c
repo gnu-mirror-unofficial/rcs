@@ -1,16 +1,13 @@
 /*
  *                       RLOG    operation
  */
-#ifndef lint
-static char rcsid[]=
-"$Header: /usr/src/local/bin/rcs/src/RCS/rlog.c,v 4.7 89/05/01 15:13:48 narten Exp $ Purdue CS";
-#endif
 /*****************************************************************************
  *                       print contents of RCS files
  *****************************************************************************
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -38,12 +35,28 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rlog.c,v $
+/* $Log: rlog.c,v $
+ * Revision 5.5  1990/11/01  05:03:55  eggert
+ * Permit arbitrary data in logs and comment leaders.
+ *
+ * Revision 5.4  1990/10/04  06:30:22  eggert
+ * Accumulate exit status across files.
+ *
+ * Revision 5.3  1990/09/11  02:41:16  eggert
+ * Plug memory leak.
+ *
+ * Revision 5.2  1990/09/04  08:02:33  eggert
+ * Count RCS lines better.
+ *
+ * Revision 5.0  1990/08/22  08:13:48  eggert
+ * Remove compile-time limits; use malloc instead.  Add setuid support.
+ * Switch to GMT.
+ * Report dates in long form, to warn about dates past 1999/12/31.
+ * Change "added/del" message to make room for the longer dates.
+ * Don't generate trailing white space.  Add -V.  Ansify and Posixate.
+ *
  * Revision 4.7  89/05/01  15:13:48  narten
  * changed copyright header to reflect current distribution rules
- * 
- * Revision 4.6  88/11/08  11:59:40  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 4.6  88/08/09  19:13:28  eggert
  * Check for memory exhaustion; don't access freed storage.
@@ -62,9 +75,6 @@ Report problems and direct all questions to:
  * 
  * Revision 1.2  87/03/27  14:22:45  jenkins
  * Port to suns
- * 
- * Revision 1.1  84/01/23  14:50:45  kcs
- * Initial revision
  * 
  * Revision 4.2  83/12/05  09:18:09  wft
  * changed rewriteflag to external.
@@ -104,105 +114,89 @@ Report problems and direct all questions to:
 
 
 
-#include "time.h"
 #include "rcsbase.h"
-#ifndef lint
-static char rcsbaseid[] = RCSBASE;
-#endif
-
-extern char * partialno();
-extern char * getcaller();          /*get login of caller                   */
-extern        free();
-extern int    countnumflds();
-extern int    compartial();
-extern int    expandsym();          /*get numeric name of a revision        */
-extern int nextc;                   /*next input character                  */
-extern char Klog[];
-extern char Ktext[];
-extern int  partime();
-extern long maketime();             /*convert parsed time to unix time.     */
-extern struct tm * localtime();     /*convert unixtime into a tm-structure  */
-extern int  pairfilenames();
-extern struct hshentry  * getnum();
-extern FILE * finptr;               /* RCS input file                       */
-extern FILE * frewrite;             /* new RCS file                         */
-extern int    rewriteflag;          /* indicates whether input should be    */
-				    /* echoed to frewrite */
-extern int    nerror;               /* error counter                        */
-
-char * RCSfilename, * workfilename;
-
-char * caller;                        /* caller's login;                    */
-int  descflag, selectflag, selectop;  /* option to print access list, symbolic  */
-                                      /* names, descriptive text, locks and */
-                                      /* Head                               */
-int  onlylockflag;		      /* option to print only files         */
-				      /* with locks			    */
-int  onlyRCSflag;                     /* option to print only RCS file name */
-int  lockflag;                        /* whether locker option is set       */
-int  revno;                           /* number of revision chosen          */
 
 struct  lockers {                     /* lockers in locker option; stored   */
-     char               * login;      /* lockerlist                         */
+     const char         * login;      /* lockerlist                         */
      struct     lockers * lockerlink;
      }  ;
 
 struct  stateattri {                  /* states in state option; stored in  */
-     char               * status;     /* statelist                          */
+     const char         * status;     /* statelist                          */
      struct  stateattri * nextstate;
      }  ;
 
 struct  authors {                     /* login names in author option;      */
-     char               * login;      /* stored in authorlist               */
+     const char         * login;      /* stored in authorlist               */
      struct     authors * nextauthor;
      }  ;
 
 struct Revpairs{                      /* revision or branch range in -r     */
-     int                  numfld;     /* option; stored in revlist          */
-     char               * strtrev;
-     char               * endrev;
+     unsigned		  numfld;     /* option; stored in revlist	    */
+     const char         * strtrev;
+     const char         * endrev;
      struct  Revpairs   * rnext;
      } ;
 
 struct Datepairs{                     /* date range in -d option; stored in */
-     char               strtdate[datelength];   /* duelst and datelist      */
-     char               enddate[datelength];
+     char               strtdate[datesize];   /* duelst and datelist      */
+     char               enddate[datesize];
      struct  Datepairs  * dnext;
      };
 
-char   Dotstring[200];                /* string of numeric revision name    */
-char   * Nextdotstring;               /* next available place of Dotstring  */
-struct  Datepairs       * datelist,  * duelst;
-struct  Revpairs        * revlist, * Revlst;
-int                     branchflag; /* set on -b */
-struct  lockers         * lockerlist;
-struct  stateattri      * statelist;
-struct  authors         * authorlist;
+static char extractdelta P((const struct hshentry*));
+static int checkrevpair P((const char*,const char*));
+static int readdeltalog P((void));
+static void cleanup P((void));
+static void extdate P((struct hshentry*));
+static void exttree P((struct hshentry*));
+static void getauthor P((char*));
+static void getdatepair P((char*));
+static void getlocker P((char*));
+static void getnumericrev P((void));
+static void getrevpairs P((char*));
+static void getscript P((struct hshentry*));
+static void getstate P((char*));
+static void putabranch P((const struct hshentry*));
+static void putadelta P((const struct hshentry*,const struct hshentry*,int));
+static void putforest P((const struct branchhead*));
+static void putree P((const struct hshentry*));
+static void putrunk P((void));
+static void recentdate P((const struct hshentry*,struct Datepairs*));
+static void trunclocks P((void));
+
+static const char *insDelFormat;
+static int branchflag;	/*set on -b */
+static int exitstatus;
+static int lockflag;
+static int revno;	/* number of revision chosen */
+static struct Datepairs *datelist, *duelst;
+static struct Revpairs *revlist, *Revlst;
+static struct authors *authorlist;
+static struct lockers *lockerlist;
+static struct stateattri *statelist;
 
 
-
-main (argc, argv)
-int argc;
-char * argv[];
+mainProg(rlogId, "rlog", "$Id: rlog.c,v 5.5 1990/11/01 05:03:55 eggert Exp $")
 {
-        struct  Datepairs       * currdate;
-        struct  assoc         * curassoc;
-        struct  access        * curaccess;
-        struct  lock          * currlock;
-        char * cmdusage;
+	static const char cmdusage[] =
+		"\nrlog usage: rlog -{bhLRt} -ddates -l[lockers] -rrevs -sstates -w[logins] -Vn file ...";
 
-	cmdusage = "command format:\nrlog -L -R -h -t -b -ddates -l[lockers] -rrevisions -sstates -w[logins] file ...";
-        cmdid = "rlog";
+	struct Datepairs *currdate;
+	const char *accessListString, *accessFormat, *commentFormat;
+	const char *headFormat, *symbolFormat;
+	const struct access *curaccess;
+	const struct assoc *curassoc;
+	const struct lock *currlock;
+	int descflag, selectflag;
+	int onlylockflag;  /* print only files with locks */
+	int selectop;  /* print only some revisions */
+	int onlyRCSflag;  /* print only RCS file name */
+
+	initid();
+
         descflag = selectflag = true;
-        lockflag = onlylockflag = selectop = false;
-	onlyRCSflag = false;
-        lockerlist = nil;
-        authorlist = nil;
-        statelist = nil;
-        Revlst = revlist = nil;
-        branchflag= false;
-        duelst = datelist = nil;
-	caller=getcaller();
+	onlylockflag = selectop = onlyRCSflag = false;
 
         while (--argc,++argv, argc>=1 && ((*argv)[0] == '-')) {
                 switch ((*argv)[1]) {
@@ -247,97 +241,116 @@ char * argv[];
                         break;
 
                 case 'h':
-                        if ( ! selectflag ) warn("option -t overrides -h");
+                        if ( ! selectflag ) warn("-t overrides -h.");
                         else    descflag = false;
                         break;
 
                 case 't':
                         selectflag = false;
-                        if ( ! descflag ) warn("option -t overrides -h");
+                        if ( ! descflag ) warn("-t overrides -h.");
                         descflag = true;
                         break;
 
+		case 'V':
+			setRCSversion(*argv);
+			break;
+
                 default:
-                        faterror("unknown option: %s\n%s", *argv,cmdusage);
+			faterror("unknown option: %s%s", *argv, cmdusage);
 
                 };
         } /* end of option processing */
 
-        if (argc<1) faterror("No input file\n%s",cmdusage);
+	if (argc<1) faterror("no input file%s", cmdusage);
 
+	if (RCSversion < VERSION(5)) {
+	    accessListString = "\naccess list:   ";
+	    accessFormat = "  %s";
+	    commentFormat = "\ncomment leader:  \"";
+	    headFormat = "\nRCS file:        %s;   Working file:    %s\nhead:           %s%s\nbranch:         %s%s\nlocks:         ";
+	    insDelFormat = "  lines added/del: %lu/%lu";
+	    symbolFormat = "  %s: %s;";
+	} else {
+	    accessListString = "\naccess list:";
+	    accessFormat = "\n\t%s";
+	    commentFormat = "\ncomment leader: \"";
+	    headFormat = "\nRCS file: %s\nWorking file: %s\nhead:%s%s\nbranch:%s%s\nlocks:%s";
+	    insDelFormat = "  lines: +%lu -%lu";
+	    symbolFormat = "\n\t%s: %s";
+	}
 
         /* now handle all filenames */
         do {
-            rewriteflag=false;
-            finptr=frewrite=nil;
+	    finptr = NULL;
+	    ffree();
 
-
-            if (!pairfilenames(argc, argv, true,false)) continue;
+	    if (!pairfilenames(argc, argv, rcsreadopen, true, false))
+		continue;
 
             /* now RCSfilename contains the name of the RCS file, and finptr
              * the file descriptor. Workfilename contains the name of the
              * working file.
              */
 
-            if ( !trysema(RCSfilename, false)) goto loopend; /*  give up */
+	    /* Keep only those locks given by -l.  */
+	    if (lockflag)
+		trunclocks();
 
             /* do nothing if -L is given and there are no locks*/
-	    if ( onlylockflag && Locks == nil ) goto loopend;
+	    if (onlylockflag && !Locks)
+		continue;
 
 	    if ( onlyRCSflag ) {
-		VOID fprintf(stdout, "%s\n", RCSfilename);
-		goto loopend;
+		aprintf(stdout, "%s\n", RCSfilename);
+		continue;
 	    }
             /*   print RCS filename , working filename and optional
                  administrative information                         */
-            VOID fprintf(stdout, "\nRCS file:        %s;   ",RCSfilename);
             /* could use getfullRCSname() here, but that is very slow */
-            VOID fprintf(stdout, "Working file:    %s\n", workfilename);
-            VOID fprintf(stdout, "head:            %s\n", Head==nil?"":Head->num);
-            VOID fprintf(stdout, "branch:          %s\n", Dbranch==nil?"":Dbranch->num);
-
-            VOID fputs("locks:         ", stdout);  /*  print locker list   */
+	    aprintf(stdout, headFormat, RCSfilename, workfilename,
+		    Head ? " " : "",  Head ? Head->num : "",
+		    Dbranch ? " " : "",  Dbranch ? Dbranch : "",
+		    StrictLocks ? " strict" : ""
+	    );
             currlock = Locks;
             while( currlock ) {
-                VOID fprintf(stdout,"  %s: %s;", currlock->login,
+		aprintf(stdout, symbolFormat, currlock->login,
                                 currlock->delta->num);
                 currlock = currlock->nextlock;
             }
-            if ( StrictLocks )
-                VOID fputs(Locks==nil?"  ;  strict":"  strict",stdout);
+            if (StrictLocks && RCSversion<VERSION(5))
+		aputs("  strict", stdout);
 
-            VOID fputs("\naccess list:   ", stdout);      /*  print access list  */
+	    aputs(accessListString, stdout);      /*  print access list  */
             curaccess = AccessList;
             while(curaccess) {
-                VOID fputs("  ",stdout);
-                VOID fputs(curaccess->login, stdout);
+		aprintf(stdout, accessFormat, curaccess->login);
                 curaccess = curaccess->nextaccess;
             }
 
-            VOID fputs("\nsymbolic names:", stdout);   /*  print symbolic names   */
-            curassoc = Symbols;
-            while( curassoc ) {
-                VOID fprintf(stdout, "  %s: %s;",curassoc->symbol,
-                           curassoc->delta->num);
-                curassoc = curassoc->nextassoc;
-            }
-
-            VOID fprintf(stdout,"\ncomment leader:  \"%s\"\n",Comment);
+	    aputs("\nsymbolic names:", stdout);   /*  print symbolic names   */
+	    for (curassoc=Symbols; curassoc; curassoc=curassoc->nextassoc)
+		aprintf(stdout, symbolFormat, curassoc->symbol, curassoc->num);
+	    aputs(commentFormat, stdout);
+	    awrite(Comment.string, Comment.size, stdout);
+	    aputs("\"\n", stdout);
+	    if (VERSION(5)<=RCSversion  ||  Expand != KEYVAL_EXPAND)
+		aprintf(stdout, "keyword substitution: %s\n",
+			expand_names[Expand]
+		);
 
             gettree();
-            VOID fprintf(stdout, "total revisions: %d;    ", TotalDeltas);
+
+	    aprintf(stdout, "total revisions: %d", TotalDeltas);
+
             if ( Head == nil || !selectflag || !descflag) {
-                VOID putc('\n',stdout);
-                if (descflag) VOID fputs("description:\n", stdout);
+		afputc('\n',stdout);
+		if (descflag) aputs("description:\n", stdout);
                 getdesc(descflag);
-                VOID fputs("=============================================================================\n",stdout);
-                goto loopend;
+		goto rlogend;
             }
 
 
-            /*  keep only those locks given by -l */
-            if (lockflag)
-                trunclocks();
             getnumericrev();    /* get numeric revision or branch names */
             revno = 0;
 
@@ -360,49 +373,60 @@ char * argv[];
             }
 
             if ( selectop || ( selectflag && descflag) )
-                VOID fprintf(stdout, "selected revisions: %d", revno);
-            VOID putc('\n', stdout);
-            if (descflag) VOID fputs("description:\n", stdout);
+		aprintf(stdout, ";\tselected revisions: %d", revno);
+	    afputc('\n', stdout);
+	    if (descflag) aputs("description:\n", stdout);
             getdesc(descflag);
-            while( (nexttok != EOFILE) && readdeltalog());
             if (selectflag && descflag && revno) {
+		while (readdeltalog())
+		    ;
                 putrunk();
                 putree(Head);
-                if (nextlex(), nexttok != EOFILE)
-                    fatserror("syntax error; expecting EOF");
+		if (nexttok != EOFILE)
+		    fatserror("expecting EOF");
             }
-            VOID fputs("=============================================================================\n",stdout);
-        loopend:
-            VOID fclose(finptr);
-        } while( ++argv, --argc >= 1);
-        exit(nerror!=0);
+	rlogend:
+	    aputs("=============================================================================\n",stdout);
+	} while (cleanup(),
+		 ++argv, --argc >= 1);
+	exitmain(exitstatus);
+}
+
+	static void
+cleanup()
+{
+	if (nerror) exitstatus = EXIT_FAILURE;
+	if (finptr) ffclose(finptr);
+}
+
+#if lint
+#	define exiterr rlogExit
+#endif
+	exiting void
+exiterr()
+{
+	_exit(EXIT_FAILURE);
 }
 
 
 
+	static void
 putrunk()
 /*  function:  print revisions chosen, which are in trunk      */
 
 {
-        struct  hshentry        * ptr, * pre;
+	register const struct hshentry *ptr;
 
-        if (Head == nil) return;   /*  empty tree  */
-
-        pre = Head;
-        ptr = Head->next;
-        while( ptr ) {
-            putadelta(pre,ptr,true);
-            pre = ptr;
-            ptr = ptr->next;
-        }
-        putadelta(pre,ptr,true);
+	for (ptr = Head;  ptr;  ptr = ptr->next)
+		putadelta(ptr, ptr->next, true);
 }
 
 
 
+	static void
 putree(root)
-struct  hshentry  *root;
-/*   function: print delta tree( not include trunck) in reversed calender
+	const struct hshentry *root;
+/*   function: print delta tree (not including trunk) in reverse
                order on each branch                                        */
 
 {
@@ -416,8 +440,9 @@ struct  hshentry  *root;
 
 
 
+	static void
 putforest(branchroot)
-struct   branchhead     * branchroot;
+	const struct branchhead *branchroot;
 /*   function:  print branches that has the same direct ancestor    */
 {
 
@@ -432,8 +457,9 @@ struct   branchhead     * branchroot;
 
 
 
+	static void
 putabranch(root)
-struct      hshentry   *root;
+	const struct hshentry *root;
 /*   function  :  print one branch     */
 
 {
@@ -449,61 +475,61 @@ struct      hshentry   *root;
 
 
 
+	static void
 putadelta(node,editscript,trunk)
-register  struct   hshentry    * node;
-register  struct   hshentry    * editscript;
-int                              trunk;
-/*  function: print delta node if node->selector is 's'.        */
+	register const struct hshentry *node, *editscript;
+	int trunk;
+/*  function: Print delta node if node->selector is set.        */
 /*      editscript indicates where the editscript is stored     */
 /*      trunk indicated whether this node is in trunk           */
 {
-        struct  branchhead      * newbranch;
-        char                    * branchnum,  branch[40];
+	const struct branchhead *newbranch;
+	struct buf branchnum;
 
-        if ( ( node == nil) || ( node->selector == 'u'))
+	if (!node->selector)
             return;
 
-        VOID fprintf(stdout,"----------------------------\n");
-        VOID fprintf(stdout, "revision %s        ",node->num);
+	aprintf(stdout,
+		"----------------------------\nrevision %s", node->num
+	);
         if ( node->lockedby )
-           VOID fprintf(stdout, "locked by: %s;       ", node->lockedby);
-        VOID putc('\n', stdout);
+	   aprintf(stdout, "\tlocked by: %s;", node->lockedby);
 
-        VOID fputs("date: ",stdout);
-        VOID PRINTDATE(stdout,node->date); VOID putc(' ',stdout);
-        VOID PRINTTIME(stdout,node->date);
-        VOID fprintf(stdout, ";  author: %s;  ", node->author);
-        VOID fprintf(stdout, "state: %s;  ", node->state);
+	aputs("\ndate: ",stdout);
+	printdate(stdout, node->date, " ");
+	aprintf(stdout, ";  author: %s;  state: %s;",
+		node->author, node->state
+	);
 
         if ( editscript )
            if(trunk)
-              VOID fprintf(stdout,"lines added/del: %d/%d",
+	      aprintf(stdout, insDelFormat,
                              editscript->deletelns, editscript->insertlns);
            else
-              VOID fprintf(stdout,"lines added/del: %d/%d",
+	      aprintf(stdout, insDelFormat,
                              editscript->insertlns, editscript->deletelns);
 
-        VOID putc('\n', stdout);
-
-        branchnum = & (branch[0]);
         newbranch = node->branches;
         if ( newbranch ) {
-           VOID fputs("branches:  ", stdout);
+	   bufautobegin(&branchnum);
+	   aputs("\nbranches:", stdout);
            while( newbranch ) {
-                getbranchno(newbranch->hsh->num, branchnum);
-                VOID fprintf(stdout, "%s;  ", branchnum);
+		getbranchno(newbranch->hsh->num, &branchnum);
+		aprintf(stdout, "  %s;", branchnum.string);
                 newbranch = newbranch->nextbranch;
            }
-           VOID putc('\n', stdout);
+	   bufautoend(&branchnum);
         }
 
-        VOID fputs(node->log,stdout);
+	afputc('\n', stdout);
+	awrite(node->log.string, node->log.size, stdout);
 }
 
 
 
 
 
+	static int
 readdeltalog()
 /*  Function : get the log message and skip the text of a deltatext node.
  *             Return false if current block does not start with a number.
@@ -512,16 +538,26 @@ readdeltalog()
  */
 {
         register struct  hshentry  * Delta;
+	struct buf logbuf;
 
         nextlex();
         if ( !(Delta = getnum() )) return(false);
-        if ( ! getkey(Klog) || ( nexttok != STRING ) )
-                fatserror("Missing log entry");
-        Delta->log = talloc(logsize);
-        VOID savestring(Delta->log, logsize);
+	getkeystring(Klog);
+	bufautobegin(&logbuf);
+	Delta->log = savestring(&logbuf);
+	/*
+	 * Do the following instead of bufautoend(&logbuf),
+	 * because the buffer must survive until we are done with the file.
+	 */
+	Delta->log.string = (char *)fremember(testrealloc(
+		(malloc_type)logbuf.string,
+		Delta->log.size
+	));
+
         nextlex();
-        if ( ! getkey(Ktext) || (nexttok != STRING) )
-                fatserror("Missing delta text");
+	while (nexttok==ID && strcmp(NextString,Ktext)!=0)
+		ignorephrase();
+	getkeystring(Ktext);
         Delta->insertlns = Delta->deletelns = 0;
         if ( Delta != Head)
                 getscript(Delta);
@@ -532,6 +568,7 @@ readdeltalog()
 
 
 
+	static void
 getscript(Delta)
 struct    hshentry   * Delta;
 /*   function:  read edit script of Delta and count how many lines added  */
@@ -541,49 +578,29 @@ struct    hshentry   * Delta;
         int ed;   /*  editor command  */
 	register FILE * fin;
         register  int   c;
-        register  int   i;
-        int             length;
+	register unsigned long i;
+	struct diffcmd dc;
 
 	fin = finptr;
-	while( (ed = getc(fin)) != EOF) {
-           /*  assume first none white character is command name  */
-            while( ed == '\n' || ed == ' ' || ed == '\t')
-		ed = getc(fin);
-            if (ed == SDELIM) break;  /*  script text is ended   */
-	    while( ( c = getc(fin)) == ' ' );  /*  skip blank  */
-            if ( ! ('0' <= c && c <= '9')) {
-                faterror("Missing line number in edit script");
-                break;
-            }
-	    while( '0' <= (c = getc(fin)) && c <= '9' ) ;
-
-	    while( c == ' ')c = getc(fin);  /*  skip blanks  */
-            if ( !('0' <= c && c <= '9' ) ) {
-                faterror("Incorrect range in edit script");
-                break;
-            }
-            length = c - '0';
-	    while( '0' <= (c = getc(fin)) && c <= '9' )
-                length = length * 10 + c - '0';
-	    while( c != '\n' && c != EOF) c = getc(fin);
-            switch (ed) {
-            case 'd' :
-                 Delta->deletelns += length;
-                 break;
-
-            case 'a' :
+	initdiffcmd(&dc);
+	while (0  <=  (ed = getdiffcmd(fin,SDELIM,(FILE *)0,&dc)))
+	    if (!ed)
+                 Delta->deletelns += dc.nlines;
+	    else {
                  /*  skip scripted lines  */
-                 for ( i=length; i > 0 && c != EOF; i--){
-		     while( (c=getc(fin)) != '\n' && c != EOF);
-                     Delta->insertlns++;
-                 }
-                 break;
-
-            default:
-                 faterror("Unknown command in edit script: %c", ed);
-                 break;
+		 i = dc.nlines;
+		 Delta->insertlns += i;
+		 do {
+		     while ((c=getc(fin)) != '\n')
+			if (c==EOF  ||  c==SDELIM && (c=getc(fin))!=SDELIM) {
+			    if (c==EOF || i!=1)
+				fatserror("unexpected end to edit script");
+			    nextc = c;
+			    return;
+			}
+		     ++rcsline;
+		 } while (--i);
             }
-        }
 	nextc = getc(fin);
 }
 
@@ -593,16 +610,17 @@ struct    hshentry   * Delta;
 
 
 
+	static void
 exttree(root)
 struct hshentry  *root;
 /*  function: select revisions , starting with root             */
 
 {
-        struct branchhead       * newbranch;
+	const struct branchhead *newbranch;
 
         if (root == nil) return;
 
-        extractdelta(root);
+	root->selector = extractdelta(root);
         exttree(root->next);
 
         newbranch = root->branches;
@@ -615,6 +633,7 @@ struct hshentry  *root;
 
 
 
+	static void
 getlocker(argv)
 char    * argv;
 /*   function : get the login names of lockers from command line   */
@@ -632,7 +651,7 @@ char    * argv;
         }
 
         while( c != '\0' ) {
-            newlocker = ( struct lockers *)talloc( sizeof(struct lockers) );
+	    newlocker = talloc(struct lockers);
             newlocker->lockerlink = lockerlist;
             newlocker->login = argv;
             lockerlist = newlocker;
@@ -647,10 +666,11 @@ char    * argv;
 
 
 
+	static void
 getauthor(argv)
 char   *argv;
-/*   function:  get the author's name form command line   */
-/*              and store in aauthorlist                  */
+/*   function:  get the author's name from command line   */
+/*              and store in authorlist                   */
 
 {
         register    c;
@@ -660,14 +680,14 @@ char   *argv;
         while( ( c = (*++argv)) == ',' || c == ' ' || c == '\t' ||
                  c == '\n' || c == ';')  ;
         if ( c == '\0' ) {
-            authorlist = (struct authors *)talloc(sizeof(struct authors));
-            authorlist->login = caller;
+	    authorlist = talloc(struct authors);
+	    authorlist->login = getcaller();
             authorlist->nextauthor  = nil;
             return;
         }
 
         while( c != '\0' ) {
-            newauthor = (struct authors *)talloc(sizeof(struct authors));
+	    newauthor = talloc(struct authors);
             newauthor->nextauthor = authorlist;
             newauthor->login = argv;
             authorlist = newauthor;
@@ -683,6 +703,7 @@ char   *argv;
 
 
 
+	static void
 getstate(argv)
 char   * argv;
 /*   function :  get the states of revisions from command line  */
@@ -696,12 +717,12 @@ char   * argv;
         while( ( c = (*++argv)) == ',' || c == ' ' || c == '\t' ||
                  c == '\n' || c == ';')  ;
         if ( c == '\0'){
-            warn(" Missing state attributes after -s options");
+	    warn("missing state attributes after -s options");
             return;
         }
 
         while( c != '\0' ) {
-            newstate = (struct stateattri *)talloc(sizeof(struct stateattri));
+	    newstate = talloc(struct stateattri);
             newstate->nextstate = statelist;
             newstate->status = argv;
             statelist = newstate;
@@ -716,12 +737,13 @@ char   * argv;
 
 
 
+	static void
 trunclocks()
 /*  Function:  Truncate the list of locks to those that are held by the  */
 /*             id's on lockerlist. Do not truncate if lockerlist empty.  */
 
 {
-        struct lockers  * plocker;
+	const struct lockers *plocker;
         struct lock     * plocked,  * nextlocked;
 
         if ( (lockerlist == nil) || (Locks == nil)) return;
@@ -744,18 +766,19 @@ trunclocks()
 
 
 
+	static void
 recentdate(root, pd)
-struct 	hshentry	* root;
-struct	Datepairs	* pd;
+	const struct hshentry *root;
+	struct Datepairs *pd;
 /*  function:  Finds the delta that is closest to the cutoff date given by   */
 /*             pd among the revisions selected by exttree.                   */
-/*             Successively narrows down the interfal given by pd,           */
+/*             Successively narrows down the interval given by pd,           */
 /*             and sets the strtdate of pd to the date of the selected delta */
 {
-        struct  branchhead      * newbranch;
+	const struct branchhead *newbranch;
 
 	if ( root == nil) return;
-        if ( root->selector == 's') {
+	if (root->selector) {
              if ( cmpnum(root->date, pd->strtdate) >= 0 &&
                   cmpnum(root->date, pd->enddate) <= 0)
 		VOID strcpy(pd->strtdate, root->date);
@@ -774,14 +797,15 @@ struct	Datepairs	* pd;
 
 
 
+	static void
 extdate(root)
 struct  hshentry        * root;
 /*  function:  select revisions which are in the date range specified     */
 /*             in duelst  and datelist, start at root                     */
 
 {
-        struct  branchhead      * newbranch;
-        struct  Datepairs       * pdate;
+	const struct branchhead *newbranch;
+	const struct Datepairs *pdate;
 
         if ( root == nil) return;
 
@@ -796,16 +820,19 @@ struct  hshentry        * root;
             }
             if ( pdate == nil) {
                 pdate = duelst;
-                while(pdate) {
+		for (;;) {
+		   if (!pdate) {
+			root->selector = false;
+			break;
+		   }
                    if ( cmpnum(root->date, pdate->strtdate) == 0)
                       break;
                    pdate = pdate->dnext;
                 }
             }
-            if ( pdate == nil)
-                root->selector = 'u';
         }
-        if (root->selector == 's') revno++;
+	if (root->selector)
+	    ++revno;
 
         extdate(root->next);
 
@@ -818,101 +845,51 @@ struct  hshentry        * root;
 
 
 
+	static char
 extractdelta(pdelta)
-struct  hshentry        * pdelta;
-/*  function:  compare information of pdelta to the authorlst, lockerlist, */
-/*             statelist, revlist and mark 's' on selector if pdelta is    */
-/*             selected; otherwise, mark 'u'                               */
+	const struct hshentry *pdelta;
+/*  function:  compare information of pdelta to the authorlist, lockerlist,*/
+/*             statelist, revlist and yield true if pdelta is selected.    */
 
 {
-        struct  lock            * plock;
-        struct  stateattri      * pstate;
-        struct  authors         * pauthor;
-        struct  Revpairs        * prevision;
-        int                       length;
+	const struct lock *plock;
+	const struct stateattri *pstate;
+	const struct authors *pauthor;
+	const struct Revpairs *prevision;
+	unsigned length;
 
-        pdelta->selector = 's';
-        if ( authorlist ) {  /*  certain author's revisions wanted only  */
-            pauthor = authorlist;
-            while((pauthor != nil) && ( strcmp(pauthor->login, pdelta->author)!=0))
-                pauthor = pauthor->nextauthor;
-            if ( pauthor == nil ) {
-                pdelta->selector = 'u';
-                return;
-            }
-        }
-        if ( statelist ) {   /* revisions with certain state wanted  */
-            pstate = statelist;
-            while((pstate != nil) && (strcmp(pstate->status, pdelta->state)!=0))
-                pstate = pstate->nextstate;
-            if ( pstate == nil ) {
-                pdelta->selector = 'u';
-                return;
-            }
-        }
-        if ( lockflag ) {    /*  locked revisions   */
-            plock = Locks;
-            while( plock && (plock->delta != pdelta))
-                plock = plock->nextlock;
-            if (plock == nil ) {
-                pdelta->selector = 'u';
-                return;
-            }
-        }
-        if ( Revlst ) {   /*  revisions or branches selected  */
-
-            prevision = Revlst;
-            while( prevision != nil ) {
+	if ((pauthor = authorlist)) /* only certain authors wanted */
+	    while (strcmp(pauthor->login, pdelta->author) != 0)
+		if (!(pauthor = pauthor->nextauthor))
+		    return false;
+	if ((pstate = statelist)) /* only certain states wanted */
+	    while (strcmp(pstate->status, pdelta->state) != 0)
+		if (!(pstate = pstate->nextstate))
+		    return false;
+	if (lockflag) /* only locked revisions wanted */
+	    for (plock = Locks;  ;  plock = plock->nextlock)
+		if (!plock)
+		    return false;
+		else if (plock->delta == pdelta)
+		    break;
+	if ((prevision = Revlst)) /* only certain revs or branches wanted */
+	    for (;;) {
                 length = prevision->numfld;
-                if ( length % 2 == 1) { /*  a branch number  */
-                     if ( countnumflds(pdelta->num) ==(length+1))
-                        if ( (compartial(pdelta->num, prevision->strtrev,length) >= 0)&&
-                             (compartial(prevision->endrev, pdelta->num, length) >= 0) )
-                             break;
-                }
-                else if ( countnumflds(pdelta->num ) == length)  /*  a revision */
-                    if ( (compartial(pdelta->num, prevision->strtrev, length) >= 0) &&
-                         (compartial(prevision->endrev, pdelta->num, length) >= 0) )
-                        break;
-                prevision = prevision->rnext;
+		if (
+		    countnumflds(pdelta->num) == length+(length&1) &&
+		    0 <= compartial(pdelta->num, prevision->strtrev, length) &&
+		    0 <= compartial(prevision->endrev, pdelta->num, length)
+		)
+		     break;
+		if (!(prevision = prevision->rnext))
+		    return false;
             }
-            if (prevision == nil)  {
-                pdelta->selector = 'u';
-                return;
-            }
-        }
+	return true;
 }
 
 
 
-char * procdate(target, source)
-char * target, * source;
-/* Function: Parses a free-format date in target, converts it
- * into RCS internal format, and stores the result into source.
- * Returns target on success, nil otherwise.
- */
-{
-	long            unixtime;
-	struct     tm   parseddate,  *ftm;
-
-	if ( partime(source, &parseddate) == 0) {
-	    error("Can't parse date/time: %s", source);
-	    *target= '\0';
-	    return nil;
-	}
-	if ( (unixtime = maketime(&parseddate)) == 0L) {
-	    error("Inconsistent date/time: %s", source);
-	    *target='\0';
-	    return nil;
-	}
-	ftm = localtime(&unixtime);
-	VOID sprintf(target,DATEFORM,
-	ftm->tm_year,ftm->tm_mon+1,ftm->tm_mday,ftm->tm_hour,ftm->tm_min,ftm->tm_sec);
-	return target;
-}
-
-
-
+	static void
 getdatepair(argv)
    char   * argv;
 /*  function:  get time range from command line and store in datelist if    */
@@ -921,24 +898,24 @@ getdatepair(argv)
 {
         register   char         c;
         struct     Datepairs    * nextdate;
-        char                    * rawdate;
+	const char		* rawdate;
 	int                     switchflag;
 
         argv--;
         while( ( c = (*++argv)) == ',' || c == ' ' || c == '\t' ||
                  c == '\n' || c == ';')  ;
         if ( c == '\0' ) {
-            warn("Missing date/time after -d");
+	    warn("missing date/time after -d");
             return;
         }
 
         while( c != '\0' )  {
 	    switchflag = false;
-	    nextdate = (struct Datepairs *) talloc(sizeof(struct Datepairs));
+	    nextdate = talloc(struct Datepairs);
             if ( c == '<' ) {   /*   case: -d <date   */
                 c = *++argv;
                 (nextdate->strtdate)[0] = '\0';
-	    } elsif (c == '>') {        /*  case:  -d >date     */
+	    } else if (c == '>') { /* case: -d'>date' */
 		c = *++argv;
 		(nextdate->enddate)[0] = '\0';
 		switchflag = true;
@@ -948,8 +925,8 @@ getdatepair(argv)
 		     c = *++argv;
                 *argv = '\0';
 		if ( c == '>' ) switchflag=true;
-		if (procdate(switchflag?nextdate->enddate:nextdate->strtdate,
-			     rawdate)==nil) continue;
+		str2date(rawdate,
+			 switchflag ? nextdate->enddate : nextdate->strtdate);
 		if ( c == ';' || c == '\0') {  /*  case: -d date  */
 		    VOID strcpy(nextdate->enddate,nextdate->strtdate);
 		    VOID sprintf(nextdate->strtdate,DATEFORM,0,0,0,0,0,0);
@@ -975,14 +952,11 @@ getdatepair(argv)
 	    while( c != '>' && c != '<' && c != ';' && c != '\0')
  		c = *++argv;
             *argv = '\0';
-	    if (procdate(switchflag?nextdate->strtdate:nextdate->enddate,
-			 rawdate)==nil) continue;
+	    str2date(rawdate,
+		     switchflag ? nextdate->strtdate : nextdate->enddate);
             nextdate->dnext = datelist;
 	    datelist = nextdate;
      end:
-/*
-	    VOID printf("startdate: %s; enddate: %s;\n", nextdate->strtdate,nextdate->enddate);
-*/
 	    if ( c == '\0')  return;
             while( (c = *++argv) == ';' || c == ' ' || c == '\t' || c =='\n');
         }
@@ -990,8 +964,7 @@ getdatepair(argv)
 
 
 
-
-
+	static void
 getnumericrev()
 /*  function:  get the numeric name of revisions which stored in revlist  */
 /*             and then stored the numeric names in Revlst                */
@@ -999,127 +972,111 @@ getnumericrev()
 
 {
         struct  Revpairs        * ptr, *pt;
-        int     flag;
-        char    *temprev;
-
-        /*  free the previous numeric revision list  */
-        pt = Revlst;
-        while( pt) {
-	   ptr = pt->rnext;
-           free((char *)pt);
-           pt = ptr;
-        }
-        Nextdotstring = &Dotstring[0]; /* reset buffer */
-
+	unsigned n;
+	struct buf s, e;
+	const struct buf *rstart, *rend;
 
         Revlst = nil;
         ptr = revlist;
+	bufautobegin(&s);
+	bufautobegin(&e);
         while( ptr ) {
-            pt = (struct Revpairs *) talloc(sizeof(struct Revpairs));
-            if ( ptr->numfld == 1 ){ /*  case:  -r rev   */
-                if ( (flag = expandsym(ptr->strtrev, Nextdotstring)) == true ) {
-                    pt->numfld = countnumflds(Nextdotstring);
-                    pt->strtrev = pt->endrev = Nextdotstring;
-                    while( *Nextdotstring++ != '\0' )  ;
-                }
-            }
-            else if( ptr->numfld == 2){ /*  case: -r rev-   */
-                if ( (flag = expandsym(ptr->strtrev, Nextdotstring)) == true) {
-                    pt->numfld = countnumflds(Nextdotstring);
-                    pt->strtrev = Nextdotstring;
-                    while( *Nextdotstring++ != '\0' ) ;
-                    pt->endrev = Nextdotstring;
-                    if ( pt->numfld > 2) choptail(pt->strtrev);
-                    * Nextdotstring++ = '\0';
-                }
-             }
-             else if(ptr->numfld == 3)  { /*  case: -r -rev   */
-                if ( (flag = expandsym(ptr->endrev, Nextdotstring)) == true) {
-                    pt->endrev = Nextdotstring;
-                    while( *Nextdotstring++ != '\0' )  ;
-                    pt->numfld = countnumflds(pt->endrev);
-                    pt->strtrev = Nextdotstring;
-                    if ( pt->numfld == 2)
-                        *Nextdotstring++ = '1';
-                    else
-                        choptail(pt->endrev);
-                    *Nextdotstring++ = '.';
-                    *Nextdotstring++ = '1';
-                    *Nextdotstring++ = '\0';
-                }
-             }
-             else  {     /*   case:  -r rev1-rev2   */
-                if ( (flag = expandsym(ptr->strtrev, Nextdotstring)) == true ) {
-                    pt->strtrev = Nextdotstring;
-                    while( *Nextdotstring++ != '\0' )  ;
-                    if ( ( flag = expandsym(ptr->endrev, Nextdotstring)) == true)  {
-                        pt->numfld = countnumflds(pt->strtrev);
-                        pt->endrev = Nextdotstring;
-                        while( *Nextdotstring++ != '\0' ) ;
-                        if((flag = checkrevpair(pt->strtrev, pt->endrev)) == true)
-                           /*  switch pt->strtrev with pt->endrev, if pt->strtrev > pt->endre  */
-                            if (compartial(pt->strtrev, pt->endrev, pt->numfld) > 0 ) {
-                                temprev = pt->strtrev;
-                                pt->strtrev = pt->endrev;
-                                pt->endrev = temprev;
-                            }
-                     }
-                }
-             }
+	    n = 0;
+	    rstart = &s;
+	    rend = &e;
 
-             if ( flag ){
+	    switch (ptr->numfld) {
+
+	      case 1: /* -r rev */
+		if (expandsym(ptr->strtrev, &s)) {
+		    rend = &s;
+		    n = countnumflds(s.string);
+                }
+		break;
+
+	      case 2: /* -r rev- */
+		if (expandsym(ptr->strtrev, &s)) {
+		    bufscpy(&e, s.string);
+		    n = countnumflds(s.string);
+		    (n<2 ? e.string : strrchr(e.string,'.'))[0]  =  0;
+                }
+		break;
+
+	      case 3: /* -r -rev */
+		if (expandsym(ptr->endrev, &e)) {
+		    if ((n = countnumflds(e.string)) < 2)
+			bufscpy(&s, ".1");
+		    else {
+			bufscpy(&s, e.string);
+			VOID strcpy(strrchr(s.string,'.'), ".1");
+		    }
+                }
+		break;
+
+	      default: /* -r rev1-rev2 */
+		if (
+			expandsym(ptr->strtrev, &s)
+		    &&	expandsym(ptr->endrev, &e)
+		    &&	checkrevpair(s.string, e.string)
+		) {
+		    n = countnumflds(s.string);
+		    /* Swap if out of order.  */
+		    if (compartial(s.string,e.string,n) > 0) {
+			rstart = &e;
+			rend = &s;
+		    }
+		}
+		break;
+	    }
+
+	    if (n) {
+		pt = ftalloc(struct Revpairs);
+		pt->numfld = n;
+		pt->strtrev = fstrsave(rstart->string);
+		pt->endrev = fstrsave(rend->string);
                 pt->rnext = Revlst;
                 Revlst = pt;
-             }
-             else
-                free((char *)pt);
-             ptr = ptr->rnext;
+	    }
+	    ptr = ptr->rnext;
         }
         /* Now take care of branchflag */
-        if (branchflag) {
-            flag =true;
-            pt = (struct Revpairs *) talloc(sizeof(struct Revpairs));
-            if (Dbranch) {
-                pt->strtrev = pt->endrev = Dbranch->num;
-            } elsif (Head!=nil) {
-                pt->strtrev = pt->endrev = /* branch number of head */
-                    partialno(Nextdotstring,Head->num,1);
-                while( *Nextdotstring++ != '\0' ) ;
-            } else flag = false;
-            if (flag) { /* prepend new node */
-                pt->rnext=Revlst; Revlst=pt;
-                pt->numfld = countnumflds(pt->strtrev);
-            }
+	if (branchflag && (Dbranch||Head)) {
+	    pt = ftalloc(struct Revpairs);
+	    pt->strtrev = pt->endrev =
+		Dbranch ? Dbranch : fstrsave(partialno(&s,Head->num,1));
+	    pt->rnext=Revlst; Revlst=pt;
+	    pt->numfld = countnumflds(pt->strtrev);
         }
-
+	bufautoend(&s);
+	bufautoend(&e);
 }
 
 
 
+	static int
 checkrevpair(num1,num2)
-char    *num1,  *num2;
+	const char *num1, *num2;
 /*  function:  check whether num1, num2 are legal pair,i.e.
     only the last field are different and have same number of
-    feilds( if length <= 2, may be different if first field)   */
+    fields( if length <= 2, may be different if first field)   */
 
 {
-        int    length;
+	unsigned length = countnumflds(num1);
 
-        if ( (length = countnumflds(num1)) != countnumflds(num2) ) {
-            error(" Invalid branch or revision pair %s : %s", num1, num2);
+	if (
+			countnumflds(num2) != length
+		||	2 < length  &&  compartial(num1, num2, length-1) != 0
+	) {
+	    error("invalid branch or revision pair %s : %s", num1, num2);
             return false;
         }
-        if ( length > 2 )
-            if (compartial(num1, num2, length-1) != 0) {
-                error("Invalid branch or revision pair %s : %s", num1, num2);
-                return false;
-            }
 
         return true;
 }
 
 
 
+	static void
 getrevpairs(argv)
 register     char    * argv;
 /*  function:  get revision or branch range from command line, and   */
@@ -1134,7 +1091,7 @@ register     char    * argv;
         while( ( c = (*++argv)) == ',' || c == ' ' || c == '\t' ||
                  c == '\n' || c == ';')  ;
         if ( c == '\0' ) {
-            warn(" Missing revision or branch number after -r");
+	    warn("missing revision or branch number after -r");
             return;
         }
 
@@ -1142,10 +1099,10 @@ register     char    * argv;
             while(  c  == ',' || c == ' ' || c == '\t' ||
                      c == '\n' || c == ';') c = *++argv;
             if (c == '\0')  return;
-            nextrevpair = (struct Revpairs *) talloc(sizeof(struct Revpairs));
+	    nextrevpair = talloc(struct Revpairs);
             nextrevpair->rnext = revlist;
             revlist = nextrevpair;
-            nextrevpair->numfld  = nil;
+	    nextrevpair->numfld = 0;
             nextrevpair->strtrev = nil;
             nextrevpair->endrev  = nil;
             flag = false;
@@ -1178,7 +1135,7 @@ register     char    * argv;
 
             * argv = '\0';
             if ( c == '<'){
-                error("separator expected near %s", nextrevpair->endrev);
+		error("separator expected near %s", nextrevpair->endrev);
                 while( (c = *++argv) != ',' && c != ' ' && c != '\0' &&
                         c != '\t' && c != '\n' && c != ';' ) ;
                 revlist = nextrevpair->rnext;
@@ -1193,17 +1150,3 @@ register     char    * argv;
             }
         }
 }
-
-
-
-choptail(strhead)
-char     * strhead;
-/*   function : chop off the last field of a branch or a revision number  */
-
-{
-        char    *pt, *sp;
-
-        for(pt = Nextdotstring-1; pt != strhead && *pt != '.'; pt--) ;
-        for(sp = strhead; sp < pt; sp++) *Nextdotstring++ = *sp;
-}
-

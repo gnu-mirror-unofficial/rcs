@@ -1,4 +1,5 @@
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -26,12 +27,12 @@ Report problems and direct all questions to:
 /*
  *                     RCS identification operation
  */
-#ifndef lint
-static char rcsid[]=
-"$Header: /usr/src/local/bin/rcs/src/RCS/ident.c,v 4.5 89/05/01 15:11:54 narten Exp $Purdue CS";
-#endif
 
-/* $Log:	ident.c,v $
+/* $Log: ident.c,v $
+ * Revision 5.0  1990/08/22  08:12:37  eggert
+ * Don't limit output to known keywords.
+ * Remove arbitrary limits and lint.  Ansify and Posixate.
+ *
  * Revision 4.5  89/05/01  15:11:54  narten
  * changed copyright header to reflect current distribution rules
  * 
@@ -49,9 +50,6 @@ static char rcsid[]=
  * 
  * Revision 1.2  87/03/27  14:21:47  jenkins
  * Port to suns
- * 
- * Revision 1.1  84/01/23  14:50:03  kcs
- * Initial revision
  * 
  * Revision 4.1  83/05/10  16:31:02  wft
  * Added option -q and input from reading stdin.
@@ -71,95 +69,121 @@ static char rcsid[]=
 */
 
 #include  "rcsbase.h"
-#define fflsbuf _flsbuf
-/* redefinition of _flsbuf in putc not needed */
-#ifndef lint
-static char rcsbaseid[] = RCSBASE;
-#endif
 
-extern enum markers trymatch();
+static int match P((FILE*));
+static int scanfile P((FILE*));
 
-int quietflag;
-
-main(argc, argv)
-int  argc; char  *argv[];
+mainProg(identId, "ident", "$Id: ident.c,v 5.0 1990/08/22 08:12:37 eggert Exp $")
 /*  Ident searches the named files for all occurrences
  *  of the pattern $keyword:...$, where the keywords are
  *  Author, Date, Header, Id, Log, RCSfile, Revision, Source, and State.
  */
 
 {
-   FILE *fp, *fopen();
+   FILE *fp;
+   int quiet;
+   int status = EXIT_SUCCESS;
 
-   quietflag = false;
-   if (argc > 1 && strcmp("-q",argv[1])==0) {
-        quietflag = true;
+   if ((quiet  =  argc > 1 && strcmp("-q",argv[1])==0)) {
         argc--; argv++;
    }
 
    if (argc<2) {
-	 if ((scanfile(stdin) == 0) && !quietflag)
-	    VOID fprintf(stderr, "ident warning: no id keywords in input\n");
-	exit(0);
+	 if ((scanfile(stdin) == 0) && !quiet)
+	    VOID fprintf(stderr, "%s warning: no id keywords in input\n", cmdid);
+	exitmain(EXIT_FAILURE);
    }
 
    while ( --argc > 0 ) {
       if ( (fp = fopen(*++argv, "r") ) == NULL ) {
-         VOID fprintf(stderr,  "ident error: can't open %s\n", *argv);
+	 VOID fprintf(stderr,  "%s error: can't open %s\n", cmdid, *argv);
+	 status = EXIT_FAILURE;
          continue;
       } else {
          VOID printf( "%s:\n", *argv);   /*  print file name  */
-	 if ((scanfile(fp) == 0) && !quietflag)
-	    VOID fprintf(stderr, "ident warning: no id keywords in %s\n", *argv);
-	 if (argc>1) putchar('\n');
+	 if ((scanfile(fp) == 0) && !quiet)
+	    VOID fprintf(stderr, "%s warning: no id keywords in %s\n", cmdid, *argv);
+	 if (argc>1) VOID putchar('\n');
 	 VOID fclose(fp);
       }
    }
-   exit(0);
+   exitmain(status);
+}
+
+#if lint
+#	define exiterr identExit
+#endif
+	exiting void
+exiterr()
+{
+	_exit(EXIT_FAILURE);
 }
 
 
-int scanfile(file)
-FILE * file;
+	static int
+scanfile(file)
+	register FILE *file;
 /* Function: scan an open file with descriptor file for keywords.
- * Returns the number of matches.
+ * Returns nonzero if a match is found.
  */
 {
-   register int matchcount;
+   register int matched;
    register int c;
 
 
-   matchcount = 0;
-   while( (c=getc(file)) != EOF) {
-      if ( (char)c==KDELIM)
-	 matchcount += match(file);
+   matched = false;
+   c = 0;
+   while (c != EOF) {
+      if (c == KDELIM) {
+	 if ((c = match(file)))
+	    continue;
+	 matched = true;
+      }
+      c = getc(file);
    }
-   return matchcount;
+   return matched;
 }
 
 
 
+	static int
 match(fp)   /* group substring between two KDELIM's; then do pattern match */
-FILE *fp;
+   register FILE *fp;
 {
-   char line[keyvallength];
+   char line[BUFSIZ];
    register int c;
    register char * tp;
 
    tp = line;
+   while ((c = getc(fp)) != VDELIM)
+      switch (ctab[c]) {
+	 case LETTER: case Letter:
+	    *tp++ = c;
+	    if (tp < line+sizeof(line)-4)
+	       break;
+	    /* fall into */
+	 default:
+	    return c ? c : '\n'/* anything but 0 or KDELIM or EOF */;
+      }
+   *tp++ = c;
+   if ((c = getc(fp)) != ' ')
+      return c ? c : '\n';
+   *tp++ = c;
    while( (c = getc(fp)) != KDELIM ) {
-      *tp++ = c;
-      if ( c==EOF || c=='\n' || tp>= line+keyvallength-2)
-         return(0);
+      switch (ctab[c]) {
+	 default:
+	    *tp++ = c;
+	    if (tp < line+sizeof(line)-2)
+	       break;
+	    /* fall into */
+	 case EOFILE: case NEWLN: case UNKN:
+	    return c ? c : '\n';
+      }
    }
+   if (tp[-1] != ' ')
+      return tp[-1];
    *tp++ = c;     /*append trailing KDELIM*/
    *tp   = '\0';
-   if (trymatch(line,true)!=Nomatch) {
-        VOID fprintf(stdout,"     $%s\n",line);
-        return(1);
-   } else {
-      /* no match; put trailing KDELIM back into input */
-      VOID ungetc(c,fp );
-      return(0);
-   }
+   VOID fprintf(stdout, "     %c%s\n", KDELIM, line);
+   return 0;
 }

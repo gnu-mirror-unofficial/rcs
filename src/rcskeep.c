@@ -1,9 +1,6 @@
 /*
  *                     RCS keyword extraction
  */
-#ifndef lint
-static char rcsid[]= "$Id: rcskeep.c,v 4.6 89/05/01 15:12:56 narten Exp $ Purdue CS";
-#endif
 /*****************************************************************************
  *                       main routine: getoldkeys()
  *                       Testprogram: define KEEPTEST
@@ -11,6 +8,7 @@ static char rcsid[]= "$Id: rcskeep.c,v 4.6 89/05/01 15:12:56 narten Exp $ Purdue
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -37,12 +35,21 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rcskeep.c,v $
+/* $Log: rcskeep.c,v $
+ * Revision 5.2  1990/10/04  06:30:20  eggert
+ * Parse time zone offsets; future RCS versions may output them.
+ *
+ * Revision 5.1  1990/09/20  02:38:56  eggert
+ * ci -k now checks dates more thoroughly.
+ *
+ * Revision 5.0  1990/08/22  08:12:53  eggert
+ * Retrieve old log message if there is one.
+ * Don't require final newline.
+ * Remove compile-time limits; use malloc instead.  Tune.
+ * Permit dates past 1999/12/31.  Ansify and Posixate.
+ *
  * Revision 4.6  89/05/01  15:12:56  narten
  * changed copyright header to reflect current distribution rules
- * 
- * Revision 4.5  88/11/08  12:01:05  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 4.5  88/08/09  19:13:03  eggert
  * Remove lint and speed up by making FILE *fp local, not global.
@@ -61,9 +68,6 @@ Report problems and direct all questions to:
  * Revision 1.2  87/03/27  14:22:29  jenkins
  * Port to suns
  * 
- * Revision 1.1  84/01/23  14:50:30  kcs
- * Initial revision
- * 
  * Revision 4.1  83/05/10  16:26:44  wft
  * Added new markers Id and RCSfile; extraction added.
  * Marker matching with trymatch().
@@ -78,232 +82,296 @@ Report problems and direct all questions to:
 
 /*
 #define KEEPTEST
+*/
 /* Testprogram; prints out the keyword values found. */
 
 #include  "rcsbase.h"
-extern char * checkid();
-extern FILE * fopen();
-static int getval();
-extern enum markers trymatch();
 
-#define IDLENGTH 30
-char prevauthor[IDLENGTH];
-char prevdate[datelength];
-char prevRCS[NCPFN];
-char prevrev[revlength];
-char prevsource[NCPPN];
-char prevstate [IDLENGTH];
-char prevlocker[IDLENGTH];
-char dummy[IDLENGTH];
+libId(keepId, "$Id: rcskeep.c,v 5.2 1990/10/04 06:30:20 eggert Exp $")
 
-getoldkeys(fname)
-char * fname;
+static int checknum P((const char*,int));
+static int getprevdate P((FILE*));
+static int getprevid P((int,FILE*,struct buf*));
+static int getprevrev P((FILE*));
+static int getval P((FILE*,struct buf*,int));
+static int get0val P((int,FILE*,struct buf*,int));
+
+struct buf prevauthor, prevrev, prevstate;
+char prevdate[datesize];
+
+	int
+getoldkeys(fp)
+	register FILE *fp;
 /* Function: Tries to read keyword values for author, date,
- * revision number, RCS file, (both with and without path),
- * state, and workfilename out of the file fname.
+ * revision number, and state out of the file fp.
  * The results are placed into
- * prevauthor, prevdate, prevRCS, prevrev, prevsource, prevstate.
+ * prevauthor, prevdate, prevrev, prevstate.
  * Aborts immediately if it finds an error and returns false.
  * If it returns true, it doesn't mean that any of the
  * values were found; instead, check to see whether the corresponding arrays
  * contain the empty string.
  */
 {
-    register FILE *fp;
     register int c;
-    char keyword[keylength+2];
+    char keyword[keylength+1];
     register char * tp;
-    enum markers mresult;
 
     /* initialize to empty */
-    prevauthor[0]=prevsource[0]=prevstate[0]=prevdate[0]=prevrev[0]= '\0';
+    bufscpy(&prevauthor, "");
+    bufscpy(&prevrev, "");
+    bufscpy(&prevstate, "");
+    *prevdate = 0;
 
-    if ( (fp = fopen(fname, "r") ) == NULL ) {
-       error("Can't open %s\n", fname);
-       return false;
-    }
     while( (c=getc(fp)) != EOF) {
         if ( c==KDELIM) {
-            /* try to get keyword */
-            tp = keyword;
-	    while( (c=getc(fp))!=EOF && (tp< keyword+keylength) && (c!='\n')
-		   && (c!=KDELIM) && (c!=VDELIM))
-		  *tp++ = c;
-
-            if (c==KDELIM) {VOID ungetc(c,fp);continue;}
+	    do {
+		/* try to get keyword */
+		tp = keyword;
+		while ((c=getc(fp))!=EOF && c!='\n' && c!=KDELIM && c!=VDELIM 
+		       && tp<keyword+keylength
+		)
+		    *tp++ = c;
+	    } while (c==KDELIM);
+	    if (c==EOF)
+		break;
             if (c!=VDELIM) continue;
-	    *tp++ = c;
-            *tp='\0';
-            while ((c=getc(fp))==' '||c=='\t'); /* skip blanks */
-            VOID ungetc(c,fp); /* needed for getval */
+	    *tp = c;
+	    if ((c=getc(fp))!=' ' && c!='\t')
+		continue;
 
-	    switch (mresult=trymatch(keyword,true)) {
+	    switch (trymatch(keyword)) {
             case Author:
-		if (getval(fp,prevauthor,IDLENGTH,true))
-                    if (!checkid(prevauthor, '\0')) goto errexit;
+		if (!getprevid(0, fp, &prevauthor))
+		    return false;
+		c = getc(fp);
                 break;
             case Date:
-		if (!getprevdate(fp,true)) goto errexit;
+		if (!(c = getprevdate(fp)))
+		    return false;
                 break;
             case Header:
             case Id:
-		if (mresult==Header) {
-		    if (!getval(fp,prevsource,NCPPN,true)) break; /*unexpanded*/
-		} else {
-		    if (!getval(fp,prevRCS,NCPFN,true))    break; /*unexpanded*/
-		}
-		if (!getval(fp,prevrev,revlength,false)) goto errexit;
-		if (!checknum(prevrev,-1)) {
-		    error("Bad revision number");
-		    goto errexit;
-		}
-		if (!getprevdate(fp,false)) goto errexit;
-		if (!getval(fp,prevauthor,IDLENGTH,false)) goto errexit;
-		if (!checkid(prevauthor, '\0')) goto errexit;
-		if (!getval(fp,prevstate,IDLENGTH,false)) goto errexit;
-		if (!checkid(prevstate, '\0')) goto errexit;
-		VOID getval(fp, dummy, IDLENGTH, true);    /* optional locker*/
-		VOID getval(fp, prevlocker,IDLENGTH,true); /* optional locker*/
-                break;
+		if (!(
+		      getval(fp, (struct buf*)nil, false) &&
+		      getprevrev(fp) &&
+		      (c = getprevdate(fp)) &&
+		      getprevid(c, fp, &prevauthor) &&
+		      getprevid(0, fp, &prevstate)
+		))
+		    return false;
+		/* Skip either ``who'' (new form) or ``Locker: who'' (old).  */
+		if (getval(fp, (struct buf*)nil, true) &&
+		    getval(fp, (struct buf*)nil, true))
+			c = getc(fp);
+		else if (nerror)
+			return false;
+		else
+			c = KDELIM;
+		break;
             case Locker:
-                VOID getval(fp,prevlocker,IDLENGTH,true);
-		if (!checkid(prevlocker, '\0')) goto errexit;
-                break;
             case Log:
-		VOID getval(fp,prevRCS,NCPPN,true);
-                break;
             case RCSfile:
-                VOID getval(fp,prevRCS,NCPFN,true);
+            case Source:
+		if (!getval(fp, (struct buf*)nil, false))
+		    return false;
+		c = getc(fp);
                 break;
             case Revision:
-                if (getval(fp,prevrev,revlength,true))
-                    if (!checknum(prevrev,-1)) {
-                        error("Bad revision number");
-                        goto errexit;
-                    }
-                break;
-            case Source:
-                VOID getval(fp,prevsource,NCPPN,true);
+		if (!getprevrev(fp))
+		    return false;
+		c = getc(fp);
                 break;
             case State:
-                if (getval(fp,prevstate,IDLENGTH,true))
-                    if (!checkid(prevstate, '\0')) goto errexit;
+		if (!getprevid(0, fp, &prevstate))
+		    return false;
+		c = getc(fp);
                 break;
             default:
                continue;
             }
-            if (getc(fp)!=KDELIM)
-                warn("Closing %c missing on keyword",KDELIM);
-            if (prevauthor[0]!='\0'&&prevrev[0]!='\0'&&prevstate[0]!='\0'&&
-                prevdate[0]!='\0' &&
-		 ((prevsource[0]!='\0')||(prevRCS[0]!='\0'))){
-                /* done; prevlocker is irrelevant */
+	    if (c != KDELIM) {
+		error("closing %c missing on keyword", KDELIM);
+		return false;
+	    }
+	    if (*prevauthor.string && *prevdate && *prevrev.string && *prevstate.string) {
                 break;
            }
         }
     }
-    VOID fclose(fp);
-    return true;
 
-errexit:
-    prevauthor[0]=prevsource[0]=prevstate[0]=prevdate[0]=prevrev[0]= '\0';
-    VOID fclose(fp); return false;
+    arewind(fp);
+    return true;
 }
 
 
-static int getval(fp,target,maxchars,optional)
-register FILE *fp;
-char * target; int maxchars, optional;
-/* Function: Places a keyword value into target, but not more
- * than maxchars characters. Prints an error if optional==false
- * and there is no keyword. Returns true if one is found, false otherwise.
+	static int
+getval(fp, target, optional)
+	register FILE *fp;
+	struct buf *target;
+	int optional;
+/* Reads a keyword value from FP into TARGET.
+ * Returns true if one is found, false otherwise.
+ * Does not modify target if it is nil.
+ * Do not report an error if OPTIONAL is set and KDELIM is found instead.
+ */
+{
+	return get0val(getc(fp), fp, target, optional);
+}
+
+	static int
+get0val(c, fp, target, optional)
+	register int c;
+	register FILE *fp;
+	struct buf *target;
+	int optional;
+/* Reads a keyword value from C+FP into TARGET, perhaps OPTIONALly.
+ * Same as getval, except C is the lookahead character.
  */
 {   register char * tp;
+    const char *tlim;
+    register int got1;
+
+    if (target) {
+	bufalloc(target, 1);
+	tp = target->string;
+	tlim = tp + target->size;
+    } else
+	tlim = tp = 0;
+    got1 = false;
+    for (;;  c = getc(fp))
+	switch (c) {
+	    default:
+		got1 = true;
+		if (tp) {
+		    *tp++ = c;
+		    if (tlim <= tp)
+			tp = bufenlarge(target, &tlim);
+		}
+		continue;
+
+	    case ' ':
+	    case '\t':
+		if (tp) {
+		    *tp = 0;
+#		    ifdef KEEPTEST
+			VOID printf("getval: %s\n", target);
+#		    endif
+		}
+		if (!got1)
+		    error("too much white space in keyword value");
+		return got1;
+
+	    case KDELIM:
+		if (!got1 && optional)
+		    return false;
+		/* fall into */
+	    case '\n':
+	    case 0:
+	    case EOF:
+		error("badly terminated keyword value");
+		return false;
+	}
+}
+
+
+	static int
+getprevdate(fp)
+FILE *fp;
+/* Function: reads a date prevdate; checks format
+ * Return 0 on error, lookahead character otherwise.
+ */
+{
+    struct buf prevday, prevtime, prevzone, prev;
+    register const char *p;
     register int c;
 
-    tp=target;
-    c=getc(fp);
-    if (c==KDELIM) {
-        if (!optional)
-            error("Missing keyword value");
-        VOID ungetc(c,fp);
-        return false;
-    } else {
-        while (!(c==' '||c=='\n'||c=='\t'||c==KDELIM||c==EOF)) {
-            if (tp-target>=maxchars-1) {
-                error("keyword value too long");
-                return false;
-            } else {
-                *tp++ =c;
-                c=getc(fp);
-            }
-        }
-        *tp= '\0';
-#       ifdef KEEPTEST
-        VOID printf("getval: %s\n",target);
-#       endif
-        while(c==' '||c=='\t') c=getc(fp); /* skip trailing blanks */
+    c = 0;
+    bufautobegin(&prevday);
+    if (getval(fp,&prevday,false)) {
+	bufautobegin(&prevtime);
+	if (getval(fp,&prevtime,false)) {
+	    bufautobegin(&prevzone);
+	    bufscpy(&prevzone, "");
+	    c = getc(fp);
+	    if (c=='-' || c=='+')
+		c = get0val(c,fp,&prevzone,false) ? getc(fp) : 0;
+	    if (c) {
+		bufautobegin(&prev);
+		p = prevday.string;
+		bufalloc(&prev, strlen(p) + strlen(prevtime.string) + strlen(prevzone.string) + 5);
+		VOID sprintf(prev.string, "%s%s %s %s", 
+		    /* Parse dates put out by old versions of RCS.  */
+		    isdigit(p[0]) && isdigit(p[1]) && p[2]=='/'  ?  "19"  :  "",
+		    p, prevtime.string, prevzone.string
+		);
+		str2date(prev.string, prevdate);
+		bufautoend(&prev);
+	    }
+	    bufautoend(&prevzone);
+	}
+	bufautoend(&prevtime);
     }
-    VOID ungetc(c,fp);
-    return true;
+    bufautoend(&prevday);
+    return c;
+}
+
+	static int
+getprevid(c, fp, b)
+	int c;
+	FILE *fp;
+	struct buf *b;
+/* Get previous identifier from C+FP into B.  */
+{
+	if (!get0val(c?c:getc(fp), fp, b, false))
+	    return false;
+	checksid(b->string);
+	return true;
+}
+
+	static int
+getprevrev(fp)
+	FILE *fp;
+/* Get previous revision from FP into prevrev.  */
+{
+	return getval(fp,&prevrev,false) && checknum(prevrev.string,-1);
 }
 
 
-int getprevdate(fp,optional)
-FILE *fp;
-int optional;
-/* Function: reads a date prevdate; checks format
- * If there is not date and optional==false, an error is printed.
- * Returns false on error, true otherwise.
- */
-{   char prevday[10];
-    char prevtime[10];
-
-    prevday[0]=prevtime[0]='\0';
-    if (!getval(fp,prevday,9,optional)) return optional;
-    if (!getval(fp,prevtime,9,false)) return false;
-    /*process date */
-    prevday[2]=prevday[5]=prevday[8]=prevtime[2]=prevtime[5]='.';
-    prevday[9]='\0';
-    VOID strcpy(prevdate,prevday);
-    VOID strcat(prevdate,prevtime);
-    if (!checknum(prevdate,5)) {
-            error("Bad date: %s",prevdate);
-            prevdate[0]='\0';
-            return false;
-    }
-    return true;
-}
-
-int checknum(sp,fields)
-register char * sp; int fields;
+	static int
+checknum(sp,fields)
+	register const char *sp;
+	int fields;
 {    register int dotcount;
-     if (sp==nil||*sp=='\0') return true;
      dotcount=0;
      while(*sp) {
         if (*sp=='.') dotcount++;
-        elsif (ctab[*sp]!=DIGIT) return false;
+	else if (!isdigit(*sp)) return false;
         sp++;
      }
-     if (fields >= 0 && dotcount!=fields) return false;
-     return true;
+     return fields<0 ? dotcount&1 : dotcount==fields;
 }
 
 
 
 #ifdef KEEPTEST
-char * RCSfilename, * workfilename;
 
+const char cmdid[] ="keeptest";
+
+	int
 main(argc, argv)
 int  argc; char  *argv[];
 {
-	cmdid="keeptest";
         while (*(++argv)) {
-                if (getoldkeys(*argv))
+		FILE *f;
+		if (!(f = fopen(*argv,"r"))) {
+			perror(f);
+			exit(1);
+		}
+		getoldkeys(f);
+		VOID fclose(f);
                 VOID printf("%s:  revision: %s, date: %s, author: %s, state: %s\n",
-                        *argv, prevrev, prevdate, prevauthor,prevstate);
-		VOID printf("Source: %s, RCSfile: %s\n",prevsource,prevRCS);
+			    *argv, prevrev.string, prevdate.string, prevauthor.string, prevstate.string);
 	}
-	exit(0);
+	exitmain(EXIT_SUCCESS);
 }
 #endif

@@ -1,13 +1,9 @@
 /*
  * PARTIME		parse date/time string into a TM structure
  *
- * Usage:
- *      #include "time.h"             -- expanded tm structure
- *	char *str; struct tm *tp;
- *	partime(str,tp);
  * Returns:
  *	0 if parsing failed
- *	else time values in specified TM structure (unspecified values
+ *	else time values in specified TM structure and zone (unspecified values
  *		set to TMNULL)
  * Notes:
  *	This code is quasi-public; it may be used freely in like software.
@@ -22,21 +18,30 @@
  *	If parsing changed so that no backup needed, could perhaps modify
  *		to use a FILE input stream.  Need terminator, though.
  *	Perhaps should return 0 on success, else a non-zero error val?
- *	Flush AMPM from TM structure and handle locally within PARTIME,
- *		like midnight/noon?
  */
 
-#ifndef lint
-static char rcsid[]=
-"$Header: /usr/src/local/bin/rcs/src/RCS/partime.c,v 1.4 89/05/01 14:48:46 narten Exp $";
-#endif
-
-/* $Log:	partime.c,v $
+/* $Log: partime.c,v $
+ * Revision 5.4  1990/10/04  06:30:15  eggert
+ * Remove date vs time heuristics that fail between 2000 and 2400.
+ * Check for overflow when lexing an integer.
+ * Parse 'Jan 10 LT' as 'Jan 10, LT', not 'Jan, 10 LT'.
+ *
+ * Revision 5.3  1990/09/24  18:56:31  eggert
+ * Update timezones.
+ *
+ * Revision 5.2  1990/09/04  08:02:16  eggert
+ * Don't parse two-digit years, because it won't work after 1999/12/31.
+ * Don't permit 'Aug Aug'.
+ *
+ * Revision 5.1  1990/08/29  07:13:49  eggert
+ * Be able to parse our own date format.  Don't assume year<10000.
+ *
+ * Revision 5.0  1990/08/22  08:12:40  eggert
+ * Switch to GMT and fix the bugs exposed thereby.  Update timezones.
+ * Ansify and Posixate.  Fix peekahead and int-size bugs.
+ *
  * Revision 1.4  89/05/01  14:48:46  narten
  * fixed #ifdef DEBUG construct
- * 
- * Revision 1.3  88/11/08  12:02:15  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 1.3  88/08/28  14:53:40  eggert
  * Remove unportable "#endif XXX"s.
@@ -44,37 +49,42 @@ static char rcsid[]=
  * Revision 1.2  87/03/27  14:21:53  jenkins
  * Port to suns
  * 
- * Revision 1.1  84/01/23  14:50:07  kcs
- * Initial revision
- * 
  * Revision 1.1  82/05/06  11:38:26  wft
  * Initial revision
  * 
  */
 
-#include <stdio.h>
-#include <ctype.h>
-#include "time.h"
+#include "rcsbase.h"
 
-#ifndef lint
-static char timeid[] = TIMEID;
-#endif
+libId(partId, "$Id: partime.c,v 5.4 1990/10/04 06:30:15 eggert Exp $")
+
+#define given(v) (0 <= (v))
+#define TMNULL (-1) /* Items not given are given this value */
+#define TZ_OFFSET (24*60) /* TMNULL  <  zone_offset - TZ_OFFSET */
 
 struct tmwent {
-	char *went;
-	long wval;	/* must be big enough to hold pointer or integer */
+	const char *went;
+	short wval;
 	char wflgs;
 	char wtype;
 };
 	/* wflgs */
-#define TWSPEC 01	/* Word wants special processing */
 #define TWTIME 02	/* Word is a time value (absence implies date) */
 #define TWDST  04	/* Word is a DST-type timezone */
-#define TW1200 010	/* Word is NOON or MIDNIGHT (sigh) */
+	/* wtype */
+#define TM_MON	1	/* month name */
+#define TM_WDAY	2	/* weekday name */
+#define TM_ZON	3	/* time zone name */
+#define TM_LT	4	/* local time */
+#define TM_DST	5	/* daylight savings time */
+#define TM_12	6	/* AM, PM, NOON, or MIDNIGHT */
+	/* wval (for wtype==TM_12) */
+#define T12_AM 1
+#define T12_PM 2
+#define T12_NOON 12
+#define T12_MIDNIGHT 0
 
-int pt12hack();
-int ptnoise();
-struct tmwent tmwords [] = {
+static const struct tmwent tmwords [] = {
 	{"january",      0, 0, TM_MON},
 	{"february",     1, 0, TM_MON},
 	{"march",        2, 0, TM_MON},
@@ -97,286 +107,408 @@ struct tmwent tmwords [] = {
 	{"saturday",     6, 0, TM_WDAY},
 
 	{"gmt",          0*60, TWTIME, TM_ZON},   /* Greenwich */
-	{"gst",          0*60, TWTIME, TM_ZON},
-	{"gdt",          0*60, TWTIME+TWDST, TM_ZON},     /* ?? */
+	{"utc",          0*60, TWTIME, TM_ZON},
+	{"ut",           0*60, TWTIME, TM_ZON},
 
+	{"nzst",        -12*60, TWTIME, TM_ZON},  /* New Zealand */
+	{"jst",         -9*60, TWTIME, TM_ZON},   /* Japan */
+	{"kst",         -9*60, TWTIME, TM_ZON},   /* Korea */
+	{"ist",         -5*60-30, TWTIME, TM_ZON},/* India */
+	{"eet",         -2*60, TWTIME, TM_ZON},   /* Eastern Europe */
+	{"cet",         -1*60, TWTIME, TM_ZON},   /* Central Europe */
+	{"met",         -1*60, TWTIME, TM_ZON},   /* Middle Europe */
+	{"wet",          0*60, TWTIME, TM_ZON},   /* Western Europe */
+	{"nst",          3*60+30, TWTIME, TM_ZON},/* Newfoundland */
 	{"ast",          4*60, TWTIME, TM_ZON},   /* Atlantic */
 	{"est",          5*60, TWTIME, TM_ZON},   /* Eastern */
 	{"cst",          6*60, TWTIME, TM_ZON},   /* Central */
 	{"mst",          7*60, TWTIME, TM_ZON},   /* Mountain */
 	{"pst",          8*60, TWTIME, TM_ZON},   /* Pacific */
-	{"yst",          9*60, TWTIME, TM_ZON},   /* Yukon */
+	{"akst",         9*60, TWTIME, TM_ZON},   /* Alaska */
+	{"hast",         10*60, TWTIME, TM_ZON},  /* Hawaii-Aleutian */
 	{"hst",          10*60, TWTIME, TM_ZON},  /* Hawaii */
-	{"bst",          11*60, TWTIME, TM_ZON},  /* Bering */
+	{"sst",          11*60, TWTIME, TM_ZON},  /* Samoa */
 
+	{"nzdt",        -12*60, TWTIME+TWDST, TM_ZON},    /* New Zealand */
+	{"kdt",         -9*60, TWTIME+TWDST, TM_ZON},     /* Korea */
+	{"bst",          0*60, TWTIME+TWDST, TM_ZON},     /* Britain */
+	{"ndt",          2*60+30, TWTIME+TWDST, TM_ZON}, /*Newfoundland (DDST)*/
 	{"adt",          4*60, TWTIME+TWDST, TM_ZON},     /* Atlantic */
 	{"edt",          5*60, TWTIME+TWDST, TM_ZON},     /* Eastern */
 	{"cdt",          6*60, TWTIME+TWDST, TM_ZON},     /* Central */
 	{"mdt",          7*60, TWTIME+TWDST, TM_ZON},     /* Mountain */
 	{"pdt",          8*60, TWTIME+TWDST, TM_ZON},     /* Pacific */
-	{"ydt",          9*60, TWTIME+TWDST, TM_ZON},     /* Yukon */
-	{"hdt",          10*60, TWTIME+TWDST, TM_ZON},    /* Hawaii */
-	{"bdt",          11*60, TWTIME+TWDST, TM_ZON},    /* Bering */
+	{"akdt",         9*60, TWTIME+TWDST, TM_ZON},     /* Alaska */
+	{"hadt",         10*60, TWTIME+TWDST, TM_ZON},    /* Hawaii-Aleutian */
 
-	{"daylight",     1, TWTIME+TWDST, TM_ZON},        /* Local Daylight */
-	{"standard",     1, TWTIME, TM_ZON},      /* Local Standard */
-	{"std",          1, TWTIME, TM_ZON},      /*   "       "    */
+#if 0
+	/*
+	 * The following names are duplicates or are not well attested.
+	 * A standard is needed.
+	 */
+	{"?st",         -13*60, TWTIME, TM_ZON},  /* Uelen */
+	{"?st",         -11*60, TWTIME, TM_ZON},  /* Magadan */
+	{"east",        -10*60, TWTIME, TM_ZON},  /* Eastern Australia */
+	{"cast",        -9*60-30, TWTIME, TM_ZON},/* Central Australia */
+	{"cst",         -8*60, TWTIME, TM_ZON},   /* China */
+	{"hkt",         -8*60, TWTIME, TM_ZON},   /* Hong Kong */
+	{"sst",         -8*60, TWTIME, TM_ZON},   /* Singapore */
+	{"wast",        -8*60, TWTIME, TM_ZON},   /* Western Australia */
+	{"?st",         -7*60, TWTIME, TM_ZON},   /* Novosibirsk */
+	{"jt",          -7*60-30, TWTIME, TM_ZON},/* Java */
+	{"nst",         -6*60-30, TWTIME, TM_ZON},/* North Sumatra */
+	{"?st",         -6*60, TWTIME, TM_ZON},   /* Tashkent */
+	{"?st",         -5*60, TWTIME, TM_ZON},	  /* Sverdlovsk */
+	{"?",           -4*60-30, TWTIME, TM_ZON},/* Afghanistan */
+	{"?st",         -4*60, TWTIME, TM_ZON},	  /* Rostov */
+	{"it",          -3*60-30, TWTIME, TM_ZON},/* Iran */
+	{"?st",         -3*60, TWTIME, TM_ZON},   /* Moscow */
+	{"ist",         -2*60, TWTIME, TM_ZON},   /* Israel */
+	{"ast",          1*60, TWTIME, TM_ZON},   /* Azores */
+	{"fst",          2*60, TWTIME, TM_ZON},   /* Fernando de Noronha */
+	{"bst",          3*60, TWTIME, TM_ZON},   /* Brazil */
+	{"wst",          4*60, TWTIME, TM_ZON},   /* Western Brazil */
+	{"ast",          5*60, TWTIME, TM_ZON},   /* Acre Brazil */
+	{"?",            9*60+30, TWTIME, TM_ZON},/* Marquesas */
+	{"?st",          12*60, TWTIME, TM_ZON},  /* Kwajalein */
 
-	{"am",           1, TWTIME, TM_AMPM},
-	{"pm",           2, TWTIME, TM_AMPM},
-	{"noon",         12,TWTIME+TW1200, 0},    /* Special frobs */
-	{"midnight",     0, TWTIME+TW1200, 0},
-	{"at",           (long)ptnoise, TWSPEC, 0},    /* Noise word */
+	{"?dt",         -13*60, TWTIME+TWDST, TM_ZON},	  /* Uelen */
+	{"?dt",         -11*60, TWTIME+TWDST, TM_ZON},	  /* Magadan */
+	{"eadt",        -10*60, TWTIME+TWDST, TM_ZON},    /* Eastern Australia */
+	{"cadt",        -9*60-30, TWTIME+TWDST, TM_ZON},  /* Central Australia */
+	{"cdt",         -8*60, TWTIME+TWDST, TM_ZON},     /* China */
+	{"wadt",        -8*60, TWTIME+TWDST, TM_ZON},     /* Western Australia */
+	{"?dt",         -7*60, TWTIME+TWDST, TM_ZON},	  /* Novosibirsk */
+	{"?dt",         -6*60, TWTIME+TWDST, TM_ZON},	  /* Tashkent */
+	{"?dt",         -5*60, TWTIME+TWDST, TM_ZON},	  /* Sverdlovsk */
+	{"?dt",         -4*60, TWTIME+TWDST, TM_ZON},	  /* Rostov */
+	{"?dt",         -3*60, TWTIME+TWDST, TM_ZON},     /* Moscow */
+	{"idt",         -2*60, TWTIME+TWDST, TM_ZON},     /* Israel */
+	{"eest",        -2*60, TWTIME+TWDST, TM_ZON},     /* Eastern Europe */
+	{"cest",        -1*60, TWTIME+TWDST, TM_ZON},     /* Central Europe */
+	{"mest",        -1*60, TWTIME+TWDST, TM_ZON},     /* Middle Europe */
+	{"west",         0*60, TWTIME+TWDST, TM_ZON},     /* Western Europe */
+	{"adt",          1*60, TWTIME+TWDST, TM_ZON},	  /* Azores */
+	{"fdt",          2*60, TWTIME+TWDST, TM_ZON},     /* Fernando de Noronha */
+	{"edt",          3*60, TWTIME+TWDST, TM_ZON},     /* Eastern Brazil */
+	{"wdt",          4*60, TWTIME+TWDST, TM_ZON},     /* Western Brazil */
+	{"adt",          5*60, TWTIME+TWDST, TM_ZON},     /* Acre Brazil */
+#endif
+
+	{"lt",           0, TWTIME, TM_LT},       /* local time */
+	{"dst",          1*60, TWTIME, TM_DST},      /* daylight savings time */
+	{"ddst",         2*60, TWTIME, TM_DST},      /* double dst */
+
+	{"am",           T12_AM,	TWTIME, TM_12},
+	{"pm",           T12_PM,	TWTIME, TM_12},
+	{"noon",         T12_NOON,	TWTIME, TM_12},
+	{"midnight",     T12_MIDNIGHT,	TWTIME, TM_12},
 
 	{0, 0, 0, 0},             /* Zero entry to terminate searches */
 };
 
-#define TMWILD (-2)	/* Value meaning item specified as wild-card */
-			/* (May use someday...) */
-
 struct token {
-	char *tcp;	/* pointer to string */
+	const char *tcp;/* pointer to string */
 	int tcnt;	/* # chars */
 	char tbrk;	/* "break" char */
 	char tbrkl;	/* last break char */
 	char tflg;	/* 0 = alpha, 1 = numeric */
 	union {         /* Resulting value; */
 		int tnum;/* either a #, or */
-		struct tmwent *ttmw;/* ptr to a tmwent. */
+		const struct tmwent *ttmw;/* ptr to a tmwent. */
 	} tval;
 };
 
-partime(astr, atm)
-char *astr;
-struct tm *atm;
-{	register int *tp;
-	register struct tmwent *twp;
-	register int i;
-	struct token btoken, atoken;
-	char *cp, ch;
-	int ord, midnoon;
-	int (*aproc)();
+static const struct tmwent*ptmatchstr P((const char*,int,const struct tmwent*));
+static int pt12hack P((struct tm *,int));
+static int ptitoken P((struct token *));
+static int ptstash P((int *,int));
+static int pttoken P((struct token *));
 
-	tp = (int *)atm;
-	zaptime(tp);			 /* Initialize the TM structure */
-	midnoon = TMNULL;		/* and our own temp stuff */
-	btoken.tcnt = btoken.tbrkl = 0;
-	btoken.tcp = astr;
+	static int
+goodzone(t, offset, am)
+	register const struct token *t;
+	int offset;
+	int *am;
+{
+	register int m;
+	if (
+		t->tflg  &&
+		t->tcnt == 4+offset  &&
+		(m = t->tval.tnum) <= 2400  &&
+		isdigit(t->tcp[offset]) &&
+		(m%=100) < 60
+	) {
+		m += t->tval.tnum/100 * 60;
+		if (t->tcp[offset-1]=='+')
+			m = -m;
+		*am = m;
+		return 1;
+	}
+	return 0;
+}
 
-domore:
-	if(!ptitoken(btoken.tcp+btoken.tcnt,&btoken))	/* Get a token */
+    int
+partime(astr, atm, zone)
+const char *astr;
+register struct tm *atm;
+int *zone;
+{
+    register int i;
+    struct token btoken, atoken;
+    int zone_offset; /* minutes west of GMT, plus TZ_OFFSET */
+    register const char *cp;
+    register char ch;
+    int ord, midnoon;
+    int *atmfield, dst, m;
+    int got1 = 0;
+
+    atm->tm_sec = TMNULL;
+    atm->tm_min = TMNULL;
+    atm->tm_hour = TMNULL;
+    atm->tm_mday = TMNULL;
+    atm->tm_mon = TMNULL;
+    atm->tm_year = TMNULL;
+    atm->tm_wday = TMNULL;
+    atm->tm_yday = TMNULL;
+    midnoon = TMNULL;		/* and our own temp stuff */
+    zone_offset = TMNULL;
+    dst = TMNULL;
+    btoken.tcnt = btoken.tbrk = 0;
+    btoken.tcp = astr;
+
+    for (;; got1=1) {
+	if (!ptitoken(&btoken))				/* Get a token */
 	  {     if(btoken.tval.tnum) return(0);         /* Read error? */
-		if(midnoon != TMNULL)			/* EOF, wrap up */
-			return(pt12hack(tp, midnoon));
-		return(1);				/* Win return! */
+		if (given(midnoon))			/* EOF, wrap up */
+			if (!pt12hack(atm, midnoon))
+				return 0;
+		if (!given(atm->tm_min))
+			atm->tm_min = 0;
+		*zone  =
+				(given(zone_offset) ? zone_offset-TZ_OFFSET : 0)
+			-	(given(dst) ? dst : 0);
+		return got1;
 	  }
 	if(btoken.tflg == 0)		/* Alpha? */
-	  {     twp = btoken.tval.ttmw;         /* Yes, get ptr to entry */
-		if(twp->wflgs&TWSPEC)		/* Special alpha crock */
-		  {     aproc = (int (*) ()) (twp->wval);
-			if(!(*aproc)(tp, twp, &btoken))
-				return(0);	/* ERR: special word err */
-			goto domore;
-		  }
-		if(twp->wflgs&TW1200)
-			if(ptstash(&midnoon,(int)twp->wval))
-				return(0);	/* ERR: noon/midnite clash */
-			else goto domore;
-		if(ptstash(&tp[twp->wtype],(int)twp->wval))
+	  {     i = btoken.tval.ttmw->wval;
+		switch (btoken.tval.ttmw->wtype) {
+		  default:
+			return 0;
+		  case TM_MON:
+			atmfield = &atm->tm_mon;
+			break;
+		  case TM_WDAY:
+			atmfield = &atm->tm_wday;
+			break;
+		  case TM_DST:
+			atmfield = &dst;
+			break;
+		  case TM_LT:
+			if (ptstash(&dst, 0))
+				return 0;
+			i = 48*60; /* local time magic number -- see maketime() */
+			/* fall into */
+		  case TM_ZON:
+			i += TZ_OFFSET;
+			if (btoken.tval.ttmw->wflgs & TWDST)
+				if (ptstash(&dst, 60))
+					return 0;
+			/* Peek ahead for offset immediately afterwards. */
+			if (
+			    (btoken.tbrk=='-' || btoken.tbrk=='+') &&
+			    (atoken=btoken, ++atoken.tcnt, ptitoken(&atoken)) &&
+			    goodzone(&atoken, 0, &m)
+			) {
+				i += m;
+				btoken = atoken;
+			}
+			atmfield = &zone_offset;
+			break;
+		  case TM_12:
+			atmfield = &midnoon;
+		}
+		if (ptstash(atmfield, i))
 			return(0);		/* ERR: val already set */
-		if(twp->wtype == TM_ZON)	/* If was zone, hack DST */
-			if(ptstash(&tp[TM_ISDST],(twp->wflgs&TWDST)))
-				return(0);	/* ERR: DST conflict */
-		goto domore;
+		continue;
 	  }
 
 	/* Token is number.  Lots of hairy heuristics. */
-	if(btoken.tcnt >= 7)	/* More than 6 digits in string? */
-		return(0);	/* ERR: number too big */
-	if(btoken.tcnt == 6)	/* 6 digits = HHMMSS.  Needs special crock */
-	  {			/* since 6 digits are too big for integer! */
-		i = (btoken.tcp[0]-'0')*10	/* Gobble 1st 2 digits */
-		   + btoken.tcp[1]-'0';
-		btoken.tcnt = 2;		/* re-read last 4 chars */
-		goto coltime;
-	  }
+	if (!isdigit(*btoken.tcp)) {
+		if (!goodzone(&btoken, 1, &m))
+			return 0;
+		zone_offset = TZ_OFFSET + m;
+		continue;
+	}
 
 	i = btoken.tval.tnum;   /* Value now known to be valid; get it. */
-	if( btoken.tcnt == 5	/*  5 digits = HMMSS */
-	 || btoken.tcnt == 3)	/*  3 digits = HMM   */
-	  {	if(btoken.tcnt != 3)
-			if(ptstash(&tp[TM_SEC], i%100))
-				return(0);	/* ERR: sec conflict */
-			else i /= 100;
-hhmm4:		if(ptstash(&tp[TM_MIN], i%100))
+	if (btoken.tcnt == 3)	/*  3 digits = HMM   */
+	  {
+hhmm4:		if (ptstash(&atm->tm_min, i%100))
 			return(0);		/* ERR: min conflict */
 		i /= 100;
-hh2:            if(ptstash(&tp[TM_HOUR], i))
+hh2:            if (ptstash(&atm->tm_hour, i))
 			return(0);		/* ERR: hour conflict */
-		goto domore;
+		continue;
 	  }
 
+	if (4 < btoken.tcnt)
+		goto year4; /* far in the future */
 	if(btoken.tcnt == 4)	/* 4 digits = YEAR or HHMM */
-	  {	if(tp[TM_YEAR] != TMNULL) goto hhmm4;	/* Already got yr? */
-		if(tp[TM_HOUR] != TMNULL) goto year4;	/* Already got hr? */
-		if((i%100) > 59) goto year4;		/* MM >= 60? */
+	  {	if (given(atm->tm_year)) goto hhmm4;	/* Already got yr? */
+		if (given(atm->tm_hour)) goto year4;	/* Already got hr? */
 		if(btoken.tbrk == ':')			/* HHMM:SS ? */
-			if( ptstash(&tp[TM_HOUR],i/100)
-			 || ptstash(&tp[TM_MIN], i%100))
+			if ( ptstash(&atm->tm_hour, i/100)
+			  || ptstash(&atm->tm_min, i%100))
 				return(0);		/* ERR: hr/min clash */
 			else goto coltm2;		/* Go handle SS */
 		if(btoken.tbrk != ',' && btoken.tbrk != '/'
-		  && ptitoken(btoken.tcp+btoken.tcnt,&atoken)	/* Peek */
-		  && atoken.tflg == 0			/* alpha */
-		  && (atoken.tval.ttmw->wflgs&TWTIME))  /* HHMM-ZON */
+		  && (atoken=btoken, ptitoken(&atoken))	/* Peek */
+		  && ( atoken.tflg
+		     ? !isdigit(*atoken.tcp)
+		     : atoken.tval.ttmw->wflgs & TWTIME)) /* HHMM-ZON */
 			goto hhmm4;
-		if(btoken.tbrkl == '-'		/* DD-Mon-YYYY */
-		  || btoken.tbrkl == ','	/* Mon DD, YYYY */
-		  || btoken.tbrkl == '/'	/* MM/DD/YYYY */
-		  || btoken.tbrkl == '.'	/* DD.MM.YYYY */
-		  || btoken.tbrk == '-'		/* YYYY-MM-DD */
-			) goto year4;
-		goto hhmm4;			/* Give up, assume HHMM. */
+		goto year4;			/* Give up, assume year. */
 	  }
 
 	/* From this point on, assume tcnt == 1 or 2 */
-	/* 2 digits = YY, MM, DD, or HH (MM and SS caught at coltime) */
+	/* 2 digits = MM, DD, or HH (MM and SS caught at coltime) */
 	if(btoken.tbrk == ':')		/* HH:MM[:SS] */
 		goto coltime;		/*  must be part of time. */
-	if(i > 31) goto yy2;		/* If >= 32, only YY poss. */
+	if (31 < i)
+		return 0;
 
 	/* Check for numerical-format date */
 	for (cp = "/-."; ch = *cp++;)
 	  {	ord = (ch == '.' ? 0 : 1);	/* n/m = D/M or M/D */
 		if(btoken.tbrk == ch)			/* "NN-" */
 		  {	if(btoken.tbrkl != ch)
-			  {	if(ptitoken(btoken.tcp+btoken.tcnt,&atoken)
+			  {
+				atoken = btoken;
+				atoken.tcnt++;
+				if (ptitoken(&atoken)
 				  && atoken.tflg == 0
 				  && atoken.tval.ttmw->wtype == TM_MON)
 					goto dd2;
 				if(ord)goto mm2; else goto dd2; /* "NN-" */
 			  }				/* "-NN-" */
-			if(tp[TM_DAY] == TMNULL
-			&& tp[TM_YEAR] != TMNULL)	/* If "YY-NN-" */
+			if (!given(atm->tm_mday)
+			  && given(atm->tm_year))	/* If "YYYY-NN-" */
 				goto mm2;		/* then always MM */
 			if(ord)goto dd2; else goto mm2;
 		  }
 		if(btoken.tbrkl == ch			/* "-NN" */
-		  && tp[ord ? TM_MON : TM_DAY] != TMNULL)
-			if(tp[ord ? TM_DAY : TM_MON] == TMNULL)	/* MM/DD */
+		  && given(ord ? atm->tm_mon : atm->tm_mday))
+			if (!given(ord ? atm->tm_mday : atm->tm_mon)) /* MM/DD */
 				if(ord)goto dd2; else goto mm2;
-			else goto yy2;			/* "-YY" */
 	  }
 
-	/* At this point only YY, DD, and HH are left.
-	 * YY is very unlikely since value is <= 32 and there was
-	 * no numerical format date.  Make one last try at YY
-	 * before dropping through to DD vs HH code.
-	 */
-	if(btoken.tcnt == 2		/* If 2 digits */
-	  && tp[TM_HOUR] != TMNULL	/* and already have hour */
-	  && tp[TM_DAY] != TMNULL	/* and day, but  */
-	  && tp[TM_YEAR] == TMNULL)	/* no year, then assume */
-		goto yy2;		/* that's what we have. */
-
 	/* Now reduced to choice between HH and DD */
-	if(tp[TM_HOUR] != TMNULL) goto dd2;	/* Have hour? Assume day. */
-	if(tp[TM_DAY] != TMNULL) goto hh2;	/* Have day? Assume hour. */
+	if (given(atm->tm_hour)) goto dd2;	/* Have hour? Assume day. */
+	if (given(atm->tm_mday)) goto hh2;	/* Have day? Assume hour. */
+	if (given(atm->tm_mon)) goto dd2;	/* Have month? Assume day. */
 	if(i > 24) goto dd2;			/* Impossible HH means DD */
-	if(!ptitoken(btoken.tcp+btoken.tcnt, &atoken))	/* Read ahead! */
+	atoken = btoken;
+	if (!ptitoken(&atoken))			/* Read ahead! */
 		if(atoken.tval.tnum) return(0); /* ERR: bad token */
 		else goto dd2;			/* EOF, assume day. */
-	if( atoken.tflg == 0		/* If next token is an alpha */
-	 && atoken.tval.ttmw->wflgs&TWTIME)  /* time-spec, assume hour */
+	if ( atoken.tflg
+	   ? !isdigit(*atoken.tcp)
+	   : atoken.tval.ttmw->wflgs & TWTIME)
+		/* If next token is a time spec, assume hour */
 		goto hh2;		/* e.g. "3 PM", "11-EDT"  */
 
-dd2:	if(ptstash(&tp[TM_DAY],i))	/* Store day (1 based) */
+dd2:	if (ptstash(&atm->tm_mday, i))	/* Store day (1 based) */
 		return(0);
-	goto domore;
+	continue;
 
-mm2:	if(ptstash(&tp[TM_MON], i-1))	/* Store month (make zero based) */
+mm2:	if (ptstash(&atm->tm_mon, i-1))	/* Store month (make zero based) */
 		return(0);
-	goto domore;
+	continue;
 
-yy2:	i += 1900;
-year4:	if(ptstash(&tp[TM_YEAR],i))	/* Store year (full number) */
+year4:	if ((i-=1900) < 0  ||  ptstash(&atm->tm_year, i)) /* Store year-1900 */
 		return(0);		/* ERR: year conflict */
-	goto domore;
+	continue;
 
 	/* Hack HH:MM[[:]SS] */
 coltime:
-	if(ptstash(&tp[TM_HOUR],i)) return(0);
-	if(!ptitoken(btoken.tcp+btoken.tcnt,&btoken))
+	if (ptstash(&atm->tm_hour, i)) return 0;
+	if (!ptitoken(&btoken))
 		return(!btoken.tval.tnum);
 	if(!btoken.tflg) return(0);	/* ERR: HH:<alpha> */
 	if(btoken.tcnt == 4)		/* MMSS */
-		if(ptstash(&tp[TM_MIN],btoken.tval.tnum/100)
-		  || ptstash(&tp[TM_SEC],btoken.tval.tnum%100))
+		if (ptstash(&atm->tm_min, btoken.tval.tnum/100)
+		  || ptstash(&atm->tm_sec, btoken.tval.tnum%100))
 			return(0);
-		else goto domore;
+		else continue;
 	if(btoken.tcnt != 2
-	  || ptstash(&tp[TM_MIN],btoken.tval.tnum))
+	  || ptstash(&atm->tm_min, btoken.tval.tnum))
 		return(0);		/* ERR: MM bad */
-	if(btoken.tbrk != ':') goto domore;	/* Seconds follow? */
-coltm2:	if(!ptitoken(btoken.tcp+btoken.tcnt,&btoken))
+	if (btoken.tbrk != ':') continue;	/* Seconds follow? */
+coltm2:	if (!ptitoken(&btoken))
 		return(!btoken.tval.tnum);
 	if(!btoken.tflg || btoken.tcnt != 2	/* Verify SS */
-	  || ptstash(&tp[TM_SEC], btoken.tval.tnum))
+	  || ptstash(&atm->tm_sec, btoken.tval.tnum))
 		return(0);		/* ERR: SS bad */
-	goto domore;
+    }
 }
 
 /* Store date/time value, return 0 if successful.
- * Fails if entry already set to a different value.
+ * Fail if entry is already set.
  */
+	static int
 ptstash(adr,val)
 int *adr;
+int val;
 {	register int *a;
-	if( *(a=adr) != TMNULL)
-		return(*a != val);
+	if (given(*(a=adr)))
+		return 1;
 	*a = val;
 	return(0);
 }
 
-/* This subroutine is invoked for NOON or MIDNIGHT when wrapping up
+/* This subroutine is invoked for AM, PM, NOON and MIDNIGHT when wrapping up
  * just prior to returning from partime.
  */
-pt12hack(atp, aval)
-int *atp, aval;
-{	register int *tp, i, h;
-	tp = atp;
-	if (((i=tp[TM_MIN]) && i != TMNULL)	/* Ensure mins, secs */
-	 || ((i=tp[TM_SEC]) && i != TMNULL))	/* are 0 or unspec'd */
-		return(0);			/* ERR: MM:SS not 00:00 */
-	i = aval;			/* Get 0 or 12 (midnite or noon) */
-	if ((h = tp[TM_HOUR]) == TMNULL	/* If hour unspec'd, win */
-	 || h == 12)			/* or if 12:00 (matches either) */
-		tp[TM_HOUR] = i;	/* Then set time */
-	else if(!(i == 0		/* Nope, but if midnight and */
-		&&(h == 0 || h == 24)))	/* time matches, can pass. */
-			return(0);	/* ERR: HH conflicts */
-	tp[TM_AMPM] = TMNULL;		/* Always reset this value if won */
-	return(1);
+	static int
+pt12hack(tm, aval)
+register struct tm *tm;
+register int aval;
+{	register int h = tm->tm_hour;
+	switch (aval) {
+	  case T12_AM:
+	  case T12_PM:
+		if (h > 12)
+			return 0;
+		if (h == 12)
+			tm->tm_hour = 0;
+		if (aval == T12_PM)
+			tm->tm_hour += 12;
+		break;
+	  default:
+		if (0 < tm->tm_min  ||  0 < tm->tm_sec)
+			return 0;
+		if (!given(h) || h==12)
+			tm->tm_hour = aval;
+		else if (aval==T12_MIDNIGHT  &&  (h==0 || h==24))
+			return 0;
+	}
+	return 1;
 }
-
-/* Null routine for no-op tokens */
-
-ptnoise() { return(1); }
 
 /* Get a token and identify it to some degree.
  * Returns 0 on failure; token.tval will be 0 for normal EOF, otherwise
  * hit error of some sort
  */
 
-ptitoken(astr, tkp)
+	static int
+ptitoken(tkp)
 register struct token *tkp;
-char *astr;
 {
-	register char *cp;
-	register int i;
+	register const char *cp;
+	register int i, j, k;
 
-	tkp->tval.tnum = 0;
-	if(pttoken(astr,tkp) == 0)
+	if (!pttoken(tkp))
 #ifdef DEBUG
 	    {
 		VOID printf("EOF\n");
@@ -388,30 +520,38 @@ char *astr;
 	cp = tkp->tcp;
 
 #ifdef DEBUG
-	i = cp[tkp->tcnt];
-	cp[tkp->tcnt] = 0;
-	VOID printf("Token: \"%s\" ",cp);
-	cp[tkp->tcnt] = i;
+	VOID printf("Token: \"%.*s\" ", tkp->tcnt, cp);
 #endif
 
-	if(tkp->tflg)
-		for(i = tkp->tcnt; i > 0; i--)
-			tkp->tval.tnum = (int)tkp->tval.tnum*10 + ((*cp++)-'0');
-	else
-	  {     i = ptmatchstr(cp, tkp->tcnt, tmwords);
-		tkp->tval.tnum = i ? i : -1;         /* Set -1 for error */
-
+	if (tkp->tflg) {
+		i = tkp->tcnt;
+		if (*cp == '+' || *cp == '-') {
+			cp++;
+			i--;
+		}
+		while (0 <= --i) {
+			j = tkp->tval.tnum*10;
+			k = j + (*cp++ - '0');
+			if (j/10 != tkp->tval.tnum  ||  k < j) {
+				/* arithmetic overflow */
+				tkp->tval.tnum = 1;
+				return 0;
+			}
+			tkp->tval.tnum = k;
+		}
+	} else if (!(tkp->tval.ttmw  =  ptmatchstr(cp, tkp->tcnt, tmwords)))
+	  {
 #ifdef DEBUG
-		if(!i) VOID printf("Not found!\n");
+		VOID printf("Not found!\n");
 #endif
-
-		if(!i) return(0);
+		tkp->tval.tnum = 1;
+		return 0;
 	  }
 
 #ifdef DEBUG
 	if(tkp->tflg)
 		VOID printf("Val: %d.\n",tkp->tval.tnum);
-	else VOID printf("Found: \"%s\", val: %d., type %d\n",
+	else VOID printf("Found: \"%s\", val: %d, type %d\n",
 		tkp->tval.ttmw->went,tkp->tval.ttmw->wval,tkp->tval.ttmw->wtype);
 #endif
 
@@ -419,24 +559,32 @@ char *astr;
 }
 
 /* Read token from input string into token structure */
-pttoken(astr,tkp)
+	static int
+pttoken(tkp)
 register struct token *tkp;
-char *astr;
 {
-	register char *cp;
+	register const char *cp;
 	register int c;
+	const char *astr;
 
-	tkp->tcp = cp = astr;
+	tkp->tcp = astr = cp = tkp->tcp + tkp->tcnt;
 	tkp->tbrkl = tkp->tbrk;		/* Set "last break" */
 	tkp->tcnt = tkp->tbrk = tkp->tflg = 0;
+	tkp->tval.tnum = 0;
 
 	while(c = *cp++)
 	  {	switch(c)
 		  {	case ' ': case '\t':	/* Flush all whitespace */
-				while((c = *cp++) && isspace(c));
-				cp--;		/* Drop thru to handle brk */
+			case '\r': case '\n':
+			case '\v': case '\f':
+				if (!tkp->tcnt) {	/* If no token yet */
+					tkp->tcp = cp;	/* ignore the brk */
+					continue;	/* and go on. */
+				}
+				/* fall into */
 			case '(': case ')':	/* Perhaps any non-alphanum */
 			case '-': case ',':	/* shd qualify as break? */
+			case '+':
 			case '/': case ':': case '.':	/* Break chars */
 				if(tkp->tcnt == 0)	/* If no token yet */
 				  {	tkp->tcp = cp;	/* ignore the brk */
@@ -446,57 +594,52 @@ char *astr;
 				tkp->tbrk = c;
 				return(tkp->tcnt);
 		  }
-		if(tkp->tcnt == 0)		/* If first char of token, */
-			tkp->tflg = isdigit(c);	/*    determine type */
-	  	if(( isdigit(c) &&  tkp->tflg)	/* If not first, make sure */
-		 ||(!isdigit(c) && !tkp->tflg))	/*    char matches type */
-			tkp->tcnt++;		/* Win, add to token. */
-		else {
-			cp--;			/* Wrong type, back up */
+		if (!tkp->tcnt++) {		/* If first char of token, */
+			if (isdigit(c)) {
+				tkp->tflg = 1;
+				if (astr<cp-2 && (cp[-2]=='-'||cp[-2]=='+')) {
+					/* timezone is break+sign+digit */
+					tkp->tcp--;
+					tkp->tcnt++;
+				}
+			}
+		} else if ((isdigit(c)!=0) != tkp->tflg) { /* else check type */
 			tkp->tbrk = c;
-			return(tkp->tcnt);
-		  }
+			return --tkp->tcnt;	/* Wrong type, back up */
+		}
 	  }
 	return(tkp->tcnt);		/* When hit EOF */
 }
 
 
+	static const struct tmwent *
 ptmatchstr(astr,cnt,astruc)
-char *astr;
-int cnt;
-struct tmwent *astruc;
-{	register char *cp, *mp;
+	const char *astr;
+	int cnt;
+	const struct tmwent *astruc;
+{
+	register const char *cp, *mp;
 	register int c;
-	struct tmwent *lastptr;
-	struct integ { int word; };   /* For getting at array ptr */
+	const struct tmwent *lastptr;
 	int i;
 
 	lastptr = 0;
-	for(;mp = (char *)((struct integ *)astruc)->word; astruc += 1)
+	for(;mp = astruc->went; astruc += 1)
 	  {	cp = astr;
 		for(i = cnt; i > 0; i--)
-		  {	switch((c = *cp++) ^ *mp++)	/* XOR the chars */
+		  {
+			switch (*cp++ - (c = *mp++))
 			  {	case 0: continue;	/* Exact match */
-				case 040: if(isalpha(c))
+				case 'A'-'a':
+				    if (ctab[c] == Letter)
 					continue;
 			  }
 			break;
 		  }
 		if(i==0)
-			if(*mp == 0) return((unsigned int)astruc);    /* Exact match */
+			if (!*mp) return astruc;	/* Exact match */
 			else if(lastptr) return(0);	/* Ambiguous */
 			else lastptr = astruc;		/* 1st ambig */
 	  }
-	return((unsigned int)lastptr);
-}
-
-
-
-zaptime(tp)
-register int *tp;
-/* clears tm structure pointed to by tp */
-{	register int i;
-	i = (sizeof (struct tm))/(sizeof (int));
-	do *tp++ = TMNULL;		/* Set entry to "unspecified" */
-	while(--i);			/* Faster than FOR */
+	return lastptr;
 }

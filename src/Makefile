@@ -1,5 +1,6 @@
-#$Header: /usr/src/local/bin/rcs/src/RCS/Makefile,v 1.20 90/07/09 10:39:16 hammer Exp $
+# $Id: Makefile,v 5.8 1990/12/13 06:54:06 eggert Exp $
 # Copyright (C) 1982, 1988, 1989 Walter Tichy
+#   Copyright 1990 by Paul Eggert
 #   Distributed under license by the Free Software Foundation, Inc.
 #
 # This file is part of RCS.
@@ -24,293 +25,250 @@
 #
 #               INSTRUCTIONS
 #               ============
-# 0.  If you are porting to different hardware,
-#     check the instructions in rcsbase.h
+
+
+#	Figure out where to put the RCS commands; define RCSDIR accordingly.
+
+RCSDIR = /usr/local/bin
+
+
+#	Define INSTALL_SETID_FLAGS as needed to install RCS setgid or setuid.
+#	This makes sense only when setegid() and seteuid() work
+#	Setgid is better than setuid because it mixes with nonstrict locking.
+#INSTALL_SETID_FLAGS = ${INSTALL_NORMAL_FLAGS}
+#INSTALL_SETID_FLAGS = -g rcs -o root -m 2555
+ INSTALL_SETID_FLAGS = ${INSTALL_NORMAL_FLAGS}
+
+
+#	Define RCSPREFIX to be empty if you want RCS to search the PATH for
+#	subsidiary RCS commands like co.  This lets you move RCS commands
+#	after building them, and permits multiple instances of setgid RCS
+#	commands on the same host for different groups.
 #
-# 1. Early version of diff did not support options needed by RCS.
-#    Newer versions of diff support them, and diff is no longer distributed with
-#    RCS. The following definitions apply only if you have both old versions
-#    and new versions of diff, and you want RCS to use the new versions.
-#    The default should be :
-#
+#	Define RCSPREFIX to a path followed by / if you want RCS to look in
+#	just one place.  This makes execution faster.  Also, if your host's
+#	execvp() system call does not understand the BSD #!/bin/sh convention
+#	for starting shell files, you must use a nonempty RCSPREFIX, because
+#	in this case rcsmerge invokes `/bin/sh ${RCSPREFIX}merge'.
 
-DIFF      = /bin/diff
-DIFF3     = /usr/lib/diff3
+#RCSPREFIX =
+#RCSPREFIX = ${RCSDIR}/
+ RCSPREFIX = ${RCSDIR}/
 
-# 1a. If you are using GNU diff and diff3, you must use the alternate form
-#     of the merge shell script called gnu-merge.sh.  In order to do that,
-#     set MERGE accordingly
+#	Define DIFF and DIFF3 to be the name of your diff and diff3 programs.
+#	DIFF must be an absolute path name if setgid or setuid is used.
+#	Define DIFF_FLAGS to be diff's options for RCS format output.
+#	If available, use the -a option for comparing arbitrary files.
+#	Define DIFF_L to be 1 if your diff understands GNU diff's -L option.
+#	Set DIFF3_TYPE=lib for traditional diff, =bin otherwise.
+#	If DIFF3_type=bin, make sure your diff3 understands -a, -L, and and -m.
+#	If DIFF3_type=lib, avoid the diff3 program visible to users, and
+#	use the one in /usr/lib instead; it may be called /usr/lib/diff3prog.
 
-#MERGE = gnu-merge.sh
-MERGE = merge.sh
+# Traditional diff
+#DIFF = /bin/diff
+#DIFF_FLAGS = -n
+#DIFF_L = 0
+#DIFF3 = /usr/lib/diff3
+#DIFF3_TYPE = lib
+
+# GNU diff -- must be version 1.15 or later
+#DIFFPREFIX = ${RCSDIR}/
+#DIFF = ${DIFFPREFIX}diff
+#DIFF_FLAGS = -an
+#DIFF_L = 1
+#DIFF3 = ${DIFF}3
+#DIFF3_TYPE = bin
+
+ DIFF = /bin/diff
+ DIFF_FLAGS = -n
+ DIFF_L = 0
+ DIFF3 = /usr/lib/diff3
+ DIFF3_TYPE = lib
 
 
-# 2.  Figure out where to put the RCS commands; define RCSDIR accordingly.
+#	Set SENDMAIL to be a comma-separated list of strings that are a command
+#	to send mail.  The first string should be an absolute pathname.
+#	The name of the addressee will be appended as a separate argument,
+#	and the standard input will be the message (first line "Subject: xxxx",
+#	second line empty).
 
-RCSDIR  = /usr/local/bin
+#SENDMAIL = "/bin/mail"
+#SENDMAIL = "/etc/delivermail", "-w"
+#SENDMAIL = "/usr/lib/sendmail"
+ SENDMAIL = "/bin/mail"
 
 
-# 3.  Figure out where to put your old RCS commands; define OLDDIR
-#     accordingly. This is not needed if you don't have an old release of RCS.
-OLDDIR    = /usr/old/bin
+#	Decide what loader libraries you need.
+#	Some older hosts need -lBSD, -ljobs, or -lPW.
 
-# 4.  Set the operating system variable OS. If you run on 4.1 BSD, do not
-#     define OS:
-#     OS  =
-#     If you run on USG Unix or UN*X, use:
-#     OS  = -DUSG
-#     If you run on Version 6 Unix, use:
-#     OS  = -DV6
-#     If you run on SunOS, Ultrix, 4.2 or 4.3 BSD, use:
-#     OS = -DV4_2BSD
-OS        = -DV4_2BSD
+LDLIBS =
 
-#     Also, set SIGNAL_TYPE to be what your signal() handlers yield.
-#     Older signal handlers yield 'int'; some newer ones 'void'.
-#     For SunOS 4.0 the correct type is 'void'; using 'int' will
-#     cause compile time errors.  Check the signal(3) man page to be sure.
 
-SIGNAL_TYPE = int
+#	Decide what C compiler flags you need.
 
-# 5.  Decide whether you want strict locking as the default or not.
-#     If you want strict locking, use:
-#     LOCKING = 1
-#     otherwise:
-#     LOCKING = 0
-LOCKING   = 1
+# Optimize.  Put in options that work well for your compiler.
+# Options to try with GCC include -fdelayed-branch, -finline-functions,
+# -fomit-frame-pointer, and -fstrength-reduce.
+CC_O = -O
 
-# 6.  Decide what loader flags you need, and define LDFLAGS accordingly.
-#     On the Vax you need none, on PDP-11s with split i/d you need -i.
-#LDFLAGS  = -i
-LDFLAGS   = -s
+# Make all initialized data read-only (not just string literals).
+# This option can improve performance by making initialized data shared.
+# It's not worth worrying about if your compiler supports the `const' keyword.
+# 4.3BSD-based compilers
+#CC_R = -R
+# most other compilers
+#CC_R =
+ CC_R =
 
-# 7.  RCS can maintain a log of the use of the co and ci commands. If you
-#     want the logging, you must
-#     a) define SNOOP (that's where the process that writes the log goes),
-#     b) define SNOOPFILE (that's the file where SNOOP writes the log;
-#        it must be owned by the same user that owns SNOOP),
-#     c) include SNOOP and SNOOPFILE in the CFLAGS macro.
-#     If you don't want the logging of command usage, omit the SNOOP and
-#     SNOOPFILE definitions from CFLAGS.
-#     The two variants of the CFLAG macros are given below.
-SNOOPFILE = /usr/log/rcslog/log
-SNOOP	= /usr/local/bin/snoop
+# Add this for SunOS 4.1 + GCC 1.37.1.
+#COMPILE.c = ${CC} ${CFLAGS} ${CPPFLAGS} -c
 
-DEFINES= -DCOMPAT2 $(OS) -DSIGNAL_TYPE=$(SIGNAL_TYPE) -DSTRICT_LOCKING=$(LOCKING) -DDIFF='"$(DIFF)"' -DCO='"${RCSDIR}/co"' -DRCS_CMD='"${RCSDIR}/rcs"' -DMERGE='"${RCSDIR}/merge"'
 
-# for command logging use
-#CFLAGS	= -O $(DEFINES) -DSNOOP='"${SNOOP}"' -DSNOOPFILE='"${SNOOPFILE}"'
-CFLAGS	= -O $(DEFINES)
+# for GCC
+#CC = gcc
+#CC_W = -Wall -Wcast-qual -Wpointer-arith -Wshadow -Wwrite-strings
+#CFLAGS = ${CC_O} ${CC_R} ${CC_W}
 
-LINTFLAGS = -c -u
-LINT = lint $(LINTFLAGS) -Dlint $(DEFINES)
+# for traditional C compilers
+#CC = cc
+#CFLAGS = ${CC_O} ${CC_R}
 
-# 8.  If you don't have release 2 RCS files around (e.g., if you don't
-#     have release 2 of RCS), remove the word -DCOMPAT2 from whatever
-#     variant of CFLAGS you selected. -DCOMPAT2 assures that release 2
-#     RCS files can still be read. (After all release 2 RCS files have
-#     been updated with release 3 or 4 ci or rcs, you can remake RCS without
-#     -DCOMPAT2.) Also, make sure that the co commands at the end of this
-#     file are commented out; otherwise, Make will complain.
-#
-# 9.  Now you are ready. Try to make 'depend' and 'all'. If all went well, make
-#     'install' if you want no logging of command usage, 'installog' otherwise.
-#
-# 10. IMPORTANT! When you have RCS installed, rename old
-#     release 2 RCS files as follows (if you have any):
-#     If the working file was "f.c" and the RCS file "f.c.v", rename the
-#     RCS file to "f.c,v". If the working file was "f.c" and the RCS file
-#     "f.v", rename the RCS file "f.c,v". Thus, suffixes are no longer
-#     dropped and RCS files end in ",v" rather than ".v".
-#
-# 11. If you want to maintain RCS with itself, be sure you preserve the
-#     original revision numbers, dates, etc. This is done by checking the
-#     files in with the -k option.
-#
-BCOMMANDS   =   ci ident rcs rcsclean rcsdiff rcsmerge rlog co
-# binary comands
+ CC = cc
+ CFLAGS = ${CC_O} ${CC_R}
 
-RCSCOMMANDS = merge $(BCOMMANDS)
+
+LINT = lint
+
+# For traditional and BSD lint, use
+#LINTFLAGS = -abchx
+# For USG lint, use
+#LINTFLAGS =
+ LINTFLAGS = -abchx
+
+
+#	If you have version 2 RCS files around, define COMPAT2 to be 1.
+#	(Version 2 became obsolete in 1982.)  This assures that version 2
+#	RCS files can still be read.  After all version 2 RCS files have
+#	been updated with later versions of ci or rcs, you can remake RCS with
+#	COMPAT2=0.
+COMPAT2 = 0
+#	When you have RCS installed, rename old version 2 RCS files as follows
+#	(if you have any).  If the working file was "f.c" and the RCS file
+#	"f.c.v", rename the RCS file to "f.c,v". If the working file was "f.c"
+#	and the RCS file "f.v", rename the RCS file "f.c,v". Thus, suffixes
+#	are no longer dropped and RCS files end in ",v" rather than ".v".
+
+
+#	Now you are ready.  Try to make "conf.h".
+#	Check the resulting conf.h for plausibility.
+#	If it's wrong, there is a bug in conf.sh; please report it.
+#	You can patch conf.h if you're in a hurry, but it's better to fix it;
+#	look at a.h and conf.error for ideas.
+#	If all else fails, copy conf.heg to conf.h and edit it by hand.
+
+#	Make "all".
+#	If all went well, make "install".
+#	If installation succeeds, make "installtest";
+#	if this fails, make "installdebug" for detailed info.
+
+#	If you want to maintain RCS with itself, be sure you preserve the
+#	original revision numbers, dates, etc. by checking the
+#	files in with the -k option.
+
+# Avoid brain damage in some versions of 'make'.
+SHELL = /bin/sh
+
+# binary commands
+BCOMMANDS   =   ci ident rcs rcsdiff rcsmerge rlog co
+
 # all commands
+RCSCOMMANDS = merge ${BCOMMANDS}
 
-BOBJECTS = ci.o co.o ident.o rcs.o rcsdiff.o rcsedit.o\
-	rcsfcmp.o rcsfnms.o rcsgen.o rcskeep.o rcskeys.o rcslex.o rcsmerge.o\
-	rcsrev.o rcssyn.o rcsutil.o rlog.o snoop.o
+all :: ${RCSCOMMANDS}
 
-all:	$(RCSCOMMANDS)
+INSTALL = install -c
+INSTALL_NORMAL_FLAGS = -g staff -m 775
 
-INSTALL = install -c -m 775 -o root -g staff
+install :: all
+	${INSTALL} ${INSTALL_SETID_FLAGS} ci ${RCSDIR}
+	${INSTALL} ${INSTALL_SETID_FLAGS} co ${RCSDIR}
+	${INSTALL} ${INSTALL_SETID_FLAGS} rcsdiff ${RCSDIR}
+	${INSTALL} ${INSTALL_SETID_FLAGS} rcsmerge ${RCSDIR}
+	${INSTALL} ${INSTALL_SETID_FLAGS} rlog ${RCSDIR}
+	${INSTALL} ${INSTALL_NORMAL_FLAGS} ident ${RCSDIR}
+	${INSTALL} ${INSTALL_NORMAL_FLAGS} rcs ${RCSDIR}
+	${INSTALL} ${INSTALL_NORMAL_FLAGS} merge ${RCSDIR}
 
-$(BOBJECTS):	rcsbase.h
+installtest ::
+	sh rcstest
 
-partime.o maketime.o co.o ci.o rcs.o rlog.o rcsutil.o:        time.h
+installdebug ::
+	sh rcstest -v
 
-install:	all 
-#	Save the old commands if you have any.
-#	-cd ${RCSDIR}; mv $(RCSCOMMANDS) ${RCSDIR}$(OLDDIR)
-	${INSTALL} ci ${RCSDIR}
-	${INSTALL} ident ${RCSDIR}
-	${INSTALL} rcs ${RCSDIR}
-	${INSTALL} rcsdiff ${RCSDIR}
-	${INSTALL} rcsmerge ${RCSDIR}
-	${INSTALL} rlog ${RCSDIR}
-	${INSTALL} co ${RCSDIR}
-	${INSTALL} merge ${RCSDIR}
-	${INSTALL} rcsclean ${RCSDIR}
-#	${INSTALL} rcsfreeze.sh ${RCSDIR}/rcsfreeze
+clean ::
+	rm -f a.* *.o conf.h conf.error ${RCSCOMMANDS}
 
-installog:	installsnoop install
+conf.h : conf.sh # Makefile
+	C='${CC} ${CFLAGS}' \
+	COMPAT2='${COMPAT2}' \
+	DIFF='${DIFF}' \
+	DIFF_L='${DIFF_L}' \
+	DIFF_FLAGS='${DIFF_FLAGS}' \
+	RCSPREFIX='${RCSPREFIX}' \
+	SENDMAIL='${SENDMAIL}' \
+	L='${LDLIBS}' \
+	sh -x conf.sh 2>conf.error
+	mv a.h $@
+	rm -f a.*
 
-installsnoop:	snoop
-	${INSTALL} snoop $(SNOOP)
-	chmod u+s $(SNOOP)
-	touch $(SNOOPFILE)
-	chmod 644 $(SNOOPFILE)
-# CAUTION: You may have to do a chown of SNOOP and SNOOPFILE (if not owned by root).
-lint: ci.lint co.lint ident.lint rlog.lint rcs.lint rcsdiff.lint rcsmerge.lint snoop.lint
+CIFILES = ci.o rcslex.o rcssyn.o rcsgen.o rcsedit.o rcskeys.o rcsmap.o \
+	rcsrev.o rcsutil.o rcsfnms.o partime.o maketime.o rcskeep.o rcsfcmp.o
+ci : ${CIFILES}
+	${CC} ${CFLAGS} ${CIFILES} ${LDLIBS} -o $@
 
-clean:
-	-rm -f *.o; rm -f $(RCSCOMMANDS) snoop
+COFILES = co.o rcslex.o rcssyn.o rcsgen.o rcsedit.o rcskeys.o rcsmap.o \
+	rcsrev.o rcsutil.o rcsfnms.o partime.o maketime.o
+co : ${COFILES}
+	${CC} ${CFLAGS} ${COFILES} ${LDLIBS} -o $@
 
-CIFILES = ci.o rcslex.o rcssyn.o rcsgen.o rcsedit.o rcskeys.o rcsrev.o rcsutil.o rcsfnms.o partime.o maketime.o rcskeep.o rcsfcmp.o
+ident : ident.o rcsmap.o
+	${CC} ${CFLAGS} ident.o rcsmap.o ${LDLIBS} -o $@
 
-CISRC = ci.c rcslex.c rcssyn.c rcsgen.c rcsedit.c rcskeys.c rcsrev.c rcsutil.c rcsfnms.c partime.c maketime.c rcskeep.c rcsfcmp.c
+merge : merge.sh
+	DIFF=${DIFF} DIFF3=${DIFF3} DIFF3_TYPE=${DIFF3_TYPE} sh $@.sh >$@.o
+	chmod +x $@.o
+	mv $@.o $@
 
-ci.lint:
-	$(LINT) $(CISRC)
-	
-ci:	$(CIFILES)
-	${CC} -o ci $(CIFILES) $(LDFLAGS)
+RLOG = rlog.o rcslex.o rcsmap.o rcssyn.o rcsrev.o rcsutil.o partime.o \
+	maketime.o rcsfnms.o
+rlog : ${RLOG}
+	${CC} ${CFLAGS} ${RLOG} ${LDLIBS} -o $@
 
-COFILES = co.o rcslex.o rcssyn.o rcsgen.o rcsedit.o rcskeys.o rcsrev.o rcsutil.o rcsfnms.o partime.o maketime.o
+RCS = rcs.o rcslex.o rcssyn.o rcsrev.o rcsutil.o rcsgen.o rcsedit.o rcskeys.o \
+	rcsmap.o rcsfnms.o
+rcs : ${RCS}
+	${CC} ${CFLAGS} ${RCS} ${LDLIBS} -o $@
 
-COSRC = co.c rcslex.c rcssyn.c rcsgen.c rcsedit.c rcskeys.c rcsrev.c rcsutil.c rcsfnms.c partime.c maketime.c
-co.lint:
-	$(LINT) $(COSRC)
-co:	$(COFILES)
-	${CC} -o co $(COFILES) $(LDFLAGS)
+RCSDIFF = rcsdiff.o rcsutil.o rcsfnms.o rcsmap.o rcsrev.o rcssyn.o rcslex.o \
+	maketime.o partime.o
+rcsdiff : ${RCSDIFF}
+	${CC} ${CFLAGS} ${RCSDIFF} ${LDLIBS} -o $@
 
-ident:	ident.o rcskeys.o
-	${CC} -o ident ident.o rcskeys.o $(LDFLAGS)
+RCSMERGE = rcsmerge.o rcsutil.o rcsfnms.o rcsmap.o rcsrev.o rcssyn.o rcslex.o
+rcsmerge : ${RCSMERGE}
+	${CC} ${CFLAGS} ${RCSMERGE} ${LDLIBS} -o $@
 
-ident.lint:
-	$(LINT) ident.c rcskeys.c
+SOURCE=	ci.c co.c ident.c maketime.c partime.c rcs.c \
+	rcsdiff.c rcsedit.c rcsfcmp.c rcsfnms.c rcsgen.c \
+	rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsmerge.c rcsrev.c rcssyn.c \
+	rcsutil.c rlog.c
+OBJECT=	ci.o co.o ident.o maketime.o partime.o rcs.o \
+	rcsdiff.o rcsedit.o rcsfcmp.o rcsfnms.o rcsgen.o \
+	rcskeep.o rcskeys.o rcslex.o rcsmap.o rcsmerge.o rcsrev.o rcssyn.o \
+	rcsutil.o rlog.o
 
-merge:	${MERGE}
-	sed -e '/^#/d' \
-		-e 's:DIFF=.*$$:DIFF=$(DIFF):' \
-		-e 's:DIFF3=.*$$:DIFF3=$(DIFF3):' \
-		${MERGE} > merge
-#	This takes out the comment lines and substitutes in DIFF and DIFF3.
-#	(Comments are not permitted in some older shells.)
-	chmod 755 merge
+lint : conf.h
+	${LINT} ${LINTFLAGS} -Dlint=1 ${SOURCE}
 
-RLOG = rlog.o rcslex.o rcssyn.o rcsrev.o rcsutil.o partime.o maketime.o rcsfnms.o
-RLOGSRC = rlog.c rcslex.c rcssyn.c rcsrev.c rcsutil.c partime.c maketime.c rcsfnms.c
-rlog:	$(RLOG)
-	${CC} -o rlog $(RLOG) $(LDFLAGS)
-
-rlog.lint:
-	$(LINT) $(RLOGSRC)
-
-RCS = rcs.o rcslex.o rcssyn.o rcsrev.o rcsutil.o rcsgen.o rcsedit.o rcskeys.o rcsfnms.o
-RCSSRC = rcs.c rcslex.c rcssyn.c rcsrev.c rcsutil.c rcsgen.c rcsedit.c rcskeys.c rcsfnms.c
-rcs:	$(RCS)
-	${CC} -o rcs $(RCS) $(LDFLAGS)
-
-rcs.lint:
-	$(LINT) $(RCSSRC)
-
-RCSCLEAN = rcsclean.o rcslex.o rcsfnms.o rcsrev.o rcssyn.o rcsutil.o
-RCSCLEANSRC = rcsclean.c rcslex.c rcsfnms.c rcsrev.c rcssyn.c rcsutil.c
-rcsclean:	$(RCSCLEAN)
-	${CC} -o rcsclean $(RCSCLEAN) $(LDFLAGS)
-
-rcsclean.lint:
-	$(LINT) $(RCSCLEANSRC)
-
-RCSDIFF = rcsdiff.o rcsutil.o rcsfnms.o rcsrev.o rcssyn.o rcslex.o
-
-RCSDIFFSRC = rcsdiff.c rcsutil.c rcsfnms.c rcsrev.c rcssyn.c rcslex.c
-rcsdiff:	$(RCSDIFF)
-	${CC} -o rcsdiff $(RCSDIFF) ${LDFLAGS}
-
-rcsdiff.lint:
-	$(LINT) $(RCSDIFFSRC)
-RCSMERGE = rcsmerge.o rcsutil.o rcsfnms.o rcsrev.o rcssyn.o rcslex.o
-RCSMERGESRC = rcsmerge.c rcsutil.c rcsfnms.c rcsrev.c rcssyn.c rcslex.c
-rcsmerge:	$(RCSMERGE)
-	${CC} -o rcsmerge $(RCSMERGE) ${LDFLAGS}
-rcsmerge.lint:
-	$(LINT) $(RCSMERGESRC)
-	
-snoop:	snoop.o
-	${CC} -o snoop snoop.o ${LDFLAGS}
-snoop.lint:
-	$(LINT) snoop.c
-
-SOURCE=	ci.c co.c curdir.c ident.c maketime.c partime.c rcs.c \
-	rcsclean.c rcsdiff.c rcsedit.c rcsfcmp.c rcsfnms.c rcsgen.c \
-	rcskeep.c rcskeys.c rcslex.c rcsmerge.c rcsrev.c rcssyn.c rcsutil.c \
-	rlog.c snoop.c
-
-HFILES=	rcsbase.h time.h
-
-depend:	${SOURCE} ${HFILES}
-	(sed '/^# DO NOT DELETE THIS LINE/q' Makefile && \
-	 cc -M ${CFLAGS} ${SOURCE} | sed 's/\.\///; /\//d' \
-	) >Makefile.new
-	cp Makefile Makefile.bak
-	cp Makefile.new Makefile
-	rm -f Makefile.new
-
-
-# DO NOT DELETE THIS LINE - 
-ci.o: ci.c
-ci.o: rcsbase.h
-ci.o: time.h
-co.o: co.c
-co.o: rcsbase.h
-co.o: time.h
-curdir.o: curdir.c
-curdir.o: rcsbase.h
-ident.o: ident.c
-ident.o: rcsbase.h
-maketime.o: maketime.c
-maketime.o: rcsbase.h
-maketime.o: time.h
-partime.o: partime.c
-partime.o: time.h
-rcs.o: rcs.c
-rcs.o: rcsbase.h
-rcsclean.o: rcsclean.c
-rcsclean.o: rcsbase.h
-rcsdiff.o: rcsdiff.c
-rcsdiff.o: rcsbase.h
-rcsedit.o: rcsedit.c
-rcsedit.o: rcsbase.h
-rcsfcmp.o: rcsfcmp.c
-rcsfcmp.o: rcsbase.h
-rcsfnms.o: rcsfnms.c
-rcsfnms.o: rcsbase.h
-rcsgen.o: rcsgen.c
-rcsgen.o: rcsbase.h
-rcskeep.o: rcskeep.c
-rcskeep.o: rcsbase.h
-rcskeys.o: rcskeys.c
-rcskeys.o: rcsbase.h
-rcslex.o: rcslex.c
-rcslex.o: rcsbase.h
-rcsmerge.o: rcsmerge.c
-rcsmerge.o: rcsbase.h
-rcsrev.o: rcsrev.c
-rcsrev.o: rcsbase.h
-rcssyn.o: rcssyn.c
-rcssyn.o: rcsbase.h
-rcsutil.o: rcsutil.c
-rcsutil.o: rcsbase.h
-rlog.o: rlog.c
-rlog.o: time.h
-rlog.o: rcsbase.h
-snoop.o: snoop.c
-snoop.o: rcsbase.h
+${OBJECT} : conf.h rcsbase.h

@@ -1,11 +1,8 @@
 /*
  *                      RCS create/change operation
  */
-#ifndef lint
-static char rcsid[]=
-"$Header: /usr/src/local/bin/rcs/src/RCS/rcs.c,v 4.13 89/12/07 12:00:36 trinkle Exp $ Purdue CS";
-#endif
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -33,16 +30,35 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rcs.c,v $
- * Revision 4.13  89/12/07  12:00:36  trinkle
- * Fixed a typo in my last fix.
- * 
- * Revision 4.12  89/10/30  15:15:33  trinkle
- * Added fixes from Paul Eggert (eggert@twinsun.com) to avoid checking
- * the workfile before necessary.
- * Fixed a bug with multiple sumbolic name options.  The same buffer was
- * being reused for the rev number.
- * 
+/* $Log: rcs.c,v $
+ * Revision 5.7  1990/12/18  17:19:21  eggert
+ * Fix bug with multiple -n and -N options.
+ *
+ * Revision 5.6  1990/12/04  05:18:40  eggert
+ * Use -I for prompts and -q for diagnostics.
+ *
+ * Revision 5.5  1990/11/11  00:06:35  eggert
+ * Fix `rcs -e' core dump.
+ *
+ * Revision 5.4  1990/11/01  05:03:33  eggert
+ * Add -I and new -t behavior.  Permit arbitrary data in logs.
+ *
+ * Revision 5.3  1990/10/04  06:30:16  eggert
+ * Accumulate exit status across files.
+ *
+ * Revision 5.2  1990/09/04  08:02:17  eggert
+ * Standardize yes-or-no procedure.
+ *
+ * Revision 5.1  1990/08/29  07:13:51  eggert
+ * Remove unused setuid support.  Clean old log messages too.
+ *
+ * Revision 5.0  1990/08/22  08:12:42  eggert
+ * Don't lose names when applying -a option to multiple files.
+ * Remove compile-time limits; use malloc instead.  Add setuid support.
+ * Permit dates past 1999/12/31.  Make lock and temp files faster and safer.
+ * Ansify and Posixate.  Add -V.  Fix umask bug.  Make linting easier.  Tune.
+ * Yield proper exit status.  Check diff's output.
+ *
  * Revision 4.11  89/05/01  15:12:06  narten
  * changed copyright header to reflect current distribution rules
  * 
@@ -52,9 +68,6 @@ Report problems and direct all questions to:
  * Revision 4.9  88/11/08  13:56:01  narten
  * removed include <sysexits.h> (not needed)
  * minor fix for -A option
- * 
- * Revision 4.8  88/11/08  12:01:58  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 4.8  88/08/09  19:12:27  eggert
  * Don't access freed storage.
@@ -76,9 +89,6 @@ Report problems and direct all questions to:
  * 
  * Revision 1.2  85/12/17  13:59:09  albitz
  * Changed setstate to rcs_setstate because of conflict with random.o.
- * 
- * Revision 1.1  84/01/23  14:50:09  kcs
- * Initial revision
  * 
  * Revision 4.3  83/12/15  12:27:33  wft
  * rcs -u now breaks most recent lock if it can't find a lock by the caller.
@@ -140,204 +150,135 @@ Report problems and direct all questions to:
  */
 
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "rcsbase.h"
-#ifndef lint
-static char rcsbaseid[] = RCSBASE;
-#endif
-
-extern FILE * fopen();
-extern char * bindex();
-extern int  expandsym();                /* get numeric revision name        */
-extern struct  hshentry  * getnum();
-extern struct  lock      * addlock();   /* add a lock                       */
-extern char              * getid();
-extern char              Klog[], Khead[], Kaccess[], Kbranch[], Ktext[];
-#ifdef COMPAT2
-extern char Ksuffix[];
-#endif
-extern char * getcaller();              /* get login of caller              */
-extern struct hshentry   * findlock();  /* find and remove lock             */
-extern struct hshentry   * genrevs();
-extern char * checkid();                /* check an identifier              */
-extern char * getfullRCSname();         /* get full path name of RCS file   */
-extern char * mktempfile();             /* temporary file name generator    */
-extern free();
-extern void catchints();
-extern void ignoreints();
-extern int  nerror;                     /* counter for errors               */
-extern int  quietflag;                  /* diagnoses suppressed if true     */
-extern char curlogmsg[];                /* current log message              */
-extern char * resultfile;               /* filename for fcopy		    */
-extern FILE *fcopy;                     /* result file during editing       */
-extern FILE * finptr;                   /* RCS input file                   */
-extern FILE * frewrite;                 /* new RCS file                     */
-extern int    rewriteflag;              /* indicates whether input should be*/
-					/* echoed to frewrite               */
-
-char * newRCSfilename, * diffilename, * cutfilename;
-char * RCSfilename, * workfilename;
-extern struct stat RCSstat, workstat; /* file status of RCS and work file   */
-extern int  haveRCSstat, haveworkstat;/* status indicators                  */
-
-char accessorlst[strtsize];
-FILE * fcut;        /* temporary file to rebuild delta tree                 */
-int    oldumask;    /* save umask                                           */
-
-int initflag, strictlock, strict_selected, textflag;
-char * textfile, * accessfile;
-char * caller, numrev[30];            /* caller's login;               */
-struct  access  * newaccessor,  * rmvaccessor,  * rplaccessor;
-struct  access  *curaccess,  *rmaccess;
-struct  hshentry        * gendeltas[hshsize];
 
 struct  Lockrev {
-        char    * revno;
+	const char *revno;
         struct  Lockrev   * nextrev;
 };
 
 struct  Symrev {
-        char    * revno;
-        char    * ssymbol;
+	const char *revno;
+	const char *ssymbol;
         int     override;
         struct  Symrev  * nextsym;
 };
 
 struct  Status {
-        char    * revno;
-        char    * status;
+	const char *revno;
+	const char *status;
         struct  Status  * nextstatus;
 };
 
+enum changeaccess {append, erase};
+struct chaccess {
+	const char *login;
+	enum changeaccess command;
+	struct chaccess *nextchaccess;
+};
+
 struct delrevpair {
-        char    * strt;
-        char    * end;
+	const char *strt;
+	const char *end;
         int     code;
 };
 
-struct  Lockrev * newlocklst,   * rmvlocklst;
-struct  Symrev  * assoclst,  * lastassoc;
-struct  Status  * statelst,  * laststate;
-struct  delrevpair      * delrev;
-struct  hshentry        * cuthead,  *cuttail,  * delstrt;
-char    branchnum[revlength], * branchsym;
-struct  hshentry branchdummy;
-char	* commsyml;
-char    * headstate;
-int     lockhead,unlockcaller,chgheadstate,branchflag,commentflag;
-int     delaccessflag;
-enum    stringwork {copy, edit, empty}; /* expand and edit_expand not needed */
+static int buildeltatext P((const struct hshentries*));
+static int removerevs P((void));
+static int sendmail P((const char*,const char*));
+static struct Lockrev *rmnewlocklst P((const struct Lockrev*));
+static void breaklock P((const struct hshentry*));
+static void buildtree P((void));
+static void cleanup P((void));
+static void getaccessor P((char*,enum changeaccess));
+static void getassoclst P((int,char*));
+static void getchaccess P((const char*,enum changeaccess));
+static void getdelrev P((char*));
+static void getstates P((char*));
+static void rcs_setstate P((const char*,const char*));
+static void scanlogtext P((struct hshentry*,int));
+static void setlock P((const char*));
+static void updateaccess P((void));
+static void updateassoc P((void));
+static void updatelocks P((void));
 
+static struct buf numrev;
+static const char *headstate;
+static int chgheadstate, exitstatus, lockhead, unlockcaller;
+static struct Lockrev *newlocklst, *rmvlocklst;
+static struct Status *statelst, *laststate;
+static struct Symrev *assoclst, *lastassoc;
+static struct chaccess *chaccess, **nextchaccess;
+static struct delrevpair delrev;
+static struct hshentry *cuthead, *cuttail, *delstrt;
+static struct hshentries *gendeltas;
 
-main (argc, argv)
-int argc;
-char * argv[];
+mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
 {
-        char    *comdusge;
-        int     result;
-	struct	access	*removeaccess(),  * getaccessor();
-        struct  Lockrev *rmnewlocklst();
+	static const char cmdusage[] =
+		"\nrcs usage: rcs -alogins -Aoldfile -{blu}[rev] -cstring -e[logins] -i -{LU} -{nN}name[:rev] -orange -sstate[:rev] -t[textfile] -Vn file ...";
+
+	const char *branchsym, *commsyml, *textfile;
+	int branchflag, expmode, initflag;
+	int r, strictlock, strict_selected, textflag;
+	mode_t defaultRCSmode;	/* default mode for new RCS files */
+	struct buf branchnum;
         struct  Lockrev *curlock,  * rmvlock, *lockpt;
         struct  Status  * curstate;
-        struct  access    *temp, *temptr;
-	int status;
 
-	status = 0;
-        nerror = 0;
+	initid();
 	catchints();
-        cmdid = "rcs";
-        quietflag = false;
-        comdusge ="command format:\nrcs -i -alogins -Alogins -e[logins] -b[rev] -c[commentleader] -l[rev] -u[rev] -L -U -nname[:rev] -Nname[:rev] -orange -sstate[:rev] -t[textfile] file....";
-        rplaccessor = nil;     delstrt = nil;
-        accessfile = textfile = caller = nil;
-        branchflag = commentflag = chgheadstate = false;
-        lockhead = false; unlockcaller=false;
+
+	nextchaccess = &chaccess;
+	branchsym = commsyml = textfile = nil;
+	branchflag = strictlock = false;
+	bufautobegin(&branchnum);
+	curlock = rmvlock = nil;
+	defaultRCSmode = 0;
+	expmode = -1;
         initflag= textflag = false;
         strict_selected = 0;
-
-	caller=getcaller();
-        laststate = statelst = nil;
-        lastassoc = assoclst = nil;
-        curlock = rmvlock = newlocklst = rmvlocklst = nil;
-        curaccess = rmaccess = rmvaccessor = newaccessor = nil;
-        delaccessflag = false;
 
         /*  preprocessing command options    */
         while (--argc,++argv, argc>=1 && ((*argv)[0] == '-')) {
                 switch ((*argv)[1]) {
 
-                case 'i':   /*  initail version  */
+		case 'i':   /*  initial version  */
                         initflag = true;
                         break;
 
                 case 'b':  /* change default branch */
-                        if (branchflag)warn("Redfinition of option -b");
+			if (branchflag) redefined('b');
                         branchflag= true;
                         branchsym = (*argv)+2;
                         break;
 
                 case 'c':   /*  change comment symbol   */
-                        if (commentflag)warn("Redefinition of option -c");
-                        commentflag = true;
+			if (commsyml) redefined('c');
                         commsyml = (*argv)+2;
                         break;
 
                 case 'a':  /*  add new accessor   */
-                        if ( (*argv)[2] == '\0') {
-                            error("Login name missing after -a");
-                        }
-                        if ( (temp = getaccessor((*argv)+1)) ) {
-                            if ( newaccessor )
-                                curaccess->nextaccess = temp->nextaccess;
-                            else
-                                newaccessor = temp->nextaccess;
-                            temp->nextaccess = nil;
-                            curaccess = temp;
-                        }
+			getaccessor(*argv+1, append);
                         break;
 
                 case 'A':  /*  append access list according to accessfile  */
-                        if ( (*argv)[2] == '\0') {
-                            error("Missing file name after -A");
+			*argv += 2;
+			if (!**argv) {
+			    error("missing file name after -A");
                             break;
                         }
-                        if ( accessfile) warn("Redefinition of option -A");
-                        *argv = *argv+2;
-                        if( pairfilenames(1, argv, true, false) > 0) {
-                            releaselst(newaccessor);
-                            newaccessor = curaccess = nil;
-                            releaselst(rmvaccessor);
-                            rmvaccessor = rmaccess = nil;
-                            accessfile = RCSfilename;
+			if (0 < pairfilenames(1,argv,rcsreadopen,true,false)) {
+			    while (AccessList) {
+				getchaccess(strsave(AccessList->login), append);
+				AccessList = AccessList->nextaccess;
+			    }
+			    ffclose(finptr);
                         }
-                        else
-                            accessfile = nil;
                         break;
 
                 case 'e':    /*  remove accessors   */
-                        if ( (*argv)[2] == '\0' ) {
-                            delaccessflag = true;
-                            break;
-                        }
-                        if ( (temp = getaccessor((*argv)+1))  ) {
-                            if ( rmvaccessor )
-                                rmaccess->nextaccess = temp->nextaccess;
-                            else
-                                rmvaccessor = temp->nextaccess;
-                            temptr = temp->nextaccess;
-                            temp->nextaccess = nil;
-                            rmaccess = temp;
-                            while( temptr ) {
-                                newaccessor = removeaccess(temptr,newaccessor,false);
-                                temptr = temptr->nextaccess;
-                            }
-                            curaccess = temp = newaccessor;
-                            while( temp){
-                                curaccess = temp;
-                                temp = temp->nextaccess;
-                            }
-                        }
+			getaccessor(*argv+1, erase);
                         break;
 
                 case 'l':    /*   lock a revision if it is unlocked   */
@@ -345,7 +286,7 @@ char * argv[];
                             lockhead = true;
                             break;
                         }
-                        lockpt = (struct Lockrev *)talloc(sizeof(struct Lockrev));
+			lockpt = talloc(struct Lockrev);
                         lockpt->revno = (*argv)+2;
                         lockpt->nextrev = nil;
                         if ( curlock )
@@ -360,7 +301,7 @@ char * argv[];
                             unlockcaller=true;
                             break;
                         }
-                        lockpt = (struct Lockrev *)talloc(sizeof(struct Lockrev));
+			lockpt = talloc(struct Lockrev);
                         lockpt->revno = (*argv)+2;
                         lockpt->nextrev = nil;
                         if (rmvlock)
@@ -375,7 +316,7 @@ char * argv[];
                 case 'L':   /*  set strict locking */
                         if (strict_selected++) {  /* Already selected L or U? */
 			   if (!strictlock)	  /* Already selected -U? */
-			       warn("Option -L overrides -U");
+			       warn("-L overrides -U.");
                         }
                         strictlock = true;
                         break;
@@ -383,7 +324,7 @@ char * argv[];
                 case 'U':   /*  release strict locking */
                         if (strict_selected++) {  /* Already selected L or U? */
 			   if (strictlock)	  /* Already selected -L? */
-			       warn("Option -L overrides -U");
+			       warn("-L overrides -U.");
                         }
 			else
 			    strictlock = false;
@@ -391,7 +332,7 @@ char * argv[];
 
                 case 'n':    /*  add new association: error, if name exists */
                         if ( (*argv)[2] == '\0') {
-                            error("Missing symbolic name after -n");
+			    error("missing symbolic name after -n");
                             break;
                         }
                         getassoclst(false, (*argv)+1);
@@ -399,16 +340,16 @@ char * argv[];
 
                 case 'N':   /*  add or change association   */
                         if ( (*argv)[2] == '\0') {
-                            error("Missing symbolic name after -N");
+			    error("missing symbolic name after -N");
                             break;
                         }
                         getassoclst(true, (*argv)+1);
                         break;
 
-                case 'o':   /*  delete revisins  */
-                        if (delrev) warn("Redefinition of option -o");
+		case 'o':   /*  delete revisions  */
+			if (delrev.strt) redefined('o');
                         if ( (*argv)[2] == '\0' ) {
-                            error("Missing revision range after -o");
+			    error("missing revision range after -o");
                             break;
                         }
                         getdelrev( (*argv)+1 );
@@ -416,7 +357,7 @@ char * argv[];
 
                 case 's':   /*  change state attribute of a revision  */
                         if ( (*argv)[2] == '\0') {
-                            error("State missing after -s");
+			    error("state missing after -s");
                             break;
                         }
                         getstates( (*argv)+1);
@@ -425,47 +366,60 @@ char * argv[];
                 case 't':   /*  change descriptive text   */
                         textflag=true;
                         if ((*argv)[2]!='\0'){
-                                if (textfile!=nil)warn("Redefinition of -t option");
+				if (textfile) redefined('t');
                                 textfile = (*argv)+2;
                         }
                         break;
 
+		case 'I':
+			interactiveflag = true;
+			break;
+
                 case 'q':
                         quietflag = true;
                         break;
+
+		case 'V':
+			setRCSversion(*argv);
+			break;
+
+		case 'k':    /*  set keyword expand mode  */
+			if (0 <= expmode) redefined('k');
+			if (0 <= (expmode = str2expmode(*argv+2)))
+			    break;
+			/* fall into */
                 default:
-                        faterror("Unknown option: %s\n%s", *argv, comdusge);
+			faterror("unknown option: %s%s", *argv, cmdusage);
                 };
         }  /* end processing of options */
 
-        if (argc<1) faterror("No input file\n%s", comdusge);
-        if (nerror) {   /*  exit, if any error in command options  */
-            diagnose("%s aborted",cmdid);
-            exit(1);
-        }
-        if (accessfile) /*  get replacement for access list   */
-            getrplaccess();
+	if (argc<1) faterror("no input file%s", cmdusage);
         if (nerror) {
-            diagnose("%s aborted",cmdid);
-            exit(1);
+	    diagnose("%s aborted\n",cmdid);
+	    exitmain(EXIT_FAILURE);
         }
+	if (initflag) {
+	    defaultRCSmode = umask((mode_t)0);
+	    VOID umask(defaultRCSmode);
+	    defaultRCSmode = ~defaultRCSmode & 0444;
+	}
 
         /* now handle all filenames */
         do {
-        rewriteflag = false;
+	foutptr = NULL;
         finptr=frewrite=NULL;
+	ffree();
 
         if ( initflag ) {
-            switch( pairfilenames(argc, argv, false, false) ) {
+	    switch (pairfilenames(argc, argv, rcswriteopen, false, false)) {
                 case -1: break;        /*  not exist; ok */
                 case  0: continue;     /*  error         */
                 case  1: error("file %s exists already", RCSfilename);
-                         VOID fclose(finptr);
                          continue;
             }
 	}
         else  {
-            switch( pairfilenames(argc, argv, true, false) ) {
+	    switch (pairfilenames(argc, argv, rcswriteopen, true, false)) {
                 case -1: continue;    /*  not exist      */
                 case  0: continue;    /*  errors         */
                 case  1: break;       /*  file exists; ok*/
@@ -479,51 +433,30 @@ char * argv[];
          * RCS file. The admin node is initialized.
          */
 
-        diagnose("RCS file: %s", RCSfilename);
+	diagnose("RCS file: %s\n", RCSfilename);
 
 	if (initflag && !getworkstat())		   continue; /* give up */
-        if (!trydiraccess(RCSfilename))            continue; /* give up */
-        if (!initflag && !checkaccesslist(caller)) continue; /* give up */
-        if (!trysema(RCSfilename,true))            continue; /* give up */
+	if (!initflag && !checkaccesslist())	   continue; /* give up */
 
         gettree(); /* read in delta tree */
 
         /*  update admin. node    */
         if (strict_selected) StrictLocks = strictlock;
-        if (commentflag) Comment = commsyml;
+	if (commsyml) {
+		Comment.string = commsyml;
+		Comment.size = strlen(commsyml);
+	}
+	if (0 <= expmode) Expand = expmode;
 
         /* update default branch */
-        if (branchflag && expandsym(branchsym, branchnum)) {
-            if (countnumflds(branchnum)>0) {
-                branchdummy.num=branchnum;
-                Dbranch = &branchdummy;
+	if (branchflag && expandsym(branchsym, &branchnum)) {
+	    if (countnumflds(branchnum.string)) {
+		Dbranch = branchnum.string;
             } else
                 Dbranch = nil;
         }
 
-        /*  update access list   */
-        if ( delaccessflag ) AccessList = nil;
-        if ( accessfile ) {
-            temp = rplaccessor;
-            while( temp ) {
-                temptr = temp->nextaccess;
-                if ( addnewaccess(temp) )
-                    temp->nextaccess = nil;
-                temp = temptr;
-            }
-        }
-        temp = rmvaccessor;
-        while(temp)   {         /*  remove accessors from accesslist   */
-            AccessList = removeaccess(temp, AccessList,true);
-            temp = temp->nextaccess;
-        }
-        temp = newaccessor;
-        while( temp)  {         /*  add new accessors   */
-            temptr = temp->nextaccess;
-            if ( addnewaccess( temp ) )
-                temp->nextaccess = nil;
-            temp = temptr;
-        }
+	updateaccess();		/*  update access list        */
 
         updateassoc();          /*  update association list   */
 
@@ -534,10 +467,10 @@ char * argv[];
             /* change state of default branch or head */
             if (Dbranch==nil) {
                 if (Head==nil)
-                     warn("Can't change states in an empty tree");
+		     warn("can't change states in an empty tree");
                 else Head->state = headstate;
             } else {
-                rcs_setstate(Dbranch->num,headstate); /* Can't set directly */
+		rcs_setstate(Dbranch,headstate); /* Can't set directly */
             }
         }
         curstate = statelst;
@@ -547,77 +480,86 @@ char * argv[];
         }
 
         cuthead = cuttail = nil;
-        if ( delrev && removerevs()) {
+	if (delrev.strt && removerevs()) {
             /*  rebuild delta tree if some deltas are deleted   */
             if ( cuttail )
 		VOID genrevs(cuttail->num, (char *)nil,(char *)nil,
-			     (char *)nil, gendeltas);
+			     (char *)nil, &gendeltas);
             buildtree();
         }
 
 
-        /* prepare for rewriting the RCS file */
-        newRCSfilename=mktempfile(RCSfilename,NEWRCSFILE);
-        oldumask = umask(0222); /* turn off write bits */
-        if ((frewrite=fopen(newRCSfilename, "w"))==NULL) {
-                VOID fclose(finptr);
-                error("Can't open file %s",newRCSfilename);
-                continue;
-        }
-        VOID umask(oldumask);
         putadmin(frewrite);
         if ( Head )
            puttree(Head, frewrite);
-	putdesc(initflag,textflag,textfile,quietflag);
-        rewriteflag = false;
+	putdesc(textflag,textfile);
+	foutptr = NULL;
 
         if ( Head) {
-            if (!delrev) {
+	    if (!delrev.strt) {
                 /* no revision deleted */
                 fastcopy(finptr,frewrite);
             } else {
-                if ( cuttail )
-                    buildeltatext(gendeltas);
-                else
-                    scanlogtext((struct hshentry *)nil,empty);
+		if (!cuttail || buildeltatext(gendeltas))
+                    scanlogtext((struct hshentry *)nil,nil);
                     /* copy rest of delta text nodes that are not deleted      */
             }
         }
+	if (finptr) {ffclose(finptr); finptr=NULL;} /* Help the file system. */
         ffclose(frewrite);   frewrite = NULL;
         if ( ! nerror ) {  /*  move temporary file to RCS file if no error */
-	    ignoreints();		/* ignore interrupts */
-            if(rename(newRCSfilename,RCSfilename)<0) {
-                error("Can't create RCS file %s; saved in %s",
-                   RCSfilename, newRCSfilename);
-                newRCSfilename[0] = '\0';  /*  avoid deletion by cleanup  */
-                restoreints();
-                VOID cleanup();
+	    /* update mode */
+	    seteid();
+	    r = chmod(newRCSfilename,
+			 (
+			       !initflag ? RCSstat.st_mode
+			     : haveworkstat==0 ? workstat.st_mode
+			     : defaultRCSmode
+			 ) & ~(S_IWUSR|S_IWGRP|S_IWOTH)
+	    );
+	    if (r == 0) {
+		ignoreints();
+		r = re_name(newRCSfilename,RCSfilename);
+		keepdirtemp(newRCSfilename);
+		restoreints();
+	    }
+	    setrid();
+	    if (r != 0) {
+		eerror(RCSfilename);
+		error("saved in %s", newRCSfilename);
+		dirtempunlink();
                 break;
             }
-            newRCSfilename[0]='\0'; /* avoid re-unlinking by cleanup()*/
-            /* update mode */
-            result=0;
-            if (!initflag) /* preserve mode bits */
-                result=chmod(RCSfilename,RCSstat.st_mode & ~0222);
-            elsif (haveworkstat==0)  /* initialization, and work file exists */
-                result=chmod(RCSfilename,workstat.st_mode & ~0222);
-            if (result<0) warn("Can't set mode of %s",RCSfilename);
-
-            restoreints();                /* catch them all again */
-            diagnose("done");
+	    diagnose("done\n");
         } else {
-	    diagnose("%s aborted; %s unchanged.",cmdid,RCSfilename);
-	    status = 1;
-	    nerror = 0;
+	    diagnose("%s aborted; %s unchanged.\n",cmdid,RCSfilename);
         }
-        } while (cleanup(),
+	} while (cleanup(),
                  ++argv, --argc >=1);
 
-        exit(status);
+	tempunlink();
+	exitmain(exitstatus);
 }       /* end of main (rcs) */
 
+	static void
+cleanup()
+{
+	if (nerror) exitstatus = EXIT_FAILURE;
+	if (finptr) ffclose(finptr);
+	if (frewrite) ffclose(frewrite);
+	dirtempunlink();
+}
+
+	exiting void
+exiterr()
+{
+	dirtempunlink();
+	tempunlink();
+	_exit(EXIT_FAILURE);
+}
 
 
+	static void
 getassoclst(flag, sp)
 int     flag;
 char    * sp;
@@ -626,21 +568,21 @@ char    * sp;
 
 {
         struct   Symrev  * pt;
-        char             * temp, *temp2;
+	const char *temp;
         int                c;
 
         while( (c=(*++sp)) == ' ' || c == '\t' || c =='\n')  ;
         temp = sp;
-        temp2=checkid(sp, ':');  /*  check for invalid symbolic name  */
-        sp = temp2; c = *sp;   *sp = '\0';
+	sp = checkid(sp, ':');  /*  check for invalid symbolic name  */
+	c = *sp;   *sp = '\0';
         while( c == ' ' || c == '\t' || c == '\n')  c = *++sp;
 
         if ( c != ':' && c != '\0') {
-	    error("Invalid string %s after option -n or -N",sp);
+	    error("invalid string %s after option -n or -N",sp);
             return;
         }
 
-        pt = (struct Symrev *)talloc(sizeof(struct Symrev));
+	pt = talloc(struct Symrev);
         pt->ssymbol = temp;
         pt->override = flag;
 	if (c == '\0')  /*  delete symbol  */
@@ -662,57 +604,70 @@ char    * sp;
 }
 
 
-
-struct access * getaccessor( sp)
-char            *sp;
-/*   Function:  get the accessor list of options -e and -a,     */
-/*              and store in curpt                              */
-
-
+	static void
+getchaccess(login, command)
+	const char *login;
+	enum changeaccess command;
 {
-        struct  access  * curpt, * pt,  *pre;
-        char    *temp;
-        register c;
+	register struct chaccess *pt;
 
-        while( ( c = *++sp) == ' ' || c == '\n' || c == '\t' || c == ',') ;
-        if ( c == '\0') {
-            error("Missing login name after option -a or -e");
-            return nil;
-        }
-
-        curpt = pt = nil;
-        while( c != '\0') {
-                temp=checkid(sp,',');
-                pt = (struct access *)talloc(sizeof(struct access));
-                pt->login = sp;
-                if ( curpt )
-                    pre->nextaccess = pt;
-                else
-                    curpt = pt;
-                pt->nextaccess = curpt;
-                pre = pt;
-                sp = temp;    c = *sp;   *sp = '\0';
-                while( c == ' ' || c == '\n' || c == '\t'|| c == ',')c =(*++sp);
-        }
-        return pt;
+	*nextchaccess = pt = talloc(struct chaccess);
+	pt->login = login;
+	pt->command = command;
+	pt->nextchaccess = nil;
+	nextchaccess = &pt->nextchaccess;
 }
 
 
 
+	static void
+getaccessor(opt, command)
+	char *opt;
+	enum changeaccess command;
+/*   Function:  get the accessor list of options -e and -a,     */
+/*		and store in chaccess				*/
+
+
+{
+        register c;
+	register char *sp;
+
+	sp = opt;
+        while( ( c = *++sp) == ' ' || c == '\n' || c == '\t' || c == ',') ;
+        if ( c == '\0') {
+	    if (command == erase  &&  sp-opt == 1) {
+		getchaccess((const char*)nil, command);
+		return;
+	    }
+	    error("missing login name after option -a or -e");
+	    return;
+        }
+
+        while( c != '\0') {
+		getchaccess(sp, command);
+		sp = checkid(sp,',');
+		c = *sp;   *sp = '\0';
+                while( c == ' ' || c == '\n' || c == '\t'|| c == ',')c =(*++sp);
+        }
+}
+
+
+
+	static void
 getstates(sp)
 char    *sp;
 /*   Function:  get one state attribute and the corresponding   */
 /*              revision and store in statelst                  */
 
 {
-        char    *temp, *temp2;
+	const char *temp;
         struct  Status  *pt;
         register        c;
 
         while( (c=(*++sp)) ==' ' || c == '\t' || c == '\n')  ;
         temp = sp;
-        temp2=checkid(sp,':');  /* check for invalid state attribute */
-        sp = temp2;   c = *sp;   *sp = '\0';
+	sp = checkid(sp,':');  /* check for invalid state attribute */
+	c = *sp;   *sp = '\0';
         while( c == ' ' || c == '\t' || c == '\n' )  c = *++sp;
 
         if ( c == '\0' ) {  /*  change state of def. branch or Head  */
@@ -721,12 +676,12 @@ char    *sp;
             return;
         }
         else if ( c != ':' ) {
-            error("Missing ':' after state in option -s");
+	    error("missing ':' after state in option -s");
             return;
         }
 
         while( (c = *++sp) == ' ' || c == '\t' || c == '\n')  ;
-        pt = (struct Status *)talloc(sizeof(struct Status));
+	pt = talloc(struct Status);
         pt->status     = temp;
         pt->revno      = sp;
         pt->nextstatus = nil;
@@ -739,60 +694,7 @@ char    *sp;
 
 
 
-getrplaccess()
-/*   Function : get the accesslist of the 'accessfile'  */
-/*              and place in rplaccessor                */
-{
-        register        char    *id, *nextp;
-        struct          access  *newaccess, *oldaccess;
-
-        if ( (finptr=fopen(accessfile, "r")) == NULL) {
-            faterror("Can't open file %s", accessfile);
-        }
-        Lexinit();
-        nextp = &accessorlst[0];
-
-        if ( ! getkey(Khead)) faterror("Missing head in %s", accessfile);
-        VOID getnum();
-        if ( ! getlex(SEMI) ) serror("Missing ';' after head in %s",accessfile);
-
-        if (getkey(Kbranch)) { /* optional */
-                Dbranch=getnum();
-                if (!getlex(SEMI)) serror("Missing ';' after branch list");
-        }
-
-
-#ifdef COMPAT2
-        /* read suffix. Only in release 2 format */
-        if (getkey(Ksuffix)) {
-            if (nexttok==STRING) {
-                readstring(); nextlex(); /*through away the suffix*/
-            } elsif(nexttok==ID) {
-                nextlex();
-            }
-            if ( ! getlex(SEMI) ) serror("Missing ';' after suffix in %s",accessfile);
-        }
-#endif
-
-        if (! getkey(Kaccess))fatserror("Missing access list in %s",accessfile);
-        oldaccess = nil;
-        while( id =getid() ) {
-            newaccess = (struct access *)talloc(sizeof(struct access));
-            newaccess->login = nextp;
-            newaccess->nextaccess = nil;
-            while( ( *nextp++ = *id++) != '\0')  ;
-            if ( oldaccess )
-                oldaccess->nextaccess = newaccess;
-            else
-                rplaccessor = newaccess;
-            oldaccess = newaccess;
-        }
-        if ( ! getlex(SEMI))serror("Missing ';' after access list in %s",accessfile);
-        return;
-}
-
-
-
+	static void
 getdelrev(sp)
 char    *sp;
 /*   Function:  get revision range or branch to be deleted,     */
@@ -801,9 +703,7 @@ char    *sp;
         int    c;
         struct  delrevpair      *pt;
 
-        if (delrev) free((char *)delrev);
-
-        pt = (struct delrevpair *)talloc(sizeof(struct delrevpair));
+	pt = &delrev;
         while((c = (*++sp)) == ' ' || c == '\n' || c == '\t') ;
 
         if ( c == '<' || c == '-' ) {  /*  -o  -rev  or <rev  */
@@ -811,7 +711,7 @@ char    *sp;
             pt->strt = sp;    pt->code = 1;
             while( c != ' ' && c != '\n' && c != '\t' && c != '\0') c =(*++sp);
             *sp = '\0';
-            pt->end = nil;  delrev = pt;
+	    pt->end = nil;
             return;
         }
         else {
@@ -822,23 +722,19 @@ char    *sp;
             while( c == ' ' || c == '\n' || c == '\t' )  c = *++sp;
             if ( c == '\0' )  {  /*   -o rev or branch   */
                 pt->end = nil;   pt->code = 0;
-                delrev = pt;
                 return;
             }
             if ( c != '-' && c != '<') {
-                faterror("Invalid range %s %s after -o", pt->strt, sp);
-                free((char *)pt);
-                return;
+		faterror("invalid range %s %s after -o", pt->strt, sp);
             }
             while( (c = *++sp) == ' ' || c == '\n' || c == '\t')  ;
             if ( c == '\0') {  /*  -o   rev-   or   rev<   */
                 pt->end = nil;   pt->code = 2;
-                delrev = pt;
                 return;
             }
         }
         /*   -o   rev1-rev2    or   rev1<rev2   */
-        pt->end = sp;  pt->code = 3;   delrev = pt;
+	pt->end = sp;  pt->code = 3;
         while( c!= ' ' && c != '\n' && c != '\t' && c != '\0') c = *++sp;
         *sp = '\0';
 }
@@ -846,76 +742,64 @@ char    *sp;
 
 
 
-scanlogtext(delta,func)
-struct hshentry * delta; enum stringwork func;
+	static void
+scanlogtext(delta,edit)
+	struct hshentry *delta;
+	int edit;
 /* Function: Scans delta text nodes up to and including the one given
  * by delta, or up to last one present, if delta==nil.
  * For the one given by delta (if delta!=nil), the log message is saved into
- * curlogmsg and the text is processed according to parameter func.
+ * curlogmsg and the text is edited if 'edit' is set, copied otherwise.
  * Assumes the initial lexeme must be read in first.
  * Does not advance nexttok after it is finished, except if delta==nil.
  */
-{       struct hshentry * nextdelta;
+{
+	const struct hshentry *nextdelta;
+	struct cbuf cb;
 
-        do {
-                rewriteflag = false;
+	for (;;) {
+		foutptr = NULL;
                 nextlex();
                 if (!(nextdelta=getnum())) {
                     if(delta)
-                        faterror("Can't find delta for revision %s", delta->num);
-                    else return; /* no more delta text nodes */
+			faterror("can't find delta for revision %s", delta->num);
+		    if (nexttok != EOFILE)
+			fatserror("expecting EOF");
+		    return; /* no more delta text nodes */
                 }
-                if ( nextdelta->selector != DELETE) {
-                        rewriteflag = true;
-                        VOID fprintf(frewrite,DELNUMFORM,nextdelta->num,Klog);
+		if (nextdelta->selector) {
+			foutptr = frewrite;
+			aprintf(frewrite,DELNUMFORM,nextdelta->num,Klog);
                 }
-                if (!getkey(Klog) || nexttok!=STRING)
-                        serror("Missing log entry");
-                elsif (delta==nextdelta) {
-                        VOID savestring(curlogmsg,logsize);
-                        delta->log=curlogmsg;
+		getkeystring(Klog);
+		if (delta==nextdelta) {
+			cb = savestring(&curlogbuf);
+			delta->log = curlogmsg =
+				cleanlogmsg(curlogbuf.string, cb.size);
                 } else {readstring();
-                        if (delta!=nil) delta->log="";
                 }
                 nextlex();
-                if (!getkey(Ktext) || nexttok!=STRING)
-                        fatserror("Missing delta text");
+		while (nexttok==ID && strcmp(NextString,Ktext)!=0)
+			ignorephrase();
+		getkeystring(Ktext);
 
-                if(delta==nextdelta)
-                        /* got the one we're looking for */
-                        switch (func) {
-                        case copy:      copystring();
-                                        break;
-                        case edit:      editstring((struct hshentry *)nil);
-                                        break;
-                        default:        faterror("Wrong scanlogtext");
-                        }
-                else    readstring(); /* skip over it */
+		if (delta==nextdelta)
+			break;
+		readstring(); /* skip over it */
 
-        } while (delta!=nextdelta);
+	}
+	/* got the one we're looking for */
+	if (edit)
+		editstring((struct hshentry *)nil);
+	else
+		copystring();
 }
 
 
 
-releaselst(sourcelst)
-struct  access  * sourcelst;
-/*   Function:  release the storages whose address are in sourcelst   */
-
-{
-        struct  access  * pt;
-
-        pt = sourcelst;
-        while(pt) {
-	    struct access *pn = pt->nextaccess;
-            free((char *)pt);
-            pt = pn;
-        }
-}
-
-
-
-struct  Lockrev  * rmnewlocklst(which)
-struct  Lockrev  * which;
+	static struct Lockrev *
+rmnewlocklst(which)
+	const struct Lockrev *which;
 /*   Function:  remove lock to revision which->revno from newlocklst   */
 
 {
@@ -923,7 +807,7 @@ struct  Lockrev  * which;
 
         while( newlocklst && (! strcmp(newlocklst->revno, which->revno))){
 	    struct Lockrev *pn = newlocklst->nextrev;
-            free((char *)newlocklst);
+	    tfree(newlocklst);
 	    newlocklst = pn;
         }
 
@@ -931,7 +815,7 @@ struct  Lockrev  * which;
         while( pt ) {
             if ( ! strcmp(pt->revno, which->revno) ) {
                 pre->nextrev = pt->nextrev;
-                free((char *)pt);
+		tfree(pt);
 		pt = pre->nextrev;
             }
             else {
@@ -944,165 +828,125 @@ struct  Lockrev  * which;
 
 
 
-struct  access  * removeaccess( who, sourcelst,flag)
-struct  access  * who, * sourcelst;
-int     flag;
-/*   Function:  remove the accessor-- who from sourcelst     */
-
+	static void
+updateaccess()
 {
-        struct  access  *pt, *pre;
+	register struct chaccess *ch;
+	register struct access **p, *t;
 
-        pt = sourcelst;
-        while( pt && (! strcmp(who->login, pt->login) )) {
-	    pre = pt->nextaccess;
-            free((char *)pt);
-	    pt = pre;
-            flag = false;
+	for (ch = chaccess;  ch;  ch = ch->nextchaccess) {
+		switch (ch->command) {
+		case erase:
+			if (!ch->login)
+			    AccessList = nil;
+			else
+			    for (p = &AccessList;  (t = *p);  )
+				if (strcmp(ch->login, t->login) == 0)
+					*p = t->nextaccess;
+				else
+					p = &t->nextaccess;
+			break;
+		case append:
+			for (p = &AccessList;  ;  p = &t->nextaccess)
+				if (!(t = *p)) {
+					*p = t = ftalloc(struct access);
+					t->login = ch->login;
+					t->nextaccess = nil;
+					break;
+				} else if (strcmp(ch->login, t->login) == 0)
+					break;
+			break;
+		}
 	}
-        pre = sourcelst = pt;
-        while( pt ) {
-            if ( ! strcmp(who->login, pt->login) ) {
-		pre->nextaccess = pt->nextaccess;
-		free((char *)pt);
-		pt = pre->nextaccess;
-                flag = false;
-            }
-            else {
-                pre = pt;
-                pt = pt->nextaccess;
-            }
-        }
-        if ( flag ) warn("Can't remove a nonexisting accessor %s",who->login);
-        return sourcelst;
 }
 
 
-
-int addnewaccess( who )
-struct  access  * who;
-/*   Function:  add new accessor-- who into AccessList    */
-
-{
-        struct  access  *pt,  *pre;
-
-        pre = pt = AccessList;
-
-        while( pt ) {
-            if ( strcmp( who->login, pt->login) ) {
-                pre = pt;
-                pt = pt->nextaccess;
-            }
-            else
-                return 0;
-        }
-        if ( pre == pt )
-            AccessList = who;
-        else
-            pre->nextaccess = who;
-        return 1;
-}
-
-
+	static int
 sendmail(Delta, who)
-char    * Delta,  *who;
+	const char *Delta, *who;
 /*   Function:  mail to who, informing him that his lock on delta was
  *   broken by caller. Ask first whether to go ahead. Return false on
  *   error or if user decides not to break the lock.
  */
 {
-        char    * messagefile;
-        int   old1, old2, c, response;
+	const char *messagefile;
+	int old1, old2, c;
         FILE    * mailmess;
 
 
-	VOID fprintf(stderr, "Revision %s is already locked by %s.\n", Delta, who);
-        VOID fprintf(stderr, "Do you want to break the lock? [ny](n): ");
-        response=c=getchar();
-        while (!(c==EOF || c=='\n')) c=getchar();/*skip to end of line*/
-        if (response=='\n'||response=='n'||response=='N') return false;
+	aprintf(stderr, "Revision %s is already locked by %s.\n", Delta, who);
+	if (!yesorno(false, "Do you want to break the lock? [ny](n): "))
+		return false;
 
         /* go ahead with breaking  */
-        messagefile=mktempfile("/tmp/", "RCSmailXXXXXX");
+	messagefile = maketemp(0);
+	errno = 0;
         if ( (mailmess = fopen(messagefile, "w")) == NULL) {
-            faterror("Can't open file %s", messagefile);
+	    efaterror(messagefile);
         }
 
-	VOID fprintf(mailmess, "Subject: Broken lock on %s\n\n",bindex(RCSfilename,'/'));
-        VOID fprintf(mailmess, "Your lock on revision %s of file %s\n",Delta, getfullRCSname());
-        VOID fprintf(mailmess,"has been broken by %s for the following reason:\n",caller);
-        VOID fputs("State the reason for breaking the lock:\n", stderr);
-        VOID fputs("(terminate with ^D or single '.')\n>> ", stderr);
+	aprintf(mailmess, "Subject: Broken lock on %s\n\nYour lock on revision %s of file %s\nhas been broken by %s for the following reason:\n",
+		bindex(RCSfilename,SLASH), Delta, getfullRCSname(), getcaller()
+	);
+	aputs("State the reason for breaking the lock:\n(terminate with single '.' or end of file)\n>> ", stderr);
 
         old1 = '\n';    old2 = ' ';
         for (; ;) {
-            c = getchar();
+	    c = getcstdin();
             if ( c == EOF ) {
-                VOID putc('\n',stderr);
-                VOID fprintf(mailmess, "%c\n", old1);
+		aprintf(mailmess, "%c\n", old1);
                 break;
             }
             else if ( c == '\n' && old1 == '.' && old2 == '\n')
                 break;
             else {
-                VOID fputc( old1, mailmess);
+		afputc(old1, mailmess);
                 old2 = old1;   old1 = c;
-                if (c== '\n') VOID fputs(">> ", stderr);
+		if (c=='\n') aputs(">> ", stderr);
             }
         }
         ffclose(mailmess);
 
 	/* ignore the exit status, even if delivermail unsuccessful */
-        VOID run(messagefile,(char*)nil,
-#ifdef SENDMAIL
-		"/usr/lib/sendmail",
-#else
-#  ifdef DELIVERMAIL
-		"/etc/delivermail","-w",
-#  else
-		"/bin/mail",
-#  endif
-#endif
-		who,(char*)nil);
-        VOID unlink(messagefile);
+	VOID run(messagefile, (char*)nil, SENDMAIL, who, (char*)nil);
 	return(true);
 }
 
 
 
-static breaklock(who,delta)
-char * who; struct hshentry * delta;
-/* function: Finds the lock held by who on delta,
+	static void
+breaklock(delta)
+	const struct hshentry *delta;
+/* function: Finds the lock held by caller on delta,
  * and removes it.
  * Sends mail if a lock different from the caller's is broken.
  * Prints an error message if there is no such lock or error.
  */
 {
         register struct lock * next, * trail;
-        char * num;
+	const char *num;
         struct lock dummy;
-        int whor, numr;
 
 	num=delta->num;
         dummy.nextlock=next=Locks;
         trail = &dummy;
         while (next!=nil) {
-		if (num != nil)
-			numr = strcmp(num, next->delta->num);
-
-		whor=strcmp(who,next->login);
-		if (whor==0 && numr==0) break; /* exact match */
-		if (numr==0 && whor !=0) {
-                        if (!sendmail( num, next->login)){
-                            diagnose("%s still locked by %s",num,next->login);
+		if (strcmp(num, next->delta->num) == 0) {
+			if (
+				strcmp(getcaller(),next->login) != 0
+			    &&	!sendmail(num, next->login)
+			) {
+			    error("%s still locked by %s", num, next->login);
 			    return;
-                        } else break; /* continue after loop */
+			}
+			break; /* exact match */
                 }
                 trail=next;
                 next=next->nextlock;
         }
         if (next!=nil) {
                 /*found one */
-                diagnose("%s unlocked",next->delta->num);
+		diagnose("%s unlocked\n",next->delta->num);
                 trail->nextlock=next->nextlock;
                 next->delta->lockedby=nil;
                 Locks=dummy.nextlock;
@@ -1113,37 +957,37 @@ char * who; struct hshentry * delta;
 
 
 
-struct hshentry *searchcutpt(object, length, store)
-char    * object;
-int     length;
-struct  hshentry   * * store;
+	static struct hshentry *
+searchcutpt(object, length, store)
+	const char *object;
+	unsigned length;
+	struct hshentries *store;
 /*   Function:  Search store and return entry with number being object. */
 /*              cuttail = nil, if the entry is Head; otherwise, cuttail */
 /*              is the entry point to the one with number being object  */
 
 {
-        while( compartial( (*store++)->num, object, length)  )  ;
-        store--;
-
-        if ( *store == Head)
-            cuthead = nil;
-        else
-            cuthead = *(store -1);
-        return *store;
+	cuthead = nil;
+	while (compartial(store->first->num, object, length)) {
+		cuthead = store->first;
+		store = store->rest;
+	}
+	return store->first;
 }
 
 
 
-int  branchpoint(strt, tail)
+	static int
+branchpoint(strt, tail)
 struct  hshentry        *strt,  *tail;
 /*   Function: check whether the deltas between strt and tail	*/
 /*		are locked or branch point, return 1 if any is  */
 /*		locked or branch point; otherwise, return 0 and */
-/*              mark DELETE on selector                         */
+/*		mark deleted					*/
 
 {
         struct  hshentry    *pt;
-	struct lock  *lockpt;
+	const struct lock *lockpt;
         int     flag;
 
 
@@ -1152,14 +996,14 @@ struct  hshentry        *strt,  *tail;
         while( pt != tail) {
             if ( pt->branches ){ /*  a branch point  */
                 flag = true;
-                error("Can't remove branch point %s", pt->num);
+		error("can't remove branch point %s", pt->num);
             }
 	    lockpt = Locks;
 	    while(lockpt && lockpt->delta != pt)
 		lockpt = lockpt->nextlock;
 	    if ( lockpt ) {
 		flag = true;
-		error("Can't remove locked revision %s",pt->num);
+		error("can't remove locked revision %s",pt->num);
 	    }
             pt = pt->next;
         }
@@ -1167,8 +1011,8 @@ struct  hshentry        *strt,  *tail;
         if ( ! flag ) {
             pt = strt;
             while( pt != tail ) {
-                pt->selector = DELETE;
-                diagnose("deleting revision %s ",pt->num);
+		pt->selector = false;
+		diagnose("deleting revision %s\n",pt->num);
                 pt = pt->next;
             }
         }
@@ -1177,6 +1021,7 @@ struct  hshentry        *strt,  *tail;
 
 
 
+	static int
 removerevs()
 /*   Function:  get the revision range to be removed, and place the     */
 /*              first revision removed in delstrt, the revision before  */
@@ -1185,25 +1030,26 @@ removerevs()
 /*              if the last is a leaf                                   */
 
 {
-        struct  hshentry    *target, *target2, * temp, *searchcutpt();
-        int     length, flag;
+	struct  hshentry *target, *target2, *temp;
+	unsigned length;
+	int flag;
 
         flag = false;
-        if ( ! expandsym(delrev->strt, &numrev[0]) ) return 0;
-        target = genrevs(&numrev[0], (char *)nil, (char *)nil, (char *)nil, gendeltas);
+	if (!expandsym(delrev.strt, &numrev)) return 0;
+	target = genrevs(numrev.string, (char*)nil, (char*)nil, (char*)nil, &gendeltas);
         if ( ! target ) return 0;
-        if ( cmpnum(target->num, &numrev[0]) ) flag = true;
-        length = countnumflds( &numrev[0] );
+	if (cmpnum(target->num, numrev.string)) flag = true;
+	length = countnumflds(numrev.string);
 
-        if ( delrev->code == 0 ) {  /*  -o  rev    or    -o  branch   */
-	    if ( length % 2)
+	if (delrev.code == 0) {  /*  -o  rev    or    -o  branch   */
+	    if (length & 1)
 		temp=searchcutpt(target->num,length+1,gendeltas);
 	    else if (flag) {
-                error("Revision %s does not exist", &numrev[0]);
+		error("Revision %s doesn't exist.", numrev.string);
 		return 0;
 	    }
 	    else
-		temp = searchcutpt(&numrev[0],length,gendeltas);
+		temp = searchcutpt(numrev.string, length, gendeltas);
 	    cuttail = target->next;
             if ( branchpoint(temp, cuttail) ) {
                 cuttail = nil;
@@ -1213,12 +1059,12 @@ removerevs()
             return 1;
         }
 
-        if ( length % 2 ) {   /*  invalid branch after -o   */
-            error("Invalid branch range %s after -o", &numrev[0]);
+	if (length & 1) {   /*  invalid branch after -o   */
+	    error("invalid branch range %s after -o", numrev.string);
             return 0;
         }
 
-        if ( delrev->code == 1 )  {  /*  -o  -rev   */
+	if (delrev.code == 1) {  /*  -o  -rev   */
             if ( length > 2 ) {
                 temp = searchcutpt( target->num, length-1, gendeltas);
                 cuttail = target->next;
@@ -1237,7 +1083,7 @@ removerevs()
             return 1;
         }
 
-        if ( delrev->code == 2 )  {   /*  -o  rev-   */
+	if (delrev.code == 2) {   /*  -o  rev-   */
             if ( length == 2 ) {
                 temp = searchcutpt(target->num, 1,gendeltas);
                 if ( flag)
@@ -1252,8 +1098,8 @@ removerevs()
                 }
                 else
                     temp = searchcutpt(target->num, length, gendeltas);
-                getbranchno(temp->num, &numrev[0]);  /*  get branch number  */
-                target = genrevs(&numrev[0], (char *)nil, (char *)nil, (char *)nil, gendeltas);
+		getbranchno(temp->num, &numrev);  /* get branch number */
+		target = genrevs(numrev.string, (char*)nil, (char*)nil, (char*)nil, &gendeltas);
             }
             if ( branchpoint( temp, cuttail ) ) {
                 cuttail = nil;
@@ -1264,22 +1110,21 @@ removerevs()
         }
 
         /*   -o   rev1-rev2   */
-        if ( ! expandsym(delrev->end, &numrev[0])  )  return 0;
-        if ( length != countnumflds( &numrev[0] ) ) {
-            error("Invalid revision range %s-%s", target->num, &numrev[0]);
-            return 0;
-        }
-        if ( length > 2 && compartial( &numrev[0], target->num, length-1) ) {
-            error("Invalid revision range %s-%s", target->num, &numrev[0]);
+	if (!expandsym(delrev.end, &numrev)) return 0;
+	if (
+		length != countnumflds(numrev.string)
+	    ||	length>2 && compartial(numrev.string, target->num, length-1)
+	) {
+	    error("invalid revision range %s-%s", target->num, numrev.string);
             return 0;
         }
 
-        target2 = genrevs( &numrev[0], (char *)nil, (char *)nil, (char *)nil,gendeltas);
+	target2 = genrevs(numrev.string,(char*)nil,(char*)nil,(char*)nil,&gendeltas);
         if ( ! target2 ) return 0;
 
         if ( length > 2) {  /* delete revisions on branches  */
             if ( cmpnum(target->num, target2->num) > 0) {
-                if ( cmpnum(target2->num, &numrev[0]) )
+		if (cmpnum(target2->num, numrev.string))
                     flag = true;
                 else
                     flag = false;
@@ -1289,7 +1134,7 @@ removerevs()
             }
             if ( flag ) {
                 if ( ! cmpnum(target->num, target2->num) ) {
-                    error("Revisions %s-%s don't exist", delrev->strt,delrev->end);
+		    error("Revisions %s-%s don't exist.", delrev.strt,delrev.end);
                     return 0;
                 }
                 cuthead = target;
@@ -1306,13 +1151,13 @@ removerevs()
                 target2 = temp;
             }
             else
-                if ( cmpnum(target2->num, &numrev[0]) )
+		if (cmpnum(target2->num, numrev.string))
                     flag = true;
                 else
                     flag = false;
             if ( flag ) {
                 if ( ! cmpnum(target->num, target2->num) ) {
-                    error("Revisions %s-%s don't exist", delrev->strt, delrev->end);
+		    error("Revisions %s-%s don't exist.", delrev.strt, delrev.end);
                     return 0;
                 }
                 cuttail = target2;
@@ -1331,14 +1176,14 @@ removerevs()
 
 
 
+	static void
 updateassoc()
 /*   Function: add or delete(if revno is nil) association	*/
 /*		which is stored in assoclst			*/
 
 {
-        struct  Symrev  * curassoc;
+	const struct Symrev *curassoc;
 	struct  assoc   * pre,  * pt;
-        struct  hshentry    * target;
 
         /*  add new associations   */
         curassoc = assoclst;
@@ -1355,14 +1200,11 @@ updateassoc()
 		    else
 			pre->nextassoc = pt->nextassoc;
 		else
-                    warn("Can't delete nonexisting symbol %s",curassoc->ssymbol);
+		    warn("can't delete nonexisting symbol %s",curassoc->ssymbol);
 	    }
-            else if ( expandsym( curassoc->revno, &numrev[0] ) ) {
+	    else if (expandsym(curassoc->revno, &numrev)) {
 	    /*   add symbol  */
-               target = (struct hshentry *) talloc(sizeof(struct hshentry));
-	       target->num = (char *) talloc(strlen(numrev) + 1);
-	       VOID strcpy(target->num, numrev);
-               VOID addsymbol(target, curassoc->ssymbol, curassoc->override);
+		VOID addsymbol(fstrsave(numrev.string), curassoc->ssymbol, curassoc->override);
             }
             curassoc = curassoc->nextsym;
         }
@@ -1371,43 +1213,46 @@ updateassoc()
 
 
 
+	static void
 updatelocks()
-/* Function: remove lock for caller or first lock if unlockcaller==true;
+/* Function: remove lock for caller or first lock if unlockcaller is set;
  *           remove locks which are stored in rmvlocklst,
  *           add new locks which are stored in newlocklst,
- *           add lock for Dbranch or Head if lockhead==true.
+ *           add lock for Dbranch or Head if lockhead is set.
  */
 {
-        struct  hshentry        *target;
-        struct  Lockrev         *lockpt;
+	const struct Lockrev *lockpt;
+	struct hshentry *target;
 
-        if(unlockcaller == true) { /*  find lock for caller  */
+	if (unlockcaller) { /*  find lock for caller  */
             if ( Head ) {
 		if (Locks) {
-		    target=findlock(caller,true);
-		    if (target==nil) {
-			breaklock(caller, Locks->delta); /* remove most recent lock */
-		    } else {
-			diagnose("%s unlocked",target->num);
+		    switch (findlock(true, &target)) {
+		      case 0:
+			breaklock(Locks->delta); /* remove most recent lock */
+			break;
+		      case 1:
+			diagnose("%s unlocked\n",target->num);
+			break;
 		    }
 		} else {
-		    warn("There are no locks set.");
+		    warn("No locks are set.");
 		}
             } else {
-                warn("Can't unlock an empty tree");
+		warn("can't unlock an empty tree");
             }
         }
 
         /*  remove locks which are stored in rmvlocklst   */
         lockpt = rmvlocklst;
         while( lockpt ) {
-	    if (expandsym(lockpt->revno, numrev)) {
-		target = genrevs(numrev, (char *)nil, (char *)nil, (char *)nil, gendeltas);
+	    if (expandsym(lockpt->revno, &numrev)) {
+		target = genrevs(numrev.string, (char *)nil, (char *)nil, (char *)nil, &gendeltas);
                 if ( target )
-		   if ( !(countnumflds(numrev)%2) && cmpnum(target->num,numrev))
-			error("Can't unlock nonexisting revision %s",lockpt->revno);
+		   if (!(countnumflds(numrev.string)&1) && cmpnum(target->num,numrev.string))
+			error("can't unlock nonexisting revision %s",lockpt->revno);
                    else
-                        breaklock(caller, target);
+			breaklock(target);
                         /* breaklock does its own diagnose */
             }
             lockpt = lockpt->nextrev;
@@ -1416,18 +1261,18 @@ updatelocks()
         /*  add new locks which stored in newlocklst  */
         lockpt = newlocklst;
         while( lockpt ) {
-            setlock(lockpt->revno,caller);
+	    setlock(lockpt->revno);
             lockpt = lockpt->nextrev;
         }
 
-        if ( lockhead == true) {  /*  lock default branch or head  */
+	if (lockhead) {  /*  lock default branch or head  */
             if (Dbranch) {
-                setlock(Dbranch->num,caller);
-            } elsif ( Head) {
-                if (addlock(Head, caller))
-                    diagnose("%s locked",Head->num);
+		setlock(Dbranch);
+	    } else if (Head) {
+		if (0 <= addlock(Head))
+		    diagnose("%s locked\n",Head->num);
             } else {
-                warn("Can't lock an empty tree");
+		warn("can't lock an empty tree");
             }
         }
 
@@ -1435,44 +1280,45 @@ updatelocks()
 
 
 
-setlock(rev,who)
-char * rev, * who;
-/* Function: Given a revision or branch number, finds the correponding
- * delta and locks it for who.
+	static void
+setlock(rev)
+	const char *rev;
+/* Function: Given a revision or branch number, finds the corresponding
+ * delta and locks it for caller.
  */
 {
-        struct  lock     *lpt;
         struct  hshentry *target;
 
-        if (expandsym(rev, &numrev[0]) ){
-            target = genrevs(&numrev[0],(char *) nil,(char *) nil,
-			     (char *)nil, gendeltas);
+	if (expandsym(rev, &numrev)) {
+	    target = genrevs(numrev.string, (char*)nil, (char*)nil,
+			     (char*)nil, &gendeltas);
             if ( target )
-               if ( !(countnumflds(&numrev[0])%2) && cmpnum(target->num,&numrev[0]))
-                    error("Can't lock nonexisting revision %s",numrev);
+	       if (!(countnumflds(numrev.string)&1) && cmpnum(target->num,numrev.string))
+		    error("can't lock nonexisting revision %s", numrev.string);
                else
-                    if(lpt=addlock(target, who))
-                        diagnose("%s locked",lpt->delta->num);
+		    if (0 <= addlock(target))
+			diagnose("%s locked\n", target->num);
         }
 }
 
 
 
+	static void
 rcs_setstate(rev,status)
-char * rev, * status;
+	const char *rev, *status;
 /* Function: Given a revision or branch number, finds the corresponding delta
  * and sets its state to status.
  */
 {
         struct  hshentry *target;
 
-        if ( expandsym(rev, &numrev[0]) ) {
-            target = genrevs(&numrev[0],(char *) nil, (char *)nil,
-			     (char *) nil, gendeltas);
+	if (expandsym(rev, &numrev)) {
+	    target = genrevs(numrev.string, (char*)nil, (char*)nil,
+			     (char*)nil, &gendeltas);
             if ( target )
-               if ( !(countnumflds(&numrev[0])%2) && cmpnum(target->num, &numrev[0]) )
-                    error("Can't set state of nonexisting revision %s to %s",
-                           numrev,status);
+	       if (!(countnumflds(numrev.string)&1) && cmpnum(target->num,numrev.string))
+		    error("can't set state of nonexisting revision %s to %s",
+			  numrev.string, status);
                else
                     target->state = status;
         }
@@ -1482,60 +1328,62 @@ char * rev, * status;
 
 
 
+	static int
 buildeltatext(deltas)
-struct  hshentry        ** deltas;
+	const struct hshentries *deltas;
 /*   Function:  put the delta text on frewrite and make necessary   */
 /*              change to delta text                                */
 {
-        int  i, c, exit_stats;
+	int exit_stats;
+	register FILE *fcut;	/* temporary file to rebuild delta tree */
+	const char *cutfilename, *diffilename;
 
-        cuttail->selector = DELETE;
-        initeditfiles("/tmp/");
-        scanlogtext(deltas[0], copy);
-        i = 1;
+	cutfilename = nil;
+	cuttail->selector = false;
+	inittmpeditfiles();
+	scanlogtext(deltas->first, false);
         if ( cuthead )  {
-            cutfilename=mktempfile("/tmp/", "RCScutXXXXXX");
+	    cutfilename = maketemp(3);
+	    errno = 0;
             if ( (fcut = fopen(cutfilename, "w")) == NULL) {
-                faterror("Can't open temporary file %s", cutfilename);
+		efaterror(cutfilename);
             }
 
-            while( deltas[i-1] != cuthead )  {
-                scanlogtext(deltas[i++], edit);
+	    while (deltas->first != cuthead) {
+		deltas = deltas->rest;
+		scanlogtext(deltas->first, true);
             }
 
-            finishedit((struct hshentry *)nil);    rewind(fcopy);
-            while( (c = getc(fcopy)) != EOF) VOID putc(c, fcut);
+	    finishedit((struct hshentry *)nil);
+	    arewind(fcopy);
+	    fastcopy(fcopy, fcut);
             swapeditfiles(false);
             ffclose(fcut);
         }
 
-        while( deltas[i-1] != cuttail)
-            scanlogtext(deltas[i++], edit);
+	while (deltas->first != cuttail)
+	    scanlogtext((deltas = deltas->rest)->first, true);
         finishedit((struct hshentry *)nil);    ffclose(fcopy);
 
         if ( cuthead ) {
-            diffilename=mktempfile("/tmp/", "RCSdifXXXXXX");
+	    diffilename = maketemp(0);
             exit_stats = run((char*)nil,diffilename,
-			DIFF,"-n",cutfilename,resultfile,(char*)nil);
-            if (exit_stats != 0 && exit_stats != (1 << BYTESIZ))
+			DIFF DIFF_FLAGS, cutfilename, resultfile, (char*)nil);
+	    if (!WIFEXITED(exit_stats) || 1<WEXITSTATUS(exit_stats))
                 faterror ("diff failed");
-            if(!putdtext(cuttail->num,curlogmsg,diffilename,frewrite)) return;
-        }
-        else
-            if (!putdtext(cuttail->num,curlogmsg,resultfile,frewrite)) return;
-
-        scanlogtext((struct hshentry *)nil,empty); /* read the rest of the deltas */
+	    return putdtext(cuttail->num,curlogmsg,diffilename,frewrite,true);
+	} else
+	    return putdtext(cuttail->num,curlogmsg,resultfile,frewrite,false);
 }
 
 
 
+	static void
 buildtree()
 /*   Function:  actually removes revisions whose selector field  */
-/*              is DELETE, and rebuilds  the linkage of deltas.  */
+/*		is false, and rebuilds the linkage of deltas.	 */
 /*              asks for reconfirmation if deleting last revision*/
 {
-	int c,  response;
-
 	struct	hshentry   * Delta;
         struct  branchhead      *pt, *pre;
 
@@ -1557,14 +1405,11 @@ buildtree()
             }
 	else {
             if ( cuttail == nil && !quietflag) {
-                VOID fprintf(stderr,"Do you really want to delete all revisions ?[ny](n): ");
-		c = response = getchar();
-		while( c != EOF && c != '\n') c = getchar();
-                if ( response != 'y' && response != 'Y') {
-                    diagnose("No revision deleted");
+		if (!yesorno(false, "Do you really want to delete all revisions? [ny](n): ")) {
+		    error("No revision deleted");
 		    Delta = delstrt;
 		    while( Delta) {
-			Delta->selector = 'S';
+			Delta->selector = true;
 			Delta = Delta->next;
 		    }
 		    return;
@@ -1575,3 +1420,27 @@ buildtree()
         return;
 }
 
+#if lint
+/* This lets us lint everything all at once. */
+
+const char cmdid[] = "";
+
+#define go(p,e) {int p P((int,char**)); void e P((void)); if(*argv)return p(argc,argv);if(*argv[1])e();return 0;}
+
+	int
+main(argc, argv)
+	int argc;
+	char **argv;
+{
+	switch (argc) {
+		case 0:	go(ciId,	ciExit);
+		case 1:	go(coId,	coExit);
+		case 2:	go(identId,	identExit);
+		case 3:	go(rcsdiffId,	rdiffExit);
+		case 4:	go(rcsmergeId,	rmergeExit);
+		case 5:	go(rlogId,	rlogExit);
+		case 6:	go(rcsId,	exiterr);
+		default: return 0;
+	}
+}
+#endif

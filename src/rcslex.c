@@ -1,21 +1,17 @@
 /*
  *                     RCS file input
  */
-#ifndef lint
-static char rcsid[]= "$Id: rcslex.c,v 4.6 89/05/01 15:13:07 narten Exp $ Purdue CS";
-#endif
 /*********************************************************************************
  *                     Lexical Analysis.
- *                     Character mapping table,
  *                     hashtable, Lexinit, nextlex, getlex, getkey,
  *                     getid, getnum, readstring, printstring, savestring,
- *                     checkid, serror, fatserror, error, faterror, warn, diagnose
- *                     fflsbuf, puts, fprintf
+ *                     checkid, fatserror, error, faterror, warn, diagnose
  *                     Testprogram: define LEXDB
  *********************************************************************************
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -42,12 +38,30 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rcslex.c,v $
+/* $Log: rcslex.c,v $
+ * Revision 5.5  1990/12/04  05:18:47  eggert
+ * Use -I for prompts and -q for diagnostics.
+ *
+ * Revision 5.4  1990/11/19  20:05:28  hammer
+ * no longer gives warning about unknown keywords if -q is specified
+ *
+ * Revision 5.3  1990/11/01  05:03:48  eggert
+ * When ignoring unknown phrases, copy them to the output RCS file.
+ *
+ * Revision 5.2  1990/09/04  08:02:27  eggert
+ * Count RCS lines better.
+ *
+ * Revision 5.1  1990/08/29  07:14:03  eggert
+ * Work around buggy compilers with defective argument promotion.
+ *
+ * Revision 5.0  1990/08/22  08:12:55  eggert
+ * Remove compile-time limits; use malloc instead.
+ * Report errno-related errors with perror().
+ * Ansify and Posixate.  Add support for ISO 8859.
+ * Use better hash function.
+ *
  * Revision 4.6  89/05/01  15:13:07  narten
  * changed copyright header to reflect current distribution rules
- * 
- * Revision 4.5  88/11/08  12:00:54  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 4.5  88/08/28  15:01:12  eggert
  * Don't loop when writing error messages to a full filesystem.
@@ -70,9 +84,6 @@ Report problems and direct all questions to:
  * Revision 1.2  87/03/27  14:22:33  jenkins
  * Port to suns
  * 
- * Revision 1.1  84/01/23  14:50:33  kcs
- * Initial revision
- * 
  * Revision 4.1  83/03/25  18:12:51  wft
  * Only changed $Header to $Id.
  * 
@@ -92,6 +103,7 @@ Report problems and direct all questions to:
 
 /*
 #define LEXDB
+*/
 /* version LEXDB is for testing the lexical analyzer. The testprogram
  * reads a stream of lexemes, enters the revision numbers into the
  * hashtable, and prints the recognized tokens. Keywords are recognized
@@ -101,35 +113,10 @@ Report problems and direct all questions to:
 
 
 #include "rcsbase.h"
-#include <varargs.h>
 
+libId(lexId, "$Id: rcslex.c,v 5.5 1990/12/04 05:18:47 eggert Exp $")
 
-
-/* character mapping table */
-enum tokens map[] = {
-        EOFILE,         /* this will end up at ctab[-1] */
-        UNKN,   INSERT, UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,
-        UNKN,   SPACE,  NEWLN,  UNKN,   SPACE,  UNKN,   UNKN,   UNKN,
-        UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,
-        UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,
-        SPACE,  EXCLA,  DQUOTE, HASH,   DOLLAR, PERCNT, AMPER,  SQUOTE,
-        LPARN,  RPARN,  TIMES,  PLUS,   COMMA,  MINUS,  PERIOD, DIVIDE,
-        DIGIT,  DIGIT,  DIGIT,  DIGIT,  DIGIT,  DIGIT,  DIGIT,  DIGIT,
-        DIGIT,  DIGIT,  COLON,  SEMI,   LESS,   EQUAL,  GREAT,  QUEST,
-        AT,     LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER,
-        LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER,
-        LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER,
-        LETTER, LETTER, LETTER, LBRACK, BACKSL, RBRACK, UPARR,  UNDER,
-        ACCENT, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER,
-        LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER,
-        LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER, LETTER,
-        LETTER, LETTER, LETTER, LBRACE, BAR,    RBRACE, TILDE,  UNKN
-};
-
-
-
-
-struct hshentry * nexthsh;  /*pointer to next hashtable-entry, set by lookup*/
+static struct hshentry *nexthsh;  /*pointer to next hash entry, set by lookup*/
 
 enum tokens     nexttok;    /*next token, set by nextlex                    */
 
@@ -137,114 +124,105 @@ int             hshenter;   /*if true, next suitable lexeme will be entered */
                             /*into the symbol table. Handle with care.      */
 int             nextc;      /*next input character, initialized by Lexinit  */
 
-int             eof;        /*end-of-file indicator, set to >0 on end of file*/
-int             line;       /*current line-number of input                  */
+unsigned long	rcsline;    /*current line-number of input		    */
 int             nerror;     /*counter for errors                            */
-int             nwarn;      /*counter for warnings                          */
-char *          cmdid;      /*command identification for error messages     */
 int             quietflag;  /*indicates quiet mode                          */
 FILE *          finptr;     /*input file descriptor                         */
 
 FILE *          frewrite;   /*file descriptor for echoing input             */
 
-int             rewriteflag;/*indicates whether to echo to frewrite         */
+FILE *		foutptr;	    /* copy of frewrite, but NULL to suppress echo  */
 
-char            StringTab[strtsize]; /* string table and heap               */
+static struct buf tokbuf;   /* token buffer				    */
 
-char *          NextString;         /*pointer to next identifier in StringTab*/
-char *          Topchar;            /*pointer to next free byte in StringTab*/
-                                    /*set by nextlex, lookup                */
-struct hshentry hshtab[hshsize];    /*hashtable                             */
+const char *    NextString; /* next token				    */
+
+/*
+ * Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
+ * so hshsize should be odd.
+ * See B J McKenzie, R Harries & T Bell, Selecting a hashing algorithm,
+ * Software--practice & experience 20, 2 (Feb 1990), 209-224.
+ */
+#ifndef hshsize
+#	define hshsize 511
+#endif
+
+static struct hshentry *hshtab[hshsize]; /*hashtable			    */
+
+static int ignored_phrases; /* have we ignored phrases in this RCS file? */
+
+    void
+warnignore()
+{
+    if (! (ignored_phrases|quietflag)) {
+	ignored_phrases = true;
+	warn("Unknown phrases like `%s ...;' are in the RCS file.", NextString);
+    }
+}
 
 
 
-
-
-lookup() {
-
-/* Function: Looks up the character string pointed to by NextString in the
+	static void
+lookup(str)
+	const char *str;
+/* Function: Looks up the character string pointed to by str in the
  * hashtable. If the string is not present, a new entry for it is created.
- * If the string is present, TopChar is moved back to save the space for
- * the string, and NextString is set to point to the original string.
  * In any case, the address of the corresponding hashtable entry is placed
  * into nexthsh.
- * Algorithm: Quadratic hash, covering all entries.
- * Assumptions: NextString points at the first character of the string.
- * Topchar points at the first empty byte after the string.
  */
-
-        register int     ihash;      /* index into hashtable */
-        register char    * sp, * np;
-        int              c, delta, final, FirstScan; /*loop control*/
+{
+	register unsigned ihash;  /* index into hashtable */
+	register const char *sp;
+	register struct hshentry *n, **p;
 
         /* calculate hash code */
-        sp = NextString;
+	sp = str;
         ihash = 0;
-        while (*sp) ihash += *sp++;
+	while (*sp)
+		ihash  =  (ihash<<2) + *sp++;
+	ihash %= hshsize;
 
-        /* set up first search loop (c=0,step=1,until (hshsiz-1)/2 */
-        c=0;delta=1;final=(hshsize-1)/2;
-        FirstScan=true;   /*first loop */
-
-        for (;;) {
-                ihash = (ihash+c)%hshsize;   /*next index*/
-
-                if (hshtab[ihash].num == nil) {
-                        /*empty slot found*/
-                        hshtab[ihash].num = NextString;
-                        nexthsh= &hshtab[ihash];/*save hashtable address*/
-#                       ifdef LEXDB
-                        VOID printf("\nEntered: %s at %d ",nexthsh->num, ihash);
-#                       endif
-                        return;
-                }
-                /* compare strings */
-                sp=NextString;np=hshtab[ihash].num;
-                while (*sp == *np++) {
-                        if (*sp == 0) {
-                                /* match found */
-                                nexthsh= &hshtab[ihash];
-                                Topchar = NextString;
-                                NextString = nexthsh->num;
-                                return;
-                        } else sp++;
-                }
-
-                /* neither empty slot nor string found */
-                /* calculate next index and repeat */
-                if (c != final)
-                        c += delta;
-                else {
-                        if (FirstScan) {
-                                /*set up second sweep*/
-                                delta = -1; final = 1; FirstScan= false;
-                        } else {
-                                fatserror("Hashtable overflow");
-                        }
-                }
-        }
-};
+	for (p = &hshtab[ihash];  ;  p = &n->nexthsh)
+		if (!(n = *p)) {
+			/* empty slot found */
+			*p = n = ftalloc(struct hshentry);
+			n->num = fstrsave(str);
+			n->nexthsh = nil;
+#			ifdef LEXDB
+				VOID printf("\nEntered: %s at %u ", str, ihash);
+#			endif
+			break;
+		} else if (strcmp(str, n->num) == 0)
+			/* match found */
+			break;
+	nexthsh = n;
+	NextString = n->num;
+}
 
 
 
 
 
 
+	void
 Lexinit()
 /* Function: Initialization of lexical analyzer:
- * initializes the hastable,
+ * initializes the hashtable,
  * initializes nextc, nexttok if finptr != NULL
  */
 {       register int            c;
 
-        for (c=hshsize-1; c>=0; c--) {
-                hshtab[c].num = nil;
+	for (c = hshsize;  0 <= --c;  ) {
+		hshtab[c] = nil;
         }
 
-        hshenter=true; eof=0; line=1; nerror=0; nwarn=0;
-        NextString=nil; Topchar = &StringTab[0];
+	hshenter=true; rcsline=1; nerror=0;
+	ignored_phrases = false;
+	bufrealloc(&tokbuf, 2);
         if (finptr) {
-                nextc = GETC(finptr,frewrite,rewriteflag); /*initial character*/
+		GETC(finptr,foutptr,c);
+		nextc = c; /*initial character*/
+		nexttok = DELIM;  /* anything but EOFILE */
                 nextlex();            /*initial token*/
         } else {
                 nextc = '\0';
@@ -253,90 +231,97 @@ Lexinit()
 }
 
 
+	static exiting void
+unexpectedEOF()
+{
+	fatserror("unexpected EOF");
+}
 
 
 
 
 
+
+
+	void
 nextlex()
 
 /* Function: Reads the next token and sets nexttok to the next token code.
- * Only if the hshenter==true, a revision number is entered into the
+ * Only if hshenter is set, a revision number is entered into the
  * hashtable and a pointer to it is placed into nexthsh.
  * This is useful for avoiding that dates are placed into the hashtable.
- * For ID's and NUM's, NextString is set to the character string in the
- * string table. Assumption: nextc contains the next character.
+ * For ID's and NUM's, NextString is set to the character string.
+ * Assumption: nextc contains the next character.
  */
 {       register c;
 	register FILE * fin, * frew;
         register char * sp;
+	const char *lim;
         register enum tokens d;
 
-        if (eof) {
-                nexttok=EOFILE;
-                return;
-        }
-	fin=finptr; frew=frewrite;
-loop:
-        switch(nexttok=ctab[nextc]) {
+	if (nexttok == EOFILE)
+		unexpectedEOF();
+	fin=finptr; frew=foutptr;
 
-        case UNKN:
-        case IDCHAR:
-        case PERIOD:
-                serror("unknown Character: %c",nextc);
-                nextc=GETC(fin,frew,rewriteflag);
-                goto loop;
+	for (;;) switch ((nexttok=ctab[nextc])) {
+
+	default:
+		fatserror("unknown character `%c'", nextc);
+		/*NOTREACHED*/
 
         case NEWLN:
-                line++;
+		++rcsline;
 #               ifdef LEXDB
-                VOID putchar('\n');
+		afputc('\n',stdout);
 #               endif
                 /* Note: falls into next case */
 
         case SPACE:
-                nextc=GETC(fin,frew,rewriteflag);
-                goto loop;
+		GETC(fin,frew,c);
+		nextc = c;
+		continue;
 
         case EOFILE:
-                eof++;
-                nexttok=EOFILE;
                 return;
 
         case DIGIT:
-                NextString = sp = Topchar;
+		sp = tokbuf.string;
+		lim = sp + tokbuf.size;
                 *sp++ = nextc;
-                while ((d=ctab[c=GETC(fin,frew,rewriteflag)])==DIGIT ||
-                        d==PERIOD) {
+		for (;;) {
+			GETC(fin,frew,c);
+			if ((d=ctab[c])!=DIGIT && d!=PERIOD)
+				break;
                         *sp++ = c;         /* 1.2. and 1.2 are different */
+			if (lim <= sp)
+				sp = bufenlarge(&tokbuf, &lim);
                 }
-                *sp++ = '\0';
-                if (sp >= StringTab+strtsize) {
-                        /*may have written outside stringtable already*/
-                        fatserror("Stringtable overflow");
-                }
-                Topchar = sp;
+		*sp = 0;
                 nextc = c;
-                if (hshenter == true)
-                        lookup();      /* lookup updates NextString, Topchar*/
+		if (hshenter)
+			lookup(tokbuf.string);
+		else
+			NextString = fstrsave(tokbuf.string);
                 nexttok = NUM;
                 return;
 
 
         case LETTER:
-                NextString = sp = Topchar;
+	case Letter:
+		sp = tokbuf.string;
+		lim = sp + tokbuf.size;
                 *sp++ = nextc;
-                while ((d=ctab[c=GETC(fin,frew,rewriteflag)])==LETTER ||
-                        d==DIGIT || d==IDCHAR) {
+		for (;;) {
+			GETC(fin,frew,c);
+			if ((d=ctab[c])!=LETTER && d!=Letter && d!=DIGIT && d!=IDCHAR)
+				break;
                         *sp++ = c;
+			if (lim <= sp)
+				sp = bufenlarge(&tokbuf, &lim);
                 }
-                *sp++ = '\0';
-                if (sp >= StringTab+strtsize) {
-                        /*may have written outside stringtable already*/
-                        fatserror("Stringtable overflow");
-                }
-                Topchar = sp;
+		*sp = 0;
                 nextc = c;
+		NextString = fstrsave(tokbuf.string);
                 nexttok = ID;  /* may be ID or keyword */
                 return;
 
@@ -346,8 +331,10 @@ loop:
                 /* read the string, and reset nextc afterwards*/
                 return;
 
-        default:
-                nextc=GETC(fin,frew,rewriteflag);
+	case COLON:
+	case SEMI:
+		GETC(fin,frew,c);
+		nextc = c;
                 return;
         }
 }
@@ -367,38 +354,56 @@ enum tokens token;
         } else  return(false);
 }
 
-int getkey (key)
-char * key;
+	int
+getkeyopt(key)
+	const char *key;
 /* Function: If the current token is a keyword identical to key,
- * getkey advances the input by calling nextlex and returns true;
+ * advances the input by calling nextlex and returns true;
  * otherwise returns false.
  */
 {
-        register char *s1,*s2;
-
-        if (nexttok==ID) {
-                s1=key; s2=NextString;
-                while(*s1 == *s2++)
-                     if (*s1++ == '\0') {
-                         /* match found */
-                         Topchar = NextString; /*reset Topchar */
-                         nextlex();
-                         return(true);
-                     }
+	if (nexttok==ID  &&  strcmp(key,NextString) == 0) {
+		 /* match found */
+		 ffree1(NextString);
+		 nextlex();
+		 return(true);
         }
         return(false);
 }
 
+	void
+getkey(key)
+	const char *key;
+/* Check that the current input token is a keyword identical to key,
+ * and advance the input by calling nextlex.
+ */
+{
+	if (!getkeyopt(key))
+		fatserror("missing '%s' keyword", key);
+}
+
+	void
+getkeystring(key)
+	const char *key;
+/* Check that the current input token is a keyword identical to key,
+ * and advance the input by calling nextlex; then look ahead for a string.
+ */
+{
+	getkey(key);
+	if (nexttok != STRING)
+		fatserror("missing string after '%s' keyword", key);
+}
 
 
-char * getid()
+	const char *
+getid()
 /* Function: Checks if nexttok is an identifier. If so,
  * advances the input by calling nextlex and returns a pointer
  * to the identifier; otherwise returns nil.
  * Treats keywords as identifiers.
  */
 {
-        register char * name;
+	register const char *name;
         if (nexttok==ID) {
                 name = NextString;
                 nextlex();
@@ -422,310 +427,529 @@ struct hshentry * getnum()
         } else  return nil;
 }
 
+	struct cbuf
+getphrases(key)
+	const char *key;
+/* Get a series of phrases that do not start with KEY, yield resulting buffer.
+ * Stop when the next phrase starts with a token that is not an identifier,
+ * or is KEY.
+ * Assume foutptr == NULL.
+ */
+{
+    register FILE *fin;
+    register int c;
+    register char *p;
+    const char *lim;
+    register const char *ki, *kn;
+    struct cbuf r;
+    struct buf b;
 
+    if (nexttok!=ID  ||  strcmp(NextString,key) == 0) {
+	r.string = 0;
+	r.size = 0;
+	return r;
+    } else {
+	warnignore();
+	fin = finptr;
+	bufautobegin(&b);
+	bufscpy(&b, NextString);
+	ffree1(NextString);
+	p = b.string + strlen(b.string);
+	lim = b.string + b.size;
+	c = nextc;
+	for (;;) {
+	    for (;;) {
+		if (lim <= p)
+		    p = bufenlarge(&b, &lim);
+		*p++ = c;
+		switch (ctab[c]) {
+		    default:
+			fatserror("unknown character `%c'", c);
+			/*NOTREACHED*/
+		    case EOFILE:
+			unexpectedEOF();
+			/*NOTREACHED*/
+		    case NEWLN:
+			++rcsline;
+			/* fall into */
+		    case COLON: case DIGIT: case LETTER: case Letter:
+		    case PERIOD: case SPACE:
+			c = getc(fin);
+			continue;
+		    case SBEGIN: /* long string */
+			for (;;) {
+			    for (;;) {
+				c = getc(fin);
+				if (lim <= p)
+				    p = bufenlarge(&b, &lim);
+				*p++ = c;
+				switch (c) {
+				    case EOF:
+					unexpectedEOF();
+					/*NOTREACHED*/
+				    case '\n':
+					++rcsline;
+					/* fall into */
+				    default:
+					continue;
+				    case SDELIM:
+					break;
+				}
+				break;
+			    }
+			    c = getc(fin);
+			    if (c != SDELIM)
+				break;
+			    if (lim <= p)
+				p = bufenlarge(&b, &lim);
+			    *p++ = c;
+			}
+			continue;
+		    case SEMI:
+			c = getc(fin);
+			if (ctab[c] == NEWLN) {
+			    ++rcsline;
+			    if (lim <= p)
+				p = bufenlarge(&b, &lim);
+			    *p++ = c;
+			    c = getc(fin);
+			}
+			for (;; c = getc(fin)) {
+			    switch (ctab[c]) {
+				case NEWLN: ++rcsline; continue;
+				case SPACE: continue;
+				default: break;
+			    }
+			    break;
+			}
+			break;
+		}
+		break;
+	    }
+	    switch (ctab[c]) {
+		case LETTER:
+		case Letter:
+		    for (kn = key;  c && *kn==c;  kn++)
+			if ((c = getc(fin)) == EOF)
+			    unexpectedEOF();
+		    if (!*kn)
+			switch (ctab[c]) {
+			    case DIGIT: case LETTER: case Letter:
+				break;
+			    default:
+				nextc = c;
+				NextString = fstrsave(key);
+				nexttok = ID;
+				goto returnit;
+			}
+		    for (ki=key; ki<kn; ) {
+			if (lim <= p)
+			    p = bufenlarge(&b, &lim);
+			*p++ = *ki++;
+		    }
+		    break;
+		default:
+		    nextc = c;
+		    nextlex();
+		    goto returnit;
+	    }
+	}
+
+    returnit:
+	/*
+	 * Do the following instead of bufautoend(&b),
+	 * because the buffer must survive until we are done with the file.
+	 */
+	r.size = p - b.string;
+	r.string = (char*)fremember(testrealloc((malloc_type)b.string, r.size));
+	return r;
+    }
+}
+
+
+	void
 readstring()
 /* skip over characters until terminating single SDELIM        */
-/* if rewriteflag==true, copy every character read to frewrite.*/
+/* If foutptr is set, copy every character read to foutptr.    */
 /* Does not advance nextlex at the end.                        */
 {       register c;
 	register FILE * fin,  * frew;
-	fin=finptr; frew=frewrite;
-        if (rewriteflag) {
-                /* copy string verbatim to frewrite */
+	fin=finptr; frew=foutptr;
+	if (frew) {
+		/* Copy string verbatim to foutptr.  */
                 while ((c=getc(fin)) != EOF) {
-			VOID putc(c,frew);
-                        if (c==SDELIM) {
-                                if ((c=getc(fin)) == EOF || putc(c,frew) != SDELIM) {
+			aputc(c,frew);
+			switch (c) {
+			    case '\n':
+				++rcsline;
+				break;
+			    case SDELIM:
+				if ((c=getc(fin)) == EOF) {
+					nextc=c;
+					return;
+				}
+				aputc(c,frew);
+				if (c != SDELIM) {
                                         /* end of string */
                                         nextc=c;
                                         return;
                                 }
+				break;
                         }
                 }
         } else {
                 /* skip string */
                 while ((c=getc(fin)) != EOF) {
-                        if (c==SDELIM) {
+			switch (c) {
+			    case '\n':
+				++rcsline;
+				break;
+			    case SDELIM:
                                 if ((c=getc(fin)) != SDELIM) {
                                         /* end of string */
                                         nextc=c;
                                         return;
                                 }
+				break;
                         }
                 }
         }
-        nextc = c;
-        error("Unterminated string");
+	unterminatedString();
 }
 
 
+	void
 printstring()
 /* Function: copy a string to stdout, until terminated with a single SDELIM.
  * Does not advance nextlex at the end.
  */
 {
         register c;
-	register FILE * fin;
+	register FILE *fin, *fout;
 	fin=finptr;
+	fout = stdout;
 	while ((c=getc(fin)) != EOF) {
-                if (c==SDELIM) {
+		switch (c) {
+		    case '\n':
+			++rcsline;
+			break;
+		    case SDELIM:
 			if ((c=getc(fin)) != SDELIM) {
                                 /* end of string */
                                 nextc=c;
                                 return;
                         }
+			break;
                 }
-                VOID putchar(c);
+		aputc(c,fout);
         }
-        nextc = c;
-        error("Unterminated string");
+	unterminatedString();
 }
 
 
 
-savestring(target,length)
-char * target; int length;
-/* copies a string terminated with SDELIM from file finptr to buffer target,
- * but not more than length bytes. If the string is longer than length,
- * the extra characters are skipped. The string may be empty, in which
- * case a '\0' is placed into target.
+	struct cbuf
+savestring(target)
+	struct buf *target;
+/* Copies a string terminated with SDELIM from file finptr to buffer target.
  * Double SDELIM is replaced with SDELIM.
- * If rewriteflag==true, the string is also copied unchanged to frewrite.
- * Returns the length of the saved string.
+ * If foutptr is set, the string is also copied unchanged to foutptr.
  * Does not advance nextlex at the end.
+ * Yield a copy of *TARGET, except with exact length.
  */
 {
         register c;
 	register FILE * fin, * frew;
-        register char * tp, * max;
+	register char *tp;
+	const char *lim;
+	struct cbuf r;
 
-	fin=finptr; frew=frewrite;
-        tp=target; max= target+length; /*max is one too large*/
-        while ((c=GETC(fin,frew,rewriteflag))!=EOF) {
-		*tp++ =c;
-                if (c== SDELIM) {
-                        if ((c=GETC(fin,frew,rewriteflag))!=SDELIM) {
+	fin=finptr; frew=foutptr;
+	tp = target->string;  lim = tp + target->size;
+	for (;;) {
+		GETC(fin,frew,c);
+		switch (c) {
+		    case '\n':
+			++rcsline;
+			break;
+		    case SDELIM:
+			GETC(fin,frew,c);
+			if (c != SDELIM) {
                                 /* end of string */
-                                *(tp-1)='\0';
                                 nextc=c;
-                                return;
+				r.string = target->string;
+				r.size = tp - r.string;
+				return r;
                         }
+			break;
+		    case EOF:
+			unterminatedString();
                 }
-                if (tp >= max) {
-                        /* overflow */
-                        error("string buffer overflow -- truncating string");
-                        target[length-1]='\0';
-                        /* skip rest of string */
-                        while ((c=GETC(fin,frew,rewriteflag))!=EOF) {
-                                if ((c==SDELIM) && ((c=GETC(fin,frew,rewriteflag))!=SDELIM)) {
-                                        /* end of string */
-                                        nextc=c;
-                                        return;
-                                }
-                        }
-                        nextc = c;
-                        error("Can't find %c to terminate string before end of file",SDELIM);
-                        return;
-                }
+		if (tp == lim)
+			tp = bufenlarge(target, &lim);
+		*tp++ = c;
         }
-        nextc = c;
-        error("Can't find %c to terminate string before end of file",SDELIM);
 }
 
 
-char  *checkid(id, delim)
-char    *id, delim;
+	char *
+checkid(id, delimiter)
+	register char *id;
+	int delimiter;
 /*   Function:  check whether the string starting at id is an   */
-/*              identifier and return a pointer to the last char*/
-/*              of the identifer. White space, delim and '\0'   */
-/*              are legal delimeters. Aborts the program if not */
+/*		identifier and return a pointer to the delimiter*/
+/*		after the identifier.  White space, delim and 0 */
+/*              are legal delimiters.  Aborts the program if not*/
 /*              a legal identifier. Useful for checking commands*/
+/*		If !delim, the only delimiter is 0.		*/
 {
         register enum  tokens  d;
         register char    *temp;
         register char    c,tc;
+	register char delim = delimiter;
 
-        temp = id;
-        if ( ctab[*id] == LETTER ) {
-            while( (d=ctab[c=(*++id)]) == LETTER || d==DIGIT || d==IDCHAR) ;
-            if ( c!=' ' && c!='\t' && c!='\n' && c!='\0' && c!=delim) {
+	temp = id;
+	if ((d = ctab[(unsigned char)(c = *id)])==LETTER || d==Letter) {
+	    while ((d = ctab[(unsigned char)(c = *++id)])==LETTER
+		|| d==Letter || d==DIGIT || d==IDCHAR
+	    )
+		;
+	    if (c  &&  (!delim || c!=delim && c!=' ' && c!='\t' && c!='\n')) {
                 /* append \0 to end of id before error message */
                 tc = c;
                 while( (c=(*++id))!=' ' && c!='\t' && c!='\n' && c!='\0' && c!=delim) ;
                 *id = '\0';
-                faterror("Invalid character %c in identifier %s",tc,temp);
-                return nil ;
-            } else
-                return id;
+		faterror("invalid character %c in identifier `%s'",tc,temp);
+	    }
         } else {
             /* append \0 to end of id before error message */
             while( (c=(*++id))!=' ' && c!='\t' && c!='\n' && c!='\0' && c!=delim) ;
             *id = '\0';
-            faterror("Identifier %s does not start with letter",temp);
-            return nil;
+	    faterror("identifier `%s' doesn't start with letter", temp);
         }
+	return id;
 }
 
-writeerror()
+	void
+checksid(id)
+	register char *id;
+/* Check whether the string ID is an identifier.  */
+{
+	VOID checkid(id, 0);
+}
+
+
+	exiting void
+IOerror()
 {
 	static looping;
 	if (looping)
-		exit(2);
-	looping = 1;
-	faterror("write error");
+		exiterr();
+	looping = true;
+	faterror("input/output error; is the file system full?");
 }
 
-nlflush(iop)
-register FILE * iop;
+void eflush() { if (fflush(stderr) == EOF) IOerror(); }
+void oflush() { if (fflush(stdout) == EOF) IOerror(); }
+
+exiting void unterminatedString() { fatserror("unterminated string"); }
+
+	static exiting void
+fatcleanup(already_newline)
+	int already_newline;
 {
-	if (putc('\n',iop)==EOF || fflush(iop)==EOF)
-                writeerror();
+	VOID fprintf(stderr, already_newline+"\n%s aborted\n", cmdid);
+	exiterr();
 }
 
+static void errsay() { oflush(); aprintf(stderr,"%s error: ",cmdid); nerror++; }
+static void fatsay() { oflush(); VOID fprintf(stderr,"%s error: ",cmdid); }
 
-/*VARARGS1*/
-serror(e,e1,e2,e3,e4,e5)
-char * e, * e1, * e2, * e3, * e4, * e5;
-/* non-fatal syntax error */
-{       nerror++;
-        VOID fprintf(stderr,"%s error, line %d: ", cmdid, line);
-        VOID fprintf(stderr,e, e1, e2, e3, e4, e5);
-        nlflush(stderr);
-}
+void eerror(n) const char *n; { errsay(); perror(n); eflush(); }
+exiting void efaterror(n) const char *n; { fatsay(); perror(n); fatcleanup(true); }
 
-/*VARARGS1*/
-error(e,e1,e2,e3,e4,e5)
-char * e, * e1, * e2, * e3, * e4, * e5;
+#if has_prototypes
+	void
+error(const char *format,...)
+#else
+	/*VARARGS1*/ void error(format, va_alist) const char *format; va_dcl
+#endif
 /* non-fatal error */
-{       nerror++;
-        VOID fprintf(stderr,"%s error: ",cmdid);
-        VOID fprintf(stderr,e, e1, e2, e3, e4, e5);
-        nlflush(stderr);
-}
-
-/*VARARGS1*/
-fatserror(e,e1,e2,e3,e4,e5)
-char * e, * e1, * e2, * e3, * e4, * e5;
-/* fatal syntax error */
-{       nerror++;
-        VOID fprintf(stderr,"%s error, line %d: ", cmdid,line);
-        VOID fprintf(stderr,e, e1, e2, e3, e4, e5);
-        VOID fprintf(stderr,"\n%s aborted\n",cmdid);
-        VOID cleanup();
-        exit(2);
-}
-
-/*VARARGS1*/
-faterror(e,e1,e2,e3,e4,e5)
-char * e, * e1, * e2, * e3, * e4, * e5;
-/* fatal error, terminates program after cleanup */
-{       nerror++;
-        VOID fprintf(stderr,"%s error: ",cmdid);
-        VOID fprintf(stderr,e, e1, e2, e3, e4, e5);
-        VOID fprintf(stderr,"\n%s aborted\n",cmdid);
-        VOID cleanup();
-        exit(2);
-}
-
-/*VARARGS1*/
-warn(e,e1,e2,e3,e4,e5)
-char * e, * e1, * e2, * e3, * e4, * e5;
-/* prints a warning message */
-{       nwarn++;
-        VOID fprintf(stderr,"%s warning: ",cmdid);
-        VOID fprintf(stderr,e, e1, e2, e3, e4, e5);
-        nlflush(stderr);
-}
-
-
-/*VARARGS1*/
-diagnose(e,e1,e2,e3,e4,e5)
-char * e, * e1, * e2, * e3, * e4, * e5;
-/* prints a diagnostic message */
 {
+	va_list args;
+	errsay();
+	vararg_start(args, format);
+	fvfprintf(stderr, format, args);
+	va_end(args);
+	afputc('\n',stderr);
+	eflush();
+}
+
+#if has_prototypes
+	exiting void
+fatserror(const char *format,...)
+#else
+	/*VARARGS1*/ exiting void
+	fatserror(format, va_alist) const char *format; va_dcl
+#endif
+/* fatal syntax error */
+{
+	va_list args;
+	oflush();
+	VOID fprintf(stderr, "%s: %s:%lu: ", cmdid, RCSfilename, rcsline);
+	vararg_start(args, format);
+	fvfprintf(stderr, format, args);
+	va_end(args);
+	fatcleanup(false);
+}
+
+#if has_prototypes
+	exiting void
+faterror(const char *format,...)
+#else
+	/*VARARGS1*/ exiting void faterror(format, va_alist)
+	const char *format; va_dcl
+#endif
+/* fatal error, terminates program after cleanup */
+{
+	va_list args;
+	fatsay();
+	vararg_start(args, format);
+	fvfprintf(stderr, format, args);
+	va_end(args);
+	fatcleanup(false);
+}
+
+#if has_prototypes
+	void
+warn(const char *format,...)
+#else
+	/*VARARGS1*/ void warn(format, va_alist) const char *format; va_dcl
+#endif
+/* prints a warning message */
+{
+	va_list args;
+	oflush();
+	aprintf(stderr,"%s warning: ",cmdid);
+	vararg_start(args, format);
+	fvfprintf(stderr, format, args);
+	va_end(args);
+	afputc('\n',stderr);
+	eflush();
+}
+
+	void
+redefined(c)
+	int c;
+{
+	warn("redefinition of -%c option", c);
+}
+
+#if has_prototypes
+	void
+diagnose(const char *format,...)
+#else
+	/*VARARGS1*/ void diagnose(format, va_alist) const char *format; va_dcl
+#endif
+/* prints a diagnostic message */
+/* Unlike the other routines, it does not append a newline. */
+/* This lets some callers suppress the newline, and is faster */
+/* in implementations that flush stderr just at the end of each printf. */
+{
+	va_list args;
         if (!quietflag) {
-                VOID fprintf(stderr,e, e1, e2, e3, e4, e5);
-                nlflush(stderr);
+		oflush();
+		vararg_start(args, format);
+		fvfprintf(stderr, format, args);
+		va_end(args);
+		eflush();
         }
 }
 
 
 
-fflsbuf(c, iop)
-unsigned c; register FILE * iop;
-/* Function: Flush iop.
- * Same routine as _flsbuf in stdio, but aborts program on error.
+	void
+afputc(c, f)
+/* Function: afputc(c,f) acts like aputc(c,f), but is smaller and slower.
  */
-{       register result;
-        if ((result=_flsbuf(c,iop))==EOF)
-                writeerror();
-        return result;
+	int c;
+	register FILE *f;
+{
+	aputc(c,f);
 }
 
 
-fputs(s, iop)
-register char *s;
-register FILE *iop;
+	void
+aputs(s, iop)
+	const char *s;
+	FILE *iop;
 /* Function: Put string s on file iop, abort on error.
- * Same as puts in stdio, but with different putc macro.
  */
 {
-	register r;
-	register c;
-
-	while (c = *s++)
-		r = putc(c, iop);
-	return(r);
+	if (fputs(s, iop) == EOF)
+		IOerror();
 }
 
 
 
-fprintf(iop, fmt, va_alist)
+	void
+#if has_prototypes
+fvfprintf(FILE *stream, const char *format, va_list args)
+#else
+	fvfprintf(stream,format,args) FILE *stream; char *format; va_list args;
+#endif
+/* like vfprintf, except abort program on error */
+{
+#if has_vfprintf
+	if (vfprintf(stream, format, args) == EOF)
+#else
+	_doprnt(format, args, stream);
+	if (ferror(stream))
+#endif
+		IOerror();
+}
+
+#if has_prototypes
+	void
+aprintf(FILE *iop, const char *fmt, ...)
+#else
+	/*VARARGS2*/ void
+aprintf(iop, fmt, va_alist)
 FILE *iop;
-char *fmt;
+const char *fmt;
 va_dcl
+#endif
 /* Function: formatted output. Same as fprintf in stdio,
  * but aborts program on error
  */
 {
-	register int value;
 	va_list ap;
-
-	va_start(ap);
-#ifdef VFPRINTF
-	VOID vfprintf(iop, fmt, ap);
-#else
-	_doprnt(fmt, ap, iop);
-#endif
-        if (ferror(iop)) {
-		writeerror();
-                value = EOF;
-        } else value = 0;
+	vararg_start(ap, fmt);
+	fvfprintf(iop, fmt, ap);
 	va_end(ap);
-	return value;
 }
 
 
 
 #ifdef LEXDB
-/* test program reading a stream of lexems and printing the tokens.
+/* test program reading a stream of lexemes and printing the tokens.
  */
 
 
 
+	int
 main(argc,argv)
 int argc; char * argv[];
 {
         cmdid="lextest";
         if (argc<2) {
-                VOID fputs("No input file\n",stderr);
-                exit(1);
+		aputs("No input file\n",stderr);
+		exitmain(EXIT_FAILURE);
         }
         if ((finptr=fopen(argv[1], "r")) == NULL) {
-                faterror("Can't open input file %s\n",argv[1]);
+		faterror("can't open input file %s",argv[1]);
         }
         Lexinit();
-        rewriteflag=false;
         while (nexttok != EOFILE) {
         switch (nexttok) {
 
@@ -734,7 +958,7 @@ int argc; char * argv[];
                 break;
 
         case NUM:
-                if (hshenter==true)
+		if (hshenter)
                    VOID printf("NUM: %s, index: %d",nexthsh->num, nexthsh-hshtab);
                 else
                    VOID printf("NUM, unentered: %s",NextString);
@@ -761,11 +985,10 @@ int argc; char * argv[];
         nextlex();
         }
         VOID printf("\nEnd of lexical analyzer test\n");
+	exitmain(EXIT_SUCCESS);
 }
 
-cleanup()
-/* dummy */
-{}
+exiting void exiterr() { _exit(EXIT_FAILURE); }
 
 
 #endif

@@ -1,11 +1,9 @@
 /*
  *                     RCS utilities
  */
-#ifndef lint
-static char rcsid[]= "$Id: rcsutil.c,v 4.8 89/12/27 13:14:43 rlw Exp $ Purdue CS";
-#endif
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -33,23 +31,38 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rcsutil.c,v $
- * Revision 4.8  89/12/27  13:14:43  rlw
- * Fixed to work with systems that do not handle the : operator properly 
- * (Ultrix)
- * 
- * Revision 4.7  89/09/14  17:22:51  miyake
- * fixed exit status when 'diff' is not found
- * patch by <eggert@twinsun.com>
- * 
+/* $Log: rcsutil.c,v $
+ * Revision 5.5  1990/12/04  05:18:49  eggert
+ * Don't output a blank line after a signal diagnostic.
+ * Use -I for prompts and -q for diagnostics.
+ *
+ * Revision 5.4  1990/11/01  05:03:53  eggert
+ * Remove unneeded setid check.  Add awrite(), fremember().
+ *
+ * Revision 5.3  1990/10/06  00:16:45  eggert
+ * Don't fread F if feof(F).
+ *
+ * Revision 5.2  1990/09/04  08:02:31  eggert
+ * Store fread()'s result in an fread_type object.
+ *
+ * Revision 5.1  1990/08/29  07:14:07  eggert
+ * Declare getpwuid() more carefully.
+ *
+ * Revision 5.0  1990/08/22  08:13:46  eggert
+ * Add setuid support.  Permit multiple locks per user.
+ * Remove compile-time limits; use malloc instead.
+ * Switch to GMT.  Permit dates past 1999/12/31.
+ * Add -V.  Remove snooping.  Ansify and Posixate.
+ * Tune.  Some USG hosts define NSIG but not sys_siglist.
+ * Don't run /bin/sh if it's hopeless.
+ * Don't leave garbage behind if the output is an empty pipe.
+ * Clean up after SIGXCPU or SIGXFSZ.  Print name of signal that caused cleanup.
+ *
  * Revision 4.6  89/05/01  15:13:40  narten
  * changed copyright header to reflect current distribution rules
  * 
  * Revision 4.5  88/11/08  16:01:02  narten
  * corrected use of varargs routines
- * 
- * Revision 4.4  88/11/08  12:00:28  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 4.4  88/08/09  19:13:24  eggert
  * Check for memory exhaustion.
@@ -66,9 +79,6 @@ Report problems and direct all questions to:
  * 
  * Revision 1.2  87/03/27  14:22:43  jenkins
  * Port to suns
- * 
- * Revision 1.1  84/01/23  14:50:43  kcs
- * Initial revision
  * 
  * Revision 4.1  83/05/10  15:53:13  wft
  * Added getcaller() and findlock().
@@ -109,88 +119,207 @@ Report problems and direct all questions to:
 
 
 
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
 #include "rcsbase.h"
-#include <pwd.h>
-#include <varargs.h>
 
-#if defined(USG) || defined(V4_2BSD)
-#include <fcntl.h>
+#if !MAKEDEPEND && defined(declare_getpwuid)
+#	include <pwd.h>
+	declare_getpwuid
 #endif
 
-#ifndef V4_2BSD
-#define vfork fork
+libId(utilId, "$Id: rcsutil.c,v 5.5 1990/12/04 05:18:49 eggert Exp $")
+
+#if lint
+	malloc_type lintalloc;
 #endif
 
-extern char * bindex();
-extern FILE * finptr;
-extern char * RCSfilename;
-extern char * getlogin();
-extern struct passwd *getpwuid();
-extern char * malloc();
-extern int errno;
+#if has_getuid
+	uid_t ruid;
+#endif
+#if SETID
+	static uid_t euid;
+	static gid_t egid, rgid;
+#endif
+
+/*
+ * list of blocks allocated with ftestalloc()
+ * These blocks can be freed by ffree when we're done with the current file.
+ * We could put the free block inside struct alloclist, rather than a pointer
+ * to the free block, but that would be less portable.
+ */
+struct alloclist {
+	malloc_type alloc;
+	struct alloclist *nextalloc;
+};
+static struct alloclist *alloced;
 
 
-char * talloc(size)
-unsigned size;
+	static malloc_type
+okalloc(p)
+	malloc_type p;
 {
-	char * p;
-	if (!(p = malloc(size))) {
+	if (!p)
 		faterror("out of memory");
-	}
 	return p;
 }
 
+	malloc_type
+testalloc(size)
+	size_t size;
+/* Allocate a block, testing that the allocation succeeded.  */
+{
+	return okalloc(malloc(size));
+}
 
+	malloc_type
+testrealloc(ptr, size)
+	malloc_type ptr;
+	size_t size;
+/* Reallocate a block, testing that the allocation succeeded.  */
+{
+	return okalloc(realloc(ptr, size));
+}
 
-char * getcaller()
-/* Function: gets the callers login from his uid.
- * If the uid is root, tries to get the true login with getlogin().
- */
-{       char * name;
-	int uid;
-	uid=getuid();
-	if (uid==0) {
-		/* super user; try getlogin() to distinguish */
-		name = getlogin();
-		if (name!=nil && *name!='\0')
-			return name;
+	malloc_type
+fremember(ptr)
+	malloc_type ptr;
+/* Remember PTR in 'alloced' so that it can be freed later.  Yield PTR.  */
+{
+	register struct alloclist *q = talloc(struct alloclist);
+	q->nextalloc = alloced;
+	alloced = q;
+	return q->alloc = ptr;
+}
+
+	malloc_type
+ftestalloc(size)
+	size_t size;
+/* Allocate a block, putting it in 'alloced' so it can be freed later. */
+{
+	return fremember(testalloc(size));
+}
+
+	void
+ffree()
+/* Free all blocks allocated with ftestalloc().  */
+{
+	register struct alloclist *p, *q;
+	for (p = alloced;  p;  p = q) {
+		q = p->nextalloc;
+		tfree(p->alloc);
+		tfree(p);
 	}
-	return(getpwuid(uid)->pw_name);
+	alloced = nil;
+}
+
+	void
+ffree1(f)
+	register const char *f;
+/* Free the block f, which was allocated by ftestalloc.  */
+{
+	register struct alloclist *p, **a = &alloced;
+
+	while ((p = *a)->alloc  !=  f)
+		a = &p->nextalloc;
+	*a = p->nextalloc;
+	tfree(p->alloc);
+	tfree(p);
+}
+
+	const char *
+strsave(s)
+	const char *s;
+/* Save s in permanently allocated storage. */
+{
+	return strcpy(tnalloc(char, strlen(s)+1), s);
+}
+
+	const char *
+fstrsave(s)
+	const char *s;
+/* Save s in storage that will be deallocated when we're done with this file. */
+{
+	return strcpy(ftnalloc(char, strlen(s)+1), s);
+}
+
+	char *
+cgetenv(name)
+	const char *name;
+/* Like getenv(), but yield a copy; getenv() can overwrite old results. */
+{
+	register char *p;
+
+	return (p=getenv(name)) ? strsave(p) : p;
 }
 
 
-
-struct hshentry * findlock(who,delete)
-char * who; int delete;
-/* Finds the first lock held by who and returns a pointer
- * to the locked delta; also removes the lock if delete==true.
- * Returns nil if there is no lock held by who.
+	const char *
+getcaller()
+/* Function: gets the caller's login.
  */
 {
-        register struct lock * next, * trail;
-        struct lock dummy;
+	static char *name;
 
-        dummy.nextlock=next=Locks;
-        trail = &dummy;
-        while (next!=nil) {
-                if(strcmp(who,next->login)==0) break; /*found a lock*/
-                trail=next;
-                next=next->nextlock;
-        }
-        if (next!=nil) {
-		/* found one */
-		if (delete) {
-		    /* delete it */
-		    trail->nextlock=next->nextlock;
-		    Locks=dummy.nextlock;
-		    next->delta->lockedby=nil; /* reset locked-by */
+	if (!name) {
+		if (!(
+		    /* Use getenv() if we're trustworthy; it's much faster.  */
+#if SETID
+			euid==ruid && egid==rgid &&
+#endif
+			(
+				(name = cgetenv("LOGNAME"))
+			||	(name = cgetenv("USER"))
+			)
+
+		    /* Follow a procedure recommended by Posix 1003.1-1988.  */
+		    ||	(name = getlogin())
+		)) {
+#if has_getuid & defined(declare_getpwuid)
+			const struct passwd *pw = getpwuid(ruid);
+			if (!pw)
+			    faterror("no password entry for userid %lu",
+				     (unsigned long)ruid
+			    );
+			name = pw->pw_name;
+#else
+			faterror("Who are you?  Please set LOGNAME.");
+#endif
 		}
-                return next->delta;
-        } else  return nil;
+		checksid(name);
+	}
+	return name;
+}
+
+
+
+	int
+findlock(delete, target)
+	int delete;
+	struct hshentry **target;
+/* Finds the first lock held by caller and returns a pointer
+ * to the locked delta; also removes the lock if delete is set.
+ * Returns 0 for no locks, 1 for one, 2 for two or more.
+ * If one lock, puts it into *target.
+ */
+{
+	register struct lock *next, **trail, **found = nil;
+
+	for (trail = &Locks;  (next = *trail);  trail = &next->nextlock)
+		if (strcmp(getcaller(), next->login)  ==  0) {
+			if (found) {
+				error("multiple revisions locked by %s; please specify one", getcaller());
+				return 2;
+			}
+			found = trail;
+		}
+	if (!found)
+		return 0;
+	next = *found;
+	*target = next->delta;
+	if (delete) {
+		next->delta->lockedby = nil;
+		*found = next->nextlock;
+	}
+	return 1;
 }
 
 
@@ -199,54 +328,47 @@ char * who; int delete;
 
 
 
-struct lock * addlock(delta,who)
-struct hshentry * delta; char * who;
-/* Given a delta, addlock checks whether
- * the delta is locked by somebody other than who.
- * If so, an error message is printed, and false returned.
- * If the delta is not reserved at all, a lock for it is added,
- * and a pointer for the lock returned.
- */
+	int
+addlock(delta)
+struct hshentry * delta;
+/* Add a lock held by caller to delta and yield 1 if successful.
+ * Print an error message and yield -1 if no lock is added because
+ * the delta is locked by somebody other than caller.
+ * Yield 0 if the caller already holds the lock.  */
 {
         struct lock * next;
 
         next=Locks;
         while (next!=nil) {
                 if (cmpnum(delta->num,next->delta->num)==0) {
-                        if (strcmp(who,next->login)==0)
-                                return next;
-                                /* lock exists already */
+			if (strcmp(getcaller(),next->login)==0)
+				return 0;
                         else {
                                 error("revision %s already locked by %s",
                                       delta->num, next->login);
-                                return false;
-                        }
-                } else {
-                        if (strcmp(who,next->login)==0) {
-                                error("you already locked %s; only one lock allowed per person.",
-                                       next->delta->num);
-                                return false;
-                        } else {
-                                next=next->nextlock;
+				return -1;
                         }
                 }
-        }
-        /* not found; set up new lockblock */
-        next= (struct lock *) talloc(sizeof (struct lock));
-        delta->lockedby=next->login=who;
+		next = next->nextlock;
+	}
+        /* set up new lockblock */
+	next = ftalloc(struct lock);
+	delta->lockedby=next->login=getcaller();
         next->delta= delta;
         next->nextlock=Locks;
         Locks=next;
-        return next;
+	return 1;
 }
 
 
 
-int addsymbol(delta,name,rebind)
-struct hshentry * delta; char * name; int rebind;
-/* Function: adds a new symbolic name and associates it with node delta.
+	int
+addsymbol(num, name, rebind)
+	const char *num, *name;
+	int rebind;
+/* Function: adds a new symbolic name and associates it with revision num.
  * If name already exists and rebind is true, the name is associated
- * with the new delta; otherwise, an error message is printed and
+ * with the new num; otherwise, an error message is printed and
  * false returned. Returns true it successful.
  */
 {       register struct assoc * next;
@@ -254,19 +376,19 @@ struct hshentry * delta; char * name; int rebind;
         while (next!=nil) {
                 if (strcmp(name,next->symbol)==0) {
                         if (rebind) {
-                                next->delta=delta;
+				next->num = num;
                                 return true;
                         } else {
                                 error("symbolic name %s already bound to %s",
-                                        name,next->delta->num);
+					name, next->num);
                                 return false;
                         }
                 } else  next = next->nextassoc;
         }
         /* not found; insert new pair. */
-        next = (struct assoc *) talloc(sizeof(struct assoc));
+	next = ftalloc(struct assoc);
         next->symbol=name;
-        next->delta=delta;
+	next->num = num;
         next->nextassoc=Symbols;
         Symbols = next;
         return true;
@@ -275,240 +397,415 @@ struct hshentry * delta; char * name; int rebind;
 
 
 
-int checkaccesslist(who)
-char * who;
-/* function: Returns true if who is the superuser, the owner of the
- * file, the access list is empty, or who is on the access list.
+int checkaccesslist()
+/* function: Returns true if caller is the superuser, the owner of the
+ * file, the access list is empty, or caller is on the access list.
  * Prints an error message and returns false otherwise.
  */
 {
-        register struct access * next;
-        struct stat statbuf;
+	register const struct access *next;
 
-        if ((AccessList==nil) || (strcmp(who,"root")==0))
+	if (!AccessList || strcmp(getcaller(),"root")==0)
                 return true;
 
         next=AccessList;
         do {
-                if (strcmp(who,next->login)==0)
+		if (strcmp(getcaller(),next->login)==0)
                         return true;
                 next=next->nextaccess;
         } while (next!=nil);
 
+#if has_getuid
+    {
+        struct stat statbuf;
         VOID fstat(fileno(finptr),&statbuf);  /* get owner of file */
-        if (getuid() == statbuf.st_uid) return true;
+        if (myself(statbuf.st_uid)) return true;
+    }
+#endif
 
-        error("User %s not on the access list",who);
+	error("user %s not on the access list", getcaller());
         return false;
 }
 
 
-static SIGNAL_TYPE catchsig(s)
+/*
+ *	 Signal handling
+ *
+ * ANSI C places too many restrictions on signal handlers.
+ * We obey as many of them as we can.
+ * Posix places fewer restrictions, and we are Posix-compatible here.
+ */
+
+static volatile sig_atomic_t heldsignal, holdlevel;
+
+	static signal_type
+catchsig(s)
+	int s;
 {
-	ignoreints();
-        diagnose("\nRCS: cleaning up\n");
-        VOID cleanup();
-	exit(2);
-#ifdef lint
-	catchsig(s);
+	const char *sname;
+	char buf[BUFSIZ];
+
+#if sig_zaps_handler
+	/* If a signal arrives before we reset the signal handler, we lose. */
+	VOID signal(s, SIG_IGN);
 #endif
+	if (holdlevel) {
+		heldsignal = s;
+		return;
+	}
+	ignoreints();
+	setrid();
+	if (!quietflag) {
+	    sname = nil;
+#if has_sys_siglist & defined(NSIG)
+	    if ((unsigned)s < NSIG) {
+#		ifndef sys_siglist
+		    extern const char *sys_siglist[];
+#		endif
+		sname = sys_siglist[s];
+	    }
+#else
+	    switch (s) {
+#ifdef SIGHUP
+		case SIGHUP:	sname = "Hangup";  break;
+#endif
+#ifdef SIGINT
+		case SIGINT:	sname = "Interrupt";  break;
+#endif
+#ifdef SIGPIPE
+		case SIGPIPE:	sname = "Broken pipe";  break;
+#endif
+#ifdef SIGQUIT
+		case SIGQUIT:	sname = "Quit";  break;
+#endif
+#ifdef SIGTERM
+		case SIGTERM:	sname = "Terminated";  break;
+#endif
+#ifdef SIGXCPU
+		case SIGXCPU:	sname = "Cputime limit exceeded";  break;
+#endif
+#ifdef SIGXFSZ
+		case SIGXFSZ:	sname = "Filesize limit exceeded";  break;
+#endif
+	    }
+#endif
+	    if (sname)
+		VOID sprintf(buf, "\nRCS: %s.  Cleaning up.\n", sname);
+	    else
+		VOID sprintf(buf, "\nRCS: Signal %d.  Cleaning up.\n", s);
+	    VOID write(STDERR_FILENO, buf, strlen(buf));
+	}
+	exiterr();
 }
 
-static sig[] = {SIGINT,SIGHUP,SIGQUIT,SIGPIPE,SIGTERM};
+	void
+ignoreints()
+{
+	++holdlevel;
+}
+
+	void
+restoreints()
+{
+	if (!--holdlevel && heldsignal)
+		VOID catchsig(heldsignal);
+}
+
+
+static const sig[] = {
+#ifdef SIGHUP
+	SIGHUP,
+#endif
+#ifdef SIGINT
+	SIGINT,
+#endif
+#ifdef SIGPIPE
+	SIGPIPE,
+#endif
+#ifdef SIGQUIT
+	SIGQUIT,
+#endif
+#ifdef SIGTERM
+	SIGTERM,
+#endif
+#ifdef SIGXCPU
+	SIGXCPU,
+#endif
+#ifdef SIGXFSZ
+	SIGXFSZ,
+#endif
+};
 #define SIGS (sizeof(sig)/sizeof(*sig))
-static SIGNAL_TYPE (*catcher[SIGS])();
-  
+
+
+#if has_sigaction
+
+	static void
+  checksig(r)
+	int r;
+  {
+	if (r < 0)
+		efaterror("signal");
+  }
+
+	void
+  catchints()
+  {
+	register int i;
+	sigset_t blocked;
+	struct sigaction act;
+
+	checksig(sigemptyset(&blocked));
+	for (i=SIGS; 0<=--i; )
+	    checksig(sigaddset(&blocked, sig[i]));
+	for (i=SIGS; 0<=--i; ) {
+	    checksig(sigaction(sig[i], (struct sigaction*)nil, &act));
+	    if (act.sa_handler != SIG_IGN) {
+		    act.sa_handler = catchsig;
+		    act.sa_mask = blocked;
+		    checksig(sigaction(sig[i], &act, (struct sigaction*)nil));
+	    }
+	}
+  }
+
+#else
+#if has_sigblock
+
+  void catchints()
+  {
+	register int i;
+	int mask;
+
+	mask = 0;
+	for (i=SIGS; 0<=--i; )
+		mask |= sigmask(sig[i]);
+	mask = sigblock(mask);
+	for (i=SIGS; 0<=--i; )
+		if (signal(sig[i], catchsig) == SIG_IGN)
+			VOID signal(sig[i], SIG_IGN);
+	VOID sigsetmask(mask);
+  }
+
+#else
+
   void catchints()
   {
 	register i;
 	for (i=SIGS; 0<=--i; )
-	    if (signal(sig[i],SIG_IGN) == SIG_IGN)
-		catcher[i]  = SIG_IGN;
-	    else
-		catcher[i] = catchsig;
-	restoreints();
+		if (signal(sig[i], SIG_IGN) != SIG_IGN)
+			VOID signal(sig[i], catchsig);
   }
 
-  void ignoreints()
-  {
-	register i;
-	for (i=SIGS; 0<=--i; )
-		VOID signal(sig[i], SIG_IGN);
-  }
+#endif
+#endif
 
-void restoreints()
-{
-	register i;
-	for (i=SIGS; 0<=--i; )
-		if (catcher[i] != SIG_IGN)
-			VOID signal(sig[i], catcher[i]);
-}
 
+	void
 fastcopy(inf,outf)
 FILE * inf, * outf;
-/* Function: copies the remainder of file inf to outf. First copies the
- * rest that is in the IO-buffer of inf character by character, and then
- * copies the remainder in blocks.
+/* Function: copies the remainder of file inf to outf.
  */
 {       char buf[BUFSIZ];
-        register int rcount, wcount;
-
-        /* write the rest of the buffer to outf */
-        while ((--inf->_cnt)>=0) {
-                VOID putc(*inf->_ptr++&0377,outf);
-        }
-        if (fflush(outf) == EOF) {
-		writeerror();
-	}
+	register fread_type rcount;
 
         /*now read the rest of the file in blocks*/
-        while ((rcount=read(fileno(inf),buf,BUFSIZ))>0) {
-                wcount=write(fileno(outf),buf,rcount);
-                if (wcount!=rcount) {
-                    writeerror();
-                }
+	while (!feof(inf)  &&  (rcount = fread(buf,sizeof(char),BUFSIZ,inf))) {
+		awrite(buf, rcount, outf);
         }
 }
 
-
-
-
-
-
-#ifdef SNOOPFILE
-
-#include "time.h"
-extern struct tm* localtime();
-extern long time();
-
-logcommand(commandname,delta, sequence,login)
-char* commandname; struct hshentry * delta, * sequence[];char * login;
-/* Function: start a process to write the file that
- * logs the RCS command.
- * Each line in the log file contains the following information:
- * operation, revision(r), backward deltas applied(b), forward deltas applied(f),
- * total deltas present(t), creation date of delta(d), date of operation(o),
- * login of caller, RCS file name.
- */
+	void
+awrite(buf, chars, f)
+	const char *buf;
+	fread_type chars;
+	FILE *f;
 {
-        char logline[200];
-        char curdate[datelength];
-	char *inoutargs[5];
-        register int i, backward, forward;
-        long clock;
-        struct tm * tm;
-
-        clock=time((long *)0);
-        tm=localtime(&clock);
-
-        VOID sprintf(curdate,DATEFORM,
-                tm->tm_year, tm->tm_mon+1, tm->tm_mday,
-                tm->tm_hour, tm->tm_min, tm->tm_sec);
-
-        i= backward=forward=0;
-        while(sequence[i]!=nil) {  /* count deltas to be applied*/
-        if (countnumflds(sequence[i]->num) == 2)
-                backward++;  /* reverse delta */
-        else    forward++;   /* branch delta  */
-        i++;
-        }
-	VOID sprintf(logline,"%s %10sr %3db %3df %3dt %sc %so %s %s",
-		commandname,delta->num,backward,forward,TotalDeltas,delta->date,
-		curdate,login,bindex(getfullRCSname(),'/'));
-	inoutargs[0] = nil;
-	inoutargs[1] = nil;
-	inoutargs[2] = SNOOP;
-	inoutargs[3] = logline;
-	inoutargs[4] = nil;
-	VOID run_back(inoutargs);
+	if (fwrite(buf, sizeof(char), chars, f) != chars)
+		IOerror();
 }
-#endif
+
+
+
+
+
+/*
+* Print RCS format date and time in user-readable format.
+*/
+	void
+printdate(f, date, separator)
+	register FILE *f;
+	const char *date, *separator;
+{
+	register const char *p = date;
+
+	while (*p++ != '.')
+		;
+	aprintf(f, "%s%.*s/%.2s/%.2s%s%.2s:%.2s:%s",
+		date[2]=='.' && VERSION(5)<=RCSversion  ?  "19"  :  "",
+		p-date-1, date,
+		p, p+3, separator, p+6, p+9, p+12
+	);
+}
+
+
 
 
 static int fdreopen(fd, file, flags, mode)
-	char *file;
+	int fd;
+	const char *file;
+	int flags;
+	mode_t mode;
 {
 	int newfd;
 	VOID close(fd);
-	newfd = flags==-1 ? creat(file,mode) : open(file,flags,mode);
+	newfd =
+#if !open_can_creat
+		flags&O_CREAT ? creat(file,mode) :
+#endif
+		open(file,flags,mode);
 	if (newfd < 0  ||  newfd == fd)
 		return newfd;
-#ifdef F_DUPFD
-	fd = fcntl(newfd, F_DUPFD, fd);
-#else
 	fd = dup2(newfd, fd);
-#endif
 	VOID close(newfd);
 	return fd;
 }
 
 static void tryopen(fd,file,flags)
-	char *file;
+	int fd, flags;
+	const char *file;
 {
-	if (file  &&  fdreopen(fd,file,flags,0600) != fd) {
-		VOID write(fileno(stderr), file, strlen(file));
-		VOID write(fileno(stderr), ": cannot open\n", 14);
-		_exit(2);
+	if (file  &&  fdreopen(fd,file,flags,S_IRUSR|S_IWUSR) != fd) {
+		VOID write(STDERR_FILENO, file, strlen(file));
+		VOID write(STDERR_FILENO, ": can't open\n", 13);
+		_exit(EXIT_TROUBLE);
 	}
 }
 
 /*
-/* Run in the background a command specified by the strings in 'inoutargs'.
-/* inoutargs[0], if nonnil, is the name of the input file.
-/* inoutargs[1], if nonnil, is the name of the output file.
-/* inoutargs[2..] form the command to be run in the background.
-/*/
-static int run_back(inoutargs)
-	char **inoutargs;
+* Run a command specified by the strings in 'inoutargs'.
+* inoutargs[0], if nonnil, is the name of the input file.
+* inoutargs[1], if nonnil, is the name of the output file.
+* inoutargs[2..] form the command to be run.
+*/
+	int
+runv(inoutargs)
+	const char **inoutargs;
 {
 	int pid;
-	register char **p;
-	if (fflush(stdout) == EOF  ||  fflush(stderr) == EOF)
-		return -1;
+	int wstatus, w;
+	register const char **p;
+	oflush();
+	eflush();
 	if (!(pid = vfork())) {
 		p = inoutargs;
-		tryopen(fileno(stdin), *p++, 0);
-		tryopen(fileno(stdout), *p++, -1);
-		VOID execv(*p, p);
+		tryopen(STDIN_FILENO, *p++, O_RDONLY);
+		tryopen(STDOUT_FILENO, *p++, O_CREAT|O_TRUNC|O_WRONLY);
+		VOID EXECRCS(*p, p);
 		if (errno == ENOEXEC) {
 			*--p = "/bin/sh";
 			VOID execv(*p, p);
 		}
-		VOID write(fileno(stderr), *p, strlen(*p));
-		VOID write(fileno(stderr), ": not found\n", 12);
-		_exit(2);
+		VOID write(STDERR_FILENO, *p, strlen(*p));
+		VOID write(STDERR_FILENO, ": not found\n", 12);
+		_exit(EXIT_TROUBLE);
 	}
-	return pid;
+	if (pid < 0)
+		return pid;
+	do {
+		if ((w = wait(&wstatus)) < 0)
+			return w;
+	} while (w != pid);
+	return wstatus;
 }
 
 #define CARGSMAX 20
 /*
-/* Run a command.
-/* The first two arguments are the input and output files (if nonnil);
-/* the rest specify the command and its arguments.
-/*/
-int run(va_alist)
+* Run a command.
+* The first two arguments are the input and output files (if nonnil);
+* the rest specify the command and its arguments.
+*/
+	int
+#if has_prototypes
+run(const char *infile, const char *outfile, ...)
+#else
+	/*VARARGS2*/
+run(infile, outfile, va_alist)
+	const char *infile;
+	const char *outfile;
 	va_dcl
+#endif
 {
 	va_list ap;
-	int pid, wstatus, w;
-	char *rgargs[CARGSMAX];
+	const char *rgargs[CARGSMAX];
 	register i = 0;
-	va_start(ap);
-	rgargs[0] = va_arg(ap, char *);
-	rgargs[1] = va_arg(ap, char *);
-	for (i =2; i< CARGSMAX; i++) {
-	    rgargs[i] = va_arg(ap, char *);
-	    if (rgargs[i] == NULL)
-		break;
-	}
+	rgargs[0] = infile;
+	rgargs[1] = outfile;
+	vararg_start(ap, outfile);
+	for (i = 2;  (rgargs[i++] = va_arg(ap, const char*));  )
+		if (CARGSMAX <= i)
+			faterror("too many command arguments");
 	va_end(ap);
-	pid = run_back(rgargs);
-	if (pid < 0)
-		return pid;
-	for (;;)
-		if ((w = wait(&wstatus)) < 0)
-			return w;
-		else if (w == pid)
-			return wstatus;
+	return runv(rgargs);
 }
+
+
+int RCSversion;
+
+	void
+setRCSversion(str)
+	const char *str;
+{
+	static const char *oldversion;
+
+	register const char *s = str + 2;
+	int v = VERSION_DEFAULT;
+
+	if (oldversion)
+		redefined('V');
+	oldversion = str;
+
+	if (*s) {
+		v = 0;
+		while (isdigit(*s))
+			v  =  10*v + *s++ - '0';
+		if (*s)
+			faterror("%s isn't a number", str);
+		if (v < VERSION_MIN  ||  VERSION_MAX < v)
+			faterror("%s out of range %d..%d", str, VERSION_MIN, VERSION_MAX);
+	}
+
+	RCSversion = VERSION(v);
+}
+
+	void
+initid()
+{
+#if SETID
+	egid = getegid();
+	euid = geteuid();
+	rgid = getgid();
+#endif
+#if has_getuid
+	ruid = getuid();
+#endif
+	setrid();
+}
+
+
+#if SETID
+	void
+seteid()
+/* Become effective user and group.  */
+{
+	if (euid!=ruid && seteuid(euid)<0  ||  egid!=rgid && setegid(egid)<0)
+		efaterror("seteid");
+}
+
+	void
+setrid()
+/* Become real user and group.  */
+{
+	if (euid!=ruid && seteuid(ruid)<0  ||  egid!=rgid && setegid(rgid)<0)
+		efaterror("setrid");
+}
+#endif

@@ -1,9 +1,6 @@
 /*
  *                     RCS file comparison
  */
-#ifndef lint
-static char rcsid[]= "$Id: rcsfcmp.c,v 4.5 89/05/01 15:12:42 narten Exp $ Purdue CS";
-#endif
 /*****************************************************************************
  *                       rcsfcmp()
  *                       Testprogram: define FCMPTEST
@@ -11,6 +8,7 @@ static char rcsid[]= "$Id: rcsfcmp.c,v 4.5 89/05/01 15:12:42 narten Exp $ Purdue
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -39,12 +37,26 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rcsfcmp.c,v $
+/* $Log: rcsfcmp.c,v $
+ * Revision 5.5  1990/11/27  09:26:05  eggert
+ * Fix comment leader bug.
+ *
+ * Revision 5.4  1990/11/01  05:03:42  eggert
+ * Permit arbitrary data in logs and comment leaders.
+ *
+ * Revision 5.3  1990/09/11  02:41:15  eggert
+ * Don't ignore differences inside keyword strings if -ko is set.
+ *
+ * Revision 5.1  1990/08/29  07:13:58  eggert
+ * Clean old log messages too.
+ *
+ * Revision 5.0  1990/08/22  08:12:49  eggert
+ * Don't append "checked in with -k by " log to logs,
+ * so that checking in a program with -k doesn't change it.
+ * Ansify and Posixate.  Remove lint.
+ *
  * Revision 4.5  89/05/01  15:12:42  narten
  * changed copyright header to reflect current distribution rules
- * 
- * Revision 4.4  88/11/08  12:01:33  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 4.4  88/08/09  19:12:50  eggert
  * Shrink stdio code size.
@@ -59,9 +71,6 @@ Report problems and direct all questions to:
  * Revision 1.2  87/03/27  14:22:19  jenkins
  * Port to suns
  * 
- * Revision 1.1  84/01/23  14:50:23  kcs
- * Initial revision
- * 
  * Revision 4.1  83/05/10  16:24:04  wft
  * Marker matching now uses trymatch(). Marker pattern is now
  * checked precisely.
@@ -73,17 +82,20 @@ Report problems and direct all questions to:
 
 /*
 #define FCMPTEST
+*/
 /* Testprogram; prints out whether two files are identical,
  * except for keywords
  */
 
 #include  "rcsbase.h"
-extern FILE * fopen();
-extern enum markers trymatch(); /* check for keywords */
+
+libId(fcmpId, "$Id: rcsfcmp.c,v 5.5 1990/11/27 09:26:05 eggert Exp $")
 
 
+	int
 rcsfcmp(xfname,uxfname,delta)
-char * xfname, *uxfname; struct hshentry *delta;
+	const char *xfname, *uxfname;
+	const struct hshentry *delta;
 /* Function: compares the files xfname and uxfname. Returns true
  * if xfname has the same contents as uxfname, while disregarding
  * keyword values. For the LOG-keyword, rcsfcmp skips the log message
@@ -97,24 +109,27 @@ char * xfname, *uxfname; struct hshentry *delta;
 {
     register int xc,uxc;
     char xkeyword[keylength+2],   uxkeyword[keylength+2];
-    char xkeyval[keyvallength+1], uxkeyval[keyvallength+1];
+    int eqkeyvals;
     register FILE * xfp, * uxfp;
+    register int delimiter;
     register char * tp;
+    register const char *sp;
     int result;
     enum markers match1,match2;
 
-    if ((xfp=fopen(tp=xfname,"r"))==NULL || (uxfp=fopen(tp=uxfname,"r"))==NULL) {
-       faterror("Can't open %s\n", tp);
-       return false;
+    errno = 0;
+    if (!(xfp=fopen(sp=xfname,"r")) || !(errno=0, uxfp=fopen(sp=uxfname,"r"))) {
+       efaterror(sp);
     }
     result=false;
+    delimiter = Expand==OLD_EXPAND ? EOF : KDELIM;
     xc=getc(xfp); uxc=getc(uxfp);
     while( xc == uxc) { /* comparison loop */
         if (xc==EOF) { /* finished; everything is the same*/
             result=true;
             break;
         }
-        if ( xc!=KDELIM) {
+	if (xc != delimiter) {
             /* get the next characters */
             xc=getc(xfp); uxc=getc(uxfp);
         } else {
@@ -131,9 +146,9 @@ char * xfname, *uxfname; struct hshentry *delta;
                 *tp++ = uxc;
 	    *tp++ = xc;  /* add closing K/VDELIM */
             *tp='\0';
-            /* now we have 2 keywords, or something thal looks like it.*/
-	    match1=trymatch(xkeyword,false);
-	    match2=trymatch(uxkeyword,false);
+	    /* Now we have 2 keywords, or something that looks like it. */
+	    match1 = trymatch(xkeyword);
+	    match2 = trymatch(uxkeyword);
 	    if (match1 != match2) break; /* not identical */
 #ifdef FCMPTEST
 	    VOID printf("found potential keywords %s and %s\n",xkeyword,uxkeyword);
@@ -148,29 +163,43 @@ char * xfname, *uxfname; struct hshentry *delta;
 #ifdef FCMPTEST
 	    VOID printf("found common keyword %s\n",xkeyword);
 #endif
-	    tp=xkeyval;
-	    if (xc==VDELIM) {/* get value */
-		while (((xc=getc(xfp))!=KDELIM) && (xc!='\n') && (xc!=EOF) &&
-			(tp<xkeyval+keyvallength))
-		    *tp++ = xc;
+	    eqkeyvals = 1;
+	    for (;;) {
+		if (xc==uxc) {
+		    if (xc==KDELIM)
+			break;
+		} else {
+		    eqkeyvals = 0;
+		    if (xc==KDELIM) {
+			while (uxc!=KDELIM && uxc!='\n' && uxc!=EOF)
+			    uxc = getc(uxfp);
+			break;
+		    }
+		    if (uxc==KDELIM) {
+			while (xc!=KDELIM && xc!='\n' && xc!=EOF)
+			    xc = getc(xfp);
+			break;
+		    }
+		}
+		if (xc=='\n' || uxc=='\n' || xc==EOF || uxc==EOF)
+		    break;
+		xc = getc(xfp);
+		uxc = getc(uxfp);
 	    }
-	    *tp = '\0';   /*xkeyval now filled with value; possibly empty*/
-	    tp=uxkeyval;
-	    if (uxc==VDELIM) {/* get value */
-		while (((uxc=getc(uxfp))!=KDELIM) && (uxc!='\n') && (uxc!=EOF) &&
-			(tp<uxkeyval+keyvallength))
-		    *tp++ = uxc;
-	    }
-	    *tp = '\0';   /*uxkeyval now filled with value; possibly empty*/
 	    if (xc!=uxc) break; /* not the same */
 	    if (xc==KDELIM) {
 		xc=getc(xfp); uxc=getc(uxfp); /* skip closing KDELIM */
 		/* if the keyword is LOG, also skip the log message in xfp*/
 		if (match1==Log) {
 		    /* first, compute the number of line feeds in log msg */
-		    int lncnt, ccnt;
-		    lncnt=2; tp=delta->log;
-		    while(*tp) if(*tp++=='\n') lncnt++;
+		    unsigned lncnt;
+		    size_t ls, ccnt;
+		    lncnt = 3;
+		    sp = delta->log.string;
+		    ls = delta->log.size;
+		    if (sizeof(ciklog)-1<=ls && !strncmp(sp,ciklog,sizeof(ciklog)-1))
+			continue; /* this log message wasn't inserted */
+		    while (ls--) if (*sp++=='\n') lncnt++;
 		    while(xc!=EOF) {
 			if (xc=='\n')
 			    if(--lncnt==0) break;
@@ -179,7 +208,7 @@ char * xfname, *uxfname; struct hshentry *delta;
 		    /* skip last comment leader */
 		    /* Can't just skip another line here, because there may be */
 		    /* additional characters on the line (after the Log....$)  */
-		    for (ccnt=strlen(Comment); ccnt>=0; lncnt--) {
+		    for (ccnt=Comment.size; ccnt--; ) {
 			xc=getc(xfp);
 			if(xc=='\n') break;
 			/* reads to the end of the comment leader or '\n',     */
@@ -193,21 +222,19 @@ char * xfname, *uxfname; struct hshentry *delta;
 #ifdef FCMPTEST
 		VOID printf("non-terminated keywords %s, potentially different values\n",xkeyword);
 #endif
-		if (strcmp(xkeyval,uxkeyval)!=0) break; /*different */
-		xc=getc(xfp); uxc=getc(uxfp); /* skip closing char  */
+		if (!eqkeyvals) break;
             }
         }
     }
-    VOID fclose(xfp); VOID fclose(uxfp);
+    ffclose(xfp); ffclose(uxfp);
     return result;
 }
 
 
 
 #ifdef FCMPTEST
-char * RCSfilename, * workfilename;
 
-char * Comment;
+const char cmdid[] = "rcsfcmp";
 
 main(argc, argv)
 int  argc; char  *argv[];
@@ -216,9 +243,10 @@ int  argc; char  *argv[];
  */
 {       struct hshentry delta;
 
-        cmdid="rcsfcmp";
-        Comment=argv[1];
-        delta.log=argv[2];
+	Comment.string = argv[1];
+	Comment.size = strlen(argv[1]);
+	delta.log.string = argv[2];
+	delta.log.size = strlen(argv[2]);
         if (rcsfcmp(argv[3],argv[4],&delta))
                 VOID printf("files are the same\n");
         else    VOID printf("files are different\n");

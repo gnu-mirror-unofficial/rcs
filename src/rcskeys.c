@@ -1,11 +1,9 @@
 /*
  *                     RCS keyword table and match operation
  */
-#ifndef lint
-static char rcsid[]= "$Id: rcskeys.c,v 4.3 89/05/01 15:13:02 narten Exp $ Purdue CS";
-#endif
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -32,7 +30,10 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rcskeys.c,v $
+/* $Log: rcskeys.c,v $
+ * Revision 5.0  1990/08/22  08:12:54  eggert
+ * Add -k.  Ansify and Posixate.
+ *
  * Revision 4.3  89/05/01  15:13:02  narten
  * changed copyright header to reflect current distribution rules
  * 
@@ -44,9 +45,6 @@ Report problems and direct all questions to:
  * Sources now pass through lint (if you ignore printf/sprintf/fprintf 
  * warnings)
  * 
- * Revision 1.1  84/01/23  14:50:32  kcs
- * Initial revision
- * 
  * Revision 4.1  83/05/04  10:06:53  wft
  * Initial revision.
  * 
@@ -55,42 +53,42 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
+libId(keysId, "$Id: rcskeys.c,v 5.0 1990/08/22 08:12:54 eggert Exp $")
 
 
-struct { char * keyword; enum markers marker;} markertable[] =
-        {{AUTHOR,   Author  },
-         {DATE,     Date    },
-         {HEADER,   Header  },
-         {IDH,      Id      },
-         {LOCKER,   Locker  },
-         {LOG,      Log     },
-         {RCSFILE,  RCSfile },
-         {REVISION, Revision},
-         {SOURCE,   Source  },
-         {STATE,    State   },
-         {nil,      Nomatch }};
+const char *const Keyword[] = {
+    /* This must be in the same order as rcsbase.h's enum markers type. */
+	nil,
+	AUTHOR, DATE, HEADER, IDH,
+	LOCKER, LOG, RCSFILE, REVISION, SOURCE, STATE,
+};
 
 
 
-enum markers trymatch(string,onlyvdelim)
-char * string;
+	enum markers
+trymatch(string)
+	const char *string;
 /* function: Checks whether string starts with a keyword followed
- * by a KDELIM or a VDELIM. If onlyvdelim==true, only a VDELIM
- * may follow the keyword.
+ * by a KDELIM or a VDELIM.
  * If successful, returns the appropriate marker, otherwise Nomatch.
  */
 {
         register int j;
-	register char * p, * s;
-        for (j=0; markertable[j].keyword!=nil; j++ ) {
+	register const char *p, *s;
+	for (j = sizeof(Keyword)/sizeof(*Keyword);  (--j);  ) {
 		/* try next keyword */
-		p = markertable[j].keyword; s = string;
-		while (*p!='\0' && *s!='\0' && *p == *s) {
-			p++; s++;
+		p = Keyword[j];
+		s = string;
+		while (*p++ == *s++) {
+			if (!*p)
+			    switch (*s) {
+				case KDELIM:
+				case VDELIM:
+				    return (enum markers)j;
+				default:
+				    return Nomatch;
+			    }
 		}
-		if (*p != '\0') continue; /* no match */
-		if ((*s == VDELIM) || (!onlyvdelim && (*s == KDELIM)))
-			return(markertable[j].marker);
         }
         return(Nomatch);
 }

@@ -1,8 +1,9 @@
 #! /bin/sh
-PATH=/usr/local/bin:/bin:/usr/bin:/usr/ucb
-#       'rcsfreeze' has the purpose of assigning a symbolic revision
-#       number to a set of RCS files, which form a valid configuration.
-#
+
+# rcsfreeze - assign a symbolic revision number to a configuration of RCS files
+
+#	$Id: rcsfreeze.sh,v 4.3 1990/11/01 05:03:45 eggert Exp $
+
 #       The idea is to run rcsfreeze each time a new version is checked
 #       in. A unique symbolic revision number (C_[number], where number
 #       is increased each time rcsfreeze is run) is then assigned to the most
@@ -21,74 +22,79 @@ PATH=/usr/local/bin:/bin:/usr/bin:/usr/ucb
 #       It is important that all changed files are checked in (there are
 #       no precautions against any error in this respect).
 #       file names:
-#       {RCS/}rcsfreeze.version         for the version number
-#       {RCS/}rscfreeze.log             for the log messages, most recent
-#                                       logmessage first.
+#       {RCS/}.rcsfreeze.ver	version number
+#       {RCS/}.rscfreeze.log	log messages, most recent first
 
-progname=`basename $0`
-DATE=`date`
+PATH=/usr/local/bin:/bin:/usr/bin:/usr/ucb:$PATH
+export PATH
+
+DATE=`date` || exit
 # Check whether we have an RCS subdirectory, so we can have the right
 # prefix for our paths.
-if [ -d RCS ] ; then
-	RCSDIR=RCS
-else
-	RCSDIR=.
+if [ -d RCS ]
+then RCSDIR=RCS/
+else RCSDIR=
 fi
 
 # Version number stuff, log message file
-VERSIONFILE=$RCSDIR/.rcsfreeze.version
-LOGFILE=$RCSDIR/.rcsfreeze.log
-if [ ! -r $VERSIONFILE ] ; then
+VERSIONFILE=${RCSDIR}.rcsfreeze.ver
+LOGFILE=${RCSDIR}.rcsfreeze.log
 # Initialize, rcsfreeze never run before in the current directory
-    cat << EOF > $VERSIONFILE
-0
-EOF
-    touch       $LOGFILE
-fi
+[ -r $VERSIONFILE ] || { echo 0 >$VERSIONFILE && >>$LOGFILE; } || exit
 
 # Get Version number, increase it, write back to file.
-VERSIONNUMBER=`cat $VERSIONFILE`
-VERSIONNUMBER=`expr $VERSIONNUMBER + 1`
-    cat << EOF > $VERSIONFILE
-$VERSIONNUMBER
-EOF
+VERSIONNUMBER=`cat $VERSIONFILE` &&
+VERSIONNUMBER=`expr $VERSIONNUMBER + 1` &&
+echo $VERSIONNUMBER >$VERSIONFILE || exit
 
 # Symbolic Revision Number
 SYMREV=C_$VERSIONNUMBER
 # Allow the user to give a meaningful symbolic name to the revision.
 SYMREVNAME=${1-$SYMREV}
-echo    "$progname: symbolic revision number computed: \"$SYMREV\""
-echo    "$progname: symbolic revision number used:     \"$SYMREVNAME\""
-echo    "$progname: the two differ only when $progname invoked with argument"
+echo >&2 "rcsfreeze: symbolic revision number computed: \"$SYMREV\"
+rcsfreeze: symbolic revision number used:     \"$SYMREVNAME\"
+rcsfreeze: the two differ only when rcsfreeze invoked with argument
+rcsfreeze: give log message, summarizing changes (end with EOF or single '.')" \
+	|| exit
 
 # Stamp the logfile. Because we order the logfile the most recent
 # first we will have to save everything right now in a temporary file.
-TMPLOG=/tmp/rcsfreeze.$$.log.tmp
-echo "Version: $SYMREVNAME($SYMREV), Date: $DATE"     > $TMPLOG
-echo "-----------"                      >> $TMPLOG
+TMPLOG=/tmp/rcsfrz$$
+trap 'rm -f $TMPLOG; exit 1' 1 2 13 15
 # Now ask for a log message, continously add to the log file
-echo    "$progname: give log message, summarizing changes"
-echo    "       (terminate with ^D or single '.')"
-while read MESS ; do
-    if [ "$MESS" = '.' ] ; then break ; fi
-    echo "  $MESS"      >> $TMPLOG
-done
-echo "-----------"                      >> $TMPLOG
-echo                                    >> $TMPLOG
+(
+	echo "Version: $SYMREVNAME($SYMREV), Date: $DATE
+-----------" || exit
+	while read MESS
+	do
+		case $MESS in
+		.) break
+		esac
+		echo "	$MESS" || exit
+	done
+	echo "-----------
+" &&
+	cat $LOGFILE
+) >$TMPLOG &&
 
 # combine old and new logfiles
-TMPLOG2=$TMPLOG.2
-cat $TMPLOG $LOGFILE >  $TMPLOG2
-cp $TMPLOG2     $LOGFILE
-rm -f  $TMPLOG $TMPLOG2
+cp $TMPLOG $LOGFILE &&
+rm -f $TMPLOG || exit
+trap 1 2 13 15
 
 # Now the real work begins by assigning a symbolic revision number
 # to each rcs file. Take the most recent version of the main trunk.
 
-for FILE in $RCSDIR/* ; do
+status=
+
+for FILE in ${RCSDIR}*
+do
 #   get the revision number of the most recent revision
-    REV=`rlog -h -d"$DATE" $FILE | fgrep 'head:' | awk ' { print $2 } ' `
-    echo        "$progname: file name: \"$FILE\", Revision Number: $REV"
+    HEAD=`rlog -h $FILE` &&
+	REV=`echo "$HEAD" | sed -n 's/^head:[ 	]*//p'` &&
 #   assign symbolic name to it.
-    rcs -q -n$SYMREVNAME:$REV $FILE
+    echo >&2 "rcsfreeze: $REV $FILE" &&
+    rcs -q -n$SYMREVNAME:$REV $FILE || status=$?
 done
+
+exit $status

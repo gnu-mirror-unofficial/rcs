@@ -3,14 +3,15 @@
  * MAKETIME		derive 32-bit time value from TM structure.
  *
  * Usage:
- *	long t,maketime();
+ *	int zone;	Minutes west of GMT, or
+ *			48*60 for localtime
+ *	time_t t;
  *	struct tm *tp;	Pointer to TM structure from <time.h>
- *			NOTE: this must be extended version!!!
- *	t = maketime(tp);
+ *	t = maketime(tp,zone);
  *
  * Returns:
- *	0 if failure; parameter out of range or nonsensical.
- *	else long time-value.
+ *	-1 if failure; parameter out of range or nonsensical.
+ *	else time-value.
  * Notes:
  *	This code is quasi-public; it may be used freely in like software.
  *	It is not to be sold, nor used in licensed software without
@@ -19,15 +20,20 @@
  * 	Copyright 1981 by Ken Harrenstien, SRI International.
  *	(ARPANET: KLH @ SRI)
  */
-#ifndef lint
-static char rcsid[]= "$Id: maketime.c,v 1.8 88/11/08 13:54:53 narten Exp $";
-#endif
-/* $Log:	maketime.c,v $
+/* $Log: maketime.c,v $
+ * Revision 5.2  1990/11/01  05:03:30  eggert
+ * Remove lint.
+ *
+ * Revision 5.1  1990/10/04  06:30:13  eggert
+ * Calculate the GMT offset of 'xxx LT' as of xxx, not as of now.
+ * Don't assume time_t is 32 bits.  Fix bugs near epoch and near end of time.
+ *
+ * Revision 5.0  1990/08/22  08:12:38  eggert
+ * Switch to GMT and fix the bugs exposed thereby.
+ * Permit dates past 1999/12/31.  Ansify and Posixate.
+ *
  * Revision 1.8  88/11/08  13:54:53  narten
  * allow negative timezones (-24h <= x <= 24h)
- * 
- * Revision 1.7  88/11/08  12:02:24  narten
- * changes from  eggert@sm.unisys.com (Paul Eggert)
  * 
  * Revision 1.7  88/08/28  14:47:52  eggert
  * Allow cc -R.  Remove unportable "#endif XXX"s.
@@ -51,9 +57,6 @@ static char rcsid[]= "$Id: maketime.c,v 1.8 88/11/08 13:54:53 narten Exp $";
  * Revision 1.2  87/03/27  14:21:48  jenkins
  * Port to suns
  * 
- * Revision 1.1  84/01/23  14:50:04  kcs
- * Initial revision
- * 
  * Revision 1.2  83/12/05  10:12:56  wft
  * added cond. compilation for USG Unix; long timezone;
  * 
@@ -64,31 +67,85 @@ static char rcsid[]= "$Id: maketime.c,v 1.8 88/11/08 13:54:53 narten Exp $";
 
 
 #include "rcsbase.h"
-#include "time.h"
 
-int daytb[] = {   /* # days in year thus far, indexed by month (0-12!!) */
+libId(maketId, "$Id: maketime.c,v 5.2 1990/11/01 05:03:30 eggert Exp $")
+
+static const struct tm *time2tm P((time_t));
+
+#define given(v) (0 <= (v)) /* Negative values are unspecified. */
+
+static const int daytb[] = {
+	/* # days in year thus far, indexed by month (0-12!!) */
 	0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
 };
 
-struct tm *localtime();
-long	time();
+	static time_t
+maketime(atm,zone)
+	const struct tm *atm;
+	int zone;
+{
+    register const struct tm *tp;
+    register int i;
+    int year, yday, mon, day, hour, min, sec, leap, localzone;
+    int attempts;
+    time_t t, tres;
 
-long maketime(atm)
-struct tm *atm;
-{	register struct tm *tp;
-	register int i;
-	int year, yday, mon, day, hour, min, sec, zone, dst, leap;
-	long tres, curtim;
+    attempts = 2;
+    localzone = zone==48*60;
+    tres = -1;
+    year = mon = day = 0;  /* Keep lint happy.  */
 
-	VOID time(&curtim);
-	tp = localtime(&curtim);        /* Get breakdowns of current time */
-	year = tp->tm_year;		/* Use to set up defaults */
-	mon = tp->tm_mon;
-	day = tp->tm_mday;
+    do {
+
+	if (localzone || !given(atm->tm_year)) {
+		if (tres == -1)
+			if ((tres = time((time_t*)0))  ==  -1)
+				return -1;
+		tp = time2tm(tres);
+		/* Get breakdowns of default time, adjusting to zone. */
+		year = tp->tm_year;		/* Use to set up defaults */
+		yday = tp->tm_yday;
+		mon = tp->tm_mon;
+		day = tp->tm_mday;
+		hour = tp->tm_hour;
+		min = tp->tm_min;
+		if (localzone) {
+		    tp = localtime(&tres);
+		    zone =
+			min - tp->tm_min + 60*(
+				hour - tp->tm_hour + 24*(
+					/* If years differ, it's by one day. */
+						year - tp->tm_year
+					?	year - tp->tm_year
+					:	yday - tp->tm_yday));
+		}
+		/* Adjust the default day, month and year according to zone.  */
+		if ((min -= zone) < 0) {
+		    if (hour-(59-min)/60 < 0  &&  --day <= 0) {
+			if (--mon < 0) {
+				--year;
+				mon = 11;
+			}
+			day  =  daytb[mon+1] - daytb[mon] + (mon==1&&!(year&3));
+		    }
+		} else
+		    if (
+		      24 <= hour+min/60  &&
+		      daytb[mon+1] - daytb[mon] + (mon==1&&!(year&3))  <  ++day
+		    ) {
+			    if (11 < ++mon) {
+				    ++year;
+				    mon = 0;
+			    }
+			    day = 1;
+		    }
+	}
+	if (zone < -24*60  ||  24*60 < zone)
+		return -1;
 
 
 #ifdef DEBUG
-printf("first YMD: %d %d %d, T=%ld\n",year,mon,day,tres);
+printf("first YMD: %d %d %d\n",year,mon,day);
 #endif
 	tp = atm;
 
@@ -96,57 +153,63 @@ printf("first YMD: %d %d %d, T=%ld\n",year,mon,day,tres);
 	 * If one of these is unspecified, it defaults either to the
 	 * current date (if no more global spec was given) or to the
 	 * zero-value for that spec (i.e. a more global spec was seen).
-	 * Start with year... note 32 bits can only handle 135 years.
+	 * Reject times that do not fit in time_t,
+	 * without assuming that time_t is 32 bits or is signed.
 	 */
-	if(tp->tm_year != TMNULL)
-	  {	if((year = tp->tm_year) >= 1900)	/* Allow full yr # */
-	  		year -= 1900;			/* by making kosher */
+	if (given(tp->tm_year))
+	  {
+		year = tp->tm_year;
 		mon = 0;		/* Since year was given, default */
 		day = 1;		/* for remaining specs is zero */
 	  }
-	if(year < 70 || 70+134 < year )	/* Check range */
-		return(0);		/* ERR: year out of range */
-	leap = year&03 ? 0 : 1;		/* See if leap year */
+	if (year < 69)			/* 1969/12/31 OK in some timezones.  */
+		return -1;		/* ERR: year out of range */
+	leap   =   !(year&3)  &&  (year%100 || !((year+300)%400));
 	year -= 70;			/* UNIX time starts at 1970 */
 
 	/*
 	 * Find day of year.
-	 * YDAY is used only if it exists and either the month or day-of-month
-	 * is missing.
 	 */
-	if (tp->tm_yday != TMNULL
-	 && (tp->tm_mon == TMNULL || tp->tm_mday == TMNULL))
-		yday = tp->tm_yday;
-	else
-	  {	if(tp->tm_mon  != TMNULL)
+	{
+		if (given(tp->tm_mon))
 		  {	mon = tp->tm_mon;	/* Month was specified */
 			day = 1;		/* so set remaining default */
 		  }
-		if(mon < 0 || 11 < mon) return(0);	/* ERR: bad month */
-		if(tp->tm_mday != TMNULL) day = tp->tm_mday;
+		if (11 < (unsigned)mon)
+			return -1;		/* ERR: bad month */
+		if (given(tp->tm_mday)) day = tp->tm_mday;
 		if(day < 1
 		 || (((daytb[mon+1]-daytb[mon]) < day)
 			&& (day!=29 || mon!=1 || !leap) ))
-				return(0);		/* ERR: bad day */
+				return -1;	/* ERR: bad day */
 		yday = daytb[mon]	/* Add # of days in months so far */
 		  + ((leap		/* Leap year, and past Feb?  If */
 		      && mon>1)? 1:0)	/* so, add leap day for this year */
 		  + day-1;		/* And finally add # days this mon */
 
-                if (tp->tm_yday != TMNULL       /* Confirm that YDAY correct */
-                 && tp->tm_yday != yday) return(0);     /* ERR: conflict */
-	  }
-	if(yday < 0 || (leap?366:365) <= yday)
-		return(0);		/* ERR: bad YDAY or maketime bug */
+	}
+	if (leap+365 <= (unsigned)yday)
+		return -1;		/* ERR: bad YDAY */
 
-	tres = year*365			/* Get # days of years so far */
+	if (year < 0) {
+	    if (yday != 364)
+		return -1;		/* ERR: too early */
+	    t = -1;
+	} else {
+	    tres = year*365;		/* Get # days of years so far */
+	    if (tres/365 != year)
+		    return -1;		/* ERR: overflow */
+	    t = tres
 		+ ((year+1)>>2)		/* plus # of leap days since 1970 */
 		+ yday;			/* and finally add # days this year */
+	    if (t+4 < tres)
+		    return -1;		/* ERR: overflow */
+	}
+	tres = t;
 
-        if((i = tp->tm_wday) != TMNULL) /* Check WDAY if present */
-                if(i < 0 || 6 < i       /* Ensure within range */
-                  || i != (tres+4)%7)   /* Matches? Jan 1,1970 was Thu = 4 */
-                        return(0);      /* ERR: bad WDAY */
+	if (given(i = tp->tm_wday)) /* Check WDAY if present */
+		if (i != (tres+4)%7)	/* 1970/01/01 was Thu = 4 */
+			return -1;	/* ERR: bad WDAY */
 
 #ifdef DEBUG
 printf("YMD: %d %d %d, T=%ld\n",year,mon,day,tres);
@@ -156,86 +219,97 @@ printf("YMD: %d %d %d, T=%ld\n",year,mon,day,tres);
 	 * (since time is always the least global spec)
 	 */
 	tres *= 86400L;			/* Get # seconds (24*60*60) */
+	if (tres/86400L != t)
+		return -1;		/* ERR: overflow */
 	hour = min = sec = 0;
-	if(tp->tm_hour != TMNULL) hour = tp->tm_hour;
-	if(tp->tm_min  != TMNULL) min  = tp->tm_min;
-	if(tp->tm_sec  != TMNULL) sec  = tp->tm_sec;
-	if( min < 0 || 60 <= min
-	 || sec < 0 || 60 <= sec) return(0);	/* ERR: MS out of range */
-	if(hour < 0 || 24 <= hour)
+	if (given(tp->tm_hour)) hour = tp->tm_hour;
+	if (given(tp->tm_min )) min  = tp->tm_min;
+	if (given(tp->tm_sec )) sec  = tp->tm_sec;
+	if (60 <= (unsigned)min  ||  60 < (unsigned)sec)
+		return -1;		/* ERR: MS out of range */
+	if (24 <= (unsigned)hour)
 		if(hour != 24 || (min+sec) !=0)	/* Allow 24:00 */
-			return(0);		/* ERR: H out of range */
+			return -1;	/* ERR: H out of range */
 
-	/* confirm AM/PM if there */
-	switch(tp->tm_ampm)
-	  {	case 0: case TMNULL:	/* Ignore these values */
-			break;
-		case 1:			/* AM */
-		case 2:			/* PM */
-			if(hour > 12) return(0);  /* ERR: hrs 13-23 bad */
-			if(hour ==12) hour = 0;	/* Modulo 12 */
-			if(tp->tm_ampm == 2)	/* If PM, then */
-				hour += 12;	/*   get 24-hour time */
-			break;
-		default: return(0);	/* ERR: illegal TM_AMPM value */
-	  }
-
-	tres += sec + 60L*(min + 60L*hour);	/* Add in # secs of time */
+	t = tres;
+	tres += sec + 60L*(zone + min + 60*hour);
 
 #ifdef DEBUG
 printf("HMS: %d %d %d T=%ld\n",hour,min,sec,tres);
 #endif
-	/*
-	 * We now have the GMT date/time and must make final
-	 * adjustment for the specified time zone.  If none is specified,
-	 * the local time-zone is assumed.
-	 */
-	if((zone = tp->tm_zon) == TMNULL	/* If unspecified */
-	 || (zone == 1))			/* or local-zone requested */
-		zone = localzone();		/* then set to local zone */
-	if(zone < -24*60 || 24*60 <= zone)
-		return(0);			/* ERR: zone out of range */
 
-	/* See if must apply Daylight Saving Time shift.
-	 * Note that if DST is specified, validity is not checked.
-	 */
-	if((dst = tp->tm_isdst) == TMNULL)	/* Must we figure it out? */
-	  {	curtim = tres +localzone()*60L;	/* Yuck.  Get equiv local */
-		dst = localtime(&curtim)->tm_isdst;     /* time, and ask. */
-	  }
-	tres += zone*60L -(dst?3600:0);	/* Add in # seconds of zone adj */
+	if (!localzone)			/* check for overflow */
+	    return (year<0 ? (tres<0||86400L<=tres) : tres<t)  ?  -1  :  tres;
 
-	return(tres);
+	/* Check results; LT may have had a different GMT offset back then.  */
+	tp = localtime(&tres);
+	if (given(atm->tm_sec)  &&  atm->tm_sec != tp->tm_sec)
+		return -1; /* If seconds don't match, we're in trouble.  */
+	if (!(
+	    given(atm->tm_min)  &&  atm->tm_min != tp->tm_min  ||
+	    given(atm->tm_hour)  &&  atm->tm_hour != tp->tm_hour  ||
+	    given(atm->tm_mday)  &&  atm->tm_mday != tp->tm_mday  ||
+	    given(atm->tm_mon)  &&  atm->tm_mon != tp->tm_mon  ||
+	    given(atm->tm_year)  &&  atm->tm_year != tp->tm_year
+	))
+		return tres; /* Everything matches.  */
+
+    } while (--attempts);
+
+    return -1;
+}
+
+/*
+* Convert Unix time to struct tm format.
+* Use Coordinated Universal Time (UTC) if available and if version 5 or newer;
+* use local time otherwise.
+*/
+	static const struct tm *
+time2tm(unixtime)
+	time_t unixtime;
+{
+	const struct tm *tm;
+	return
+			VERSION(5)<=RCSversion && (tm = gmtime(&unixtime))
+		?	tm
+		:	localtime(&unixtime);
+}
+
+/*
+* Convert Unix time to RCS format.
+* For compatibility with older versions of RCS,
+* dates before AD 2000 are stored without the leading "19".
+*/
+	void
+time2date(unixtime,date)
+	time_t unixtime;
+	char date[datesize];
+{
+	register const struct tm *tm = time2tm(unixtime);
+	VOID sprintf(date, DATEFORM,
+		tm->tm_year  +  (tm->tm_year<100 ? 0 : 1900),
+		tm->tm_mon+1, tm->tm_mday,
+		tm->tm_hour, tm->tm_min, tm->tm_sec
+	);
 }
 
 
-/* LOCALZONE		return local timezone in # mins west of GMT
- *
+
+	void
+str2date(source, target)
+	const char *source;
+	char target[datesize];
+/* Parse a free-format date in SOURCE, convert it
+ * into RCS internal format, and store the result into TARGET.
  */
-
-#if defined(V6) || defined(USG)
-extern long timezone;
-#else
-#include <sys/types.h>
-#include <sys/timeb.h>
-#endif
-
-static int lclzon;
-localzone()
 {
-    if (!lclzon) {
-#if defined(V6) || defined(USG)
-#ifdef USG
-	tzset();
-#endif
-	lclzon = timezone/60 + 1;
-#else
-	struct timeb tb;
+	int zone;
+	time_t unixtime;
+	struct tm parseddate;
 
-	ftime(&tb);
-	lclzon = tb.timezone + 1;
-
-#endif
-    }
-    return lclzon - 1;
+	if (!partime(source, &parseddate, &zone))
+	    faterror("can't parse date/time: %s", source);
+	if ((unixtime = maketime(&parseddate, zone))  ==  -1)
+	    faterror("bad date/time: %s", source);
+	time2date(unixtime, target);
 }

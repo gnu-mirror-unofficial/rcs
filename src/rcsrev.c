@@ -1,11 +1,9 @@
 /*
  *                     RCS revision number handling
  */
-#ifndef lint
-static char rcsid[]= "$Id: rcsrev.c,v 4.5 89/05/01 15:13:22 narten Exp $ Purdue CS";
-#endif
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -33,7 +31,12 @@ Report problems and direct all questions to:
 
 
 
-/* $Log:	rcsrev.c,v $
+/* $Log: rcsrev.c,v $
+ * Revision 5.0  1990/08/22  08:13:43  eggert
+ * Remove compile-time limits; use malloc instead.
+ * Ansify and Posixate.  Tune.
+ * Remove possibility of an internal error.  Remove lint.
+ *
  * Revision 4.5  89/05/01  15:13:22  narten
  * changed copyright header to reflect current distribution rules
  * 
@@ -51,9 +54,6 @@ Report problems and direct all questions to:
  * 
  * Revision 1.2  87/03/27  14:22:37  jenkins
  * Port to suns
- * 
- * Revision 1.1  84/01/23  14:50:37  kcs
- * Initial revision
  * 
  * Revision 4.1  83/03/25  21:10:45  wft
  * Only changed $Header to $Id.
@@ -78,59 +78,57 @@ Report problems and direct all questions to:
 
 /*
 #define REVTEST
+*/
 /* version REVTEST is for testing the routines that generate a sequence
  * of delta numbers needed to regenerate a given delta.
  */
 
 #include "rcsbase.h"
 
-extern FILE * finptr;   /* RCS input file */
-extern char * getid();
-extern struct hshentry * getnum();
-extern int    getkey();
-extern int    getlex();
+libId(revId, "$Id: rcsrev.c,v 5.0 1990/08/22 08:13:43 eggert Exp $")
 
-extern char * getkeyval();
-struct hshentry * genbranch(); /* forward */
+static struct hshentry *genbranch P((const struct hshentry*,const char*,unsigned,const char*,const char*,const char*,struct hshentries**));
 
 
 
-int countnumflds(s)
-char * s;
+	unsigned
+countnumflds(s)
+	const char *s;
 /* Given a pointer s to a dotted number (date or revision number),
  * countnumflds returns the number of digitfields in s.
  */
-{       register char * sp;
-        register int    count;
+{
+	register const char *sp;
+	register unsigned count;
         if ((sp=s)==nil) return(0);
         if (*sp == '\0') return(0);
         count = 1;
-        while (*sp) {
+	do {
                 if (*sp++ == '.') count++;
-        }
+	} while (*sp);
         if (*(--sp) == '.') count--; /*trailing periods don't count*/
         return(count);
 }
 
+	void
 getbranchno(revno,branchno)
-char * revno, * branchno;
+	const char *revno;
+	struct buf *branchno;
 /* Given a non-nil revision number revno, getbranchno copies the number of the branch
- * on which revno is into branchnumber. If revno itself is a branch number,
+ * on which revno is into branchno. If revno itself is a branch number,
  * it is copied unchanged.
  */
 {
-        register int i, numflds;
-        register char * tp, * sp;
+	register unsigned numflds;
+	register char *tp;
 
+	bufscpy(branchno, revno);
         numflds=countnumflds(revno);
-        if (numflds%2 == 1)
-                VOID strcpy(branchno,revno);
-        else {
-                sp=revno; tp=branchno;
-                for (i=1;i<numflds;i++) {
-                        while(*sp!='.') *tp++ = *sp++;
-                        *tp++ = *sp++;
-                }
+	if (!(numflds & 1)) {
+		tp = branchno->string;
+		while (--numflds)
+			while (*tp++ != '.')
+				;
                 *(tp-1)='\0';
         }
 }
@@ -138,14 +136,14 @@ char * revno, * branchno;
 
 
 int cmpnum(num1, num2)
-char * num1, * num2;
+	const char *num1, *num2;
 /* compares the two dotted numbers num1 and num2 lexicographically
  * by field. Individual fields are compared numerically.
  * returns <0, 0, >0 if num1<num2, num1==num2, and num1>num2, resp.
  * omitted fields are assumed to be higher than the existing ones.
 */
 {
-        register char * s1, *s2;
+	register const char *s1, *s2;
         register int n1, n2;
 
         s1=num1==nil?"":num1;
@@ -153,18 +151,14 @@ char * num1, * num2;
 
         do {
                 n1 = 0;
-                while (('0' <= *s1) && (*s1 <= '9')) {
-                        n1 = n1*10 + (*s1 - '0');
-                        s1++;
-                }
+		while (isdigit(*s1))
+			n1 = n1*10 + (*s1++ - '0');
                 /* skip '.' */
                 if (*s1=='.') s1++;
 
                 n2 = 0;
-                while (('0' <= *s2) && (*s2 <= '9')) {
-                        n2 = n2*10 + (*s2 - '0');
-                        s2++;
-                }
+		while (isdigit(*s2))
+			n2 = n2*10 + (*s2++ - '0');
                 /* skip '.' */
                 if (*s2=='.') s2++;
 
@@ -182,53 +176,48 @@ char * num1, * num2;
 
 
 int cmpnumfld(num1, num2, fld)
-char * num1, * num2; int fld;
+	const char *num1, *num2;
+	unsigned fld;
 /* compares the two dotted numbers at field fld and returns
  * num1[fld]-num2[fld]. Assumes that num1 and num2 have at least fld fields.
+ * fld must be positive.
 */
 {
-        register char * s1, *s2;
-        register int n1, n2;
+	register const char *s1, *s2;
+	register unsigned n1, n2;
 
-        s1=num1; n1=fld-1;
+	s1 = num1;
+	s2 = num2;
         /* skip fld-1 fields */
-        while (n1) {
-                while(*s1 != '.') s1++;
-                n1--; s1++;
-        }
-        s2 = num2; n2=fld-1;
-        while (n2) {
-                while(*s2 != '.') s2++;
-                n2--; s2++;
-        }
-        /* Don't put the above into a single loop! */
+	for (n1 = fld;  (--n1);  ) {
+		while (*s1++ != '.')
+			;
+		while (*s2++ != '.')
+			;
+	}
         /* Now s1 and s2 point to the beginning of the respective fields */
         /* compute numerical value and compare */
         n1 = 0;
-        while (('0' <= *s1) && (*s1 <= '9')) {
-                n1 = n1*10 + (*s1 - '0');
-                s1++;
-        }
+	while (isdigit(*s1))
+		n1 = n1*10 + (*s1++ - '0');
         n2 = 0;
-        while (('0' <= *s2) && (*s2 <= '9')) {
-                n2 = n2*10 + (*s2 - '0');
-                s2++;
-        }
-        return (n1 - n2);
+	while (isdigit(*s2))
+		n2 = n2*10 + (*s2++ - '0');
+	return n1<n2 ? -1 : n1==n2 ? 0 : 1;
 }
 
 
-int compartial(num1, num2, length)
-char    * num1;
-char    * num2;
-int     length;
+	int
+compartial(num1, num2, length)
+	const char *num1, *num2;
+	unsigned length;
 
 /*   compare the first "length" fields of two dot numbers;
      the omitted field is considered to be larger than any number  */
 /*   restriction:  at least one number has length or more fields   */
 
 {
-        register        char    *s1, *s2;
+	register const char *s1, *s2;
         register        int     n1, n2;
 
 
@@ -236,152 +225,108 @@ int     length;
         if ( s1==nil || *s1 == '\0' ) return 1;
         if ( s2==nil || *s2 == '\0' ) return -1;
 
-        do {
+	for (;;) {
             n1 = 0;
-            while( ('0' <= *s1) && (*s1 <= '9') ) {
-                n1 = n1 * 10 + (*s1 - '0') ;
-                s1++;
-            }
+	    while (isdigit(*s1))
+		n1 = n1*10 + (*s1++ - '0');
             if ( *s1 == '.' ) s1++;    /*  skip .   */
 
             n2 = 0;
-            while( ( '0' <= *s2) && ( *s2 <= '9' ) ) {
-                   n2 = n2 * 10 + ( *s2 - '0' ) ;
-                s2++;
-            }
+	    while (isdigit(*s2))
+		n2 = n2*10 + (*s2++ - '0');
             if (*s2 == '.') s2++;
-        }   while(  ( n1 == n2) && ((--length) != 0) &&
-                    ( *s1 != '\0') && (*s2 != '\0')  );
 
-        if ( (n1 != n2) || (length == 0) ){
-                return(n1-n2);   }
-
-        if ( *s1 == '\0' ) return 1;
-        if ( *s2 == '\0' ) return -1;
-	VOID fprintf(stderr, "RCS Internal error, routine: compartial\n");
-	return(0);
-}
-
-
-
-incnum(onum,nnum)
-char * onum, *nnum;
-/* increments the last field of revision number onum by one and
- * places the result into nnum
- */
-{
-        register char * sp, *tp;
-        register int i;
-
-        sp = onum; tp = nnum;
-        for (i=countnumflds(onum)-1; i>0; i--) {
-                while (*sp != '.') *tp++ = *sp++;
-                *tp++ = *sp++;  /* copy dot also */
-        }
-        VOID sprintf(tp,"%d",atoi(sp)+1);
+	    if ( n1 != n2 ) return n1-n2;
+	    if ( --length == 0 ) return 0;
+	    if ( *s1 == '\0' ) return 1;
+	    if ( *s2 == '\0' ) return -1;
+	}
 }
 
 
 char * partialno(rev1,rev2,length)
-char * rev1, * rev2; register int length;
+	struct buf *rev1;
+	const char *rev2;
+	register unsigned length;
 /* Function: Copies length fields of revision number rev2 into rev1.
- * returns rev1.
+ * Return rev1's string.
  */
-{       register char * r1,* r2;
+{
+	register char *r1;
 
-        r1=rev1; r2=rev2;
+	bufscpy(rev1, rev2);
+	r1 = rev1->string;
         while (length) {
-                while(*r2 != '.' && *r2!='\0') *r1++ = *r2++;
-                *r1++ = *r2++;
+		while (*r1!='.' && *r1)
+			++r1;
+		++r1;
                 length--;
         }
         /* eliminate last '.'*/
         *(r1-1)='\0';
-        return rev1;
+	return rev1->string;
 }
 
 
 
-char * getancestor(r1, r2, r3)
-char * r1, *r2, *r3;
-/* function: finds the common ancestor of r1 and r2 and
- * places it into r3.
- * returns r3 if successful, false otherwise.
- * works reliably only if r1 and r2 are not branch numbers.
+
+	static void
+store1(store, next)
+	struct hshentries ***store;
+	struct hshentry *next;
+/*
+ * Allocate a new list node that addresses NEXT.
+ * Append it to the list that **STORE is the end pointer of.
  */
-{       int l1, l2, l3;
-        char t1[revlength], t2[revlength];
+{
+	register struct hshentries *p;
 
-        l1=countnumflds(r1); l2=countnumflds(r2);
-        if ((l1<=2 && l2<=2)||(cmpnum(r1,r2)==0)) {
-                /* on main trunk or identical */
-                error("Common ancestor of %s and %s undefined.", r1, r2);
-                return false;
-        }
-
-        l3=0;
-        while ((cmpnumfld(r1, r2, l3+1)==0) && (cmpnumfld(r1, r2, l3+2)==0)){
-                l3=l3+2;
-        }
-        /* This will terminate since r1 and r2 are not the same; see above*/
-        if (l3==0) {
-                /* no common prefix. Common ancestor on main trunk. */
-                VOID partialno(t1,r1,l1>2?2:l1); VOID partialno(t2,r2,l2>2?2:l2);
-                if (cmpnum(t1,t2)<0)
-                        VOID strcpy(r3,t1);
-                else    VOID strcpy(r3,t2);
-                if ((cmpnum(r3,r1)==0)||(cmpnum(r3,r2)==0)) {
-                        error("Ancestor for %s and %s undefined.",r1,r2);
-                        return false;
-                }
-                return r3;
-        } else {
-               if (cmpnumfld(r1,r2,l3+1)==0) {
-                        error("Ancestor for %s and %s undefined.",r1,r2);
-                        return false;
-                }
-                return(partialno(r3,r1,l3));
-        }
+	p = ftalloc(struct hshentries);
+	p->first = next;
+	**store = p;
+	*store = &p->rest;
 }
-
-
-
 
 struct hshentry * genrevs(revno,date,author,state,store)
-char * revno, * date, * author, * state;
-struct hshentry * * store;
+	const char *revno, *date, *author, *state;
+	struct hshentries **store;
 /* Function: finds the deltas needed for reconstructing the
  * revision given by revno, date, author, and state, and stores pointers
- * to these deltas into an array whose starting address is given by store.
- * The last pointer stored is nil. The last delta (target delta) is returned.
+ * to these deltas into a list whose starting address is given by store.
+ * The last delta (target delta) is returned.
  * If the proper delta could not be found, nil is returned.
  */
 {
-        int length;
+	unsigned length;
         register struct hshentry * next;
         int result;
-        char * branchnum;
-        char t[revlength];
+	const char *branchnum;
+	struct buf t;
 
-        if (Head == nil) {
-                error("RCSfile empty.");
-                return nil;
+	bufautobegin(&t);
+
+	if (!(next = Head)) {
+		error("RCS file empty");
+		goto norev;
         }
 
         length = countnumflds(revno);
-        next=Head;
 
         if (length >= 1) {
                 /* at least one field; find branch exactly */
-                while ((next!=nil) &&
-                       ((result=cmpnumfld(revno,next->num,1))<0)) {
-                        /*puts(next->num);*/
-                        *store++ = next;
+		while ((result=cmpnumfld(revno,next->num,1)) < 0) {
+			store1(&store, next);
                         next = next->next;
+			if (!next) {
+			    error("branch number %s too low", partialno(&t,revno,1));
+			    goto norev;
+			}
                 }
 
-                if (next==nil) {error("Branch number %s too low.",partialno(t,revno,1));return nil;}
-                if (result>0)  {error("Branch number %s not present.",partialno(t,revno,1));return nil;}
+		if (result>0) {
+			error("branch number %s absent", partialno(&t,revno,1));
+			goto norev;
+		}
         }
         if (length<=1){
                 /* pick latest one on given branch */
@@ -394,19 +339,19 @@ struct hshentry * * store;
                         (state ==nil?1:(strcmp(state, next->state) ==0))
                         )
                        )
-                {       /*puts(next->num);*/
-                        *store ++ = next;
+		{
+			store1(&store, next);
                         next=next->next;
                 }
                 if ((next==nil) ||
                     (cmpnumfld(branchnum,next->num,1)!=0))/*overshot*/ {
-                        error("Cannot find revision on branch %s with a date before %s, author %s, and state %s.",
-                                length==0?partialno(t,branchnum,1):revno,date==nil?"<now>":date,
+			error("can't find revision on branch %s with a date before %s, author %s, and state %s",
+				length ? revno : partialno(&t,branchnum,1),
+				date ? date : "<now>",
                                 author==nil?"<any>":author, state==nil?"<any>":state);
-                        return nil;
+			goto norev;
                 } else {
-                        /*puts(next->num);*/
-                        *store++ = next;
+			store1(&store, next);
                 }
                 *store = nil;
                 return next;
@@ -414,26 +359,25 @@ struct hshentry * * store;
 
         /* length >=2 */
         /* find revision; may go low if length==2*/
-        while ((next!=nil) &&
-               ((result =cmpnumfld(revno,next->num,2)) <0) &&
+	while ((result=cmpnumfld(revno,next->num,2)) < 0  &&
                (cmpnumfld(revno,next->num,1)==0) ) {
-                /*puts(next->num);*/
-                *store++ = next;
+		store1(&store, next);
                 next = next->next;
+		if (!next)
+			break;
         }
 
         if ((next==nil) || (cmpnumfld(revno,next->num,1)!=0)) {
-                error("Revision number %s too low.",partialno(t,revno,2));
-                return nil;
+		error("revision number %s too low", partialno(&t,revno,2));
+		goto norev;
         }
         if ((length>2) && (result!=0)) {
-                error("Revision %s not present.",partialno(t,revno,2));
-                return nil;
+		error("revision %s absent", partialno(&t,revno,2));
+		goto norev;
         }
 
         /* print last one */
-        /*puts(next->num);*/
-        *store++ = next;
+	store1(&store, next);
 
         if (length>2)
                 return genbranch(next,revno,length,date,author,state,store);
@@ -454,45 +398,64 @@ struct hshentry * * store;
                 *store=nil;
                 return next;
         }
+    norev:
+	bufautoend(&t);
+	return nil;
 }
 
 
 
 
-struct hshentry * genbranch(bpoint, revno, length,date,author,state,store)
-struct hshentry * bpoint;
-char * revno; int length;
-char * date, * author, * state;
-struct hshentry ** store;
+	static struct hshentry *
+genbranch(bpoint, revno, length, date, author, state, store)
+	const struct hshentry *bpoint;
+	const char *revno;
+	unsigned length;
+	const char *date, *author, *state;
+	struct hshentries **store;
 /* Function: given a branchpoint, a revision number, date, author, and state,
  * genbranch finds the deltas necessary to reconstruct the given revision
  * from the branch point on.
- * Pointers to the found deltas are stored in an array beginning with store.
+ * Pointers to the found deltas are stored in a list beginning with store.
  * revno must be on a side branch.
  * return nil on error
  */
 {
-        int field;
+	unsigned field;
         register struct hshentry * next, * trail;
-        register struct branchhead * bhead;
+	register const struct branchhead *bhead;
         int result;
-        char t[revlength];
+	struct buf t;
 
+	field = 3;
         bhead = bpoint->branches;
 
-        for (field=3; field<=length; field=field+2) {
-
-                if (bhead==nil) {error("No side branches present for %s.",partialno(t,revno,field-1));return nil;}
+	do {
+		if (!bhead) {
+			bufautobegin(&t);
+			error("no side branches present for %s", partialno(&t,revno,field-1));
+			bufautoend(&t);
+			return nil;
+		}
 
                 /*find branch head*/
                 /*branches are arranged in increasing order*/
-                while ((bhead!=nil) &&
-                       ((result=cmpnumfld(revno,bhead->hsh->num,field))>0)) {
+		while (0 < (result=cmpnumfld(revno,bhead->hsh->num,field))) {
                         bhead = bhead->nextbranch;
+			if (!bhead) {
+			    bufautobegin(&t);
+			    error("branch number %s too high",partialno(&t,revno,field));
+			    bufautoend(&t);
+			    return nil;
+			}
                 }
 
-                if (bhead==nil) {error("Branch number %s too high.",partialno(t,revno,field));return nil;}
-                if (result<0)   {error("Branch number %s not present.",partialno(t,revno,field));return nil;}
+		if (result<0) {
+		    bufautobegin(&t);
+		    error("branch number %s absent", partialno(&t,revno,field));
+		    bufautoend(&t);
+		    return nil;
+		}
 
                 next = bhead->hsh;
                 if (length==field) {
@@ -506,21 +469,19 @@ struct hshentry ** store;
                         } while (next!=nil);
 
                         if (trail==nil) {
-                             error("Cannot find revision on branch %s with a date before %s, author %s, and state %s.",
+			     error("can't find revision on branch %s with a date before %s, author %s, and state %s",
                                         revno, date==nil?"<now>":date,
                                         author==nil?"<any>":author, state==nil?"<any>":state);
                              return nil;
                         } else { /* print up to last one suitable */
                              next = bhead->hsh;
                              while (next!=trail) {
-                                  /*puts(next->num);*/
-                                  *store++ = next;
+				  store1(&store, next);
                                   next=next->next;
                              }
-                             /*puts(next->num);*/
-                             *store++ = next;
+			     store1(&store, next);
                         }
-                        *store = nil;
+			*store = nil;
                         return next;
                 }
 
@@ -528,11 +489,13 @@ struct hshentry ** store;
                 /* find revision */
                 /* check low */
                 if (cmpnumfld(revno,next->num,field+1)<0) {
-                        error("Revision number %s too low.",partialno(t,revno,field+1));
+			bufautobegin(&t);
+			error("revision number %s too low", partialno(&t,revno,field+1));
+			bufautoend(&t);
                         return(nil);
                 }
-                do {    /*puts(next->num);*/
-                        *store++ = next;
+		do {
+			store1(&store, next);
                         trail = next;
                         next = next->next;
                 } while ((next!=nil) &&
@@ -540,7 +503,9 @@ struct hshentry ** store;
 
                 if ((length>field+1) &&  /*need exact hit */
                     (cmpnumfld(revno,trail->num,field+1) !=0)){
-                        error("Revision %s not present.",partialno(t,revno,field+1));
+			bufautobegin(&t);
+			error("revision %s absent", partialno(&t,revno,field+1));
+			bufautoend(&t);
                         return(nil);
                 }
                 if (length == field+1) {
@@ -560,93 +525,122 @@ struct hshentry ** store;
                 }
                 bhead = trail->branches;
 
-        }
+	} while ((field+=2) <= length);
         * store = nil;
         return trail;
 }
 
 
-char * lookupsym(id)
-char * id;
+	static const char *
+lookupsym(id)
+	const char *id;
 /* Function: looks up id in the list of symbolic names starting
  * with pointer SYMBOLS, and returns a pointer to the corresponding
  * revision number. Returns nil if not present.
  */
 {
-        register struct assoc * next;
+	register const struct assoc *next;
         next = Symbols;
         while (next!=nil) {
                 if (strcmp(id, next->symbol)==0)
-                        return(next->delta->num);
+			return next->num;
                 else    next=next->nextassoc;
         }
         return nil;
 }
 
 int expandsym(source, target)
-char * source, * target;
+	const char *source;
+	struct buf *target;
 /* Function: Source points to a revision number. Expandsym copies
  * the number to target, but replaces all symbolic fields in the
  * source number with their numeric values.
  * A trailing '.' is omitted; leading zeroes are compressed.
  * returns false on error;
  */
-{       register char * sp, * tp, *bp;
-        char symbuf[30];
+{
+	register const char *sp;
+	register char *tp;
+	const char *tlim;
         register enum tokens d;
 
-        sp = source; tp=target;
+	bufalloc(target, 1);
+	tp = target->string;
+	sp = source;
         if (sp == nil) { /*accept nil pointer as a legal value*/
                 *tp='\0';
                 return true;
         }
+	tlim = tp + target->size;
 
         while (*sp != '\0') {
-                if (ctab[*sp] == DIGIT) {
+		switch (ctab[(unsigned char)*sp]) {
+		    case DIGIT:
                         if (*sp=='0') {
                                 /* skip leading zeroes */
                                 sp++;
                                 while(*sp == '0') sp++;
-                                if (*sp=='\0' || *sp=='.') *tp++ = '0'; /*single zero*/
+				if (!*sp || *sp=='.') --sp; /* single zero */
                         }
-                        while(ctab[*sp] == DIGIT) *tp++ = *sp++;
+			while (isdigit(*sp)) {
+				if (tlim <= tp)
+					tp = bufenlarge(target, &tlim);
+				*tp++ = *sp++;
+			}
+			if (tlim <= tp)
+				tp = bufenlarge(target, &tlim);
                         if ((*sp == '\0') || ((*sp=='.')&&(*(sp+1)=='\0'))) {
                                 *tp='\0'; return true;
                         }
-                        if (*sp == '.') *tp++ = *sp++;
-                        else {
-                            error("Improper revision number: %s",source);
-                            *tp = '\0';
-                            return false;
-                        }
-                } elsif (ctab[*sp] == LETTER) {
-                        bp = symbuf;
-                        do {    *bp++ = *sp++;
-                        } while(((d=ctab[*sp])==LETTER) || (d==DIGIT) ||
+			if (*sp != '.')
+				goto improper;
+			*tp++ = *sp++;
+			break;
+
+		    case LETTER:
+		    case Letter:
+			{
+			register char *bp = tp;
+			register size_t s = tp - target->string;
+			do {
+				if (tlim <= bp)
+					bp = bufenlarge(target, &tlim);
+				*bp++ = *sp++;
+			} while ((d=ctab[(unsigned char)*sp])==LETTER ||
+			      d==Letter || d==DIGIT ||
                               (d==IDCHAR));
+			if (tlim <= bp)
+				bp = bufenlarge(target, &tlim);
                         *bp= '\0';
-                        bp=lookupsym(symbuf);
+			tp = target->string + s;
+			}
+			{
+			register const char *bp = lookupsym(tp);
                         if (bp==nil) {
-                                error("Symbolic number %s is undefined.",symbuf);
-                                *tp='\0';
+				error("Symbolic number %s is undefined.", tp);
                                 return false;
                         } else { /* copy number */
-                                while (*tp++ = *bp++); /* copies the trailing \0*/
+				do {
+					if (tlim <= tp)
+						tp = bufenlarge(target, &tlim);
+				} while ((*tp++ = *bp++));
                         }
+			}
                         if ((*sp == '\0') || ((*sp=='.')&&(*(sp+1)=='\0')))
                                 return true;
-                        if (*sp == '.')  {
-                                *(tp-1) = *sp++;
-                        } else {
-                                error("Improper revision number: %s",source);
-                                return false;
-                        }
-                }else {
-                        error("Improper revision number: %s", source);
-                        *tp = '\0';
+			if (*sp++ != '.')
+				goto improper;
+			tp[-1] = '.';
+			break;
+
+		    default:
+		    improper:
+			error("improper revision number: %s", source);
                         return false;
                 }
         }
+	if (tlim<=tp)
+		tp = bufenlarge(target,&tlim);
         *tp = '\0';
         return true;
 }
@@ -655,25 +649,27 @@ char * source, * target;
 
 #ifdef REVTEST
 
+const char cmdid[] = "revtest";
+
+	int
 main(argc,argv)
 int argc; char * argv[];
 {
-        char symrevno[revlength];       /* used for input of revision numbers */
-        char numricrevno[revlength];
+	static struct buf numricrevno;
+	char symrevno[100];       /* used for input of revision numbers */
         char author[20];
         char state[20];
         char date[20];
-        struct hshentry * gendeltas[hshsize/2];
+	struct hshentries *gendeltas;
         struct hshentry * target;
         int i;
 
-        cmdid = "revtest";
         if (argc<2) {
-                VOID fputs("No input file\n",stderr);
-                exit(-1);
+		aputs("No input file\n",stderr);
+		exitmain(EXIT_FAILURE);
         }
         if ((finptr=fopen(argv[1], "r")) == NULL) {
-                faterror("Can't open input file %s\n",argv[1]);
+		faterror("can't open input file %s", argv[1]);
         }
         Lexinit();
         getadmin();
@@ -685,32 +681,31 @@ int argc; char * argv[];
         do {
                 /* all output goes to stderr, to have diagnostics and       */
                 /* errors in sequence.                                      */
-                VOID fprintf(stderr,"\nEnter revision number or <return> or '.': ");
+		aputs("\nEnter revision number or <return> or '.': ",stderr);
                 if(gets(symrevno)==NULL) break;
                 if (*symrevno == '.') break;
-                VOID fprintf(stderr,"%s;\n",symrevno);
-                expandsym(symrevno,numricrevno);
-                VOID fprintf(stderr,"expanded number: %s; ",numricrevno);
-                VOID fprintf(stderr,"Date: ");
-                gets(date); VOID fprintf(stderr,"%s; ",date);
-                VOID fprintf(stderr,"Author: ");
-                gets(author);VOID fprintf(stderr,"%s; ",author);
-                VOID fprintf(stderr,"State: ");
-                gets(state); VOID fprintf(stderr, "%s;\n", state);
-                target=genrevs(numricrevno,*date=='\0'?(char *)nil:date, *author=='\0'?(char *)nil:author,
-                              *state=='\0'?(char *)nil:state,gendeltas);
+		aprintf(stderr,"%s;\n",symrevno);
+		expandsym(symrevno,&numricrevno);
+		aprintf(stderr,"expanded number: %s; ",numricrevno.string);
+		aprintf(stderr,"Date: ");
+		gets(date); aprintf(stderr,"%s; ",date);
+		aprintf(stderr,"Author: ");
+		gets(author); aprintf(stderr,"%s; ",author);
+		aprintf(stderr,"State: ");
+		gets(state); aprintf(stderr, "%s;\n", state);
+		target = genrevs(numricrevno.string, *date?date:(char *)nil, *author?author:(char *)nil,
+				 *state?state:(char*)nil, &gendeltas);
                 if (target!=nil) {
-                        i=0;
-                        while (gendeltas[i]!=nil) {
-                                VOID fprintf(stderr,"%s\n",gendeltas[i++]->num);
+			while (gendeltas) {
+				aprintf(stderr,"%s\n",gendeltas->first->num);
+				gendeltas = gendeltas->next;
                         }
                 }
         } while (true);
-        VOID fprintf(stderr,"done\n");
-
+	aprintf(stderr,"done\n");
+	exitmain(EXIT_SUCCESS);
 }
 
-cleanup(){}
-/*dummy*/
+exiting void exiterr() { _exit(EXIT_FAILURE); }
 
-#endif REVTEST
+#endif

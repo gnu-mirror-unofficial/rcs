@@ -1,4 +1,5 @@
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
+   Copyright 1990 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
@@ -23,40 +24,254 @@ Report problems and direct all questions to:
 
 */
 
-This directory contains complete sources for RCS version 4.3,
-Sat Nov 18 13:34:16 EST 1989
+$Id: README,v 5.6 1990/12/13 06:54:04 eggert Exp $
 
-This directory contains complete sources for version 4 of RCS.
-Version 3 was included in the 4.3 BSD distribution. Features include:
+This directory contains complete sources for RCS version 5.5.
 
-1) Version 4 supports the "branch" keyword.
 
-2) Numerous bug fixes. In addition, RCS now runs on many more machine
-architectures, including Suns (3.x and 4.0), VAXen (4.2 and 4.3 BSD),
-and IBM PC-ATs (Xenix).
+Installation notes:
 
-3) Version 4 is backward compatible with version 3. Version 4 RCS will
-handle files checked in under version 3 (but not vice versa).
+  RCS requires a diff that supports the -n option.
+  Get GNU diff (version 1.15 or later) if your diff lacks -n.
 
-4) This distribution is not supported in anyway. However, bugs and
-(especially) bug fixes may be reported to rcs-bugs@cs.purdue.edu.
+  RCS works best with a diff that supports -a, -L, and (diff3 only) -m.
+  GNU diff supports these options.
 
-5) Older versions of diff do not support options used by RCS. It is
-known that 4.3 BSD, and SunOS 3.2 (and later releases) support the
-needed options. If your version of diff does not support these
-options, obtain the GNU diff from the FSF.  If you use the GNU diff,
-it is necessary to change the setting of MERGE in the Makefile in the
-src directory.
+  Sources for RCS are in the src directory.
+  Read the directions in src/Makefile to set up the options
+  for building RCS on your system.
+  If `make' fails to build src/conf.h, look in src/conf.error
+  to see what went wrong in the src/conf.sh shell file.
+  If all else fails, create src/conf.h manually by editing a
+  copy of src/conf.heg.
 
-6) RCS is free software; you can redistribute it and/or modify it
-under the terms of the GNU General Public License.
+  Manual entries reside in man.
 
-7) All sources for RCS are contained in the "src" subdirectory. Read the
-directions in its Makefile to set up the correct compile options for
-building RCS on your system.  Pay special attention to the comment
-about setting SIGNAL_TYPE in the Makefile.
+  To test your installation of RCS, run the shell file src/rcstest.
 
-8) man pages reside in man.
+  Troff source for the paper `RCS--A System for Version Control', which
+  appeared in _Software--Practice & Experience_, is in rcs.ms.
 
-9) Troff source for the paper "RCS - A System for Version Control", which
-appeared in Software Practice and Experience, can be found in "rcs.ms".
+
+RCS compatibility notes:
+
+  RCS version 5 reads RCS files written by any RCS version released since 1982.
+  It also writes RCS files that these older versions of RCS can read,
+  unless you use one of the following new features:
+
+	checkin times after 1999/12/31 23:59:59 GMT
+	checking in non-text files
+	non-Ascii symbolic names
+	rcs -bX, where X is nonempty
+	rcs -kX, where X is not `kv'
+	RCS files that exceed hardcoded limits in older RCS versions
+
+
+Features new to RCS version 5 include:
+
+  RCS can check in arbitrary files, not just text files, if diff -a works.
+  RCS can merge lines containing just a single `.' if diff3 -m works.
+  GNU diff supports the -a and -m options.
+
+  RCS can now be installed as a setgid or setuid program
+  if the setegid() and seteuid() system calls work.
+  Setid privileges yield extra security if RCS files are protected so that
+  only the effective group or user can write RCS directories.
+  RCS uses the real group and user for all accesses other than to RCS files.
+  On older hosts lacking setegid() and seteuid(), RCS uses the effective group
+  and user for all accesses; formerly it was inconsistent.
+
+  New options to co, rcsdiff, and rcsmerge give more flexibility to keyword
+  substitution.
+
+    -kkv substitutes the default `$Keyword: value $' for keyword strings.
+    However, a locker's name is inserted only as a file is being locked,
+    i.e. by `ci -l' and `co -l'.  This is normally the default.
+
+    -kkvl acts like -kkv, except that a locker's name is always inserted
+    if the given revision is currently locked.  This was the default in
+    version 4.  It is now the default only with when using rcsdiff to
+    compare a revision to a working file whose mode is that of a file
+    checked out for changes.
+
+    -kk substitutes just `$Keyword$', which helps to ignore keyword values
+    when comparing revisions.
+
+    -ko retrieves the old revision's keyword string, thus bypassing keyword
+    substitution.
+
+    -kv retrieves just `value'.  This can ease the use of keyword values, but
+    it is dangerous because it causes RCS to lose track of where the keywords
+    are, so for safety the owner write permission of the working file is
+    turned off when -kv is used; to edit the file later, check it out again
+    without -kv.
+
+  rcs -ko sets the default keyword substitution to be in the style of co -ko,
+  and similarly for the other -k options.  This can be useful with binary file
+  formats that cannot tolerate changing the lengths of keyword strings.
+  However it also renders a RCS file readable only by RCS version 5 or later.
+  Use rcs -kkv to restore the usual default substitution.
+
+  RCS can now be used by development groups that span timezone boundaries.
+  All times are now displayed in GMT, and GMT is the default timezone.
+  To use local time with co -d, append ` LT' to the time.
+  When interchanging RCS files with sites running older versions of RCS,
+  users may encounter discrepancies of up to 13 hours in old time stamps.
+  The list of timezone names has been modernized.
+
+  Dates are now displayed using four-digit years, not two-digit years.
+  Years given in -d options must now have four digits.
+  This change is required for RCS to continue to work after 1999/12/31.
+  The form of dates in version 5 RCS files will not change until 2000/01/01,
+  so in the meantime RCS files can still be interchanged with sites
+  running older versions of RCS.  To make room for the longer dates,
+  rlog now outputs `lines: +A -D' instead of `lines added/del: A/D'.
+
+  To help prevent diff programs that are broken or have run out of memory
+  from trashing an RCS file, ci now checks diff output more carefully.
+
+  ci -k now handles the Log keyword, so that checking in a file
+  with -k does not normally alter the file's contents.
+
+  RCS no longer outputs white space at the ends of lines
+  unless the original working file had it.
+  For consistency with other keywords,
+  a space, not a tab, is now output after `$Log:'.
+  Rlog now puts lockers and symbolic names on separate lines in the output
+  to avoid generating lines that are too long.
+  A similar fix has been made to lists in the RCS files themselves.
+
+  RCS no longer outputs the string `Locker: ' when expanding Header or Id
+  keywords.  This saves space and reverts back to version 3 behavior.
+
+  The default branch is not put into the RCS file unless it is nonempty.
+  Therefore, files generated by RCS version 5 can be read by RCS version 3
+  unless they use the default branch feature introduced in version 4.
+  This fixes a compatibility problem introduced by version 4.
+
+  RCS can now emulate older versions of RCS; see `co -V'.
+  This may be useful to overcome compatibility problems
+  due to the above changes.
+
+  Programs like Emacs can now interact with RCS commands via a pipe:
+  the new -I option causes ci, co, and rcs to run interactively,
+  even if standard input is not a terminal.
+  These commands now accept multiple inputs from stdin separated by `.' lines.
+
+  ci now silently ignores the -t option if the RCS file already exists.
+  This simplifies some shell scripts and improves security in setuid sites.
+
+  Descriptive text may be given directly in an argument of the form -t-string.
+
+  The character set for symbolic names has been upgraded
+  from Ascii to ISO 8859.
+
+  rcsdiff now passes through all options used by GNU diff;
+  this is a longer list than 4.3BSD diff.
+
+  merge's new -L option gives tags for merge's overlap report lines.
+  This ability used to be present in a different, undocumented form;
+  the new form is chosen for compatibility with GNU diff3's -L option.
+
+  rcsmerge and merge now have a -q option, just like their siblings do.
+
+  RCS now attempts to ignore parts of an RCS file that look like they come
+  from a future version of RCS.
+
+  When properly configured, RCS now strictly conforms with Posix 1003.1-1988.
+  Normally, RCS file names contain `,', which is outside the Posix portable
+  filename character set; but in impoverished Posix environments, you can
+  compile RCS so that the RCS file for Foo is named just RCS/Foo.
+  RCS can still be compiled in non-Posix traditional Unix environments,
+  and can use common BSD and USG extensions to Posix.
+  RCS is a conforming ANSI C program, and also compiles under traditional C.
+
+  Arbitrary limits on internal table sizes have been removed.
+  The only limit now is the amount of memory available via malloc().
+
+  File temporaries, lock files, signals, and system call return codes
+  are now handled more cleanly, portably, and quickly.
+  Some race conditions have been removed.
+
+  A new compile-time option RCSPREFIX lets administrators avoid absolute path
+  names for subsidiary programs, trading speed for flexibility.
+
+  The configuration procedure is now more automatic.
+
+  Snooping has been removed; it did not work in version 4.
+
+
+Version 4 was the first version distributed by FSF.
+Beside bug fixes, features new to RCS version 4 include:
+
+  The notion of default branch has been added; see rcs -b.
+
+
+Version 3 was included in the 4.3BSD distribution.
+
+
+Further projects:
+
+  Improve performance when checking out branch revisions;
+  see the `piece table' comments in rcs.ms.
+  Joe Berkovitz of Stratus has written some fast revision extraction code;
+  unfortunately there wasn't enough time to integrate it into RCS version 5.
+  It's probably best to use mmap() here if available.
+
+  Let the user mark an RCS revision as deleted; checking out such a revision
+  would result in no working file.  Similarly, using `co -d' with a date either
+  before the initial revision or after the file was marked deleted should
+  remove the working file.  For extra credit, extend the notion of `deleted' to
+  include `renamed', i.e. when an RCS file gets renamed.
+
+  Use a better scheme for locking revisions; the current scheme requires
+  changing the RCS file just to lock or unlock a revision.
+  The new scheme should coexist as well as possible with older versions of RCS.
+
+  Permit multiple option-filename pairs, e.g. co -r1.4 a -r1.5 b.
+
+  Add rcs options for changing keyword names, e.g. XConsortium instead of Id.
+
+  If there are multiple locks by a user, ci should fall back on ci -k's
+  method to figure out which version it is.
+
+  Add frozen branches a la SCCS.  In general, be able to emulate all of
+  SCCS, so that an SCCS-to-RCS program can be practical.
+
+  Improve RCS's method for storing binary files.
+  Although it is more efficient than SCCS's,
+  the diff algorithm is still line oriented,
+  and often generates long output for minor changes to an executable file.
+
+  Port binary file handling to non-Unix hosts where fopen(F,"r") and
+  fopen(F,"rb") are quite different beasts.
+
+  Extend the grammar of RCS files so that keywords need not be in a fixed order.
+
+  Clean up the source code with a consistent indenting style.
+
+  Update the date parser to use the more modern getdate.y by Bellovin, Salz,
+  and Berets.
+
+  Internationalize messages; unfortunately, there's no common standard yet.
+
+  Prune the unnecessary keyword substitution baggage from the rcs command.
+
+  Break up the code into a library so that it's easier to write new programs
+  that manipulate RCS files.
+
+
+Credits:
+
+  RCS was designed and built by Walter F. Tichy of Purdue University.
+  RCS version 3 was released in 1983.
+
+  Thomas Narten, Dan Trinkle, and others of Purdue supported RCS through
+  version 4.2, released in 1989.  Guy Harris of Sun contributed many porting
+  fixes.  Paul Eggert of System Development Corporation contributed bug fixes
+  and tuneups.  Jay Lepreau contributed 4.3BSD support.
+
+  Paul Eggert of Twin Sun wrote the changes for RCS version 5, released in
+  1990.  Ideas for setgid support were contributed by Bill Hahn of Stratus.
+  Test case ideas were contributed by Matt Cross of Stratus.
+  Adam Hammer of Purdue QAed.
