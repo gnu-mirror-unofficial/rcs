@@ -3,14 +3,14 @@
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -32,6 +32,21 @@ Report problems and direct all questions to:
 
 
 /* $Log: rcsutil.c,v $
+ * Revision 5.10  1991/10/07  17:32:46  eggert
+ * Support piece tables even if !has_mmap.
+ *
+ * Revision 5.9  1991/08/19  03:13:55  eggert
+ * Add spawn() support.  Explicate assumptions about getting invoker's name.
+ * Standardize user-visible dates.  Tune.
+ *
+ * Revision 5.8  1991/04/21  11:58:30  eggert
+ * Plug setuid security hole.
+ *
+ * Revision 5.6  1991/02/26  17:48:39  eggert
+ * Fix setuid bug.  Use fread, fwrite more portably.
+ * Support waitpid.  Don't assume -1 is acceptable to W* macros.
+ * strsave -> str_save (DG/UX name clash)
+ *
  * Revision 5.5  1990/12/04  05:18:49  eggert
  * Don't output a blank line after a signal diagnostic.
  * Use -I for prompts and -q for diagnostics.
@@ -121,23 +136,42 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
-#if !MAKEDEPEND && defined(declare_getpwuid)
-#	include <pwd.h>
-	declare_getpwuid
+libId(utilId, "$Id: rcsutil.c,v 5.10 1991/10/07 17:32:46 eggert Exp $")
+
+#if !has_memcmp
+	int
+memcmp(s1, s2, n)
+	void const *s1, *s2;
+	size_t n;
+{
+	register unsigned char const
+		*p1 = (unsigned char const*)s1,
+		*p2 = (unsigned char const*)s2;
+	register size_t i = n;
+	register int r = 0;
+	while (i--  &&  !(r = (*p1++ - *p2++)))
+		;
+	return r;
+}
 #endif
 
-libId(utilId, "$Id: rcsutil.c,v 5.5 1990/12/04 05:18:49 eggert Exp $")
+#if !has_memcpy
+	void *
+memcpy(s1, s2, n)
+	void *s1;
+	void const *s2;
+	size_t n;
+{
+	register char *p1 = (char*)s1;
+	register char const *p2 = (char const*)s2;
+	while (n--)
+		*p1++ = *p2++;
+	return s1;
+}
+#endif
 
 #if lint
 	malloc_type lintalloc;
-#endif
-
-#if has_getuid
-	uid_t ruid;
-#endif
-#if SETID
-	static uid_t euid;
-	static gid_t egid, rgid;
 #endif
 
 /*
@@ -213,7 +247,7 @@ ffree()
 
 	void
 ffree1(f)
-	register const char *f;
+	register char const *f;
 /* Free the block f, which was allocated by ftestalloc.  */
 {
 	register struct alloclist *p, **a = &alloced;
@@ -225,17 +259,17 @@ ffree1(f)
 	tfree(p);
 }
 
-	const char *
-strsave(s)
-	const char *s;
+	char *
+str_save(s)
+	char const *s;
 /* Save s in permanently allocated storage. */
 {
 	return strcpy(tnalloc(char, strlen(s)+1), s);
 }
 
-	const char *
-fstrsave(s)
-	const char *s;
+	char *
+fstr_save(s)
+	char const *s;
 /* Save s in storage that will be deallocated when we're done with this file. */
 {
 	return strcpy(ftnalloc(char, strlen(s)+1), s);
@@ -243,45 +277,51 @@ fstrsave(s)
 
 	char *
 cgetenv(name)
-	const char *name;
+	char const *name;
 /* Like getenv(), but yield a copy; getenv() can overwrite old results. */
 {
 	register char *p;
 
-	return (p=getenv(name)) ? strsave(p) : p;
+	return (p=getenv(name)) ? str_save(p) : p;
 }
 
-
-	const char *
-getcaller()
-/* Function: gets the caller's login.
- */
+	char const *
+getusername(suspicious)
+	int suspicious;
+/* Get the caller's login name.  Trust only getwpuid if SUSPICIOUS.  */
 {
 	static char *name;
 
 	if (!name) {
-		if (!(
-		    /* Use getenv() if we're trustworthy; it's much faster.  */
-#if SETID
-			euid==ruid && egid==rgid &&
-#endif
-			(
-				(name = cgetenv("LOGNAME"))
-			||	(name = cgetenv("USER"))
-			)
-
-		    /* Follow a procedure recommended by Posix 1003.1-1988.  */
-		    ||	(name = getlogin())
-		)) {
-#if has_getuid & defined(declare_getpwuid)
-			const struct passwd *pw = getpwuid(ruid);
+		if (
+		    /* Prefer getenv() unless suspicious; it's much faster.  */
+#		    if getlogin_is_secure
+			    (suspicious
+			    ||
+				!(name = cgetenv("LOGNAME"))
+			    &&  !(name = cgetenv("USER")))
+			&&  !(name = getlogin())
+#		    else
+			suspicious
+			||
+				!(name = cgetenv("LOGNAME"))
+			    &&  !(name = cgetenv("USER"))
+			    &&  !(name = getlogin())
+#		    endif
+		) {
+#if has_getuid && has_getpwuid
+			struct passwd const *pw = getpwuid(ruid());
 			if (!pw)
 			    faterror("no password entry for userid %lu",
-				     (unsigned long)ruid
+				     (unsigned long)ruid()
 			    );
 			name = pw->pw_name;
 #else
+#if has_setuid
+			faterror("setuid not supported");
+#else
 			faterror("Who are you?  Please set LOGNAME.");
+#endif
 #endif
 		}
 		checksid(name);
@@ -291,158 +331,24 @@ getcaller()
 
 
 
-	int
-findlock(delete, target)
-	int delete;
-	struct hshentry **target;
-/* Finds the first lock held by caller and returns a pointer
- * to the locked delta; also removes the lock if delete is set.
- * Returns 0 for no locks, 1 for one, 2 for two or more.
- * If one lock, puts it into *target.
- */
-{
-	register struct lock *next, **trail, **found = nil;
 
-	for (trail = &Locks;  (next = *trail);  trail = &next->nextlock)
-		if (strcmp(getcaller(), next->login)  ==  0) {
-			if (found) {
-				error("multiple revisions locked by %s; please specify one", getcaller());
-				return 2;
-			}
-			found = trail;
-		}
-	if (!found)
-		return 0;
-	next = *found;
-	*target = next->delta;
-	if (delete) {
-		next->delta->lockedby = nil;
-		*found = next->nextlock;
-	}
-	return 1;
-}
-
-
-
-
-
-
-
-	int
-addlock(delta)
-struct hshentry * delta;
-/* Add a lock held by caller to delta and yield 1 if successful.
- * Print an error message and yield -1 if no lock is added because
- * the delta is locked by somebody other than caller.
- * Yield 0 if the caller already holds the lock.  */
-{
-        struct lock * next;
-
-        next=Locks;
-        while (next!=nil) {
-                if (cmpnum(delta->num,next->delta->num)==0) {
-			if (strcmp(getcaller(),next->login)==0)
-				return 0;
-                        else {
-                                error("revision %s already locked by %s",
-                                      delta->num, next->login);
-				return -1;
-                        }
-                }
-		next = next->nextlock;
-	}
-        /* set up new lockblock */
-	next = ftalloc(struct lock);
-	delta->lockedby=next->login=getcaller();
-        next->delta= delta;
-        next->nextlock=Locks;
-        Locks=next;
-	return 1;
-}
-
-
-
-	int
-addsymbol(num, name, rebind)
-	const char *num, *name;
-	int rebind;
-/* Function: adds a new symbolic name and associates it with revision num.
- * If name already exists and rebind is true, the name is associated
- * with the new num; otherwise, an error message is printed and
- * false returned. Returns true it successful.
- */
-{       register struct assoc * next;
-        next=Symbols;
-        while (next!=nil) {
-                if (strcmp(name,next->symbol)==0) {
-                        if (rebind) {
-				next->num = num;
-                                return true;
-                        } else {
-                                error("symbolic name %s already bound to %s",
-					name, next->num);
-                                return false;
-                        }
-                } else  next = next->nextassoc;
-        }
-        /* not found; insert new pair. */
-	next = ftalloc(struct assoc);
-        next->symbol=name;
-	next->num = num;
-        next->nextassoc=Symbols;
-        Symbols = next;
-        return true;
-}
-
-
-
-
-int checkaccesslist()
-/* function: Returns true if caller is the superuser, the owner of the
- * file, the access list is empty, or caller is on the access list.
- * Prints an error message and returns false otherwise.
- */
-{
-	register const struct access *next;
-
-	if (!AccessList || strcmp(getcaller(),"root")==0)
-                return true;
-
-        next=AccessList;
-        do {
-		if (strcmp(getcaller(),next->login)==0)
-                        return true;
-                next=next->nextaccess;
-        } while (next!=nil);
-
-#if has_getuid
-    {
-        struct stat statbuf;
-        VOID fstat(fileno(finptr),&statbuf);  /* get owner of file */
-        if (myself(statbuf.st_uid)) return true;
-    }
-#endif
-
-	error("user %s not on the access list", getcaller());
-        return false;
-}
-
+#if has_signal
 
 /*
  *	 Signal handling
  *
- * ANSI C places too many restrictions on signal handlers.
+ * Standard C places too many restrictions on signal handlers.
  * We obey as many of them as we can.
  * Posix places fewer restrictions, and we are Posix-compatible here.
  */
 
-static volatile sig_atomic_t heldsignal, holdlevel;
+static sig_atomic_t volatile heldsignal, holdlevel;
 
 	static signal_type
 catchsig(s)
 	int s;
 {
-	const char *sname;
+	char const *sname;
 	char buf[BUFSIZ];
 
 #if sig_zaps_handler
@@ -457,10 +363,10 @@ catchsig(s)
 	setrid();
 	if (!quietflag) {
 	    sname = nil;
-#if has_sys_siglist & defined(NSIG)
+#if has_sys_siglist && defined(NSIG)
 	    if ((unsigned)s < NSIG) {
 #		ifndef sys_siglist
-		    extern const char *sys_siglist[];
+		    extern char const *sys_siglist[];
 #		endif
 		sname = sys_siglist[s];
 	    }
@@ -512,7 +418,7 @@ restoreints()
 }
 
 
-static const sig[] = {
+static int const sig[] = {
 #ifdef SIGHUP
 	SIGHUP,
 #endif
@@ -541,29 +447,29 @@ static const sig[] = {
 #if has_sigaction
 
 	static void
-  checksig(r)
+  check_sig(r)
 	int r;
   {
-	if (r < 0)
+	if (r != 0)
 		efaterror("signal");
   }
 
-	void
-  catchints()
+	static void
+  setup_catchsig()
   {
 	register int i;
 	sigset_t blocked;
 	struct sigaction act;
 
-	checksig(sigemptyset(&blocked));
+	check_sig(sigemptyset(&blocked));
 	for (i=SIGS; 0<=--i; )
-	    checksig(sigaddset(&blocked, sig[i]));
+	    check_sig(sigaddset(&blocked, sig[i]));
 	for (i=SIGS; 0<=--i; ) {
-	    checksig(sigaction(sig[i], (struct sigaction*)nil, &act));
+	    check_sig(sigaction(sig[i], (struct sigaction*)nil, &act));
 	    if (act.sa_handler != SIG_IGN) {
 		    act.sa_handler = catchsig;
 		    act.sa_mask = blocked;
-		    checksig(sigaction(sig[i], &act, (struct sigaction*)nil));
+		    check_sig(sigaction(sig[i], &act, (struct sigaction*)nil));
 	    }
 	}
   }
@@ -571,7 +477,8 @@ static const sig[] = {
 #else
 #if has_sigblock
 
-  void catchints()
+	static void
+  setup_catchsig()
   {
 	register int i;
 	int mask;
@@ -581,105 +488,200 @@ static const sig[] = {
 		mask |= sigmask(sig[i]);
 	mask = sigblock(mask);
 	for (i=SIGS; 0<=--i; )
-		if (signal(sig[i], catchsig) == SIG_IGN)
-			VOID signal(sig[i], SIG_IGN);
+		if (
+		    signal(sig[i], catchsig) == SIG_IGN  &&
+		    signal(sig[i], SIG_IGN) != catchsig
+		)
+			faterror("signal catcher failure");
 	VOID sigsetmask(mask);
   }
 
 #else
 
-  void catchints()
+	static void
+  setup_catchsig()
   {
 	register i;
+
 	for (i=SIGS; 0<=--i; )
-		if (signal(sig[i], SIG_IGN) != SIG_IGN)
-			VOID signal(sig[i], catchsig);
+		if (
+		    signal(sig[i], SIG_IGN) != SIG_IGN  &&
+		    signal(sig[i], catchsig) != SIG_IGN
+		)
+			faterror("signal catcher failure");
   }
 
 #endif
 #endif
 
+	void
+catchints()
+{
+	static int catching_ints;
+	if (!catching_ints) {
+		catching_ints = true;
+		setup_catchsig();
+	}
+}
+
+#endif /* has_signal */
+
 
 	void
 fastcopy(inf,outf)
-FILE * inf, * outf;
+	register RILE *inf;
+	FILE *outf;
 /* Function: copies the remainder of file inf to outf.
  */
-{       char buf[BUFSIZ];
+{
+#if large_memory
+#	if has_mmap
+	    awrite((char const*)inf->ptr, (size_t)(inf->lim - inf->ptr), outf);
+	    inf->ptr = inf->lim;
+#	else
+	    for (;;) {
+		awrite((char const*)inf->ptr, (size_t)(inf->readlim - inf->ptr), outf);
+		inf->ptr = inf->readlim;
+		if (inf->ptr == inf->lim)
+		    break;
+		VOID Igetmore(inf);
+	    }
+#	endif
+#else
+	char buf[BUFSIZ*8];
 	register fread_type rcount;
 
         /*now read the rest of the file in blocks*/
-	while (!feof(inf)  &&  (rcount = fread(buf,sizeof(char),BUFSIZ,inf))) {
-		awrite(buf, rcount, outf);
+	while (!feof(inf)) {
+		if (!(rcount = Fread(buf,sizeof(*buf),sizeof(buf),inf))) {
+			testIerror(inf);
+			return;
+		}
+		awrite(buf, (size_t)rcount, outf);
         }
+#endif
 }
+
+#ifndef SSIZE_MAX
+ /* This does not work in #ifs, but it's good enough for us.  */
+ /* Underestimating SSIZE_MAX may slow us down, but it won't break us.  */
+#	define SSIZE_MAX ((unsigned)-1 >> 1)
+#endif
 
 	void
 awrite(buf, chars, f)
-	const char *buf;
-	fread_type chars;
+	char const *buf;
+	size_t chars;
 	FILE *f;
 {
-	if (fwrite(buf, sizeof(char), chars, f) != chars)
-		IOerror();
+	/* Posix 1003.1-1990 ssize_t hack */
+	while (SSIZE_MAX < chars) {
+		if (Fwrite(buf, sizeof(*buf), SSIZE_MAX, f)  !=  SSIZE_MAX)
+			Oerror();
+		buf += SSIZE_MAX;
+		chars -= SSIZE_MAX;
+	}
+
+	if (Fwrite(buf, sizeof(*buf), chars, f)  !=  chars)
+		Oerror();
 }
 
 
 
 
 
-/*
-* Print RCS format date and time in user-readable format.
-*/
-	void
-printdate(f, date, separator)
-	register FILE *f;
-	const char *date, *separator;
+	static int
+movefd(old, new)
+	int old, new;
 {
-	register const char *p = date;
-
-	while (*p++ != '.')
-		;
-	aprintf(f, "%s%.*s/%.2s/%.2s%s%.2s:%.2s:%s",
-		date[2]=='.' && VERSION(5)<=RCSversion  ?  "19"  :  "",
-		p-date-1, date,
-		p, p+3, separator, p+6, p+9, p+12
-	);
+	if (old < 0  ||  old == new)
+		return old;
+#	ifdef F_DUPFD
+		new = fcntl(old, F_DUPFD, new);
+#	else
+		new = dup2(old, new);
+#	endif
+	return close(old)==0 ? new : -1;
 }
 
-
-
-
-static int fdreopen(fd, file, flags, mode)
+	static int
+fdreopen(fd, file, flags)
 	int fd;
-	const char *file;
+	char const *file;
 	int flags;
-	mode_t mode;
 {
 	int newfd;
 	VOID close(fd);
 	newfd =
 #if !open_can_creat
-		flags&O_CREAT ? creat(file,mode) :
+		flags&O_CREAT ? creat(file, S_IRUSR|S_IWUSR) :
 #endif
-		open(file,flags,mode);
-	if (newfd < 0  ||  newfd == fd)
-		return newfd;
-	fd = dup2(newfd, fd);
-	VOID close(newfd);
-	return fd;
+		open(file, flags, S_IRUSR|S_IWUSR);
+	return movefd(newfd, fd);
 }
 
-static void tryopen(fd,file,flags)
+#if !has_spawn
+	static void
+tryopen(fd,file,flags)
 	int fd, flags;
-	const char *file;
+	char const *file;
 {
-	if (file  &&  fdreopen(fd,file,flags,S_IRUSR|S_IWUSR) != fd) {
-		VOID write(STDERR_FILENO, file, strlen(file));
-		VOID write(STDERR_FILENO, ": can't open\n", 13);
-		_exit(EXIT_TROUBLE);
-	}
+	if (file  &&  fdreopen(fd,file,flags) != fd)
+		efaterror(file);
 }
+#else
+	static int
+tryopen(fd,file,flags)
+	int fd, flags;
+	char const *file;
+{
+	int newfd = -1;
+	if (file  &&  ((newfd=dup(fd)) < 0  ||  fdreopen(fd,file,flags) != fd))
+		efaterror(file);
+	return newfd;
+}
+	static void
+redirect(old, new)
+	int old, new;
+{
+	if (0 <= old   &&   (close(new) != 0  ||  movefd(old,new) < 0))
+		efaterror("spawn I/O redirection");
+}
+#endif
+
+
+
+#if !has_fork && !has_spawn
+	static void
+bufargcat(b, c, s)
+	register struct buf *b;
+	int c;
+	register char const *s;
+/* Append to B a copy of C, plus a quoted copy of S.  */
+{
+	register char *p;
+	register char const *t;
+	size_t bl, sl;
+
+	for (t=s, sl=0;  *t;  )
+		sl  +=  3*(*t++=='\'') + 1;
+	bl = strlen(b->string);
+	bufrealloc(b, bl + sl + 4);
+	p = b->string + bl;
+	*p++ = c;
+	*p++ = '\'';
+	while (*s) {
+		if (*s == '\'') {
+			*p++ = '\'';
+			*p++ = '\\';
+			*p++ = '\'';
+		}
+		*p++ = *s++;
+	}
+	*p++ = '\'';
+	*p = 0;
+}
+#endif
 
 /*
 * Run a command specified by the strings in 'inoutargs'.
@@ -689,33 +691,75 @@ static void tryopen(fd,file,flags)
 */
 	int
 runv(inoutargs)
-	const char **inoutargs;
+	char const **inoutargs;
 {
-	int pid;
-	int wstatus, w;
-	register const char **p;
+	register char const **p;
+	int wstatus;
+
 	oflush();
 	eflush();
+    {
+#if has_spawn
+	int in, out;
+	p = inoutargs;
+	in = tryopen(STDIN_FILENO, *p++, O_BINARY|O_RDONLY);
+	out = tryopen(STDOUT_FILENO, *p++, O_BINARY|O_CREAT|O_TRUNC|O_WRONLY);
+	wstatus = spawn_RCS(0, *p, (char*const*)p);
+	if (wstatus == -1  &&  errno == ENOEXEC) {
+		*--p = RCS_SHELL;
+		wstatus = spawnv(0, *p, (char*const*)p);
+	}
+	redirect(in, STDIN_FILENO);
+	redirect(out, STDOUT_FILENO);
+#else
+#if has_fork
+	pid_t pid;
+#	if !has_waitpid
+		pid_t w;
+#	endif
 	if (!(pid = vfork())) {
 		p = inoutargs;
-		tryopen(STDIN_FILENO, *p++, O_RDONLY);
-		tryopen(STDOUT_FILENO, *p++, O_CREAT|O_TRUNC|O_WRONLY);
-		VOID EXECRCS(*p, p);
+		tryopen(STDIN_FILENO, *p++, O_BINARY|O_RDONLY);
+		tryopen(STDOUT_FILENO, *p++, O_BINARY|O_CREAT|O_TRUNC|O_WRONLY);
+		VOID exec_RCS(*p, (char*const*)p);
 		if (errno == ENOEXEC) {
-			*--p = "/bin/sh";
-			VOID execv(*p, p);
+			*--p = RCS_SHELL;
+			VOID execv(*p, (char*const*)p);
 		}
 		VOID write(STDERR_FILENO, *p, strlen(*p));
 		VOID write(STDERR_FILENO, ": not found\n", 12);
 		_exit(EXIT_TROUBLE);
 	}
 	if (pid < 0)
-		return pid;
-	do {
-		if ((w = wait(&wstatus)) < 0)
-			return w;
-	} while (w != pid);
-	return wstatus;
+		efaterror("fork");
+#	if has_waitpid
+		if (waitpid(pid, &wstatus, 0) < 0)
+			efaterror("waitpid");
+#	else
+		do {
+			if ((w = wait(&wstatus)) < 0)
+				efaterror("wait");
+		} while (w != pid);
+#	endif
+#else
+	static struct buf b;
+
+	/* Use system().  On many hosts system() discards signals.  Yuck!  */
+	p = inoutargs+2;
+	bufscpy(&b, *p);
+	while (*++p)
+		bufargcat(&b, ' ', *p);
+	if (inoutargs[0])
+		bufargcat(&b, '<', inoutargs[0]);
+	if (inoutargs[1])
+		bufargcat(&b, '>', inoutargs[1]);
+	wstatus = system(b.string);
+#endif
+#endif
+    }
+	if (!WIFEXITED(wstatus))
+		faterror("%s failed", inoutargs[2]);
+	return WEXITSTATUS(wstatus);
 }
 
 #define CARGSMAX 20
@@ -726,22 +770,22 @@ runv(inoutargs)
 */
 	int
 #if has_prototypes
-run(const char *infile, const char *outfile, ...)
+run(char const *infile, char const *outfile, ...)
 #else
 	/*VARARGS2*/
 run(infile, outfile, va_alist)
-	const char *infile;
-	const char *outfile;
+	char const *infile;
+	char const *outfile;
 	va_dcl
 #endif
 {
 	va_list ap;
-	const char *rgargs[CARGSMAX];
+	char const *rgargs[CARGSMAX];
 	register i = 0;
 	rgargs[0] = infile;
 	rgargs[1] = outfile;
 	vararg_start(ap, outfile);
-	for (i = 2;  (rgargs[i++] = va_arg(ap, const char*));  )
+	for (i = 2;  (rgargs[i++] = va_arg(ap, char const*));  )
 		if (CARGSMAX <= i)
 			faterror("too many command arguments");
 	va_end(ap);
@@ -749,20 +793,43 @@ run(infile, outfile, va_alist)
 }
 
 
+	char const *
+date2str(date, datebuf)
+	char const date[datesize];
+	char datebuf[datesize];
+/*
+* Format a user-readable form of the RCS format DATE into the buffer DATEBUF.
+* Yield DATEBUF.
+*/
+{
+	register char const *p = date;
+
+	while (*p++ != '.')
+		;
+	VOID sprintf(datebuf,
+		"19%.*s/%.2s/%.2s %.2s:%.2s:%s" +
+			(date[2]=='.' && VERSION(5)<=RCSversion  ?  0  :  2),
+		(int)(p-date-1), date,
+		p, p+3, p+6, p+9, p+12
+	);
+	return datebuf;
+}
+
+
 int RCSversion;
 
 	void
 setRCSversion(str)
-	const char *str;
+	char const *str;
 {
-	static const char *oldversion;
+	static int oldversion;
 
-	register const char *s = str + 2;
+	register char const *s = str + 2;
 	int v = VERSION_DEFAULT;
 
 	if (oldversion)
 		redefined('V');
-	oldversion = str;
+	oldversion = true;
 
 	if (*s) {
 		v = 0;
@@ -770,42 +837,158 @@ setRCSversion(str)
 			v  =  10*v + *s++ - '0';
 		if (*s)
 			faterror("%s isn't a number", str);
-		if (v < VERSION_MIN  ||  VERSION_MAX < v)
-			faterror("%s out of range %d..%d", str, VERSION_MIN, VERSION_MAX);
+		if (v < VERSION_min  ||  VERSION_max < v)
+			faterror("%s out of range %d..%d", str, VERSION_min, VERSION_max);
 	}
 
 	RCSversion = VERSION(v);
 }
 
-	void
-initid()
+	int
+getRCSINIT(argc, argv, newargv)
+	int argc;
+	char **argv, ***newargv;
 {
-#if SETID
-	egid = getegid();
-	euid = geteuid();
-	rgid = getgid();
-#endif
-#if has_getuid
-	ruid = getuid();
-#endif
-	setrid();
+	register char *p, *q, **pp;
+	unsigned n;
+
+	if (!(q = cgetenv("RCSINIT")))
+		*newargv = argv;
+	else {
+		n = argc + 2;
+		/*
+		 * Count spaces in RCSINIT to allocate a new arg vector.
+		 * This is an upper bound, but it's OK even if too large.
+		 */
+		for (p = q;  ;  ) {
+			switch (*p++) {
+			    default:
+				continue;
+
+			    case ' ':
+			    case '\b': case '\f': case '\n':
+			    case '\r': case '\t': case '\v':
+				n++;
+				continue;
+
+			    case '\0':
+				break;
+			}
+			break;
+		}
+		*newargv = pp = tnalloc(char*, n);
+		*pp++ = *argv++; /* copy program name */
+		for (p = q;  ;  ) {
+			for (;;) {
+				switch (*q) {
+				    case '\0':
+					goto copyrest;
+
+				    case ' ':
+				    case '\b': case '\f': case '\n':
+				    case '\r': case '\t': case '\v':
+					q++;
+					continue;
+				}
+				break;
+			}
+			*pp++ = p;
+			++argc;
+			for (;;) {
+				switch ((*p++ = *q++)) {
+				    case '\0':
+					goto copyrest;
+
+				    case '\\':
+					if (!*q)
+						goto copyrest;
+					p[-1] = *q++;
+					continue;
+
+				    default:
+					continue;
+
+				    case ' ':
+				    case '\b': case '\f': case '\n':
+				    case '\r': case '\t': case '\v':
+					break;
+				}
+				break;
+			}
+			p[-1] = '\0';
+		}
+	    copyrest:
+		while ((*pp++ = *argv++))
+			;
+	}
+	return argc;
 }
 
 
-#if SETID
+#define cacheid(E) static uid_t i; static int s; if (!s){ s=1; i=(E); } return i
+
+#if has_getuid
+	uid_t ruid() { cacheid(getuid()); }
+#endif
+#if has_setuid
+	uid_t euid() { cacheid(geteuid()); }
+#endif
+
+
+#if has_setuid
+
+/*
+ * Setuid execution really works only with Posix 1003.1a Draft 5 seteuid(),
+ * because it lets us switch back and forth between arbitrary users.
+ * If seteuid() doesn't work, we fall back on setuid(),
+ * which works if saved setuid is supported,
+ * unless the real or effective user is root.
+ * This area is such a mess that we always check switches at runtime.
+ */
+
+	static void
+set_uid_to(u)
+	uid_t u;
+/* Become user u.  */
+{
+	static int looping;
+
+	if (euid() == ruid())
+		return;
+#if (has_fork||has_spawn) && DIFF_ABSOLUTE
+	if (seteuid(u) != 0)
+		efaterror("setuid");
+#endif
+	if (geteuid() != u) {
+		if (looping)
+			return;
+		looping = true;
+		faterror("root setuid not supported" + (u?5:0));
+	}
+}
+
+static int stick_with_euid;
+
+	void
+/* Ignore all calls to seteid() and setrid().  */
+nosetid()
+{
+	stick_with_euid = true;
+}
+
 	void
 seteid()
-/* Become effective user and group.  */
+/* Become effective user.  */
 {
-	if (euid!=ruid && seteuid(euid)<0  ||  egid!=rgid && setegid(egid)<0)
-		efaterror("seteid");
+	if (!stick_with_euid)
+		set_uid_to(euid());
 }
 
 	void
 setrid()
-/* Become real user and group.  */
+/* Become real user.  */
 {
-	if (euid!=ruid && seteuid(ruid)<0  ||  egid!=rgid && setegid(rgid)<0)
-		efaterror("setrid");
+	if (!stick_with_euid)
+		set_uid_to(ruid());
 }
 #endif

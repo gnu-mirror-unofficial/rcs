@@ -2,7 +2,7 @@
 
 # rcsfreeze - assign a symbolic revision number to a configuration of RCS files
 
-#	$Id: rcsfreeze.sh,v 4.3 1990/11/01 05:03:45 eggert Exp $
+#	$Id: rcsfreeze.sh,v 4.4 1991/04/21 11:58:24 eggert Exp $
 
 #       The idea is to run rcsfreeze each time a new version is checked
 #       in. A unique symbolic revision number (C_[number], where number
@@ -51,8 +51,8 @@ echo $VERSIONNUMBER >$VERSIONFILE || exit
 SYMREV=C_$VERSIONNUMBER
 # Allow the user to give a meaningful symbolic name to the revision.
 SYMREVNAME=${1-$SYMREV}
-echo >&2 "rcsfreeze: symbolic revision number computed: \"$SYMREV\"
-rcsfreeze: symbolic revision number used:     \"$SYMREVNAME\"
+echo >&2 "rcsfreeze: symbolic revision number computed: \"${SYMREV}\"
+rcsfreeze: symbolic revision number used:     \"${SYMREVNAME}\"
 rcsfreeze: the two differ only when rcsfreeze invoked with argument
 rcsfreeze: give log message, summarizing changes (end with EOF or single '.')" \
 	|| exit

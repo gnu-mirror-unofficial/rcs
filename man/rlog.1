@@ -2,9 +2,9 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: rlog.1,v 5.0 1990/08/22 09:11:00 eggert Exp $
-.ds g \s-1GMT\s0
-.ds r \s-1RCS\s0
+.Id $Id: rlog.1,v 5.3 1991/08/22 06:50:48 eggert Exp $
+.ds g \&\s-1UTC\s0
+.ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
 .TH RLOG 1 \*(Dt GNU
@@ -16,19 +16,15 @@ rlog \- print log messages and other information about RCS files
 .SH DESCRIPTION
 .B rlog
 prints information about \*r files.
-File names ending in
-.B ,v
-denote \*r files; all others denote working files.
-If a working file is given,
-.B rlog
-tries to find the corresponding
-\*r file first in an \*r subdirectory and then in the working file's directory,
-as explained in
-.BR co (1).
+.PP
+Pathnames matching an \*r suffix denote \*r files;
+all others denote working files.
+Names are paired as explained in
+.BR ci (1).
 .PP
 .B rlog
 prints the following information for each
-\*r file: \*r file name, working file name, head (i.e., the number
+\*r file: \*r pathname, working pathname, head (i.e., the number
 of the latest revision on the trunk), default branch, access list, locks,
 symbolic names, suffix, total number of revisions,
 number of revisions selected for printing, and
@@ -38,7 +34,7 @@ reverse chronological order for each branch.  For each revision,
 prints revision number, author, date/time, state, number of
 lines added/deleted (with respect to the previous revision),
 locker of the revision (if any), and log message.
-All times are displayed in \*g.
+All times are displayed in Coordinated Universal Time (\*g).
 Without options,
 .B rlog
 prints complete information.
@@ -56,10 +52,10 @@ and
 .B \-R
 Print only the name of the \*r file.
 This is convenient for translating a
-working file name into an \*r file name.
+working pathname into an \*r pathname.
 .TP
 .B \-h
-Print only the \*r file name, working file name, head,
+Print only the \*r pathname, working pathname, head,
 default branch, access list, locks,
 symbolic names, and suffix.
 .TP
@@ -128,25 +124,26 @@ of login names is given,
 ignore all locks other than those held by the
 .IR lockers .
 For example,
-.B "rlog\ \-L\ \-R\ \-lwft\ RCS/*,v"
+.B "rlog\ \-L\ \-R\ \-lwft\ RCS/*"
 prints the name of \*r files locked by the user
 .BR wft .
 .TP
-.BI \-r revisions
+.BR \-r [\f2revisions\fP]
 prints information about revisions given in the comma-separated list
 .I revisions
-of revisions and ranges.  A range
-.IB rev1 \- rev2
+of revisions and ranges.
+A range
+.IB rev1 : rev2
 means revisions
 .I rev1
 to
 .I rev2
 on the same branch,
-.BI \- rev
+.BI : rev
 means revisions from the beginning of the branch up to and including
 .IR rev ,
 and
-.IB rev \-
+.IB rev :
 means revisions starting with
 .I rev
 to the end of the branch containing
@@ -155,6 +152,14 @@ An argument that is a branch means all
 revisions on that branch.
 A range of branches means all revisions
 on the branches in that range.
+A branch followed by a
+.B .\&
+means the latest revision in that branch.
+A bare
+.B \-r
+with no
+.I revisions
+means the latest revision on the default branch, normally the trunk.
 .TP
 .BI \-s states
 prints information about revisions whose state attributes match one of the
@@ -176,6 +181,14 @@ when generating logs.
 See
 .BR co (1)
 for more.
+.TP
+.BI \-x "suffixes"
+Use
+.I suffixes
+to characterize \*r files.
+See
+.BR ci (1)
+for details.
 .PP
 .B rlog
 prints the intersection of the revisions selected with
@@ -193,10 +206,10 @@ and
 .SH EXAMPLES
 .LP
 .nf
-.B "    rlog  \-L  \-R  RCS/*,v"
-.B "    rlog  \-L  \-h  RCS/*,v"
-.B "    rlog  \-L  \-l  RCS/*,v"
-.B "    rlog  RCS/*,v"
+.B "    rlog  \-L  \-R  RCS/*"
+.B "    rlog  \-L  \-h  RCS/*"
+.B "    rlog  \-L  \-l  RCS/*"
+.B "    rlog  RCS/*"
 .fi
 .LP
 The first command prints the names of all \*r files in the subdirectory
@@ -204,6 +217,13 @@ The first command prints the names of all \*r files in the subdirectory
 that have locks.  The second command prints the headers of those files,
 and the third prints the headers plus the log messages of the locked revisions.
 The last command prints complete information.
+.SH ENVIRONMENT
+.TP
+.B \s-1RCSINIT\s0
+options prepended to the argument list, separated by spaces.
+See
+.BR ci (1)
+for details.
 .SH DIAGNOSTICS
 The exit status is zero if and only if all operations were successful.
 .SH IDENTIFICATION
@@ -213,7 +233,7 @@ Revision Number: \*(Rv; Release Date: \*(Dt.
 .br
 Copyright \(co 1982, 1988, 1989 by Walter F. Tichy.
 .br
-Copyright \(co 1990 by Paul Eggert.
+Copyright \(co 1990, 1991 by Paul Eggert.
 .SH "SEE ALSO"
 ci(1), co(1), ident(1), rcs(1), rcsdiff(1), rcsintro(1), rcsmerge(1),
 rcsfile(5)
@@ -223,3 +243,18 @@ Walter F. Tichy,
 .I "Software\*-Practice & Experience"
 .BR 15 ,
 7 (July 1985), 637-654.
+.SH BUGS
+The separator for revision ranges in the
+.B \-r
+option used to be
+.B \-
+instead of
+.BR : ,
+but this leads to confusion when symbolic names contain
+.BR \- .
+For backwards compatibility
+.B "rlog \-r"
+still supports the old
+.B \-
+separator, but it warns about this obsolete use.
+.br

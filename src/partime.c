@@ -21,6 +21,12 @@
  */
 
 /* $Log: partime.c,v $
+ * Revision 5.6  1991/08/19  03:13:55  eggert
+ * Update timezones.
+ *
+ * Revision 5.5  1991/04/21  11:58:18  eggert
+ * Don't put , just before } in initializer.
+ *
  * Revision 5.4  1990/10/04  06:30:15  eggert
  * Remove date vs time heuristics that fail between 2000 and 2400.
  * Check for overflow when lexing an integer.
@@ -56,14 +62,14 @@
 
 #include "rcsbase.h"
 
-libId(partId, "$Id: partime.c,v 5.4 1990/10/04 06:30:15 eggert Exp $")
+libId(partId, "$Id: partime.c,v 5.6 1991/08/19 03:13:55 eggert Exp $")
 
 #define given(v) (0 <= (v))
 #define TMNULL (-1) /* Items not given are given this value */
 #define TZ_OFFSET (24*60) /* TMNULL  <  zone_offset - TZ_OFFSET */
 
 struct tmwent {
-	const char *went;
+	char const *went;
 	short wval;
 	char wflgs;
 	char wtype;
@@ -84,7 +90,7 @@ struct tmwent {
 #define T12_NOON 12
 #define T12_MIDNIGHT 0
 
-static const struct tmwent tmwords [] = {
+static struct tmwent const tmwords [] = {
 	{"january",      0, 0, TM_MON},
 	{"february",     1, 0, TM_MON},
 	{"march",        2, 0, TM_MON},
@@ -109,6 +115,7 @@ static const struct tmwent tmwords [] = {
 	{"gmt",          0*60, TWTIME, TM_ZON},   /* Greenwich */
 	{"utc",          0*60, TWTIME, TM_ZON},
 	{"ut",           0*60, TWTIME, TM_ZON},
+	{"cut",		 0*60, TWTIME, TM_ZON},
 
 	{"nzst",        -12*60, TWTIME, TM_ZON},  /* New Zealand */
 	{"jst",         -9*60, TWTIME, TM_ZON},   /* Japan */
@@ -132,7 +139,7 @@ static const struct tmwent tmwords [] = {
 	{"nzdt",        -12*60, TWTIME+TWDST, TM_ZON},    /* New Zealand */
 	{"kdt",         -9*60, TWTIME+TWDST, TM_ZON},     /* Korea */
 	{"bst",          0*60, TWTIME+TWDST, TM_ZON},     /* Britain */
-	{"ndt",          2*60+30, TWTIME+TWDST, TM_ZON}, /*Newfoundland (DDST)*/
+	{"ndt",		 3*60+30, TWTIME+TWDST, TM_ZON},  /* Newfoundland */
 	{"adt",          4*60, TWTIME+TWDST, TM_ZON},     /* Atlantic */
 	{"edt",          5*60, TWTIME+TWDST, TM_ZON},     /* Eastern */
 	{"cdt",          6*60, TWTIME+TWDST, TM_ZON},     /* Central */
@@ -146,47 +153,34 @@ static const struct tmwent tmwords [] = {
 	 * The following names are duplicates or are not well attested.
 	 * A standard is needed.
 	 */
-	{"?st",         -13*60, TWTIME, TM_ZON},  /* Uelen */
-	{"?st",         -11*60, TWTIME, TM_ZON},  /* Magadan */
 	{"east",        -10*60, TWTIME, TM_ZON},  /* Eastern Australia */
 	{"cast",        -9*60-30, TWTIME, TM_ZON},/* Central Australia */
 	{"cst",         -8*60, TWTIME, TM_ZON},   /* China */
 	{"hkt",         -8*60, TWTIME, TM_ZON},   /* Hong Kong */
 	{"sst",         -8*60, TWTIME, TM_ZON},   /* Singapore */
 	{"wast",        -8*60, TWTIME, TM_ZON},   /* Western Australia */
-	{"?st",         -7*60, TWTIME, TM_ZON},   /* Novosibirsk */
-	{"jt",          -7*60-30, TWTIME, TM_ZON},/* Java */
-	{"nst",         -6*60-30, TWTIME, TM_ZON},/* North Sumatra */
-	{"?st",         -6*60, TWTIME, TM_ZON},   /* Tashkent */
-	{"?st",         -5*60, TWTIME, TM_ZON},	  /* Sverdlovsk */
+	{"?",		-6*60-30, TWTIME, TM_ZON},/* Burma */
 	{"?",           -4*60-30, TWTIME, TM_ZON},/* Afghanistan */
-	{"?st",         -4*60, TWTIME, TM_ZON},	  /* Rostov */
 	{"it",          -3*60-30, TWTIME, TM_ZON},/* Iran */
-	{"?st",         -3*60, TWTIME, TM_ZON},   /* Moscow */
 	{"ist",         -2*60, TWTIME, TM_ZON},   /* Israel */
+	{"mez",		-1*60, TWTIME, TM_ZON},   /* Mittel-Europaeische Zeit */
 	{"ast",          1*60, TWTIME, TM_ZON},   /* Azores */
 	{"fst",          2*60, TWTIME, TM_ZON},   /* Fernando de Noronha */
 	{"bst",          3*60, TWTIME, TM_ZON},   /* Brazil */
 	{"wst",          4*60, TWTIME, TM_ZON},   /* Western Brazil */
 	{"ast",          5*60, TWTIME, TM_ZON},   /* Acre Brazil */
 	{"?",            9*60+30, TWTIME, TM_ZON},/* Marquesas */
-	{"?st",          12*60, TWTIME, TM_ZON},  /* Kwajalein */
+	{"?",		 12*60, TWTIME, TM_ZON},  /* Kwajalein */
 
-	{"?dt",         -13*60, TWTIME+TWDST, TM_ZON},	  /* Uelen */
-	{"?dt",         -11*60, TWTIME+TWDST, TM_ZON},	  /* Magadan */
 	{"eadt",        -10*60, TWTIME+TWDST, TM_ZON},    /* Eastern Australia */
 	{"cadt",        -9*60-30, TWTIME+TWDST, TM_ZON},  /* Central Australia */
 	{"cdt",         -8*60, TWTIME+TWDST, TM_ZON},     /* China */
 	{"wadt",        -8*60, TWTIME+TWDST, TM_ZON},     /* Western Australia */
-	{"?dt",         -7*60, TWTIME+TWDST, TM_ZON},	  /* Novosibirsk */
-	{"?dt",         -6*60, TWTIME+TWDST, TM_ZON},	  /* Tashkent */
-	{"?dt",         -5*60, TWTIME+TWDST, TM_ZON},	  /* Sverdlovsk */
-	{"?dt",         -4*60, TWTIME+TWDST, TM_ZON},	  /* Rostov */
-	{"?dt",         -3*60, TWTIME+TWDST, TM_ZON},     /* Moscow */
 	{"idt",         -2*60, TWTIME+TWDST, TM_ZON},     /* Israel */
 	{"eest",        -2*60, TWTIME+TWDST, TM_ZON},     /* Eastern Europe */
 	{"cest",        -1*60, TWTIME+TWDST, TM_ZON},     /* Central Europe */
 	{"mest",        -1*60, TWTIME+TWDST, TM_ZON},     /* Middle Europe */
+	{"mesz",	-1*60, TWTIME+TWDST, TM_ZON},	  /* Mittel-Europaeische Sommerzeit */
 	{"west",         0*60, TWTIME+TWDST, TM_ZON},     /* Western Europe */
 	{"adt",          1*60, TWTIME+TWDST, TM_ZON},	  /* Azores */
 	{"fdt",          2*60, TWTIME+TWDST, TM_ZON},     /* Fernando de Noronha */
@@ -204,22 +198,22 @@ static const struct tmwent tmwords [] = {
 	{"noon",         T12_NOON,	TWTIME, TM_12},
 	{"midnight",     T12_MIDNIGHT,	TWTIME, TM_12},
 
-	{0, 0, 0, 0},             /* Zero entry to terminate searches */
+	{0, 0, 0, 0}	/* Zero entry to terminate searches */
 };
 
 struct token {
-	const char *tcp;/* pointer to string */
+	char const *tcp;/* pointer to string */
 	int tcnt;	/* # chars */
 	char tbrk;	/* "break" char */
 	char tbrkl;	/* last break char */
 	char tflg;	/* 0 = alpha, 1 = numeric */
 	union {         /* Resulting value; */
 		int tnum;/* either a #, or */
-		const struct tmwent *ttmw;/* ptr to a tmwent. */
+		struct tmwent const *ttmw;/* a ptr to a tmwent.  */
 	} tval;
 };
 
-static const struct tmwent*ptmatchstr P((const char*,int,const struct tmwent*));
+static struct tmwent const*ptmatchstr P((char const*,int,struct tmwent const*));
 static int pt12hack P((struct tm *,int));
 static int ptitoken P((struct token *));
 static int ptstash P((int *,int));
@@ -227,7 +221,7 @@ static int pttoken P((struct token *));
 
 	static int
 goodzone(t, offset, am)
-	register const struct token *t;
+	register struct token const *t;
 	int offset;
 	int *am;
 {
@@ -250,14 +244,14 @@ goodzone(t, offset, am)
 
     int
 partime(astr, atm, zone)
-const char *astr;
+char const *astr;
 register struct tm *atm;
 int *zone;
 {
     register int i;
     struct token btoken, atoken;
     int zone_offset; /* minutes west of GMT, plus TZ_OFFSET */
-    register const char *cp;
+    register char const *cp;
     register char ch;
     int ord, midnoon;
     int *atmfield, dst, m;
@@ -505,7 +499,7 @@ register int aval;
 ptitoken(tkp)
 register struct token *tkp;
 {
-	register const char *cp;
+	register char const *cp;
 	register int i, j, k;
 
 	if (!pttoken(tkp))
@@ -563,9 +557,9 @@ register struct token *tkp;
 pttoken(tkp)
 register struct token *tkp;
 {
-	register const char *cp;
+	register char const *cp;
 	register int c;
-	const char *astr;
+	char const *astr;
 
 	tkp->tcp = astr = cp = tkp->tcp + tkp->tcnt;
 	tkp->tbrkl = tkp->tbrk;		/* Set "last break" */
@@ -612,15 +606,15 @@ register struct token *tkp;
 }
 
 
-	static const struct tmwent *
+	static struct tmwent const *
 ptmatchstr(astr,cnt,astruc)
-	const char *astr;
+	char const *astr;
 	int cnt;
-	const struct tmwent *astruc;
+	struct tmwent const *astruc;
 {
-	register const char *cp, *mp;
+	register char const *cp, *mp;
 	register int c;
-	const struct tmwent *lastptr;
+	struct tmwent const *lastptr;
 	int i;
 
 	lastptr = 0;

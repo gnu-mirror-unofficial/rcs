@@ -2,9 +2,9 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: co.1,v 5.4 1990/12/04 05:18:32 eggert Exp $
-.ds g \s-1GMT\s0
-.ds r \s-1RCS\s0
+.Id $Id: co.1,v 5.7 1991/08/19 03:13:55 eggert Exp $
+.ds g \&\s-1UTC\s0
+.ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
 .TH CO 1 \*(Dt GNU
@@ -17,18 +17,11 @@ co \- check out RCS revisions
 .B co
 retrieves a revision from each \*r file and stores it into
 the corresponding working file.
-Each file name ending in
-.B ,v
-is taken to be an \*r file;
-all other files are assumed to be working files.
-If only a working file is given,
-.B co
-tries to find the corresponding \*r file in the directory
-.B ./RCS
-and then in the current directory.
-For more details, see
-.SM "FILE NAMING"
-below.
+.PP
+Pathnames matching an \*r suffix denote \*r files;
+all others denote working files.
+Names are paired as explained in
+.BR ci (1).
 .PP
 Revisions of an \*r file may be checked out locked or unlocked.  Locking a
 revision prevents overlapping updates.  A revision checked out for reading or
@@ -63,6 +56,7 @@ to any of the options
 .BR \-f ,
 .BR \-I ,
 .BR \-l ,
+.BR \-M ,
 .BR \-p ,
 .BR \-q ,
 .BR \-r ,
@@ -107,7 +101,13 @@ is omitted, the latest revision on the default branch
 option of
 .BR rcs (1))
 is retrieved.
-A revision is composed of one or more numeric or symbolic fields
+If
+.I rev
+is
+.BR $ ,
+.B co
+determines the revision number from keyword values in the working file.
+Otherwise, a revision is composed of one or more numeric or symbolic fields
 separated by periods.  The numeric equivalent of a symbolic field
 is specified with the
 .B \-n
@@ -130,7 +130,7 @@ locked by the caller.  If
 .I rev
 is omitted,
 .B \-u
-retrieves the latest revision locked by the caller; if no such lock exists,
+retrieves the revision locked by the caller, if there is one; otherwise,
 it retrieves the latest revision on the default branch.
 .TP
 .BR \-f [\f2rev\fP]
@@ -242,8 +242,8 @@ other common time zone names are understood.
 For example, the following
 .IR date s
 are equivalent
-if local time is January 11, 1990, 8pm Pacific Standard Time
-(eight hours west of \*g):
+if local time is January 11, 1990, 8pm Pacific Standard Time,
+eight hours west of Coordinated Universal Time (\*g):
 .RS
 .LP
 .RS
@@ -277,6 +277,12 @@ defaults to
 10:30:00 \*g of the 20th of the \*g time zone's current month and year.
 The date/time must be quoted if it contains spaces.
 .RE
+.TP
+.BR \-M [\f2rev\fP]
+Set the modification time on the new working file
+to be the date of the retrieved revision.
+Use this option with care; it can confuse
+.BR make (1).
 .TP
 .BI \-s state
 retrieves the latest revision on the selected branch whose state is set to
@@ -361,12 +367,8 @@ overlap with changes from
 to
 .I rev3,
 .B co
-prints a warning and includes the
-overlapping sections, delimited by the lines
-.BI <<<<<<< "\ rev1,"
-.BR ======= ,
-and
-.BI >>>>>>> "\ rev3."
+reports overlaps as described in
+.BR merge (1).
 .PP
 For the initial pair,
 .I rev2
@@ -412,6 +414,14 @@ instead of
 .IB yyyy / mm / dd
 and may also contain different white space in the substitution for
 .BR $\&Log$ .
+.TP
+.BI \-x "suffixes"
+Use
+.I suffixes
+to characterize \*r files.
+See
+.BR ci (1)
+for details.
 .SH "KEYWORD SUBSTITUTION"
 Strings of the form
 .BI $ keyword $
@@ -459,14 +469,14 @@ and the locker (if locked).
 .B $\&Id$
 Same as
 .BR $\&Header$ ,
-except that the \*r file name is without a path.
+except that the \*r filename is without a path.
 .TP
 .B $\&Locker$
 The login name of the user who locked the revision (empty if not locked).
 .TP
 .B $\&Log$
 The log message supplied during checkin, preceded by a header
-containing the \*r file name, the revision number, the author, and the date
+containing the \*r filename, the revision number, the author, and the date
 (\*g).
 Existing log messages are
 .I not
@@ -492,66 +502,6 @@ option of
 .BR rcs (1)
 or
 .BR ci (1).
-.SH "FILE NAMING"
-Pairs of \*r files and working files may be specified in three ways
-(see also the
-example section).
-.PP
-1) Both the \*r file and the working file are given.  The \*r file name is of
-the form
-.IB path1 / workfile ,v
-and the working file name is of the form
-.IB path2 / workfile
-where
-.IB path1 /
-and
-.IB path2 /
-are (possibly different or empty) paths and
-.I workfile
-is a file name.
-.PP
-2) Only the \*r file is given.  Then the working file is created in the current
-directory and its name is derived from the name of the \*r file
-by removing
-.IB path1 /
-and the suffix
-.BR ,v .
-.PP
-3) Only the working file is given.
-Then
-.B co
-looks for an \*r file of the form
-.IB path2 /RCS/ workfile ,v
-or
-.IB path2 / workfile ,v
-(in this order).
-.PP
-If the \*r file is specified without a path in 1) and 2), then
-.B co
-looks for the \*r file first in the directory
-.B ./RCS
-and then in the current
-directory.
-.SH EXAMPLES
-Suppose the current directory contains a subdirectory
-.B RCS
-with an \*r file
-.BR io.c,v .
-Then all of the following commands retrieve the latest
-revision from
-.B RCS/io.c,v
-and store it into
-.BR io.c .
-.LP
-.RS
-.nf
-.ft 3
-co  io.c;    co  RCS/io.c,v;   co  io.c,v;
-co  io.c  RCS/io.c,v;    co  io.c  io.c,v;
-co  RCS/io.c,v  io.c;    co  io.c,v  io.c;
-.ft
-.fi
-.RE
 .SH "FILE MODES"
 The working file inherits the read and execute permissions from the \*r
 file.  In addition, the owner write permission is turned on, unless
@@ -574,8 +524,15 @@ is given, the working file is deleted without asking.
 accesses files much as
 .BR ci (1)
 does, except that it does not need to read the working file.
+.SH ENVIRONMENT
+.TP
+.B \s-1RCSINIT\s0
+options prepended to the argument list, separated by spaces.
+See
+.BR ci (1)
+for details.
 .SH DIAGNOSTICS
-The \*r file name, the working file name,
+The \*r pathname, the working pathname,
 and the revision number retrieved are
 written to the diagnostic output.
 The exit status is zero if and only if all operations were successful.
@@ -586,9 +543,9 @@ Revision Number: \*(Rv; Release Date: \*(Dt.
 .br
 Copyright \(co 1982, 1988, 1989 by Walter F. Tichy.
 .br
-Copyright \(co 1990 by Paul Eggert.
+Copyright \(co 1990, 1991 by Paul Eggert.
 .SH "SEE ALSO"
-ci(1), ctime(3), date(1), ident(1),
+ci(1), ctime(3), date(1), ident(1), make(1),
 rcs(1), rcsdiff(1), rcsintro(1), rcsmerge(1), rlog(1),
 rcsfile(5)
 .br
@@ -609,3 +566,4 @@ into the keyword.
 The
 .B \-d
 option sometimes gets confused, and accepts no date before 1970.
+.br

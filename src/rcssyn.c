@@ -10,14 +10,14 @@
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -37,6 +37,19 @@ Report problems and direct all questions to:
 
 
 /* $Log: rcssyn.c,v $
+ * Revision 5.8  1991/08/19  03:13:55  eggert
+ * Tune.
+ *
+ * Revision 5.7  1991/04/21  11:58:29  eggert
+ * Disambiguate names on shortname hosts.
+ * Fix errno bug.  Add MS-DOS support.
+ *
+ * Revision 5.6  1991/02/28  19:18:51  eggert
+ * Fix null termination bug in reporting keyword expansion.
+ *
+ * Revision 5.5  1991/02/25  07:12:44  eggert
+ * Check diff output more carefully; avoid overflow.
+ *
  * Revision 5.4  1990/11/01  05:28:48  eggert
  * When ignoring unknown phrases, copy them to the output RCS file.
  * Permit arbitrary data in logs and comment leaders.
@@ -120,23 +133,24 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
-libId(synId, "$Id: rcssyn.c,v 5.4 1990/11/01 05:28:48 eggert Exp $")
+libId(synId, "$Id: rcssyn.c,v 5.8 1991/08/19 03:13:55 eggert Exp $")
 
 /* forward */
-static const char *getkeyval P((const char*,enum tokens,int));
+static char const *getkeyval P((char const*,enum tokens,int));
+static int strn2expmode P((char const*,size_t));
 
 /* keyword table */
 
-const char
+char const
 	Kdesc[]     = "desc",
 	Klog[]      = "log",
 	Ktext[]     = "text";
 
-static const char
+static char const
 	Kaccess[]   = "access",
 	Kauthor[]   = "author",
 	Kbranch[]   = "branch",
-	Kbranches[] = "branches",
+	K_branches[]= "branches",
 	Kcomment[]  = "comment",
 	Kdate[]     = "date",
 	Kexpand[]   = "expand",
@@ -159,13 +173,13 @@ struct lock     * Locks;
 int		  Expand;
 int               StrictLocks;
 struct hshentry * Head;
-const char      * Dbranch;
-int               TotalDeltas;
+char const      * Dbranch;
+unsigned TotalDeltas;
 
 
 	static void
 getsemi(key)
-	const char *key;
+	char const *key;
 /* Get a semicolon to finish off a phrase started by KEY.  */
 {
 	if (!getlex(SEMI))
@@ -187,7 +201,7 @@ getdnum()
 getadmin()
 /* Read an <admin> and initialize the appropriate global variables.  */
 {
-	register const char *id;
+	register char const *id;
         struct access   * newaccess;
         struct assoc    * newassoc;
         struct lock     * newlock;
@@ -288,8 +302,10 @@ getadmin()
 		if (nexttok==STRING) {
 			bufautobegin(&b);
 			cb = savestring(&b);
-			if ((Expand = str2expmode(cb.string)) < 0)
-			    fatserror("unknown expand mode %s", b.string);
+			if ((Expand = strn2expmode(cb.string,cb.size)) < 0)
+			    fatserror("unknown expand mode %.*s",
+				(int)cb.size, cb.string
+			    );
 			bufautoend(&b);
 			nextlex();
 		}
@@ -298,7 +314,7 @@ getadmin()
 	Ignored = getphrases(Kdesc);
 }
 
-const char *const expand_names[] = {
+char const *const expand_names[] = {
 	/* These must agree with *_EXPAND in rcsbase.h.  */
 	"kv","kvl","k","v","o",
 	0
@@ -306,13 +322,21 @@ const char *const expand_names[] = {
 
 	int
 str2expmode(s)
-	const char *s;
+	char const *s;
 /* Yield expand mode corresponding to S, or -1 if bad.  */
 {
-	const char *const *p;
+	return strn2expmode(s, strlen(s));
+}
+
+	static int
+strn2expmode(s, n)
+	char const *s;
+	size_t n;
+{
+	char const *const *p;
 
 	for (p = expand_names;  *p;  ++p)
-		if (strcmp(*p,s) == 0)
+		if (memcmp(*p,s,n) == 0  &&  !(*p)[n])
 			return p - expand_names;
 	return -1;
 }
@@ -357,7 +381,7 @@ getdelta()
 
         Delta->state = getkeyval(Kstate, ID, true);
 
-	getkey(Kbranches);
+	getkey(K_branches);
 	LastBranch = &Delta->branches;
 	while ((num = getdnum())) {
 		NewBranch = ftalloc(struct branchhead);
@@ -366,12 +390,13 @@ getdelta()
 		LastBranch = &NewBranch->nextbranch;
         }
 	*LastBranch = nil;
-	getsemi(Kbranches);
+	getsemi(K_branches);
 
 	getkey(Knext);
 	Delta->next = num = getdnum();
 	getsemi(Knext);
 	Delta->lockedby = nil;
+	Delta->log.string = 0;
 	Delta->selector = true;
 	Delta->ig = getphrases(Kdesc);
         TotalDeltas++;
@@ -385,7 +410,7 @@ gettree()
  * updates the lockedby fields.
  */
 {
-	const struct lock *currlock;
+	struct lock const *currlock;
 
         while (getdelta());
         currlock=Locks;
@@ -416,9 +441,9 @@ int  prdesc;
 
 
 
-	static const char *
+	static char const *
 getkeyval(keyword, token, optional)
-	const char *keyword;
+	char const *keyword;
 	enum tokens token;
 	int optional;
 /* reads a pair of the form
@@ -428,7 +453,7 @@ getkeyval(keyword, token, optional)
  * the actual character string of <id> or <num> is returned.
  */
 {
-	register const char *val = nil;
+	register char const *val = nil;
 
 	getkey(keyword);
         if (nexttok==token) {
@@ -453,11 +478,9 @@ register FILE * fout;
  * and Head have been set.
  */
 {
-	const struct assoc *curassoc;
-	const struct lock *curlock;
-	const struct access *curaccess;
-	register const char *sp;
-	register size_t ss;
+	struct assoc const *curassoc;
+	struct lock const *curlock;
+	struct access const *curaccess;
 
 	aprintf(fout, "%s\t%s;\n", Khead, Head?Head->num:"");
 	if (Dbranch && VERSION(4)<=RCSversion)
@@ -483,15 +506,10 @@ register FILE * fout;
         }
 	if (StrictLocks) aprintf(fout, "; %s", Kstrict);
 	aprintf(fout, ";\n");
-	if ((ss = Comment.size)) {
-		aprintf(fout, "%s\t%c", Kcomment, SDELIM);
-		sp = Comment.string;
-		do {
-		    if (*sp == SDELIM)
-			afputc(SDELIM,fout);
-		    afputc(*sp++,fout);
-		} while (--ss);
-		aprintf(fout, "%c;\n", SDELIM);
+	if (Comment.size) {
+		aprintf(fout, "%s\t", Kcomment);
+		putstring(fout, true, Comment, false);
+		aprintf(fout, ";\n");
         }
 	if (Expand != KEYVAL_EXPAND)
 		aprintf(fout, "%s\t%c%s%c;\n",
@@ -506,12 +524,12 @@ register FILE * fout;
 
 	static void
 putdelta(node,fout)
-register const struct hshentry *node;
+register struct hshentry const *node;
 register FILE * fout;
 /* Function: prints a <delta> node to fout;
  */
 {
-	const struct branchhead *nextbranch;
+	struct branchhead const *nextbranch;
 
         if (node == nil) return;
 
@@ -536,12 +554,12 @@ register FILE * fout;
 
 	void
 puttree(root,fout)
-const struct hshentry * root;
+struct hshentry const *root;
 register FILE * fout;
 /* Function: prints the delta tree in preorder to fout, starting with root.
  */
 {
-	const struct branchhead *nextbranch;
+	struct branchhead const *nextbranch;
 
         if (root==nil) return;
 
@@ -558,9 +576,14 @@ register FILE * fout;
 }
 
 
+	static exiting void
+unexpected_EOF()
+{
+	faterror("unexpected EOF in diff output");
+}
 
 int putdtext(num,log,srcfilename,fout,diffmt)
-	const char *num, *srcfilename;
+	char const *num, *srcfilename;
 	struct cbuf log;
 	FILE *fout;
 	int diffmt;
@@ -572,63 +595,89 @@ int putdtext(num,log,srcfilename,fout,diffmt)
  * If diffmt is true, also checks that text is valid diff -n output.
  */
 {
-	FILE *fin;
+	RILE *fin;
 	int result;
-	if (!(fin = fopen(srcfilename,"r"))) {
+	if (!(fin = Iopen(srcfilename, "r", (struct stat*)0))) {
 		eerror(srcfilename);
 		return false;
 	}
 	result = putdftext(num,log,fin,fout,diffmt);
-	ffclose(fin);
+	Ifclose(fin);
 	return result;
 }
 
+	void
+putstring(out, delim, s, log)
+	register FILE *out;
+	struct cbuf s;
+	int delim, log;
+/*
+ * Output to OUT one SDELIM if DELIM, then the string S with SDELIMs doubled.
+ * If LOG is set then S is a log string; append a newline if S is nonempty.
+ */
+{
+	register char const *sp;
+	register size_t ss;
+
+	if (delim)
+		aputc(SDELIM, out);
+	sp = s.string;
+	for (ss = s.size;  ss;  --ss) {
+		if (*sp == SDELIM)
+			aputc(SDELIM, out);
+		aputc(*sp++, out);
+	}
+	if (s.size && log)
+		aputc('\n', out);
+	aputc(SDELIM, out);
+}
+
 	int
-putdftext(num,log,fin,fout,diffmt)
-	const char *num;
+putdftext(num,log,finfile,foutfile,diffmt)
+	char const *num;
 	struct cbuf log;
-	register FILE *fin;
-	register FILE *fout;
+	RILE *finfile;
+	FILE *foutfile;
 	int diffmt;
 /* like putdtext(), except the source file is already open */
 {
-	register const char *sp;
+	declarecache;
+	register FILE *fout;
 	register int c;
-	register size_t ss;
+	register RILE *fin;
 	int ed;
 	struct diffcmd dc;
 
+	fout = foutfile;
 	aprintf(fout,DELNUMFORM,num,Klog);
         /* put log */
-	afputc(SDELIM,fout);
-	sp = log.string;
-	for (ss = log.size;  ss;  --ss) {
-		if (*sp == SDELIM)
-			aputc(SDELIM,fout);
-		aputc(*sp++,fout);
-	}
+	putstring(fout, true, log, true);
         /* put text */
-	aprintf(fout, "\n%c\n%s\n%c",SDELIM,Ktext,SDELIM);
+	aprintf(fout, "\n%s\n%c", Ktext, SDELIM);
+	fin = finfile;
+	setupcache(fin);
 	if (!diffmt) {
 	    /* Copy the file */
-	    while ((c=getc(fin))!=EOF) {
+	    cache(fin);
+	    for (;;) {
+		cachegeteof(c, break;);
 		if (c==SDELIM) aputc(SDELIM,fout);   /*double up SDELIM*/
 		aputc(c,fout);
 	    }
 	} else {
 	    initdiffcmd(&dc);
-	    while (0  <=  (ed = getdiffcmd(fin,EOF,fout,&dc)))
-		if (ed)
+	    while (0  <=  (ed = getdiffcmd(fin,false,fout,&dc)))
+		if (ed) {
+		    cache(fin);
 		    while (dc.nlines--)
 			do {
-			    if ((c=getc(fin)) == EOF) {
-				if (!dc.nlines)
-				    goto OK_EOF;
-				faterror("unexpected EOF in diff output");
-			    }
-			    if (c==SDELIM) aputc(SDELIM,fout);
+			    cachegeteof(c, { if (!dc.nlines) goto OK_EOF; unexpected_EOF(); });
+			    if (c == SDELIM)
+				aputc(SDELIM,fout);
 			    aputc(c,fout);
 			} while (c != '\n');
+		    uncache(fin);
+		}
 	}
     OK_EOF:
 	aprintf(fout, "%c\n", SDELIM);
@@ -644,13 +693,28 @@ initdiffcmd(dc)
 	dc->dafter = 0;
 }
 
+	static exiting void
+badDiffOutput(buf)
+	char const *buf;
+{
+	faterror("bad diff output line: %s", buf);
+}
+
+	static exiting void
+diffLineNumberTooLarge(buf)
+	char const *buf;
+{
+	faterror("diff line number too large: %s", buf);
+}
+
 	int
-getdiffcmd(fin,delimiter,fout,dc)
-	register FILE *fin, *fout;
+getdiffcmd(finfile, delimiter, foutfile, dc)
+	RILE *finfile;
+	FILE *foutfile;
 	int delimiter;
 	struct diffcmd *dc;
 /* Get a editing command output by 'diff -n' from fin.
- * The input is delimited by the delimiter, which may be EOF for no delimiter.
+ * The input is delimited by SDELIM if delimiter is set, EOF otherwise.
  * Copy a clean version of the command to fout (if nonnull).
  * Yield 0 for 'd', 1 for 'a', and -1 for EOF.
  * Store the command's line number and length into dc->line1 and dc->nlines.
@@ -658,47 +722,73 @@ getdiffcmd(fin,delimiter,fout,dc)
  */
 {
 	register int c;
+	declarecache;
+	register FILE *fout;
 	register char *p;
-	unsigned long line1, nlines;
+	register RILE *fin;
+	unsigned long line1, nlines, t;
 	char buf[BUFSIZ];
-	c = getc(fin);
-	if (c==delimiter) {
-		if (c!=EOF && fout)
-			aputc(c, fout);
-		return EOF;
+
+	fin = finfile;
+	fout = foutfile;
+	setupcache(fin); cache(fin);
+	cachegeteof(c, { if (delimiter) unexpected_EOF(); return -1; } );
+	if (delimiter) {
+		if (c==SDELIM) {
+			cacheget(c);
+			if (c==SDELIM) {
+				buf[0] = c;
+				buf[1] = 0;
+				badDiffOutput(buf);
+			}
+			uncache(fin);
+			nextc = c;
+			if (fout)
+				aprintf(fout, "%c%c", SDELIM, c);
+			return -1;
+		}
 	}
 	p = buf;
 	do {
-		if (c == EOF) {
-			faterror("unexpected EOF in diff output");
-		}
 		if (buf+BUFSIZ-2 <= p) {
 			faterror("diff output command line too long");
 		}
 		*p++ = c;
-	} while ((c=getc(fin)) != '\n');
-	if (delimiter!=EOF)
+		cachegeteof(c, unexpected_EOF();) ;
+	} while (c != '\n');
+	uncache(fin);
+	if (delimiter)
 		++rcsline;
 	*p = '\0';
-	for (p = buf+1;  *p++ == ' ';)
+	for (p = buf+1;  (c = *p++) == ' ';  )
 		;
-	--p;
-	if (!((buf[0]=='a' || buf[0]=='d')  &&  isdigit(*p))) {
-		faterror("bad diff output: %s", buf);
-	}
 	line1 = 0;
-	do {
-		line1 = line1*10 + (*p++ - '0');
-	} while (isdigit(*p));
-	while (*p++ == ' ')
-		;
-	--p;
-	nlines = 0;
-	while (isdigit(*p))
-		nlines = nlines*10 + (*p++ - '0');
-	if (!nlines) {
-		faterror("incorrect range %lu in diff output: %s", nlines, buf);
+	while (isdigit(c)) {
+		t = line1 * 10;
+		if (
+			ULONG_MAX/10 < line1  ||
+			(line1 = t + (c - '0'))  <  t
+		)
+			diffLineNumberTooLarge(buf);
+		c = *p++;
 	}
+	while (c == ' ')
+		c = *p++;
+	nlines = 0;
+	while (isdigit(c)) {
+		t = nlines * 10;
+		if (
+			ULONG_MAX/10 < nlines  ||
+			(nlines = t + (c - '0'))  <  t
+		)
+			diffLineNumberTooLarge(buf);
+		c = *p++;
+	}
+	if (c || !nlines) {
+		badDiffOutput(buf);
+	}
+	if (line1+nlines < line1)
+		diffLineNumberTooLarge(buf);
 	switch (buf[0]) {
 	    case 'a':
 		if (line1 < dc->adprev) {
@@ -713,6 +803,8 @@ getdiffcmd(fin,delimiter,fout,dc)
 		dc->adprev = line1;
 		dc->dafter = line1 + nlines;
 		break;
+	    default:
+		badDiffOutput(buf);
 	}
 	if (fout) {
 		aprintf(fout, "%s\n", buf);
@@ -726,7 +818,7 @@ getdiffcmd(fin,delimiter,fout,dc)
 
 #ifdef SYNTEST
 
-const char cmdid[] = "syntest";
+char const cmdid[] = "syntest";
 
 	int
 main(argc,argv)
@@ -737,7 +829,7 @@ int argc; char * argv[];
 		aputs("No input file\n",stderr);
 		exitmain(EXIT_FAILURE);
         }
-        if ((finptr=fopen(argv[1], "r")) == NULL) {
+	if (!(finptr = Iopen(argv[1], FOPEN_R, (struct stat*)0))) {
 		faterror("can't open input file %s", argv[1]);
         }
         Lexinit();
@@ -749,7 +841,9 @@ int argc; char * argv[];
 
         getdesc(true);
 
-        if (nextlex(),nexttok!=EOFILE) {
+	nextlex();
+
+	if (!eoflex()) {
 		fatserror("expecting EOF");
         }
 	exitmain(EXIT_SUCCESS);

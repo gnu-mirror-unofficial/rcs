@@ -3,14 +3,14 @@
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -31,6 +31,18 @@ Report problems and direct all questions to:
 
 
 /* $Log: rcsgen.c,v $
+ * Revision 5.10  1991/10/07  17:32:46  eggert
+ * Fix log bugs, e.g. ci -t/dev/null when has_mmap.
+ *
+ * Revision 5.9  1991/09/10  22:15:46  eggert
+ * Fix test for redirected stdin.
+ *
+ * Revision 5.8  1991/08/19  03:13:55  eggert
+ * Add piece tables.  Tune.
+ *
+ * Revision 5.7  1991/04/21  11:58:24  eggert
+ * Add MS-DOS support.
+ *
  * Revision 5.6  1990/12/27  19:54:26  eggert
  * Fix bug: rcs -t inserted \n, making RCS file grow.
  *
@@ -110,33 +122,30 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
-libId(genId, "$Id: rcsgen.c,v 5.6 1990/12/27 19:54:26 eggert Exp $")
+libId(genId, "$Id: rcsgen.c,v 5.10 1991/10/07 17:32:46 eggert Exp $")
 
 int interactiveflag;  /* Should we act as if stdin is a tty?  */
-struct cbuf curlogmsg;  /* buffer for current log message */
-struct buf curlogbuf;  /* same, including allocated but unused bytes */
+struct buf curlogbuf;  /* buffer for current log message */
 
-enum stringwork {copy, edit, expand, edit_expand };
-
-static void scandeltatext P((struct hshentry*,enum stringwork));
+enum stringwork { enter, copy, edit, expand, edit_expand };
+static void scandeltatext P((struct hshentry*,enum stringwork,int));
 
 
 
 
-	const char *
-buildrevision(deltas, target, tostdout, expandflag)
-	const struct hshentries *deltas;
+	char const *
+buildrevision(deltas, target, outfile, expandflag)
+	struct hshentries const *deltas;
 	struct hshentry *target;
-	int tostdout;
+	FILE *outfile;
 	int expandflag;
 /* Function: Generates the revision given by target
  * by retrieving all deltas given by parameter deltas and combining them.
- * If tostdout is set, the revision is printed on the standard output,
+ * If outfile is set, the revision is output to it,
  * otherwise written into a temporary file.
- * Temporary files are put into tmp unless the caller has already set up
- * the temp file directory by invoking initeditfiles(), which sets fcopy.
+ * Temporary files are allocated by maketemp().
  * if expandflag is set, keyword expansion is performed.
- * Returns nil on errors, the name of the file with the revision otherwise.
+ * Return nil if outfile is set, the name of the temporary file otherwise.
  *
  * Algorithm: Copy initial revision unchanged.  Then edit all revisions but
  * the last one into it, alternating input and output files (resultfile and
@@ -146,41 +155,36 @@ buildrevision(deltas, target, tostdout, expandflag)
  * or no keyword expansion is necessary, or if output goes to stdout.
  */
 {
-	static const char nonnil[] = ""; /* some char* value that isn't nil */
-
 	if (deltas->first == target) {
                 /* only latest revision to generate */
-		if (tostdout) {
-                        fcopy=stdout;
-			scandeltatext(target, expandflag?expand:copy);
-			return nonnil;
-                } else {
-			if (!fcopy)
-				inittmpeditfiles();
-                        scandeltatext(target,expandflag?expand:copy);
-                        ffclose(fcopy);
+		openfcopy(outfile);
+		scandeltatext(target, expandflag?expand:copy, true);
+		if (outfile)
+			return 0;
+		else {
+			Ozclose(&fcopy);
                         return(resultfile);
-                }
+		}
         } else {
                 /* several revisions to generate */
-		if (!fcopy)
-			inittmpeditfiles();
-                /* write initial revision into fcopy, no keyword expansion */
-		scandeltatext(deltas->first, copy);
+		/* Get initial revision without keyword expansion.  */
+		scandeltatext(deltas->first, enter, false);
 		while ((deltas=deltas->rest)->rest) {
                         /* do all deltas except last one */
-			scandeltatext(deltas->first, edit);
+			scandeltatext(deltas->first, edit, false);
                 }
-		if (expandflag | tostdout) {
+		if (expandflag || outfile) {
                         /* first, get to beginning of file*/
-			finishedit((struct hshentry *)nil);
-			swapeditfiles(tostdout);
+			finishedit((struct hshentry *)nil, outfile, false);
                 }
-		scandeltatext(deltas->first, expandflag ? edit_expand : edit);
-		finishedit(expandflag ? deltas->first : (struct hshentry*)nil);
-		if (tostdout)
-			return nonnil;
-		ffclose(fcopy);
+		scandeltatext(deltas->first, expandflag?edit_expand:edit, true);
+		finishedit(
+			expandflag ? deltas->first : (struct hshentry*)nil,
+			outfile, true
+		);
+		if (outfile)
+			return 0;
+		Ozclose(&fcopy);
 		return resultfile;
         }
 }
@@ -188,28 +192,31 @@ buildrevision(deltas, target, tostdout, expandflag)
 
 
 	static void
-scandeltatext(delta,func)
-struct hshentry * delta; enum stringwork func;
+scandeltatext(delta, func, needlog)
+	struct hshentry * delta;
+	enum stringwork func;
+	int needlog;
 /* Function: Scans delta text nodes up to and including the one given
  * by delta. For the one given by delta, the log message is saved into
- * curlogmsg and the text is processed according to parameter func.
+ * delta->log if needlog is set; func specifies how to handle the text.
  * Assumes the initial lexeme must be read in first.
  * Does not advance nexttok after it is finished.
  */
 {
-	const struct hshentry *nextdelta;
+	struct hshentry const *nextdelta;
 	struct cbuf cb;
 
         for (;;) {
+		if (eoflex())
+		    fatserror("can't find delta for revision %s", delta->num);
                 nextlex();
                 if (!(nextdelta=getnum())) {
-		    fatserror("can't find delta for revision %s", delta->num);
+		    fatserror("delta number corrupted");
                 }
 		getkeystring(Klog);
-		if (delta==nextdelta) {
+		if (needlog && delta==nextdelta) {
 			cb = savestring(&curlogbuf);
-			delta->log = curlogmsg =
-				cleanlogmsg(curlogbuf.string, cb.size);
+			delta->log = cleanlogmsg(curlogbuf.string, cb.size);
                 } else {readstring();
                 }
                 nextlex();
@@ -223,6 +230,7 @@ struct hshentry * delta; enum stringwork func;
 
 	}
 	switch (func) {
+		case enter: enterstring(); break;
 		case copy: copystring(); break;
 		case expand: xpandstring(delta); break;
 		case edit: editstring((struct hshentry *)nil); break;
@@ -236,7 +244,7 @@ cleanlogmsg(m, s)
 	size_t s;
 {
 	register char *t = m;
-	register const char *f = t;
+	register char const *f = t;
 	struct cbuf r;
 	while (s) {
 	    --s;
@@ -269,25 +277,28 @@ int ttystdin()
 	int
 getcstdin()
 {
-	register int c = getchar();
-	if (c == EOF) {
-		if (ferror(stdin))
-			IOerror();
-		if (ttystdin()) {
-			clearerr(stdin);
+	register FILE *in;
+	register int c;
+
+	in = stdin;
+	if (feof(in) && ttystdin())
+		clearerr(in);
+	c = getc(in);
+	if (c < 0) {
+		testIerror(in);
+		if (feof(in) && ttystdin())
 			afputc('\n',stderr);
-		}
 	}
 	return c;
 }
 
 #if has_prototypes
 	int
-yesorno(int default_answer, const char *question, ...)
+yesorno(int default_answer, char const *question, ...)
 #else
 		/*VARARGS2*/ int
 	yesorno(default_answer, question, va_alist)
-		int default_answer; const char *question; va_dcl
+		int default_answer; char const *question; va_dcl
 #endif
 {
 	va_list args;
@@ -299,7 +310,7 @@ yesorno(int default_answer, const char *question, ...)
 		va_end(args);
 		eflush();
 		r = c = getcstdin();
-		while (c!='\n' && c!=EOF)
+		while (c!='\n' && !feof(stdin))
 			c = getcstdin();
 		if (r=='y' || r=='Y')
 			return true;
@@ -313,74 +324,109 @@ yesorno(int default_answer, const char *question, ...)
 	void
 putdesc(textflag, textfile)
 	int textflag;
-	const char *textfile;
+	char *textfile;
 /* Function: puts the descriptive text into file frewrite.
  * if finptr && !textflag, the text is copied from the old description.
  * Otherwise, if the textfile!=nil, the text is read from that
  * file, or from stdin, if textfile==nil.
  * A textfile with a leading '-' is treated as a string, not a file name.
  * If finptr, the old descriptive text is discarded.
+ * Always clears foutptr.
  */
-{       register FILE * txt; register int c, old1, old2;
+{
+	static struct buf desc;
+	static struct cbuf desclean;
+
+	register FILE *txt;
+	register int c;
 	register FILE * frew;
+	register char *p;
+	register size_t s;
+	char const *plim;
 
 	frew = frewrite;
 	if (finptr && !textflag) {
                 /* copy old description */
-		aprintf(frew,"\n\n%s%c",Kdesc,nextc);
+		aprintf(frew, "\n\n%s%c", Kdesc, nextc);
 		foutptr = frewrite;
 		getdesc(false);
+		foutptr = 0;
         } else {
+		foutptr = 0;
                 /* get new description */
 		if (finptr) {
                         /*skip old description*/
-			foutptr = NULL;
 			getdesc(false);
                 }
 		aprintf(frew,"\n\n%s\n%c",Kdesc,SDELIM);
-                if (textfile) {
-                        old1='\n';
-                        /* copy textfile */
-			txt = NULL;
-			if (*textfile=='-' || (txt=fopen(textfile,"r"))) {
-				while (txt ? (c=getc(txt))!=EOF : (c = *++textfile)) {
-					if (c==SDELIM) afputc(c,frew); /*double up*/
-					afputc(c,frew);
-                                        old1=c;
-                                }
-				if (old1!='\n') afputc('\n',frew);
-				if (txt) ffclose(txt);
-				aprintf(frew, "%c\n", SDELIM);
-				return;
-                        } else {
-				efaterror(textfile);
-                        }
-                }
-                /* read text from stdin */
-		if (feof(stdin))
-		    faterror("can't reread redirected stdin for description; use -t-<description>");
-		if (ttystdin())
-		    aputs("enter description, terminated with single '.' or end of file:\nNOTE: This is NOT the log message!\n>> ",stderr);
-		if ((old1=getcstdin()) != EOF) {
-		     old2 = '\n';
-		     for (;;) {
-			    if (old1=='\n' && ttystdin())
-				    aputs(">> ",stderr);
-			    c = getcstdin();
-                            if (c==EOF) {
-				    afputc(old1,frew);
-				    if (old1!='\n') afputc('\n',frew);
-                                    break;
-                            }
-			    if (c=='\n' && old1=='.' && old2=='\n') {
-                                    break;
-                            }
-			    if (old1==SDELIM) afputc(old1,frew); /* double up*/
-			    afputc(old1,frew);
-                            old2=old1;
-                            old1=c;
-                    } /* end for */
+		if (!textfile)
+			desclean = getsstdin(
+				"t-", "description",
+				"NOTE: This is NOT the log message!\n", &desc
+			);
+		else if (!desclean.string) {
+			if (*textfile == '-') {
+				p = textfile + 1;
+				s = strlen(p);
+			} else {
+				if (!(txt = fopen(textfile, "r")))
+					efaterror(textfile);
+				bufalloc(&desc, 1);
+				p = desc.string;
+				plim = p + desc.size;
+				for (;;) {
+					if ((c=getc(txt)) < 0) {
+						testIerror(txt);
+						if (feof(txt))
+							break;
+					}
+					if (plim <= p)
+					    p = bufenlarge(&desc, &plim);
+					*p++ = c;
+				}
+				if (fclose(txt) != 0)
+					Ierror();
+				s = p - desc.string;
+				p = desc.string;
+			}
+			desclean = cleanlogmsg(p, s);
 		}
-		aprintf(frew, "%c\n", SDELIM);
+		putstring(frew, false, desclean, true);
+		aputc('\n', frew);
         }
+}
+
+	struct cbuf
+getsstdin(option, name, note, buf)
+	char const *option, *name, *note;
+	struct buf *buf;
+{
+	register int c;
+	register char *p;
+	register size_t i;
+	register int tty = ttystdin();
+
+	if (tty)
+	    aprintf(stderr,
+		"enter %s, terminated with single '.' or end of file:\n%s>> ",
+		name, note
+	    );
+	else if (feof(stdin))
+	    faterror("can't reread redirected stdin for %s; use -%s<%s>",
+		name, option, name
+	    );
+	
+	for (
+	   i = 0,  p = 0;
+	   c = getcstdin(),  !feof(stdin);
+	   bufrealloc(buf, i+1),  p = buf->string,  p[i++] = c
+	)
+		if (c == '\n')
+			if (i  &&  p[i-1]=='.'  &&  (i==1 || p[i-2]=='\n')) {
+				/* Remove trailing '.'.  */
+				--i;
+				break;
+			} else if (tty)
+				aputs(">> ", stderr);
+	return cleanlogmsg(p, i);
 }

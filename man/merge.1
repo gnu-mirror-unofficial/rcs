@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: merge.1,v 5.1 1990/08/29 07:12:59 eggert Exp $
+.Id $Id: merge.1,v 5.3 1991/02/28 19:18:45 eggert Exp $
 .TH MERGE 1 \*(Dt GNU
 .SH NAME
 merge \- three-way file merge
@@ -51,8 +51,19 @@ An overlap occurs if both
 and
 .I file3
 have changes in a common segment of lines.
+On a few older hosts where
+.B diff3
+does not support the
+.B \-E
+option,
 .B merge
-outputs a message if overlaps occurred,
+does not detect overlaps, and merely supplies the changed lines from
+.I file3.
+On most hosts, if overlaps occur,
+.B merge
+outputs a message (unless the
+.B \-q
+option is given),
 and includes both alternatives
 in the result.  The alternatives are delimited as follows:
 .LP
@@ -77,9 +88,6 @@ options are given, the labels are output in place of the names
 and
 .I file3
 in overlap reports.
-Any overlap message is suppressed if the
-.B \-q
-option is given.
 .SH DIAGNOSTICS
 Exit status is 0 for no overlaps, 1 for some overlaps, 2 for trouble.
 .SH IDENTIFICATION
@@ -89,6 +97,6 @@ Revision Number: \*(Rv; Release Date: \*(Dt.
 .br
 Copyright \(co 1982, 1988, 1989 by Walter F. Tichy.
 .br
-Copyright \(co 1990 by Paul Eggert.
+Copyright \(co 1990, 1991 by Paul Eggert.
 .SH SEE ALSO
 diff3(1), diff(1), rcsmerge(1), co(1).

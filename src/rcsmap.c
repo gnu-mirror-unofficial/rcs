@@ -1,14 +1,14 @@
 /* RCS map of character types */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -28,14 +28,11 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
-libId(mapId, "$Id: rcsmap.c,v 5.0 1990/08/22 08:13:14 eggert Exp $")
+libId(mapId, "$Id: rcsmap.c,v 5.2 1991/08/19 03:13:55 eggert Exp $")
 
 /* map of character types */
 /* ISO 8859/1 (Latin-1) */
-/* For best results, this should match diff's opinion of which */
-/* characters may appear in a text file. */
-const enum tokens map[] = {
-	EOFILE, /* ctab[-1] */
+enum tokens const ctab[] = {
 	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,
 	SPACE,	SPACE,	NEWLN,	SPACE,	SPACE,	SPACE,	UNKN,	UNKN,
 	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,	UNKN,
@@ -67,5 +64,5 @@ const enum tokens map[] = {
 	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,
 	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,
 	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	IDCHAR,
-	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,
+	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter,	Letter
 };

@@ -21,6 +21,9 @@
  *	(ARPANET: KLH @ SRI)
  */
 /* $Log: maketime.c,v $
+ * Revision 5.3  1991/08/19  03:13:55  eggert
+ * Add setfiledate, str2time, TZ_must_be_set.
+ *
  * Revision 5.2  1990/11/01  05:03:30  eggert
  * Remove lint.
  *
@@ -68,23 +71,23 @@
 
 #include "rcsbase.h"
 
-libId(maketId, "$Id: maketime.c,v 5.2 1990/11/01 05:03:30 eggert Exp $")
+libId(maketId, "$Id: maketime.c,v 5.3 1991/08/19 03:13:55 eggert Exp $")
 
-static const struct tm *time2tm P((time_t));
+static struct tm const *time2tm P((time_t));
 
 #define given(v) (0 <= (v)) /* Negative values are unspecified. */
 
-static const int daytb[] = {
+static int const daytb[] = {
 	/* # days in year thus far, indexed by month (0-12!!) */
 	0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
 };
 
 	static time_t
 maketime(atm,zone)
-	const struct tm *atm;
+	struct tm const *atm;
 	int zone;
 {
-    register const struct tm *tp;
+    register struct tm const *tp;
     register int i;
     int year, yday, mon, day, hour, min, sec, leap, localzone;
     int attempts;
@@ -261,18 +264,22 @@ printf("HMS: %d %d %d T=%ld\n",hour,min,sec,tres);
 
 /*
 * Convert Unix time to struct tm format.
-* Use Coordinated Universal Time (UTC) if available and if version 5 or newer;
+* Use Coordinated Universal Time (UTC) if version 5 or newer;
 * use local time otherwise.
 */
-	static const struct tm *
+	static struct tm const *
 time2tm(unixtime)
 	time_t unixtime;
 {
-	const struct tm *tm;
-	return
-			VERSION(5)<=RCSversion && (tm = gmtime(&unixtime))
-		?	tm
-		:	localtime(&unixtime);
+	struct tm const *tm;
+#	if TZ_must_be_set
+		static char const *TZ;
+		if (!TZ  &&  !(TZ = getenv("TZ")))
+			faterror("TZ is not set");
+#	endif
+	if (!(tm  =  (RCSversion<VERSION(5) ? localtime : gmtime)(&unixtime)))
+		faterror("UTC is not available; perhaps TZ is not set?");
+	return tm;
 }
 
 /*
@@ -285,7 +292,7 @@ time2date(unixtime,date)
 	time_t unixtime;
 	char date[datesize];
 {
-	register const struct tm *tm = time2tm(unixtime);
+	register struct tm const *tm = time2tm(unixtime);
 	VOID sprintf(date, DATEFORM,
 		tm->tm_year  +  (tm->tm_year<100 ? 0 : 1900),
 		tm->tm_mon+1, tm->tm_mday,
@@ -295,13 +302,10 @@ time2date(unixtime,date)
 
 
 
-	void
-str2date(source, target)
-	const char *source;
-	char target[datesize];
-/* Parse a free-format date in SOURCE, convert it
- * into RCS internal format, and store the result into TARGET.
- */
+	static time_t
+str2time(source)
+	char const *source;
+/* Parse a free-format date in SOURCE, yielding a Unix format time.  */
 {
 	int zone;
 	time_t unixtime;
@@ -311,5 +315,30 @@ str2date(source, target)
 	    faterror("can't parse date/time: %s", source);
 	if ((unixtime = maketime(&parseddate, zone))  ==  -1)
 	    faterror("bad date/time: %s", source);
-	time2date(unixtime, target);
+	return unixtime;
+}
+
+	void
+str2date(source, target)
+	char const *source;
+	char target[datesize];
+/* Parse a free-format date in SOURCE, convert it
+ * into RCS internal format, and store the result into TARGET.
+ */
+{
+	time2date(str2time(source), target);
+}
+
+	int
+setfiledate(file, date)
+	char const *file, date[datesize];
+/* Set the access and modification time of FILE to DATE.  */
+{
+	static struct utimbuf times; /* static so unused fields are zero */
+	char datebuf[datesize];
+
+	if (!date)
+		return 0;
+	times.actime = times.modtime = str2time(date2str(date, datebuf));
+	return utime(file, &times);
 }

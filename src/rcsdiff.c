@@ -7,14 +7,14 @@
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -36,6 +36,15 @@ Report problems and direct all questions to:
 
 
 /* $Log: rcsdiff.c,v $
+ * Revision 5.10  1991/10/07  17:32:46  eggert
+ * Remove lint.
+ *
+ * Revision 5.9  1991/08/19  03:13:55  eggert
+ * Add RCSINIT, -r$.  Tune.
+ *
+ * Revision 5.8  1991/04/21  11:58:21  eggert
+ * Add -x, RCSINIT, MS-DOS support.
+ *
  * Revision 5.7  1990/12/13  06:54:07  eggert
  * GNU diff 1.15 has -u.
  *
@@ -112,42 +121,40 @@ Report problems and direct all questions to:
 #include "rcsbase.h"
 
 #if DIFF_L
-static const char *setup_label P((struct buf*,const char*,const char[datesize]));
+static char const *setup_label P((struct buf*,char const*,char const[datesize]));
 #endif
 static void cleanup P((void));
 
-static const char co[] = CO;
-
 static int exitstatus;
+static RILE *workptr;
+static struct stat workstat;
 
-mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert Exp $")
+mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.10 1991/10/07 17:32:46 eggert Exp $")
 {
-    static const char cmdusage[] =
+    static char const cmdusage[] =
 	    "\nrcsdiff usage: rcsdiff [-q] [-rrev1 [-rrev2]] [-Vn] [diff options] file ...";
-    static const char quietarg[] = "-q";
 
     int  revnums;                 /* counter for revision numbers given */
-    const char *rev1, *rev2;	/* revision numbers from command line */
-    const char *xrev1, *xrev2;	/* expanded revision numbers */
-    const char *expandarg, *lexpandarg, *versionarg;
+    char const *rev1, *rev2;	/* revision numbers from command line */
+    char const *xrev1, *xrev2;	/* expanded revision numbers */
+    char const *expandarg, *lexpandarg, *versionarg;
 #if DIFF_L
     static struct buf labelbuf[2];
     int file_labels;
-    const char **diff_label1, **diff_label2;
+    char const **diff_label1, **diff_label2;
     char date2[datesize];
 #endif
-    const char **diffv, **diffp;	/* argv for subsidiary diff */
-    const char **pp, *p, *diffvstr;
+    char const *cov[9];
+    char const **diffv, **diffp;	/* argv for subsidiary diff */
+    char const **pp, *p, *diffvstr;
     struct buf commarg;
     struct buf numericrev;	/* expanded revision number */
     struct hshentries *gendeltas;	/* deltas to be generated */
     struct hshentry * target;
-    int  exit_stats;
-    char *argp, *dcp;
+    char *a, *dcp, **newargv;
     register c;
 
-    initid();
-    catchints();
+    exitstatus = DIFF_SUCCESS;
 
     bufautobegin(&commarg);
     bufautobegin(&numericrev);
@@ -156,27 +163,26 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 #if DIFF_L
     file_labels = 0;
 #endif
-    expandarg = versionarg = quietarg; /* i.e. a no-op */
+    expandarg = versionarg = 0;
+    suffixes = X_DEFAULT;
 
     /* Room for args + 2 i/o [+ 2 labels] + 1 file + 1 trailing null.  */
-    diffp = diffv = tnalloc(const char*, argc + 4 + 2*DIFF_L);
+    diffp = diffv = tnalloc(char const*, argc + 4 + 2*DIFF_L);
     *diffp++ = nil;
     *diffp++ = nil;
     *diffp++ = DIFF;
 
-    while (--argc,++argv, argc>=1 && ((*argv)[0] == '-')) {
-	dcp = argp = *argv + 1;
-	while (c = *argp++) switch (c) {
+    argc = getRCSINIT(argc, argv, &newargv);
+    argv = newargv;
+    while (a = *++argv,  0<--argc && *a++=='-') {
+	dcp = a;
+	while (c = *a++) switch (c) {
 	    case 'r':
-		    if (*argp!='\0') {
-			if (revnums==0) {
-				rev1= argp; revnums=1;
-			} else if (revnums==1) {
-				rev2= argp; revnums=2;
-			} else {
-				faterror("too many revision numbers");
-			}
-		    } /* do nothing for empty -r */
+		    switch (++revnums) {
+			case 1: rev1=a; break;
+			case 2: rev2=a; break;
+			default: faterror("too many revision numbers");
+		    }
 		    goto option_handled;
 #if DIFF_L
 	    case 'L':
@@ -186,9 +192,9 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 #endif
 	    case 'C': case 'D': case 'F': case 'I':
 		    *dcp++ = c;
-		    if (*argp)
-			do *dcp++ = *argp;
-			while (*++argp);
+		    if (*a)
+			do *dcp++ = *a++;
+			while (*a);
 		    else {
 			if (!--argc)
 			    faterror("-%c needs following argument%s",
@@ -208,6 +214,9 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 	    case 'q':
 		    quietflag=true;
 		    break;
+	    case 'x':
+		    suffixes = *argv + 2;
+		    goto option_handled;
 	    case 'V':
 		    versionarg = *argv;
 		    setRCSversion(versionarg);
@@ -231,14 +240,14 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 
     for (pp = diffv+3, c = 0;  pp<diffp;  )
 	    c += strlen(*pp++) + 1;
-    diffvstr = argp = tnalloc(char, c + 1);
+    diffvstr = a = tnalloc(char, c + 1);
     for (pp = diffv+3;  pp<diffp;  ) {
 	    p = *pp++;
-	    *argp++ = ' ';
-	    while ((*argp = *p++))
-		    argp++;
+	    *a++ = ' ';
+	    while ((*a = *p++))
+		    a++;
     }
-    *argp = 0;
+    *a = 0;
 
 #if DIFF_L
     diff_label1 = diff_label2 = nil;
@@ -250,22 +259,23 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 #endif
     diffp[2] = nil;
 
+    cov[0] = 0;
+    cov[2] = CO;
+    cov[3] = "-q";
+
     /* now handle all filenames */
     do {
-	    finptr=NULL;
 	    ffree();
 
-	    if (pairfilenames(argc, argv, rcsreadopen, true, false) != 1)
+	    if (pairfilenames(argc, argv, rcsreadopen, true, false)  <=  0)
 		    continue;
 	    diagnose("===================================================================\nRCS file: %s\n",RCSfilename);
 	    if (!rev2) {
 		/* Make sure work file is readable, and get its status.  */
-		if ((c = open(workfilename,O_RDONLY,0)) < 0) {
+		if (!(workptr = Iopen(workfilename,FOPEN_R_WORK,&workstat))) {
 		    eerror(workfilename);
 		    continue;
 		}
-		if (!getfworkstat(c)) continue;
-		VOID close(c);
 	    }
 
 
@@ -275,10 +285,10 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 		    error("no revisions present");
 		    continue;
 	    }
-	    if (revnums==0)
+	    if (revnums==0  ||  !*rev1)
 		    rev1  =  Dbranch ? Dbranch : Head->num;
 
-	    if (!expandsym(rev1,&numericrev)) continue;
+	    if (!fexpandsym(rev1, &numericrev, workptr)) continue;
 	    if (!(target=genrevs(numericrev.string,(char *)nil,(char *)nil,(char *)nil,&gendeltas))) continue;
 	    xrev1=target->num;
 #if DIFF_L
@@ -288,16 +298,22 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 
 	    lexpandarg = expandarg;
 	    if (revnums==2) {
-		    if (!expandsym(rev2, &numericrev)) continue;
+		    if (!fexpandsym(
+			    *rev2 ? rev2  : Dbranch ? Dbranch  : Head->num,
+			    &numericrev,
+			    workptr
+		    ))
+			continue;
 		    if (!(target=genrevs(numericrev.string,(char *)nil,(char *)nil,(char *)nil,&gendeltas))) continue;
 		    xrev2=target->num;
 	    } else if (
 			target->lockedby
-		&&	lexpandarg == quietarg
+		&&	!lexpandarg
 		&&	Expand == KEYVAL_EXPAND
 		&&	WORKMODE(RCSstat.st_mode,true) == workstat.st_mode
 	    )
 		    lexpandarg = "-kkvl";
+	    Izclose(&workptr);
 #if DIFF_L
 	    if (diff_label2)
 		if (revnums == 2)
@@ -308,30 +324,41 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 		}
 #endif
 
-	    diffp[0] = maketemp(0);
 	    diagnose("retrieving revision %s\n", xrev1);
 	    bufscpy(&commarg, "-p");
 	    bufscat(&commarg, xrev1);
-	    if (run((char*)nil,diffp[0], co,quietarg,commarg.string,lexpandarg,versionarg,RCSfilename,(char*)nil)){
+
+	    cov[1] = diffp[0] = maketemp(0);
+	    pp = &cov[4];
+	    *pp++ = commarg.string;
+	    if (lexpandarg)
+		    *pp++ = lexpandarg;
+	    if (versionarg)
+		    *pp++ = versionarg;
+	    *pp++ = RCSfilename;
+	    *pp = 0;
+
+	    if (runv(cov)) {
 		    error("co failed");
 		    continue;
 	    }
 	    if (!rev2) {
 		    diffp[1] = workfilename;
 		    if (workfilename[0] == '+') {
-			    /* Some diffs have options with leading '+'. */
-			    diffp[1] = argp =
-				    ftnalloc(char, strlen(workfilename)+3);
-			    *argp++ = '.';
-			    *argp++ = SLASH;
-			    VOID strcpy(argp, workfilename);
+			/* Some diffs have options with leading '+'.  */
+			char *dp = ftnalloc(char, strlen(workfilename)+3);
+			diffp[1] = dp;
+			*dp++ = '.';
+			*dp++ = SLASH;
+			VOID strcpy(dp, workfilename);
 		    }
 	    } else {
-		    diffp[1] = maketemp(1);
 		    diagnose("retrieving revision %s\n",xrev2);
 		    bufscpy(&commarg, "-p");
 		    bufscat(&commarg, xrev2);
-		    if (run((char*)nil,diffp[1], co,quietarg,commarg.string,expandarg,versionarg,RCSfilename,(char *)nil)){
+		    cov[1] = diffp[1] = maketemp(1);
+		    cov[4] = commarg.string;
+		    if (runv(cov)) {
 			    error("co failed");
 			    continue;
 		    }
@@ -341,14 +368,16 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
 	    else
 		    diagnose("diff%s -r%s -r%s\n", diffvstr, xrev1, xrev2);
 
-	    exit_stats = runv(diffv);
-
-	    if (exit_stats)
-		    if (WIFEXITED(exit_stats) && WEXITSTATUS(exit_stats)==1) {
-			    if (!exitstatus)
-				    exitstatus = 1;
-		    } else
+	    switch (runv(diffv)) {
+		    case DIFF_SUCCESS:
+			    break;
+		    case DIFF_FAILURE:
+			    if (exitstatus == DIFF_SUCCESS)
+				    exitstatus = DIFF_FAILURE;
+			    break;
+		    default:
 			    error("diff failed");
+	    }
     } while (cleanup(),
 	     ++argv, --argc >=1);
 
@@ -360,8 +389,9 @@ mainProg(rcsdiffId, "rcsdiff", "$Id: rcsdiff.c,v 5.7 1990/12/13 06:54:07 eggert 
     static void
 cleanup()
 {
-    if (nerror) exitstatus = EXIT_TROUBLE;
-    if (finptr) ffclose(finptr);
+    if (nerror) exitstatus = DIFF_TROUBLE;
+    Izclose(&finptr);
+    Izclose(&workptr);
 }
 
 #if lint
@@ -371,26 +401,22 @@ cleanup()
 exiterr()
 {
     tempunlink();
-    _exit(EXIT_TROUBLE);
+    _exit(DIFF_TROUBLE);
 }
 
 #if DIFF_L
-	static const char *
+	static char const *
 setup_label(b, name, date)
 	struct buf *b;
-	const char *name;
-	const char date[datesize];
+	char const *name;
+	char const date[datesize];
 {
-	const char *p;
-
-	bufalloc(b,  2+strlen(name)+1+datesize);
-	for (p = date;  *p++ != '.';  )
-		;
-	VOID sprintf(b->string, "-L%s\t%s%.*s/%.2s/%.2s %.2s:%.2s:%s",
-		name,
-		date[2]=='.' ? "19" : "",
-		p-date-1, date, p, p+3, p+6, p+9, p+12
-	);
-	return b->string;
+	char *p;
+	size_t l = strlen(name) + 3;
+	bufalloc(b, l+datesize);
+	p = b->string;
+	VOID sprintf(p, "-L%s\t", name);
+	VOID date2str(date, p+l);
+	return p;
 }
 #endif

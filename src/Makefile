@@ -1,13 +1,13 @@
-# $Id: Makefile,v 5.8 1990/12/13 06:54:06 eggert Exp $
+# $Id: Makefile,v 5.16 1991/10/07 17:32:46 eggert Exp $
 # Copyright (C) 1982, 1988, 1989 Walter Tichy
-#   Copyright 1990 by Paul Eggert
+# Copyright 1990, 1991 by Paul Eggert
 #   Distributed under license by the Free Software Foundation, Inc.
 #
 # This file is part of RCS.
 #
 # RCS is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 1, or (at your option)
+# the Free Software Foundation; either version 2, or (at your option)
 # any later version.
 #
 # RCS is distributed in the hope that it will be useful,
@@ -23,252 +23,217 @@
 #
 #    rcs-bugs@cs.purdue.edu
 #
-#               INSTRUCTIONS
-#               ============
 
+# default target
+default :: all
 
-#	Figure out where to put the RCS commands; define RCSDIR accordingly.
+# See README for more information on the configuration section.
+# ----- start of configuration section -----
 
-RCSDIR = /usr/local/bin
-
-
-#	Define INSTALL_SETID_FLAGS as needed to install RCS setgid or setuid.
-#	This makes sense only when setegid() and seteuid() work
-#	Setgid is better than setuid because it mixes with nonstrict locking.
-#INSTALL_SETID_FLAGS = ${INSTALL_NORMAL_FLAGS}
-#INSTALL_SETID_FLAGS = -g rcs -o root -m 2555
- INSTALL_SETID_FLAGS = ${INSTALL_NORMAL_FLAGS}
-
-
-#	Define RCSPREFIX to be empty if you want RCS to search the PATH for
-#	subsidiary RCS commands like co.  This lets you move RCS commands
-#	after building them, and permits multiple instances of setgid RCS
-#	commands on the same host for different groups.
-#
-#	Define RCSPREFIX to a path followed by / if you want RCS to look in
-#	just one place.  This makes execution faster.  Also, if your host's
-#	execvp() system call does not understand the BSD #!/bin/sh convention
-#	for starting shell files, you must use a nonempty RCSPREFIX, because
-#	in this case rcsmerge invokes `/bin/sh ${RCSPREFIX}merge'.
-
-#RCSPREFIX =
-#RCSPREFIX = ${RCSDIR}/
- RCSPREFIX = ${RCSDIR}/
-
-#	Define DIFF and DIFF3 to be the name of your diff and diff3 programs.
-#	DIFF must be an absolute path name if setgid or setuid is used.
-#	Define DIFF_FLAGS to be diff's options for RCS format output.
-#	If available, use the -a option for comparing arbitrary files.
-#	Define DIFF_L to be 1 if your diff understands GNU diff's -L option.
-#	Set DIFF3_TYPE=lib for traditional diff, =bin otherwise.
-#	If DIFF3_type=bin, make sure your diff3 understands -a, -L, and and -m.
-#	If DIFF3_type=lib, avoid the diff3 program visible to users, and
-#	use the one in /usr/lib instead; it may be called /usr/lib/diff3prog.
-
-# Traditional diff
-#DIFF = /bin/diff
-#DIFF_FLAGS = -n
-#DIFF_L = 0
-#DIFF3 = /usr/lib/diff3
-#DIFF3_TYPE = lib
-
-# GNU diff -- must be version 1.15 or later
-#DIFFPREFIX = ${RCSDIR}/
-#DIFF = ${DIFFPREFIX}diff
-#DIFF_FLAGS = -an
-#DIFF_L = 1
-#DIFF3 = ${DIFF}3
-#DIFF3_TYPE = bin
-
- DIFF = /bin/diff
- DIFF_FLAGS = -n
- DIFF_L = 0
- DIFF3 = /usr/lib/diff3
- DIFF3_TYPE = lib
-
-
-#	Set SENDMAIL to be a comma-separated list of strings that are a command
-#	to send mail.  The first string should be an absolute pathname.
-#	The name of the addressee will be appended as a separate argument,
-#	and the standard input will be the message (first line "Subject: xxxx",
-#	second line empty).
-
-#SENDMAIL = "/bin/mail"
-#SENDMAIL = "/etc/delivermail", "-w"
-#SENDMAIL = "/usr/lib/sendmail"
- SENDMAIL = "/bin/mail"
-
-
-#	Decide what loader libraries you need.
-#	Some older hosts need -lBSD, -ljobs, or -lPW.
-
-LDLIBS =
-
-
-#	Decide what C compiler flags you need.
-
-# Optimize.  Put in options that work well for your compiler.
-# Options to try with GCC include -fdelayed-branch, -finline-functions,
-# -fomit-frame-pointer, and -fstrength-reduce.
-CC_O = -O
-
-# Make all initialized data read-only (not just string literals).
-# This option can improve performance by making initialized data shared.
-# It's not worth worrying about if your compiler supports the `const' keyword.
-# 4.3BSD-based compilers
-#CC_R = -R
-# most other compilers
-#CC_R =
- CC_R =
-
-# Add this for SunOS 4.1 + GCC 1.37.1.
-#COMPILE.c = ${CC} ${CFLAGS} ${CPPFLAGS} -c
-
-
-# for GCC
-#CC = gcc
-#CC_W = -Wall -Wcast-qual -Wpointer-arith -Wshadow -Wwrite-strings
-#CFLAGS = ${CC_O} ${CC_R} ${CC_W}
-
-# for traditional C compilers
-#CC = cc
-#CFLAGS = ${CC_O} ${CC_R}
+#(Unix
 
  CC = cc
- CFLAGS = ${CC_O} ${CC_R}
+#CC = bsdcc -qlanglvl=ansi# AIX
+#CC = cc -g# debug
+#CC = gcc -g# GCC
 
+ CC_D =
 
-LINT = lint
+ CC_O = -O
+#CC_O =# debug
+#CC_O = -O -R# BSD compilers that do not support `const'
+#CC_O = -O -fdelayed-branch -finline-functions -fomit-frame-pointer -fstrength-reduce# GCC options for brave souls
 
-# For traditional and BSD lint, use
-#LINTFLAGS = -abchx
-# For USG lint, use
-#LINTFLAGS =
- LINTFLAGS = -abchx
+ CC_W =
+#CC_W = -Wall -Wcast-qual -Wpointer-arith -Wshadow -Wwrite-strings# GCC
 
+ CFLAGS = $(CC_D) $(CC_O) $(CC_W)
 
-#	If you have version 2 RCS files around, define COMPAT2 to be 1.
-#	(Version 2 became obsolete in 1982.)  This assures that version 2
-#	RCS files can still be read.  After all version 2 RCS files have
-#	been updated with later versions of ci or rcs, you can remake RCS with
-#	COMPAT2=0.
-COMPAT2 = 0
-#	When you have RCS installed, rename old version 2 RCS files as follows
-#	(if you have any).  If the working file was "f.c" and the RCS file
-#	"f.c.v", rename the RCS file to "f.c,v". If the working file was "f.c"
-#	and the RCS file "f.v", rename the RCS file "f.c,v". Thus, suffixes
-#	are no longer dropped and RCS files end in ",v" rather than ".v".
+ COMPAT2 = 0
+#COMPAT2 = 1
 
+ DIFF = $(DIFFPREFIX)diff
+#DIFF = $(DIFFPREFIX)rdiff# short for ``RCS diff'' on some hosts
 
-#	Now you are ready.  Try to make "conf.h".
-#	Check the resulting conf.h for plausibility.
-#	If it's wrong, there is a bug in conf.sh; please report it.
-#	You can patch conf.h if you're in a hurry, but it's better to fix it;
-#	look at a.h and conf.error for ideas.
-#	If all else fails, copy conf.heg to conf.h and edit it by hand.
+ DIFFPREFIX = /usr/local/gnu/# GNU diff -- must be version 1.15 or later
+#DIFFPREFIX = /bin/# traditional diff
+#DIFFPREFIX = /usr/bin/# traditional diff (alternate name)
 
-#	Make "all".
-#	If all went well, make "install".
-#	If installation succeeds, make "installtest";
-#	if this fails, make "installdebug" for detailed info.
+ DIFF_FLAGS = -an# GNU diff
+#DIFF_FLAGS = -n# traditional diff
 
-#	If you want to maintain RCS with itself, be sure you preserve the
-#	original revision numbers, dates, etc. by checking the
-#	files in with the -k option.
+ DIFF_L = 1# GNU diff
+#DIFF_L = 0# traditional diff
+
+ DIFF_SUCCESS = 0
+#DIFF_SUCCESS = EXIT_SUCCESS
+ DIFF_FAILURE = 1
+#DIFF_FAILURE = EXIT_FAILURE
+ DIFF_TROUBLE = 2
+#DIFF_TROUBLE = (EXIT_FAILURE*2)
+
+ DIFF3 = $(DIFF)3# GNU diff3
+#DIFF3 = /usr/lib/diff3# traditional diff3
+#DIFF3 = /usr/5lib/diff3prog# other aliases for traditional diff3
+#DIFF3 = /usr/lib/diff3prog
+#DIFF3 = /usr/lib/rdiff3
+
+ DIFF3_BIN = 1# GNU diff
+#DIFF3_BIN = 0# traditional diff
+
+ ED = /bin/ed
+
+ EXECUTABLE_GROUP = staff# BSD unix installation
+ EXECUTABLE_PERMISSIONS = -g $(EXECUTABLE_GROUP) -m 775# BSD unix installation
+ INSTALL = install -c $(EXECUTABLE_PERMISSIONS)# BSD unix installation
+#INSTALL = cp# traditional Unix installation
+
+ LDFLAGS =
+
+ LDLIBS =
+
+ LINK = $(CC) $(LDFLAGS)
+
+ LINT = lint -abchx# traditional and BSD lint
+#LINT = lint# System V lint
+
+ MAKE = make
+
+ OTHER_OBJECT =
+
+ RCSDIR = /usr/local/bin
+#RCSDIR = /bin
+#RCSDIR = /usr/bin
+
+ RCSPREFIX = $(RCSDIR)/
+#RCSPREFIX =
+
+ REMOVE = rm -f
+
+ SENDMAIL = "/bin/mail"
+#SENDMAIL = "/etc/delivermail", "-w"
+#SENDMAIL = "/usr/bin/mail"
+#SENDMAIL = "/usr/lib/sendmail"
+#SENDMAIL = "mail"
+#SENDMAIL =# for impoverished hosts that lack electronic mail
+
+ TESTPREFIX =
+
+ o = .o
+#o = .s# Minix/PC with ACK cc
+
+ x =
+
+#)
+# On non-Unix hosts you must manually create and edit conf.h from conf.heg.
+
+# ----- end of configuration section -----
+# You shouldn't have to change anything past this point.
+
 
 # Avoid brain damage in some versions of 'make'.
 SHELL = /bin/sh
 
-# binary commands
-BCOMMANDS   =   ci ident rcs rcsdiff rcsmerge rlog co
-
 # all commands
-RCSCOMMANDS = merge ${BCOMMANDS}
+RCSCOMMANDS = ci$x co$x ident$x merge$x rcs$x rcsdiff$x rcsmerge$x rlog$x
 
-all :: ${RCSCOMMANDS}
-
-INSTALL = install -c
-INSTALL_NORMAL_FLAGS = -g staff -m 775
+all :: $(RCSCOMMANDS)
 
 install :: all
-	${INSTALL} ${INSTALL_SETID_FLAGS} ci ${RCSDIR}
-	${INSTALL} ${INSTALL_SETID_FLAGS} co ${RCSDIR}
-	${INSTALL} ${INSTALL_SETID_FLAGS} rcsdiff ${RCSDIR}
-	${INSTALL} ${INSTALL_SETID_FLAGS} rcsmerge ${RCSDIR}
-	${INSTALL} ${INSTALL_SETID_FLAGS} rlog ${RCSDIR}
-	${INSTALL} ${INSTALL_NORMAL_FLAGS} ident ${RCSDIR}
-	${INSTALL} ${INSTALL_NORMAL_FLAGS} rcs ${RCSDIR}
-	${INSTALL} ${INSTALL_NORMAL_FLAGS} merge ${RCSDIR}
+	$(INSTALL) ci$x $(DESTDIR)$(RCSDIR)
+	$(INSTALL) co$x $(DESTDIR)$(RCSDIR)
+	$(INSTALL) ident$x $(DESTDIR)$(RCSDIR)
+	$(INSTALL) merge$x $(DESTDIR)$(RCSDIR)
+	$(INSTALL) rcs$x $(DESTDIR)$(RCSDIR)
+	$(INSTALL) rcsdiff$x $(DESTDIR)$(RCSDIR)
+	$(INSTALL) rcsmerge$x $(DESTDIR)$(RCSDIR)
+	$(INSTALL) rlog$x $(DESTDIR)$(RCSDIR)
 
+# Install RCS and (if applicable) GNU diff before running these tests.
+# To test RCS before installing it, see README.
+RCSTEST = PATH=$(RCSDIR):$(DIFFPREFIX).:$$PATH sh $(TESTPREFIX)rcstest
 installtest ::
-	sh rcstest
-
+	$(RCSTEST)
 installdebug ::
-	sh rcstest -v
+	$(RCSTEST) -v
 
 clean ::
-	rm -f a.* *.o conf.h conf.error ${RCSCOMMANDS}
+	$(REMOVE) a.* *$o conf.h conf.error $(RCSCOMMANDS) rcsclean$x
 
-conf.h : conf.sh # Makefile
-	C='${CC} ${CFLAGS}' \
-	COMPAT2='${COMPAT2}' \
-	DIFF='${DIFF}' \
-	DIFF_L='${DIFF_L}' \
-	DIFF_FLAGS='${DIFF_FLAGS}' \
-	RCSPREFIX='${RCSPREFIX}' \
-	SENDMAIL='${SENDMAIL}' \
-	L='${LDLIBS}' \
-	sh -x conf.sh 2>conf.error
+#(Unix
+conf.h : conf.sh Makefile
+	$(REMOVE) a.*
+	CC='$(CC)' CFLAGS='$(CFLAGS)' \
+	COMPAT2='$(COMPAT2)' \
+	DIFF3='$(DIFF3)' DIFF3_BIN='$(DIFF3_BIN)' \
+	DIFF='$(DIFF)' DIFF_FLAGS='$(DIFF_FLAGS)' DIFF_L='$(DIFF_L)' \
+	DIFF_SUCCESS='$(DIFF_SUCCESS)' DIFF_FAILURE='$(DIFF_FAILURE)' DIFF_TROUBLE='$(DIFF_TROUBLE)' \
+	ED='$(ED)' \
+	LDFLAGS='$(LDFLAGS)' LDLIBS='$(LDLIBS)' \
+	RCSPREFIX='$(RCSPREFIX)' \
+	SENDMAIL='$(SENDMAIL)' \
+	sh -x conf.sh >a.h 2>conf.error
 	mv a.h $@
-	rm -f a.*
+	$(REMOVE) a.*
+#)
 
-CIFILES = ci.o rcslex.o rcssyn.o rcsgen.o rcsedit.o rcskeys.o rcsmap.o \
-	rcsrev.o rcsutil.o rcsfnms.o partime.o maketime.o rcskeep.o rcsfcmp.o
-ci : ${CIFILES}
-	${CC} ${CFLAGS} ${CIFILES} ${LDLIBS} -o $@
+ci = ci$o rcslex$o rcssyn$o rcsgen$o rcsedit$o rcskeys$o rcsmap$o \
+	rcsrev$o rcsutil$o rcsfnms$o partime$o maketime$o rcskeep$o \
+	rcsfcmp$o $(OTHER_OBJECT)
+ci$x : $(ci)
+	$(LINK) $(ci) $(LDLIBS) -o $@
 
-COFILES = co.o rcslex.o rcssyn.o rcsgen.o rcsedit.o rcskeys.o rcsmap.o \
-	rcsrev.o rcsutil.o rcsfnms.o partime.o maketime.o
-co : ${COFILES}
-	${CC} ${CFLAGS} ${COFILES} ${LDLIBS} -o $@
+co = co$o rcslex$o rcssyn$o rcsgen$o rcsedit$o rcskeys$o rcsmap$o \
+	rcsrev$o rcsutil$o rcsfnms$o partime$o maketime$o rcskeep$o $(OTHER_OBJECT)
+co$x : $(co)
+	$(LINK) $(co) $(LDLIBS) -o $@
 
-ident : ident.o rcsmap.o
-	${CC} ${CFLAGS} ident.o rcsmap.o ${LDLIBS} -o $@
+ident = ident$o rcsmap$o $(OTHER_OBJECT)
+ident$x : $(ident)
+	$(LINK) $(ident) $(LDLIBS) -o $@
 
-merge : merge.sh
-	DIFF=${DIFF} DIFF3=${DIFF3} DIFF3_TYPE=${DIFF3_TYPE} sh $@.sh >$@.o
-	chmod +x $@.o
-	mv $@.o $@
+merge = merge$o merger$o rcsfnms$o rcslex$o \
+	rcsmap$o rcsrev$o rcssyn$o rcsutil$o \
+	rcskeep$o rcskeys$o $(OTHER_OBJECT)
+merge$x : $(merge)
+	$(LINK) $(merge) $(LDLIBS) -o $@
 
-RLOG = rlog.o rcslex.o rcsmap.o rcssyn.o rcsrev.o rcsutil.o partime.o \
-	maketime.o rcsfnms.o
-rlog : ${RLOG}
-	${CC} ${CFLAGS} ${RLOG} ${LDLIBS} -o $@
+rlog = rlog$o rcslex$o rcsmap$o rcssyn$o rcsrev$o rcsutil$o partime$o \
+	maketime$o rcsfnms$o rcskeep$o rcskeys$o $(OTHER_OBJECT)
+rlog$x : $(rlog)
+	$(LINK) $(rlog) $(LDLIBS) -o $@
 
-RCS = rcs.o rcslex.o rcssyn.o rcsrev.o rcsutil.o rcsgen.o rcsedit.o rcskeys.o \
-	rcsmap.o rcsfnms.o
-rcs : ${RCS}
-	${CC} ${CFLAGS} ${RCS} ${LDLIBS} -o $@
+rcs = rcs$o rcslex$o rcssyn$o rcsrev$o rcsutil$o rcsgen$o rcsedit$o rcskeys$o \
+	rcsmap$o rcsfnms$o rcskeep$o $(OTHER_OBJECT)
+rcs$x : $(rcs)
+	$(LINK) $(rcs) $(LDLIBS) -o $@
 
-RCSDIFF = rcsdiff.o rcsutil.o rcsfnms.o rcsmap.o rcsrev.o rcssyn.o rcslex.o \
-	maketime.o partime.o
-rcsdiff : ${RCSDIFF}
-	${CC} ${CFLAGS} ${RCSDIFF} ${LDLIBS} -o $@
+rcsclean = rcsclean$o rcsedit$o rcsfcmp$o rcsfnms$o rcsgen$o rcskeys$o \
+	rcslex$o rcsmap$o rcsrev$o rcssyn$o rcsutil$o rcskeep$o $(OTHER_OBJECT)
+rcsclean$x : $(rcsclean)
+	$(LINK) $(rcsclean) $(LDLIBS) -o $@
 
-RCSMERGE = rcsmerge.o rcsutil.o rcsfnms.o rcsmap.o rcsrev.o rcssyn.o rcslex.o
-rcsmerge : ${RCSMERGE}
-	${CC} ${CFLAGS} ${RCSMERGE} ${LDLIBS} -o $@
+rcsdiff = rcsdiff$o rcsutil$o rcsfnms$o rcsmap$o rcsrev$o rcssyn$o rcslex$o \
+	maketime$o partime$o rcskeep$o rcskeys$o $(OTHER_OBJECT)
+rcsdiff$x : $(rcsdiff)
+	$(LINK) $(rcsdiff) $(LDLIBS) -o $@
 
-SOURCE=	ci.c co.c ident.c maketime.c partime.c rcs.c \
-	rcsdiff.c rcsedit.c rcsfcmp.c rcsfnms.c rcsgen.c \
+rcsmerge = rcsmerge$o merger$o rcsutil$o rcsfnms$o rcsmap$o rcsrev$o rcssyn$o \
+	rcslex$o rcskeep$o rcskeys$o $(OTHER_OBJECT)
+rcsmerge$x : $(rcsmerge)
+	$(LINK) $(rcsmerge) $(LDLIBS) -o $@
+
+SOURCE=	ci.c co.c ident.c maketime.c merge.c merger.c partime.c rcs.c \
+	rcsclean.c rcsdiff.c rcsedit.c rcsfcmp.c rcsfnms.c rcsgen.c \
 	rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsmerge.c rcsrev.c rcssyn.c \
 	rcsutil.c rlog.c
-OBJECT=	ci.o co.o ident.o maketime.o partime.o rcs.o \
-	rcsdiff.o rcsedit.o rcsfcmp.o rcsfnms.o rcsgen.o \
-	rcskeep.o rcskeys.o rcslex.o rcsmap.o rcsmerge.o rcsrev.o rcssyn.o \
-	rcsutil.o rlog.o
+OBJECT=	ci$o co$o ident$o maketime$o merge$o merger$o partime$o rcs$o \
+	rcsclean$o rcsdiff$o rcsedit$o rcsfcmp$o rcsfnms$o rcsgen$o \
+	rcskeep$o rcskeys$o rcslex$o rcsmap$o rcsmerge$o rcsrev$o rcssyn$o \
+	rcsutil$o rlog$o
 
-lint : conf.h
-	${LINT} ${LINTFLAGS} -Dlint=1 ${SOURCE}
+lint :: conf.h
+	$(LINT) $(CC_D) -Dlint=1 $(SOURCE)
 
-${OBJECT} : conf.h rcsbase.h
+conf_h = conf.h
+$(OBJECT) : $(conf_h) rcsbase.h

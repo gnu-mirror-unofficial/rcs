@@ -2,8 +2,8 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: rcsintro.1,v 5.0 1990/08/22 09:11:00 eggert Exp $
-.ds r \s-1RCS\s0
+.Id $Id: rcsintro.1,v 5.1 1991/04/21 12:00:46 eggert Exp $
+.ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
 .am SS
@@ -79,12 +79,17 @@ deleted, the corresponding deltas are compressed accordingly.
 Suppose you have a file
 .B f.c
 that you wish to put under control of \*r.
-Invoke the check-in command
+If you have not already done so, make an \*r directory with the command
+.IP
+.B "mkdir  RCS"
+.LP
+Then invoke the check-in command
 .IP
 .B "ci  f.c"
 .LP
-This command creates the \*r file
-.BR f.c,v ,
+This command creates an \*r file in the
+.B RCS
+directory,
 stores
 .B f.c
 into it as revision 1.1, and
@@ -95,9 +100,7 @@ should be a synopsis of the contents of the file.  All later check-in
 commands will ask you for a log entry, which should summarize the
 changes that you made.
 .PP
-Files ending in
-.B ,v
-are called \*r files (\*(lqv\*(rq stands for \*(lqversions\*(rq);
+Files in the \*r directory are called \*r files;
 the others are called working files.
 To get back the working file
 .B f.c
@@ -106,8 +109,7 @@ command
 .IP
 .B "co  f.c"
 .LP
-This command extracts the latest revision from
-.B f.c,v
+This command extracts the latest revision from the \*r file
 and writes
 it into
 .BR f.c .
@@ -278,7 +280,7 @@ Revision Number: \*(Rv; Release Date: \*(Dt.
 .br
 Copyright \(co 1982, 1988, 1989 by Walter F. Tichy.
 .br
-Copyright \(co 1990 by Paul Eggert.
+Copyright \(co 1990, 1991 by Paul Eggert.
 .SH "SEE ALSO"
 ci(1), co(1), ident(1), rcs(1), rcsdiff(1), rcsintro(1), rcsmerge(1), rlog(1)
 .br
@@ -287,3 +289,4 @@ Walter F. Tichy,
 .I "Software\*-Practice & Experience"
 .BR 15 ,
 7 (July 1985), 637-654.
+.br

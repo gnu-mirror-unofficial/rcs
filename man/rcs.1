@@ -2,8 +2,8 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: rcs.1,v 5.3 1990/12/04 05:18:34 eggert Exp $
-.ds r \s-1RCS\s0
+.Id $Id: rcs.1,v 5.6 1991/09/26 23:16:17 eggert Exp $
+.ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
 .TH RCS 1 \*(Dt GNU
@@ -28,15 +28,12 @@ the
 .B \-i
 option is present.
 .PP
-File names ending in
-.B ,v
-denote \*r files; all others denote working files.
-If a working file is given,
-.B rcs
-tries to find the corresponding \*r file first in an \*r subdirectory
-and then in the working file's directory,
-as explained in
-.BR co (1).
+Pathnames matching an \*r suffix denote \*r files;
+all others denote working files.
+Names are paired as explained in
+.BR ci (1).
+Revision numbers use the syntax described in
+.BR ci (1).
 .SH OPTIONS
 .TP
 .B \-i
@@ -160,21 +157,53 @@ be used for files that are shared.
 Whether default locking is strict is determined by your system administrator,
 but it is normally strict.
 .TP
-.B \-n\f2name\fP\f1[\fP:\f2rev\fP\f1]\fP
+\f3\-m\fP\f2rev\fP\f3:\fP\f2msg\fP
+Replace revision
+.IR rev 's
+log message with
+.IR msg .
+.TP
+\f3\-n\fP\f2name\fP[\f3:\fP[\f2rev\fP]]
 Associate the symbolic name
 .I name
 with the branch or
 revision
 .IR rev .
-Print an error message if
+Delete the symbolic name if both
+.B :
+and
+.I rev
+are omitted; otherwise, print an error message if
 .I name
 is already associated with
 another number.
 If
 .I rev
-is omitted, the symbolic name is deleted.
+is symbolic, it is expanded before association.
+A
+.I rev
+consisting of a branch number followed by a
+.B .\&
+stands for the current latest revision in the branch.
+A
+.B :
+with an empty
+.I rev
+stands for the current latest revision on the default branch,
+normally the trunk.
+For example,
+.BI "rcs\ \-n" name ":\ RCS/*"
+associates
+.I name
+with the current latest revision of all the named \*r files;
+this contrasts with
+.BI "rcs\ \-n" name ":$\ RCS/*"
+which associates
+.I name
+with the revision numbers extracted from keyword strings
+in the corresponding working files.
 .TP
-.B \-N\f2name\fP\f1[\fP:\f2rev\fP\f1]\fP
+\f3\-N\fP\f2name\fP[\f3:\fP[\f2rev\fP]]
 Act like
 .BR \-n ,
 except override any previous assignment of
@@ -187,20 +216,20 @@ A range consisting of a single revision number means that revision.
 A range consisting of a branch number means the latest revision on that
 branch.
 A range of the form
-.IB rev1 \- rev2
+.IB rev1 : rev2
 means
 revisions
 .I rev1
 to
 .I rev2
 on the same branch,
-.BI \- rev
+.BI : rev
 means from the beginning of the branch containing
 .I rev
 up to and including
 .IR rev ,
 and
-.IB rev \-
+.IB rev :
 means
 from revision
 .I rev
@@ -247,7 +276,7 @@ Write descriptive text from the contents of the named
 into the \*r file, deleting the existing text.
 The
 .IR file
-name may not begin with
+pathname may not begin with
 .BR \- .
 If
 .I file
@@ -275,6 +304,14 @@ Emulate \*r version
 See
 .BR co (1)
 for details.
+.TP
+.BI \-x "suffixes"
+Use
+.I suffixes
+to characterize \*r files.
+See
+.BR ci (1)
+for details.
 .SH COMPATIBILITY
 The
 .BI \-b rev
@@ -292,16 +329,33 @@ to make an \*r file acceptable to \*r version
 .I n
 by discarding information that would confuse version
 .IR n .
-.SH DIAGNOSTICS
-The \*r file name and the revisions outdated are written to
-the diagnostic output.
-The exit status is zero if and only if all operations were successful.
+.PP
+\*r version 5.5 and earlier does not support the
+.B \-x
+option, and requires a
+.B ,v
+suffix on an \*r pathname.
 .SH FILES
 .B rcs
 accesses files much as
 .BR ci (1)
 does,
-except that it does not need to access the working file or its directory.
+except that it uses the effective user for all accesses,
+it does not write the working file or its directory,
+and it does not even read the working file unless a revision number of
+.B $
+is specified.
+.SH ENVIRONMENT
+.TP
+.B \s-1RCSINIT\s0
+options prepended to the argument list, separated by spaces.
+See
+.BR ci (1)
+for details.
+.SH DIAGNOSTICS
+The \*r pathname and the revisions outdated are written to
+the diagnostic output.
+The exit status is zero if and only if all operations were successful.
 .SH IDENTIFICATION
 Author: Walter F. Tichy.
 .br
@@ -309,7 +363,7 @@ Revision Number: \*(Rv; Release Date: \*(Dt.
 .br
 Copyright \(co 1982, 1988, 1989 by Walter F. Tichy.
 .br
-Copyright \(co 1990 by Paul Eggert.
+Copyright \(co 1990, 1991 by Paul Eggert.
 .SH "SEE ALSO"
 co(1), ci(1), ident(1), rcsdiff(1), rcsintro(1), rcsmerge(1), rlog(1),
 rcsfile(5)
@@ -319,3 +373,25 @@ Walter F. Tichy,
 .I "Software\*-Practice & Experience"
 .BR 15 ,
 7 (July 1985), 637-654.
+.SH BUGS
+The separator for revision ranges in the
+.B \-o
+option used to be
+.B \-
+instead of
+.BR : ,
+but this leads to confusion when symbolic names contain
+.BR \- .
+For backwards compatibility
+.B "rcs \-o"
+still supports the old
+.B \-
+separator, but it warns about this obsolete use.
+.PP
+Symbolic names need not refer to existing revisions or branches.
+For example, the
+.B \-o
+option does not remove symbolic names for the outdated revisions; you must use
+.B \-n
+to remove the names.
+.br

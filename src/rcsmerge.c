@@ -7,14 +7,14 @@
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -35,6 +35,18 @@ Report problems and direct all questions to:
 
 
 /* $Log: rcsmerge.c,v $
+ * Revision 5.7  1991/11/20  17:58:09  eggert
+ * Don't Iopen(f, "r+"); it's not portable.
+ *
+ * Revision 5.6  1991/08/19  03:13:55  eggert
+ * Add -r$.  Tune.
+ *
+ * Revision 5.5  1991/04/21  11:58:27  eggert
+ * Add -x, RCSINIT, MS-DOS support.
+ *
+ * Revision 5.4  1991/02/25  07:12:43  eggert
+ * Merging a revision to itself is no longer an error.
+ *
  * Revision 5.3  1990/11/01  05:03:50  eggert
  * Remove unneeded setid check.
  *
@@ -84,56 +96,60 @@ Report problems and direct all questions to:
  */
 #include "rcsbase.h"
 
-static exiting void nowork P((void));
+static char const co[] = CO;
 
-static const char co[] = CO;
-
-mainProg(rcsmergeId, "rcsmerge", "$Id: rcsmerge.c,v 5.3 1990/11/01 05:03:50 eggert Exp $")
+mainProg(rcsmergeId, "rcsmerge", "$Id: rcsmerge.c,v 5.7 1991/11/20 17:58:09 eggert Exp $")
 {
-	static const char cmdusage[] =
+	static char const cmdusage[] =
 		"\nrcsmerge usage: rcsmerge -rrev1 [-rrev2] [-p] [-Vn] file";
-	static const char quietarg[] = "-q";
+	static char const quietarg[] = "-q";
 
-	const char *rev1, *rev2; /*revision numbers*/
-	const char *temp1file, *temp2file;
-	const char *expandarg, *versionarg;
-	const char *mergearg[13], **a;
+	register int i;
+	char *a, **newargv;
+	char const *arg[3];
+	char const *rev[2]; /*revision numbers*/
+	char const *expandarg, *versionarg;
         int tostdout;
-	int status, workfd;
+	int status;
+	RILE *workptr;
 	struct buf commarg;
 	struct buf numericrev; /* holds expanded revision number */
 	struct hshentries *gendeltas; /* deltas to be generated */
         struct hshentry * target;
 
-	initid();
-        catchints();
-
 	bufautobegin(&commarg);
 	bufautobegin(&numericrev);
-	rev1 = rev2 = nil;
+	rev[0] = rev[1] = nil;
 	status = 0; /* Keep lint happy.  */
 	tostdout = false;
 	expandarg = versionarg = quietarg; /* i.e. a no-op */
+	suffixes = X_DEFAULT;
 
-        while (--argc,++argv, argc>=1 && ((*argv)[0] == '-')) {
-                switch ((*argv)[1]) {
+	argc = getRCSINIT(argc, argv, &newargv);
+	argv = newargv;
+	while (a = *++argv,  0<--argc && *a++=='-') {
+		switch (*a++) {
                 case 'p':
                         tostdout=true;
 			goto revno;
+
 		case 'q':
 			quietflag = true;
+		revno:
+			if (!*a)
+				break;
                         /* falls into -r */
                 case 'r':
-		revno:
-                        if ((*argv)[2]!='\0') {
-			    if (!rev1)
-				    rev1 = *argv + 2;
-			    else if (!rev2)
-				    rev2 = *argv + 2;
-			    else
-                                    faterror("too many revision numbers");
-                        } /* do nothing for empty -r or -p */
+			if (!rev[0])
+				rev[0] = a;
+			else if (!rev[1])
+				rev[1] = a;
+			else
+				faterror("too many revision numbers");
                         break;
+		case 'x':
+			suffixes = a;
+			break;
 		case 'V':
 			versionarg = *argv;
 			setRCSversion(versionarg);
@@ -150,92 +166,79 @@ mainProg(rcsmergeId, "rcsmerge", "$Id: rcsmerge.c,v 5.3 1990/11/01 05:03:50 egge
         } /* end of option processing */
 
 	if (argc<1) faterror("no input file%s", cmdusage);
-	if (!rev1) faterror("no base revision number given");
+	if (!rev[0]) faterror("no base revision number given");
 
         /* now handle all filenames */
 
-	if (pairfilenames(argc, argv, rcsreadopen, true, false) == 1) {
+	if (0  <  pairfilenames(argc, argv, rcsreadopen, true, false)) {
 
                 if (argc>2 || (argc==2&&argv[1]!=nil))
                         warn("too many arguments");
 		diagnose("RCS file: %s\n", RCSfilename);
-		if ((workfd = open(workfilename, tostdout?O_RDONLY:O_RDWR)) < 0)
-			nowork();
+		if (!(workptr = Iopen(workfilename,
+			FOPEN_R_WORK,
+			(struct stat*)0
+		)))
+			efaterror(workfilename);
 
                 gettree();  /* reads in the delta tree */
 
                 if (Head==nil) faterror("no revisions present");
 
-
-		if (!expandsym(rev1,&numericrev)) goto end;
+		if (!*rev[0])
+			rev[0]  =  Dbranch ? Dbranch : Head->num;
+		if (!fexpandsym(rev[0], &numericrev, workptr))
+			goto end;
 		if (!(target=genrevs(numericrev.string, (char *)nil, (char *)nil, (char *)nil,&gendeltas))) goto end;
-                rev1=target->num;
-		if (!rev2)
-			rev2  =  Dbranch ? Dbranch : Head->num;
-		if (!expandsym(rev2,&numericrev)) goto end;
+		rev[0] = target->num;
+		if (!rev[1] || !*rev[1])
+			rev[1]  =  Dbranch ? Dbranch : Head->num;
+		if (!fexpandsym(rev[1], &numericrev, workptr))
+			goto end;
 		if (!(target=genrevs(numericrev.string, (char *)nil, (char *)nil, (char *)nil,&gendeltas))) goto end;
-                rev2=target->num;
+		rev[1] = target->num;
 
-		if (strcmp(rev1,rev2) == 0) {
-			error("merging revision %s to itself (no change)",
-				rev1
-			);
+		if (strcmp(rev[0],rev[1]) == 0) {
 			if (tostdout) {
-				FILE *w;
-				errno = 0;
-				if (!(w = fdopen(workfd,"r")))
-					nowork();
-				fastcopy(w,stdout);
-				ffclose(w);
+				FILE *o;
+#				if text_equals_binary_stdio || text_work_stdio
+				    o = stdout;
+#				else
+				    if (!(o=fdopen(STDOUT_FILENO,FOPEN_W_WORK)))
+					efaterror("stdout");
+#				endif
+				fastcopy(workptr,o);
+				Ofclose(o);
 			}
 			goto end;
 		}
-		if (close(workfd) < 0)
-			nowork();
+		Izclose(&workptr);
 
-		temp1file = maketemp(0);
-		temp2file = maketemp(1);
-
-		diagnose("retrieving revision %s\n", rev1);
-		bufscpy(&commarg, "-p");
-		bufscat(&commarg, rev1);
-		if (run((char*)nil,temp1file, co,quietarg,commarg.string,expandarg,versionarg,RCSfilename,(char*)nil)){
-                        faterror("co failed");
-                }
-		diagnose("retrieving revision %s\n",rev2);
-		bufscpy(&commarg, "-p");
-		bufscat(&commarg, rev2);
-		if (run((char*)nil,temp2file, co,quietarg,commarg.string,expandarg,versionarg,RCSfilename,(char*)nil)){
-                        faterror("co failed");
-                }
+		for (i=0; i<2; i++) {
+			diagnose("retrieving revision %s\n", rev[i]);
+			bufscpy(&commarg, "-p");
+			bufscat(&commarg, rev[i]);
+			if (run(
+				(char*)0,
+				/* Do not collide with merger.c maketemp().  */
+				arg[i+1] = maketemp(i+3),
+				co, quietarg, commarg.string, expandarg,
+				versionarg, RCSfilename, (char*)0
+			))
+				faterror("co failed");
+		}
 		diagnose("Merging differences between %s and %s into %s%s\n",
-                         rev1, rev2, workfilename,
+			 rev[0], rev[1], workfilename,
                          tostdout?"; result to stdout":"");
 
-		a = mergearg;
-		*a++ = nil;
-		*a++ = nil;
-		*a++ = MERGE;
-		if (tostdout)
-		    *a++ = "-p";
-		if (quietflag)
-		    *a++ = quietarg;
-		*a++ = "-L";  *a++ = workfilename;
-		*a++ = "-L";  *a++ = rev2;
-		*a++ = workfilename;
-		*a++ = temp1file;
-		*a++ = temp2file;
-		*a = nil;
-
-		status = runv(mergearg);
-		if (!WIFEXITED(status)  ||  1 < WEXITSTATUS(status)) {
-                        faterror("merge failed");
-                }
+		arg[0] = rev[0] = workfilename;
+		status = merge(tostdout, rev, arg);
         }
 
 end:
+	Izclose(&workptr);
 	tempunlink();
-	exitmain(nerror ? EXIT_TROUBLE : WEXITSTATUS(status));
+	exitmain(nerror ? DIFF_TROUBLE : status);
 }
 
 #if lint
@@ -245,12 +248,5 @@ end:
 exiterr()
 {
 	tempunlink();
-	_exit(EXIT_TROUBLE);
-}
-
-
-	static exiting void
-nowork()
-{
-	efaterror(workfilename);
+	_exit(DIFF_TROUBLE);
 }

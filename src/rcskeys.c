@@ -3,14 +3,14 @@
  */
 
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -31,6 +31,13 @@ Report problems and direct all questions to:
 
 
 /* $Log: rcskeys.c,v $
+ * Revision 5.2  1991/08/19  03:13:55  eggert
+ * Say `T const' instead of `const T'; it's less confusing for pointer types.
+ * (This change was made in other source files too.)
+ *
+ * Revision 5.1  1991/04/21  11:58:25  eggert
+ * Don't put , just before } in initializer.
+ *
  * Revision 5.0  1990/08/22  08:12:54  eggert
  * Add -k.  Ansify and Posixate.
  *
@@ -53,28 +60,28 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
-libId(keysId, "$Id: rcskeys.c,v 5.0 1990/08/22 08:12:54 eggert Exp $")
+libId(keysId, "$Id: rcskeys.c,v 5.2 1991/08/19 03:13:55 eggert Exp $")
 
 
-const char *const Keyword[] = {
+char const *const Keyword[] = {
     /* This must be in the same order as rcsbase.h's enum markers type. */
 	nil,
 	AUTHOR, DATE, HEADER, IDH,
-	LOCKER, LOG, RCSFILE, REVISION, SOURCE, STATE,
+	LOCKER, LOG, RCSFILE, REVISION, SOURCE, STATE
 };
 
 
 
 	enum markers
 trymatch(string)
-	const char *string;
+	char const *string;
 /* function: Checks whether string starts with a keyword followed
  * by a KDELIM or a VDELIM.
  * If successful, returns the appropriate marker, otherwise Nomatch.
  */
 {
         register int j;
-	register const char *p, *s;
+	register char const *p, *s;
 	for (j = sizeof(Keyword)/sizeof(*Keyword);  (--j);  ) {
 		/* try next keyword */
 		p = Keyword[j];

@@ -1,12 +1,12 @@
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -34,6 +34,18 @@ Report problems and direct all questions to:
 
 
 /* $Log: co.c,v $
+ * Revision 5.9  1991/10/07  17:32:46  eggert
+ * ci -u src/RCS/co.c,v src/co.c <<\.
+ * -k affects just working file, not RCS file.
+ *
+ * Revision 5.8  1991/08/19  03:13:55  eggert
+ * Warn before removing somebody else's file.
+ * Add -M.  Fix co -j bugs.  Tune.
+ *
+ * Revision 5.7  1991/04/21  11:58:15  eggert
+ * Ensure that working file is newer than RCS file after co -[lu].
+ * Add -x, RCSINIT, MS-DOS support.
+ *
  * Revision 5.6  1990/12/04  05:18:38  eggert
  * Don't checkaccesslist() unless necessary.
  * Use -I for prompts and -q for diagnostics.
@@ -131,52 +143,57 @@ Report problems and direct all questions to:
 
 #include "rcsbase.h"
 
-static const char *getancestor P((const char*,const char*));
-static int buildjoin P((const char*));
-static int creatempty P((void));
-static int fixworkmode P((const char*));
+static char const *getancestor P((char const*,char const*));
+static int buildjoin P((char const*));
 static int preparejoin P((void));
-static int rmlock P((const struct hshentry*));
+static int rmlock P((struct hshentry const*));
 static int rmworkfile P((void));
 static void cleanup P((void));
 
-static const char quietarg[] = "-q";
+static char const quietarg[] = "-q";
 
-static const char *join, *versionarg;
-static const char *joinlist[joinlength];/* revisions to be joined	*/
+static char const *expandarg, *join, *suffixarg, *versionarg;
+static char const *joinlist[joinlength]; /* revisions to be joined */
+static FILE *neworkptr;
 static int exitstatus;
-static int forceflag, tostdout;
+static int forceflag;
 static int lastjoin;			/* index of last element in joinlist  */
 static int lockflag; /* -1 -> unlock, 0 -> do nothing, 1 -> lock */
+static int mtimeflag;
 static struct hshentries *gendeltas;	/* deltas to be generated	*/
 static struct hshentry *targetdelta;	/* final delta to be generated	*/
+static struct stat workstat;
 
-mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
+mainProg(coId, "co", "$Id: co.c,v 5.9 1991/10/07 17:32:46 eggert Exp $")
 {
-	static const char cmdusage[] =
+	static char const cmdusage[] =
 		"\nco usage: co -{flpqru}[rev] -ddate -jjoinlist -sstate -w[login] -Vn file ...";
 
-	const char *author, *date, *rev, *state;
-	const char *neworkfilename;
+	char *a, **newargv;
+	char const *author, *date, *rev, *state;
+	char const *joinfilename, *newdate, *neworkfilename;
 	int changelock;  /* 1 if a lock has been changed, -1 if error */
-	int expmode, r;
+	int expmode, r, tostdout, workstatstat;
 	struct buf numericrev;	/* expanded revision number	*/
 	char finaldate[datesize];
 
-	initid();
-	catchints();
+	setrid();
 	author = date = rev = state = nil;
 	bufautobegin(&numericrev);
 	expmode = -1;
-	versionarg = nil;
+	suffixes = X_DEFAULT;
+	tostdout = false;
 
-        while (--argc,++argv, argc>=1 && ((*argv)[0] == '-')) {
-                switch ((*argv)[1]) {
+	argc = getRCSINIT(argc, argv, &newargv);
+	argv = newargv;
+	while (a = *++argv,  0<--argc && *a++=='-') {
+		switch (*a++) {
 
                 case 'r':
-                revno:  if ((*argv)[2]!='\0') {
+		revno:
+			if (*a) {
 				if (rev) warn("redefinition of revision number");
-                                rev = (*argv)+2;
+				rev = a;
                         }
                         break;
 
@@ -199,7 +216,7 @@ mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
                         goto revno;
 
                 case 'p':
-                        tostdout=true;
+			tostdout = true;
                         goto revno;
 
 		case 'I':
@@ -213,41 +230,50 @@ mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
                 case 'd':
 			if (date)
 				redefined('d');
-			str2date(*argv+2, finaldate);
+			str2date(a, finaldate);
                         date=finaldate;
                         break;
 
                 case 'j':
-                        if ((*argv)[2]!='\0'){
+			if (*a) {
 				if (join) redefined('j');
-                                join = (*argv)+2;
+				join = a;
                         }
                         break;
 
+		case 'M':
+			mtimeflag = true;
+			goto revno;
+
                 case 's':
-                        if ((*argv)[2]!='\0'){
+			if (*a) {
 				if (state) redefined('s');
-                                state = (*argv)+2;
+				state = a;
                         }
                         break;
 
                 case 'w':
 			if (author) redefined('w');
-                        if ((*argv)[2]!='\0')
-                                author = (*argv)+2;
+			if (*a)
+				author = a;
 			else
 				author = getcaller();
                         break;
 
+		case 'x':
+			suffixarg = *argv;
+			suffixes = a;
+			break;
+
 		case 'V':
-			if (versionarg) redefined('V');
 			versionarg = *argv;
 			setRCSversion(versionarg);
 			break;
 
 		case 'k':    /*  set keyword expand mode  */
+			expandarg = *argv;
 			if (0 <= expmode) redefined('k');
-			if (0 <= (expmode = str2expmode(*argv+2)))
+			if (0 <= (expmode = str2expmode(a)))
 			    break;
 			/* fall into */
                 default:
@@ -257,40 +283,43 @@ mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
         } /* end of option processing */
 
 	if (argc<1) faterror("no input file%s", cmdusage);
+	if (tostdout)
+#	    if text_equals_binary_stdio || text_work_stdio
+		workstdout = stdout;
+#	    else
+		if (!(workstdout = fdopen(STDOUT_FILENO, FOPEN_W_WORK)))
+		    efaterror("stdout");
+#	    endif
 
         /* now handle all filenames */
         do {
-        finptr=frewrite=NULL;
-	fcopy = foutptr = NULL;
 	ffree();
 
-	if (!pairfilenames(argc, argv, lockflag?rcswriteopen:rcsreadopen, true, tostdout))
+	if (pairfilenames(argc, argv, lockflag?rcswriteopen:rcsreadopen, true, false)  <=  0)
 		continue;
 
         /* now RCSfilename contains the name of the RCS file, and finptr
-         * the file descriptor. If tostdout is false, workfilename contains
-         * the name of the working file, otherwise undefined (not nil!).
+	 * points at it.  workfilename contains the name of the working file.
 	 * Also, RCSstat has been set.
          */
 	diagnose("%s  -->  %s\n", RCSfilename,tostdout?"stdout":workfilename);
 
-	if (!tostdout) {
-		if (!getworkstat()) continue; /* give up */
-		if (!initeditfiles(workfilename)) {
+	workstatstat = -1;
+	if (tostdout) {
+		neworkfilename = 0;
+		neworkptr = workstdout;
+	} else {
+		workstatstat = stat(workfilename, &workstat);
+		neworkfilename = makedirtemp(workfilename, 1);
+		if (!(neworkptr = fopen(neworkfilename, FOPEN_W_WORK))) {
 			if (errno == EACCES)
 				error("%s: parent directory isn't writable",
 					workfilename
 				);
 			else
-				eerror(resultfile);
+				eerror(neworkfilename);
 			continue;
 		}
-	}
-	if (0 <= expmode)
-		Expand = expmode;
-	if (0 < lockflag  &&  Expand == VAL_EXPAND) {
-		error("cannot combine -kv and -l");
-		continue;
 	}
 
         gettree();  /* reads in the delta tree */
@@ -298,8 +327,11 @@ mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
         if (Head==nil) {
                 /* no revisions; create empty file */
 		diagnose("no revisions present; generating empty revision 0.0\n");
-                if (!tostdout)
-                        if (!creatempty()) continue;
+		Ozclose(&fcopy);
+		if (workstatstat == 0)
+			if (!rmworkfile()) continue;
+		changelock = 0;
+		newdate = 0;
                 /* Can't reserve a delta, so don't call addlock */
         } else {
                 if (rev!=nil) {
@@ -321,26 +353,26 @@ mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
 		if (!(targetdelta=genrevs(numericrev.string,date,author,state,&gendeltas)))
                         continue;
                 /* check reservations */
-		changelock = 0;
-		if (lockflag) {
-		    changelock =
-		       lockflag<0 ? rmlock(targetdelta) : addlock(targetdelta);
-		    if (changelock) {
-			if (changelock<0 || !checkaccesslist())
-			    continue;
-		    } else {
-			ffclose(frewrite);  frewrite=NULL;
-			seteid();
-			ignoreints();
-			r = unlink(newRCSfilename);
-			keepdirtemp(newRCSfilename);
-			restoreints();
-			setrid();
-			if (r != 0) {
-			    eerror(RCSfilename);
-			    continue;
-			}
-		    }
+		changelock =
+			lockflag < 0 ?
+				rmlock(targetdelta)
+			: lockflag == 0 ?
+				0
+			:
+				addlock(targetdelta);
+
+		if (
+			changelock < 0 ||
+			changelock && !checkaccesslist() ||
+			!dorewrite(lockflag, changelock)
+		)
+			continue;
+
+		if (0 <= expmode)
+			Expand = expmode;
+		if (0 < lockflag  &&  Expand == VAL_EXPAND) {
+			error("cannot combine -kv and -l");
+			continue;
 		}
 
                 if (join && !preparejoin()) continue;
@@ -349,69 +381,70 @@ mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
 			 0<lockflag ? " (locked)" :
 			 lockflag<0 ? " (unlocked)" : "");
 
-                /* remove old working file if necessary */
-                if (!tostdout)
+		/* Prepare to remove old working file if necessary.  */
+		if (workstatstat == 0)
                         if (!rmworkfile()) continue;
-
-                /* prepare for rewriting the RCS file */
-		if (changelock) {
-                        putadmin(frewrite);
-                        puttree(Head,frewrite);
-			aprintf(frewrite, "\n\n%s%c",Kdesc,nextc);
-			foutptr = frewrite;
-		}
 
                 /* skip description */
                 getdesc(false); /* don't echo*/
 
 		locker_expansion = 0 < lockflag;
-                if (!(neworkfilename=buildrevision(gendeltas,targetdelta,
-						   tostdout,Expand!=OLD_EXPAND)))
-                                continue;
+		joinfilename = buildrevision(
+			gendeltas, targetdelta,
+			join&&tostdout ? (FILE*)0 : neworkptr,
+			Expand!=OLD_EXPAND
+		);
+#		if !large_memory
+			if (fcopy == neworkptr)
+				fcopy = 0;  /* Don't close it twice.  */
+#		endif
+		if_advise_access(changelock && gendeltas->first!=targetdelta,
+			finptr, MADV_SEQUENTIAL
+		);
 
-		if (changelock && !nerror) {
-                        /* rewrite the rest of the RCSfile */
-                        fastcopy(finptr,frewrite);
-			ffclose(finptr); finptr=NULL; /*Help the file system.*/
-                        ffclose(frewrite); frewrite=NULL;
-			seteid();
-			if ((r = chmod(newRCSfilename, RCSstat.st_mode & ~(S_IWUSR|S_IWGRP|S_IWOTH))) == 0) {
-			    ignoreints();
-			    r = re_name(newRCSfilename,RCSfilename);
-			    keepdirtemp(newRCSfilename);
-			    restoreints();
+		if (!donerewrite(changelock))
+			continue;
+
+		newdate = targetdelta->date;
+		if (join) {
+			newdate = 0;
+			if (!joinfilename) {
+				aflush(neworkptr);
+				joinfilename = neworkfilename;
 			}
-			setrid();
-			if (r != 0) {
-				eerror(RCSfilename);
-				error("saved in %s", newRCSfilename);
-				dirtempunlink();
-                                break;
-                        }
-                }
-
-                if (join) {
-			if (!buildjoin(neworkfilename)) continue;
-                }
-                if (!tostdout) {
-			if (!fixworkmode(neworkfilename))
+			if (!buildjoin(joinfilename))
 				continue;
-			ignoreints();
-			r = re_name(neworkfilename,workfilename);
-			keepdirtemp(neworkfilename);
-			restoreints();
-			if (r != 0) {
-				eerror(workfilename);
-				error("see %s", neworkfilename);
-                                continue;
-                        }
 		}
         }
-	if (!tostdout) diagnose("done\n");
+	if (!tostdout) {
+	    r = 0;
+	    if (mtimeflag && newdate) {
+		if (!join)
+		    aflush(neworkptr);
+		r = setfiledate(neworkfilename, newdate);
+	    }
+	    if (r == 0) {
+		ignoreints();
+		r = chnamemod(&neworkptr, neworkfilename, workfilename,
+		  WORKMODE(RCSstat.st_mode,
+		    !(Expand==VAL_EXPAND || lockflag<=0&&StrictLocks)
+		  )
+		);
+		keepdirtemp(neworkfilename);
+		restoreints();
+	    }
+	    if (r != 0) {
+		eerror(workfilename);
+		error("see %s", neworkfilename);
+		continue;
+	    }
+	    diagnose("done\n");
+	}
         } while (cleanup(),
                  ++argv, --argc >=1);
 
 	tempunlink();
+	Ofclose(workstdout);
 	exitmain(exitstatus);
 
 }       /* end of main (co) */
@@ -420,8 +453,12 @@ mainProg(coId, "co", "$Id: co.c,v 5.6 1990/12/04 05:18:38 eggert Exp $")
 cleanup()
 {
 	if (nerror) exitstatus = EXIT_FAILURE;
-	if (finptr) ffclose(finptr);
-	if (frewrite) ffclose(frewrite);
+	Izclose(&finptr);
+	Ozclose(&frewrite);
+#	if !large_memory
+		if (fcopy!=workstdout) Ozclose(&fcopy);
+#	endif
+	if (neworkptr!=workstdout) Ozclose(&neworkptr);
 	dirtempunlink();
 }
 
@@ -448,77 +485,36 @@ rmworkfile()
  * Otherwise (file writable):
  *   if !quietmode asks the user whether to really delete it (default: fail);
  *   otherwise failure.
- * Returns 0 on failure to get permission, -1 if there's nothing to remove,
- * 1 if there is a file to remove.
+ * Returns true if permission is gotten.
  */
 {
-	if (haveworkstat)	  /* File doesn't exist; set by pairfilenames*/
-	    return -1;
-
 	if (workstat.st_mode&(S_IWUSR|S_IWGRP|S_IWOTH) && !forceflag) {
 	    /* File is writable */
-	    if (!yesorno(false, "writable %s exists; remove it? [ny](n): ",
-			workfilename
+	    if (!yesorno(false, "writable %s exists%s; remove it? [ny](n): ",
+			workfilename,
+			myself(workstat.st_uid) ? "" : ", and you do not own it"
 	    )) {
 		error(!quietflag && ttystdin()
 			? "checkout aborted"
 			: "writable %s exists; checkout aborted", workfilename);
-		return 0;
+		return false;
             }
         }
 	/* Actual unlink is done later by caller. */
-	return 1;
-}
-
-	static int
-fixworkmode(f)
-	const char *f;
-{
-	if (
-		chmod(f, WORKMODE(RCSstat.st_mode,
-		    !(Expand==VAL_EXPAND  ||  lockflag<=0 && StrictLocks)
-		)) < 0
-	) {
-		eerror(workfilename);
-		return false;
-	}
 	return true;
 }
 
 
 	static int
-creatempty()
-/* Function: creates an empty working file.
- * First, removes an existing working file with rmworkfile().
- */
-{
-        int  fdesc;              /* file descriptor */
-	int s;
-
-	if (!(s = rmworkfile()))
-		return false;
-	if (0 < s  &&  unlink(workfilename) != 0) {
-		eerror(workfilename);
-		return false;
-	}
-        fdesc=creat(workfilename,0);
-	if (fdesc < 0)
-		efaterror(workfilename);
-	VOID close(fdesc); /* empty file */
-	return fixworkmode(workfilename);
-}
-
-
-	static int
 rmlock(delta)
-	const struct hshentry *delta;
+	struct hshentry const *delta;
 /* Function: removes the lock held by caller on delta.
  * Returns -1 if someone else holds the lock,
  * 0 if there is no lock on delta,
  * and 1 if a lock was found and removed.
  */
 {       register struct lock * next, * trail;
-	const char *num;
+	char const *num;
         struct lock dummy;
         int whomatch, nummatch;
 
@@ -554,7 +550,7 @@ rmlock(delta)
  *****************************************************************/
 
 
-	static const char *
+	static char const *
 addjoin(joinrev)
 	char *joinrev;
 /* Add joinrev's number to joinlist, yielding address of char past joinrev,
@@ -562,7 +558,7 @@ addjoin(joinrev)
  */
 {
 	register char *j;
-	register const struct hshentry *d;
+	register struct hshentry const *d;
 	char terminator;
 	struct buf numrev;
 	struct hshentries *joindeltas;
@@ -600,7 +596,7 @@ preparejoin()
  * revision numbers into joinlist.
  */
 {
-	register const char *j;
+	register char const *j;
 
         j=join;
         lastjoin= -1;
@@ -644,9 +640,9 @@ preparejoin()
 
 
 
-	static const char *
+	static char const *
 getancestor(r1, r2)
-	const char *r1, *r2;
+	char const *r1, *r2;
 /* Yield the common ancestor of r1 and r2 if successful, nil otherwise.
  * Work reliably only if r1 and r2 are not branch numbers.
  */
@@ -654,7 +650,7 @@ getancestor(r1, r2)
 	static struct buf t1, t2;
 
 	unsigned l1, l2, l3;
-	const char *r;
+	char const *r;
 
 	l1 = countnumflds(r1);
 	l2 = countnumflds(r2);
@@ -682,19 +678,18 @@ getancestor(r1, r2)
 
 	static int
 buildjoin(initialfile)
-	const char *initialfile;
+	char const *initialfile;
 /* Function: merge pairs of elements in joinlist into initialfile
- * If tostdout is set, copy result to stdout.
- * All unlinking of initialfile, rev2, and rev3 should be done by *tempunlink().
+ * If workstdout is set, copy result to stdout.
+ * All unlinking of initialfile, rev2, and rev3 should be done by tempunlink().
  */
 {
 	struct buf commarg;
 	struct buf subs;
-	const char *rev2, *rev3;
+	char const *rev2, *rev3;
         int i;
-	int status;
-	const char *cov[8], *mergev[12];
-	const char **p;
+	char const *cov[10], *mergev[12];
+	char const **p;
 
 	bufautobegin(&commarg);
 	bufautobegin(&subs);
@@ -706,6 +701,8 @@ buildjoin(initialfile)
 	cov[2] = CO;
 	/* cov[3] setup below */
 	p = &cov[4];
+	if (expandarg) *p++ = expandarg;
+	if (suffixarg) *p++ = suffixarg;
 	if (versionarg) *p++ = versionarg;
 	*p++ = quietarg;
 	*p++ = RCSfilename;
@@ -747,14 +744,17 @@ buildjoin(initialfile)
 		mergev[6] = joinlist[i+1];
 		p = &mergev[7];
 		if (quietflag) *p++ = quietarg;
-		if (lastjoin<=i+2 && tostdout) *p++ = "-p";
+		if (lastjoin<=i+2 && workstdout) *p++ = "-p";
 		*p++ = initialfile;
 		*p++ = rev2;
 		*p++ = rev3;
 		*p = nil;
-		status = runv(mergev);
-		if (!WIFEXITED(status) || 1<WEXITSTATUS(status))
+		switch (runv(mergev)) {
+		    case DIFF_FAILURE: case DIFF_SUCCESS:
+			break;
+		    default:
 			goto badmerge;
+		}
                 i=i+2;
         }
 	bufautoend(&commarg);

@@ -2,14 +2,14 @@
  *                      RCS create/change operation
  */
 /* Copyright (C) 1982, 1988, 1989 Walter Tichy
-   Copyright 1990 by Paul Eggert
+   Copyright 1990, 1991 by Paul Eggert
    Distributed under license by the Free Software Foundation, Inc.
 
 This file is part of RCS.
 
 RCS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 RCS is distributed in the hope that it will be useful,
@@ -31,6 +31,22 @@ Report problems and direct all questions to:
 
 
 /* $Log: rcs.c,v $
+ * Revision 5.12  1991/11/20  17:58:08  eggert
+ * Don't read the delta tree from a nonexistent RCS file.
+ *
+ * Revision 5.11  1991/10/07  17:32:46  eggert
+ * Remove lint.
+ *
+ * Revision 5.10  1991/08/19  23:17:54  eggert
+ * Add -m, -r$, piece tables.  Revision separator is `:', not `-'.  Tune.
+ *
+ * Revision 5.9  1991/04/21  11:58:18  eggert
+ * Add -x, RCSINIT, MS-DOS support.
+ *
+ * Revision 5.8  1991/02/25  07:12:38  eggert
+ * strsave -> str_save (DG/UX name clash)
+ * 0444 -> S_IRUSR|S_IRGRP|S_IROTH for portability
+ *
  * Revision 5.7  1990/12/18  17:19:21  eggert
  * Fix bug with multiple -n and -N options.
  *
@@ -153,59 +169,68 @@ Report problems and direct all questions to:
 #include "rcsbase.h"
 
 struct  Lockrev {
-	const char *revno;
+	char const *revno;
         struct  Lockrev   * nextrev;
 };
 
 struct  Symrev {
-	const char *revno;
-	const char *ssymbol;
+	char const *revno;
+	char const *ssymbol;
         int     override;
         struct  Symrev  * nextsym;
 };
 
+struct Message {
+	char const *revno;
+	struct cbuf message;
+	struct Message *nextmessage;
+};
+
 struct  Status {
-	const char *revno;
-	const char *status;
+	char const *revno;
+	char const *status;
         struct  Status  * nextstatus;
 };
 
 enum changeaccess {append, erase};
 struct chaccess {
-	const char *login;
+	char const *login;
 	enum changeaccess command;
 	struct chaccess *nextchaccess;
 };
 
 struct delrevpair {
-	const char *strt;
-	const char *end;
+	char const *strt;
+	char const *end;
         int     code;
 };
 
-static int buildeltatext P((const struct hshentries*));
+static int buildeltatext P((struct hshentries const*));
 static int removerevs P((void));
-static int sendmail P((const char*,const char*));
-static struct Lockrev *rmnewlocklst P((const struct Lockrev*));
-static void breaklock P((const struct hshentry*));
+static int sendmail P((char const*,char const*));
+static struct Lockrev *rmnewlocklst P((struct Lockrev const*));
+static void breaklock P((struct hshentry const*));
 static void buildtree P((void));
 static void cleanup P((void));
+static void doaccess P((void));
+static void doassoc P((void));
+static void dolocks P((void));
+static void domessages P((void));
 static void getaccessor P((char*,enum changeaccess));
 static void getassoclst P((int,char*));
-static void getchaccess P((const char*,enum changeaccess));
+static void getchaccess P((char const*,enum changeaccess));
 static void getdelrev P((char*));
+static void getmessage P((char*));
 static void getstates P((char*));
-static void rcs_setstate P((const char*,const char*));
+static void rcs_setstate P((char const*,char const*));
 static void scanlogtext P((struct hshentry*,int));
-static void setlock P((const char*));
-static void updateaccess P((void));
-static void updateassoc P((void));
-static void updatelocks P((void));
+static void setlock P((char const*));
 
 static struct buf numrev;
-static const char *headstate;
+static char const *headstate;
 static int chgheadstate, exitstatus, lockhead, unlockcaller;
 static struct Lockrev *newlocklst, *rmvlocklst;
+static struct Message *messagelst, *lastmessage;
 static struct Status *statelst, *laststate;
 static struct Symrev *assoclst, *lastassoc;
 static struct chaccess *chaccess, **nextchaccess;
@@ -213,21 +238,23 @@ static struct delrevpair delrev;
 static struct hshentry *cuthead, *cuttail, *delstrt;
 static struct hshentries *gendeltas;
 
-mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
+mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.12 1991/11/20 17:58:08 eggert Exp $")
 {
-	static const char cmdusage[] =
-		"\nrcs usage: rcs -alogins -Aoldfile -{blu}[rev] -cstring -e[logins] -i -{LU} -{nN}name[:rev] -orange -sstate[:rev] -t[textfile] -Vn file ...";
+	static char const cmdusage[] =
+		"\nrcs usage: rcs -{ae}logins -Afile -{blu}[rev] -cstring -{iLU} -{nNs}name[:rev] -orange -t[file] -Vn file ...";
 
-	const char *branchsym, *commsyml, *textfile;
+	char *a, **newargv, *textfile;
+	char const *branchsym, *commsyml;
 	int branchflag, expmode, initflag;
-	int r, strictlock, strict_selected, textflag;
+	int e, r, strictlock, strict_selected, textflag;
 	mode_t defaultRCSmode;	/* default mode for new RCS files */
+	mode_t RCSmode;
 	struct buf branchnum;
+	struct stat workstat;
         struct  Lockrev *curlock,  * rmvlock, *lockpt;
         struct  Status  * curstate;
 
-	initid();
-	catchints();
+	nosetid();
 
 	nextchaccess = &chaccess;
 	branchsym = commsyml = textfile = nil;
@@ -236,12 +263,15 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
 	curlock = rmvlock = nil;
 	defaultRCSmode = 0;
 	expmode = -1;
+	suffixes = X_DEFAULT;
         initflag= textflag = false;
         strict_selected = 0;
 
         /*  preprocessing command options    */
-        while (--argc,++argv, argc>=1 && ((*argv)[0] == '-')) {
-                switch ((*argv)[1]) {
+	argc = getRCSINIT(argc, argv, &newargv);
+	argv = newargv;
+	while (a = *++argv,  0<--argc && *a++=='-') {
+		switch (*a++) {
 
 		case 'i':   /*  initial version  */
                         initflag = true;
@@ -250,12 +280,12 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                 case 'b':  /* change default branch */
 			if (branchflag) redefined('b');
                         branchflag= true;
-                        branchsym = (*argv)+2;
+			branchsym = a;
                         break;
 
                 case 'c':   /*  change comment symbol   */
 			if (commsyml) redefined('c');
-                        commsyml = (*argv)+2;
+			commsyml = a;
                         break;
 
                 case 'a':  /*  add new accessor   */
@@ -263,17 +293,17 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                         break;
 
                 case 'A':  /*  append access list according to accessfile  */
-			*argv += 2;
-			if (!**argv) {
+			if (!*a) {
 			    error("missing file name after -A");
                             break;
                         }
+			*argv = a;
 			if (0 < pairfilenames(1,argv,rcsreadopen,true,false)) {
 			    while (AccessList) {
-				getchaccess(strsave(AccessList->login), append);
+				getchaccess(str_save(AccessList->login),append);
 				AccessList = AccessList->nextaccess;
 			    }
-			    ffclose(finptr);
+			    Izclose(&finptr);
                         }
                         break;
 
@@ -282,12 +312,13 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                         break;
 
                 case 'l':    /*   lock a revision if it is unlocked   */
-                        if ( (*argv)[2] == '\0'){ /* lock head or def. branch */
+			if (!*a) {
+			    /* Lock head or default branch.  */
                             lockhead = true;
                             break;
                         }
 			lockpt = talloc(struct Lockrev);
-                        lockpt->revno = (*argv)+2;
+			lockpt->revno = a;
                         lockpt->nextrev = nil;
                         if ( curlock )
                             curlock->nextrev = lockpt;
@@ -297,12 +328,12 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                         break;
 
                 case 'u':   /*  release lock of a locked revision   */
-                        if ( (*argv)[2] == '\0'){ /*  unlock head  */
+			if (!*a) {
                             unlockcaller=true;
                             break;
                         }
 			lockpt = talloc(struct Lockrev);
-                        lockpt->revno = (*argv)+2;
+			lockpt->revno = a;
                         lockpt->nextrev = nil;
                         if (rmvlock)
                             rmvlock->nextrev = lockpt;
@@ -331,7 +362,7 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                         break;
 
                 case 'n':    /*  add new association: error, if name exists */
-                        if ( (*argv)[2] == '\0') {
+			if (!*a) {
 			    error("missing symbolic name after -n");
                             break;
                         }
@@ -339,16 +370,20 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                         break;
 
                 case 'N':   /*  add or change association   */
-                        if ( (*argv)[2] == '\0') {
+			if (!*a) {
 			    error("missing symbolic name after -N");
                             break;
                         }
                         getassoclst(true, (*argv)+1);
                         break;
 
+		case 'm':   /*  change log message  */
+			getmessage(a);
+			break;
+
 		case 'o':   /*  delete revisions  */
 			if (delrev.strt) redefined('o');
-                        if ( (*argv)[2] == '\0' ) {
+			if (!*a) {
 			    error("missing revision range after -o");
                             break;
                         }
@@ -356,7 +391,7 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                         break;
 
                 case 's':   /*  change state attribute of a revision  */
-                        if ( (*argv)[2] == '\0') {
+			if (!*a) {
 			    error("state missing after -s");
                             break;
                         }
@@ -365,9 +400,9 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
 
                 case 't':   /*  change descriptive text   */
                         textflag=true;
-                        if ((*argv)[2]!='\0'){
+			if (*a) {
 				if (textfile) redefined('t');
-                                textfile = (*argv)+2;
+				textfile = a;
                         }
                         break;
 
@@ -379,13 +414,17 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                         quietflag = true;
                         break;
 
+		case 'x':
+			suffixes = a;
+			break;
+
 		case 'V':
 			setRCSversion(*argv);
 			break;
 
 		case 'k':    /*  set keyword expand mode  */
 			if (0 <= expmode) redefined('k');
-			if (0 <= (expmode = str2expmode(*argv+2)))
+			if (0 <= (expmode = str2expmode(a)))
 			    break;
 			/* fall into */
                 default:
@@ -401,13 +440,11 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
 	if (initflag) {
 	    defaultRCSmode = umask((mode_t)0);
 	    VOID umask(defaultRCSmode);
-	    defaultRCSmode = ~defaultRCSmode & 0444;
+	    defaultRCSmode = (S_IRUSR|S_IRGRP|S_IROTH) & ~defaultRCSmode;
 	}
 
         /* now handle all filenames */
         do {
-	foutptr = NULL;
-        finptr=frewrite=NULL;
 	ffree();
 
         if ( initflag ) {
@@ -435,10 +472,16 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
 
 	diagnose("RCS file: %s\n", RCSfilename);
 
-	if (initflag && !getworkstat())		   continue; /* give up */
-	if (!initflag && !checkaccesslist())	   continue; /* give up */
-
-        gettree(); /* read in delta tree */
+	RCSmode = defaultRCSmode;
+	if (initflag) {
+		if (stat(workfilename, &workstat) == 0)
+			RCSmode = workstat.st_mode;
+	} else {
+		if (!checkaccesslist()) continue;
+		gettree(); /* Read the delta tree.  */
+		RCSmode = RCSstat.st_mode;
+	}
+	RCSmode &= ~(S_IWUSR|S_IWGRP|S_IWOTH);
 
         /*  update admin. node    */
         if (strict_selected) StrictLocks = strictlock;
@@ -456,11 +499,13 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
                 Dbranch = nil;
         }
 
-	updateaccess();		/*  update access list        */
+	doaccess();	/* Update access list.  */
 
-        updateassoc();          /*  update association list   */
+	doassoc();	/* Update association list.  */
 
-        updatelocks();          /*  update locks              */
+	dolocks();	/* Update locks.  */
+
+	domessages();	/* Update log messages.  */
 
         /*  update state attribution  */
         if (chgheadstate) {
@@ -488,44 +533,36 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
             buildtree();
         }
 
+	if (nerror)
+		continue;
 
         putadmin(frewrite);
         if ( Head )
            puttree(Head, frewrite);
 	putdesc(textflag,textfile);
-	foutptr = NULL;
 
         if ( Head) {
-	    if (!delrev.strt) {
-                /* no revision deleted */
-                fastcopy(finptr,frewrite);
+	    if (!delrev.strt && !messagelst) {
+		/* No revision was deleted and no message was changed.  */
+		fastcopy(finptr, frewrite);
             } else {
-		if (!cuttail || buildeltatext(gendeltas))
-                    scanlogtext((struct hshentry *)nil,nil);
+		if (!cuttail || buildeltatext(gendeltas)) {
+		    advise_access(finptr, MADV_SEQUENTIAL);
+		    scanlogtext((struct hshentry *)nil, false);
                     /* copy rest of delta text nodes that are not deleted      */
+		}
             }
         }
-	if (finptr) {ffclose(finptr); finptr=NULL;} /* Help the file system. */
-        ffclose(frewrite);   frewrite = NULL;
+	Izclose(&finptr);
         if ( ! nerror ) {  /*  move temporary file to RCS file if no error */
 	    /* update mode */
-	    seteid();
-	    r = chmod(newRCSfilename,
-			 (
-			       !initflag ? RCSstat.st_mode
-			     : haveworkstat==0 ? workstat.st_mode
-			     : defaultRCSmode
-			 ) & ~(S_IWUSR|S_IWGRP|S_IWOTH)
-	    );
-	    if (r == 0) {
-		ignoreints();
-		r = re_name(newRCSfilename,RCSfilename);
-		keepdirtemp(newRCSfilename);
-		restoreints();
-	    }
-	    setrid();
+	    ignoreints();
+	    r = chnamemod(&frewrite, newRCSfilename, RCSfilename, RCSmode);
+	    e = errno;
+	    keepdirtemp(newRCSfilename);
+	    restoreints();
 	    if (r != 0) {
-		eerror(RCSfilename);
+		enerror(e, RCSfilename);
 		error("saved in %s", newRCSfilename);
 		dirtempunlink();
                 break;
@@ -545,8 +582,9 @@ mainProg(rcsId, "rcs", "$Id: rcs.c,v 5.7 1990/12/18 17:19:21 eggert Exp $")
 cleanup()
 {
 	if (nerror) exitstatus = EXIT_FAILURE;
-	if (finptr) ffclose(finptr);
-	if (frewrite) ffclose(frewrite);
+	Izclose(&finptr);
+	Ozclose(&fcopy);
+	Ozclose(&frewrite);
 	dirtempunlink();
 }
 
@@ -568,7 +606,7 @@ char    * sp;
 
 {
         struct   Symrev  * pt;
-	const char *temp;
+	char const *temp;
         int                c;
 
         while( (c=(*++sp)) == ' ' || c == '\t' || c =='\n')  ;
@@ -589,10 +627,7 @@ char    * sp;
             pt->revno = nil;
         else {
             while( (c = *++sp) == ' ' || c == '\n' || c == '\t')  ;
-	    if ( c == '\0' )
-                pt->revno = nil;
-	    else
-                pt->revno = sp;
+	    pt->revno = sp;
         }
         pt->nextsym = nil;
         if (lastassoc)
@@ -606,7 +641,7 @@ char    * sp;
 
 	static void
 getchaccess(login, command)
-	const char *login;
+	char const *login;
 	enum changeaccess command;
 {
 	register struct chaccess *pt;
@@ -636,7 +671,7 @@ getaccessor(opt, command)
         while( ( c = *++sp) == ' ' || c == '\n' || c == '\t' || c == ',') ;
         if ( c == '\0') {
 	    if (command == erase  &&  sp-opt == 1) {
-		getchaccess((const char*)nil, command);
+		getchaccess((char const*)nil, command);
 		return;
 	    }
 	    error("missing login name after option -a or -e");
@@ -652,6 +687,35 @@ getaccessor(opt, command)
 }
 
 
+	static void
+getmessage(option)
+	char *option;
+{
+	struct Message *pt;
+	struct cbuf cb;
+	char *m;
+
+	if (!(m = strchr(option, ':'))) {
+		error("-m option lacks revision number");
+		return;
+	}
+	*m++ = 0;
+	cb = cleanlogmsg(m, strlen(m));
+	if (!cb.size) {
+		error("-m option lacks log message");
+		return;
+	}
+	pt = talloc(struct Message);
+	pt->revno = option;
+	pt->message = cb;
+	pt->nextmessage = 0;
+	if (lastmessage)
+		lastmessage->nextmessage = pt;
+	else
+		messagelst = pt;
+	lastmessage = pt;
+}
+
 
 	static void
 getstates(sp)
@@ -660,7 +724,7 @@ char    *sp;
 /*              revision and store in statelst                  */
 
 {
-	const char *temp;
+	char const *temp;
         struct  Status  *pt;
         register        c;
 
@@ -702,11 +766,21 @@ char    *sp;
 {
         int    c;
         struct  delrevpair      *pt;
+	int separator;
 
 	pt = &delrev;
         while((c = (*++sp)) == ' ' || c == '\n' || c == '\t') ;
 
-        if ( c == '<' || c == '-' ) {  /*  -o  -rev  or <rev  */
+	/* Support old ambiguous '-' syntax; this will go away.  */
+	if (strchr(sp,':'))
+		separator = ':';
+	else {
+		if (strchr(sp,'-')  &&  VERSION(5) <= RCSversion)
+		    warn("`-' is obsolete in `-o%s'; use `:' instead", sp);
+		separator = '-';
+	}
+
+	if (c == separator) { /* -o:rev */
             while( (c = (*++sp)) == ' ' || c == '\n' || c == '\t')  ;
             pt->strt = sp;    pt->code = 1;
             while( c != ' ' && c != '\n' && c != '\t' && c != '\0') c =(*++sp);
@@ -717,23 +791,23 @@ char    *sp;
         else {
             pt->strt = sp;
             while( c != ' ' && c != '\n' && c != '\t' && c != '\0'
-                   && c != '-' && c != '<' )  c = *++sp;
+		   && c != separator )  c = *++sp;
             *sp = '\0';
             while( c == ' ' || c == '\n' || c == '\t' )  c = *++sp;
             if ( c == '\0' )  {  /*   -o rev or branch   */
                 pt->end = nil;   pt->code = 0;
                 return;
             }
-            if ( c != '-' && c != '<') {
+	    if (c != separator) {
 		faterror("invalid range %s %s after -o", pt->strt, sp);
             }
             while( (c = *++sp) == ' ' || c == '\n' || c == '\t')  ;
-            if ( c == '\0') {  /*  -o   rev-   or   rev<   */
+	    if (!c) {  /* -orev: */
                 pt->end = nil;   pt->code = 2;
                 return;
             }
         }
-        /*   -o   rev1-rev2    or   rev1<rev2   */
+	/* -orev1:rev2 */
 	pt->end = sp;  pt->code = 3;
         while( c!= ' ' && c != '\n' && c != '\t' && c != '\0') c = *++sp;
         *sp = '\0';
@@ -749,33 +823,39 @@ scanlogtext(delta,edit)
 /* Function: Scans delta text nodes up to and including the one given
  * by delta, or up to last one present, if delta==nil.
  * For the one given by delta (if delta!=nil), the log message is saved into
- * curlogmsg and the text is edited if 'edit' is set, copied otherwise.
+ * delta->log if delta==cuttail; the text is edited if EDIT is set, else copied.
  * Assumes the initial lexeme must be read in first.
  * Does not advance nexttok after it is finished, except if delta==nil.
  */
 {
-	const struct hshentry *nextdelta;
+	struct hshentry const *nextdelta;
 	struct cbuf cb;
 
 	for (;;) {
-		foutptr = NULL;
-                nextlex();
-                if (!(nextdelta=getnum())) {
+		foutptr = 0;
+		if (eoflex()) {
                     if(delta)
 			faterror("can't find delta for revision %s", delta->num);
-		    if (nexttok != EOFILE)
-			fatserror("expecting EOF");
 		    return; /* no more delta text nodes */
                 }
+		nextlex();
+		if (!(nextdelta=getnum()))
+		    faterror("delta number corrupted");
 		if (nextdelta->selector) {
 			foutptr = frewrite;
 			aprintf(frewrite,DELNUMFORM,nextdelta->num,Klog);
                 }
 		getkeystring(Klog);
-		if (delta==nextdelta) {
+		if (nextdelta == cuttail) {
 			cb = savestring(&curlogbuf);
-			delta->log = curlogmsg =
-				cleanlogmsg(curlogbuf.string, cb.size);
+			if (!delta->log.string)
+			    delta->log = cleanlogmsg(curlogbuf.string, cb.size);
+		} else if (nextdelta->log.string && nextdelta->selector) {
+			foutptr = 0;
+			readstring();
+			foutptr = frewrite;
+			putstring(foutptr, false, nextdelta->log, true);
+			afputc(nextc, foutptr);
                 } else {readstring();
                 }
                 nextlex();
@@ -792,14 +872,14 @@ scanlogtext(delta,edit)
 	if (edit)
 		editstring((struct hshentry *)nil);
 	else
-		copystring();
+		enterstring();
 }
 
 
 
 	static struct Lockrev *
 rmnewlocklst(which)
-	const struct Lockrev *which;
+	struct Lockrev const *which;
 /*   Function:  remove lock to revision which->revno from newlocklst   */
 
 {
@@ -829,7 +909,7 @@ rmnewlocklst(which)
 
 
 	static void
-updateaccess()
+doaccess()
 {
 	register struct chaccess *ch;
 	register struct access **p, *t;
@@ -863,15 +943,17 @@ updateaccess()
 
 	static int
 sendmail(Delta, who)
-	const char *Delta, *who;
+	char const *Delta, *who;
 /*   Function:  mail to who, informing him that his lock on delta was
  *   broken by caller. Ask first whether to go ahead. Return false on
  *   error or if user decides not to break the lock.
  */
 {
-	const char *messagefile;
+#ifdef SENDMAIL
+	char const *messagefile;
 	int old1, old2, c;
         FILE    * mailmess;
+#endif
 
 
 	aprintf(stderr, "Revision %s is already locked by %s.\n", Delta, who);
@@ -879,21 +961,21 @@ sendmail(Delta, who)
 		return false;
 
         /* go ahead with breaking  */
+#ifdef SENDMAIL
 	messagefile = maketemp(0);
-	errno = 0;
-        if ( (mailmess = fopen(messagefile, "w")) == NULL) {
+	if (!(mailmess = fopen(messagefile, "w"))) {
 	    efaterror(messagefile);
         }
 
 	aprintf(mailmess, "Subject: Broken lock on %s\n\nYour lock on revision %s of file %s\nhas been broken by %s for the following reason:\n",
-		bindex(RCSfilename,SLASH), Delta, getfullRCSname(), getcaller()
+		basename(RCSfilename), Delta, getfullRCSname(), getcaller()
 	);
 	aputs("State the reason for breaking the lock:\n(terminate with single '.' or end of file)\n>> ", stderr);
 
         old1 = '\n';    old2 = ' ';
         for (; ;) {
 	    c = getcstdin();
-            if ( c == EOF ) {
+	    if (feof(stdin)) {
 		aprintf(mailmess, "%c\n", old1);
                 break;
             }
@@ -905,10 +987,14 @@ sendmail(Delta, who)
 		if (c=='\n') aputs(">> ", stderr);
             }
         }
-        ffclose(mailmess);
+	Ozclose(&mailmess);
 
-	/* ignore the exit status, even if delivermail unsuccessful */
-	VOID run(messagefile, (char*)nil, SENDMAIL, who, (char*)nil);
+	if (run(messagefile, (char*)nil, SENDMAIL, who, (char*)nil))
+		warn("Mail may have failed."),
+#else
+		warn("Mail notification of broken locks is not available."),
+#endif
+		warn("Please tell `%s' why you broke the lock.", who);
 	return(true);
 }
 
@@ -916,7 +1002,7 @@ sendmail(Delta, who)
 
 	static void
 breaklock(delta)
-	const struct hshentry *delta;
+	struct hshentry const *delta;
 /* function: Finds the lock held by caller on delta,
  * and removes it.
  * Sends mail if a lock different from the caller's is broken.
@@ -924,7 +1010,7 @@ breaklock(delta)
  */
 {
         register struct lock * next, * trail;
-	const char *num;
+	char const *num;
         struct lock dummy;
 
 	num=delta->num;
@@ -959,7 +1045,7 @@ breaklock(delta)
 
 	static struct hshentry *
 searchcutpt(object, length, store)
-	const char *object;
+	char const *object;
 	unsigned length;
 	struct hshentries *store;
 /*   Function:  Search store and return entry with number being object. */
@@ -987,7 +1073,7 @@ struct  hshentry        *strt,  *tail;
 
 {
         struct  hshentry    *pt;
-	const struct lock *lockpt;
+	struct lock const *lockpt;
         int     flag;
 
 
@@ -1177,12 +1263,13 @@ removerevs()
 
 
 	static void
-updateassoc()
+doassoc()
 /*   Function: add or delete(if revno is nil) association	*/
 /*		which is stored in assoclst			*/
 
 {
-	const struct Symrev *curassoc;
+	char const *p;
+	struct Symrev const *curassoc;
 	struct  assoc   * pre,  * pt;
 
         /*  add new associations   */
@@ -1202,10 +1289,18 @@ updateassoc()
 		else
 		    warn("can't delete nonexisting symbol %s",curassoc->ssymbol);
 	    }
-	    else if (expandsym(curassoc->revno, &numrev)) {
-	    /*   add symbol  */
-		VOID addsymbol(fstrsave(numrev.string), curassoc->ssymbol, curassoc->override);
-            }
+	    else {
+		if (curassoc->revno[0]) {
+		    p = 0;
+		    if (expandsym(curassoc->revno, &numrev))
+			p = fstr_save(numrev.string);
+		} else if (!(p = tiprev()))
+		    error("no latest revision to associate with symbol %s",
+			    curassoc->ssymbol
+		    );
+		if (p)
+		    VOID addsymbol(p, curassoc->ssymbol, curassoc->override);
+	    }
             curassoc = curassoc->nextsym;
         }
 
@@ -1214,14 +1309,14 @@ updateassoc()
 
 
 	static void
-updatelocks()
+dolocks()
 /* Function: remove lock for caller or first lock if unlockcaller is set;
  *           remove locks which are stored in rmvlocklst,
  *           add new locks which are stored in newlocklst,
  *           add lock for Dbranch or Head if lockhead is set.
  */
 {
-	const struct Lockrev *lockpt;
+	struct Lockrev const *lockpt;
 	struct hshentry *target;
 
 	if (unlockcaller) { /*  find lock for caller  */
@@ -1282,7 +1377,7 @@ updatelocks()
 
 	static void
 setlock(rev)
-	const char *rev;
+	char const *rev;
 /* Function: Given a revision or branch number, finds the corresponding
  * delta and locks it for caller.
  */
@@ -1302,10 +1397,26 @@ setlock(rev)
 }
 
 
+	static void
+domessages()
+{
+	struct hshentry *target;
+	struct Message *p;
+
+	for (p = messagelst;  p;  p = p->nextmessage)
+	    if (
+		expandsym(p->revno, &numrev)  &&
+		(target = genrevs(
+			numrev.string, (char*)0, (char*)0, (char*)0, &gendeltas
+		))
+	    )
+		target->log = p->message;
+}
+
 
 	static void
 rcs_setstate(rev,status)
-	const char *rev, *status;
+	char const *rev, *status;
 /* Function: Given a revision or branch number, finds the corresponding delta
  * and sets its state to status.
  */
@@ -1330,22 +1441,19 @@ rcs_setstate(rev,status)
 
 	static int
 buildeltatext(deltas)
-	const struct hshentries *deltas;
+	struct hshentries const *deltas;
 /*   Function:  put the delta text on frewrite and make necessary   */
 /*              change to delta text                                */
 {
-	int exit_stats;
 	register FILE *fcut;	/* temporary file to rebuild delta tree */
-	const char *cutfilename, *diffilename;
+	char const *cutfilename, *diffilename;
 
 	cutfilename = nil;
 	cuttail->selector = false;
-	inittmpeditfiles();
 	scanlogtext(deltas->first, false);
         if ( cuthead )  {
 	    cutfilename = maketemp(3);
-	    errno = 0;
-            if ( (fcut = fopen(cutfilename, "w")) == NULL) {
+	    if (!(fcut = fopen(cutfilename, FOPEN_W_WORK))) {
 		efaterror(cutfilename);
             }
 
@@ -1354,26 +1462,26 @@ buildeltatext(deltas)
 		scanlogtext(deltas->first, true);
             }
 
-	    finishedit((struct hshentry *)nil);
-	    arewind(fcopy);
-	    fastcopy(fcopy, fcut);
-            swapeditfiles(false);
-            ffclose(fcut);
+	    snapshotedit(fcut);
+	    Ofclose(fcut);
         }
 
 	while (deltas->first != cuttail)
 	    scanlogtext((deltas = deltas->rest)->first, true);
-        finishedit((struct hshentry *)nil);    ffclose(fcopy);
+	finishedit((struct hshentry *)nil, (FILE*)0, true);
+	Ozclose(&fcopy);
 
         if ( cuthead ) {
 	    diffilename = maketemp(0);
-            exit_stats = run((char*)nil,diffilename,
-			DIFF DIFF_FLAGS, cutfilename, resultfile, (char*)nil);
-	    if (!WIFEXITED(exit_stats) || 1<WEXITSTATUS(exit_stats))
-                faterror ("diff failed");
-	    return putdtext(cuttail->num,curlogmsg,diffilename,frewrite,true);
+	    switch (run((char*)nil,diffilename,
+			DIFF DIFF_FLAGS, cutfilename, resultfile, (char*)nil
+	    )) {
+		case DIFF_FAILURE: case DIFF_SUCCESS: break;
+		default: faterror ("diff failed");
+	    }
+	    return putdtext(cuttail->num,cuttail->log,diffilename,frewrite,true);
 	} else
-	    return putdtext(cuttail->num,curlogmsg,resultfile,frewrite,false);
+	    return putdtext(cuttail->num,cuttail->log,resultfile,frewrite,false);
 }
 
 
@@ -1423,24 +1531,24 @@ buildtree()
 #if lint
 /* This lets us lint everything all at once. */
 
-const char cmdid[] = "";
+char const cmdid[] = "";
 
-#define go(p,e) {int p P((int,char**)); void e P((void)); if(*argv)return p(argc,argv);if(*argv[1])e();return 0;}
+#define go(p,e) {int p P((int,char**)); void e P((void)); if(*argv)return p(argc,argv);if(*argv[1])e();}
 
 	int
 main(argc, argv)
 	int argc;
 	char **argv;
 {
-	switch (argc) {
-		case 0:	go(ciId,	ciExit);
-		case 1:	go(coId,	coExit);
-		case 2:	go(identId,	identExit);
-		case 3:	go(rcsdiffId,	rdiffExit);
-		case 4:	go(rcsmergeId,	rmergeExit);
-		case 5:	go(rlogId,	rlogExit);
-		case 6:	go(rcsId,	exiterr);
-		default: return 0;
-	}
+	go(ciId,	ciExit);
+	go(coId,	coExit);
+	go(identId,	identExit);
+	go(mergeId,	mergeExit);
+	go(rcsId,	exiterr);
+	go(rcscleanId,	rcscleanExit);
+	go(rcsdiffId,	rdiffExit);
+	go(rcsmergeId,	rmergeExit);
+	go(rlogId,	rlogExit);
+	return 0;
 }
 #endif
