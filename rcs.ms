@@ -15,11 +15,6 @@
 .vs 18p
 .R
 ..
-.de Id
-.ND \\$4
-..
-.Id $Id: rcs.ms,v 5.4 1995/06/01 16:23:43 eggert Exp $
-.RP
 .TL
 RCS\*-A System for Version Control
 .sp
