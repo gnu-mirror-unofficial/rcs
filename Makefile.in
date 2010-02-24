@@ -54,8 +54,8 @@ dist :: $(srcdir)/configure
 	(cd build-aux && ln install-sh mkinstalldirs \
 		../$$d/build-aux) && \
 	(cd man && ln *.[0-9] *.[0-9]in \
-		ChangeLog COPYING Makefile.in ../$$d/man) && \
-	(cd src && ln *.[ch] *.heg *.sh ChangeLog COPYING \
+		ChangeLog Makefile.in ../$$d/man) && \
+	(cd src && ln *.[ch] *.heg *.sh ChangeLog \
 		Makefile.in rcstest TAGS ../$$d/src) && \
 	tar -cbf 1 - $$d | gzip -9 >$$d.tar.gz && \
 	rm -fr $$d

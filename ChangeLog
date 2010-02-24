@@ -1,5 +1,11 @@
 2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[admin] Distribute only one copy of COPYING.
+
+	* Makefile.in (dist): Don't distribute man/COPYING, man/COPYING.
+
+2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[admin] Move install-sh, mkinstalldirs into new dir build-aux/.
 
 	* build-aux/install-sh: Move here from top-level;
