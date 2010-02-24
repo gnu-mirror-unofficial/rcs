@@ -21,6 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 srcdir = @srcdir@
+bauxdir = $(srcdir)/../build-aux
 VPATH = @srcdir@
 
 INSTALL = @INSTALL@
@@ -42,8 +43,8 @@ rcsfile.5 : rcsfile.5in
 
 check dvi info TAGS ::
 
-installdirs :: ../mkinstalldirs
-	-$(srcdir)/../mkinstalldirs $(man1dir) $(man5dir)
+installdirs :: $(bauxdir)/mkinstalldirs
+	-$(bauxdir)/mkinstalldirs $(man1dir) $(man5dir)
 
 man1pages = ci co ident merge rcs rcsclean rcsdiff rcsintro rcsmerge rlog
 

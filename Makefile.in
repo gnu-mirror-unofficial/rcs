@@ -49,10 +49,12 @@ dist :: $(srcdir)/configure
 		's/.*version_string[^"]*"\([0-9.]*\).*/\1/p' \
 	` && \
 	rm -fr $$d && \
-	mkdir $$d $$d/man $$d/src && \
+	mkdir $$d $$d/build-aux $$d/man $$d/src && \
 	ln *.ms ChangeLog configure configure.in COPYING CREDITS \
-		INSTALL INSTALL.RCS install-sh \
-		Makefile.in mkinstalldirs NEWS README REFS $$d && \
+		INSTALL INSTALL.RCS \
+		Makefile.in NEWS README REFS $$d && \
+	(cd build-aux && ln install-sh mkinstalldirs \
+		../$$d/build-aux) && \
 	(cd man && ln *.[0-9] *.[0-9]in \
 		ChangeLog COPYING Makefile.in ../$$d/man) && \
 	(cd src && ln *.[ch] *.heg *.sh ChangeLog COPYING \

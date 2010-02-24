@@ -1,3 +1,10 @@
+2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[admin] Move install-sh, mkinstalldirs into new dir build-aux/.
+
+	* Makefile.in (bauxdir): New var.
+	(installdirs): Use $(bauxdir).
+
 Fri Jun 16 06:19:24 1995  Paul Eggert  <eggert@twinsun.com>
 
 	* ci.1, rlog.1: Fix typos in -zLT example.

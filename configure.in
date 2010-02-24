@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_INIT(src/rcsbase.h)
+AC_CONFIG_AUX_DIR([build-aux])
 
 # Set up simple `diff' test.
 echo 0 >conftest0
