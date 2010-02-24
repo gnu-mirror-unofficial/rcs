@@ -1,7 +1,5 @@
 # Make RCS.
 
-#	$Id: Makefile.in,v 5.26 1995/06/16 06:19:24 eggert Exp $
-
 # Copyright (C) 2010 Thien-Thi Nguyen
 # Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
 # Copyright (C) 1982, 1988, 1989 Walter Tichy

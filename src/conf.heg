@@ -1,7 +1,5 @@
 /* example RCS compile-time configuration */
 
-	/* $Id: conf.heg,v 1.17 1995/06/02 18:19:00 eggert Exp $ */
-
 /*
  * This example RCS compile-time configuration describes a host that conforms
  * to Standard C (1990) and to Posix 1003.1b-1993 with Memory Mapped Files,

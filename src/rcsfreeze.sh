@@ -2,8 +2,6 @@
 
 # rcsfreeze - assign a symbolic revision number to a configuration of RCS files
 
-#	$Id: rcsfreeze.sh,v 4.6 1993/11/03 17:42:27 eggert Exp $
-
 #       The idea is to run rcsfreeze each time a new version is checked
 #       in. A unique symbolic revision number (C_[number], where number
 #       is increased each time rcsfreeze is run) is then assigned to the most

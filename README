@@ -20,5 +20,3 @@ See the following files and directories for more information.
 	src/version.c - the version number of this release
 
 If you lack troff, you can get GNU groff to format the documentation.
-
-$Id: README,v 5.24 1995/06/16 06:19:24 eggert Exp $

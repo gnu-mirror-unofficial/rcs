@@ -1,7 +1,5 @@
 # Master makefile for RCS
 
-#	$Id: Makefile.in,v 1.6 1995/06/16 06:19:24 eggert Exp $
-
 # Copyright (C) 2010 Thien-Thi Nguyen
 # Copyright (C) 1995 Paul Eggert
 #
