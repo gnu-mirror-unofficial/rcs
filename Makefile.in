@@ -62,7 +62,7 @@ dist :: $(srcdir)/configure
 		rm -f TMP) && \
 	(cd src && ln *.[ch] *.heg *.sh ChangeLog \
 		Makefile.in rcstest TAGS ../$$d/src) && \
-	tar -cbf 1 - $$d | gzip -9 >$$d.tar.gz && \
+	tar -cf - $$d | gzip -9 >$$d.tar.gz && \
 	rm -fr $$d
 
 $(srcdir)/configure : configure.in

@@ -1,5 +1,11 @@
 2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[admin] On "make dist", don't bother with tar(1) blocking factor.
+
+	* Makefile.in (dist): Don't specify the tar(1) blocking factor.
+
+2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Set metainfo at "make dist"; say "GNU RCS <VERSION>".
 
 	* Makefile.in (dist) <man>: Prepend release version and release date.
