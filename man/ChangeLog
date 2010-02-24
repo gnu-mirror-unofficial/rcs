@@ -1,5 +1,24 @@
 2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[man] Set metainfo at "make dist"; say "GNU RCS <VERSION>".
+
+	* ci.1 (Id): Delete macro and call.
+	(TH): Say "GNU RCS <VERSION>".
+	* co.1: Likewise.
+	* merge.1: Likewise.
+	* rcs.1: Likewise.
+	* rcsclean.1: Likewise.
+	* rcsdiff.1: Likewise.
+	* rcsfile.5in: Likewise.
+	* rcsfreeze.1: Likewise.
+	* rcsintro.1: Likewise.
+	* rcsmerge.1: Likewise.
+	* rlog.1: Likewise.
+	* ident.1: Likewise.
+	(iD): Hardcode value.
+
+2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[admin] Move install-sh, mkinstalldirs into new dir build-aux/.
 
 	* Makefile.in (bauxdir): New var.
