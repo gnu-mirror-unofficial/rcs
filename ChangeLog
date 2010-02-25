@@ -1,5 +1,13 @@
 2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Require a C99-capable compiler.
+
+	* configure.in (AC_PROG_CC): Delete.
+	(AC_PROG_CC_C99): New.
+	If no C99-capable compiler is found, error out.
+
+2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use zero-arg form of AC_OUTPUT.
 
 	* configure.in (AC_CONFIG_FILES): New.
