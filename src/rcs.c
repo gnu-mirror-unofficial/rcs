@@ -1423,27 +1423,3 @@ buildtree()
         return;
 }
 
-#if RCS_lint
-/* This lets us lint everything all at once. */
-
-char const cmdid[] = "";
-
-#define go(p,e) {int p P((int,char**)); void e P((void)); if(*argv)return p(argc,argv);if(*argv[1])e();}
-
-	int
-main(argc, argv)
-	int argc;
-	char **argv;
-{
-	go(ciId,	ciExit);
-	go(coId,	coExit);
-	go(identId,	identExit);
-	go(mergeId,	mergeExit);
-	go(rcsId,	exiterr);
-	go(rcscleanId,	rcscleanExit);
-	go(rcsdiffId,	rdiffExit);
-	go(rcsmergeId,	rmergeExit);
-	go(rlogId,	rlogExit);
-	return 0;
-}
-#endif

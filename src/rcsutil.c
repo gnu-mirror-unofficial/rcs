@@ -54,10 +54,6 @@ memcpy(s1, s2, n)
 }
 #endif
 
-#if RCS_lint
-	malloc_type lintalloc;
-#endif
-
 /*
  * list of blocks allocated with ftestalloc()
  * These blocks can be freed by ffree when we're done with the current file.

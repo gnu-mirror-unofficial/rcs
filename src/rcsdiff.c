@@ -325,9 +325,6 @@ cleanup()
     Izclose(&workptr);
 }
 
-#if RCS_lint
-#	define exiterr rdiffExit
-#endif
     void
 exiterr()
 {

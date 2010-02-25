@@ -377,9 +377,6 @@ cleanup()
 	dirtempunlink();
 }
 
-#if RCS_lint
-#	define exiterr coExit
-#endif
 	void
 exiterr()
 {

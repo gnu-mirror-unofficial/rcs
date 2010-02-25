@@ -95,9 +95,6 @@ mainProg(mergeId, "merge")
 }
 
 
-#if RCS_lint
-#	define exiterr mergeExit
-#endif
 	void
 exiterr()
 {

@@ -224,9 +224,6 @@ OBJECT=	ci$o co$o ident$o maketime$o merge$o merger$o partime$o rcs$o \
 	rcskeep$o rcskeys$o rcslex$o rcsmap$o rcsmerge$o rcsrev$o rcssyn$o \
 	rcstime$o rcsutil$o rlog$o version$o
 
-lint :: conf.h
-	$(LINT) -DRCS_lint=1 $(ALL_CFLAGS) $(SOURCE)
-
 TAGS : $(SOURCE)
 	etags $(SOURCE)
 

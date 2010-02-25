@@ -238,11 +238,7 @@ struct assoc {
 
 #define mainArgs (argc,argv) int argc; char **argv;
 
-#if RCS_lint
-#	define mainProg(name,cmd) int name mainArgs
-#else
-#	define mainProg(n,c) char const Copyright[] = "Copyright 1982,1988,1989 Walter F. Tichy, Purdue CS\nCopyright 1990,1991,1992,1993,1994,1995 Paul Eggert", cmdid[] = c; int main P((int,char**)); int main mainArgs
-#endif
+#define mainProg(n,c) char const Copyright[] = "Copyright 1982,1988,1989 Walter F. Tichy, Purdue CS\nCopyright 1990,1991,1992,1993,1994,1995 Paul Eggert", cmdid[] = c; int main P((int,char**)); int main mainArgs
 
 /*
  * Markers for keyword expansion (used in co and ident)
@@ -533,18 +529,12 @@ malloc_type testalloc P((size_t));
 malloc_type testrealloc P((malloc_type,size_t));
 #define ftalloc(T) ftnalloc(T,1)
 #define talloc(T) tnalloc(T,1)
-#if RCS_lint
-	extern malloc_type lintalloc;
-#	define ftnalloc(T,n) (lintalloc = ftestalloc(sizeof(T)*(n)), (T*)0)
-#	define tnalloc(T,n) (lintalloc = testalloc(sizeof(T)*(n)), (T*)0)
-#	define trealloc(T,p,n) (lintalloc = testrealloc((malloc_type)0, sizeof(T)*(n)), p)
-#	define tfree(p)
-#else
-#	define ftnalloc(T,n) ((T*) ftestalloc(sizeof(T)*(n)))
-#	define tnalloc(T,n) ((T*) testalloc(sizeof(T)*(n)))
-#	define trealloc(T,p,n) ((T*) testrealloc((malloc_type)(p), sizeof(T)*(n)))
-#	define tfree(p) free((malloc_type)(p))
-#endif
+
+#define ftnalloc(T,n) ((T*) ftestalloc(sizeof(T)*(n)))
+#define tnalloc(T,n) ((T*) testalloc(sizeof(T)*(n)))
+#define trealloc(T,p,n) ((T*) testrealloc((malloc_type)(p), sizeof(T)*(n)))
+#define tfree(p) free((malloc_type)(p))
+
 time_t now P((void));
 void awrite P((char const*,size_t,FILE*));
 void fastcopy P((RILE*,FILE*));

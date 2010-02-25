@@ -79,9 +79,6 @@ mainProg(identId, "ident")
    exitmain(status);
 }
 
-#if RCS_lint
-#	define exiterr identExit
-#endif
 	void
 exiterr()
 {

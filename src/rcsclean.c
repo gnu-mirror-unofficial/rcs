@@ -240,9 +240,6 @@ cleanup()
 	dirtempunlink();
 }
 
-#if RCS_lint
-#	define exiterr rcscleanExit
-#endif
 	void
 exiterr()
 {

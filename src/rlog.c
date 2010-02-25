@@ -339,9 +339,6 @@ cleanup()
 	Izclose(&finptr);
 }
 
-#if RCS_lint
-#	define exiterr rlogExit
-#endif
 	void
 exiterr()
 {

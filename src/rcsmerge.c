@@ -182,9 +182,6 @@ mainProg(rcsmergeId, "rcsmerge")
 	exitmain(nerror ? DIFF_TROUBLE : status);
 }
 
-#if RCS_lint
-#	define exiterr rmergeExit
-#endif
 	void
 exiterr()
 {

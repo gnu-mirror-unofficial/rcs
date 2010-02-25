@@ -1,5 +1,25 @@
 2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Drop "make lint" support.
+
+	* rcsbase.h [RCS_lint] (lintalloc): Delete var.
+	[RCS_lint] (mainProg, ftnalloc, tnalloc, trealloc, tfree):
+	Remove macro definitions; promoting non-RCS_lint to top-level.
+	* ci.c [RCS_lint] (exiterr): Delete #define.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merge.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+	* rcs.c [RCS_lint] (cmdid, go, main):
+	Delete var, #define, and func, respectively.
+	* Makefile.in (lint): Delete target.
+
+2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Don't coddle compilers that require `(void) EXPRESSION;'.
 
 	* conf.sh: Remove check for `(void) EXPRESSION;' requirement.
