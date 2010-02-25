@@ -144,7 +144,7 @@ maketemp(n)
 	    char const *tp = tmp();
 	    size_t tplen = dir_useful_len(tp);
 	    p = testalloc(tplen + 10);
-	    VOID sprintf(p, "%.*s%cT%cXXXXXX", (int)tplen, tp, SLASH, '0'+n);
+	    sprintf(p, "%.*s%cT%cXXXXXX", (int)tplen, tp, SLASH, '0'+n);
 	    if (!mktemp(p) || !*p)
 		faterror("can't make temporary pathname `%.*s%cT%cXXXXXX'",
 			(int)tplen, tp, SLASH, '0'+n
@@ -175,7 +175,7 @@ tempunlink()
 
 	for (i = TEMPNAMES;  0 <= --i;  )
 	    if ((p = tpnames[i])) {
-		VOID unlink(p);
+		unlink(p);
 		/*
 		 * We would tfree(p) here,
 		 * but this might dump core if we're handing a signal.
@@ -341,7 +341,7 @@ bufscat(b, s)
 {
 	size_t blen  =  b->string ? strlen(b->string) : 0;
 	bufrealloc(b, blen+strlen(s)+1);
-	VOID strcpy(b->string+blen, s);
+	strcpy(b->string+blen, s);
 }
 
 	void
@@ -351,7 +351,7 @@ bufscpy(b, s)
 /* Copy S into B. */
 {
 	bufalloc(b, strlen(s)+1);
-	VOID strcpy(b->string, s);
+	strcpy(b->string, s);
 }
 
 
@@ -481,12 +481,12 @@ fin2open(d, dlen, base, baselen, x, xlen, rcsopen, mustread)
 	bufalloc(&RCSb, dlen + rcslen + 1 + baselen + xlen + 1);
 
 	/* Try dRCS/basex.  */
-	VOID memcpy(p = RCSb.string, d, dlen);
-	VOID memcpy(p += dlen, rcsdir, rcslen);
+	memcpy(p = RCSb.string, d, dlen);
+	memcpy(p += dlen, rcsdir, rcslen);
 	p += rcslen;
 	*p++ = SLASH;
-	VOID memcpy(p, base, baselen);
-	VOID memcpy(p += baselen, x, xlen);
+	memcpy(p, base, baselen);
+	memcpy(p += baselen, x, xlen);
 	p[xlen] = 0;
 	if (xlen) {
 	    if (finopen(rcsopen, mustread))
@@ -494,9 +494,9 @@ fin2open(d, dlen, base, baselen, x, xlen, rcsopen, mustread)
 
 	    /* Try dbasex.  */
 	    /* Start from scratch, because finopen() may have changed RCSb.  */
-	    VOID memcpy(p = RCSb.string, d, dlen);
-	    VOID memcpy(p += dlen, base, baselen);
-	    VOID memcpy(p += baselen, x, xlen);
+	    memcpy(p = RCSb.string, d, dlen);
+	    memcpy(p += dlen, base, baselen);
+	    memcpy(p += baselen, x, xlen);
 	    p[xlen] = 0;
 	}
 	return finopen(rcsopen, mustread);
@@ -594,7 +594,7 @@ pairnames(argc, argv, rcsopen, mustread, quiet)
 		bufscpy(&RCSbuf, "");
 		if (RCS1)
 			/* RCS filename was given without path.  */
-			VOID fin2open(arg, (size_t)0, RCSbase, baselen,
+			fin2open(arg, (size_t)0, RCSbase, baselen,
 				x, strlen(x), rcsopen, mustread
 			);
 		else {
@@ -708,10 +708,10 @@ getfullRCSname()
 		dlen = wdlen;
 		bufalloc(&rcsbuf, dlen + strlen(r) + 2);
 		d = rcsbuf.string;
-		VOID memcpy(d, wd, dlen);
+		memcpy(d, wd, dlen);
 		d += dlen;
 		*d++ = SLASH;
-		VOID strcpy(d, r);
+		strcpy(d, r);
 #	    endif
 	    return rcsbuf.string;
         }
@@ -780,14 +780,14 @@ getcwd(path, size)
 #		ifndef SIGCHLD
 #		define SIGCHLD SIGCLD
 #		endif
-		VOID signal(SIGCHLD, SIG_DFL);
+		signal(SIGCHLD, SIG_DFL);
 #	endif
 	if (!(child = vfork())) {
 		if (
 			close(fd[0]) == 0 &&
 			(fd[1] == STDOUT_FILENO ||
 #				ifdef F_DUPFD
-					(VOID close(STDOUT_FILENO),
+					(close(STDOUT_FILENO),
 					fcntl(fd[1], F_DUPFD, STDOUT_FILENO))
 #				else
 					dup2(fd[1], STDOUT_FILENO)
@@ -796,9 +796,9 @@ getcwd(path, size)
 				close(fd[1]) == 0
 			)
 		) {
-			VOID close(STDERR_FILENO);
-			VOID execl(binpwd, binpwd, (char *)0);
-			VOID execl(usrbinpwd, usrbinpwd, (char *)0);
+			close(STDERR_FILENO);
+			execl(binpwd, binpwd, (char *)0);
+			execl(usrbinpwd, usrbinpwd, (char *)0);
 		}
 		_exit(EXIT_FAILURE);
 	}
@@ -845,7 +845,7 @@ getcwd(path, size)
 #		endif
 	}
 	if (!fp) {
-		VOID close(fd[0]);
+		close(fd[0]);
 		errno = e;
 		return 0;
 	}

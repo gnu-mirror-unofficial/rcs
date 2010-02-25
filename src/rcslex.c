@@ -123,7 +123,7 @@ lookup(str)
 			n->num = fstr_save(str);
 			n->nexthsh = 0;
 #			ifdef LEXDB
-				VOID printf("\nEntered: %s at %u ", str, ihash);
+				printf("\nEntered: %s at %u ", str, ihash);
 #			endif
 			break;
 		} else if (strcmp(str, n->num) == 0)
@@ -725,14 +725,14 @@ checksid(id)
 	char *id;
 /* Check whether the string ID is an identifier.  */
 {
-	VOID checkid(id, 0);
+	checkid(id, 0);
 }
 
 	void
 checkssym(sym)
 	char *sym;
 {
-	VOID checksym(sym, 0);
+	checksym(sym, 0);
 }
 
 
@@ -824,7 +824,7 @@ fd2RILE(fd, name, type, status)
 		efaterror(name);
 	if (!S_ISREG(status->st_mode)) {
 		error("`%s' is not a regular file", name);
-		VOID close(fd);
+		close(fd);
 		errno = EINVAL;
 		return 0;
 	} else {
@@ -968,7 +968,7 @@ advise_access(f, advice)
 	int advice;
 {
     if (f->deallocate == mmap_deallocate)
-	VOID madvise((char *)f->base, (size_t)(f->lim - f->base), advice);
+	madvise((char *)f->base, (size_t)(f->lim - f->base), advice);
 	/* Don't worry if madvise fails; it's only advisory.  */
 }
 #endif
@@ -1047,7 +1047,7 @@ void oflush()
 fatcleanup(already_newline)
 	int already_newline;
 {
-	VOID fprintf(stderr, already_newline+"\n%s aborted\n", cmdid);
+	fprintf(stderr, already_newline+"\n%s aborted\n", cmdid);
 	exiterr();
 }
 
@@ -1172,7 +1172,7 @@ fatserror(char const *format,...)
 {
 	va_list args;
 	oflush();
-	VOID fprintf(stderr, "%s: %s:%ld: ", cmdid, RCSname, rcsline);
+	fprintf(stderr, "%s: %s:%ld: ", cmdid, RCSname, rcsline);
 	vararg_start(args, format);
 	fvfprintf(stderr, format, args);
 	va_end(args);
@@ -1346,7 +1346,7 @@ fvfprintf(FILE *stream, char const *format, va_list args)
 		_doprnt(format, args, stream);
 #	else
 		int *a = (int *)args;
-		VOID fprintf(stream, format,
+		fprintf(stream, format,
 			a[0], a[1], a[2], a[3], a[4],
 			a[5], a[6], a[7], a[8], a[9]
 		);
@@ -1402,34 +1402,34 @@ int argc; char * argv[];
         switch (nexttok) {
 
         case ID:
-                VOID printf("ID: %s",NextString);
+                printf("ID: %s",NextString);
                 break;
 
         case NUM:
 		if (hshenter)
-                   VOID printf("NUM: %s, index: %d",nexthsh->num, nexthsh-hshtab);
+                   printf("NUM: %s, index: %d",nexthsh->num, nexthsh-hshtab);
                 else
-                   VOID printf("NUM, unentered: %s",NextString);
+                   printf("NUM, unentered: %s",NextString);
                 hshenter = !hshenter; /*alternate between dates and numbers*/
                 break;
 
         case COLON:
-                VOID printf("COLON"); break;
+                printf("COLON"); break;
 
         case SEMI:
-                VOID printf("SEMI"); break;
+                printf("SEMI"); break;
 
         case STRING:
                 readstring();
-                VOID printf("STRING"); break;
+                printf("STRING"); break;
 
         case UNKN:
-                VOID printf("UNKN"); break;
+                printf("UNKN"); break;
 
         default:
-                VOID printf("DEFAULT"); break;
+                printf("DEFAULT"); break;
         }
-        VOID printf(" | ");
+        printf(" | ");
         nextlex();
         }
 	exitmain(EXIT_SUCCESS);

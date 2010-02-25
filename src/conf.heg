@@ -151,8 +151,6 @@
 #define bad_a_rename 0 /* Does rename(A,B) fail if A is unwritable?  */
 #define bad_b_rename 0 /* Does rename(A,B) fail if B is unwritable?  */
 #define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */
-/* typedef int void; */ /* Some ancient compilers need this.  */
-#define VOID (void) /* 'VOID e;' discards the value of an expression 'e'.  */
 #define has_seteuid 0 /* Does seteuid() work?  See ../INSTALL.RCS.  */
 #define has_setreuid 0 /* Does setreuid() work?  See ../INSTALL.RCS.  */
 #define has_setuid 1 /* Does setuid() exist?  */

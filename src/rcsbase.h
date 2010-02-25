@@ -322,7 +322,7 @@ int rcsfcmp P((RILE*,struct stat const*,char const*,struct hshentry const*));
 
 /* rcsfnms */
 #define bufautobegin(b) clear_buf(b)
-#define clear_buf(b) (VOID ((b)->string = 0, (b)->size = 0))
+#define clear_buf(b) (((b)->string = 0, (b)->size = 0))
 extern FILE *workstdout;
 extern char *workname;
 extern char const *RCSname;

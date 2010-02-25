@@ -136,7 +136,7 @@ editLineNumberOverflow()
 #if large_memory
 
 #if has_memmove
-#	define movelines(s1, s2, n) VOID memmove(s1, s2, (n)*sizeof(Iptr_type))
+#	define movelines(s1, s2, n) memmove(s1, s2, (n)*sizeof(Iptr_type))
 #else
 	static void movelines P((Iptr_type*,Iptr_type const*,long));
 	static void
@@ -1345,7 +1345,7 @@ makedirtemp(isworkfile)
 	*tp++ = '0'+isworkfile;
 	catchints();
 #	if has_mktemp
-		VOID strcpy(tp, "XXXXXX");
+		strcpy(tp, "XXXXXX");
 		if (!mktemp(np) || !*np)
 		    faterror("can't make temporary pathname `%.*s_%cXXXXXX'",
 			(int)dl, name, '0'+isworkfile
@@ -1360,7 +1360,7 @@ makedirtemp(isworkfile)
 		name += dl;
 		if (*name) name++;
 		if (*name) name++;
-		VOID strcpy(tp, name);
+		strcpy(tp, name);
 #	endif
 	dirtpmaker[newRCSdirtp_index + isworkfile] = real;
 	return np;
@@ -1377,7 +1377,7 @@ dirtempunlink()
 	    if ((m = dirtpmaker[i]) != notmade) {
 		if (m == effective)
 		    seteid();
-		VOID un_link(dirtpname[i].string);
+		un_link(dirtpname[i].string);
 		if (m == effective)
 		    setrid();
 		dirtpmaker[i] = notmade;
@@ -1767,8 +1767,8 @@ ORCSerror()
 */
 {
 	if (0 <= fdlock)
-		VOID close(fdlock);
+		close(fdlock);
 	if (frewrite)
 		/* Avoid fclose, since stdio may not be reentrant.  */
-		VOID close(fileno(frewrite));
+		close(fileno(frewrite));
 }

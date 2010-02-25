@@ -407,7 +407,7 @@ mainProg(rcsId, "rcs")
 	if (delrev.strt && removerevs()) {
             /*  rebuild delta tree if some deltas are deleted   */
             if ( cuttail )
-		VOID genrevs(
+		genrevs(
 			cuttail->num, (char *)0, (char *)0, (char *)0,
 			&gendeltas
 		);
@@ -1055,7 +1055,7 @@ removerevs()
                 else
                     temp = searchcutpt(target->num, length, gendeltas);
 		getbranchno(temp->num, &numrev);  /* get branch number */
-		VOID genrevs(numrev.string, (char*)0, (char*)0, (char*)0, &gendeltas);
+		genrevs(numrev.string, (char*)0, (char*)0, (char*)0, &gendeltas);
             }
             if ( branchpoint( temp, cuttail ) ) {
 		cuttail = 0;

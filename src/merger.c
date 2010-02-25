@@ -34,7 +34,7 @@ normalize_arg(s, b)
 	char *t;
 	if (*s == '-') {
 		*b = t = testalloc(strlen(s) + 3);
-		VOID sprintf(t, ".%c%s", SLASH, s);
+		sprintf(t, ".%c%s", SLASH, s);
 		return t;
 	} else {
 		*b = 0;

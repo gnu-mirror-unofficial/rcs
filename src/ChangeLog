@@ -1,5 +1,29 @@
 2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Don't coddle compilers that require `(void) EXPRESSION;'.
+
+	* conf.sh: Remove check for `(void) EXPRESSION;' requirement.
+	Don't #define `VOID'.
+	* conf.heg: Don't #define `VOID'.
+	* ci.c: Throughout, remove "VOID " in front of expressions.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merger.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsbase.h: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcstime.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Drop RCS keyword `Id' from code.
 
 	* rcsbase.h (RCSBASE, libId): Delete #define:s.

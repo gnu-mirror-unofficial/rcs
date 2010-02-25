@@ -204,7 +204,7 @@ mainProg(coId, "co")
 		    if (stdout_mode != newmode) {
 			stdout_mode = newmode;
 			oflush();
-			VOID setmode(STDOUT_FILENO, newmode);
+			setmode(STDOUT_FILENO, newmode);
 		    }
 #		endif
 		neworkname = 0;
@@ -578,8 +578,8 @@ getancestor(r1, r2)
 	    /* This will terminate since r1 and r2 are not the same; see above. */
 	    if (l3==0) {
 		/* no common prefix; common ancestor on main trunk */
-		VOID partialno(&t1, r1, l1>2 ? 2 : l1);
-		VOID partialno(&t2, r2, l2>2 ? 2 : l2);
+		partialno(&t1, r1, l1>2 ? 2 : l1);
+		partialno(&t2, r2, l2>2 ? 2 : l2);
 		r = cmpnum(t1.string,t2.string)<0 ? t1.string : t2.string;
 		if (cmpnum(r,r1)!=0 && cmpnum(r,r2)!=0)
 			return r;

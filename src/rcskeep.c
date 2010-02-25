@@ -245,7 +245,7 @@ get0val(c, fp, target, optional)
 		if (tp) {
 		    *tp = 0;
 #		    ifdef KEEPTEST
-			VOID printf("getval: %s\n", target);
+			printf("getval: %s\n", target);
 #		    endif
 		}
 		return got1;
@@ -282,7 +282,7 @@ keepdate(fp)
 	    if (c) {
 		register char const *d = prevday.string, *t = prevtime.string;
 		bufalloc(&prevdate, strlen(d) + strlen(t) + 9);
-		VOID sprintf(prevdate.string, "%s%s %s%s",
+		sprintf(prevdate.string, "%s%s %s%s",
 		    /* Parse dates put out by old versions of RCS.  */
 		      isdigit(d[0]) && isdigit(d[1]) && !isdigit(d[2])
 		    ? "19" : "",
@@ -365,7 +365,7 @@ int  argc; char  *argv[];
         while (*(++argv)) {
 		workname = *argv;
 		getoldkeys((RILE*)0);
-                VOID printf("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
+                printf("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
 			    *argv, prevrev.string, prevdate.string, prevauthor.string, prevname.string, prevstate.string);
 	}
 	exitmain(EXIT_SUCCESS);

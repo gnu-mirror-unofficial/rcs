@@ -45,12 +45,12 @@ mainProg(identId, "ident")
 		    break;
 
 		case 'V':
-		    VOID printf("RCS version %s\n", RCS_version_string);
+		    printf("RCS version %s\n", RCS_version_string);
 		    quiet = -1;
 		    break;
 
 		default:
-		    VOID fprintf(stderr,
+		    fprintf(stderr,
 			"ident: usage: ident -{qV} [file...]\n"
 		    );
 		    exitmain(EXIT_FAILURE);
@@ -59,7 +59,7 @@ mainProg(identId, "ident")
 
    if (0 <= quiet)
        if (!a)
-	    VOID scanfile(stdin, (char*)0, quiet);
+	    scanfile(stdin, (char*)0, quiet);
        else
 	    do {
 		if (!(fp = fopen(a, FOPEN_RB))) {
@@ -93,7 +93,7 @@ reportError(s)
 	char const *s;
 {
 	int e = errno;
-	VOID fprintf(stderr, "%s error: ", cmdid);
+	fprintf(stderr, "%s error: ", cmdid);
 	errno = e;
 	perror(s);
 }
@@ -111,7 +111,7 @@ scanfile(file, name, quiet)
    register int c;
 
    if (name) {
-      VOID printf("%s:\n", name);
+      printf("%s:\n", name);
       if (ferror(stdout))
 	 return -1;
    } else
@@ -133,12 +133,12 @@ scanfile(file, name, quiet)
       * The following is equivalent to exit(EXIT_FAILURE), but we invoke
       * exiterr to keep lint happy.  The DOS and OS/2 ports need exiterr.
       */
-      VOID fflush(stderr);
-      VOID fflush(stdout);
+      fflush(stderr);
+      fflush(stdout);
       exiterr();
    }
    if (!quiet)
-      VOID fprintf(stderr, "%s warning: no id keywords in %s\n", cmdid, name);
+      fprintf(stderr, "%s warning: no id keywords in %s\n", cmdid, name);
    return 0;
 }
 
@@ -189,6 +189,6 @@ match(fp)   /* group substring between two KDELIM's; then do pattern match */
       return c;
    *tp++ = c;     /*append trailing KDELIM*/
    *tp   = '\0';
-   VOID printf("     %c%s\n", KDELIM, line);
+   printf("     %c%s\n", KDELIM, line);
    return 0;
 }

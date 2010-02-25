@@ -142,7 +142,7 @@ rcsfcmp(xfp, xstatp, uname, delta)
 		(*tp = xc,  (match1 = trymatch(xkeyword)) != Nomatch)
 	    ) {
 #ifdef FCMPTEST
-	      VOID printf("found common keyword %s\n",xkeyword);
+	      printf("found common keyword %s\n",xkeyword);
 #endif
 	      result = -1;
 	      for (;;) {
@@ -219,7 +219,7 @@ rcsfcmp(xfp, xstatp, uname, delta)
 		  /* both end in the same character, but not a KDELIM */
 		  /* must compare string values.*/
 #ifdef FCMPTEST
-		  VOID printf("non-terminated keywords %s, potentially different values\n",xkeyword);
+		  printf("non-terminated keywords %s, potentially different values\n",xkeyword);
 #endif
 		  if (!eqkeyvals)
 		      goto return1;
@@ -263,7 +263,7 @@ int  argc; char  *argv[];
 	delta.log.string = argv[2];
 	delta.log.size = strlen(argv[2]);
 	if (rcsfcmp(Iopen(argv[3], FOPEN_R_WORK, (struct stat*)0), argv[4], &delta))
-                VOID printf("files are the same\n");
-        else    VOID printf("files are different\n");
+                printf("files are the same\n");
+        else    printf("files are different\n");
 }
 #endif

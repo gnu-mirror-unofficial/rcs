@@ -282,7 +282,7 @@ mainProg(rcsdiffId, "rcsdiff")
 			diffp[1] = dp;
 			*dp++ = '.';
 			*dp++ = SLASH;
-			VOID strcpy(dp, workname);
+			strcpy(dp, workname);
 		    }
 	    } else {
 		    diagnose("retrieving revision %s\n",xrev2);
@@ -344,7 +344,7 @@ setup_label(b, num, date)
 {
 	char *p;
 	char datestr[datesize + zonelenmax];
-	VOID date2str(date, datestr);
+	date2str(date, datestr);
 	bufalloc(b,
 		strlen(workname)
 		+ sizeof datestr + 4
@@ -352,9 +352,9 @@ setup_label(b, num, date)
 	);
 	p = b->string;
 	if (num)
-		VOID sprintf(p, "-L%s\t%s\t%s", workname, datestr, num);
+		sprintf(p, "-L%s\t%s\t%s", workname, datestr, num);
 	else
-		VOID sprintf(p, "-L%s\t%s", workname, datestr);
+		sprintf(p, "-L%s\t%s", workname, datestr);
 	return p;
 }
 #endif

@@ -877,7 +877,7 @@ incnum(onum,nnum)
 	l = strlen(onum);
 	bufalloc(nnum, l+2);
 	np = tp = nnum->string;
-	VOID strcpy(np, onum);
+	strcpy(np, onum);
 	for (tp = np + l;  np != tp;  )
 		if (isdigit(*--tp)) {
 			if (*tp != '9') {
@@ -1051,8 +1051,8 @@ getlogmsg()
 		i = sizeof(ciklog)+strlen(caller)+3;
 		bufalloc(&logbuf, i + datesize + zonelenmax);
 		tp = logbuf.string;
-		VOID sprintf(tp, "%s%s at ", ciklog, caller);
-		VOID date2str(getcurdate(), tp+i);
+		sprintf(tp, "%s%s at ", ciklog, caller);
+		date2str(getcurdate(), tp+i);
 		logmsg.string = tp;
 		logmsg.size = strlen(tp);
 		return logmsg;

@@ -301,7 +301,7 @@ mainProg(rlogId, "rlog")
 		/*  get most recently date of the dates pointed by duelst  */
 		currdate = duelst;
 		while( currdate) {
-		    VOID strcpy(currdate->strtdate, "0.0.0.0.0.0");
+		    strcpy(currdate->strtdate, "0.0.0.0.0.0");
 		    recentdate(Head, currdate);
 		    currdate = currdate->dnext;
 		}
@@ -739,7 +739,7 @@ recentdate(root, pd)
 	if (root->selector) {
 	     if ( cmpdate(root->date, pd->strtdate) >= 0 &&
 		  cmpdate(root->date, pd->enddate) <= 0)
-		VOID strcpy(pd->strtdate, root->date);
+		strcpy(pd->strtdate, root->date);
         }
 
         recentdate(root->next, pd);
@@ -895,7 +895,7 @@ getdatepair(argv)
 		str2date(rawdate,
 			 switchflag ? nextdate->enddate : nextdate->strtdate);
 		if ( c == ';' || c == '\0') {  /*  case: -d date  */
-		    VOID strcpy(nextdate->enddate,nextdate->strtdate);
+		    strcpy(nextdate->enddate,nextdate->strtdate);
                     nextdate->dnext = duelst;
                     duelst = nextdate;
 		    goto end;
@@ -987,7 +987,7 @@ getnumericrev()
 		    bufscpy(&s, ".0");
 		else {
 		    bufscpy(&s, e.string);
-		    VOID strcpy(strrchr(s.string,'.'), ".0");
+		    strcpy(strrchr(s.string,'.'), ".0");
 		}
 		break;
 

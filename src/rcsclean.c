@@ -302,7 +302,7 @@ get_directory(dirname, aargv)
 		if (entries == entries_max)
 			offset = trealloc(size_t, offset, entries_max<<=1);
 		offset[entries++] = chars;
-		VOID strcpy(a+chars, en);
+		strcpy(a+chars, en);
 		chars += s;
 	}
 #	if void_closedir

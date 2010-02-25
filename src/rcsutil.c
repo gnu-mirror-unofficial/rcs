@@ -313,7 +313,7 @@ my_psignal(sig, s)
 	    for (p = sname;  *p;  *b++ = *p++)
 		continue;
 	    *b++ = '\n';
-	    VOID write(STDERR_FILENO, buf, b - buf);
+	    write(STDERR_FILENO, buf, b - buf);
 	}
 }
 #endif
@@ -339,7 +339,7 @@ catchsigaction(s, i, c)
 {
 #   if sig_zaps_handler
 	/* If a signal arrives before we reset the handler, we lose. */
-	VOID signal(s, SIG_IGN);
+	signal(s, SIG_IGN);
 #   endif
 
 #   ifdef SA_SIGINFO
@@ -401,8 +401,8 @@ catchsigaction(s, i, c)
 		    char const *p1;
 		    for (p1 = p;  *p1;  p1++)
 			continue;
-		    VOID write(STDERR_FILENO, buf, b - buf);
-		    VOID write(STDERR_FILENO, p, p1 - p);
+		    write(STDERR_FILENO, buf, b - buf);
+		    write(STDERR_FILENO, p, p1 - p);
 		    b = buf;
 		    p = ": Permission denied.  ";
 		}
@@ -412,7 +412,7 @@ catchsigaction(s, i, c)
 #	endif
 	for (p = "Cleaning up.\n";  *p;  *b++ = *p++)
 	    continue;
-	VOID write(STDERR_FILENO, buf, b - buf);
+	write(STDERR_FILENO, buf, b - buf);
     }
     exiterr();
 }
@@ -428,9 +428,9 @@ restoreints()
 {
 	if (!--holdlevel && heldsignal)
 #	    ifdef SA_SIGINFO
-		VOID catchsigaction(heldsignal, heldsiginfo, (void *)0);
+		catchsigaction(heldsignal, heldsiginfo, (void *)0);
 #	    else
-		VOID catchsig(heldsignal);
+		catchsig(heldsignal);
 #	    endif
 }
 
@@ -508,7 +508,7 @@ static void setup_catchsig P((int const*,int));
 		    signal(sig[i], SIG_IGN) != catchsig
 		)
 			faterror("signal catcher failure");
-	VOID sigsetmask(mask);
+	sigsetmask(mask);
   }
 
 #else
@@ -613,7 +613,7 @@ fastcopy(inf,outf)
 		inf->ptr = inf->readlim;
 		if (inf->ptr == inf->lim)
 		    break;
-		VOID Igetmore(inf);
+		Igetmore(inf);
 	    }
 #	endif
 #else
@@ -670,7 +670,7 @@ dupSafer(fd)
 	    e = errno;
 	    for (i = STDIN_FILENO;  i <= STDERR_FILENO;  i++)
 		    if (used & (1<<i))
-			    VOID close(i);
+			    close(i);
 	    errno = e;
 	    return f;
 #	endif
@@ -684,7 +684,7 @@ fdSafer(fd)
 	if (STDIN_FILENO <= fd  &&  fd <= STDERR_FILENO) {
 		int f = dupSafer(fd);
 		int e = errno;
-		VOID close(fd);
+		close(fd);
 		errno = e;
 		fd = f;
 	}
@@ -704,13 +704,13 @@ fopenSafer(filename, type)
 			int f = dupSafer(fd);
 			if (f < 0) {
 				int e = errno;
-				VOID fclose(stream);
+				fclose(stream);
 				errno = e;
 				return 0;
 			}
 			if (fclose(stream) != 0) {
 				int e = errno;
-				VOID close(f);
+				close(f);
 				errno = e;
 				return 0;
 			}
@@ -752,7 +752,7 @@ fdreopen(fd, file, flags)
 	int flags;
 {
 	int newfd;
-	VOID close(fd);
+	close(fd);
 	newfd =
 #if !open_can_creat
 		flags&O_CREAT ? creat(file, S_IRUSR|S_IWUSR) :
@@ -850,7 +850,7 @@ runv(infd, outname, args)
 #	    ifndef SIGCHLD
 #	    define SIGCHLD SIGCLD
 #	    endif
-	    VOID signal(SIGCHLD, SIG_DFL);
+	    signal(SIGCHLD, SIG_DFL);
 	}
 #endif
 
@@ -913,7 +913,7 @@ runv(infd, outname, args)
 		char const *notfound;
 		if (infd != -1  &&  infd != STDIN_FILENO  &&  (
 #		    ifdef F_DUPFD
-			(VOID close(STDIN_FILENO),
+			(close(STDIN_FILENO),
 			fcntl(infd, F_DUPFD, STDIN_FILENO) != STDIN_FILENO)
 #		    else
 			dup2(infd, STDIN_FILENO) != STDIN_FILENO
@@ -937,12 +937,12 @@ runv(infd, outname, args)
 			write_stderr(": cannot create\n");
 			_exit(EXIT_TROUBLE);
 		    }
-		VOID exec_RCS(args[1], (char**)(args + 1));
+		exec_RCS(args[1], (char**)(args + 1));
 		notfound = args[1];
 #		ifdef RCS_SHELL
 		    if (errno == ENOEXEC) {
 			args[0] = notfound = RCS_SHELL;
-			VOID execv(args[0], (char**)args);
+			execv(args[0], (char**)args);
 		    }
 #		endif
 
@@ -976,7 +976,7 @@ runv(infd, outname, args)
 		bufargcat(&b, ' ', *p);
 	if (infd != -1  &&  infd != STDIN_FILENO) {
 		char redirection[32];
-		VOID sprintf(redirection, "<&%d", infd);
+		sprintf(redirection, "<&%d", infd);
 		bufscat(&b, redirection);
 	}
 	if (outname)

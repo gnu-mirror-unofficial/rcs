@@ -37,7 +37,7 @@ time2date(unixtime,date)
 	char date[datesize];
 {
 	register struct tm const *tm = time2tm(unixtime, RCSversion<VERSION(5));
-	VOID sprintf(date,
+	sprintf(date,
 #		if has_printf_dot
 			"%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",
 #		else
@@ -122,7 +122,7 @@ date2str(date, datebuf)
 	while (*p++ != '.')
 		continue;
 	if (!use_zone_offset)
-	    VOID sprintf(datebuf,
+	    sprintf(datebuf,
 		"19%.*s/%.2s/%.2s %.2s:%.2s:%s"
 			+ (date[2]=='.' && VERSION(5)<=RCSversion  ?  0  :  2),
 		(int)(p-date-1), date,
@@ -157,7 +157,7 @@ date2str(date, datebuf)
 		zone = -zone;
 		c = '-';
 	    }
-	    VOID sprintf(datebuf,
+	    sprintf(datebuf,
 #		if has_printf_dot
 		    "%.2d-%.2d-%.2d %.2d:%.2d:%.2d%c%.2d",
 #		else
@@ -173,9 +173,9 @@ date2str(date, datebuf)
 #		else
 		    static char const fmt[] = ":%02d";
 #		endif
-		VOID sprintf(datebuf + strlen(datebuf), fmt, non_hour / 60);
+		sprintf(datebuf + strlen(datebuf), fmt, non_hour / 60);
 		if ((non_hour %= 60))
-		    VOID sprintf(datebuf + strlen(datebuf), fmt, non_hour);
+		    sprintf(datebuf + strlen(datebuf), fmt, non_hour);
 	    }
 	}
 	return datebuf;

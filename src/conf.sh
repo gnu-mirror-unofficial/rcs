@@ -1096,26 +1096,6 @@ echo "#define bad_a_rename $a /* Does rename(A,B) fail if A is unwritable?  */"
 echo "#define bad_b_rename $b /* Does rename(A,B) fail if B is unwritable?  */"
 echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
 
-$ech >&3 "$0: configuring void, VOID $dots"
-cat >a.c <<EOF
-#include "$A_H"
-void f() {}
-int main() {f(); exitmain(0);}
-EOF
-$PREPARE_CC || exit
-if $CS a.c $LS >&2 && $CS_OK
-then
-	v='(void) '
-	echo '/* typedef int void; */ /* Some ancient compilers need this.  */'
-	ok=OK
-else
-	v=
-	echo 'typedef int void;'
-	ok='your compiler is a museum piece'
-fi
-echo >&3 $ok
-echo "#define VOID $v/* 'VOID e;' discards the value of an expression 'e'.  */"
-
 case $has_getuid in
 0)
 	a='/* ' z='*/ ' has_seteuid=?;;
