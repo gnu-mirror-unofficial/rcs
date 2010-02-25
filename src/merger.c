@@ -21,33 +21,36 @@
 
 #include "rcsbase.h"
 
-	static char const *normalize_arg P((char const*,char**));
-	static char const *
-normalize_arg(s, b)
-	char const *s;
-	char **b;
+static char const *normalize_arg P ((char const *, char **));
+static char const *
+normalize_arg (s, b)
+     char const *s;
+     char **b;
 /*
  * If S looks like an option, prepend ./ to it.  Yield the result.
  * Set *B to the address of any storage that was allocated.
  */
 {
-	char *t;
-	if (*s == '-') {
-		*b = t = testalloc(strlen(s) + 3);
-		sprintf(t, ".%c%s", SLASH, s);
-		return t;
-	} else {
-		*b = 0;
-		return s;
-	}
+  char *t;
+  if (*s == '-')
+    {
+      *b = t = testalloc (strlen (s) + 3);
+      sprintf (t, ".%c%s", SLASH, s);
+      return t;
+    }
+  else
+    {
+      *b = 0;
+      return s;
+    }
 }
 
-	int
-merge(tostdout, edarg, label, argv)
-	int tostdout;
-	char const *edarg;
-	char const *const label[3];
-	char const *const argv[3];
+int
+merge (tostdout, edarg, label, argv)
+     int tostdout;
+     char const *edarg;
+     char const *const label[3];
+     char const *const argv[3];
 /*
  * Do `merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2',
  * where TOSTDOUT specifies whether -p is present,
@@ -56,84 +59,82 @@ merge(tostdout, edarg, label, argv)
  * Yield DIFF_SUCCESS or DIFF_FAILURE.
  */
 {
-	register int i;
-	FILE *f;
-	RILE *rt;
-	char const *a[3], *t;
-	char *b[3];
-	int s;
+  register int i;
+  FILE *f;
+  RILE *rt;
+  char const *a[3], *t;
+  char *b[3];
+  int s;
 #if !DIFF3_BIN
-	char const *d[2];
+  char const *d[2];
 #endif
 
-	for (i=3; 0<=--i; )
-		a[i] = normalize_arg(argv[i], &b[i]);
+  for (i = 3; 0 <= --i;)
+    a[i] = normalize_arg (argv[i], &b[i]);
 
-	if (!edarg)
-		edarg = "-E";
+  if (!edarg)
+    edarg = "-E";
 
 #if DIFF3_BIN
-	t = 0;
-	if (!tostdout)
-		t = maketemp(0);
-	s = run(
-		-1, t,
-		DIFF3, edarg, "-am",
-		"-L", label[0],
-		"-L", label[1],
-		"-L", label[2],
-		a[0], a[1], a[2], (char*)0
-	);
-	switch (s) {
-		case DIFF_SUCCESS:
-			break;
-		case DIFF_FAILURE:
-			warn("conflicts during merge");
-			break;
-		default:
-			exiterr();
-	}
-	if (t) {
-		if (!(f = fopenSafer(argv[0], "w")))
-			efaterror(argv[0]);
-		if (!(rt = Iopen(t, "r", (struct stat*)0)))
-			efaterror(t);
-		fastcopy(rt, f);
-		Ifclose(rt);
-		Ofclose(f);
-	}
+  t = 0;
+  if (!tostdout)
+    t = maketemp (0);
+  s = run (-1, t,
+           DIFF3, edarg, "-am",
+           "-L", label[0],
+           "-L", label[1], "-L", label[2], a[0], a[1], a[2], (char *) 0);
+  switch (s)
+    {
+    case DIFF_SUCCESS:
+      break;
+    case DIFF_FAILURE:
+      warn ("conflicts during merge");
+      break;
+    default:
+      exiterr ();
+    }
+  if (t)
+    {
+      if (!(f = fopenSafer (argv[0], "w")))
+        efaterror (argv[0]);
+      if (!(rt = Iopen (t, "r", (struct stat *) 0)))
+        efaterror (t);
+      fastcopy (rt, f);
+      Ifclose (rt);
+      Ofclose (f);
+    }
 #else
-	for (i=0; i<2; i++)
-		switch (run(
-			-1, d[i]=maketemp(i),
-			DIFF, a[i], a[2], (char*)0
-		)) {
-			case DIFF_FAILURE: case DIFF_SUCCESS: break;
-			default: faterror("diff failed");
-		}
-	t = maketemp(2);
-	s = run(
-		-1, t,
-		DIFF3, edarg, d[0], d[1], a[0], a[1], a[2],
-		label[0], label[2], (char*)0
-	);
-	if (s != DIFF_SUCCESS) {
-		s = DIFF_FAILURE;
-		warn("overlaps or other problems during merge");
-	}
-	if (!(f = fopenSafer(t, "a+")))
-		efaterror(t);
-	aputs(tostdout ? "1,$p\n" : "w\n",  f);
-	Orewind(f);
-	aflush(f);
-	if (run(fileno(f), (char*)0, ED, "-", a[0], (char*)0))
-		exiterr();
-	Ofclose(f);
+  for (i = 0; i < 2; i++)
+    switch (run (-1, d[i] = maketemp (i), DIFF, a[i], a[2], (char *) 0))
+      {
+      case DIFF_FAILURE:
+      case DIFF_SUCCESS:
+        break;
+      default:
+        faterror ("diff failed");
+      }
+  t = maketemp (2);
+  s = run (-1, t,
+           DIFF3, edarg, d[0], d[1], a[0], a[1], a[2],
+           label[0], label[2], (char *) 0);
+  if (s != DIFF_SUCCESS)
+    {
+      s = DIFF_FAILURE;
+      warn ("overlaps or other problems during merge");
+    }
+  if (!(f = fopenSafer (t, "a+")))
+    efaterror (t);
+  aputs (tostdout ? "1,$p\n" : "w\n", f);
+  Orewind (f);
+  aflush (f);
+  if (run (fileno (f), (char *) 0, ED, "-", a[0], (char *) 0))
+    exiterr ();
+  Ofclose (f);
 #endif
 
-	tempunlink();
-	for (i=3; 0<=--i; )
-		if (b[i])
-			tfree(b[i]);
-	return s;
+  tempunlink ();
+  for (i = 3; 0 <= --i;)
+    if (b[i])
+      tfree (b[i]);
+  return s;
 }

@@ -39,37 +39,35 @@
  * as identifiers.
  */
 
-
-
 #include "rcsbase.h"
 
-static char *checkidentifier P((char*,int,int));
-static void errsay P((char const*));
-static void fatsay P((char const*));
-static void lookup P((char const*));
-static void startsay P((const char*,const char*));
-static void warnsay P((char const*));
+static char *checkidentifier P ((char *, int, int));
+static void errsay P ((char const *));
+static void fatsay P ((char const *));
+static void lookup P ((char const *));
+static void startsay P ((const char *, const char *));
+static void warnsay P ((char const *));
 
-static struct hshentry *nexthsh;  /*pointer to next hash entry, set by lookup*/
+static struct hshentry *nexthsh;        /*pointer to next hash entry, set by lookup */
 
-enum tokens     nexttok;    /*next token, set by nextlex                    */
+enum tokens nexttok;            /*next token, set by nextlex                    */
 
-int             hshenter;   /*if true, next suitable lexeme will be entered */
+int hshenter;                   /*if true, next suitable lexeme will be entered */
                             /*into the symbol table. Handle with care.      */
-int             nextc;      /*next input character, initialized by Lexinit  */
+int nextc;                      /*next input character, initialized by Lexinit  */
 
-long		rcsline;    /*current line-number of input		    */
-int             nerror;     /*counter for errors                            */
-int             quietflag;  /*indicates quiet mode                          */
-RILE *		finptr;	    /*input file descriptor			    */
+long rcsline;                   /*current line-number of input                  */
+int nerror;                     /*counter for errors                            */
+int quietflag;                  /*indicates quiet mode                          */
+RILE *finptr;                   /*input file descriptor                         */
 
-FILE *          frewrite;   /*file descriptor for echoing input             */
+FILE *frewrite;                 /*file descriptor for echoing input             */
 
-FILE *		foutptr;    /* copy of frewrite, but 0 to suppress echo  */
+FILE *foutptr;                  /* copy of frewrite, but 0 to suppress echo  */
 
-static struct buf tokbuf;   /* token buffer				    */
+static struct buf tokbuf;       /* token buffer                                 */
 
-char const *    NextString; /* next token				    */
+char const *NextString;         /* next token                                   */
 
 /*
  * Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
@@ -81,96 +79,88 @@ char const *    NextString; /* next token				    */
 #	define hshsize 511
 #endif
 
-static struct hshentry *hshtab[hshsize]; /*hashtable			    */
+static struct hshentry *hshtab[hshsize];        /*hashtable                        */
 
-static int ignored_phrases; /* have we ignored phrases in this RCS file? */
+static int ignored_phrases;     /* have we ignored phrases in this RCS file? */
 
-    void
-warnignore()
+void
+warnignore ()
 {
-    if (!ignored_phrases) {
-	ignored_phrases = true;
-	rcswarn("Unknown phrases like `%s ...;' are present.", NextString);
+  if (!ignored_phrases)
+    {
+      ignored_phrases = true;
+      rcswarn ("Unknown phrases like `%s ...;' are present.", NextString);
     }
 }
 
-
-
-	static void
-lookup(str)
-	char const *str;
+static void
+lookup (str)
+     char const *str;
 /* Function: Looks up the character string pointed to by str in the
  * hashtable. If the string is not present, a new entry for it is created.
  * In any case, the address of the corresponding hashtable entry is placed
  * into nexthsh.
  */
 {
-	register unsigned ihash;  /* index into hashtable */
-	register char const *sp;
-	register struct hshentry *n, **p;
+  register unsigned ihash;      /* index into hashtable */
+  register char const *sp;
+  register struct hshentry *n, **p;
 
-        /* calculate hash code */
-	sp = str;
-        ihash = 0;
-	while (*sp)
-		ihash  =  (ihash<<2) + *sp++;
-	ihash %= hshsize;
+  /* calculate hash code */
+  sp = str;
+  ihash = 0;
+  while (*sp)
+    ihash = (ihash << 2) + *sp++;
+  ihash %= hshsize;
 
-	for (p = &hshtab[ihash];  ;  p = &n->nexthsh)
-		if (!(n = *p)) {
-			/* empty slot found */
-			*p = n = ftalloc(struct hshentry);
-			n->num = fstr_save(str);
-			n->nexthsh = 0;
+  for (p = &hshtab[ihash];; p = &n->nexthsh)
+    if (!(n = *p))
+      {
+        /* empty slot found */
+        *p = n = ftalloc (struct hshentry);
+        n->num = fstr_save (str);
+        n->nexthsh = 0;
 #			ifdef LEXDB
-				printf("\nEntered: %s at %u ", str, ihash);
+        printf ("\nEntered: %s at %u ", str, ihash);
 #			endif
-			break;
-		} else if (strcmp(str, n->num) == 0)
-			/* match found */
-			break;
-	nexthsh = n;
-	NextString = n->num;
+        break;
+      }
+    else if (strcmp (str, n->num) == 0)
+      /* match found */
+      break;
+  nexthsh = n;
+  NextString = n->num;
 }
 
-
-
-
-
-
-	void
-Lexinit()
+void
+Lexinit ()
 /* Function: Initialization of lexical analyzer:
  * initializes the hashtable,
  * initializes nextc, nexttok if finptr != 0
  */
-{       register int            c;
+{
+  register int c;
 
-	for (c = hshsize;  0 <= --c;  ) {
-		hshtab[c] = 0;
-        }
+  for (c = hshsize; 0 <= --c;)
+    {
+      hshtab[c] = 0;
+    }
 
-	nerror = 0;
-	if (finptr) {
-		foutptr = 0;
-		hshenter = true;
-		ignored_phrases = false;
-		rcsline = 1;
-		bufrealloc(&tokbuf, 2);
-		Iget_(finptr, nextc)
-                nextlex();            /*initial token*/
-        }
+  nerror = 0;
+  if (finptr)
+    {
+      foutptr = 0;
+      hshenter = true;
+      ignored_phrases = false;
+      rcsline = 1;
+      bufrealloc (&tokbuf, 2);
+      Iget_ (finptr, nextc)
+      nextlex (); /*initial token */
+    }
 }
 
-
-
-
-
-
-
-	void
-nextlex()
-
+void
+nextlex ()
 /* Function: Reads the next token and sets nexttok to the next token code.
  * Only if hshenter is set, a revision number is entered into the
  * hashtable and a pointer to it is placed into nexthsh.
@@ -178,221 +168,245 @@ nextlex()
  * For ID's and NUM's, NextString is set to the character string.
  * Assumption: nextc contains the next character.
  */
-{       register c;
-	declarecache;
-	register FILE *frew;
-        register char * sp;
-	char const *limit;
-        register enum tokens d;
-	register RILE *fin;
+{
+  register c;
+  declarecache;
+  register FILE *frew;
+  register char *sp;
+  char const *limit;
+  register enum tokens d;
+  register RILE *fin;
 
-	fin=finptr; frew=foutptr;
-	setupcache(fin); cache(fin);
-	c = nextc;
+  fin = finptr;
+  frew = foutptr;
+  setupcache (fin);
+  cache (fin);
+  c = nextc;
 
-	for (;;) { switch ((d = ctab[c])) {
+  for (;;)
+    {
+      switch ((d = ctab[c]))
+        {
 
-	default:
-		fatserror("unknown character `%c'", c);
-		/*NOTREACHED*/
-
-        case NEWLN:
-		++rcsline;
+        default:
+          fatserror ("unknown character `%c'", c);
+         /*NOTREACHED*/ case NEWLN:
+          ++rcsline;
 #               ifdef LEXDB
-		afputc('\n',stdout);
+          afputc ('\n', stdout);
 #               endif
-                /* Note: falls into next case */
+          /* Note: falls into next case */
 
         case SPACE:
-		GETC_(frew, c)
-		continue;
+          GETC_ (frew, c)
+          continue;
 
-	case IDCHAR:
-	case LETTER:
-	case Letter:
-		d = ID;
-		/* fall into */
-	case DIGIT:
-	case PERIOD:
-		sp = tokbuf.string;
-		limit = sp + tokbuf.size;
-		*sp++ = c;
-		for (;;) {
-			GETC_(frew, c)
-			switch (ctab[c]) {
-			    case IDCHAR:
-			    case LETTER:
-			    case Letter:
-				d = ID;
-				/* fall into */
-			    case DIGIT:
-			    case PERIOD:
-				*sp++ = c;
-				if (limit <= sp)
-					sp = bufenlarge(&tokbuf, &limit);
-				continue;
+        case IDCHAR:
+        case LETTER:
+        case Letter:
+          d = ID;
+          /* fall into */
+        case DIGIT:
+        case PERIOD:
+          sp = tokbuf.string;
+          limit = sp + tokbuf.size;
+          *sp++ = c;
+          for (;;)
+            {
+              GETC_ (frew, c)
+              switch (ctab[c])
+                {
+                case IDCHAR:
+                case LETTER:
+                case Letter:
+                  d = ID;
+                  /* fall into */
+                case DIGIT:
+                case PERIOD:
+                  *sp++ = c;
+                  if (limit <= sp)
+                    sp = bufenlarge (&tokbuf, &limit);
+                  continue;
 
-			    default:
-				break;
-			}
-			break;
+                default:
+                  break;
                 }
-		*sp = 0;
-		if (d == DIGIT  ||  d == PERIOD) {
-			d = NUM;
-			if (hshenter) {
-				lookup(tokbuf.string);
-				break;
-			}
-		}
-		NextString = fstr_save(tokbuf.string);
-		break;
+              break;
+            }
+          *sp = 0;
+          if (d == DIGIT || d == PERIOD)
+            {
+              d = NUM;
+              if (hshenter)
+                {
+                  lookup (tokbuf.string);
+                  break;
+                }
+            }
+          NextString = fstr_save (tokbuf.string);
+          break;
 
-        case SBEGIN: /* long string */
-		d = STRING;
-                /* note: only the initial SBEGIN has been read*/
-                /* read the string, and reset nextc afterwards*/
-		break;
+        case SBEGIN:           /* long string */
+          d = STRING;
+          /* note: only the initial SBEGIN has been read */
+          /* read the string, and reset nextc afterwards */
+          break;
 
-	case COLON:
-	case SEMI:
-		GETC_(frew, c)
-		break;
-	} break; }
-	nextc = c;
-	nexttok = d;
-	uncache(fin);
+        case COLON:
+        case SEMI:
+          GETC_ (frew, c)
+          break;
+        }
+      break;
+    }
+  nextc = c;
+  nexttok = d;
+  uncache (fin);
 }
 
-	int
-eoflex()
+int
+eoflex ()
 /*
  * Yield true if we look ahead to the end of the input, false otherwise.
  * nextc becomes undefined at end of file.
  */
 {
-	register int c;
-	declarecache;
-	register FILE *fout;
-	register RILE *fin;
+  register int c;
+  declarecache;
+  register FILE *fout;
+  register RILE *fin;
 
-	c = nextc;
-	fin = finptr;
-	fout = foutptr;
-	setupcache(fin); cache(fin);
+  c = nextc;
+  fin = finptr;
+  fout = foutptr;
+  setupcache (fin);
+  cache (fin);
 
-	for (;;) {
-		switch (ctab[c]) {
-			default:
-				nextc = c;
-				uncache(fin);
-				return false;
+  for (;;)
+    {
+      switch (ctab[c])
+        {
+        default:
+          nextc = c;
+          uncache (fin);
+          return false;
 
-			case NEWLN:
-				++rcsline;
-				/* fall into */
-			case SPACE:
-				cachegeteof_(c, {uncache(fin);return true;})
-				break;
-		}
-		if (fout)
-			aputc_(c, fout)
-	}
+        case NEWLN:
+          ++rcsline;
+          /* fall into */
+        case SPACE:
+          cachegeteof_ (c,
+                        {
+                        uncache (fin);
+                        return true;
+                        })
+          break;
+        }
+      if (fout)
+        aputc_ (c, fout)
+    }
 }
 
-
-int getlex(token)
-enum tokens token;
+int
+getlex (token)
+     enum tokens token;
 /* Function: Checks if nexttok is the same as token. If so,
  * advances the input by calling nextlex and returns true.
  * otherwise returns false.
  * Doesn't work for strings and keywords; loses the character string for ids.
  */
 {
-        if (nexttok==token) {
-                nextlex();
-                return(true);
-        } else  return(false);
+  if (nexttok == token)
+    {
+      nextlex ();
+      return (true);
+    }
+  else
+    return (false);
 }
 
-	int
-getkeyopt(key)
-	char const *key;
+int
+getkeyopt (key)
+     char const *key;
 /* Function: If the current token is a keyword identical to key,
  * advances the input by calling nextlex and returns true;
  * otherwise returns false.
  */
 {
-	if (nexttok==ID  &&  strcmp(key,NextString) == 0) {
-		 /* match found */
-		 ffree1(NextString);
-		 nextlex();
-		 return(true);
-        }
-        return(false);
+  if (nexttok == ID && strcmp (key, NextString) == 0)
+    {
+      /* match found */
+      ffree1 (NextString);
+      nextlex ();
+      return (true);
+    }
+  return (false);
 }
 
-	void
-getkey(key)
-	char const *key;
+void
+getkey (key)
+     char const *key;
 /* Check that the current input token is a keyword identical to key,
  * and advance the input by calling nextlex.
  */
 {
-	if (!getkeyopt(key))
-		fatserror("missing '%s' keyword", key);
+  if (!getkeyopt (key))
+    fatserror ("missing '%s' keyword", key);
 }
 
-	void
-getkeystring(key)
-	char const *key;
+void
+getkeystring (key)
+     char const *key;
 /* Check that the current input token is a keyword identical to key,
  * and advance the input by calling nextlex; then look ahead for a string.
  */
 {
-	getkey(key);
-	if (nexttok != STRING)
-		fatserror("missing string after '%s' keyword", key);
+  getkey (key);
+  if (nexttok != STRING)
+    fatserror ("missing string after '%s' keyword", key);
 }
 
-
-	char const *
-getid()
+char const *
+getid ()
 /* Function: Checks if nexttok is an identifier. If so,
  * advances the input by calling nextlex and returns a pointer
  * to the identifier; otherwise returns 0.
  * Treats keywords as identifiers.
  */
 {
-	register char const *name;
-        if (nexttok==ID) {
-                name = NextString;
-                nextlex();
-                return name;
-	} else
-		return 0;
+  register char const *name;
+  if (nexttok == ID)
+    {
+      name = NextString;
+      nextlex ();
+      return name;
+    }
+  else
+    return 0;
 }
 
-
-struct hshentry * getnum()
+struct hshentry *
+getnum ()
 /* Function: Checks if nexttok is a number. If so,
  * advances the input by calling nextlex and returns a pointer
  * to the hashtable entry.  Otherwise returns 0.
  * Doesn't work if hshenter is false.
  */
 {
-        register struct hshentry * num;
-        if (nexttok==NUM) {
-                num=nexthsh;
-                nextlex();
-                return num;
-	} else
-		return 0;
+  register struct hshentry *num;
+  if (nexttok == NUM)
+    {
+      num = nexthsh;
+      nextlex ();
+      return num;
+    }
+  else
+    return 0;
 }
 
-	struct cbuf
-getphrases(key)
-	char const *key;
+struct cbuf
+getphrases (key)
+     char const *key;
 /*
 * Get a series of phrases that do not start with KEY.  Yield resulting buffer.
 * Stop when the next phrase starts with a token that is not an identifier,
@@ -400,213 +414,241 @@ getphrases(key)
 * this routine assumes nextlex() has already been invoked before we start.
 */
 {
-    declarecache;
-    register int c;
-    register char const *kn;
-    struct cbuf r;
-    register RILE *fin;
-    register FILE *frew;
+  declarecache;
+  register int c;
+  register char const *kn;
+  struct cbuf r;
+  register RILE *fin;
+  register FILE *frew;
 #   if large_memory
 #	define savech_(c) ;
 #   else
-	register char *p;
-	char const *limit;
-	struct buf b;
+  register char *p;
+  char const *limit;
+  struct buf b;
 #	define savech_(c) {if (limit<=p)p=bufenlarge(&b,&limit); *p++ =(c);}
 #   endif
 
-    if (nexttok!=ID  ||  strcmp(NextString,key) == 0)
-	clear_buf(&r);
-    else {
-	warnignore();
-	fin = finptr;
-	frew = foutptr;
-	setupcache(fin); cache(fin);
+  if (nexttok != ID || strcmp (NextString, key) == 0)
+    clear_buf (&r);
+  else
+    {
+      warnignore ();
+      fin = finptr;
+      frew = foutptr;
+      setupcache (fin);
+      cache (fin);
 #	if large_memory
-	    r.string = (char const*)cacheptr() - strlen(NextString) - 1;
+      r.string = (char const *) cacheptr () - strlen (NextString) - 1;
 #	else
-	    bufautobegin(&b);
-	    bufscpy(&b, NextString);
-	    p = b.string + strlen(b.string);
-	    limit = b.string + b.size;
+      bufautobegin (&b);
+      bufscpy (&b, NextString);
+      p = b.string + strlen (b.string);
+      limit = b.string + b.size;
 #	endif
-	ffree1(NextString);
-	c = nextc;
-	for (;;) {
-	    for (;;) {
-		savech_(c)
-		switch (ctab[c]) {
-		    default:
-			fatserror("unknown character `%c'", c);
-			/*NOTREACHED*/
-		    case NEWLN:
-			++rcsline;
-			/* fall into */
-		    case COLON: case DIGIT: case LETTER: case Letter:
-		    case PERIOD: case SPACE:
-			GETC_(frew, c)
-			continue;
-		    case SBEGIN: /* long string */
-			for (;;) {
-			    for (;;) {
-				GETC_(frew, c)
-				savech_(c)
-				switch (c) {
-				    case '\n':
-					++rcsline;
-					/* fall into */
-				    default:
-					continue;
+      ffree1 (NextString);
+      c = nextc;
+      for (;;)
+        {
+          for (;;)
+            {
+              savech_ (c)
+              switch (ctab[c])
+                {
+                default:
+                  fatserror ("unknown character `%c'", c);
+                  /*NOTREACHED*/ case NEWLN:
+                  ++rcsline;
+                  /* fall into */
+                case COLON:
+                case DIGIT:
+                case LETTER:
+                case Letter:
+                case PERIOD:
+                case SPACE:
+                  GETC_ (frew, c)
+                  continue;
+                case SBEGIN:     /* long string */
+                  for (;;)
+                    {
+                      for (;;)
+                        {
+                          GETC_ (frew, c)
+                          savech_ (c)
+                          switch (c)
+                            {
+                            case '\n':
+                              ++rcsline;
+                              /* fall into */
+                            default:
+                              continue;
 
-				    case SDELIM:
-					break;
-				}
-				break;
-			    }
-			    GETC_(frew, c)
-			    if (c != SDELIM)
-				break;
-			    savech_(c)
-			}
-			continue;
-		    case SEMI:
-			cacheget_(c)
-			if (ctab[c] == NEWLN) {
-			    if (frew)
-				aputc_(c, frew)
-			    ++rcsline;
-			    savech_(c)
-			    cacheget_(c)
-			}
+                            case SDELIM:
+                              break;
+                            }
+                          break;
+                        }
+                      GETC_ (frew, c)
+                      if (c != SDELIM)
+                        break;
+                      savech_ (c)
+                    }
+                  continue;
+                case SEMI:
+                  cacheget_ (c)
+                  if (ctab[c] == NEWLN)
+                    {
+                      if (frew)
+                        aputc_ (c, frew)
+                      ++ rcsline;
+                      savech_ (c)
+                      cacheget_ (c)
+                    }
 #			if large_memory
-			    r.size = (char const*)cacheptr() - 1 - r.string;
+                  r.size = (char const *) cacheptr () - 1 - r.string;
 #			endif
-			for (;;) {
-			    switch (ctab[c]) {
-				case NEWLN:
-					++rcsline;
-					/* fall into */
-				case SPACE:
-					cacheget_(c)
-					continue;
+                  for (;;)
+                    {
+                      switch (ctab[c])
+                        {
+                        case NEWLN:
+                          ++rcsline;
+                          /* fall into */
+                        case SPACE:
+                          cacheget_ (c)
+                          continue;
 
-				default: break;
-			    }
-			    break;
-			}
-			if (frew)
-			    aputc_(c, frew)
-			break;
-		}
-		break;
-	    }
-	    if (ctab[c] == Letter) {
-		    for (kn = key;  c && *kn==c;  kn++)
-			GETC_(frew, c)
-		    if (!*kn)
-			switch (ctab[c]) {
-			    case DIGIT: case LETTER: case Letter:
-			    case IDCHAR: case PERIOD:
-				break;
-			    default:
-				nextc = c;
-				NextString = fstr_save(key);
-				nexttok = ID;
-				uncache(fin);
-				goto returnit;
-			}
+                        default:
+                          break;
+                        }
+                      break;
+                    }
+                  if (frew)
+                    aputc_ (c, frew)
+                  break;
+                }
+              break;
+            }
+          if (ctab[c] == Letter)
+            {
+              for (kn = key; c && *kn == c; kn++)
+                GETC_ (frew, c)
+              if (!*kn)
+                switch (ctab[c])
+                  {
+                  case DIGIT:
+                  case LETTER:
+                  case Letter:
+                  case IDCHAR:
+                  case PERIOD:
+                    break;
+                  default:
+                    nextc = c;
+                    NextString = fstr_save (key);
+                    nexttok = ID;
+                    uncache (fin);
+                    goto returnit;
+                  }
 #		    if !large_memory
-			{
-			    register char const *ki;
-			    for (ki=key; ki<kn; )
-				savech_(*ki++)
-			}
+              {
+                register char const *ki;
+                for (ki = key; ki < kn;)
+                  savech_ (*ki++)
+              }
 #		    endif
-	    } else {
-		    nextc = c;
-		    uncache(fin);
-		    nextlex();
-		    break;
-	    }
-	}
+            }
+          else
+            {
+              nextc = c;
+              uncache (fin);
+              nextlex ();
+              break;
+            }
+        }
     returnit:;
 #	if !large_memory
-	    return bufremember(&b, (size_t)(p - b.string));
+      return bufremember (&b, (size_t) (p - b.string));
 #	endif
     }
-    return r;
+  return r;
 }
 
-
-	void
-readstring()
+void
+readstring ()
 /* skip over characters until terminating single SDELIM        */
 /* If foutptr is set, copy every character read to foutptr.    */
 /* Does not advance nextlex at the end.                        */
-{       register c;
-	declarecache;
-	register FILE *frew;
-	register RILE *fin;
-	fin=finptr; frew=foutptr;
-	setupcache(fin); cache(fin);
-	for (;;) {
-		GETC_(frew, c)
-		switch (c) {
-		    case '\n':
-			++rcsline;
-			break;
+{
+  register c;
+  declarecache;
+  register FILE *frew;
+  register RILE *fin;
+  fin = finptr;
+  frew = foutptr;
+  setupcache (fin);
+  cache (fin);
+  for (;;)
+    {
+      GETC_ (frew, c)
+      switch (c)
+        {
+        case '\n':
+          ++rcsline;
+          break;
 
-		    case SDELIM:
-			GETC_(frew, c)
-			if (c != SDELIM) {
-				/* end of string */
-				nextc = c;
-				uncache(fin);
-				return;
-			}
-			break;
-		}
-	}
+        case SDELIM:
+          GETC_ (frew, c)
+          if (c != SDELIM)
+            {
+              /* end of string */
+              nextc = c;
+              uncache (fin);
+              return;
+            }
+          break;
+        }
+    }
 }
 
-
-	void
-printstring()
+void
+printstring ()
 /* Function: copy a string to stdout, until terminated with a single SDELIM.
  * Does not advance nextlex at the end.
  */
 {
-        register c;
-	declarecache;
-	register FILE *fout;
-	register RILE *fin;
-	fin=finptr;
-	fout = stdout;
-	setupcache(fin); cache(fin);
-	for (;;) {
-		cacheget_(c)
-		switch (c) {
-		    case '\n':
-			++rcsline;
-			break;
-		    case SDELIM:
-			cacheget_(c)
-			if (c != SDELIM) {
-                                nextc=c;
-				uncache(fin);
-                                return;
-                        }
-			break;
-                }
-		aputc_(c,fout)
+  register c;
+  declarecache;
+  register FILE *fout;
+  register RILE *fin;
+  fin = finptr;
+  fout = stdout;
+  setupcache (fin);
+  cache (fin);
+  for (;;)
+    {
+      cacheget_ (c)
+      switch (c)
+        {
+        case '\n':
+          ++rcsline;
+          break;
+        case SDELIM:
+          cacheget_ (c)
+          if (c != SDELIM)
+            {
+              nextc = c;
+              uncache (fin);
+              return;
+            }
+          break;
         }
+      aputc_ (c, fout)
+    }
 }
 
-
-
-	struct cbuf
-savestring(target)
-	struct buf *target;
+struct cbuf
+savestring (target)
+     struct buf *target;
 /* Copies a string terminated with SDELIM from file finptr to buffer target.
  * Double SDELIM is replaced with SDELIM.
  * If foutptr is set, the string is also copied unchanged to foutptr.
@@ -614,47 +656,52 @@ savestring(target)
  * Yield a copy of *TARGET, except with exact length.
  */
 {
-        register c;
-	declarecache;
-	register FILE *frew;
-	register char *tp;
-	register RILE *fin;
-	char const *limit;
-	struct cbuf r;
+  register c;
+  declarecache;
+  register FILE *frew;
+  register char *tp;
+  register RILE *fin;
+  char const *limit;
+  struct cbuf r;
 
-	fin=finptr; frew=foutptr;
-	setupcache(fin); cache(fin);
-	tp = target->string;  limit = tp + target->size;
-	for (;;) {
-		GETC_(frew, c)
-		switch (c) {
-		    case '\n':
-			++rcsline;
-			break;
-		    case SDELIM:
-			GETC_(frew, c)
-			if (c != SDELIM) {
-                                /* end of string */
-                                nextc=c;
-				r.string = target->string;
-				r.size = tp - r.string;
-				uncache(fin);
-				return r;
-                        }
-			break;
-                }
-		if (tp == limit)
-			tp = bufenlarge(target, &limit);
-		*tp++ = c;
+  fin = finptr;
+  frew = foutptr;
+  setupcache (fin);
+  cache (fin);
+  tp = target->string;
+  limit = tp + target->size;
+  for (;;)
+    {
+      GETC_ (frew, c)
+      switch (c)
+        {
+        case '\n':
+          ++rcsline;
+          break;
+        case SDELIM:
+          GETC_ (frew, c)
+          if (c != SDELIM)
+            {
+              /* end of string */
+              nextc = c;
+              r.string = target->string;
+              r.size = tp - r.string;
+              uncache (fin);
+              return r;
+            }
+          break;
         }
+      if (tp == limit)
+        tp = bufenlarge (target, &limit);
+      *tp++ = c;
+    }
 }
 
-
-	static char *
-checkidentifier(id, delimiter, dotok)
-	register char *id;
-	int delimiter;
-	register int dotok;
+static char *
+checkidentifier (id, delimiter, dotok)
+     register char *id;
+     int delimiter;
+     register int dotok;
 /*   Function:  check whether the string starting at id is an   */
 /*		identifier and return a pointer to the delimiter*/
 /*		after the identifier.  White space, delim and 0 */
@@ -663,779 +710,920 @@ checkidentifier(id, delimiter, dotok)
 /*		If !delim, the only delimiter is 0.		*/
 /*		Allow '.' in identifier only if DOTOK is set.   */
 {
-        register char    *temp;
-	register char c;
-	register char delim = delimiter;
-	int isid = false;
+  register char *temp;
+  register char c;
+  register char delim = delimiter;
+  int isid = false;
 
-	temp = id;
-	for (;;  id++) {
-		switch (ctab[(unsigned char)(c = *id)]) {
-			case IDCHAR:
-			case LETTER:
-			case Letter:
-				isid = true;
-				continue;
+  temp = id;
+  for (;; id++)
+    {
+      switch (ctab[(unsigned char) (c = *id)])
+        {
+        case IDCHAR:
+        case LETTER:
+        case Letter:
+          isid = true;
+          continue;
 
-			case DIGIT:
-				continue;
+        case DIGIT:
+          continue;
 
-			case PERIOD:
-				if (dotok)
-					continue;
-				break;
+        case PERIOD:
+          if (dotok)
+            continue;
+          break;
 
-			default:
-				break;
-		}
-		break;
-	}
-	if (	 ! isid
-	    ||	 (c  &&  (!delim || (c!=delim && c!=' ' && c!='\t' && c!='\n')))
-	) {
-                /* append \0 to end of id before error message */
-		while ((c = *id) && c!=' ' && c!='\t' && c!='\n' && c!=delim)
-		    id++;
-                *id = '\0';
-		faterror("invalid %s `%s'",
-			dotok ? "identifier" : "symbol", temp
-		);
-	}
-	return id;
+        default:
+          break;
+        }
+      break;
+    }
+  if (!isid
+      || (c
+          && (!delim
+              || (c != delim && c != ' ' && c != '\t'
+                  && c != '\n'))))
+    {
+      /* append \0 to end of id before error message */
+      while ((c = *id) && c != ' ' && c != '\t' && c != '\n'
+             && c != delim)
+        id++;
+      *id = '\0';
+      faterror ("invalid %s `%s'", dotok ? "identifier" : "symbol", temp);
+    }
+  return id;
 }
 
-	char *
-checkid(id, delimiter)
-	char *id;
-	int delimiter;
+char *
+checkid (id, delimiter)
+     char *id;
+     int delimiter;
 {
-	return checkidentifier(id, delimiter, true);
+  return checkidentifier (id, delimiter, true);
 }
 
-	char *
-checksym(sym, delimiter)
-	char *sym;
-	int delimiter;
+char *
+checksym (sym, delimiter)
+     char *sym;
+     int delimiter;
 {
-	return checkidentifier(sym, delimiter, false);
+  return checkidentifier (sym, delimiter, false);
 }
 
-	void
-checksid(id)
-	char *id;
+void
+checksid (id)
+     char *id;
 /* Check whether the string ID is an identifier.  */
 {
-	checkid(id, 0);
+  checkid (id, 0);
 }
 
-	void
-checkssym(sym)
-	char *sym;
+void
+checkssym (sym)
+     char *sym;
 {
-	checksym(sym, 0);
+  checksym (sym, 0);
 }
-
 
 #if !large_memory
 #   define Iclose(f) fclose(f)
 #else
 # if !maps_memory
-    static int Iclose P((RILE *));
-	static int
-    Iclose(f)
-	register RILE *f;
-    {
-	tfree(f->base);
-	f->base = 0;
-	return fclose(f->stream);
-    }
+static int Iclose P ((RILE *));
+static int
+Iclose (f)
+     register RILE *f;
+{
+  tfree (f->base);
+  f->base = 0;
+  return fclose (f->stream);
+}
 # else
-    static int Iclose P((RILE *));
-	static int
-    Iclose(f)
-	register RILE *f;
-    {
-	(* f->deallocate) (f);
-	f->base = 0;
-	return close(f->fd);
-    }
+static int Iclose P ((RILE *));
+static int
+Iclose (f)
+     register RILE *f;
+{
+  (*f->deallocate) (f);
+  f->base = 0;
+  return close (f->fd);
+}
 
 #   if has_map_fd
-	static void map_fd_deallocate P((RILE *));
-	    static void
-	map_fd_deallocate(f)
-	    register RILE *f;
-	{
-	    if (vm_deallocate(
-		task_self(),
-		(vm_address_t) f->base,
-		(vm_size_t) (f->lim - f->base)
-	    ) != KERN_SUCCESS)
-		efaterror("vm_deallocate");
-	}
+static void
+map_fd_deallocate P ((RILE *));
+static void
+map_fd_deallocate (f)
+     register RILE *f;
+{
+  if (vm_deallocate (task_self (),
+                     (vm_address_t) f->base,
+                     (vm_size_t) (f->lim - f->base)) !=
+      KERN_SUCCESS)
+    efaterror ("vm_deallocate");
+}
 #   endif
 #   if has_mmap
-	static void mmap_deallocate P((RILE *));
-	    static void
-	mmap_deallocate(f)
-	    register RILE *f;
-	{
-	    if (munmap((char *) f->base, (size_t) (f->lim - f->base)) != 0)
-		efaterror("munmap");
-	}
+static void mmap_deallocate P ((RILE *));
+static void
+mmap_deallocate (f)
+     register RILE *f;
+{
+  if (munmap ((char *) f->base, (size_t) (f->lim - f->base)) != 0)
+    efaterror ("munmap");
+}
 #   endif
-    static void read_deallocate P((RILE *));
-	static void
-    read_deallocate(f)
-	RILE *f;
-    {
-	tfree(f->base);
-    }
+static void read_deallocate P ((RILE *));
+static void
+read_deallocate (f)
+     RILE *f;
+{
+  tfree (f->base);
+}
 
-    static void nothing_to_deallocate P((RILE *));
-	static void
-    nothing_to_deallocate(f)
-	RILE *f;
-    {
-    }
+static void nothing_to_deallocate P ((RILE *));
+static void
+nothing_to_deallocate (f)
+     RILE *f;
+{
+}
 # endif
 #endif
 
-
 #if large_memory && maps_memory
-	static RILE *fd2_RILE P((int,char const*,struct stat*));
-	static RILE *
-fd2_RILE(fd, name, status)
+static RILE *fd2_RILE P ((int, char const *, struct stat *));
+static RILE *
+fd2_RILE (fd, name, status)
 #else
-	static RILE *fd2RILE P((int,char const*,char const*,struct stat*));
-	static RILE *
-fd2RILE(fd, name, type, status)
-	char const *type;
+static RILE * fd2RILE P ((int, char const *, char const *, struct stat *));
+static RILE *
+fd2RILE (fd, name, type, status)
+     char const *type;
 #endif
-	int fd;
-	char const *name;
-	register struct stat *status;
+     int fd;
+     char const *name;
+     register struct stat *status;
 {
-	struct stat st;
+  struct stat st;
 
-	if (!status)
-		status = &st;
-	if (fstat(fd, status) != 0)
-		efaterror(name);
-	if (!S_ISREG(status->st_mode)) {
-		error("`%s' is not a regular file", name);
-		close(fd);
-		errno = EINVAL;
-		return 0;
-	} else {
+  if (!status)
+    status = &st;
+  if (fstat (fd, status) != 0)
+    efaterror (name);
+  if (!S_ISREG (status->st_mode))
+    {
+      error ("`%s' is not a regular file", name);
+      close (fd);
+      errno = EINVAL;
+      return 0;
+    }
+  else
+    {
 
 #	    if !(large_memory && maps_memory)
-		FILE *stream;
-		if (!(stream = fdopen(fd, type)))
-			efaterror(name);
+      FILE *stream;
+      if (!(stream = fdopen (fd, type)))
+        efaterror (name);
 #	    endif
 
 #	    if !large_memory
-		return stream;
+      return stream;
 #	    else
 #		define RILES 3
-	      {
-		static RILE rilebuf[RILES];
+      {
+        static RILE rilebuf[RILES];
 
-		register RILE *f;
-		size_t s = status->st_size;
+        register RILE *f;
+        size_t s = status->st_size;
 
-		if (s != status->st_size)
-			faterror("%s: too large", name);
-		for (f = rilebuf;  f->base;  f++)
-			if (f == rilebuf+RILES)
-				faterror("too many RILEs");
+        if (s != status->st_size)
+          faterror ("%s: too large", name);
+        for (f = rilebuf; f->base; f++)
+          if (f == rilebuf + RILES)
+            faterror ("too many RILEs");
 #		if maps_memory
-			f->deallocate = nothing_to_deallocate;
+        f->deallocate = nothing_to_deallocate;
 #		endif
-		if (!s) {
-		    static unsigned char nothing;
-		    f->base = &nothing; /* Any nonzero address will do.  */
-		} else {
-		    f->base = 0;
+        if (!s)
+          {
+            static unsigned char nothing;
+            f->base = &nothing;     /* Any nonzero address will do.  */
+          }
+        else
+          {
+            f->base = 0;
 #		    if has_map_fd
-			map_fd(
-				fd, (vm_offset_t)0, (vm_address_t*) &f->base,
-				TRUE, (vm_size_t)s
-			);
-			f->deallocate = map_fd_deallocate;
+            map_fd (fd, (vm_offset_t) 0,
+                    (vm_address_t *) & f->base, TRUE,
+                    (vm_size_t) s);
+            f->deallocate = map_fd_deallocate;
 #		    endif
 #		    if has_mmap
-			if (!f->base) {
-			    catchmmapints();
-			    f->base = (unsigned char *) mmap(
-				(char *)0, s, PROT_READ, MAP_SHARED,
-				fd, (off_t)0
-			    );
+            if (!f->base)
+              {
+                catchmmapints ();
+                f->base = (unsigned char *) mmap ((char *) 0, s,
+                                                  PROT_READ,
+                                                  MAP_SHARED, fd,
+                                                  (off_t) 0);
 #			    ifndef MAP_FAILED
 #			    define MAP_FAILED (-1)
 #			    endif
-			    if (f->base == (unsigned char *) MAP_FAILED)
-				f->base = 0;
-			    else {
+                if (f->base == (unsigned char *) MAP_FAILED)
+                  f->base = 0;
+                else
+                  {
 #				if has_NFS && mmap_signal
-				    /*
-				    * On many hosts, the superuser
-				    * can mmap an NFS file it can't read.
-				    * So access the first page now, and print
-				    * a nice message if a bus error occurs.
-				    */
-				    readAccessFilenameBuffer(name, f->base);
+                    /*
+                     * On many hosts, the superuser
+                     * can mmap an NFS file it can't read.
+                     * So access the first page now, and print
+                     * a nice message if a bus error occurs.
+                     */
+                    readAccessFilenameBuffer (name, f->base);
 #				endif
-			    }
-			    f->deallocate = mmap_deallocate;
-			}
+                  }
+                f->deallocate = mmap_deallocate;
+              }
 #		    endif
-		    if (!f->base) {
-			f->base = tnalloc(unsigned char, s);
+            if (!f->base)
+              {
+                f->base = tnalloc (unsigned char, s);
 #			if maps_memory
-			{
-			    /*
-			    * We can't map the file into memory for some reason.
-			    * Read it into main memory all at once; this is
-			    * the simplest substitute for memory mapping.
-			    */
-			    char *bufptr = (char *) f->base;
-			    size_t bufsiz = s;
-			    do {
-				ssize_t r = read(fd, bufptr, bufsiz);
-				switch (r) {
-				    case -1:
-					efaterror(name);
+                {
+                  /*
+                   * We can't map the file into memory for some reason.
+                   * Read it into main memory all at once; this is
+                   * the simplest substitute for memory mapping.
+                   */
+                  char *bufptr = (char *) f->base;
+                  size_t bufsiz = s;
+                  do
+                    {
+                      ssize_t r = read (fd, bufptr, bufsiz);
+                      switch (r)
+                        {
+                        case -1:
+                          efaterror (name);
 
-				    case 0:
-					/* The file must have shrunk!  */
-					status->st_size = s -= bufsiz;
-					bufsiz = 0;
-					break;
+                        case 0:
+                          /* The file must have shrunk!  */
+                          status->st_size = s -= bufsiz;
+                          bufsiz = 0;
+                          break;
 
-				    default:
-					bufptr += r;
-					bufsiz -= r;
-					break;
-				}
-			    } while (bufsiz);
-			    if (lseek(fd, (off_t)0, SEEK_SET) == -1)
-				efaterror(name);
-			    f->deallocate = read_deallocate;
-			}
+                        default:
+                          bufptr += r;
+                          bufsiz -= r;
+                          break;
+                        }
+                    }
+                  while (bufsiz);
+                  if (lseek (fd, (off_t) 0, SEEK_SET) == -1)
+                    efaterror (name);
+                  f->deallocate = read_deallocate;
+                }
 #			endif
-		    }
-		}
-		f->ptr = f->base;
-		f->lim = f->base + s;
-		f->fd = fd;
+              }
+          }
+        f->ptr = f->base;
+        f->lim = f->base + s;
+        f->fd = fd;
 #		if !maps_memory
-		    f->readlim = f->base;
-		    f->stream = stream;
+        f->readlim = f->base;
+        f->stream = stream;
 #		endif
-		if_advise_access(s, f, MADV_SEQUENTIAL);
-		return f;
-	      }
+        if_advise_access (s, f, MADV_SEQUENTIAL);
+        return f;
+      }
 #	    endif
-	}
+    }
 }
 
 #if !maps_memory && large_memory
-	int
-Igetmore(f)
-	register RILE *f;
+int
+Igetmore (f)
+     register RILE *f;
 {
-	register fread_type r;
-	register size_t s = f->lim - f->readlim;
+  register fread_type r;
+  register size_t s = f->lim - f->readlim;
 
-	if (BUFSIZ < s)
-		s = BUFSIZ;
-	if (!(r = Fread(f->readlim, sizeof(*f->readlim), s, f->stream))) {
-		testIerror(f->stream);
-		f->lim = f->readlim;  /* The file might have shrunk!  */
-		return 0;
-	}
-	f->readlim += r;
-	return 1;
+  if (BUFSIZ < s)
+    s = BUFSIZ;
+  if (! (r = Fread (f->readlim, sizeof (*f->readlim), s, f->stream)))
+    {
+      testIerror (f->stream);
+      f->lim = f->readlim;  /* The file might have shrunk!  */
+      return 0;
+    }
+  f->readlim += r;
+  return 1;
 }
 #endif
 
 #if has_madvise && has_mmap && large_memory
-	void
-advise_access(f, advice)
-	register RILE *f;
-	int advice;
+void
+advise_access (f, advice)
+     register RILE *f;
+     int advice;
 {
-    if (f->deallocate == mmap_deallocate)
-	madvise((char *)f->base, (size_t)(f->lim - f->base), advice);
-	/* Don't worry if madvise fails; it's only advisory.  */
+  if (f->deallocate == mmap_deallocate)
+    madvise ((char *) f->base, (size_t) (f->lim - f->base), advice);
+  /* Don't worry if madvise fails; it's only advisory.  */
 }
 #endif
 
-	RILE *
+RILE *
 #if large_memory && maps_memory
-I_open(name, status)
+I_open (name, status)
 #else
-Iopen(name, type, status)
-	char const *type;
+Iopen (name, type, status)
+     char const *type;
 #endif
-	char const *name;
-	struct stat *status;
+     char const *name;
+     struct stat *status;
 /* Open NAME for reading, yield its descriptor, and set *STATUS.  */
 {
-	int fd = fdSafer(open(name, O_RDONLY
+  int fd = fdSafer (open (name, O_RDONLY
 #		if OPEN_O_BINARY
-			|  (strchr(type,'b') ? OPEN_O_BINARY : 0)
+                          | (strchr (type, 'b') ? OPEN_O_BINARY :
+                             0)
 #		endif
-	));
+                          ));
 
-	if (fd < 0)
-		return 0;
+  if (fd < 0)
+    return 0;
 #	if large_memory && maps_memory
-		return fd2_RILE(fd, name, status);
+  return fd2_RILE (fd, name, status);
 #	else
-		return fd2RILE(fd, name, type, status);
+  return fd2RILE (fd, name, type, status);
 #	endif
 }
 
-
 static int Oerrloop;
 
-	void
-Oerror()
+void
+Oerror ()
 {
-	if (Oerrloop)
-		exiterr();
-	Oerrloop = true;
-	efaterror("output error");
+  if (Oerrloop)
+    exiterr ();
+  Oerrloop = true;
+  efaterror ("output error");
 }
 
-void Ieof() { fatserror("unexpected end of file"); }
-void Ierror() { efaterror("input error"); }
-void testIerror(f) FILE *f; { if (ferror(f)) Ierror(); }
-void testOerror(o) FILE *o; { if (ferror(o)) Oerror(); }
+void
+Ieof ()
+{
+  fatserror ("unexpected end of file");
+}
+void
+Ierror ()
+{
+  efaterror ("input error");
+}
+void
+testIerror (f)
+     FILE *f;
+{
+  if (ferror (f))
+    Ierror ();
+}
+void
+testOerror (o)
+     FILE *o;
+{
+  if (ferror (o))
+    Oerror ();
+}
 
-void Ifclose(f) RILE *f; { if (f && Iclose(f)!=0) Ierror(); }
-void Ofclose(f) FILE *f; { if (f && fclose(f)!=0) Oerror(); }
-void Izclose(p) RILE **p; { Ifclose(*p); *p = 0; }
-void Ozclose(p) FILE **p; { Ofclose(*p); *p = 0; }
+void
+Ifclose (f)
+     RILE *f;
+{
+  if (f && Iclose (f) != 0)
+    Ierror ();
+}
+void
+Ofclose (f)
+     FILE *f;
+{
+  if (f && fclose (f) != 0)
+    Oerror ();
+}
+void
+Izclose (p)
+     RILE **p;
+{
+  Ifclose (*p);
+  *p = 0;
+}
+void
+Ozclose (p)
+     FILE **p;
+{
+  Ofclose (*p);
+  *p = 0;
+}
 
 #if !large_memory
-	void
-testIeof(f)
-	FILE *f;
+void
+testIeof (f)
+     FILE *f;
 {
-	testIerror(f);
-	if (feof(f))
-		Ieof();
+  testIerror (f);
+  if (feof (f))
+    Ieof ();
 }
-void Irewind(f) FILE *f; { if (fseek(f,0L,SEEK_SET) != 0) Ierror(); }
+void
+Irewind (f)
+     FILE *f;
+{
+  if (fseek (f, 0L, SEEK_SET) != 0)
+    Ierror ();
+}
 #endif
 
-void Orewind(f) FILE *f; { if (fseek(f,0L,SEEK_SET) != 0) Oerror(); }
-
-void aflush(f) FILE *f; { if (fflush(f) != 0) Oerror(); }
-void eflush() { if (fflush(stderr)!=0 && !Oerrloop) Oerror(); }
-void oflush()
+void
+Orewind (f)
+     FILE *f;
 {
-	if (fflush(workstdout ? workstdout : stdout) != 0  &&  !Oerrloop)
-		Oerror();
+  if (fseek (f, 0L, SEEK_SET) != 0)
+    Oerror ();
 }
 
-	void
-fatcleanup(already_newline)
-	int already_newline;
+void
+aflush (f)
+     FILE *f;
 {
-	fprintf(stderr, already_newline+"\n%s aborted\n", cmdid);
-	exiterr();
+  if (fflush (f) != 0)
+    Oerror ();
+}
+void
+eflush ()
+{
+  if (fflush (stderr) != 0 && !Oerrloop)
+    Oerror ();
+}
+void
+oflush ()
+{
+  if (fflush (workstdout ? workstdout : stdout) != 0 && !Oerrloop)
+    Oerror ();
 }
 
-	static void
-startsay(s, t)
-	const char *s, *t;
+void
+fatcleanup (already_newline)
+     int already_newline;
 {
-	oflush();
-	if (s)
-	    aprintf(stderr, "%s: %s: %s", cmdid, s, t);
-	else
-	    aprintf(stderr, "%s: %s", cmdid, t);
+  fprintf (stderr, already_newline + "\n%s aborted\n", cmdid);
+  exiterr ();
 }
 
-	static void
-fatsay(s)
-	char const *s;
+static void
+startsay (s, t)
+     const char *s, *t;
 {
-	startsay(s, "");
+  oflush ();
+  if (s)
+    aprintf (stderr, "%s: %s: %s", cmdid, s, t);
+  else
+    aprintf (stderr, "%s: %s", cmdid, t);
 }
 
-	static void
-errsay(s)
-	char const *s;
+static void
+fatsay (s)
+     char const *s;
 {
-	fatsay(s);
-	nerror++;
+  startsay (s, "");
 }
 
-	static void
-warnsay(s)
-	char const *s;
+static void
+errsay (s)
+     char const *s;
 {
-	startsay(s, "warning: ");
+  fatsay (s);
+  nerror++;
 }
 
-void eerror(s) char const *s; { enerror(errno,s); }
-
-	void
-enerror(e,s)
-	int e;
-	char const *s;
+static void
+warnsay (s)
+     char const *s;
 {
-	errsay((char const*)0);
-	errno = e;
-	perror(s);
-	eflush();
+  startsay (s, "warning: ");
 }
 
-void efaterror(s) char const *s; { enfaterror(errno,s); }
-
-	void
-enfaterror(e,s)
-	int e;
-	char const *s;
+void
+eerror (s)
+     char const *s;
 {
-	fatsay((char const*)0);
-	errno = e;
-	perror(s);
-	fatcleanup(true);
+  enerror (errno, s);
+}
+
+void
+enerror (e, s)
+     int e;
+     char const *s;
+{
+  errsay ((char const *) 0);
+  errno = e;
+  perror (s);
+  eflush ();
+}
+
+void
+efaterror (s)
+     char const *s;
+{
+  enfaterror (errno, s);
+}
+
+void
+enfaterror (e, s)
+     int e;
+     char const *s;
+{
+  fatsay ((char const *) 0);
+  errno = e;
+  perror (s);
+  fatcleanup (true);
 }
 
 #if has_prototypes
-	void
-error(char const *format,...)
+void
+error (char const *format, ...)
 #else
-	/*VARARGS1*/ void error(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+error (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* non-fatal error */
 {
-	va_list args;
-	errsay((char const*)0);
-	vararg_start(args, format);
-	fvfprintf(stderr, format, args);
-	va_end(args);
-	afputc('\n',stderr);
-	eflush();
+  va_list args;
+  errsay ((char const *) 0);
+  vararg_start (args, format);
+  fvfprintf (stderr, format, args);
+  va_end (args);
+  afputc ('\n', stderr);
+  eflush ();
 }
 
 #if has_prototypes
-	void
-rcserror(char const *format,...)
+void
+rcserror (char const *format, ...)
 #else
-	/*VARARGS1*/ void rcserror(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+rcserror (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* non-fatal RCS file error */
 {
-	va_list args;
-	errsay(RCSname);
-	vararg_start(args, format);
-	fvfprintf(stderr, format, args);
-	va_end(args);
-	afputc('\n',stderr);
-	eflush();
+  va_list args;
+  errsay (RCSname);
+  vararg_start (args, format);
+  fvfprintf (stderr, format, args);
+  va_end (args);
+  afputc ('\n', stderr);
+  eflush ();
 }
 
 #if has_prototypes
-	void
-workerror(char const *format,...)
+void
+workerror (char const *format, ...)
 #else
-	/*VARARGS1*/ void workerror(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+workerror (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* non-fatal working file error */
 {
-	va_list args;
-	errsay(workname);
-	vararg_start(args, format);
-	fvfprintf(stderr, format, args);
-	va_end(args);
-	afputc('\n',stderr);
-	eflush();
+  va_list args;
+  errsay (workname);
+  vararg_start (args, format);
+  fvfprintf (stderr, format, args);
+  va_end (args);
+  afputc ('\n', stderr);
+  eflush ();
 }
 
 #if has_prototypes
-	void
-fatserror(char const *format,...)
+void
+fatserror (char const *format, ...)
 #else
-	/*VARARGS1*/ void
-	fatserror(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+fatserror (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* fatal RCS file syntax error */
 {
-	va_list args;
-	oflush();
-	fprintf(stderr, "%s: %s:%ld: ", cmdid, RCSname, rcsline);
-	vararg_start(args, format);
-	fvfprintf(stderr, format, args);
-	va_end(args);
-	fatcleanup(false);
+  va_list args;
+  oflush ();
+  fprintf (stderr, "%s: %s:%ld: ", cmdid, RCSname, rcsline);
+  vararg_start (args, format);
+  fvfprintf (stderr, format, args);
+  va_end (args);
+  fatcleanup (false);
 }
 
 #if has_prototypes
-	void
-faterror(char const *format,...)
+void
+faterror (char const *format, ...)
 #else
-	/*VARARGS1*/ void faterror(format, va_alist)
-	char const *format; va_dcl
+/*VARARGS1 */
+void
+faterror (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* fatal error, terminates program after cleanup */
 {
-	va_list args;
-	fatsay((char const*)0);
-	vararg_start(args, format);
-	fvfprintf(stderr, format, args);
-	va_end(args);
-	fatcleanup(false);
+  va_list args;
+  fatsay ((char const *) 0);
+  vararg_start (args, format);
+  fvfprintf (stderr, format, args);
+  va_end (args);
+  fatcleanup (false);
 }
 
 #if has_prototypes
-	void
-rcsfaterror(char const *format,...)
+void
+rcsfaterror (char const *format, ...)
 #else
-	/*VARARGS1*/ void rcsfaterror(format, va_alist)
-	char const *format; va_dcl
+/*VARARGS1 */
+void
+rcsfaterror (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* fatal RCS file error, terminates program after cleanup */
 {
-	va_list args;
-	fatsay(RCSname);
-	vararg_start(args, format);
-	fvfprintf(stderr, format, args);
-	va_end(args);
-	fatcleanup(false);
+  va_list args;
+  fatsay (RCSname);
+  vararg_start (args, format);
+  fvfprintf (stderr, format, args);
+  va_end (args);
+  fatcleanup (false);
 }
 
 #if has_prototypes
-	void
-warn(char const *format,...)
+void
+warn (char const *format, ...)
 #else
-	/*VARARGS1*/ void warn(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+warn (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* warning */
 {
-	va_list args;
-	if (!quietflag) {
-		warnsay((char *)0);
-		vararg_start(args, format);
-		fvfprintf(stderr, format, args);
-		va_end(args);
-		afputc('\n', stderr);
-		eflush();
-	}
+  va_list args;
+  if (!quietflag)
+    {
+      warnsay ((char *) 0);
+      vararg_start (args, format);
+      fvfprintf (stderr, format, args);
+      va_end (args);
+      afputc ('\n', stderr);
+      eflush ();
+    }
 }
 
 #if has_prototypes
-	void
-rcswarn(char const *format,...)
+void
+rcswarn (char const *format, ...)
 #else
-	/*VARARGS1*/ void rcswarn(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+rcswarn (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* RCS file warning */
 {
-	va_list args;
-	if (!quietflag) {
-		warnsay(RCSname);
-		vararg_start(args, format);
-		fvfprintf(stderr, format, args);
-		va_end(args);
-		afputc('\n', stderr);
-		eflush();
-	}
+  va_list args;
+  if (!quietflag)
+    {
+      warnsay (RCSname);
+      vararg_start (args, format);
+      fvfprintf (stderr, format, args);
+      va_end (args);
+      afputc ('\n', stderr);
+      eflush ();
+    }
 }
 
 #if has_prototypes
-	void
-workwarn(char const *format,...)
+void
+workwarn (char const *format, ...)
 #else
-	/*VARARGS1*/ void workwarn(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+workwarn (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* working file warning */
 {
-	va_list args;
-	if (!quietflag) {
-		warnsay(workname);
-		vararg_start(args, format);
-		fvfprintf(stderr, format, args);
-		va_end(args);
-		afputc('\n', stderr);
-		eflush();
-	}
+  va_list args;
+  if (!quietflag)
+    {
+      warnsay (workname);
+      vararg_start (args, format);
+      fvfprintf (stderr, format, args);
+      va_end (args);
+      afputc ('\n', stderr);
+      eflush ();
+    }
 }
 
-	void
-redefined(c)
-	int c;
+void
+redefined (c)
+     int c;
 {
-	warn("redefinition of -%c option", c);
+  warn ("redefinition of -%c option", c);
 }
 
 #if has_prototypes
-	void
-diagnose(char const *format,...)
+void
+diagnose (char const *format, ...)
 #else
-	/*VARARGS1*/ void diagnose(format, va_alist) char const *format; va_dcl
+/*VARARGS1 */
+void
+diagnose (format, va_alist)
+     char const *format;
+     va_dcl
 #endif
 /* prints a diagnostic message */
 /* Unlike the other routines, it does not append a newline. */
 /* This lets some callers suppress the newline, and is faster */
 /* in implementations that flush stderr just at the end of each printf. */
 {
-	va_list args;
-        if (!quietflag) {
-		oflush();
-		vararg_start(args, format);
-		fvfprintf(stderr, format, args);
-		va_end(args);
-		eflush();
-        }
+  va_list args;
+  if (!quietflag)
+    {
+      oflush ();
+      vararg_start (args, format);
+      fvfprintf (stderr, format, args);
+      va_end (args);
+      eflush ();
+    }
 }
 
-
-
-	void
-afputc(c, f)
+void
+afputc (c, f)
 /* afputc(c,f); acts like aputc_(c,f) but is smaller and slower.  */
-	int c;
-	register FILE *f;
+     int c;
+     register FILE *f;
 {
-	aputc_(c,f)
+  aputc_ (c, f)
 }
 
-
-	void
-aputs(s, iop)
-	char const *s;
-	FILE *iop;
+void
+aputs (s, iop)
+     char const *s;
+     FILE *iop;
 /* Function: Put string s on file iop, abort on error.
  */
 {
 #if has_fputs
-	if (fputs(s, iop) < 0)
-		Oerror();
+  if (fputs (s, iop) < 0)
+    Oerror ();
 #else
-	awrite(s, strlen(s), iop);
+  awrite (s, strlen (s), iop);
 #endif
 }
 
-
-
-	void
+void
 #if has_prototypes
-fvfprintf(FILE *stream, char const *format, va_list args)
+fvfprintf (FILE * stream, char const *format, va_list args)
 #else
-	fvfprintf(stream,format,args) FILE *stream; char *format; va_list args;
+fvfprintf (stream, format, args)
+     FILE *stream;
+     char *format;
+     va_list args;
 #endif
 /* like vfprintf, except abort program on error */
 {
 #if has_vfprintf
-	if (vfprintf(stream, format, args) < 0)
-		Oerror();
+  if (vfprintf (stream, format, args) < 0)
+    Oerror ();
 #else
 #	if has__doprintf
-		_doprintf(stream, format, args);
+  _doprintf (stream, format, args);
 #	else
 #	if has__doprnt
-		_doprnt(format, args, stream);
+  _doprnt (format, args, stream);
 #	else
-		int *a = (int *)args;
-		fprintf(stream, format,
-			a[0], a[1], a[2], a[3], a[4],
-			a[5], a[6], a[7], a[8], a[9]
-		);
+  int *a = (int *) args;
+  fprintf (stream, format,
+           a[0], a[1], a[2], a[3], a[4],
+           a[5], a[6], a[7], a[8], a[9]);
 #	endif
 #	endif
-	if (ferror(stream))
-		Oerror();
+  if (ferror (stream))
+    Oerror ();
 #endif
 }
 
 #if has_prototypes
-	void
-aprintf(FILE *iop, char const *fmt, ...)
+void
+aprintf (FILE * iop, char const *fmt, ...)
 #else
-	/*VARARGS2*/ void
-aprintf(iop, fmt, va_alist)
-FILE *iop;
-char const *fmt;
-va_dcl
+/*VARARGS2 */
+void
+aprintf (iop, fmt, va_alist)
+     FILE *iop;
+     char const *fmt;
+     va_dcl
 #endif
 /* Function: formatted output. Same as fprintf in stdio,
  * but aborts program on error
  */
 {
-	va_list ap;
-	vararg_start(ap, fmt);
-	fvfprintf(iop, fmt, ap);
-	va_end(ap);
+  va_list ap;
+  vararg_start (ap, fmt);
+  fvfprintf (iop, fmt, ap);
+  va_end (ap);
 }
-
-
 
 #ifdef LEXDB
 /* test program reading a stream of lexemes and printing the tokens.
  */
 
-
-
-	int
-main(argc,argv)
-int argc; char * argv[];
+int
+main (argc, argv)
+     int argc;
+     char *argv[];
 {
-        cmdid="lextest";
-        if (argc<2) {
-		aputs("No input file\n",stderr);
-		exitmain(EXIT_FAILURE);
-        }
-	if (!(finptr=Iopen(argv[1], FOPEN_R, (struct stat*)0))) {
-		faterror("can't open input file %s",argv[1]);
-        }
-        Lexinit();
-	while (!eoflex()) {
-        switch (nexttok) {
+  cmdid = "lextest";
+  if (argc < 2)
+    {
+      aputs ("No input file\n", stderr);
+      exitmain (EXIT_FAILURE);
+    }
+  if (!(finptr = Iopen (argv[1], FOPEN_R, (struct stat *) 0)))
+    {
+      faterror ("can't open input file %s", argv[1]);
+    }
+  Lexinit ();
+  while (!eoflex ())
+    {
+      switch (nexttok)
+        {
 
         case ID:
-                printf("ID: %s",NextString);
-                break;
+          printf ("ID: %s", NextString);
+          break;
 
         case NUM:
-		if (hshenter)
-                   printf("NUM: %s, index: %d",nexthsh->num, nexthsh-hshtab);
-                else
-                   printf("NUM, unentered: %s",NextString);
-                hshenter = !hshenter; /*alternate between dates and numbers*/
-                break;
+          if (hshenter)
+            printf ("NUM: %s, index: %d", nexthsh->num,
+                    nexthsh - hshtab);
+          else
+            printf ("NUM, unentered: %s", NextString);
+          hshenter = !hshenter;     /*alternate between dates and numbers */
+          break;
 
         case COLON:
-                printf("COLON"); break;
+          printf ("COLON");
+          break;
 
         case SEMI:
-                printf("SEMI"); break;
+          printf ("SEMI");
+          break;
 
         case STRING:
-                readstring();
-                printf("STRING"); break;
+          readstring ();
+          printf ("STRING");
+          break;
 
         case UNKN:
-                printf("UNKN"); break;
+          printf ("UNKN");
+          break;
 
         default:
-                printf("DEFAULT"); break;
+          printf ("DEFAULT");
+          break;
         }
-        printf(" | ");
-        nextlex();
-        }
-	exitmain(EXIT_SUCCESS);
+      printf (" | ");
+      nextlex ();
+    }
+  exitmain (EXIT_SUCCESS);
 }
 
-void exiterr() { _exit(EXIT_FAILURE); }
-
+void
+exiterr ()
+{
+  _exit (EXIT_FAILURE);
+}
 
 #endif

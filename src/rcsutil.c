@@ -23,34 +23,33 @@
 #include "rcsbase.h"
 
 #if !has_memcmp
-	int
-memcmp(s1, s2, n)
-	void const *s1, *s2;
-	size_t n;
+int
+memcmp (s1, s2, n)
+     void const *s1, *s2;
+     size_t n;
 {
-	register unsigned char const
-		*p1 = (unsigned char const*)s1,
-		*p2 = (unsigned char const*)s2;
-	register size_t i = n;
-	register int r = 0;
-	while (i--  &&  !(r = (*p1++ - *p2++)))
-		;
-	return r;
+  register unsigned char const
+    *p1 = (unsigned char const *) s1, *p2 = (unsigned char const *) s2;
+  register size_t i = n;
+  register int r = 0;
+  while (i-- && !(r = (*p1++ - *p2++)))
+    ;
+  return r;
 }
 #endif
 
 #if !has_memcpy
-	void *
-memcpy(s1, s2, n)
-	void *s1;
-	void const *s2;
-	size_t n;
+void *
+memcpy (s1, s2, n)
+     void *s1;
+     void const *s2;
+     size_t n;
 {
-	register char *p1 = (char*)s1;
-	register char const *p2 = (char const*)s2;
-	while (n--)
-		*p1++ = *p2++;
-	return s1;
+  register char *p1 = (char *) s1;
+  register char const *p2 = (char const *) s2;
+  while (n--)
+    *p1++ = *p2++;
+  return s1;
 }
 #endif
 
@@ -60,160 +59,153 @@ memcpy(s1, s2, n)
  * We could put the free block inside struct alloclist, rather than a pointer
  * to the free block, but that would be less portable.
  */
-struct alloclist {
-	malloc_type alloc;
-	struct alloclist *nextalloc;
+struct alloclist
+{
+  malloc_type alloc;
+  struct alloclist *nextalloc;
 };
 static struct alloclist *alloced;
 
-
-	static malloc_type okalloc P((malloc_type));
-	static malloc_type
-okalloc(p)
-	malloc_type p;
+static malloc_type okalloc P ((malloc_type));
+static malloc_type
+okalloc (p)
+     malloc_type p;
 {
-	if (!p)
-		faterror("out of memory");
-	return p;
+  if (!p)
+    faterror ("out of memory");
+  return p;
 }
 
-	malloc_type
-testalloc(size)
-	size_t size;
+malloc_type
+testalloc (size)
+     size_t size;
 /* Allocate a block, testing that the allocation succeeded.  */
 {
-	return okalloc(malloc(size));
+  return okalloc (malloc (size));
 }
 
-	malloc_type
-testrealloc(ptr, size)
-	malloc_type ptr;
-	size_t size;
+malloc_type
+testrealloc (ptr, size)
+     malloc_type ptr;
+     size_t size;
 /* Reallocate a block, testing that the allocation succeeded.  */
 {
-	return okalloc(realloc(ptr, size));
+  return okalloc (realloc (ptr, size));
 }
 
-	malloc_type
-fremember(ptr)
-	malloc_type ptr;
+malloc_type
+fremember (ptr)
+     malloc_type ptr;
 /* Remember PTR in 'alloced' so that it can be freed later.  Yield PTR.  */
 {
-	register struct alloclist *q = talloc(struct alloclist);
-	q->nextalloc = alloced;
-	alloced = q;
-	return q->alloc = ptr;
+  register struct alloclist *q = talloc (struct alloclist);
+  q->nextalloc = alloced;
+  alloced = q;
+  return q->alloc = ptr;
 }
 
-	malloc_type
-ftestalloc(size)
-	size_t size;
+malloc_type
+ftestalloc (size)
+     size_t size;
 /* Allocate a block, putting it in 'alloced' so it can be freed later. */
 {
-	return fremember(testalloc(size));
+  return fremember (testalloc (size));
 }
 
-	void
-ffree()
+void
+ffree ()
 /* Free all blocks allocated with ftestalloc().  */
 {
-	register struct alloclist *p, *q;
-	for (p = alloced;  p;  p = q) {
-		q = p->nextalloc;
-		tfree(p->alloc);
-		tfree(p);
-	}
-	alloced = 0;
+  register struct alloclist *p, *q;
+  for (p = alloced; p; p = q)
+    {
+      q = p->nextalloc;
+      tfree (p->alloc);
+      tfree (p);
+    }
+  alloced = 0;
 }
 
-	void
-ffree1(f)
-	register char const *f;
+void
+ffree1 (f)
+     register char const *f;
 /* Free the block f, which was allocated by ftestalloc.  */
 {
-	register struct alloclist *p, **a = &alloced;
+  register struct alloclist *p, **a = &alloced;
 
-	while ((p = *a)->alloc  !=  f)
-		a = &p->nextalloc;
-	*a = p->nextalloc;
-	tfree(p->alloc);
-	tfree(p);
+  while ((p = *a)->alloc != f)
+    a = &p->nextalloc;
+  *a = p->nextalloc;
+  tfree (p->alloc);
+  tfree (p);
 }
 
-	char *
-str_save(s)
-	char const *s;
+char *
+str_save (s)
+     char const *s;
 /* Save s in permanently allocated storage. */
 {
-	return strcpy(tnalloc(char, strlen(s)+1), s);
+  return strcpy (tnalloc (char, strlen (s) + 1), s);
 }
 
-	char *
-fstr_save(s)
-	char const *s;
+char *
+fstr_save (s)
+     char const *s;
 /* Save s in storage that will be deallocated when we're done with this file. */
 {
-	return strcpy(ftnalloc(char, strlen(s)+1), s);
+  return strcpy (ftnalloc (char, strlen (s) + 1), s);
 }
 
-	char *
-cgetenv(name)
-	char const *name;
+char *
+cgetenv (name)
+     char const *name;
 /* Like getenv(), but yield a copy; getenv() can overwrite old results. */
 {
-	register char *p;
+  register char *p;
 
-	return (p=getenv(name)) ? str_save(p) : p;
+  return (p = getenv (name)) ? str_save (p) : p;
 }
 
-	char const *
-getusername(suspicious)
-	int suspicious;
+char const *
+getusername (suspicious)
+     int suspicious;
 /* Get the caller's login name.  Trust only getwpuid if SUSPICIOUS.  */
 {
-	static char *name;
+  static char *name;
 
-	if (!name) {
-		if (
-		    /* Prefer getenv() unless suspicious; it's much faster.  */
+  if (!name)
+    {
+      if (
+           /* Prefer getenv() unless suspicious; it's much faster.  */
 #		    if getlogin_is_secure
-			    (suspicious
-			    || (
-				    !(name = cgetenv("LOGNAME"))
-				&&  !(name = cgetenv("USER"))
-			    ))
-			&&  !(name = getlogin())
+           (suspicious
+            || (!(name = cgetenv ("LOGNAME"))
+                && !(name = cgetenv ("USER")))) && !(name = getlogin ())
 #		    else
-			suspicious
-			|| (
-				!(name = cgetenv("LOGNAME"))
-			    &&  !(name = cgetenv("USER"))
-			    &&  !(name = getlogin())
-			)
+           suspicious
+           || (!(name = cgetenv ("LOGNAME"))
+               && !(name = cgetenv ("USER")) && !(name = getlogin ()))
 #		    endif
-		) {
+        )
+        {
 #if has_getuid && has_getpwuid
-			struct passwd const *pw = getpwuid(ruid());
-			if (!pw)
-			    faterror("no password entry for userid %lu",
-				     (unsigned long)ruid()
-			    );
-			name = pw->pw_name;
+          struct passwd const *pw = getpwuid (ruid ());
+          if (!pw)
+            faterror ("no password entry for userid %lu",
+                      (unsigned long) ruid ());
+          name = pw->pw_name;
 #else
 #if has_setuid
-			faterror("setuid not supported");
+          faterror ("setuid not supported");
 #else
-			faterror("Who are you?  Please setenv LOGNAME.");
+          faterror ("Who are you?  Please setenv LOGNAME.");
 #endif
 #endif
-		}
-		checksid(name);
-	}
-	return name;
+        }
+      checksid (name);
+    }
+  return name;
 }
-
-
-
 
 #if has_signal
 
@@ -227,403 +219,433 @@ getusername(suspicious)
 
 static sig_atomic_t volatile heldsignal, holdlevel;
 #ifdef SA_SIGINFO
-	static int unsupported_SA_SIGINFO;
-	static siginfo_t bufsiginfo;
-	static siginfo_t *volatile heldsiginfo;
+static int unsupported_SA_SIGINFO;
+static siginfo_t bufsiginfo;
+static siginfo_t *volatile heldsiginfo;
 #endif
 
-
 #if has_NFS && has_mmap && large_memory && mmap_signal
-    static char const *accessName;
+static char const *accessName;
 
-	  void
-    readAccessFilenameBuffer(filename, p)
-	char const *filename;
-	unsigned char const *p;
-    {
-	unsigned char volatile t;
-	accessName = filename;
-	t = *p;
-	accessName = 0;
-    }
+void
+readAccessFilenameBuffer (filename, p)
+     char const *filename;
+     unsigned char const *p;
+{
+  unsigned char volatile t;
+  accessName = filename;
+  t = *p;
+  accessName = 0;
+}
 #else
 #   define accessName ((char const *) 0)
 #endif
 
-
 #if !has_psignal
 
 # define psignal my_psignal
-	static void my_psignal P((int,char const*));
-	static void
-my_psignal(sig, s)
-	int sig;
-	char const *s;
+static void my_psignal P ((int, char const *));
+static void
+my_psignal (sig, s)
+     int sig;
+     char const *s;
 {
-	char const *sname = "Unknown signal";
+  char const *sname = "Unknown signal";
 #	if has_sys_siglist && defined(NSIG)
-	    if ((unsigned)sig < NSIG)
-		sname = sys_siglist[sig];
+  if ((unsigned) sig < NSIG)
+    sname = sys_siglist[sig];
 #	else
-	    switch (sig) {
+  switch (sig)
+    {
 #	       ifdef SIGHUP
-		case SIGHUP:	sname = "Hangup";  break;
+    case SIGHUP:
+      sname = "Hangup";
+      break;
 #	       endif
 #	       ifdef SIGINT
-		case SIGINT:	sname = "Interrupt";  break;
+    case SIGINT:
+      sname = "Interrupt";
+      break;
 #	       endif
 #	       ifdef SIGPIPE
-		case SIGPIPE:	sname = "Broken pipe";  break;
+    case SIGPIPE:
+      sname = "Broken pipe";
+      break;
 #	       endif
 #	       ifdef SIGQUIT
-		case SIGQUIT:	sname = "Quit";  break;
+    case SIGQUIT:
+      sname = "Quit";
+      break;
 #	       endif
 #	       ifdef SIGTERM
-		case SIGTERM:	sname = "Terminated";  break;
+    case SIGTERM:
+      sname = "Terminated";
+      break;
 #	       endif
 #	       ifdef SIGXCPU
-		case SIGXCPU:	sname = "Cputime limit exceeded";  break;
+    case SIGXCPU:
+      sname = "Cputime limit exceeded";
+      break;
 #	       endif
 #	       ifdef SIGXFSZ
-		case SIGXFSZ:	sname = "Filesize limit exceeded";  break;
+    case SIGXFSZ:
+      sname = "Filesize limit exceeded";
+      break;
 #	       endif
 #	      if has_mmap && large_memory
 #	       if defined(SIGBUS) && mmap_signal==SIGBUS
-		case SIGBUS:	sname = "Bus error";  break;
+    case SIGBUS:
+      sname = "Bus error";
+      break;
 #	       endif
 #	       if defined(SIGSEGV) && mmap_signal==SIGSEGV
-		case SIGSEGV:	sname = "Segmentation fault";  break;
+    case SIGSEGV:
+      sname = "Segmentation fault";
+      break;
 #	       endif
 #	      endif
-	    }
+    }
 #	endif
 
-	/* Avoid calling sprintf etc., in case they're not reentrant.  */
-	{
-	    char const *p;
-	    char buf[BUFSIZ], *b = buf;
-	    for (p = s;  *p;  *b++ = *p++)
-		continue;
-	    *b++ = ':';
-	    *b++ = ' ';
-	    for (p = sname;  *p;  *b++ = *p++)
-		continue;
-	    *b++ = '\n';
-	    write(STDERR_FILENO, buf, b - buf);
-	}
+  /* Avoid calling sprintf etc., in case they're not reentrant.  */
+  {
+    char const *p;
+    char buf[BUFSIZ], *b = buf;
+    for (p = s; *p; *b++ = *p++)
+      continue;
+    *b++ = ':';
+    *b++ = ' ';
+    for (p = sname; *p; *b++ = *p++)
+      continue;
+    *b++ = '\n';
+    write (STDERR_FILENO, buf, b - buf);
+  }
 }
 #endif
 
-static signal_type catchsig P((int));
+static signal_type catchsig P ((int));
 #ifdef SA_SIGINFO
-	static signal_type catchsigaction P((int,siginfo_t*,void*));
+static signal_type catchsigaction P ((int, siginfo_t *, void *));
 #endif
 
-	static signal_type
-catchsig(s)
-	int s;
+static signal_type
+catchsig (s)
+     int s;
 #ifdef SA_SIGINFO
 {
-	catchsigaction(s, (siginfo_t *)0, (void *)0);
+  catchsigaction (s, (siginfo_t *) 0, (void *) 0);
 }
-	static signal_type
-catchsigaction(s, i, c)
-	int s;
-	siginfo_t *i;
-	void *c;
+
+static signal_type
+catchsigaction (s, i, c)
+     int s;
+     siginfo_t *i;
+     void *c;
 #endif
 {
 #   if sig_zaps_handler
-	/* If a signal arrives before we reset the handler, we lose. */
-	signal(s, SIG_IGN);
+  /* If a signal arrives before we reset the handler, we lose. */
+  signal (s, SIG_IGN);
 #   endif
 
 #   ifdef SA_SIGINFO
-	if (!unsupported_SA_SIGINFO)
-	    i = 0;
+  if (!unsupported_SA_SIGINFO)
+    i = 0;
 #   endif
 
-    if (holdlevel) {
-	heldsignal = s;
+  if (holdlevel)
+    {
+      heldsignal = s;
 #	ifdef SA_SIGINFO
-	    if (i) {
-		bufsiginfo = *i;
-		heldsiginfo = &bufsiginfo;
-	    }
+      if (i)
+        {
+          bufsiginfo = *i;
+          heldsiginfo = &bufsiginfo;
+        }
 #	endif
-	return;
+      return;
     }
 
-    ignoreints();
-    setrid();
-    if (!quietflag) {
-	/* Avoid calling sprintf etc., in case they're not reentrant.  */
-	char const *p;
-	char buf[BUFSIZ], *b = buf;
+  ignoreints ();
+  setrid ();
+  if (!quietflag)
+    {
+      /* Avoid calling sprintf etc., in case they're not reentrant.  */
+      char const *p;
+      char buf[BUFSIZ], *b = buf;
 
-	if ( !	(
+      if (!(
 #		if has_mmap && large_memory && mmap_signal
-			/* Check whether this signal was planned.  */
-			s == mmap_signal && accessName
+             /* Check whether this signal was planned.  */
+             s == mmap_signal && accessName
 #		else
-			0
+             0
 #		endif
-	)) {
-	    char const *nRCS = "\nRCS";
+          ))
+        {
+          char const *nRCS = "\nRCS";
 #	    if defined(SA_SIGINFO) && has_si_errno && has_mmap && large_memory && mmap_signal
-		if (s == mmap_signal  &&  i  &&  i->si_errno) {
-		    errno = i->si_errno;
-		    perror(nRCS++);
-		}
+          if (s == mmap_signal && i && i->si_errno)
+            {
+              errno = i->si_errno;
+              perror (nRCS++);
+            }
 #	    endif
 #	    if defined(SA_SIGINFO) && has_psiginfo
-		if (i)
-		    psiginfo(i, nRCS);
-		else
-		    psignal(s, nRCS);
+          if (i)
+            psiginfo (i, nRCS);
+          else
+            psignal (s, nRCS);
 #	    else
-		psignal(s, nRCS);
+          psignal (s, nRCS);
 #	    endif
-	}
+        }
 
-	for (p = "RCS: ";  *p;  *b++ = *p++)
-	    continue;
+      for (p = "RCS: "; *p; *b++ = *p++)
+        continue;
 #	if has_mmap && large_memory && mmap_signal
-	    if (s == mmap_signal) {
-		p = accessName;
-		if (!p)
-		    p = "Was a file changed by some other process?  ";
-		else {
-		    char const *p1;
-		    for (p1 = p;  *p1;  p1++)
-			continue;
-		    write(STDERR_FILENO, buf, b - buf);
-		    write(STDERR_FILENO, p, p1 - p);
-		    b = buf;
-		    p = ": Permission denied.  ";
-		}
-		while (*p)
-		    *b++ = *p++;
-	    }
+      if (s == mmap_signal)
+        {
+          p = accessName;
+          if (!p)
+            p = "Was a file changed by some other process?  ";
+          else
+            {
+              char const *p1;
+              for (p1 = p; *p1; p1++)
+                continue;
+              write (STDERR_FILENO, buf, b - buf);
+              write (STDERR_FILENO, p, p1 - p);
+              b = buf;
+              p = ": Permission denied.  ";
+            }
+          while (*p)
+            *b++ = *p++;
+        }
 #	endif
-	for (p = "Cleaning up.\n";  *p;  *b++ = *p++)
-	    continue;
-	write(STDERR_FILENO, buf, b - buf);
+      for (p = "Cleaning up.\n"; *p; *b++ = *p++)
+        continue;
+      write (STDERR_FILENO, buf, b - buf);
     }
-    exiterr();
+  exiterr ();
 }
 
-	void
-ignoreints()
+void
+ignoreints ()
 {
-	++holdlevel;
+  ++holdlevel;
 }
 
-	void
-restoreints()
+void
+restoreints ()
 {
-	if (!--holdlevel && heldsignal)
+  if (!--holdlevel && heldsignal)
 #	    ifdef SA_SIGINFO
-		catchsigaction(heldsignal, heldsiginfo, (void *)0);
+    catchsigaction (heldsignal, heldsiginfo, (void *) 0);
 #	    else
-		catchsig(heldsignal);
+    catchsig (heldsignal);
 #	    endif
 }
 
-
-static void setup_catchsig P((int const*,int));
+static void setup_catchsig P ((int const *, int));
 
 #if has_sigaction
 
-	static void check_sig P((int));
-	static void
-  check_sig(r)
-	int r;
-  {
-	if (r != 0)
-		efaterror("signal handling");
-  }
+static void check_sig P ((int));
+static void
+check_sig (r)
+     int r;
+{
+  if (r != 0)
+    efaterror ("signal handling");
+}
 
-	static void
-  setup_catchsig(sig, sigs)
-	int const *sig;
-	int sigs;
-  {
-	register int i, j;
-	struct sigaction act;
+static void
+setup_catchsig (sig, sigs)
+     int const *sig;
+     int sigs;
+{
+  register int i, j;
+  struct sigaction act;
 
-	for (i=sigs; 0<=--i; ) {
-	    check_sig(sigaction(sig[i], (struct sigaction*)0, &act));
-	    if (act.sa_handler != SIG_IGN) {
-		act.sa_handler = catchsig;
+  for (i = sigs; 0 <= --i;)
+    {
+      check_sig (sigaction (sig[i], (struct sigaction *) 0, &act));
+      if (act.sa_handler != SIG_IGN)
+        {
+          act.sa_handler = catchsig;
 #		ifdef SA_SIGINFO
-		    if (!unsupported_SA_SIGINFO) {
+          if (!unsupported_SA_SIGINFO)
+            {
 #			if has_sa_sigaction
-			    act.sa_sigaction = catchsigaction;
+              act.sa_sigaction = catchsigaction;
 #			else
-			    act.sa_handler = catchsigaction;
+              act.sa_handler = catchsigaction;
 #			endif
-			act.sa_flags |= SA_SIGINFO;
-		    }
+              act.sa_flags |= SA_SIGINFO;
+            }
 #		endif
-		for (j=sigs; 0<=--j; )
-		    check_sig(sigaddset(&act.sa_mask, sig[j]));
-		if (sigaction(sig[i], &act, (struct sigaction*)0) != 0) {
+          for (j = sigs; 0 <= --j;)
+            check_sig (sigaddset (&act.sa_mask, sig[j]));
+          if (sigaction (sig[i], &act, (struct sigaction *) 0) != 0)
+            {
 #		    if defined(SA_SIGINFO) && defined(ENOTSUP)
-			if (errno == ENOTSUP  &&  !unsupported_SA_SIGINFO) {
-			    /* Turn off use of SA_SIGINFO and try again.  */
-			    unsupported_SA_SIGINFO = 1;
-			    i++;
-			    continue;
-			}
+              if (errno == ENOTSUP && !unsupported_SA_SIGINFO)
+                {
+                  /* Turn off use of SA_SIGINFO and try again.  */
+                  unsupported_SA_SIGINFO = 1;
+                  i++;
+                  continue;
+                }
 #		    endif
-		    check_sig(-1);
-		}
-	    }
-	}
-  }
+              check_sig (-1);
+            }
+        }
+    }
+}
 
 #else
 #if has_sigblock
 
-	static void
-  setup_catchsig(sig, sigs)
-	int const *sig;
-	int sigs;
-  {
-	register int i;
-	int mask;
+static void
+setup_catchsig (sig, sigs)
+     int const *sig;
+     int sigs;
+{
+  register int i;
+  int mask;
 
-	mask = 0;
-	for (i=sigs; 0<=--i; )
-		mask |= sigmask(sig[i]);
-	mask = sigblock(mask);
-	for (i=sigs; 0<=--i; )
-		if (
-		    signal(sig[i], catchsig) == SIG_IGN  &&
-		    signal(sig[i], SIG_IGN) != catchsig
-		)
-			faterror("signal catcher failure");
-	sigsetmask(mask);
-  }
+  mask = 0;
+  for (i = sigs; 0 <= --i;)
+    mask |= sigmask (sig[i]);
+  mask = sigblock (mask);
+  for (i = sigs; 0 <= --i;)
+    if (signal (sig[i], catchsig) == SIG_IGN &&
+        signal (sig[i], SIG_IGN) != catchsig)
+      faterror ("signal catcher failure");
+  sigsetmask (mask);
+}
 
 #else
 
-	static void
-  setup_catchsig(sig, sigs)
-	int const *sig;
-	int sigs;
-  {
-	register i;
+static void
+setup_catchsig (sig, sigs)
+     int const *sig;
+     int sigs;
+{
+  register i;
 
-	for (i=sigs; 0<=--i; )
-		if (
-		    signal(sig[i], SIG_IGN) != SIG_IGN  &&
-		    signal(sig[i], catchsig) != SIG_IGN
-		)
-			faterror("signal catcher failure");
-  }
+  for (i = sigs; 0 <= --i;)
+    if (signal (sig[i], SIG_IGN) != SIG_IGN &&
+        signal (sig[i], catchsig) != SIG_IGN)
+      faterror ("signal catcher failure");
+}
 
 #endif
 #endif
-
 
 static int const regsigs[] = {
 # ifdef SIGHUP
-	SIGHUP,
+  SIGHUP,
 # endif
 # ifdef SIGINT
-	SIGINT,
+  SIGINT,
 # endif
 # ifdef SIGPIPE
-	SIGPIPE,
+  SIGPIPE,
 # endif
 # ifdef SIGQUIT
-	SIGQUIT,
+  SIGQUIT,
 # endif
 # ifdef SIGTERM
-	SIGTERM,
+  SIGTERM,
 # endif
 # ifdef SIGXCPU
-	SIGXCPU,
+  SIGXCPU,
 # endif
 # ifdef SIGXFSZ
-	SIGXFSZ,
+  SIGXFSZ,
 # endif
 };
 
-	void
-catchints()
+void
+catchints ()
 {
-	static int catching_ints;
-	if (!catching_ints) {
-	    catching_ints = true;
-	    setup_catchsig(regsigs, (int) (sizeof(regsigs)/sizeof(*regsigs)));
-	}
+  static int catching_ints;
+  if (!catching_ints)
+    {
+      catching_ints = true;
+      setup_catchsig (regsigs, (int) (sizeof (regsigs) / sizeof (*regsigs)));
+    }
 }
 
 #if has_mmap && large_memory && mmap_signal
 
     /*
-    * If you mmap an NFS file, and someone on another client removes the last
-    * link to that file, and you later reference an uncached part of that file,
-    * you'll get a SIGBUS or SIGSEGV (depending on the operating system).
-    * Catch the signal and report the problem to the user.
-    * Unfortunately, there's no portable way to differentiate between this
-    * problem and actual bugs in the program.
-    * This NFS problem is rare, thank goodness.
-    *
-    * This can also occur if someone truncates the file, even without NFS.
-    */
+     * If you mmap an NFS file, and someone on another client removes the last
+     * link to that file, and you later reference an uncached part of that file,
+     * you'll get a SIGBUS or SIGSEGV (depending on the operating system).
+     * Catch the signal and report the problem to the user.
+     * Unfortunately, there's no portable way to differentiate between this
+     * problem and actual bugs in the program.
+     * This NFS problem is rare, thank goodness.
+     *
+     * This can also occur if someone truncates the file, even without NFS.
+     */
 
-    static int const mmapsigs[] = { mmap_signal };
+static int const mmapsigs[] = { mmap_signal };
 
-	    void
-    catchmmapints()
+void
+catchmmapints ()
+{
+  static int catching_mmap_ints;
+  if (!catching_mmap_ints)
     {
-	static int catching_mmap_ints;
-	if (!catching_mmap_ints) {
-	    catching_mmap_ints = true;
-	    setup_catchsig(mmapsigs, (int)(sizeof(mmapsigs)/sizeof(*mmapsigs)));
-	}
+      catching_mmap_ints = true;
+      setup_catchsig (mmapsigs,
+                      (int) (sizeof (mmapsigs) / sizeof (*mmapsigs)));
     }
+}
 #endif
 
 #endif /* has_signal */
 
-
-	void
-fastcopy(inf,outf)
-	register RILE *inf;
-	FILE *outf;
+void
+fastcopy (inf, outf)
+     register RILE *inf;
+     FILE *outf;
 /* Function: copies the remainder of file inf to outf.
  */
 {
 #if large_memory
 #	if maps_memory
-	    awrite((char const*)inf->ptr, (size_t)(inf->lim - inf->ptr), outf);
-	    inf->ptr = inf->lim;
+  awrite ((char const *) inf->ptr, (size_t) (inf->lim - inf->ptr), outf);
+  inf->ptr = inf->lim;
 #	else
-	    for (;;) {
-		awrite((char const*)inf->ptr, (size_t)(inf->readlim - inf->ptr), outf);
-		inf->ptr = inf->readlim;
-		if (inf->ptr == inf->lim)
-		    break;
-		Igetmore(inf);
-	    }
+  for (;;)
+    {
+      awrite ((char const *) inf->ptr, (size_t) (inf->readlim - inf->ptr),
+              outf);
+      inf->ptr = inf->readlim;
+      if (inf->ptr == inf->lim)
+        break;
+      Igetmore (inf);
+    }
 #	endif
 #else
-	char buf[BUFSIZ*8];
-	register fread_type rcount;
+  char buf[BUFSIZ * 8];
+  register fread_type rcount;
 
-        /*now read the rest of the file in blocks*/
-	while (!feof(inf)) {
-		if (!(rcount = Fread(buf,sizeof(*buf),sizeof(buf),inf))) {
-			testIerror(inf);
-			return;
-		}
-		awrite(buf, (size_t)rcount, outf);
+  /*now read the rest of the file in blocks */
+  while (!feof (inf))
+    {
+      if (!(rcount = Fread (buf, sizeof (*buf), sizeof (buf), inf)))
+        {
+          testIerror (inf);
+          return;
         }
+      awrite (buf, (size_t) rcount, outf);
+    }
 #endif
 }
 
@@ -633,178 +655,183 @@ fastcopy(inf,outf)
 #	define SSIZE_MAX ((unsigned)-1 >> 1)
 #endif
 
-	void
-awrite(buf, chars, f)
-	char const *buf;
-	size_t chars;
-	FILE *f;
+void
+awrite (buf, chars, f)
+     char const *buf;
+     size_t chars;
+     FILE *f;
 {
-	/* Posix 1003.1-1990 ssize_t hack */
-	while (SSIZE_MAX < chars) {
-		if (Fwrite(buf, sizeof(*buf), SSIZE_MAX, f)  !=  SSIZE_MAX)
-			Oerror();
-		buf += SSIZE_MAX;
-		chars -= SSIZE_MAX;
-	}
+  /* Posix 1003.1-1990 ssize_t hack */
+  while (SSIZE_MAX < chars)
+    {
+      if (Fwrite (buf, sizeof (*buf), SSIZE_MAX, f) != SSIZE_MAX)
+        Oerror ();
+      buf += SSIZE_MAX;
+      chars -= SSIZE_MAX;
+    }
 
-	if (Fwrite(buf, sizeof(*buf), chars, f)  !=  chars)
-		Oerror();
+  if (Fwrite (buf, sizeof (*buf), chars, f) != chars)
+    Oerror ();
 }
 
 /* dup a file descriptor; the result must not be stdin, stdout, or stderr.  */
-	static int dupSafer P((int));
-	static int
-dupSafer(fd)
-	int fd;
+static int dupSafer P ((int));
+static int
+dupSafer (fd)
+     int fd;
 {
 #	ifdef F_DUPFD
-	    return fcntl(fd, F_DUPFD, STDERR_FILENO + 1);
+  return fcntl (fd, F_DUPFD, STDERR_FILENO + 1);
 #	else
-	    int e, f, i, used = 0;
-	    while (STDIN_FILENO <= (f = dup(fd))  &&  f <= STDERR_FILENO)
-		    used |= 1<<f;
-	    e = errno;
-	    for (i = STDIN_FILENO;  i <= STDERR_FILENO;  i++)
-		    if (used & (1<<i))
-			    close(i);
-	    errno = e;
-	    return f;
+  int e, f, i, used = 0;
+  while (STDIN_FILENO <= (f = dup (fd)) && f <= STDERR_FILENO)
+    used |= 1 << f;
+  e = errno;
+  for (i = STDIN_FILENO; i <= STDERR_FILENO; i++)
+    if (used & (1 << i))
+      close (i);
+  errno = e;
+  return f;
 #	endif
 }
 
 /* Renumber a file descriptor so that it's not stdin, stdout, or stderr.  */
-	int
-fdSafer(fd)
-	int fd;
+int
+fdSafer (fd)
+     int fd;
 {
-	if (STDIN_FILENO <= fd  &&  fd <= STDERR_FILENO) {
-		int f = dupSafer(fd);
-		int e = errno;
-		close(fd);
-		errno = e;
-		fd = f;
-	}
-	return fd;
+  if (STDIN_FILENO <= fd && fd <= STDERR_FILENO)
+    {
+      int f = dupSafer (fd);
+      int e = errno;
+      close (fd);
+      errno = e;
+      fd = f;
+    }
+  return fd;
 }
 
 /* Like fopen, except the result is never stdin, stdout, or stderr.  */
-	FILE *
-fopenSafer(filename, type)
-	char const *filename;
-	char const *type;
+FILE *
+fopenSafer (filename, type)
+     char const *filename;
+     char const *type;
 {
-	FILE *stream = fopen(filename, type);
-	if (stream) {
-		int fd = fileno(stream);
-		if (STDIN_FILENO <= fd  &&  fd <= STDERR_FILENO) {
-			int f = dupSafer(fd);
-			if (f < 0) {
-				int e = errno;
-				fclose(stream);
-				errno = e;
-				return 0;
-			}
-			if (fclose(stream) != 0) {
-				int e = errno;
-				close(f);
-				errno = e;
-				return 0;
-			}
-			stream = fdopen(f, type);
-		}
-	}
-	return stream;
+  FILE *stream = fopen (filename, type);
+  if (stream)
+    {
+      int fd = fileno (stream);
+      if (STDIN_FILENO <= fd && fd <= STDERR_FILENO)
+        {
+          int f = dupSafer (fd);
+          if (f < 0)
+            {
+              int e = errno;
+              fclose (stream);
+              errno = e;
+              return 0;
+            }
+          if (fclose (stream) != 0)
+            {
+              int e = errno;
+              close (f);
+              errno = e;
+              return 0;
+            }
+          stream = fdopen (f, type);
+        }
+    }
+  return stream;
 }
-
 
 #ifdef F_DUPFD
 #	undef dup
 #	define dup(fd) fcntl(fd, F_DUPFD, 0)
 #endif
 
-
 #if has_fork || has_spawn
 
-	static int movefd P((int,int));
-	static int
-movefd(old, new)
-	int old, new;
+static int movefd P ((int, int));
+static int
+movefd (old, new)
+     int old, new;
 {
-	if (old < 0  ||  old == new)
-		return old;
+  if (old < 0 || old == new)
+    return old;
 #	ifdef F_DUPFD
-		new = fcntl(old, F_DUPFD, new);
+  new = fcntl (old, F_DUPFD, new);
 #	else
-		new = dup2(old, new);
+  new = dup2 (old, new);
 #	endif
-	return close(old)==0 ? new : -1;
+  return close (old) == 0 ? new : -1;
 }
 
-	static int fdreopen P((int,char const*,int));
-	static int
-fdreopen(fd, file, flags)
-	int fd;
-	char const *file;
-	int flags;
+static int fdreopen P ((int, char const *, int));
+static int
+fdreopen (fd, file, flags)
+     int fd;
+     char const *file;
+     int flags;
 {
-	int newfd;
-	close(fd);
-	newfd =
+  int newfd;
+  close (fd);
+  newfd =
 #if !open_can_creat
-		flags&O_CREAT ? creat(file, S_IRUSR|S_IWUSR) :
+    flags & O_CREAT ? creat (file, S_IRUSR | S_IWUSR) :
 #endif
-		open(file, flags, S_IRUSR|S_IWUSR);
-	return movefd(newfd, fd);
+    open (file, flags, S_IRUSR | S_IWUSR);
+  return movefd (newfd, fd);
 }
 
 #if has_spawn
-	static void redirect P((int,int));
-	static void
-redirect(old, new)
-	int old, new;
+static void redirect P ((int, int));
+static void
+redirect (old, new)
+     int old, new;
 /*
 * Move file descriptor OLD to NEW.
 * If OLD is -1, do nothing.
 * If OLD is -2, just close NEW.
 */
 {
-	if ((old != -1 && close(new) != 0) || (0 <= old && movefd(old,new) < 0))
-		efaterror("spawn I/O redirection");
+  if ((old != -1 && close (new) != 0) || (0 <= old && movefd (old, new) < 0))
+    efaterror ("spawn I/O redirection");
 }
 #endif
 
-
 #else /* !has_fork && !has_spawn */
 
-	static void bufargcat P((struct buf*,int,char const*));
-	static void
-bufargcat(b, c, s)
-	register struct buf *b;
-	int c;
-	register char const *s;
+static void bufargcat P ((struct buf *, int, char const *));
+static void
+bufargcat (b, c, s)
+     register struct buf *b;
+     int c;
+     register char const *s;
 /* Append to B a copy of C, plus a quoted copy of S.  */
 {
-	register char *p;
-	register char const *t;
-	size_t bl, sl;
+  register char *p;
+  register char const *t;
+  size_t bl, sl;
 
-	for (t=s, sl=0;  *t;  )
-		sl  +=  3*(*t++=='\'') + 1;
-	bl = strlen(b->string);
-	bufrealloc(b, bl + sl + 4);
-	p = b->string + bl;
-	*p++ = c;
-	*p++ = '\'';
-	while (*s) {
-		if (*s == '\'') {
-			*p++ = '\'';
-			*p++ = '\\';
-			*p++ = '\'';
-		}
-		*p++ = *s++;
-	}
-	*p++ = '\'';
-	*p = 0;
+  for (t = s, sl = 0; *t;)
+    sl += 3 * (*t++ == '\'') + 1;
+  bl = strlen (b->string);
+  bufrealloc (b, bl + sl + 4);
+  p = b->string + bl;
+  *p++ = c;
+  *p++ = '\'';
+  while (*s)
+    {
+      if (*s == '\'')
+        {
+          *p++ = '\'';
+          *p++ = '\\';
+          *p++ = '\'';
+        }
+      *p++ = *s++;
+    }
+  *p++ = '\'';
+  *p = 0;
 }
 
 #endif
@@ -815,14 +842,14 @@ bufargcat(b, c, s)
 * This is useful if you are a child process, whose buffers are usually wrong.
 * Exit immediately if the write does not completely succeed.
 */
-static void write_stderr P((char const *));
-	static void
-write_stderr(s)
-	char const *s;
+static void write_stderr P ((char const *));
+static void
+write_stderr (s)
+     char const *s;
 {
-	size_t slen = strlen(s);
-	if (write(STDERR_FILENO, s, slen) != slen)
-		_exit(EXIT_TROUBLE);
+  size_t slen = strlen (s);
+  if (write (STDERR_FILENO, s, slen) != slen)
+    _exit (EXIT_TROUBLE);
 }
 #endif
 
@@ -832,163 +859,180 @@ write_stderr(s)
 * outname, if nonzero, is the name of the output file.
 * args[1..] form the command to be run; args[0] might be modified.
 */
-	int
-runv(infd, outname, args)
-	int infd;
-	char const *outname, **args;
+int
+runv (infd, outname, args)
+     int infd;
+     char const *outname, **args;
 {
-	int wstatus;
+  int wstatus;
 
 #if bad_wait_if_SIGCHLD_ignored
-	static int fixed_SIGCHLD;
-	if (!fixed_SIGCHLD) {
-	    fixed_SIGCHLD = true;
+  static int fixed_SIGCHLD;
+  if (!fixed_SIGCHLD)
+    {
+      fixed_SIGCHLD = true;
 #	    ifndef SIGCHLD
 #	    define SIGCHLD SIGCLD
 #	    endif
-	    signal(SIGCHLD, SIG_DFL);
-	}
+      signal (SIGCHLD, SIG_DFL);
+    }
 #endif
 
-	oflush();
-	eflush();
-    {
+  oflush ();
+  eflush ();
+  {
 #if has_spawn
-	int in, out;
-	char const *file;
+    int in, out;
+    char const *file;
 
-	in = -1;
-	if (infd != -1  &&  infd != STDIN_FILENO) {
-	    if ((in = dup(STDIN_FILENO)) < 0) {
-		if (errno != EBADF)
-		    efaterror("spawn input setup");
-		in = -2;
-	    } else {
+    in = -1;
+    if (infd != -1 && infd != STDIN_FILENO)
+      {
+        if ((in = dup (STDIN_FILENO)) < 0)
+          {
+            if (errno != EBADF)
+              efaterror ("spawn input setup");
+            in = -2;
+          }
+        else
+          {
 #		ifdef F_DUPFD
-		    if (close(STDIN_FILENO) != 0)
-			efaterror("spawn input close");
+            if (close (STDIN_FILENO) != 0)
+              efaterror ("spawn input close");
 #		endif
-	    }
-	    if (
+          }
+        if (
 #		ifdef F_DUPFD
-		    fcntl(infd, F_DUPFD, STDIN_FILENO) != STDIN_FILENO
+             fcntl (infd, F_DUPFD, STDIN_FILENO) != STDIN_FILENO
 #		else
-		    dup2(infd, STDIN_FILENO) != STDIN_FILENO
+             dup2 (infd, STDIN_FILENO) != STDIN_FILENO
 #		endif
-	    )
-		efaterror("spawn input redirection");
-	}
+          )
+          efaterror ("spawn input redirection");
+      }
 
-	out = -1;
-	if (outname) {
-	    if ((out = dup(STDOUT_FILENO)) < 0) {
-		if (errno != EBADF)
-		    efaterror("spawn output setup");
-		out = -2;
-	    }
-	    if (fdreopen(
-		STDOUT_FILENO, outname,
-		O_CREAT | O_TRUNC | O_WRONLY
-	    ) < 0)
-		efaterror(outname);
-	}
+    out = -1;
+    if (outname)
+      {
+        if ((out = dup (STDOUT_FILENO)) < 0)
+          {
+            if (errno != EBADF)
+              efaterror ("spawn output setup");
+            out = -2;
+          }
+        if (fdreopen (STDOUT_FILENO, outname,
+                      O_CREAT | O_TRUNC | O_WRONLY) < 0)
+          efaterror (outname);
+      }
 
-	wstatus = spawn_RCS(0, args[1], (char**)(args + 1));
+    wstatus = spawn_RCS (0, args[1], (char **) (args + 1));
 #	ifdef RCS_SHELL
-	    if (wstatus == -1  &&  errno == ENOEXEC) {
-		args[0] = RCS_SHELL;
-		wstatus = spawnv(0, args[0], (char**)args);
-	    }
+    if (wstatus == -1 && errno == ENOEXEC)
+      {
+        args[0] = RCS_SHELL;
+        wstatus = spawnv (0, args[0], (char **) args);
+      }
 #	endif
-	redirect(in, STDIN_FILENO);
-	redirect(out, STDOUT_FILENO);
+    redirect (in, STDIN_FILENO);
+    redirect (out, STDOUT_FILENO);
 #else
 #if has_fork
-	pid_t pid;
-	if (!(pid = vfork())) {
-		char const *notfound;
-		if (infd != -1  &&  infd != STDIN_FILENO  &&  (
+    pid_t pid;
+    if (!(pid = vfork ()))
+      {
+        char const *notfound;
+        if (infd != -1 && infd != STDIN_FILENO && (
 #		    ifdef F_DUPFD
-			(close(STDIN_FILENO),
-			fcntl(infd, F_DUPFD, STDIN_FILENO) != STDIN_FILENO)
+                                                    (close (STDIN_FILENO),
+                                                     fcntl (infd, F_DUPFD,
+                                                            STDIN_FILENO) !=
+                                                     STDIN_FILENO)
 #		    else
-			dup2(infd, STDIN_FILENO) != STDIN_FILENO
+                                                    dup2 (infd,
+                                                          STDIN_FILENO) !=
+                                                    STDIN_FILENO
 #		    endif
-		)) {
-		    /* Avoid perror since it may misuse buffers.  */
-		    write_stderr(args[1]);
-		    write_stderr(": I/O redirection failed\n");
-		    _exit(EXIT_TROUBLE);
-		}
+            ))
+          {
+            /* Avoid perror since it may misuse buffers.  */
+            write_stderr (args[1]);
+            write_stderr (": I/O redirection failed\n");
+            _exit (EXIT_TROUBLE);
+          }
 
-		if (outname)
-		    if (fdreopen(
-			STDOUT_FILENO, outname,
-			O_CREAT | O_TRUNC | O_WRONLY
-		    ) < 0) {
-			/* Avoid perror since it may misuse buffers.  */
-			write_stderr(args[1]);
-			write_stderr(": ");
-			write_stderr(outname);
-			write_stderr(": cannot create\n");
-			_exit(EXIT_TROUBLE);
-		    }
-		exec_RCS(args[1], (char**)(args + 1));
-		notfound = args[1];
+        if (outname)
+          if (fdreopen (STDOUT_FILENO, outname,
+                        O_CREAT | O_TRUNC | O_WRONLY) < 0)
+            {
+              /* Avoid perror since it may misuse buffers.  */
+              write_stderr (args[1]);
+              write_stderr (": ");
+              write_stderr (outname);
+              write_stderr (": cannot create\n");
+              _exit (EXIT_TROUBLE);
+            }
+        exec_RCS (args[1], (char **) (args + 1));
+        notfound = args[1];
 #		ifdef RCS_SHELL
-		    if (errno == ENOEXEC) {
-			args[0] = notfound = RCS_SHELL;
-			execv(args[0], (char**)args);
-		    }
+        if (errno == ENOEXEC)
+          {
+            args[0] = notfound = RCS_SHELL;
+            execv (args[0], (char **) args);
+          }
 #		endif
 
-		/* Avoid perror since it may misuse buffers.  */
-		write_stderr(notfound);
-		write_stderr(": not found\n");
-		_exit(EXIT_TROUBLE);
-	}
-	if (pid < 0)
-		efaterror("fork");
+        /* Avoid perror since it may misuse buffers.  */
+        write_stderr (notfound);
+        write_stderr (": not found\n");
+        _exit (EXIT_TROUBLE);
+      }
+    if (pid < 0)
+      efaterror ("fork");
 #	if has_waitpid
-		if (waitpid(pid, &wstatus, 0) < 0)
-			efaterror("waitpid");
+    if (waitpid (pid, &wstatus, 0) < 0)
+      efaterror ("waitpid");
 #	else
-		{
-			pid_t w;
-			do {
-				if ((w = wait(&wstatus)) < 0)
-					efaterror("wait");
-			} while (w != pid);
-		}
+    {
+      pid_t w;
+      do
+        {
+          if ((w = wait (&wstatus)) < 0)
+            efaterror ("wait");
+        }
+      while (w != pid);
+    }
 #	endif
 #else
-	static struct buf b;
-	char const *p;
+    static struct buf b;
+    char const *p;
 
-	/* Use system().  On many hosts system() discards signals.  Yuck!  */
-	p = args + 1;
-	bufscpy(&b, *p);
-	while (*++p)
-		bufargcat(&b, ' ', *p);
-	if (infd != -1  &&  infd != STDIN_FILENO) {
-		char redirection[32];
-		sprintf(redirection, "<&%d", infd);
-		bufscat(&b, redirection);
-	}
-	if (outname)
-		bufargcat(&b, '>', outname);
-	wstatus = system(b.string);
+    /* Use system().  On many hosts system() discards signals.  Yuck!  */
+    p = args + 1;
+    bufscpy (&b, *p);
+    while (*++p)
+      bufargcat (&b, ' ', *p);
+    if (infd != -1 && infd != STDIN_FILENO)
+      {
+        char redirection[32];
+        sprintf (redirection, "<&%d", infd);
+        bufscat (&b, redirection);
+      }
+    if (outname)
+      bufargcat (&b, '>', outname);
+    wstatus = system (b.string);
 #endif
 #endif
+  }
+  if (!WIFEXITED (wstatus))
+    {
+      if (WIFSIGNALED (wstatus))
+        {
+          psignal (WTERMSIG (wstatus), args[1]);
+          fatcleanup (1);
+        }
+      faterror ("%s failed for unknown reason", args[1]);
     }
-	if (!WIFEXITED(wstatus)) {
-		if (WIFSIGNALED(wstatus)) {
-			psignal(WTERMSIG(wstatus), args[1]);
-			fatcleanup(1);
-		}
-		faterror("%s failed for unknown reason", args[1]);
-	}
-	return WEXITSTATUS(wstatus);
+  return WEXITSTATUS (wstatus);
 }
 
 #define CARGSMAX 20
@@ -998,152 +1042,178 @@ runv(infd, outname, args)
 * outname, if nonzero, is the name of the output file.
 * The remaining arguments specify the command and its arguments.
 */
-	int
+int
 #if has_prototypes
-run(int infd, char const *outname, ...)
+run (int infd, char const *outname, ...)
 #else
-	/*VARARGS2*/
-run(infd, outname, va_alist)
-	int infd;
-	char const *outname;
-	va_dcl
+        /*VARARGS2 */
+run (infd, outname, va_alist)
+     int infd;
+     char const *outname;
+     va_dcl
 #endif
 {
-	va_list ap;
-	char const *rgargs[CARGSMAX];
-	register int i;
-	vararg_start(ap, outname);
-	for (i = 1;  (rgargs[i++] = va_arg(ap, char const*));  )
-		if (CARGSMAX <= i)
-			faterror("too many command arguments");
-	va_end(ap);
-	return runv(infd, outname, rgargs);
+  va_list ap;
+  char const *rgargs[CARGSMAX];
+  register int i;
+  vararg_start (ap, outname);
+  for (i = 1; (rgargs[i++] = va_arg (ap, char const *));)
+    if (CARGSMAX <= i)
+      faterror ("too many command arguments");
+  va_end (ap);
+  return runv (infd, outname, rgargs);
 }
-
 
 int RCSversion;
 
-	void
-setRCSversion(str)
-	char const *str;
+void
+setRCSversion (str)
+     char const *str;
 {
-	static int oldversion;
+  static int oldversion;
 
-	register char const *s = str + 2;
+  register char const *s = str + 2;
 
-	if (*s) {
-		int v = VERSION_DEFAULT;
+  if (*s)
+    {
+      int v = VERSION_DEFAULT;
 
-		if (oldversion)
-			redefined('V');
-		oldversion = true;
-		v = 0;
-		while (isdigit(*s))
-			v  =  10*v + *s++ - '0';
-		if (*s)
-			error("%s isn't a number", str);
-		else if (v < VERSION_min  ||  VERSION_max < v)
-			error("%s out of range %d..%d",
-				str, VERSION_min, VERSION_max
-			);
+      if (oldversion)
+        redefined ('V');
+      oldversion = true;
+      v = 0;
+      while (isdigit (*s))
+        v = 10 * v + *s++ - '0';
+      if (*s)
+        error ("%s isn't a number", str);
+      else if (v < VERSION_min || VERSION_max < v)
+        error ("%s out of range %d..%d", str, VERSION_min, VERSION_max);
 
-		RCSversion = VERSION(v);
-	} else {
-		printf("%s%s", cmdid, COMMAND_VERSION);
-		exit(0);
-	}
+      RCSversion = VERSION (v);
+    }
+  else
+    {
+      printf ("%s%s", cmdid, COMMAND_VERSION);
+      exit (0);
+    }
 }
 
-	int
-getRCSINIT(argc, argv, newargv)
-	int argc;
-	char **argv, ***newargv;
+int
+getRCSINIT (argc, argv, newargv)
+     int argc;
+     char **argv, ***newargv;
 {
-	register char *p, *q, **pp;
-	size_t n;
+  register char *p, *q, **pp;
+  size_t n;
 
-	if (!(q = cgetenv("RCSINIT")))
-		*newargv = argv;
-	else {
-		n = argc + 2;
-		/*
-		 * Count spaces in RCSINIT to allocate a new arg vector.
-		 * This is an upper bound, but it's OK even if too large.
-		 */
-		for (p = q;  ;  ) {
-			switch (*p++) {
-			    default:
-				continue;
+  if (!(q = cgetenv ("RCSINIT")))
+    *newargv = argv;
+  else
+    {
+      n = argc + 2;
+      /*
+       * Count spaces in RCSINIT to allocate a new arg vector.
+       * This is an upper bound, but it's OK even if too large.
+       */
+      for (p = q;;)
+        {
+          switch (*p++)
+            {
+            default:
+              continue;
 
-			    case ' ':
-			    case '\b': case '\f': case '\n':
-			    case '\r': case '\t': case '\v':
-				n++;
-				continue;
+            case ' ':
+            case '\b':
+            case '\f':
+            case '\n':
+            case '\r':
+            case '\t':
+            case '\v':
+              n++;
+              continue;
 
-			    case '\0':
-				break;
-			}
-			break;
-		}
-		*newargv = pp = tnalloc(char*, n);
-		*pp++ = *argv++; /* copy program name */
-		for (p = q;  ;  ) {
-			for (;;) {
-				switch (*q) {
-				    case '\0':
-					goto copyrest;
+            case '\0':
+              break;
+            }
+          break;
+        }
+      *newargv = pp = tnalloc (char *, n);
+      *pp++ = *argv++;          /* copy program name */
+      for (p = q;;)
+        {
+          for (;;)
+            {
+              switch (*q)
+                {
+                case '\0':
+                  goto copyrest;
 
-				    case ' ':
-				    case '\b': case '\f': case '\n':
-				    case '\r': case '\t': case '\v':
-					q++;
-					continue;
-				}
-				break;
-			}
-			*pp++ = p;
-			++argc;
-			for (;;) {
-				switch ((*p++ = *q++)) {
-				    case '\0':
-					goto copyrest;
+                case ' ':
+                case '\b':
+                case '\f':
+                case '\n':
+                case '\r':
+                case '\t':
+                case '\v':
+                  q++;
+                  continue;
+                }
+              break;
+            }
+          *pp++ = p;
+          ++argc;
+          for (;;)
+            {
+              switch ((*p++ = *q++))
+                {
+                case '\0':
+                  goto copyrest;
 
-				    case '\\':
-					if (!*q)
-						goto copyrest;
-					p[-1] = *q++;
-					continue;
+                case '\\':
+                  if (!*q)
+                    goto copyrest;
+                  p[-1] = *q++;
+                  continue;
 
-				    default:
-					continue;
+                default:
+                  continue;
 
-				    case ' ':
-				    case '\b': case '\f': case '\n':
-				    case '\r': case '\t': case '\v':
-					break;
-				}
-				break;
-			}
-			p[-1] = '\0';
-		}
-	    copyrest:
-		while ((*pp++ = *argv++))
-			continue;
-	}
-	return argc;
+                case ' ':
+                case '\b':
+                case '\f':
+                case '\n':
+                case '\r':
+                case '\t':
+                case '\v':
+                  break;
+                }
+              break;
+            }
+          p[-1] = '\0';
+        }
+    copyrest:
+      while ((*pp++ = *argv++))
+        continue;
+    }
+  return argc;
 }
-
 
 #define cacheid(E) static uid_t i; static int s; if (!s){ s=1; i=(E); } return i
 
 #if has_getuid
-	uid_t ruid() { cacheid(getuid()); }
+uid_t
+ruid ()
+{
+  cacheid (getuid ());
+}
 #endif
 #if has_setuid
-	uid_t euid() { cacheid(geteuid()); }
+uid_t
+euid ()
+{
+  cacheid (geteuid ());
+}
 #endif
-
 
 #if has_setuid
 
@@ -1156,66 +1226,68 @@ getRCSINIT(argc, argv, newargv)
  * This area is such a mess that we always check switches at runtime.
  */
 
-	static void
+static void
 #if has_prototypes
-set_uid_to(uid_t u)
+set_uid_to (uid_t u)
 #else
- set_uid_to(u) uid_t u;
+set_uid_to (u)
+     uid_t u;
 #endif
 /* Become user u.  */
 {
-	static int looping;
+  static int looping;
 
-	if (euid() == ruid())
-		return;
+  if (euid () == ruid ())
+    return;
 #if (has_fork||has_spawn) && DIFF_ABSOLUTE
 #	if has_setreuid
-		if (setreuid(u==euid() ? ruid() : euid(), u) != 0)
-			efaterror("setuid");
+  if (setreuid (u == euid ()? ruid () : euid (), u) != 0)
+    efaterror ("setuid");
 #	else
-		if (seteuid(u) != 0)
-			efaterror("setuid");
+  if (seteuid (u) != 0)
+    efaterror ("setuid");
 #	endif
 #endif
-	if (geteuid() != u) {
-		if (looping)
-			return;
-		looping = true;
-		faterror("root setuid not supported" + (u?5:0));
-	}
+  if (geteuid () != u)
+    {
+      if (looping)
+        return;
+      looping = true;
+      faterror ("root setuid not supported" + (u ? 5 : 0));
+    }
 }
 
 static int stick_with_euid;
 
-	void
+void
 /* Ignore all calls to seteid() and setrid().  */
-nosetid()
+nosetid ()
 {
-	stick_with_euid = true;
+  stick_with_euid = true;
 }
 
-	void
-seteid()
+void
+seteid ()
 /* Become effective user.  */
 {
-	if (!stick_with_euid)
-		set_uid_to(euid());
+  if (!stick_with_euid)
+    set_uid_to (euid ());
 }
 
-	void
-setrid()
+void
+setrid ()
 /* Become real user.  */
 {
-	if (!stick_with_euid)
-		set_uid_to(ruid());
+  if (!stick_with_euid)
+    set_uid_to (ruid ());
 }
 #endif
 
-	time_t
-now()
+time_t
+now ()
 {
-	static time_t t;
-	if (!t  &&  time(&t) == -1)
-		efaterror("time");
-	return t;
+  static time_t t;
+  if (!t && time (&t) == -1)
+    efaterror ("time");
+  return t;
 }
