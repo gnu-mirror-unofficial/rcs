@@ -1,5 +1,12 @@
 2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use zero-arg form of AC_OUTPUT.
+
+	* configure.in (AC_CONFIG_FILES): New.
+	(AC_OUTPUT): Move args to `AC_CONFIG_FILES'.
+
+2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move authoritative version number into configure.in.
 
 	* autogen.sh: New file.
