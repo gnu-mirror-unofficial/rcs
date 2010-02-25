@@ -35,9 +35,6 @@
 #include "partime.h"
 #include "maketime.h"
 
-char const maketId[]
-  = "$Id: maketime.c,v 5.11 1995/06/16 06:19:24 eggert Exp $";
-
 static int isleap P((int));
 static int month_days P((struct tm const*));
 static time_t maketime P((struct partime const*,time_t));

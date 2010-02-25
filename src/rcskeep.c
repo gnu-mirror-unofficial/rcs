@@ -22,8 +22,6 @@
 
 #include  "rcsbase.h"
 
-libId(keepId, "$Id: rcskeep.c,v 5.10 1995/06/16 06:19:24 eggert Exp $")
-
 static int badly_terminated P((void));
 static int checknum P((char const*));
 static int get0val P((int,RILE*,struct buf*,int));

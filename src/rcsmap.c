@@ -22,8 +22,6 @@
 
 #include "rcsbase.h"
 
-libId(mapId, "$Id: rcsmap.c,v 5.3 1995/06/16 06:19:24 eggert Exp $")
-
 /* map of character types */
 /* ISO 8859/1 (Latin-1) */
 enum tokens const ctab[] = {

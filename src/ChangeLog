@@ -1,3 +1,35 @@
+2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Drop RCS keyword `Id' from code.
+
+	* rcsbase.h (RCSBASE, libId): Delete #define:s.
+	(mainProg): Don't take 3rd arg; don't define `baseid', lib id string.
+	* ci.c: Update `mainProg' call.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merge.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+	* merger.c: Delete `libId' call.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcskeys.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmap.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcstime.c: Likewise.
+	* rcsutil.c: Likewise.
+	* conf.sh (Id): Delete var.
+	* maketime.c (maketId): Likewise.
+	* partime.c (partimeId): Likewise.
+
 2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[admin] Move install-sh, mkinstalldirs into new dir build-aux/.

@@ -29,8 +29,6 @@
 
 #include "rcsbase.h"
 
-libId(editId, "$Id: rcsedit.c,v 5.19 1995/06/16 06:19:24 eggert Exp $")
-
 static void editEndsPrematurely P((void)) exiting;
 static void editLineNumberOverflow P((void)) exiting;
 static void escape_string P((FILE*,char const*));

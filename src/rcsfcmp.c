@@ -35,8 +35,6 @@
 
 #include  "rcsbase.h"
 
-libId(fcmpId, "$Id: rcsfcmp.c,v 5.14 1995/06/16 06:19:24 eggert Exp $")
-
 	static int discardkeyval P((int,RILE*));
 	static int
 discardkeyval(c, f)

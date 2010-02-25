@@ -22,9 +22,6 @@
 
 #include "rcsbase.h"
 
-libId(keysId, "$Id: rcskeys.c,v 5.4 1995/06/16 06:19:24 eggert Exp $")
-
-
 char const *const Keyword[] = {
     /* This must be in the same order as rcsbase.h's enum markers type. */
 	0,

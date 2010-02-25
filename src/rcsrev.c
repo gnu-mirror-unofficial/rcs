@@ -22,8 +22,6 @@
 
 #include "rcsbase.h"
 
-libId(revId, "$Id: rcsrev.c,v 5.10 1995/06/16 06:19:24 eggert Exp $")
-
 static char const *branchtip P((char const*));
 static char const *lookupsym P((char const*));
 static char const *normalizeyear P((char const*,char[5]));

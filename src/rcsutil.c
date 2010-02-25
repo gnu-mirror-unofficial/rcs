@@ -22,8 +22,6 @@
 
 #include "rcsbase.h"
 
-libId(utilId, "$Id: rcsutil.c,v 5.20 1995/06/16 06:19:24 eggert Exp $")
-
 #if !has_memcmp
 	int
 memcmp(s1, s2, n)

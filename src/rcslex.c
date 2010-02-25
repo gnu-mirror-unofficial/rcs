@@ -43,8 +43,6 @@
 
 #include "rcsbase.h"
 
-libId(lexId, "$Id: rcslex.c,v 5.19 1995/06/16 06:19:24 eggert Exp $")
-
 static char *checkidentifier P((char*,int,int));
 static void errsay P((char const*));
 static void fatsay P((char const*));

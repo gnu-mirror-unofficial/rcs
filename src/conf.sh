@@ -1,6 +1,6 @@
 #! /bin/sh
 # Output RCS compile-time configuration.
-Id='$Id: conf.sh,v 5.25 1995/06/16 06:19:24 eggert Exp $'
+
 # Copyright (C) 2010 Thien-Thi Nguyen
 # Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
 #
@@ -46,8 +46,6 @@ L=$LIBS
 
 cat <<EOF
 /* RCS compile-time configuration */
-
-	/* $Id */
 
 /*
  * This file is generated automatically.

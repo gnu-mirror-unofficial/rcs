@@ -22,8 +22,6 @@
 
 #include "rcsbase.h"
 
-libId(genId, "$Id: rcsgen.c,v 5.16 1995/06/16 06:19:24 eggert Exp $")
-
 int interactiveflag;  /* Should we act as if stdin is a tty?  */
 struct buf curlogbuf;  /* buffer for current log message */
 

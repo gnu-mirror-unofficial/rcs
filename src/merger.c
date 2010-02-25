@@ -21,8 +21,6 @@
 
 #include "rcsbase.h"
 
-libId(mergerId, "$Id: merger.c,v 1.7 1995/06/16 06:19:24 eggert Exp $")
-
 	static char const *normalize_arg P((char const*,char**));
 	static char const *
 normalize_arg(s, b)

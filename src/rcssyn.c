@@ -36,8 +36,6 @@
 
 #include "rcsbase.h"
 
-libId(synId, "$Id: rcssyn.c,v 5.15 1995/06/16 06:19:24 eggert Exp $")
-
 static char const *getkeyval P((char const*,enum tokens,int));
 static int getdelta P((void));
 static int strn2expmode P((char const*,size_t));

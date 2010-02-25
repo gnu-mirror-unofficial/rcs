@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define RCSBASE "$Id: rcsbase.h,v 5.20 1995/06/16 06:19:24 eggert Exp $"
-
 #include "conf.h"
 
 
@@ -241,11 +239,9 @@ struct assoc {
 #define mainArgs (argc,argv) int argc; char **argv;
 
 #if RCS_lint
-#	define libId(name,rcsid)
-#	define mainProg(name,cmd,rcsid) int name mainArgs
+#	define mainProg(name,cmd) int name mainArgs
 #else
-#	define libId(name,rcsid) char const name[] = rcsid;
-#	define mainProg(n,c,i) char const Copyright[] = "Copyright 1982,1988,1989 Walter F. Tichy, Purdue CS\nCopyright 1990,1991,1992,1993,1994,1995 Paul Eggert", baseid[] = RCSBASE, cmdid[] = c; libId(n,i) int main P((int,char**)); int main mainArgs
+#	define mainProg(n,c) char const Copyright[] = "Copyright 1982,1988,1989 Walter F. Tichy, Purdue CS\nCopyright 1990,1991,1992,1993,1994,1995 Paul Eggert", cmdid[] = c; int main P((int,char**)); int main mainArgs
 #endif
 
 /*
