@@ -23,9 +23,7 @@
 
 static char const *normalize_arg (char const *, char **);
 static char const *
-normalize_arg (s, b)
-     char const *s;
-     char **b;
+normalize_arg (char const *s, char **b)
 /*
  * If S looks like an option, prepend ./ to it.  Yield the result.
  * Set *B to the address of any storage that was allocated.
@@ -46,11 +44,8 @@ normalize_arg (s, b)
 }
 
 int
-merge (tostdout, edarg, label, argv)
-     int tostdout;
-     char const *edarg;
-     char const *const label[3];
-     char const *const argv[3];
+merge (int tostdout, char const *edarg, char const *const label[3],
+       char const *const argv[3])
 /*
  * Do `merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2',
  * where TOSTDOUT specifies whether -p is present,

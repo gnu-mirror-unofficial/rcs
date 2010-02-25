@@ -60,8 +60,7 @@ static enum maker volatile dirtpmaker[DIRTEMPNAMES];       /* if these are set *
 #define newRCSname (dirtpname[newRCSdirtp_index].string)
 
 #if has_NFS || bad_unlink
-int un_link (s)
-     char const *s;
+int un_link (char const *s)
 /*
  * Remove S, even if it is unwritable.
  * Ignore unlink() ENOENT failures; NFS generates bogus ones.
@@ -99,8 +98,7 @@ int un_link (s)
 #  else
 static int do_link (char const *, char const *);
 static int
-do_link (s, t)
-     char const *s, *t;
+do_link (char const *s, char const *t)
 /* Link S to T, ignoring bogus EEXIST problems due to NFS failures.  */
 {
   int r = link (s, t);
@@ -118,13 +116,13 @@ do_link (s, t)
 #endif
 
 static void
-editEndsPrematurely ()
+editEndsPrematurely (void)
 {
   fatserror ("edit script ends prematurely");
 }
 
 static void
-editLineNumberOverflow ()
+editLineNumberOverflow (void)
 {
   fatserror ("edit script refers to line past end of file");
 }
@@ -136,10 +134,8 @@ editLineNumberOverflow ()
 #else
 static void movelines (Iptr_type *, Iptr_type const *, long);
 static void
-movelines (s1, s2, n)
-     register Iptr_type *s1;
-     register Iptr_type const *s2;
-     register long n;
+movelines (register Iptr_type *s1, register Iptr_type const *s2,
+           register long n)
 {
   if (s1 < s2)
     do
@@ -178,9 +174,7 @@ static Iptr_type *line;
 static size_t gap, gapsize, linelim;
 
 static void
-insertline (n, l)
-     long n;
-     Iptr_type l;
+insertline (long n, Iptr_type l)
 /* Before line N, insert line L.  N is 0-origin.  */
 {
   if (linelim - gapsize < n)
@@ -201,8 +195,7 @@ insertline (n, l)
 }
 
 static void
-deletelines (n, nlines)
-     long n, nlines;
+deletelines (long n, long nlines)
 /* Delete lines N through N+NLINES-1.  N is 0-origin.  */
 {
   long l = n + nlines;
@@ -218,9 +211,7 @@ deletelines (n, nlines)
 }
 
 static void
-snapshotline (f, l)
-     register FILE *f;
-     register Iptr_type l;
+snapshotline (register FILE *f, register Iptr_type l)
 {
   register int c;
   do
@@ -233,8 +224,7 @@ snapshotline (f, l)
 }
 
 void
-snapshotedit (f)
-     FILE *f;
+snapshotedit (FILE *f)
 /* Copy the current state of the edits to F.  */
 {
   register Iptr_type *p, *lim, *l = line;
@@ -245,11 +235,7 @@ snapshotedit (f)
 }
 
 static void
-finisheditline (fin, fout, l, delta)
-     RILE *fin;
-     FILE *fout;
-     Iptr_type l;
-     struct hshentry const *delta;
+finisheditline (RILE *fin, FILE *fout, Iptr_type l, struct hshentry const *delta)
 {
   fin->ptr = l;
   if (expandline (fin, fout, delta, true, (FILE *) 0, true) < 0)
@@ -257,10 +243,7 @@ finisheditline (fin, fout, l, delta)
 }
 
 void
-finishedit (delta, outfile, done)
-     struct hshentry const *delta;
-     FILE *outfile;
-     int done;
+finishedit (struct hshentry const *delta, FILE *outfile, int done)
 /*
  * Doing expansion if DELTA is set, output the state of the edits to OUTFILE.
  * But do nothing unless DONE is set (which means we are on the last pass).
@@ -291,8 +274,7 @@ finishedit (delta, outfile, done)
 #else /* !large_memory */
 static FILE *fopen_update_truncate (char const *);
 static FILE *
-fopen_update_truncate (name)
-     char const *name;
+fopen_update_truncate (char const *name)
 {
   if (bad_fopen_wplus && un_link (name) != 0)
     efaterror (name);
@@ -301,8 +283,7 @@ fopen_update_truncate (name)
 #endif
 
 void
-openfcopy (f)
-     FILE *f;
+openfcopy (FILE *f)
 {
   if (!(fcopy = f))
     {
@@ -317,8 +298,7 @@ openfcopy (f)
 
 static void swapeditfiles (FILE *);
 static void
-swapeditfiles (outfile)
-     FILE *outfile;
+swapeditfiles (FILE *outfile)
 /* Function: swaps resultname and editname, assigns fedit=fcopy,
  * and rewinds fedit for reading.  Set fcopy to outfile if nonnull;
  * otherwise, set fcopy to be resultname opened for reading and writing.
@@ -337,8 +317,7 @@ swapeditfiles (outfile)
 }
 
 void
-snapshotedit (f)
-     FILE *f;
+snapshotedit (FILE *f)
 /* Copy the current state of the edits to F.  */
 {
   finishedit ((struct hshentry *) 0, (FILE *) 0, false);
@@ -347,10 +326,7 @@ snapshotedit (f)
 }
 
 void
-finishedit (delta, outfile, done)
-     struct hshentry const *delta;
-     FILE *outfile;
-     int done;
+finishedit (struct hshentry const *delta, FILE *outfile, int done)
 /* copy the rest of the edit file and close it (if it exists).
  * if delta, perform keyword substitution at the same time.
  * If DONE is set, we are finishing the last pass.
@@ -384,9 +360,7 @@ finishedit (delta, outfile, done)
 #else
 static void copylines (long, struct hshentry const *);
 static void
-copylines (upto, delta)
-     register long upto;
-     struct hshentry const *delta;
+copylines (register long upto, struct hshentry const *delta)
 /*
  * Copy input lines editline+1..upto from fedit to fcopy.
  * If delta, keyword expansion is done simultaneously.
@@ -434,8 +408,7 @@ copylines (upto, delta)
 #endif
 
 void
-xpandstring (delta)
-     struct hshentry const *delta;
+xpandstring (struct hshentry const *delta)
 /* Function: Reads a string terminated by SDELIM from finptr and writes it
  * to fcopy. Double SDELIM is replaced with single SDELIM.
  * Keyword expansion is performed with data from delta.
@@ -447,7 +420,7 @@ xpandstring (delta)
 }
 
 void
-copystring ()
+copystring (void)
 /* Function: copies a string terminated with a single SDELIM from finptr to
  * fcopy, replacing all double SDELIM with a single SDELIM.
  * If foutptr is nonnull, the string also copied unchanged to foutptr.
@@ -497,7 +470,7 @@ copystring ()
 }
 
 void
-enterstring ()
+enterstring (void)
 /* Like copystring, except the string is put into the edit data structure.  */
 {
 #if !large_memory
@@ -563,10 +536,9 @@ enterstring ()
 
 void
 #if large_memory
-edit_string ()
+edit_string (void)
 #else
-editstring (delta)
-     struct hshentry const *delta;
+editstring (struct hshentry const *delta)
 #endif
 /*
  * Read an edit script from finptr and applies it to the edit file.
@@ -707,11 +679,8 @@ editstring (delta)
 /* The rest is for keyword expansion */
 
 int
-expandline (infile, outfile, delta, delimstuffed, frewfile, dolog)
-     RILE *infile;
-     FILE *outfile, *frewfile;
-     struct hshentry const *delta;
-     int delimstuffed, dolog;
+expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
+            int delimstuffed, FILE *frewfile, int dolog)
 /*
  * Read a line from INFILE and write it to OUTFILE.
  * Do keyword expansion with data from DELTA.
@@ -863,9 +832,7 @@ uncache_exit:
 }
 
 static void
-escape_string (out, s)
-     register FILE *out;
-     register char const *s;
+escape_string (register FILE *out, register char const *s)
 /* Output to OUT the string S, escaping chars that would break `ci -k'.  */
 {
   register char c;
@@ -902,13 +869,8 @@ escape_string (out, s)
 char const ciklog[ciklogsize] = "checked in with -k by ";
 
 static void
-keyreplace (marker, delta, delimstuffed, infile, out, dolog)
-     enum markers marker;
-     register struct hshentry const *delta;
-     int delimstuffed;
-     RILE *infile;
-     register FILE *out;
-     int dolog;
+keyreplace (enum markers marker, register struct hshentry const *delta,
+            int delimstuffed, RILE *infile, register FILE *out, int dolog)
 /* function: outputs the keyword value(s) corresponding to marker.
  * Attributes are derived from delta.
  */
@@ -1139,8 +1101,7 @@ keyreplace (marker, delta, delimstuffed, infile, out, dolog)
 #if has_readlink
 static int resolve_symlink (struct buf *);
 static int
-resolve_symlink (L)
-     struct buf *L;
+resolve_symlink (struct buf *L)
 /*
  * If L is a symbolic link, resolve it to the name that it points to.
  * If unsuccessful, set errno and yield -1.
@@ -1201,10 +1162,7 @@ resolve_symlink (L)
 #endif
 
 RILE *
-rcswriteopen (RCSbuf, status, mustread)
-     struct buf *RCSbuf;
-     struct stat *status;
-     int mustread;
+rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
 /*
  * Create the lock file corresponding to RCSBUF.
  * Then try to open RCSBUF for reading and yield its RILE* descriptor.
@@ -1397,8 +1355,7 @@ rcswriteopen (RCSbuf, status, mustread)
 }
 
 void
-keepdirtemp (name)
-     char const *name;
+keepdirtemp (char const *name)
 /* Do not unlink name, either because it's not there any more,
  * or because it has already been unlinked.
  */
@@ -1414,8 +1371,7 @@ keepdirtemp (name)
 }
 
 char const *
-makedirtemp (isworkfile)
-     int isworkfile;
+makedirtemp (int isworkfile)
 /*
  * Create a unique pathname and store it into dirtpname.
  * Because of storage in tpnames, dirtempunlink() can unlink the file later.
@@ -1468,7 +1424,7 @@ makedirtemp (isworkfile)
 }
 
 void
-dirtempunlink ()
+dirtempunlink (void)
 /* Clean up makedirtemp() files.  May be invoked by signal handler. */
 {
   register int i;
@@ -1578,9 +1534,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 }
 
 int
-setmtime (file, mtime)
-     char const *file;
-     time_t mtime;
+setmtime (char const *file, time_t mtime)
 /* Set FILE's last modified time to MTIME, but do nothing if MTIME is -1.  */
 {
   static struct utimbuf amtime; /* static so unused fields are zero */
@@ -1592,9 +1546,7 @@ setmtime (file, mtime)
 }
 
 int
-findlock (delete, target)
-     int delete;
-     struct hshentry **target;
+findlock (int delete, struct hshentry **target)
 /*
  * Find the first lock held by caller and return a pointer
  * to the locked delta; also removes the lock if DELETE.
@@ -1630,9 +1582,7 @@ findlock (delete, target)
 }
 
 int
-addlock (delta, verbose)
-     struct hshentry *delta;
-     int verbose;
+addlock (struct hshentry *delta, int verbose)
 /*
  * Add a lock held by caller to DELTA and yield 1 if successful.
  * Print an error message if verbose and yield -1 if no lock is added because
@@ -1662,9 +1612,7 @@ addlock (delta, verbose)
 }
 
 int
-addsymbol (num, name, rebind)
-     char const *num, *name;
-     int rebind;
+addsymbol (char const *num, char const *name, int rebind)
 /*
  * Associate with revision NUM the new symbolic NAME.
  * If NAME already exists and REBIND is set, associate NAME with NUM;
@@ -1697,7 +1645,7 @@ addsymbol (num, name, rebind)
 }
 
 char const *
-getcaller ()
+getcaller (void)
 /* Get the caller's login name.  */
 {
 #	if has_setuid
@@ -1708,7 +1656,7 @@ getcaller ()
 }
 
 int
-checkaccesslist ()
+checkaccesslist (void)
 /*
  * Return true if caller is the superuser, the owner of the
  * file, the access list is empty, or caller is on the access list.
@@ -1734,8 +1682,7 @@ checkaccesslist ()
 }
 
 int
-dorewrite (lockflag, changed)
-     int lockflag, changed;
+dorewrite (int lockflag, int changed)
 /*
  * Do nothing if LOCKFLAG is zero.
  * Prepare to rewrite an RCS file if CHANGED is positive.
@@ -1791,9 +1738,7 @@ dorewrite (lockflag, changed)
 }
 
 int
-donerewrite (changed, newRCStime)
-     int changed;
-     time_t newRCStime;
+donerewrite (int changed, time_t newRCStime)
 /*
  * Finish rewriting an RCS file if CHANGED is nonzero.
  * Set its mode if CHANGED is positive.
@@ -1848,7 +1793,7 @@ donerewrite (changed, newRCStime)
 }
 
 void
-ORCSclose ()
+ORCSclose (void)
 {
   if (0 <= fdlock)
     {
@@ -1860,7 +1805,7 @@ ORCSclose ()
 }
 
 void
-ORCSerror ()
+ORCSerror (void)
 /*
 * Like ORCSclose, except we are cleaning up after an interrupt or fatal error.
 * Do not report errors, since this may loop.  This is needed only because

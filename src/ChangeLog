@@ -1,5 +1,33 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use Standard C syntax for function definitions.
+
+	* ci.c: Throughout, use Standard C syntax for function definitions.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* maketime.c: Likewise.
+	* merge.c: Likewise.
+	* merger.c: Likewise.
+	* partime.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcskeys.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcstime.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ANSI prototypes.
 
 	Abbreviations:

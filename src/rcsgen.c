@@ -32,11 +32,8 @@ static void putdelta (struct hshentry const *, FILE *);
 static void scandeltatext (struct hshentry *, enum stringwork, int);
 
 char const *
-buildrevision (deltas, target, outfile, expandflag)
-     struct hshentries const *deltas;
-     struct hshentry *target;
-     FILE *outfile;
-     int expandflag;
+buildrevision (struct hshentries const *deltas, struct hshentry *target,
+               FILE *outfile, int expandflag)
 /* Function: Generates the revision given by target
  * by retrieving all deltas given by parameter deltas and combining them.
  * If outfile is set, the revision is output to it,
@@ -91,10 +88,7 @@ buildrevision (deltas, target, outfile, expandflag)
 }
 
 static void
-scandeltatext (delta, func, needlog)
-     struct hshentry *delta;
-     enum stringwork func;
-     int needlog;
+scandeltatext (struct hshentry *delta, enum stringwork func, int needlog)
 /* Function: Scans delta text nodes up to and including the one given
  * by delta. For the one given by delta, the log message is saved into
  * delta->log if needlog is set; func specifies how to handle the text.
@@ -156,9 +150,7 @@ scandeltatext (delta, func, needlog)
 }
 
 struct cbuf
-cleanlogmsg (m, s)
-     char *m;
-     size_t s;
+cleanlogmsg (char *m, size_t s)
 {
   register char *t = m;
   register char const *f = t;
@@ -182,7 +174,7 @@ cleanlogmsg (m, s)
 }
 
 int
-ttystdin ()
+ttystdin (void)
 {
   static int initialized;
   if (!initialized)
@@ -195,7 +187,7 @@ ttystdin ()
 }
 
 int
-getcstdin ()
+getcstdin (void)
 {
   register FILE *in;
   register int c;
@@ -237,9 +229,7 @@ yesorno (int default_answer, char const *question, ...)
 }
 
 void
-putdesc (textflag, textfile)
-     int textflag;
-     char *textfile;
+putdesc (int textflag, char *textfile)
 /* Function: puts the descriptive text into file frewrite.
  * if finptr && !textflag, the text is copied from the old description.
  * Otherwise, if textfile, the text is read from that
@@ -320,9 +310,8 @@ putdesc (textflag, textfile)
 }
 
 struct cbuf
-getsstdin (option, name, note, buf)
-     char const *option, *name, *note;
-     struct buf *buf;
+getsstdin (char const *option, char const *name,
+           char const *note, struct buf *buf)
 {
   register int c;
   register char *p;
@@ -359,7 +348,7 @@ getsstdin (option, name, note, buf)
 }
 
 void
-putadmin ()
+putadmin (void)
 /* Output the admin node.  */
 {
   register FILE *fout;
@@ -429,9 +418,7 @@ putadmin ()
 }
 
 static void
-putdelta (node, fout)
-     register struct hshentry const *node;
-     register FILE *fout;
+putdelta (register struct hshentry const *node, register FILE *fout)
 /* Output the delta NODE to FOUT.  */
 {
   struct branchhead const *nextbranch;
@@ -455,9 +442,7 @@ putdelta (node, fout)
 }
 
 void
-puttree (root, fout)
-     struct hshentry const *root;
-     register FILE *fout;
+puttree (struct hshentry const *root, register FILE *fout)
 /* Output the delta tree with base ROOT in preorder to FOUT.  */
 {
   struct branchhead const *nextbranch;
@@ -479,11 +464,8 @@ puttree (root, fout)
 }
 
 int
-putdtext (delta, srcname, fout, diffmt)
-     struct hshentry const *delta;
-     char const *srcname;
-     FILE *fout;
-     int diffmt;
+putdtext (struct hshentry const *delta, char const *srcname,
+          FILE *fout, int diffmt)
 /*
  * Output a deltatext node with delta number DELTA->num, log message DELTA->log,
  * ignored phrases DELTA->igtext and text SRCNAME to FOUT.
@@ -505,10 +487,7 @@ putdtext (delta, srcname, fout, diffmt)
 }
 
 void
-putstring (out, delim, s, log)
-     register FILE *out;
-     struct cbuf s;
-     int delim, log;
+putstring (register FILE *out, int delim, struct cbuf s, int log)
 /*
  * Output to OUT one SDELIM if DELIM, then the string S with SDELIMs doubled.
  * If LOG is set then S is a log string; append a newline if S is nonempty.
@@ -532,11 +511,8 @@ putstring (out, delim, s, log)
 }
 
 void
-putdftext (delta, finfile, foutfile, diffmt)
-     struct hshentry const *delta;
-     RILE *finfile;
-     FILE *foutfile;
-     int diffmt;
+putdftext (struct hshentry const *delta, RILE *finfile,
+           FILE *foutfile, int diffmt)
 /* like putdtext(), except the source file is already open */
 {
   declarecache;

@@ -400,7 +400,7 @@ mainProg (coId, "co")
 }                               /* end of main (co) */
 
 static void
-cleanup ()
+cleanup (void)
 {
   if (nerror)
     exitstatus = EXIT_FAILURE;
@@ -416,7 +416,7 @@ cleanup ()
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   ORCSerror ();
   dirtempunlink ();
@@ -429,7 +429,7 @@ exiterr ()
  *****************************************************************/
 
 static int
-rmworkfile ()
+rmworkfile (void)
 /*
  * Prepare to remove workname, if it exists, and if
  * it is read-only.
@@ -457,8 +457,7 @@ rmworkfile ()
 }
 
 static int
-rmlock (delta)
-     struct hshentry const *delta;
+rmlock (struct hshentry const *delta)
 /* Function: removes the lock held by caller on delta.
  * Returns -1 if someone else holds the lock,
  * 0 if there is no lock on delta,
@@ -506,8 +505,7 @@ rmlock (delta)
  *****************************************************************/
 
 static char *
-addjoin (joinrev)
-     char *joinrev;
+addjoin (char *joinrev)
 /* Add joinrev's number to joinlist, yielding address of char past joinrev,
  * or 0 if no such revision exists.
  */
@@ -555,8 +553,7 @@ addjoin (joinrev)
 }
 
 static int
-preparejoin (j)
-     register char *j;
+preparejoin (register char *j)
 /* Parse join list J and place pointers to the
  * revision numbers into joinlist.
  */
@@ -618,8 +615,7 @@ preparejoin (j)
 }
 
 static char const *
-getancestor (r1, r2)
-     char const *r1, *r2;
+getancestor (char const *r1, char const *r2)
 /* Yield the common ancestor of r1 and r2 if successful, 0 otherwise.
  * Work reliably only if r1 and r2 are not branch numbers.
  */
@@ -656,8 +652,7 @@ getancestor (r1, r2)
 }
 
 static int
-buildjoin (initialfile)
-     char const *initialfile;
+buildjoin (char const *initialfile)
 /* Function: merge pairs of elements in joinlist into initialfile
  * If workstdout is set, copy result to stdout.
  * All unlinking of initialfile, rev2, and rev3 should be done by tempunlink().

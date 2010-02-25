@@ -37,9 +37,7 @@
 
 static int discardkeyval (int, RILE *);
 static int
-discardkeyval (c, f)
-     register int c;
-     register RILE *f;
+discardkeyval (register int c, register RILE *f)
 {
   for (;;)
     switch (c)
@@ -54,11 +52,8 @@ discardkeyval (c, f)
 }
 
 int
-rcsfcmp (xfp, xstatp, uname, delta)
-     register RILE *xfp;
-     struct stat const *xstatp;
-     char const *uname;
-     struct hshentry const *delta;
+rcsfcmp (register RILE *xfp, struct stat const *xstatp,
+         char const *uname, struct hshentry const *delta)
 /* Compare the files xfp and uname.  Return zero
  * if xfp has the same contents as uname and neither has keywords,
  * otherwise -1 if they are the same ignoring keyword values,
@@ -284,9 +279,8 @@ returnresult:
 
 char const cmdid[] = "rcsfcmp";
 
-main (argc, argv)
-     int argc;
-     char *argv[];
+int
+main (int argc, char *argv[])
 /* first argument: comment leader; 2nd: log message, 3rd: expanded file,
  * 4th: unexpanded file
  */

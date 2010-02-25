@@ -199,7 +199,7 @@ mainProg (rcsmergeId, "rcsmerge")
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   tempunlink ();
   _exit (DIFF_TROUBLE);

@@ -27,8 +27,7 @@ static char const usage[] =
   "\nmerge: usage: merge [-AeEpqxX3] [-L lab [-L lab [-L lab]]] file1 file2 file3";
 
 static void
-badoption (a)
-     char const *a;
+badoption (char const *a)
 {
   error ("unknown option: %s%s", a, usage);
 }
@@ -98,7 +97,7 @@ mainProg (mergeId, "merge")
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   tempunlink ();
   _exit (DIFF_TROUBLE);

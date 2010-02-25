@@ -34,8 +34,7 @@ int prevkeys;
 struct buf prevauthor, prevdate, prevname, prevrev, prevstate;
 
 int
-getoldkeys (fp)
-     register RILE *fp;
+getoldkeys (register RILE *fp)
 /* Function: Tries to read keyword values for author, date,
  * revision number, and state out of the file fp.
  * If fp is null, workname is opened and closed instead of using fp.
@@ -203,17 +202,14 @@ getoldkeys (fp)
 }
 
 static int
-badly_terminated ()
+badly_terminated (void)
 {
   workerror ("badly terminated keyword value");
   return false;
 }
 
 static int
-getval (fp, target, optional)
-     register RILE *fp;
-     struct buf *target;
-     int optional;
+getval (register RILE *fp, struct buf *target, int optional)
 /* Reads a keyword value from FP into TARGET.
  * Returns true if one is found, false otherwise.
  * Does not modify target if it is 0.
@@ -226,11 +222,7 @@ getval (fp, target, optional)
 }
 
 static int
-get0val (c, fp, target, optional)
-     register int c;
-     register RILE *fp;
-     struct buf *target;
-     int optional;
+get0val (register int c, register RILE *fp, struct buf *target, int optional)
 /* Reads a keyword value from C+FP into TARGET, perhaps OPTIONALly.
  * Same as getval, except C is the lookahead character.
  */
@@ -286,8 +278,7 @@ get0val (c, fp, target, optional)
 }
 
 static int
-keepdate (fp)
-     RILE *fp;
+keepdate (RILE *fp)
 /* Function: reads a date prevdate; checks format
  * Return 0 on error, lookahead character otherwise.
  */
@@ -322,10 +313,7 @@ keepdate (fp)
 }
 
 static int
-keepid (c, fp, b)
-     int c;
-     RILE *fp;
-     struct buf *b;
+keepid (int c, RILE *fp, struct buf *b)
 /* Get previous identifier from C+FP into B.  */
 {
   if (!c)
@@ -337,16 +325,14 @@ keepid (c, fp, b)
 }
 
 static int
-keeprev (fp)
-     RILE *fp;
+keeprev (RILE *fp)
 /* Get previous revision from FP into prevrev.  */
 {
   return getval (fp, &prevrev, false) && checknum (prevrev.string);
 }
 
 static int
-checknum (s)
-     char const *s;
+checknum (char const *s)
 {
   register char const *sp;
   register int dotcount = 0;
@@ -382,9 +368,7 @@ checknum (s)
 char const cmdid[] = "keeptest";
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
   while (*(++argv))
     {

@@ -646,7 +646,7 @@ mainProg (ciId, "ci")
 }                               /* end of main (ci) */
 
 static void
-cleanup ()
+cleanup (void)
 {
   if (nerror)
     exitstatus = EXIT_FAILURE;
@@ -659,7 +659,7 @@ cleanup ()
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   ORCSerror ();
   dirtempunlink ();
@@ -671,7 +671,7 @@ exiterr ()
 /* the rest are auxiliary routines                               */
 
 static int
-addelta ()
+addelta (void)
 /* Function: Appends a delta to the delta tree, whose number is
  * given by newdelnum.  Updates Head, newdelnum, newdelnumlength,
  * and the links in newdelta.
@@ -818,10 +818,7 @@ addelta ()
 }
 
 static int
-addbranch (branchpoint, num, removedlock)
-     struct hshentry *branchpoint;
-     struct buf *num;
-     int removedlock;
+addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
 /* adds a new branch and branch delta at branchpoint.
  * If num is the null string, appends the new branch, incrementing
  * the highest branch number (initially 1), and setting the level number to 1.
@@ -928,8 +925,7 @@ addbranch (branchpoint, num, removedlock)
 }
 
 static int
-addsyms (num)
-     char const *num;
+addsyms (char const *num)
 {
   register struct Symrev *p;
 
@@ -940,9 +936,7 @@ addsyms (num)
 }
 
 static void
-incnum (onum, nnum)
-     char const *onum;
-     struct buf *nnum;
+incnum (char const *onum, struct buf *nnum)
 /* Increment the last field of revision number onum by one and
  * place the result into nnum.
  */
@@ -977,8 +971,7 @@ incnum (onum, nnum)
 }
 
 static int
-removelock (delta)
-     struct hshentry *delta;
+removelock (struct hshentry *delta)
 /* function: Finds the lock held by caller on delta,
  * removes it, and returns nonzero if successful.
  * Print an error message and return -1 if there is no such lock.
@@ -1012,7 +1005,7 @@ removelock (delta)
 }
 
 static char const *
-getcurdate ()
+getcurdate (void)
 /* Return a pointer to the current date.  */
 {
   static char buffer[datesize]; /* date buffer */
@@ -1042,11 +1035,8 @@ fixwork (mode_t newworkmode, time_t mtime)
 }
 
 static int
-xpandfile (unexfile, delta, exname, dolog)
-     RILE *unexfile;
-     struct hshentry const *delta;
-     char const **exname;
-     int dolog;
+xpandfile (RILE *unexfile, struct hshentry const *delta,
+           char const **exname, int dolog)
 /*
  * Read unexfile and copy it to a
  * file, performing keyword substitution with data from delta.
@@ -1087,7 +1077,7 @@ xpandfile (unexfile, delta, exname, dolog)
 /* --------------------- G E T L O G M S G --------------------------------*/
 
 static struct cbuf
-getlogmsg ()
+getlogmsg (void)
 /* Obtain and yield a log message.
  * If a log message is given with -m, yield that message.
  * If this is the initial revision, yield a standard log message.
@@ -1150,9 +1140,7 @@ getlogmsg ()
 /*  Make a linked list of Symbolic names  */
 
 static void
-addassoclst (flag, sp)
-     int flag;
-     char const *sp;
+addassoclst (int flag, char const *sp)
 {
   struct Symrev *pt;
 

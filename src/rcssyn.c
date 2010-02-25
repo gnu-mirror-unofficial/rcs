@@ -80,8 +80,7 @@ char const *Dbranch;
 int TotalDeltas;
 
 static void
-getsemi (key)
-     char const *key;
+getsemi (char const *key)
 /* Get a semicolon to finish off a phrase started by KEY.  */
 {
   if (!getlex (SEMI))
@@ -89,7 +88,7 @@ getsemi (key)
 }
 
 static struct hshentry *
-getdnum ()
+getdnum (void)
 /* Get a delta number.  */
 {
   register struct hshentry *delta = getnum ();
@@ -99,7 +98,7 @@ getdnum ()
 }
 
 void
-getadmin ()
+getadmin (void)
 /* Read an <admin> and initialize the appropriate global variables.  */
 {
   register char const *id;
@@ -238,17 +237,14 @@ char const *const expand_names[] = {
 };
 
 int
-str2expmode (s)
-     char const *s;
+str2expmode (char const *s)
 /* Yield expand mode corresponding to S, or -1 if bad.  */
 {
   return strn2expmode (s, strlen (s));
 }
 
 static int
-strn2expmode (s, n)
-     char const *s;
-     size_t n;
+strn2expmode (char const *s, size_t n)
 {
   char const *const *p;
 
@@ -259,8 +255,7 @@ strn2expmode (s, n)
 }
 
 void
-ignorephrases (key)
-     const char *key;
+ignorephrases (const char *key)
 /*
 * Ignore a series of phrases that do not start with KEY.
 * Stop when the next phrase starts with a token that is not an identifier,
@@ -297,7 +292,7 @@ ignorephrases (key)
 }
 
 static int
-getdelta ()
+getdelta (void)
 /* Function: reads a delta block.
  * returns false if the current block does not start with a number.
  */
@@ -340,7 +335,7 @@ getdelta ()
 }
 
 void
-gettree ()
+gettree (void)
 /* Function: Reads in the delta tree with getdelta(), then
  * updates the lockedby fields.
  */
@@ -358,8 +353,7 @@ gettree ()
 }
 
 void
-getdesc (prdesc)
-     int prdesc;
+getdesc (int prdesc)
 /* Function: read in descriptive text
  * nexttok is not advanced afterwards.
  * If prdesc is set, the text is printed to stdout.
@@ -374,10 +368,7 @@ getdesc (prdesc)
 }
 
 static char const *
-getkeyval (keyword, token, optional)
-     char const *keyword;
-     enum tokens token;
-     int optional;
+getkeyval (char const *keyword, enum tokens token, int optional)
 /* reads a pair of the form
  * <keyword> <token> ;
  * where token is one of <id> or <num>. optional indicates whether
@@ -403,14 +394,13 @@ getkeyval (keyword, token, optional)
 }
 
 void
-unexpected_EOF ()
+unexpected_EOF (void)
 {
   rcsfaterror ("unexpected EOF in diff output");
 }
 
 void
-initdiffcmd (dc)
-     register struct diffcmd *dc;
+initdiffcmd (register struct diffcmd *dc)
 /* Initialize *dc suitably for getdiffcmd(). */
 {
   dc->adprev = 0;
@@ -418,25 +408,19 @@ initdiffcmd (dc)
 }
 
 static void
-badDiffOutput (buf)
-     char const *buf;
+badDiffOutput (char const *buf)
 {
   rcsfaterror ("bad diff output line: %s", buf);
 }
 
 static void
-diffLineNumberTooLarge (buf)
-     char const *buf;
+diffLineNumberTooLarge (char const *buf)
 {
   rcsfaterror ("diff line number too large: %s", buf);
 }
 
 int
-getdiffcmd (finfile, delimiter, foutfile, dc)
-     RILE *finfile;
-     FILE *foutfile;
-     int delimiter;
-     struct diffcmd *dc;
+getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
 /* Get a editing command output by 'diff -n' from fin.
  * The input is delimited by SDELIM if delimiter is set, EOF otherwise.
  * Copy a clean version of the command to fout (if nonnull).
@@ -560,9 +544,7 @@ getdiffcmd (finfile, delimiter, foutfile, dc)
 char const cmdid[] = "syntest";
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
 
   if (argc < 2)
@@ -593,7 +575,7 @@ main (argc, argv)
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   _exit (EXIT_FAILURE);
 }

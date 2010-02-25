@@ -112,7 +112,7 @@ static struct compair const comtable[] = {
 #if has_mktemp
 static char const *tmp (void);
 static char const *
-tmp ()
+tmp (void)
 /* Yield the name of the tmp directory.  */
 {
   static char const *s;
@@ -126,8 +126,7 @@ tmp ()
 #endif
 
 char const *
-maketemp (n)
-     int n;
+maketemp (int n)
 /* Create a unique pathname using n and the process id and store it
  * into the nth slot in tpnames.
  * Because of storage in tpnames, tempunlink() can unlink the file later.
@@ -167,7 +166,7 @@ maketemp (n)
 }
 
 void
-tempunlink ()
+tempunlink (void)
 /* Clean up maketemp() files.  May be invoked by signal handler.
  */
 {
@@ -188,9 +187,7 @@ tempunlink ()
 }
 
 static char const *
-bindex (sp, c)
-     register char const *sp;
-     register int c;
+bindex (register char const *sp, register int c)
 /* Function: Finds the last occurrence of character c in string sp
  * and returns a pointer to the character just beyond it. If the
  * character doesn't occur in the string, sp is returned.
@@ -207,8 +204,7 @@ bindex (sp, c)
 }
 
 static int
-suffix_matches (suffix, pattern)
-     register char const *suffix, *pattern;
+suffix_matches (register char const *suffix, register char const *pattern)
 {
   register int c;
   if (!pattern)
@@ -231,7 +227,7 @@ suffix_matches (suffix, pattern)
 }
 
 static void
-InitAdmin ()
+InitAdmin (void)
 /* function: initializes an admin node */
 {
   register char const *Suffix;
@@ -258,9 +254,7 @@ InitAdmin ()
 }
 
 void
-bufalloc (b, size)
-     register struct buf *b;
-     size_t size;
+bufalloc (register struct buf *b, size_t size)
 /* Ensure *B is a name buffer of at least SIZE bytes.
  * *B's old contents can be freed; *B's new contents are undefined.
  */
@@ -278,9 +272,7 @@ bufalloc (b, size)
 }
 
 void
-bufrealloc (b, size)
-     register struct buf *b;
-     size_t size;
+bufrealloc (register struct buf *b, size_t size)
 /* like bufalloc, except *B's old contents, if any, are preserved */
 {
   if (b->size < size)
@@ -297,8 +289,7 @@ bufrealloc (b, size)
 }
 
 void
-bufautoend (b)
-     struct buf *b;
+bufautoend (struct buf *b)
 /* Free an auto buffer at block exit. */
 {
   if (b->size)
@@ -306,9 +297,7 @@ bufautoend (b)
 }
 
 struct cbuf
-bufremember (b, s)
-     struct buf *b;
-     size_t s;
+bufremember (struct buf *b, size_t s)
 /*
  * Free the buffer B with used size S.
  * Yield a cbuf with identical contents.
@@ -328,9 +317,7 @@ bufremember (b, s)
 }
 
 char *
-bufenlarge (b, alim)
-     register struct buf *b;
-     char const **alim;
+bufenlarge (register struct buf *b, char const **alim)
 /* Make *B larger.  Set *ALIM to its new limit, and yield the relocated value
  * of its old limit.
  */
@@ -342,9 +329,7 @@ bufenlarge (b, alim)
 }
 
 void
-bufscat (b, s)
-     struct buf *b;
-     char const *s;
+bufscat (struct buf *b, char const *s)
 /* Concatenate S to B's end. */
 {
   size_t blen = b->string ? strlen (b->string) : 0;
@@ -353,9 +338,7 @@ bufscat (b, s)
 }
 
 void
-bufscpy (b, s)
-     struct buf *b;
-     char const *s;
+bufscpy (struct buf *b, char const *s)
 /* Copy S into B. */
 {
   bufalloc (b, strlen (s) + 1);
@@ -363,8 +346,7 @@ bufscpy (b, s)
 }
 
 char const *
-basefilename (p)
-     char const *p;
+basefilename (char const *p)
 /* Yield the address of the base filename of the pathname P.  */
 {
   register char const *b = p, *q = p;
@@ -380,8 +362,7 @@ basefilename (p)
 }
 
 static size_t
-suffixlen (x)
-     char const *x;
+suffixlen (char const *x)
 /* Yield the length of X, an RCS pathname suffix.  */
 {
   register char const *p;
@@ -401,8 +382,7 @@ suffixlen (x)
 }
 
 char const *
-rcssuffix (name)
-     char const *name;
+rcssuffix (char const *name)
 /* Yield the suffix of NAME if it is an RCS pathname, 0 otherwise.  */
 {
   char const *x, *p, *nz;
@@ -430,12 +410,8 @@ rcssuffix (name)
   return 0;
 }
 
-/*ARGSUSED*/
 RILE *
-rcsreadopen (RCSpath, status, mustread)
-     struct buf *RCSpath;
-     struct stat *status;
-     int mustread;
+rcsreadopen (struct buf *RCSpath, struct stat *status, int mustread)
 /* Open RCSPATH for reading and yield its FILE* descriptor.
  * If successful, set *STATUS to its status.
  * Pass this routine to pairnames() for read-only access to the file.  */
@@ -444,9 +420,7 @@ rcsreadopen (RCSpath, status, mustread)
 }
 
 static int
-finopen (rcsopen, mustread)
-     RILE *(*rcsopen) (struct buf *, struct stat *, int);
-     int mustread;
+finopen (RILE *(*rcsopen) (struct buf *, struct stat *, int), int mustread)
 /*
  * Use RCSOPEN to open an RCS file; MUSTREAD is set if the file must be read.
  * Set finptr to the result and yield true if successful.
@@ -475,11 +449,11 @@ finopen (rcsopen, mustread)
 }
 
 static int
-fin2open (d, dlen, base, baselen, x, xlen, rcsopen, mustread)
-     char const *d, *base, *x;
-     size_t dlen, baselen, xlen;
-     RILE *(*rcsopen) (struct buf *, struct stat *, int);
-     int mustread;
+fin2open (char const *d, size_t dlen,
+          char const *base, size_t baselen,
+          char const *x, size_t xlen,
+          RILE *(*rcsopen) (struct buf *, struct stat *, int),
+          int mustread)
 /*
  * D is a directory name with length DLEN (including trailing slash).
  * BASE is a filename with length BASELEN.
@@ -520,11 +494,9 @@ fin2open (d, dlen, base, baselen, x, xlen, rcsopen, mustread)
 }
 
 int
-pairnames (argc, argv, rcsopen, mustread, quiet)
-     int argc;
-     char **argv;
-     RILE *(*rcsopen) (struct buf *, struct stat *, int);
-     int mustread, quiet;
+pairnames (int argc, char **argv,
+           RILE *(*rcsopen) (struct buf *, struct stat *, int),
+           int mustread, int quiet)
 /*
  * Pair the pathnames pointed to by argv; argc indicates
  * how many there are.
@@ -668,7 +640,7 @@ pairnames (argc, argv, rcsopen, mustread, quiet)
 }
 
 char const *
-getfullRCSname ()
+getfullRCSname (void)
 /*
  * Return a pointer to the full pathname of the RCS file.
  * Remove leading `./'.
@@ -750,8 +722,7 @@ getfullRCSname ()
 }
 
 static size_t
-dir_useful_len (d)
-     char const *d;
+dir_useful_len (char const *d)
 /*
 * D names a directory; yield the number of characters of D's useful part.
 * To create a file in D, append a SLASH and a file name to D's useful part.
@@ -773,8 +744,7 @@ dir_useful_len (d)
 
 #ifndef isSLASH
 int
-isSLASH (c)
-     int c;
+isSLASH (int c)
 {
   switch (c)
     {
@@ -789,9 +759,7 @@ isSLASH (c)
 #if !has_getcwd && !has_getwd
 
 char *
-getcwd (path, size)
-     char *path;
-     size_t size;
+getcwd (char *path, size_t size)
 {
   static char const usrbinpwd[] = "/usr/bin/pwd";
 #	define binpwd (usrbinpwd+4)
@@ -921,9 +889,8 @@ getcwd (path, size)
 
 char const cmdid[] = "pair";
 
-main (argc, argv)
-     int argc;
-     char *argv[];
+int
+main (int argc, char *argv[])
 {
   int result;
   int initflag;
@@ -987,7 +954,7 @@ main (argc, argv)
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   dirtempunlink ();
   tempunlink ();

@@ -34,8 +34,7 @@ static void cantfindbranch (char const *, char const[datesize],
 static void store1 (struct hshentries ***, struct hshentry *);
 
 int
-countnumflds (s)
-     char const *s;
+countnumflds (char const *s)
 /* Given a pointer s to a dotted number (date or revision number),
  * countnumflds returns the number of digitfields in s.
  */
@@ -55,9 +54,7 @@ countnumflds (s)
 }
 
 void
-getbranchno (revno, branchno)
-     char const *revno;
-     struct buf *branchno;
+getbranchno (char const *revno, struct buf *branchno)
 /* Given a revision number revno, getbranchno copies the number of the branch
  * on which revno is into branchno. If revno itself is a branch number,
  * it is copied unchanged.
@@ -79,8 +76,7 @@ getbranchno (revno, branchno)
 }
 
 int
-cmpnum (num1, num2)
-     char const *num1, *num2;
+cmpnum (char const *num1, char const *num2)
 /* compares the two dotted numbers num1 and num2 lexicographically
  * by field. Individual fields are compared numerically.
  * returns <0, 0, >0 if num1<num2, num1==num2, and num1>num2, resp.
@@ -129,9 +125,7 @@ cmpnum (num1, num2)
 }
 
 int
-cmpnumfld (num1, num2, fld)
-     char const *num1, *num2;
-     int fld;
+cmpnumfld (char const *num1, char const *num2, int fld)
 /* Compare the two dotted numbers at field fld.
  * num1 and num2 must have at least fld fields.
  * fld must be positive.
@@ -164,8 +158,7 @@ cmpnumfld (num1, num2, fld)
 }
 
 int
-cmpdate (d1, d2)
-     char const *d1, *d2;
+cmpdate (char const *d1, char const *d2)
 /*
 * Compare the two dates.  This is just like cmpnum,
 * except that for compatibility with old versions of RCS,
@@ -190,9 +183,7 @@ cmpdate (d1, d2)
 }
 
 static char const *
-normalizeyear (date, year)
-     char const *date;
-     char year[5];
+normalizeyear (char const *date, char year[5])
 {
   if (isdigit (date[0]) && isdigit (date[1]) && !isdigit (date[2]))
     {
@@ -208,8 +199,8 @@ normalizeyear (date, year)
 }
 
 static void
-cantfindbranch (revno, date, author, state)
-     char const *revno, date[datesize], *author, *state;
+cantfindbranch (char const *revno, char const date[datesize],
+                char const *author, char const *state)
 {
   char datebuf[datesize + zonelenmax];
 
@@ -224,9 +215,7 @@ cantfindbranch (revno, date, author, state)
 }
 
 static void
-absent (revno, field)
-     char const *revno;
-     int field;
+absent (char const *revno, int field)
 {
   struct buf t;
   bufautobegin (&t);
@@ -236,14 +225,10 @@ absent (revno, field)
 }
 
 int
-compartial (num1, num2, length)
-     char const *num1, *num2;
-     int length;
-
+compartial (char const *num1, char const *num2, int length)
 /*   compare the first "length" fields of two dot numbers;
      the omitted field is considered to be larger than any number  */
 /*   restriction:  at least one number has length or more fields   */
-
 {
   register char const *s1, *s2;
   register size_t d1, d2;
@@ -290,10 +275,7 @@ compartial (num1, num2, length)
 }
 
 char *
-partialno (rev1, rev2, length)
-     struct buf *rev1;
-     char const *rev2;
-     register int length;
+partialno (struct buf *rev1, char const *rev2, register int length)
 /* Function: Copies length fields of revision number rev2 into rev1.
  * Return rev1's string.
  */
@@ -315,9 +297,7 @@ partialno (rev1, rev2, length)
 }
 
 static void
-store1 (store, next)
-     struct hshentries ***store;
-     struct hshentry *next;
+store1 (struct hshentries ***store, struct hshentry *next)
 /*
  * Allocate a new list node that addresses NEXT.
  * Append it to the list that **STORE is the end pointer of.
@@ -332,9 +312,8 @@ store1 (store, next)
 }
 
 struct hshentry *
-genrevs (revno, date, author, state, store)
-     char const *revno, *date, *author, *state;
-     struct hshentries **store;
+genrevs (char const *revno, char const *date, char const *author,
+         char const *state, struct hshentries **store)
 /* Function: finds the deltas needed for reconstructing the
  * revision given by revno, date, author, and state, and stores pointers
  * to these deltas into a list whose starting address is given by store.
@@ -462,12 +441,9 @@ norev:
 }
 
 static struct hshentry *
-genbranch (bpoint, revno, length, date, author, state, store)
-     struct hshentry const *bpoint;
-     char const *revno;
-     int length;
-     char const *date, *author, *state;
-     struct hshentries **store;
+genbranch (struct hshentry const *bpoint, char const *revno,
+           int length, char const *date, char const *author,
+           char const *state, struct hshentries **store)
 /* Function: given a branchpoint, a revision number, date, author, and state,
  * genbranch finds the deltas necessary to reconstruct the given revision
  * from the branch point on.
@@ -607,8 +583,7 @@ genbranch (bpoint, revno, length, date, author, state, store)
 }
 
 static char const *
-lookupsym (id)
-     char const *id;
+lookupsym (char const *id)
 /* Function: looks up id in the list of symbolic names starting
  * with pointer SYMBOLS, and returns a pointer to the corresponding
  * revision number.  Return 0 if not present.
@@ -622,9 +597,7 @@ lookupsym (id)
 }
 
 int
-expandsym (source, target)
-     char const *source;
-     struct buf *target;
+expandsym (char const *source, struct buf *target)
 /* Function: Source points to a revision number. Expandsym copies
  * the number to target, but replaces all symbolic fields in the
  * source number with their numeric values.
@@ -637,10 +610,7 @@ expandsym (source, target)
 }
 
 int
-fexpandsym (source, target, fp)
-     char const *source;
-     struct buf *target;
-     RILE *fp;
+fexpandsym (char const *source, struct buf *target, RILE *fp)
 /* Same as expandsym, except if FP is nonzero, it is used to expand KDELIM.  */
 {
   register char const *sp, *bp;
@@ -766,9 +736,7 @@ fexpandsym (source, target, fp)
 }
 
 char const *
-namedrev (name, delta)
-     char const *name;
-     struct hshentry *delta;
+namedrev (char const *name, struct hshentry *delta)
 /* Yield NAME if it names DELTA, 0 otherwise.  */
 {
   if (name)
@@ -799,8 +767,7 @@ namedrev (name, delta)
 }
 
 static char const *
-branchtip (branch)
-     char const *branch;
+branchtip (char const *branch)
 {
   struct hshentry *h;
   struct hshentries *hs;
@@ -810,7 +777,7 @@ branchtip (branch)
 }
 
 char const *
-tiprev ()
+tiprev (void)
 {
   return Dbranch ? branchtip (Dbranch) : Head ? Head->num : (char const *) 0;
 }
@@ -825,9 +792,7 @@ tiprev ()
 char const cmdid[] = "revtest";
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
   static struct buf numricrevno;
   char symrevno[100];           /* used for input of revision numbers */
@@ -894,7 +859,7 @@ main (argc, argv)
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   _exit (EXIT_FAILURE);
 }

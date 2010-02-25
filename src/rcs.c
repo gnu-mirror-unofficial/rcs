@@ -513,7 +513,7 @@ mainProg (rcsId, "rcs")
 }                               /* end of main (rcs) */
 
 static void
-cleanup ()
+cleanup (void)
 {
   if (nerror)
     exitstatus = EXIT_FAILURE;
@@ -524,7 +524,7 @@ cleanup ()
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   ORCSerror ();
   dirtempunlink ();
@@ -533,9 +533,7 @@ exiterr ()
 }
 
 static void
-getassoclst (flag, sp)
-     int flag;
-     char *sp;
+getassoclst (int flag, char *sp)
 /*  Function:   associate a symbolic name to a revision or branch,      */
 /*              and store in assoclst                                   */
 
@@ -576,9 +574,7 @@ getassoclst (flag, sp)
 }
 
 static void
-getchaccess (login, command)
-     char const *login;
-     enum changeaccess command;
+getchaccess (char const *login, enum changeaccess command)
 {
   register struct chaccess *pt;
 
@@ -591,9 +587,7 @@ getchaccess (login, command)
 }
 
 static void
-getaccessor (opt, command)
-     char *opt;
-     enum changeaccess command;
+getaccessor (char *opt, enum changeaccess command)
 /*   Function:  get the accessor list of options -e and -a,     */
 /*		and store in chaccess				*/
 
@@ -627,8 +621,7 @@ getaccessor (opt, command)
 }
 
 static void
-getmessage (option)
-     char *option;
+getmessage (char *option)
 {
   struct Message *pt;
   struct cbuf cb;
@@ -655,8 +648,7 @@ getmessage (option)
 }
 
 static void
-getstates (sp)
-     char *sp;
+getstates (char *sp)
 /*   Function:  get one state attribute and the corresponding   */
 /*              revision and store in statelst                  */
 
@@ -697,8 +689,7 @@ getstates (sp)
 }
 
 static void
-getdelrev (sp)
-     char *sp;
+getdelrev (char *sp)
 /*   Function:  get revision range or branch to be deleted,     */
 /*              and place in delrev                             */
 {
@@ -769,9 +760,7 @@ getdelrev (sp)
 }
 
 static void
-scanlogtext (delta, edit)
-     struct hshentry *delta;
-     int edit;
+scanlogtext (struct hshentry *delta, int edit)
 /* Function: Scans delta text nodes up to and including the one given
  * by delta, or up to last one present, if !delta.
  * For the one given by delta (if delta), the log message is saved into
@@ -838,8 +827,7 @@ scanlogtext (delta, edit)
 }
 
 static struct Lockrev **
-rmnewlocklst (which)
-     char const *which;
+rmnewlocklst (char const *which)
 /* Remove lock to revision WHICH from newlocklst.  */
 {
   struct Lockrev *pt, **pre;
@@ -857,7 +845,7 @@ rmnewlocklst (which)
 }
 
 static int
-doaccess ()
+doaccess (void)
 {
   register struct chaccess *ch;
   register struct access **p, *t;
@@ -904,8 +892,7 @@ doaccess ()
 }
 
 static int
-sendmail (Delta, who)
-     char const *Delta, *who;
+sendmail (char const *Delta, char const *who)
 /*   Function:  mail to who, informing him that his lock on delta was
  *   broken by caller. Ask first whether to go ahead. Return false on
  *   error or if user decides not to break the lock.
@@ -977,8 +964,7 @@ sendmail (Delta, who)
 }
 
 static int
-breaklock (delta)
-     struct hshentry const *delta;
+breaklock (struct hshentry const *delta)
 /* function: Finds the lock held by caller on delta,
  * and removes it.
  * Sends mail if a lock different from the caller's is broken.
@@ -1008,10 +994,7 @@ breaklock (delta)
 }
 
 static struct hshentry *
-searchcutpt (object, length, store)
-     char const *object;
-     int length;
-     struct hshentries *store;
+searchcutpt (char const *object, int length, struct hshentries *store)
 /*   Function:  Search store and return entry with number being object. */
 /*		cuttail = 0, if the entry is Head; otherwise, cuttail   */
 /*              is the entry point to the one with number being object  */
@@ -1027,8 +1010,7 @@ searchcutpt (object, length, store)
 }
 
 static int
-branchpoint (strt, tail)
-     struct hshentry *strt, *tail;
+branchpoint (struct hshentry *strt, struct hshentry *tail)
 /*   Function: check whether the deltas between strt and tail	*/
 /*		are locked or branch point, return 1 if any is  */
 /*		locked or branch point; otherwise, return 0 and */
@@ -1058,7 +1040,7 @@ branchpoint (strt, tail)
 }
 
 static int
-removerevs ()
+removerevs (void)
 /*   Function:  get the revision range to be removed, and place the     */
 /*              first revision removed in delstrt, the revision before  */
 /*		delstrt in cuthead (0, if delstrt is head), and the	*/
@@ -1234,7 +1216,7 @@ removerevs ()
 }
 
 static int
-doassoc ()
+doassoc (void)
 /* Add or delete (if !revno) association that is stored in assoclst.  */
 {
   char const *p;
@@ -1281,7 +1263,7 @@ doassoc ()
 }
 
 static int
-dolocks ()
+dolocks (void)
 /* Function: remove lock for caller or first lock if unlockcaller is set;
  *           remove locks which are stored in rmvlocklst,
  *           add new locks which are stored in newlocklst,
@@ -1352,8 +1334,7 @@ dolocks ()
 }
 
 static int
-setlock (rev)
-     char const *rev;
+setlock (char const *rev)
 /* Function: Given a revision or branch number, finds the corresponding
  * delta and locks it for caller.
  */
@@ -1385,7 +1366,7 @@ setlock (rev)
 }
 
 static int
-domessages ()
+domessages (void)
 {
   struct hshentry *target;
   struct Message *p;
@@ -1408,8 +1389,7 @@ domessages ()
 }
 
 static int
-rcs_setstate (rev, status)
-     char const *rev, *status;
+rcs_setstate (char const *rev, char const *status)
 /* Function: Given a revision or branch number, finds the corresponding delta
  * and sets its state to status.
  */
@@ -1435,8 +1415,7 @@ rcs_setstate (rev, status)
 }
 
 static int
-buildeltatext (deltas)
-     struct hshentries const *deltas;
+buildeltatext (struct hshentries const *deltas)
 /*   Function:  put the delta text on frewrite and make necessary   */
 /*              change to delta text                                */
 {
@@ -1500,7 +1479,7 @@ buildeltatext (deltas)
 }
 
 static void
-buildtree ()
+buildtree (void)
 /*   Function:  actually removes revisions whose selector field  */
 /*		is false, and rebuilds the linkage of deltas.	 */
 /*              asks for reconfirmation if deleting last revision*/

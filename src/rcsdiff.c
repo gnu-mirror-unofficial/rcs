@@ -379,7 +379,7 @@ mainProg (rcsdiffId, "rcsdiff")
 }
 
 static void
-cleanup ()
+cleanup (void)
 {
   if (nerror)
     exitstatus = DIFF_TROUBLE;
@@ -388,7 +388,7 @@ cleanup ()
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   tempunlink ();
   _exit (DIFF_TROUBLE);
@@ -396,10 +396,7 @@ exiterr ()
 
 #if DIFF_L
 static char const *
-setup_label (b, num, date)
-     struct buf *b;
-     char const *num;
-     char const date[datesize];
+setup_label (struct buf *b, char const *num, char const date[datesize])
 {
   char *p;
   char datestr[datesize + zonelenmax];

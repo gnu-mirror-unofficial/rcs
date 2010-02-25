@@ -81,14 +81,13 @@ mainProg (identId, "ident")
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   _exit (EXIT_FAILURE);
 }
 
 static void
-reportError (s)
-     char const *s;
+reportError (char const *s)
 {
   int e = errno;
   fprintf (stderr, "%s error: ", cmdid);
@@ -97,10 +96,7 @@ reportError (s)
 }
 
 static int
-scanfile (file, name, quiet)
-     register FILE *file;
-     char const *name;
-     int quiet;
+scanfile (register FILE *file, char const *name, int quiet)
 /* Function: scan an open file with descriptor file for keywords.
  * Return -1 if there's a write error; exit immediately on a read error.
  */
@@ -145,8 +141,8 @@ scanfile (file, name, quiet)
 }
 
 static int
-match (fp)                      /* group substring between two KDELIM's; then do pattern match */
-     register FILE *fp;
+match (register FILE *fp)
+/* group substring between two KDELIM's; then do pattern match */
 {
   char line[BUFSIZ];
   register int c;

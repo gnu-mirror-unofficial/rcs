@@ -32,9 +32,7 @@ static int use_zone_offset;     /* if zero, use UTC without zone indication */
 * dates from 1900 through 1999 are stored without the leading "19".
 */
 void
-time2date (unixtime, date)
-     time_t unixtime;
-     char date[datesize];
+time2date (time_t unixtime, char date[datesize])
 {
   register struct tm const *tm = time2tm (unixtime, RCSversion < VERSION (5));
   sprintf (date,
@@ -50,10 +48,7 @@ time2date (unixtime, date)
 /* Like str2time, except die if an error was found.  */
 static time_t str2time_checked (char const *, time_t, long);
 static time_t
-str2time_checked (source, default_time, default_zone)
-     char const *source;
-     time_t default_time;
-     long default_zone;
+str2time_checked (char const *source, time_t default_time, long default_zone)
 {
   time_t t = str2time (source, default_time, default_zone);
   if (t == -1)
@@ -66,9 +61,7 @@ str2time_checked (source, default_time, default_zone)
 * into RCS internal format, and store the result into TARGET.
 */
 void
-str2date (source, target)
-     char const *source;
-     char target[datesize];
+str2date (char const *source, char target[datesize])
 {
   time2date (str2time_checked (source, now (),
                                use_zone_offset ? zone_offset
@@ -78,8 +71,7 @@ str2date (source, target)
 
 /* Convert an RCS internal format date to time_t.  */
 time_t
-date2time (source)
-     char const source[datesize];
+date2time (char const source[datesize])
 {
   char s[datesize + zonelenmax];
   return str2time_checked (date2str (source, s), (time_t) 0, 0);
@@ -87,8 +79,7 @@ date2time (source)
 
 /* Set the time zone for date2str output.  */
 void
-zone_set (s)
-     char const *s;
+zone_set (char const *s)
 {
   if ((use_zone_offset = *s))
     {
@@ -106,9 +97,7 @@ zone_set (s)
 * Yield DATEBUF.
 */
 char const *
-date2str (date, datebuf)
-     char const date[datesize];
-     char datebuf[datesize + zonelenmax];
+date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
 {
   register char const *p = date;
 

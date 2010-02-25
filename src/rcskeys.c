@@ -30,8 +30,7 @@ char const *const Keyword[] = {
 };
 
 enum markers
-trymatch (string)
-     char const *string;
+trymatch (char const *string)
 /* function: Checks whether string starts with a keyword followed
  * by a KDELIM or a VDELIM.
  * If successful, returns the appropriate marker, otherwise Nomatch.

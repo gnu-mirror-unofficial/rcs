@@ -24,9 +24,7 @@
 
 #if !has_memcmp
 int
-memcmp (s1, s2, n)
-     void const *s1, *s2;
-     size_t n;
+memcmp (void const *s1, void const *s2, size_t n)
 {
   register unsigned char const
     *p1 = (unsigned char const *) s1, *p2 = (unsigned char const *) s2;
@@ -40,10 +38,7 @@ memcmp (s1, s2, n)
 
 #if !has_memcpy
 void *
-memcpy (s1, s2, n)
-     void *s1;
-     void const *s2;
-     size_t n;
+memcpy (void *s1, void const *s2, size_t n)
 {
   register char *p1 = (char *) s1;
   register char const *p2 = (char const *) s2;
@@ -68,8 +63,7 @@ static struct alloclist *alloced;
 
 static malloc_type okalloc (malloc_type);
 static malloc_type
-okalloc (p)
-     malloc_type p;
+okalloc (malloc_type p)
 {
   if (!p)
     faterror ("out of memory");
@@ -77,25 +71,21 @@ okalloc (p)
 }
 
 malloc_type
-testalloc (size)
-     size_t size;
+testalloc (size_t size)
 /* Allocate a block, testing that the allocation succeeded.  */
 {
   return okalloc (malloc (size));
 }
 
 malloc_type
-testrealloc (ptr, size)
-     malloc_type ptr;
-     size_t size;
+testrealloc (malloc_type ptr, size_t size)
 /* Reallocate a block, testing that the allocation succeeded.  */
 {
   return okalloc (realloc (ptr, size));
 }
 
 malloc_type
-fremember (ptr)
-     malloc_type ptr;
+fremember (malloc_type ptr)
 /* Remember PTR in 'alloced' so that it can be freed later.  Yield PTR.  */
 {
   register struct alloclist *q = talloc (struct alloclist);
@@ -105,15 +95,14 @@ fremember (ptr)
 }
 
 malloc_type
-ftestalloc (size)
-     size_t size;
+ftestalloc (size_t size)
 /* Allocate a block, putting it in 'alloced' so it can be freed later. */
 {
   return fremember (testalloc (size));
 }
 
 void
-ffree ()
+ffree (void)
 /* Free all blocks allocated with ftestalloc().  */
 {
   register struct alloclist *p, *q;
@@ -127,8 +116,7 @@ ffree ()
 }
 
 void
-ffree1 (f)
-     register char const *f;
+ffree1 (register char const *f)
 /* Free the block f, which was allocated by ftestalloc.  */
 {
   register struct alloclist *p, **a = &alloced;
@@ -141,24 +129,21 @@ ffree1 (f)
 }
 
 char *
-str_save (s)
-     char const *s;
+str_save (char const *s)
 /* Save s in permanently allocated storage. */
 {
   return strcpy (tnalloc (char, strlen (s) + 1), s);
 }
 
 char *
-fstr_save (s)
-     char const *s;
+fstr_save (char const *s)
 /* Save s in storage that will be deallocated when we're done with this file. */
 {
   return strcpy (ftnalloc (char, strlen (s) + 1), s);
 }
 
 char *
-cgetenv (name)
-     char const *name;
+cgetenv (char const *name)
 /* Like getenv(), but yield a copy; getenv() can overwrite old results. */
 {
   register char *p;
@@ -167,8 +152,7 @@ cgetenv (name)
 }
 
 char const *
-getusername (suspicious)
-     int suspicious;
+getusername (int suspicious)
 /* Get the caller's login name.  Trust only getwpuid if SUSPICIOUS.  */
 {
   static char *name;
@@ -228,9 +212,7 @@ static siginfo_t *volatile heldsiginfo;
 static char const *accessName;
 
 void
-readAccessFilenameBuffer (filename, p)
-     char const *filename;
-     unsigned char const *p;
+readAccessFilenameBuffer (char const *filename, unsigned char const *p)
 {
   unsigned char volatile t;
   accessName = filename;
@@ -246,9 +228,7 @@ readAccessFilenameBuffer (filename, p)
 # define psignal my_psignal
 static void my_psignal (int, char const *);
 static void
-my_psignal (sig, s)
-     int sig;
-     char const *s;
+my_psignal (int sig, char const *s)
 {
   char const *sname = "Unknown signal";
 #	if has_sys_siglist && defined(NSIG)
@@ -329,18 +309,14 @@ static signal_type catchsigaction (int, siginfo_t *, void *);
 #endif
 
 static signal_type
-catchsig (s)
-     int s;
+catchsig (int s)
 #ifdef SA_SIGINFO
 {
   catchsigaction (s, (siginfo_t *) 0, (void *) 0);
 }
 
 static signal_type
-catchsigaction (s, i, c)
-     int s;
-     siginfo_t *i;
-     void *c;
+catchsigaction (int s, siginfo_t *i, void *c)
 #endif
 {
 #   if sig_zaps_handler
@@ -431,13 +407,13 @@ catchsigaction (s, i, c)
 }
 
 void
-ignoreints ()
+ignoreints (void)
 {
   ++holdlevel;
 }
 
 void
-restoreints ()
+restoreints (void)
 {
   if (!--holdlevel && heldsignal)
 #	    ifdef SA_SIGINFO
@@ -453,17 +429,14 @@ static void setup_catchsig (int const *, int);
 
 static void check_sig (int);
 static void
-check_sig (r)
-     int r;
+check_sig (int r)
 {
   if (r != 0)
     efaterror ("signal handling");
 }
 
 static void
-setup_catchsig (sig, sigs)
-     int const *sig;
-     int sigs;
+setup_catchsig (int const *sig, int sigs)
 {
   register int i, j;
   struct sigaction act;
@@ -508,9 +481,7 @@ setup_catchsig (sig, sigs)
 #if has_sigblock
 
 static void
-setup_catchsig (sig, sigs)
-     int const *sig;
-     int sigs;
+setup_catchsig (int const *sig, int sigs)
 {
   register int i;
   int mask;
@@ -529,9 +500,7 @@ setup_catchsig (sig, sigs)
 #else
 
 static void
-setup_catchsig (sig, sigs)
-     int const *sig;
-     int sigs;
+setup_catchsig (int const *sig, int sigs)
 {
   register i;
 
@@ -569,7 +538,7 @@ static int const regsigs[] = {
 };
 
 void
-catchints ()
+catchints (void)
 {
   static int catching_ints;
   if (!catching_ints)
@@ -596,7 +565,7 @@ catchints ()
 static int const mmapsigs[] = { mmap_signal };
 
 void
-catchmmapints ()
+catchmmapints (void)
 {
   static int catching_mmap_ints;
   if (!catching_mmap_ints)
@@ -611,9 +580,7 @@ catchmmapints ()
 #endif /* has_signal */
 
 void
-fastcopy (inf, outf)
-     register RILE *inf;
-     FILE *outf;
+fastcopy (register RILE *inf, FILE *outf)
 /* Function: copies the remainder of file inf to outf.
  */
 {
@@ -656,10 +623,7 @@ fastcopy (inf, outf)
 #endif
 
 void
-awrite (buf, chars, f)
-     char const *buf;
-     size_t chars;
-     FILE *f;
+awrite (char const *buf, size_t chars, FILE *f)
 {
   /* Posix 1003.1-1990 ssize_t hack */
   while (SSIZE_MAX < chars)
@@ -677,8 +641,7 @@ awrite (buf, chars, f)
 /* dup a file descriptor; the result must not be stdin, stdout, or stderr.  */
 static int dupSafer (int);
 static int
-dupSafer (fd)
-     int fd;
+dupSafer (int fd)
 {
 #	ifdef F_DUPFD
   return fcntl (fd, F_DUPFD, STDERR_FILENO + 1);
@@ -697,8 +660,7 @@ dupSafer (fd)
 
 /* Renumber a file descriptor so that it's not stdin, stdout, or stderr.  */
 int
-fdSafer (fd)
-     int fd;
+fdSafer (int fd)
 {
   if (STDIN_FILENO <= fd && fd <= STDERR_FILENO)
     {
@@ -713,9 +675,7 @@ fdSafer (fd)
 
 /* Like fopen, except the result is never stdin, stdout, or stderr.  */
 FILE *
-fopenSafer (filename, type)
-     char const *filename;
-     char const *type;
+fopenSafer (char const *filename, char const *type)
 {
   FILE *stream = fopen (filename, type);
   if (stream)
@@ -753,8 +713,7 @@ fopenSafer (filename, type)
 
 static int movefd (int, int);
 static int
-movefd (old, new)
-     int old, new;
+movefd (int old, int new)
 {
   if (old < 0 || old == new)
     return old;
@@ -768,10 +727,7 @@ movefd (old, new)
 
 static int fdreopen (int, char const *, int);
 static int
-fdreopen (fd, file, flags)
-     int fd;
-     char const *file;
-     int flags;
+fdreopen (int fd, char const *file, int flags)
 {
   int newfd;
   close (fd);
@@ -786,8 +742,7 @@ fdreopen (fd, file, flags)
 #if has_spawn
 static void redirect (int, int);
 static void
-redirect (old, new)
-     int old, new;
+redirect (int old, int new)
 /*
 * Move file descriptor OLD to NEW.
 * If OLD is -1, do nothing.
@@ -803,10 +758,7 @@ redirect (old, new)
 
 static void bufargcat (struct buf *, int, char const *);
 static void
-bufargcat (b, c, s)
-     register struct buf *b;
-     int c;
-     register char const *s;
+bufargcat (register struct buf *b, int c, register char const *s)
 /* Append to B a copy of C, plus a quoted copy of S.  */
 {
   register char *p;
@@ -844,8 +796,7 @@ bufargcat (b, c, s)
 */
 static void write_stderr (char const *);
 static void
-write_stderr (s)
-     char const *s;
+write_stderr (char const *s)
 {
   size_t slen = strlen (s);
   if (write (STDERR_FILENO, s, slen) != slen)
@@ -860,9 +811,7 @@ write_stderr (s)
 * args[1..] form the command to be run; args[0] might be modified.
 */
 int
-runv (infd, outname, args)
-     int infd;
-     char const *outname, **args;
+runv (int infd, char const *outname, char const **args)
 {
   int wstatus;
 
@@ -1059,8 +1008,7 @@ run (int infd, char const *outname, ...)
 int RCSversion;
 
 void
-setRCSversion (str)
-     char const *str;
+setRCSversion (char const *str)
 {
   static int oldversion;
 
@@ -1091,9 +1039,7 @@ setRCSversion (str)
 }
 
 int
-getRCSINIT (argc, argv, newargv)
-     int argc;
-     char **argv, ***newargv;
+getRCSINIT (int argc, char **argv, char ***newargv)
 {
   register char *p, *q, **pp;
   size_t n;
@@ -1194,14 +1140,14 @@ getRCSINIT (argc, argv, newargv)
 
 #if has_getuid
 uid_t
-ruid ()
+ruid (void)
 {
   cacheid (getuid ());
 }
 #endif
 #if has_setuid
 uid_t
-euid ()
+euid (void)
 {
   cacheid (geteuid ());
 }
@@ -1248,13 +1194,13 @@ static int stick_with_euid;
 
 void
 /* Ignore all calls to seteid() and setrid().  */
-nosetid ()
+nosetid (void)
 {
   stick_with_euid = true;
 }
 
 void
-seteid ()
+seteid (void)
 /* Become effective user.  */
 {
   if (!stick_with_euid)
@@ -1262,7 +1208,7 @@ seteid ()
 }
 
 void
-setrid ()
+setrid (void)
 /* Become real user.  */
 {
   if (!stick_with_euid)
@@ -1271,7 +1217,7 @@ setrid ()
 #endif
 
 time_t
-now ()
+now (void)
 {
   static time_t t;
   if (!t && time (&t) == -1)

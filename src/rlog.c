@@ -353,7 +353,7 @@ mainProg (rlogId, "rlog")
 }
 
 static void
-cleanup ()
+cleanup (void)
 {
   if (nerror)
     exitstatus = EXIT_FAILURE;
@@ -361,13 +361,13 @@ cleanup ()
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   _exit (EXIT_FAILURE);
 }
 
 static void
-putrunk ()
+putrunk (void)
 /*  function:  print revisions chosen, which are in trunk      */
 {
   register struct hshentry const *ptr;
@@ -377,8 +377,7 @@ putrunk ()
 }
 
 static void
-putree (root)
-     struct hshentry const *root;
+putree (struct hshentry const *root)
 /*   function: print delta tree (not including trunk) in reverse
                order on each branch                                        */
 
@@ -392,8 +391,7 @@ putree (root)
 }
 
 static void
-putforest (branchroot)
-     struct branchhead const *branchroot;
+putforest (struct branchhead const *branchroot)
 /*   function:  print branches that has the same direct ancestor    */
 {
   if (!branchroot)
@@ -406,8 +404,7 @@ putforest (branchroot)
 }
 
 static void
-putabranch (root)
-     struct hshentry const *root;
+putabranch (struct hshentry const *root)
 /*   function  :  print one branch     */
 
 {
@@ -420,9 +417,9 @@ putabranch (root)
 }
 
 static void
-putadelta (node, editscript, trunk)
-     register struct hshentry const *node, *editscript;
-     int trunk;
+putadelta (register struct hshentry const *node,
+           register struct hshentry const *editscript,
+           int trunk)
 /*  function: Print delta node if node->selector is set.        */
 /*      editscript indicates where the editscript is stored     */
 /*      trunk indicated whether this node is in trunk           */
@@ -485,7 +482,7 @@ putadelta (node, editscript, trunk)
 }
 
 static struct hshentry const *
-readdeltalog ()
+readdeltalog (void)
 /*  Function : get the log message and skip the text of a deltatext node.
  *	       Return the delta found.
  *             Assumes the current lexeme is not yet in nexttok; does not
@@ -519,8 +516,7 @@ readdeltalog ()
 }
 
 static void
-getscript (Delta)
-     struct hshentry *Delta;
+getscript (struct hshentry *Delta)
 /*   function:  read edit script of Delta and count how many lines added  */
 /*              and deleted in the script                                 */
 
@@ -575,8 +571,7 @@ getscript (Delta)
 }
 
 static void
-exttree (root)
-     struct hshentry *root;
+exttree (struct hshentry *root)
 /*  function: select revisions , starting with root             */
 
 {
@@ -598,8 +593,7 @@ exttree (root)
 }
 
 static void
-getlocker (argv)
-     char *argv;
+getlocker (char *argv)
 /*   function : get the login names of lockers from command line   */
 /*              and store in lockerlist.                           */
 
@@ -635,8 +629,7 @@ getlocker (argv)
 }
 
 static void
-getauthor (argv)
-     char *argv;
+getauthor (char *argv)
 /*   function:  get the author's name from command line   */
 /*              and store in authorlist                   */
 
@@ -675,8 +668,7 @@ getauthor (argv)
 }
 
 static void
-getstate (argv)
-     char *argv;
+getstate (char *argv)
 /*   function :  get the states of revisions from command line  */
 /*               and store in statelist                         */
 
@@ -713,7 +705,7 @@ getstate (argv)
 }
 
 static void
-trunclocks ()
+trunclocks (void)
 /*  Function:  Truncate the list of locks to those that are held by the  */
 /*             id's on lockerlist. Do not truncate if lockerlist empty.  */
 {
@@ -739,9 +731,7 @@ trunclocks ()
 }
 
 static void
-recentdate (root, pd)
-     struct hshentry const *root;
-     struct Datepairs *pd;
+recentdate (struct hshentry const *root, struct Datepairs *pd)
 /*  function:  Finds the delta that is closest to the cutoff date given by   */
 /*             pd among the revisions selected by exttree.                   */
 /*             Successively narrows down the interval given by pd,           */
@@ -768,8 +758,7 @@ recentdate (root, pd)
 }
 
 static int
-extdate (root)
-     struct hshentry *root;
+extdate (struct hshentry *root)
 /*  function:  select revisions which are in the date range specified     */
 /*             in duelst  and datelist, start at root                     */
 /* Yield number of revisions selected, including those already selected.  */
@@ -823,8 +812,7 @@ extdate (root)
 }
 
 static char
-extractdelta (pdelta)
-     struct hshentry const *pdelta;
+extractdelta (struct hshentry const *pdelta)
 /*  function:  compare information of pdelta to the authorlist, lockerlist,*/
 /*             statelist, revlist and yield true if pdelta is selected.    */
 
@@ -864,8 +852,7 @@ extractdelta (pdelta)
 }
 
 static void
-getdatepair (argv)
-     char *argv;
+getdatepair (char *argv)
 /*  function:  get time range from command line and store in datelist if    */
 /*             a time range specified or in duelst if a time spot specified */
 
@@ -960,7 +947,7 @@ getdatepair (argv)
 }
 
 static int
-getnumericrev ()
+getnumericrev (void)
 /*  function:  get the numeric name of revisions which stored in revlist  */
 /*             and then stored the numeric names in Revlst                */
 /*             if branchflag, also add default branch                     */
@@ -1060,8 +1047,7 @@ freebufs:
 }
 
 static int
-checkrevpair (num1, num2)
-     char const *num1, *num2;
+checkrevpair (char const *num1, char const *num2)
 /*  function:  check whether num1, num2 are legal pair,i.e.
     only the last field are different and have same number of
     fields( if length <= 2, may be different if first field)   */
@@ -1080,8 +1066,7 @@ checkrevpair (num1, num2)
 }
 
 static void
-getrevpairs (argv)
-     register char *argv;
+getrevpairs (register char *argv)
 /*  function:  get revision or branch range from command line, and   */
 /*             store in revlist                                      */
 

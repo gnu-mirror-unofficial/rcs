@@ -168,9 +168,7 @@ static struct name_val const zone_names[] = {
 };
 
 static int
-lookup (s, table)
-     char const *s;
-     struct name_val const table[];
+lookup (char const *s, struct name_val const table[])
 /* Look for a prefix of S in TABLE, returning val for first matching entry.  */
 {
   int j;
@@ -192,8 +190,7 @@ done:
 }
 
 static void
-undefine (t)
-     struct partime *t;
+undefine (struct partime *t)
 /* Set *T to ``undefined'' values.  */
 {
   t->tm.tm_sec = t->tm.tm_min = t->tm.tm_hour = t->tm.tm_mday = t->tm.tm_mon
@@ -233,10 +230,7 @@ static char const *const patterns[] = {
 };
 
 static char const *
-parse_prefix (str, t, pi)
-     char const *str;
-     struct partime *t;
-     int *pi;
+parse_prefix (char const *str, struct partime *t, int *pi)
 /*
 * Parse an initial prefix of STR, setting *T accordingly.
 * Return the first character after the prefix, or 0 if it couldn't be parsed.
@@ -284,9 +278,7 @@ parse_prefix (str, t, pi)
 }
 
 static char const *
-parse_fixed (s, digits, res)
-     char const *s;
-     int digits, *res;
+parse_fixed (char const *s, int digits, int *res)
 /*
 * Parse an initial prefix of S of length DIGITS; it must be a number.
 * Store the parsed number into *RES.
@@ -307,9 +299,7 @@ parse_fixed (s, digits, res)
 }
 
 static char const *
-parse_ranged (s, digits, lo, hi, res)
-     char const *s;
-     int digits, lo, hi, *res;
+parse_ranged (char const *s, int digits, int lo, int hi, int *res)
 /*
 * Parse an initial prefix of S of length DIGITS;
 * it must be a number in the range LO through HI.
@@ -322,9 +312,8 @@ parse_ranged (s, digits, lo, hi, res)
 }
 
 static char const *
-parse_decimal (s, digits, lo, hi, resolution, res, fres)
-     char const *s;
-     int digits, lo, hi, resolution, *res, *fres;
+parse_decimal (char const *s, int digits, int lo, int hi,
+               int resolution, int *res, int *fres)
 /*
 * Parse an initial prefix of S of length DIGITS;
 * it must be a number in the range LO through HI
@@ -358,9 +347,7 @@ parse_decimal (s, digits, lo, hi, resolution, res, fres)
 }
 
 char *
-parzone (s, zone)
-     char const *s;
-     long *zone;
+parzone (char const *s, long *zone)
 /*
 * Parse an initial prefix of S; it must denote a time zone.
 * Set *ZONE to the number of seconds east of GMT,
@@ -456,10 +443,7 @@ parzone (s, zone)
 }
 
 static char const *
-parse_pattern_letter (s, c, t)
-     char const *s;
-     int c;
-     struct partime *t;
+parse_pattern_letter (char const *s, int c, struct partime *t)
 /*
 * Parse an initial prefix of S, matching the pattern whose code is C.
 * Set *T accordingly.
@@ -670,9 +654,7 @@ parse_pattern_letter (s, c, t)
 }
 
 static int
-merge_partime (t, u)
-     struct partime *t;
-     struct partime const *u;
+merge_partime (struct partime *t, struct partime const *u)
 /*
 * If there is no conflict, merge into *T the additional information in *U
 * and return 0.  Otherwise do nothing and return -1.
@@ -708,9 +690,7 @@ merge_partime (t, u)
 }
 
 char *
-partime (s, t)
-     char const *s;
-     struct partime *t;
+partime (char const *s, struct partime *t)
 /*
 * Parse a date/time prefix of S, putting the parsed result into *T.
 * Return the first character after the prefix.

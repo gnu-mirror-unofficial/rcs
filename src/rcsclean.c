@@ -231,7 +231,7 @@ mainProg (rcscleanId, "rcsclean")
 }
 
 static void
-cleanup ()
+cleanup (void)
 {
   if (nerror)
     exitstatus = EXIT_FAILURE;
@@ -243,7 +243,7 @@ cleanup ()
 }
 
 void
-exiterr ()
+exiterr (void)
 {
   ORCSerror ();
   dirtempunlink ();
@@ -252,8 +252,7 @@ exiterr ()
 }
 
 static int
-unlock (delta)
-     struct hshentry *delta;
+unlock (struct hshentry *delta)
 {
   register struct rcslock **al, *l;
 
@@ -270,9 +269,7 @@ unlock (delta)
 
 #if has_dirent
 static int
-get_directory (dirname, aargv)
-     char const *dirname;
-     char ***aargv;
+get_directory (char const *dirname, char ***aargv)
 /*
  * Put a vector of all DIRNAME's directory entries names into *AARGV.
  * Ignore names of RCS files.

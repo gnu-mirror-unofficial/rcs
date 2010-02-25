@@ -49,8 +49,7 @@ static time_t maketime (struct partime const *, time_t);
 #define TM_YEAR_ORIGIN 1900
 
 static int
-isleap (y)
-     int y;
+isleap (int y)
 {
   return (y & 3) == 0 && (y % 100 != 0 || y % 400 == 0);
 }
@@ -62,8 +61,7 @@ static int const month_yday[] = {
 
 /* Yield the number of days in TM's month.  */
 static int
-month_days (tm)
-     struct tm const *tm;
+month_days (struct tm const *tm)
 {
   int m = tm->tm_mon;
   return month_yday[m + 1] - month_yday[m]
@@ -75,9 +73,7 @@ month_days (tm)
 * Use gmtime if available and if !LOCALZONE, localtime otherwise.
 */
 struct tm *
-time2tm (unixtime, localzone)
-     time_t unixtime;
-     int localzone;
+time2tm (time_t unixtime, int localzone)
 {
   struct tm *tm;
 #	if TZ_must_be_set
@@ -93,8 +89,7 @@ time2tm (unixtime, localzone)
 
 /* Yield A - B, measured in seconds.  */
 time_t
-difftm (a, b)
-     struct tm const *a, *b;
+difftm (struct tm const *a, struct tm const *b)
 {
   int ay = a->tm_year + (TM_YEAR_ORIGIN - 1);
   int by = b->tm_year + (TM_YEAR_ORIGIN - 1);
@@ -116,9 +111,7 @@ difftm (a, b)
 * plus adjust wday if it is defined.
 */
 void
-adjzone (t, seconds)
-     register struct tm *t;
-     long seconds;
+adjzone (register struct tm *t, long seconds)
 {
   /*
    * This code can be off by a second if SECONDS is not a multiple of 60,
@@ -181,9 +174,7 @@ adjzone (t, seconds)
 * have them anyway, so allow them if localtime/gmtime does.
 */
 time_t
-tm2time (tm, localzone)
-     struct tm *tm;
-     int localzone;
+tm2time (struct tm *tm, int localzone)
 {
   /* Cache the most recent t,tm pairs; 1 for gmtime, 1 for localtime.  */
   static time_t t_cache[2];
@@ -244,9 +235,7 @@ tm2time (tm, localzone)
 * ISO 8601 day-of-year and week numbers are not yet supported.
 */
 static time_t
-maketime (pt, default_time)
-     struct partime const *pt;
-     time_t default_time;
+maketime (struct partime const *pt, time_t default_time)
 {
   int localzone, wday;
   struct tm tm;
@@ -312,10 +301,7 @@ maketime (pt, default_time)
 
 /* Parse a free-format date in SOURCE, yielding a Unix format time.  */
 time_t
-str2time (source, default_time, default_zone)
-     char const *source;
-     time_t default_time;
-     long default_zone;
+str2time (char const *source, time_t default_time, long default_zone)
 {
   struct partime pt;
 
@@ -329,9 +315,7 @@ str2time (source, default_time, default_zone)
 #if TEST
 #include <stdio.h>
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   time_t default_time = time ((time_t *) 0);
   long default_zone = argv[1] ? atol (argv[1]) : 0;
