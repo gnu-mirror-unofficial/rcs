@@ -1049,7 +1049,7 @@ setRCSversion(str)
 
 		RCSversion = VERSION(v);
 	} else {
-		printf("RCS version %s\n", RCS_version_string);
+		printf("%s%s", cmdid, COMMAND_VERSION);
 		exit(0);
 	}
 }

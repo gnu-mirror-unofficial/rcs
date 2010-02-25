@@ -45,7 +45,7 @@ mainProg(identId, "ident")
 		    break;
 
 		case 'V':
-		    printf("RCS version %s\n", RCS_version_string);
+		    printf("%s%s", cmdid, COMMAND_VERSION);
 		    quiet = -1;
 		    break;
 

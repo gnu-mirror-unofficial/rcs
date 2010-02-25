@@ -1,5 +1,20 @@
 2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move authoritative version number into configure.in.
+
+	* rcsbase.h: #include "auto-sussed.h".
+	(RCS_version_string): Delete decl.
+	(COMMAND_VERSION): New #define.
+	* ident.c (main): Use `COMMAND_VERSION'.
+	* merge.c (main): Likewise.
+	* rcsutil.c (setRCSversion): Likewise.
+	* Makefile.in (SOURCE): Remove version.c.
+	(ci, co, ident, merge, rlog, rcs, rcsclean)
+	(rcsdiff, rcsmerge, OBJECT): Remove `version$o'.
+	* version.c: Delete file.
+
+2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Drop "make lint" support.
 
 	* rcsbase.h [RCS_lint] (lintalloc): Delete var.

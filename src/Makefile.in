@@ -164,65 +164,65 @@ conf.h : conf.sh Makefile
 
 ci = ci$o rcslex$o rcssyn$o rcsgen$o rcsedit$o rcskeys$o rcsmap$o \
 	rcsrev$o rcsutil$o rcsfnms$o maketime$o partime$o rcstime$o rcskeep$o \
-	rcsfcmp$o version$o $(LIBOBJS)
+	rcsfcmp$o $(LIBOBJS)
 ci$x : $(ci)
 	$(LINK) $(ci) -o $@ $(LIBS)
 
 co = co$o rcslex$o rcssyn$o rcsgen$o rcsedit$o rcskeys$o rcsmap$o \
 	rcsrev$o rcsutil$o rcsfnms$o maketime$o partime$o rcstime$o rcskeep$o \
-	version$o $(LIBOBJS)
+	$(LIBOBJS)
 co$x : $(co)
 	$(LINK) $(co) -o $@ $(LIBS)
 
-ident = ident$o rcsmap$o version$o $(LIBOBJS)
+ident = ident$o rcsmap$o $(LIBOBJS)
 ident$x : $(ident)
 	$(LINK) $(ident) -o $@ $(LIBS)
 
 merge = merge$o merger$o rcsfnms$o rcslex$o \
 	rcsmap$o rcsrev$o rcssyn$o rcsutil$o \
-	rcskeep$o rcskeys$o maketime$o partime$o rcstime$o version$o \
+	rcskeep$o rcskeys$o maketime$o partime$o rcstime$o \
 	$(LIBOBJS)
 merge$x : $(merge)
 	$(LINK) $(merge) -o $@ $(LIBS)
 
 rlog = rlog$o rcslex$o rcsmap$o rcssyn$o rcsrev$o rcsutil$o \
 	maketime$o partime$o rcstime$o rcsfnms$o rcskeep$o rcskeys$o \
-	version$o $(LIBOBJS)
+	$(LIBOBJS)
 rlog$x : $(rlog)
 	$(LINK) $(rlog) -o $@ $(LIBS)
 
 rcs = rcs$o rcslex$o rcssyn$o rcsrev$o rcsutil$o rcsgen$o \
 	rcsedit$o rcskeys$o rcsmap$o rcsfnms$o rcskeep$o \
-	maketime$o partime$o rcstime$o version$o $(LIBOBJS)
+	maketime$o partime$o rcstime$o $(LIBOBJS)
 rcs$x : $(rcs)
 	$(LINK) $(rcs) -o $@ $(LIBS)
 
 rcsclean = rcsclean$o rcsedit$o rcsfcmp$o rcsfnms$o rcsgen$o rcskeys$o \
 	rcslex$o rcsmap$o rcsrev$o rcssyn$o rcsutil$o rcskeep$o \
-	maketime$o partime$o rcstime$o version$o $(LIBOBJS)
+	maketime$o partime$o rcstime$o $(LIBOBJS)
 rcsclean$x : $(rcsclean)
 	$(LINK) $(rcsclean) -o $@ $(LIBS)
 
 rcsdiff = rcsdiff$o rcsutil$o rcsfnms$o rcsmap$o rcsrev$o rcssyn$o \
 	rcslex$o maketime$o partime$o rcstime$o rcskeep$o rcskeys$o \
-	version$o $(LIBOBJS)
+	$(LIBOBJS)
 rcsdiff$x : $(rcsdiff)
 	$(LINK) $(rcsdiff) -o $@ $(LIBS)
 
 rcsmerge = rcsmerge$o merger$o rcsutil$o rcsfnms$o rcsmap$o rcsrev$o \
 	rcssyn$o rcslex$o rcskeep$o rcskeys$o \
-	maketime$o partime$o rcstime$o version$o $(LIBOBJS)
+	maketime$o partime$o rcstime$o $(LIBOBJS)
 rcsmerge$x : $(rcsmerge)
 	$(LINK) $(rcsmerge) -o $@ $(LIBS)
 
 SOURCE=	ci.c co.c ident.c maketime.c merge.c merger.c partime.c rcs.c \
 	rcsclean.c rcsdiff.c rcsedit.c rcsfcmp.c rcsfnms.c rcsgen.c \
 	rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsmerge.c rcsrev.c rcssyn.c \
-	rcstime.c rcsutil.c rlog.c version.c
+	rcstime.c rcsutil.c rlog.c
 OBJECT=	ci$o co$o ident$o maketime$o merge$o merger$o partime$o rcs$o \
 	rcsclean$o rcsdiff$o rcsedit$o rcsfcmp$o rcsfnms$o rcsgen$o \
 	rcskeep$o rcskeys$o rcslex$o rcsmap$o rcsmerge$o rcsrev$o rcssyn$o \
-	rcstime$o rcsutil$o rlog$o version$o
+	rcstime$o rcsutil$o rlog$o
 
 TAGS : $(SOURCE)
 	etags $(SOURCE)

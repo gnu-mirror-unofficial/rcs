@@ -1,3 +1,13 @@
+2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move authoritative version number into configure.in.
+
+	* autogen.sh: New file.
+	* configure.in (AC_INIT): Use three-arg form.
+	(AC_CONFIG_HEADERS): New.
+	* Makefile.in (PACKAGE_VERSION, PACKAGE_TARNAME): New vars.
+	(dist): Use them.
+
 2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[admin] On "make dist", don't bother with tar(1) blocking factor.

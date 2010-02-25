@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "auto-sussed.h"
 #include "conf.h"
 
 
@@ -576,4 +577,13 @@ void setRCSversion P((char const*));
 #endif
 
 /* version */
-extern char const RCS_version_string[];
+#define COMMAND_VERSION                                         \
+  (" (" PACKAGE_NAME ") " PACKAGE_VERSION "\n"                  \
+   "Copyright (C) 2010 Thien-Thi Nguyen\n"                      \
+   "Copyright (C) 1990-1995 Paul Eggert\n"                      \
+   "Copyright (C) 1982,1988,1989 Walter F. Tichy, Purdue CS\n"  \
+   "License GPLv2+; GNU GPL version 2 or later"                 \
+   " <http://gnu.org/licenses/gpl.html>\n"                      \
+   "This is free software: you are free"                        \
+   " to change and redistribute it.\n"                          \
+   "There is NO WARRANTY, to the extent permitted by law.\n")
