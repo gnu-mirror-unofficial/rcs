@@ -317,7 +317,7 @@ getsstdin(option, name, note, buf)
 	    rcsfaterror("can't reread redirected stdin for %s; use -%s<%s>",
 		name, option, name
 	    );
-	
+
 	for (
 	   i = 0,  p = 0;
 	   c = getcstdin(),  !feof(stdin);

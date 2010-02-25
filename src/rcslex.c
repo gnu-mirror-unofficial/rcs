@@ -231,7 +231,7 @@ nextlex()
 				if (limit <= sp)
 					sp = bufenlarge(&tokbuf, &limit);
 				continue;
-			    
+
 			    default:
 				break;
 			}
@@ -684,7 +684,7 @@ checkidentifier(id, delimiter, dotok)
 				if (dotok)
 					continue;
 				break;
-			
+
 			default:
 				break;
 		}

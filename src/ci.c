@@ -150,7 +150,7 @@ mainProg(ciId, "ci")
 			checkssym(a);
 			addassoclst(false, a);
 		        break;
-		
+
 		case 'N':
 			if (!*a) {
                                 error("missing symbolic name after -N");
@@ -352,7 +352,7 @@ mainProg(ciId, "ci")
 	if (!addsyms(newdelta.num))
 	    continue;
 
-    
+
 	putadmin();
         puttree(Head,frewrite);
 	putdesc(false,textfile);
@@ -557,7 +557,7 @@ mainProg(ciId, "ci")
 		    Irewind(workptr);
 		    /* Expand keywords in file.  */
 		    locker_expansion = lockthis;
-		    workdelta->name = 
+		    workdelta->name =
 			namedrev(
 				assoclst ? assoclst->ssymbol
 				: keepflag && *prevname.string ? prevname.string
@@ -1087,7 +1087,7 @@ addassoclst(flag, sp)
 	char const *sp;
 {
         struct Symrev *pt;
-	
+
 	pt = talloc(struct Symrev);
 	pt->ssymbol = sp;
 	pt->override = flag;

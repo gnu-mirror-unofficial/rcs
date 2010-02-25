@@ -66,27 +66,27 @@ struct compair {
 */
 static struct compair const comtable[] = {
 	{ "a"	, "-- "	},	/* Ada */
-	{ "ada"	, "-- "	},	
-	{ "adb"	, "-- "	},	
-	{ "ads"	, "-- "	},	
+	{ "ada"	, "-- "	},
+	{ "adb"	, "-- "	},
+	{ "ads"	, "-- "	},
 	{ "asm"	, ";; "	},	/* assembler (MS-DOS) */
 	{ "bat"	, ":: "	},	/* batch (MS-DOS) */
 	{ "body", "-- "	},	/* Ada */
 	{ "c"	, " * "	},	/* C */
 	{ "c++"	, "// "	},	/* C++ in all its infinite guises */
-	{ "cc"	, "// "	},	
-	{ "cpp"	, "// "	},	
-	{ "cxx"	, "// "	},	
+	{ "cc"	, "// "	},
+	{ "cpp"	, "// "	},
+	{ "cxx"	, "// "	},
 	{ "cl"	, ";;; "},	/* Common Lisp */
 	{ "cmd"	, ":: "	},	/* command (OS/2) */
 	{ "cmf"	, "c "	},	/* CM Fortran */
 	{ "cs"	, " * "	},	/* C* */
 	{ "el"	, "; "	},	/* Emacs Lisp */
 	{ "f"	, "c "	},	/* Fortran */
-	{ "for"	, "c "	},	
+	{ "for"	, "c "	},
 	{ "h"	, " * "	},	/* C-header */
 	{ "hpp"	, "// "	},	/* C++ header */
-	{ "hxx"	, "// "	},	
+	{ "hxx"	, "// "	},
 	{ "l"	, " * "	},	/* lex (NOTE: franzlisp disagrees) */
 	{ "lisp", ";;; "},	/* Lucid Lisp */
 	{ "lsp"	, ";; "	},	/* Microsoft Lisp */
@@ -97,7 +97,7 @@ static struct compair const comtable[] = {
 	{ "mm"	, ".\\\" "},	/* troff -mm */
 	{ "ms"	, ".\\\" "},	/* troff -ms */
 	{ "p"	, " * "	},	/* Pascal */
-	{ "pas"	, " * "	},	
+	{ "pas"	, " * "	},
 	{ "ps"	, "% "	},	/* PostScript */
 	{ "spec", "-- "	},	/* Ada */
 	{ "sty"	, "% "	},	/* LaTeX style */

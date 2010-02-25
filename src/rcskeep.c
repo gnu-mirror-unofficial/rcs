@@ -334,11 +334,11 @@ checknum(s)
 		    return true;
 		else
 		    break;
-	    
+
 	    case '.':
 		dotcount++;
 		continue;
-	    
+
 	    default:
 		if (isdigit(*sp))
 		    continue;
