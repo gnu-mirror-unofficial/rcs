@@ -1,3 +1,40 @@
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ANSI prototypes.
+
+	Abbreviations:
+	D: "Don't use `P (PROTOTYPE)', just use PROTOTYPE directly."
+	P: "For #if has_prototypes FOO #else BAR #endif blocks,
+	replace block with simply FOO."
+
+	* maketime.h (__MAKETIME_P): Delete macro;
+	update callers to use its arg directly.
+	* partime.h (__PARTIME_P): Likewise.
+	* ci.c: D; P.
+	* co.c: D.
+	* ident.c: D.
+	* maketime.c: D.
+	* merge.c: D.
+	* merger.c: D.
+	* partime.c: D.
+	* rcs.c: D.
+	* rcsbase.h: D.
+	* rcsclean.c: D.
+	* rcsdiff.c: D.
+	* rcsedit.c: D; P.
+	* rcsfcmp.c: D.
+	* rcsfnms.c: D.
+	* rcsgen.c: D; P.
+	* rcskeep.c: D.
+	* rcslex.c: D; P.
+	* rcsrev.c: D.
+	* rcssyn.c: D.
+	* rcstime.c: D.
+	* rcsutil.c: D; P.
+	* rlog.c: D.
+	* conf.sh: Don't compute `has_prototypes' or `P'.
+	Also fix buglet: Use `$ech' instead of `echo'.
+
 2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move authoritative version number into configure.in.

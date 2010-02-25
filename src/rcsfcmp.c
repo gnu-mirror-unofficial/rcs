@@ -35,7 +35,7 @@
 
 #include  "rcsbase.h"
 
-static int discardkeyval P ((int, RILE *));
+static int discardkeyval (int, RILE *);
 static int
 discardkeyval (c, f)
      register int c;

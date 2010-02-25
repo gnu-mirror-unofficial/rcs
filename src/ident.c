@@ -22,9 +22,9 @@
 
 #include  "rcsbase.h"
 
-static int match P ((FILE *));
-static int scanfile P ((FILE *, char const *, int));
-static void reportError P ((char const *));
+static int match (FILE *);
+static int scanfile (FILE *, char const *, int);
+static void reportError (char const *);
 
 mainProg (identId, "ident")
 /*  Ident searches the named files for all occurrences

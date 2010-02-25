@@ -29,17 +29,17 @@
 
 #include "rcsbase.h"
 
-static char const *bindex P ((char const *, int));
-static int fin2open P ((char const *, size_t, char const *, size_t,
-                        char const *, size_t,
-                        RILE * (*)P ((struct buf *, struct stat *, int)),
-                        int));
-static int finopen P ((RILE * (*)P ((struct buf *, struct stat *, int)),
-                       int));
-static int suffix_matches P ((char const *, char const *));
-static size_t dir_useful_len P ((char const *));
-static size_t suffixlen P ((char const *));
-static void InitAdmin P ((void));
+static char const *bindex (char const *, int);
+static int fin2open (char const *, size_t, char const *, size_t,
+                     char const *, size_t,
+                     RILE * (*) (struct buf *, struct stat *, int),
+                     int);
+static int finopen (RILE * (*) (struct buf *, struct stat *, int),
+                    int);
+static int suffix_matches (char const *, char const *);
+static size_t dir_useful_len (char const *);
+static size_t suffixlen (char const *);
+static void InitAdmin (void);
 
 char const *RCSname;
 char *workname;
@@ -110,7 +110,7 @@ static struct compair const comtable[] = {
 };
 
 #if has_mktemp
-static char const *tmp P ((void));
+static char const *tmp (void);
 static char const *
 tmp ()
 /* Yield the name of the tmp directory.  */
@@ -445,7 +445,7 @@ rcsreadopen (RCSpath, status, mustread)
 
 static int
 finopen (rcsopen, mustread)
-     RILE *(*rcsopen) P ((struct buf *, struct stat *, int));
+     RILE *(*rcsopen) (struct buf *, struct stat *, int);
      int mustread;
 /*
  * Use RCSOPEN to open an RCS file; MUSTREAD is set if the file must be read.
@@ -478,7 +478,7 @@ static int
 fin2open (d, dlen, base, baselen, x, xlen, rcsopen, mustread)
      char const *d, *base, *x;
      size_t dlen, baselen, xlen;
-     RILE *(*rcsopen) P ((struct buf *, struct stat *, int));
+     RILE *(*rcsopen) (struct buf *, struct stat *, int);
      int mustread;
 /*
  * D is a directory name with length DLEN (including trailing slash).
@@ -523,7 +523,7 @@ int
 pairnames (argc, argv, rcsopen, mustread, quiet)
      int argc;
      char **argv;
-     RILE *(*rcsopen) P ((struct buf *, struct stat *, int));
+     RILE *(*rcsopen) (struct buf *, struct stat *, int);
      int mustread, quiet;
 /*
  * Pair the pathnames pointed to by argv; argc indicates

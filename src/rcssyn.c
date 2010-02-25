@@ -36,13 +36,13 @@
 
 #include "rcsbase.h"
 
-static char const *getkeyval P ((char const *, enum tokens, int));
-static int getdelta P ((void));
-static int strn2expmode P ((char const *, size_t));
-static struct hshentry *getdnum P ((void));
-static void badDiffOutput P ((char const *)) exiting;
-static void diffLineNumberTooLarge P ((char const *)) exiting;
-static void getsemi P ((char const *));
+static char const *getkeyval (char const *, enum tokens, int);
+static int getdelta (void);
+static int strn2expmode (char const *, size_t);
+static struct hshentry *getdnum (void);
+static void badDiffOutput (char const *) exiting;
+static void diffLineNumberTooLarge (char const *) exiting;
+static void getsemi (char const *);
 
 /* keyword table */
 

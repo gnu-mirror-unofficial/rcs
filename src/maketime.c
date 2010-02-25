@@ -35,9 +35,9 @@
 #include "partime.h"
 #include "maketime.h"
 
-static int isleap P ((int));
-static int month_days P ((struct tm const *));
-static time_t maketime P ((struct partime const *, time_t));
+static int isleap (int);
+static int month_days (struct tm const *);
+static time_t maketime (struct partime const *, time_t);
 
 /*
 * For maximum portability, use only localtime and gmtime.

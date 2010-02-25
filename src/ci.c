@@ -29,17 +29,17 @@ struct Symrev
   struct Symrev *nextsym;
 };
 
-static char const *getcurdate P ((void));
-static int addbranch P ((struct hshentry *, struct buf *, int));
-static int addelta P ((void));
-static int addsyms P ((char const *));
-static int fixwork P ((mode_t, time_t));
-static int removelock P ((struct hshentry *));
-static int xpandfile P ((RILE *, struct hshentry const *, char const **, int));
-static struct cbuf getlogmsg P ((void));
-static void cleanup P ((void));
-static void incnum P ((char const *, struct buf *));
-static void addassoclst P ((int, char const *));
+static char const *getcurdate (void);
+static int addbranch (struct hshentry *, struct buf *, int);
+static int addelta (void);
+static int addsyms (char const *);
+static int fixwork (mode_t, time_t);
+static int removelock (struct hshentry *);
+static int xpandfile (RILE *, struct hshentry const *, char const **, int);
+static struct cbuf getlogmsg (void);
+static void cleanup (void);
+static void incnum (char const *, struct buf *);
+static void addassoclst (int, char const *);
 
 static FILE *exfile;
 static RILE *workptr;           /* working file pointer         */
@@ -1023,14 +1023,7 @@ getcurdate ()
 }
 
 static int
-#if has_prototypes
 fixwork (mode_t newworkmode, time_t mtime)
-  /* The `#if has_prototypes' is needed because mode_t might promote to int.  */
-#else
-fixwork (newworkmode, mtime)
-     mode_t newworkmode;
-     time_t mtime;
-#endif
 {
   return
     1 < workstat.st_nlink

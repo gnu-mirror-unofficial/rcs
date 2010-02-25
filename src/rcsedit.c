@@ -29,11 +29,11 @@
 
 #include "rcsbase.h"
 
-static void editEndsPrematurely P ((void)) exiting;
-static void editLineNumberOverflow P ((void)) exiting;
-static void escape_string P ((FILE *, char const *));
-static void keyreplace P ((enum markers, struct hshentry const *,
-                           int, RILE *, FILE *, int));
+static void editEndsPrematurely (void) exiting;
+static void editLineNumberOverflow (void) exiting;
+static void escape_string (FILE *, char const *);
+static void keyreplace (enum markers, struct hshentry const *,
+                        int, RILE *, FILE *, int);
 
 FILE *fcopy;               /* result file descriptor                          */
 char const *resultname;    /* result pathname                                 */
@@ -97,7 +97,7 @@ int un_link (s)
 #  if !has_NFS
 #	define do_link(s,t) link(s,t)
 #  else
-static int do_link P ((char const *, char const *));
+static int do_link (char const *, char const *);
 static int
 do_link (s, t)
      char const *s, *t;
@@ -134,7 +134,7 @@ editLineNumberOverflow ()
 #if has_memmove
 #	define movelines(s1, s2, n) memmove(s1, s2, (n)*sizeof(Iptr_type))
 #else
-static void movelines P ((Iptr_type *, Iptr_type const *, long));
+static void movelines (Iptr_type *, Iptr_type const *, long);
 static void
 movelines (s1, s2, n)
      register Iptr_type *s1;
@@ -160,11 +160,10 @@ movelines (s1, s2, n)
 }
 #endif
 
-static void deletelines P ((long, long));
-static void finisheditline P ((RILE *, FILE *, Iptr_type,
-                               struct hshentry const *));
-static void insertline P ((long, Iptr_type));
-static void snapshotline P ((FILE *, Iptr_type));
+static void deletelines (long, long);
+static void finisheditline (RILE *, FILE *, Iptr_type, struct hshentry const *);
+static void insertline (long, Iptr_type);
+static void snapshotline (FILE *, Iptr_type);
 
 /*
  * `line' contains pointers to the lines in the currently `edited' file.
@@ -290,7 +289,7 @@ finishedit (delta, outfile, done)
 /* Open a temporary NAME for output, truncating any previous contents.  */
 #   define fopen_update_truncate(name) fopenSafer(name, FOPEN_W_WORK)
 #else /* !large_memory */
-static FILE *fopen_update_truncate P ((char const *));
+static FILE *fopen_update_truncate (char const *);
 static FILE *
 fopen_update_truncate (name)
      char const *name;
@@ -316,7 +315,7 @@ openfcopy (f)
 
 #if !large_memory
 
-static void swapeditfiles P ((FILE *));
+static void swapeditfiles (FILE *);
 static void
 swapeditfiles (outfile)
      FILE *outfile;
@@ -383,7 +382,7 @@ finishedit (delta, outfile, done)
 #if large_memory
 #	define copylines(upto,delta) (editline = (upto))
 #else
-static void copylines P ((long, struct hshentry const *));
+static void copylines (long, struct hshentry const *);
 static void
 copylines (upto, delta)
      register long upto;
@@ -1138,7 +1137,7 @@ keyreplace (marker, delta, delimstuffed, infile, out, dolog)
 }
 
 #if has_readlink
-static int resolve_symlink P ((struct buf *));
+static int resolve_symlink (struct buf *);
 static int
 resolve_symlink (L)
      struct buf *L;
@@ -1488,18 +1487,8 @@ dirtempunlink ()
 }
 
 int
-#if has_prototypes
 chnamemod (FILE ** fromp, char const *from, char const *to,
            int set_mode, mode_t mode, time_t mtime)
-    /* The `#if has_prototypes' is needed because mode_t might promote to int.  */
-#else
-chnamemod (fromp, from, to, set_mode, mode, mtime)
-     FILE **fromp;
-     char const *from, *to;
-     int set_mode;
-     mode_t mode;
-     time_t mtime;
-#endif
 /*
  * Rename a file (with stream pointer *FROMP) from FROM to TO.
  * FROM already exists.

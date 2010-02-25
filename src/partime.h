@@ -55,11 +55,5 @@ struct partime
   long zone;
 };
 
-#if defined(__STDC__) || has_prototypes
-#	define __PARTIME_P(x) x
-#else
-#	define __PARTIME_P(x) ()
-#endif
-
-char *partime __PARTIME_P ((char const *, struct partime *));
-char *parzone __PARTIME_P ((char const *, long *));
+char *partime (char const *, struct partime *);
+char *parzone (char const *, long *);

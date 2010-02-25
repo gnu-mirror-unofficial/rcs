@@ -440,13 +440,8 @@ EOF
 	echo "$a#define $i$z"
 done
 
-echo >&3 "$0: configuring has_prototypes, has_stdarg, has_varargs, va_start_args $dots"
+$ech >&3 "$0: configuring has_stdarg, has_varargs, va_start_args $dots"
 cat >a.ha <<'EOF'
-#if has_prototypes
-#	define P(params) params
-#else
-#	define P(params) ()
-#endif
 #if has_stdarg
 #	include <stdarg.h>
 #else
@@ -471,15 +466,11 @@ cat >a.c <<EOF
 #include "a.ha"
 
 struct buf { int x; };
-int pairnames P((int,char**,FILE*(*)P((struct buf*,struct stat*,int)),int,int)); /* a la rcsbase.h */
-FILE *(*rcsopen)P((struct buf*,struct stat*,int));  /* a la rcsfnms.c */
+int pairnames (int,char**,FILE*(*) (struct buf*,struct stat*,int),int,int); /* a la rcsbase.h */
+FILE *(*rcsopen) (struct buf*,struct stat*,int);  /* a la rcsfnms.c */
 
 static char *e(p,i) char **p; int i; { return p[i]; }
-#if has_prototypes
 static char *f(char *(*g)(char**,int), char **p, ...)
-#else
-static char *f(g, p, va_alist) char *(*g)(); char **p; va_dcl
-#endif
 {
 	char *s;
 	va_list v;
@@ -488,41 +479,37 @@ static char *f(g, p, va_alist) char *(*g)(); char **p; va_dcl
 	va_end(v);
 	return s;
 }
-int main P((int, char**));
+int main (int, char**);
 int
 main(argc, argv) int argc; char **argv; {
 	exitmain(f(e,argv,0) != argv[0]  ||  f(e,argv,1) != argv[1]);
 }
 EOF
-for has_prototypes in 1 0
+for has_stdarg in 1 v 0
 do
-	for has_stdarg in 1 v 0
+	case $has_stdarg in
+	1) has_varargs=-1;;
+	v) has_varargs=1 has_stdarg=0;;
+	*) has_varargs=0
+	esac
+	case $has_stdarg in
+	0) as='1 2';;
+	1) as='2 1'
+	esac
+	for va_start_args in $as
 	do
-		case $has_stdarg in
-		1) has_varargs=-1;;
-		v) has_varargs=1 has_stdarg=0;;
-		*) has_varargs=0
-		esac
-		case $has_stdarg in
-		0) as='1 2';;
-		1) as='2 1'
-		esac
-		for va_start_args in $as
-		do
-			$PREPARE_CC || exit
-			$CL \
-				-Dhas_prototypes=$has_prototypes \
-				-Dhas_stdarg=$has_stdarg \
-				-Dhas_varargs=$has_varargs \
-				-Dva_start_args=$va_start_args \
-				a.c $L >&2 && $aout && break
-		done && break
+		$PREPARE_CC || exit
+		$CL \
+			-Dhas_stdarg=$has_stdarg \
+			-Dhas_varargs=$has_varargs \
+			-Dva_start_args=$va_start_args \
+			a.c $L >&2 && $aout && break
 	done && break
 done || {
-	echo >&3 $0: cannot deduce has_prototypes, has_stdarg, va_start_args
+	echo >&3 $0: cannot deduce has_stdarg, va_start_args
 	exit 1
 }
-echo >&3 $has_prototypes, $has_stdarg, $has_varargs, $va_start_args
+echo >&3 $has_stdarg, $has_varargs, $va_start_args
 case $has_varargs in
 -1) a='/* ' z='*/ ' has_varargs='?';;
 *) a= z=
@@ -530,7 +517,6 @@ esac
 cat - a.ha <<EOF
 
 /* Define boolean symbols to be 0 (false, the default), or 1 (true).  */
-#define has_prototypes $has_prototypes /* Do function prototypes work?  */
 #define has_stdarg $has_stdarg /* Does <stdarg.h> work?  */
 $a#define has_varargs $has_varargs $z/* Does <varargs.h> work?  */
 #define va_start_args $va_start_args /* How many args does va_start() take?  */
@@ -636,7 +622,7 @@ echo "#define getlogin_is_secure 0 /* Is getlogin() secure?  Usually it's not.  
 $ech >&3 "$0: configuring has_attribute_noreturn $dots"
 cat >a.c <<EOF
 #include "$A_H"
-static void e P((int)) __attribute__((noreturn));
+static void e (int) __attribute__((noreturn));
 static void e(i) int i; { exit(i); }
 int main() { e(0); }
 EOF
@@ -1199,7 +1185,7 @@ case $has_signal,$has_sigaction in
 	cat >a.c <<EOF
 #include "$A_H"
 #if !defined(signal) && declare_signal
-	signal_type (*signal P((int,signal_type(*)signal_args)))signal_args;
+	signal_type (*signal (int,signal_type(*)signal_args))signal_args;
 #endif
 static signal_type nothing(i) int i; {}
 int
@@ -1219,7 +1205,7 @@ EOF
 	do
 		for signal_type in void int
 		do
-			for signal_args in 'P((int))' '()'
+			for signal_args in '(int)' '()'
 			do
 				$PREPARE_CC || exit
 				($CL \
@@ -1294,7 +1280,7 @@ cat >a.c <<EOF
 #define CHAR1 '#' /* the first character in this file */
 #include "$A_H"
 #if !defined(fread) && declare_fread
-	fread_type fread P((void*,freadarg_type,freadarg_type,FILE*));
+	fread_type fread (void*,freadarg_type,freadarg_type,FILE*);
 #endif
 int
 main() {
@@ -1339,7 +1325,7 @@ typedef void *malloc_type;
 #ifndef malloc
 	malloc_type malloc();
 #endif
-static malloc_type identity P((malloc_type));
+static malloc_type identity (malloc_type);
 static malloc_type identity(x) malloc_type x; { return x; }
 int main() { exitmain(!identity(malloc(1))); }
 EOF
@@ -1748,12 +1734,8 @@ cat >a.c <<EOF
 #else
 #	define printf_string(m, n)
 #endif
-int p P((char const*,...)) printf_string(1, 2);
-#if has_prototypes
+int p (char const*,...) printf_string(1, 2);
 int p(char const*format,...)
-#else
-/*VARARGS1*/ int p(format, va_alist) char *format; va_dcl
-#endif
 {
 	int r;
 	va_list args;
@@ -1807,12 +1789,8 @@ case $h in
 	a= z=
 	cat >a.c <<EOF
 #include "$A_H"
-#if has_prototypes
 static int
 p(char const*format,...)
-#else
-/*VARARGS1*/ static int p(format, va_alist) char *format; va_dcl
-#endif
 {
 	va_list args;
 	vararg_start(args, format);
@@ -1951,7 +1929,7 @@ case ${PWD-`pwd`} in
 	SLASH='\'
 	qSLASH="'\\\\'"
 	SLASHes="$qSLASH: case '/': case ':'"
-	isSLASH='int isSLASH P((int));'
+	isSLASH='int isSLASH (int);'
 	ROOTPATH="(isSLASH((p)[0]) || (p)[0] && (p)[1]==':')"
 	X_DEFAULT="$SLASH,v";;
 *)
@@ -2120,7 +2098,7 @@ cat >a.ha <<EOF
 #endif
 
 /* <unistd.h> */
-char *getlogin P((void));
+char *getlogin (void);
 #ifndef STDIN_FILENO
 #	define STDIN_FILENO 0
 #	define STDOUT_FILENO 1
@@ -2131,9 +2109,9 @@ char *getlogin P((void));
 #	define vfork fork
 #endif
 #if has_getcwd || !has_getwd
-	char *getcwd P((char*,size_t));
+	char *getcwd (char*,size_t);
 #else
-	char *getwd P((char*));
+	char *getwd (char*);
 #endif
 #if has_setuid && !has_seteuid
 #	undef seteuid
@@ -2172,17 +2150,17 @@ char *getlogin P((void));
 #define SEEK_CUR 1
 #endif
 #if has_mktemp
-	char *mktemp P((char*)); /* traditional */
+	char *mktemp (char*); /* traditional */
 #else
-	char *tmpnam P((char*));
+	char *tmpnam (char*);
 #endif
 
 /* <stdlib.h> */
-char *getenv P((char const*));
-void _exit P((int)) exiting;
-void exit P((int)) exiting;
-malloc_type malloc P((size_t));
-malloc_type realloc P((malloc_type,size_t));
+char *getenv (char const*);
+void _exit (int) exiting;
+void exit (int) exiting;
+malloc_type malloc (size_t);
+malloc_type realloc (malloc_type,size_t);
 #ifndef EXIT_FAILURE
 #define EXIT_FAILURE 1
 #endif
@@ -2191,16 +2169,16 @@ malloc_type realloc P((malloc_type,size_t));
 #endif
 
 /* <string.h> */
-char *strcpy P((char*,char const*));
-char *strchr P((char const*,int));
-char *strrchr P((char const*,int));
-void *memcpy P((void*,void const*,size_t));
+char *strcpy (char*,char const*);
+char *strchr (char const*,int);
+char *strrchr (char const*,int);
+void *memcpy (void*,void const*,size_t);
 #if has_memmove
-	void *memmove P((void*,void const*,size_t));
+	void *memmove (void*,void const*,size_t);
 #endif
 
 /* <time.h> */
-time_t time P((time_t*));
+time_t time (time_t*);
 EOF
 
 cat >a.c <<EOF

@@ -22,11 +22,11 @@
 #include "rcsbase.h"
 
 #if has_dirent
-static int get_directory P ((char const *, char ***));
+static int get_directory (char const *, char ***);
 #endif
 
-static int unlock P ((struct hshentry *));
-static void cleanup P ((void));
+static int unlock (struct hshentry *);
+static void cleanup (void);
 
 static RILE *workptr;
 static int exitstatus;

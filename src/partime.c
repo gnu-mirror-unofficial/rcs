@@ -48,16 +48,14 @@ struct name_val
   int val;
 };
 
-static char const *parse_decimal
-P ((char const *, int, int, int, int, int *, int *));
-static char const *parse_fixed P ((char const *, int, int *));
-static char const *parse_pattern_letter
-P ((char const *, int, struct partime *));
-static char const *parse_prefix P ((char const *, struct partime *, int *));
-static char const *parse_ranged P ((char const *, int, int, int, int *));
-static int lookup P ((char const *, struct name_val const[]));
-static int merge_partime P ((struct partime *, struct partime const *));
-static void undefine P ((struct partime *));
+static char const *parse_decimal (char const *, int, int, int, int, int *, int *);
+static char const *parse_fixed (char const *, int, int *);
+static char const *parse_pattern_letter (char const *, int, struct partime *);
+static char const *parse_prefix (char const *, struct partime *, int *);
+static char const *parse_ranged (char const *, int, int, int, int *);
+static int lookup (char const *, struct name_val const[]);
+static int merge_partime (struct partime *, struct partime const *);
+static void undefine (struct partime *);
 
 static struct name_val const month_names[] = {
   {"jan", 0}, {"feb", 1}, {"mar", 2}, {"apr", 3}, {"may", 4}, {"jun", 5},

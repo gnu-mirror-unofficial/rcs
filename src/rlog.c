@@ -56,26 +56,26 @@ struct Datepairs
   char ne_date;                 /* datelist only; distinguishes < from <= */
 };
 
-static char extractdelta P ((struct hshentry const *));
-static int checkrevpair P ((char const *, char const *));
-static int extdate P ((struct hshentry *));
-static int getnumericrev P ((void));
-static struct hshentry const *readdeltalog P ((void));
-static void cleanup P ((void));
-static void exttree P ((struct hshentry *));
-static void getauthor P ((char *));
-static void getdatepair P ((char *));
-static void getlocker P ((char *));
-static void getrevpairs P ((char *));
-static void getscript P ((struct hshentry *));
-static void getstate P ((char *));
-static void putabranch P ((struct hshentry const *));
-static void putadelta P ((struct hshentry const *, struct hshentry const *, int));
-static void putforest P ((struct branchhead const *));
-static void putree P ((struct hshentry const *));
-static void putrunk P ((void));
-static void recentdate P ((struct hshentry const *, struct Datepairs *));
-static void trunclocks P ((void));
+static char extractdelta (struct hshentry const *);
+static int checkrevpair (char const *, char const *);
+static int extdate (struct hshentry *);
+static int getnumericrev (void);
+static struct hshentry const *readdeltalog (void);
+static void cleanup (void);
+static void exttree (struct hshentry *);
+static void getauthor (char *);
+static void getdatepair (char *);
+static void getlocker (char *);
+static void getrevpairs (char *);
+static void getscript (struct hshentry *);
+static void getstate (char *);
+static void putabranch (struct hshentry const *);
+static void putadelta (struct hshentry const *, struct hshentry const *, int);
+static void putforest (struct branchhead const *);
+static void putree (struct hshentry const *);
+static void putrunk (void);
+static void recentdate (struct hshentry const *, struct Datepairs *);
+static void trunclocks (void);
 
 static char const *insDelFormat;
 static int branchflag;          /*set on -b */

@@ -22,13 +22,13 @@
 
 #include  "rcsbase.h"
 
-static int badly_terminated P ((void));
-static int checknum P ((char const *));
-static int get0val P ((int, RILE *, struct buf *, int));
-static int getval P ((RILE *, struct buf *, int));
-static int keepdate P ((RILE *));
-static int keepid P ((int, RILE *, struct buf *));
-static int keeprev P ((RILE *));
+static int badly_terminated (void);
+static int checknum (char const *);
+static int get0val (int, RILE *, struct buf *, int);
+static int getval (RILE *, struct buf *, int);
+static int keepdate (RILE *);
+static int keepid (int, RILE *, struct buf *);
+static int keeprev (RILE *);
 
 int prevkeys;
 struct buf prevauthor, prevdate, prevname, prevrev, prevstate;

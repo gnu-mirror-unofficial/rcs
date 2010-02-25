@@ -22,13 +22,13 @@
 
 #include "rcsbase.h"
 
-static char *addjoin P ((char *));
-static char const *getancestor P ((char const *, char const *));
-static int buildjoin P ((char const *));
-static int preparejoin P ((char *));
-static int rmlock P ((struct hshentry const *));
-static int rmworkfile P ((void));
-static void cleanup P ((void));
+static char *addjoin (char *);
+static char const *getancestor (char const *, char const *);
+static int buildjoin (char const *);
+static int preparejoin (char *);
+static int rmlock (struct hshentry const *);
+static int rmworkfile (void);
+static void cleanup (void);
 
 static char const quietarg[] = "-q";
 

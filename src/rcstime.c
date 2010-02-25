@@ -48,7 +48,7 @@ time2date (unixtime, date)
 }
 
 /* Like str2time, except die if an error was found.  */
-static time_t str2time_checked P ((char const *, time_t, long));
+static time_t str2time_checked (char const *, time_t, long);
 static time_t
 str2time_checked (source, default_time, default_zone)
      char const *source;

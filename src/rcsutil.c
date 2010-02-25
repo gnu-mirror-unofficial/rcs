@@ -66,7 +66,7 @@ struct alloclist
 };
 static struct alloclist *alloced;
 
-static malloc_type okalloc P ((malloc_type));
+static malloc_type okalloc (malloc_type);
 static malloc_type
 okalloc (p)
      malloc_type p;
@@ -244,7 +244,7 @@ readAccessFilenameBuffer (filename, p)
 #if !has_psignal
 
 # define psignal my_psignal
-static void my_psignal P ((int, char const *));
+static void my_psignal (int, char const *);
 static void
 my_psignal (sig, s)
      int sig;
@@ -323,9 +323,9 @@ my_psignal (sig, s)
 }
 #endif
 
-static signal_type catchsig P ((int));
+static signal_type catchsig (int);
 #ifdef SA_SIGINFO
-static signal_type catchsigaction P ((int, siginfo_t *, void *));
+static signal_type catchsigaction (int, siginfo_t *, void *);
 #endif
 
 static signal_type
@@ -447,11 +447,11 @@ restoreints ()
 #	    endif
 }
 
-static void setup_catchsig P ((int const *, int));
+static void setup_catchsig (int const *, int);
 
 #if has_sigaction
 
-static void check_sig P ((int));
+static void check_sig (int);
 static void
 check_sig (r)
      int r;
@@ -675,7 +675,7 @@ awrite (buf, chars, f)
 }
 
 /* dup a file descriptor; the result must not be stdin, stdout, or stderr.  */
-static int dupSafer P ((int));
+static int dupSafer (int);
 static int
 dupSafer (fd)
      int fd;
@@ -751,7 +751,7 @@ fopenSafer (filename, type)
 
 #if has_fork || has_spawn
 
-static int movefd P ((int, int));
+static int movefd (int, int);
 static int
 movefd (old, new)
      int old, new;
@@ -766,7 +766,7 @@ movefd (old, new)
   return close (old) == 0 ? new : -1;
 }
 
-static int fdreopen P ((int, char const *, int));
+static int fdreopen (int, char const *, int);
 static int
 fdreopen (fd, file, flags)
      int fd;
@@ -784,7 +784,7 @@ fdreopen (fd, file, flags)
 }
 
 #if has_spawn
-static void redirect P ((int, int));
+static void redirect (int, int);
 static void
 redirect (old, new)
      int old, new;
@@ -801,7 +801,7 @@ redirect (old, new)
 
 #else /* !has_fork && !has_spawn */
 
-static void bufargcat P ((struct buf *, int, char const *));
+static void bufargcat (struct buf *, int, char const *);
 static void
 bufargcat (b, c, s)
      register struct buf *b;
@@ -842,7 +842,7 @@ bufargcat (b, c, s)
 * This is useful if you are a child process, whose buffers are usually wrong.
 * Exit immediately if the write does not completely succeed.
 */
-static void write_stderr P ((char const *));
+static void write_stderr (char const *);
 static void
 write_stderr (s)
      char const *s;
@@ -1043,15 +1043,7 @@ runv (infd, outname, args)
 * The remaining arguments specify the command and its arguments.
 */
 int
-#if has_prototypes
 run (int infd, char const *outname, ...)
-#else
-        /*VARARGS2 */
-run (infd, outname, va_alist)
-     int infd;
-     char const *outname;
-     va_dcl
-#endif
 {
   va_list ap;
   char const *rgargs[CARGSMAX];
@@ -1227,12 +1219,7 @@ euid ()
  */
 
 static void
-#if has_prototypes
 set_uid_to (uid_t u)
-#else
-set_uid_to (u)
-     uid_t u;
-#endif
 /* Become user u.  */
 {
   static int looping;

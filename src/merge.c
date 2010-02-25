@@ -21,7 +21,7 @@
 
 #include "rcsbase.h"
 
-static void badoption P ((char const *));
+static void badoption (char const *);
 
 static char const usage[] =
   "\nmerge: usage: merge [-AeEpqxX3] [-L lab [-L lab [-L lab]]] file1 file2 file3";

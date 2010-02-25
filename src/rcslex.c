@@ -41,12 +41,12 @@
 
 #include "rcsbase.h"
 
-static char *checkidentifier P ((char *, int, int));
-static void errsay P ((char const *));
-static void fatsay P ((char const *));
-static void lookup P ((char const *));
-static void startsay P ((const char *, const char *));
-static void warnsay P ((char const *));
+static char *checkidentifier (char *, int, int);
+static void errsay (char const *);
+static void fatsay (char const *);
+static void lookup (char const *);
+static void startsay (const char *, const char *);
+static void warnsay (char const *);
 
 static struct hshentry *nexthsh;        /*pointer to next hash entry, set by lookup */
 
@@ -790,7 +790,7 @@ checkssym (sym)
 #   define Iclose(f) fclose(f)
 #else
 # if !maps_memory
-static int Iclose P ((RILE *));
+static int Iclose (RILE *);
 static int
 Iclose (f)
      register RILE *f;
@@ -800,7 +800,7 @@ Iclose (f)
   return fclose (f->stream);
 }
 # else
-static int Iclose P ((RILE *));
+static int Iclose (RILE *);
 static int
 Iclose (f)
      register RILE *f;
@@ -812,7 +812,7 @@ Iclose (f)
 
 #   if has_map_fd
 static void
-map_fd_deallocate P ((RILE *));
+map_fd_deallocate (RILE *);
 static void
 map_fd_deallocate (f)
      register RILE *f;
@@ -825,7 +825,7 @@ map_fd_deallocate (f)
 }
 #   endif
 #   if has_mmap
-static void mmap_deallocate P ((RILE *));
+static void mmap_deallocate (RILE *);
 static void
 mmap_deallocate (f)
      register RILE *f;
@@ -834,7 +834,7 @@ mmap_deallocate (f)
     efaterror ("munmap");
 }
 #   endif
-static void read_deallocate P ((RILE *));
+static void read_deallocate (RILE *);
 static void
 read_deallocate (f)
      RILE *f;
@@ -842,7 +842,7 @@ read_deallocate (f)
   tfree (f->base);
 }
 
-static void nothing_to_deallocate P ((RILE *));
+static void nothing_to_deallocate (RILE *);
 static void
 nothing_to_deallocate (f)
      RILE *f;
@@ -852,11 +852,11 @@ nothing_to_deallocate (f)
 #endif
 
 #if large_memory && maps_memory
-static RILE *fd2_RILE P ((int, char const *, struct stat *));
+static RILE *fd2_RILE (int, char const *, struct stat *);
 static RILE *
 fd2_RILE (fd, name, status)
 #else
-static RILE * fd2RILE P ((int, char const *, char const *, struct stat *));
+static RILE * fd2RILE (int, char const *, char const *, struct stat *);
 static RILE *
 fd2RILE (fd, name, type, status)
      char const *type;
@@ -1249,16 +1249,8 @@ enfaterror (e, s)
   fatcleanup (true);
 }
 
-#if has_prototypes
 void
 error (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-error (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* non-fatal error */
 {
   va_list args;
@@ -1270,16 +1262,8 @@ error (format, va_alist)
   eflush ();
 }
 
-#if has_prototypes
 void
 rcserror (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-rcserror (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* non-fatal RCS file error */
 {
   va_list args;
@@ -1291,16 +1275,8 @@ rcserror (format, va_alist)
   eflush ();
 }
 
-#if has_prototypes
 void
 workerror (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-workerror (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* non-fatal working file error */
 {
   va_list args;
@@ -1312,16 +1288,8 @@ workerror (format, va_alist)
   eflush ();
 }
 
-#if has_prototypes
 void
 fatserror (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-fatserror (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* fatal RCS file syntax error */
 {
   va_list args;
@@ -1333,16 +1301,8 @@ fatserror (format, va_alist)
   fatcleanup (false);
 }
 
-#if has_prototypes
 void
 faterror (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-faterror (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* fatal error, terminates program after cleanup */
 {
   va_list args;
@@ -1353,16 +1313,8 @@ faterror (format, va_alist)
   fatcleanup (false);
 }
 
-#if has_prototypes
 void
 rcsfaterror (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-rcsfaterror (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* fatal RCS file error, terminates program after cleanup */
 {
   va_list args;
@@ -1373,16 +1325,8 @@ rcsfaterror (format, va_alist)
   fatcleanup (false);
 }
 
-#if has_prototypes
 void
 warn (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-warn (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* warning */
 {
   va_list args;
@@ -1397,16 +1341,8 @@ warn (format, va_alist)
     }
 }
 
-#if has_prototypes
 void
 rcswarn (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-rcswarn (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* RCS file warning */
 {
   va_list args;
@@ -1421,16 +1357,8 @@ rcswarn (format, va_alist)
     }
 }
 
-#if has_prototypes
 void
 workwarn (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-workwarn (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* working file warning */
 {
   va_list args;
@@ -1452,16 +1380,8 @@ redefined (c)
   warn ("redefinition of -%c option", c);
 }
 
-#if has_prototypes
 void
 diagnose (char const *format, ...)
-#else
-/*VARARGS1 */
-void
-diagnose (format, va_alist)
-     char const *format;
-     va_dcl
-#endif
 /* prints a diagnostic message */
 /* Unlike the other routines, it does not append a newline. */
 /* This lets some callers suppress the newline, and is faster */
@@ -1503,14 +1423,7 @@ aputs (s, iop)
 }
 
 void
-#if has_prototypes
 fvfprintf (FILE * stream, char const *format, va_list args)
-#else
-fvfprintf (stream, format, args)
-     FILE *stream;
-     char *format;
-     va_list args;
-#endif
 /* like vfprintf, except abort program on error */
 {
 #if has_vfprintf
@@ -1534,17 +1447,8 @@ fvfprintf (stream, format, args)
 #endif
 }
 
-#if has_prototypes
 void
 aprintf (FILE * iop, char const *fmt, ...)
-#else
-/*VARARGS2 */
-void
-aprintf (iop, fmt, va_alist)
-     FILE *iop;
-     char const *fmt;
-     va_dcl
-#endif
 /* Function: formatted output. Same as fprintf in stdio,
  * but aborts program on error
  */

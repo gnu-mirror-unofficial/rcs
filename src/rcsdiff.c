@@ -23,10 +23,9 @@
 #include "rcsbase.h"
 
 #if DIFF_L
-static char const *setup_label
-P ((struct buf *, char const *, char const[datesize]));
+static char const *setup_label (struct buf *, char const *, char const[datesize]);
 #endif
-static void cleanup P ((void));
+static void cleanup (void);
 
 static int exitstatus;
 static RILE *workptr;

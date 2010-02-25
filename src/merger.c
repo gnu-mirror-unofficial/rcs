@@ -21,7 +21,7 @@
 
 #include "rcsbase.h"
 
-static char const *normalize_arg P ((char const *, char **));
+static char const *normalize_arg (char const *, char **);
 static char const *
 normalize_arg (s, b)
      char const *s;

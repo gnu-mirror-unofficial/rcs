@@ -22,16 +22,16 @@
 
 #include "rcsbase.h"
 
-static char const *branchtip P ((char const *));
-static char const *lookupsym P ((char const *));
-static char const *normalizeyear P ((char const *, char[5]));
-static struct hshentry *genbranch
-P ((struct hshentry const *, char const *, int, char const *, char const *,
-    char const *, struct hshentries **));
-static void absent P ((char const *, int));
-static void cantfindbranch
-P ((char const *, char const[datesize], char const *, char const *));
-static void store1 P ((struct hshentries ***, struct hshentry *));
+static char const *branchtip (char const *);
+static char const *lookupsym (char const *);
+static char const *normalizeyear (char const *, char[5]);
+static struct hshentry *genbranch (struct hshentry const *, char const *,
+                                   int, char const *, char const *,
+                                   char const *, struct hshentries **);
+static void absent (char const *, int);
+static void cantfindbranch (char const *, char const[datesize],
+                            char const *, char const *);
+static void store1 (struct hshentries ***, struct hshentry *);
 
 int
 countnumflds (s)

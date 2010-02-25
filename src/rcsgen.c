@@ -28,8 +28,8 @@ struct buf curlogbuf;           /* buffer for current log message */
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
 
-static void putdelta P ((struct hshentry const *, FILE *));
-static void scandeltatext P ((struct hshentry *, enum stringwork, int));
+static void putdelta (struct hshentry const *, FILE *);
+static void scandeltatext (struct hshentry *, enum stringwork, int);
 
 char const *
 buildrevision (deltas, target, outfile, expandflag)
@@ -213,16 +213,8 @@ getcstdin ()
   return c;
 }
 
-#if has_prototypes
 int
 yesorno (int default_answer, char const *question, ...)
-#else
-                /*VARARGS2 */ int
-yesorno (default_answer, question, va_alist)
-     int default_answer;
-     char const *question;
-     va_dcl
-#endif
 {
   va_list args;
   register int c, r;
