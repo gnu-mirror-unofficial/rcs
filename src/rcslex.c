@@ -1358,12 +1358,8 @@ aputs (char const *s, FILE *iop)
 /* Function: Put string s on file iop, abort on error.
  */
 {
-#if has_fputs
   if (fputs (s, iop) < 0)
     Oerror ();
-#else
-  awrite (s, strlen (s), iop);
-#endif
 }
 
 void

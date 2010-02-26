@@ -487,21 +487,6 @@ echo >&3 $ok
 echo "#define has_fflush_input $h /* Does fflush() work on input files?  */"
 rm -f a.c || exit
 
-$ech >&3 "$0: configuring has_fputs $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (fputs("Hello\"\nworld", stdout) < 0); }
-EOF
-Hello='Hello"
-world'
-$PREPARE_CC a.a || exit
-if $CL a.c $L >&2 && $aout >a.a && x=`$aout` && test " $x" = " $Hello"
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_fputs $h /* Does fputs() work?  */"
-
 $ech >&3 "$0: configuring has_ftruncate $dots"
 cat >a.c <<EOF
 #include "$A_H"
