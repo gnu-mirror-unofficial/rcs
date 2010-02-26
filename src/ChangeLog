@@ -1,5 +1,14 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Assume signal handlers return `void'.
+
+	* rcsutil.c: Do s/signal_type/void/g.
+	* conf.sh: Remove check for signal handler rv type.
+	Also, remove checks for kill(2); replace
+	callers with use `raise (getpid (), ...)'.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Presume availability of `fputs'.
 
 	* rcslex.c (aputs): Move code out

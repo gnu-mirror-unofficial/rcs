@@ -551,19 +551,6 @@ EOF
 esac
 echo "$a#define has_getpwuid $h $z/* Does getpwuid() work?  */"
 
-$ech >&3 "$0: configuring has_kill $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (kill(getpid(), 0) != 0); }
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then has_kill=1 ok=OK
-else has_kill=0 ok='does not work'
-fi
-echo >&3 $ok
-# Used only by this script, not by RCS, so we don't output it to stdout.
-
 $ech >&3 "$0: configuring has_map_fd, has_mmap, has_madvise, mmap_signal $dots"
 rm -f a.c a.d a.e || exit
 cat >a.c <<EOF
@@ -843,16 +830,12 @@ main(argc, argv) int argc; char **argv; {
 		return (1);
 	if (sigaction(SIGINT, &s, (struct sigaction*)0) != 0)
 		return (1);
-#	if has_kill
-		kill(getpid(), SIGINT);
-#	else
-		raise(SIGINT);
-#	endif
+	raise(SIGINT);
 	return (gotsig != 1);
 }
 EOF
 $PREPARE_CC || exit
-if ($CL -Dhas_kill=$has_kill a.c $L && $aout) >&2
+if ($CL a.c $L && $aout) >&2
 then has_sigaction=1 ok=OK
 else has_sigaction=0 ok='does not work'
 fi
@@ -863,52 +846,42 @@ has_sa_sigaction=0 ok='does not work'
 case $has_sigaction in
 1)
 	$PREPARE_CC || exit
-	if ($CL -Dhas_kill=$has_kill -Dhas_sa_sigaction=1 a.c $L && $aout) >&2
+	if ($CL -Dhas_sa_sigaction=1 a.c $L && $aout) >&2
 	then has_sa_sigaction=1 ok=OK
 	fi
 esac
 echo >&3 $ok
 echo "#define has_sa_sigaction $has_sa_sigaction /* Does struct sigaction have sa_sigaction?  */"
 
-$ech >&3 "$0: configuring has_signal, signal_type, sig_zaps_handler $dots"
+$ech >&3 "$0: configuring has_signal, sig_zaps_handler $dots"
 case $has_signal,$has_sigaction in
 1,0)
 	cat >a.c <<EOF
 #include "$A_H"
 #if !defined(signal) && declare_signal
-	signal_type (*signal (int,signal_type(*)signal_args))signal_args;
+	void (*signal (int, void(*)signal_args))signal_args;
 #endif
-static signal_type nothing(i) int i; {}
+static void nothing(i) int i; {}
 int
 main(argc, argv) int argc; char **argv; {
 	signal(SIGINT, nothing);
-#	if has_kill
-		while (--argc)
-			kill(getpid(), SIGINT);
-		return (0);
-#	else
-		/* Pretend that sig_zaps_handler; better safe than sorry.  */
-		return (2 < argc);
-#	endif
+	while (--argc)
+		raise(SIGINT);
+	return (0);
 }
 EOF
 	for declare_signal in 1 0
 	do
-		for signal_type in void int
+		for signal_args in '(int)' '()'
 		do
-			for signal_args in '(int)' '()'
-			do
-				$PREPARE_CC || exit
-				($CL \
-					-Ddeclare_signal=$declare_signal \
-					-Dhas_kill=$has_kill \
-					-Dsignal_args="$signal_args" \
-					-Dsignal_type=$signal_type \
-						a.c $L && $aout 1) >&2 && break
-			done && break
+			$PREPARE_CC || exit
+			($CL \
+				-Ddeclare_signal=$declare_signal \
+				-Dsignal_args="$signal_args" \
+					a.c $L && $aout 1) >&2 && break
 		done && break
 	done || {
-		echo >&3 $0: cannot deduce signal_type
+		echo >&3 $0: cannot deduce signal type
 		exit 1
 	}
 	if $aout 1 2 >&2
@@ -916,13 +889,11 @@ EOF
 	else sig_zaps_handler=1
 	fi;;
 *)
-	signal_type=void
 	sig_zaps_handler=0
 esac
-echo >&3 $has_signal, $signal_type, $sig_zaps_handler
+echo >&3 $has_signal, $sig_zaps_handler
 cat <<EOF
 #define has_signal $has_signal /* Does signal() work?  */
-#define signal_type $signal_type /* type returned by signal handlers */
 #define sig_zaps_handler $sig_zaps_handler /* Must a signal handler reinvoke signal()?  */
 EOF
 
@@ -944,20 +915,16 @@ case $has_sigaction in
 int
 main() {
 	sigblock(sigmask(SIGHUP));
-#	if has_kill
-		return (kill(getpid(), SIGHUP) != 0);
-#	else
-		return (raise(SIGHUP) != 0);
-#	endif
+	return (raise(SIGHUP) != 0);
 }
 EOF
 	if
 		$PREPARE_CC || exit
-		($CL -Dhas_kill=$has_kill a.c $L && $aout) >&2
+		($CL a.c $L && $aout) >&2
 	then h=1
 	elif
 		$PREPARE_CC || exit
-		($CL -Dhas_kill=$has_kill -Ddefine_sigmask=1 a.c $L && $aout) >&2
+		($CL -Ddefine_sigmask=1 a.c $L && $aout) >&2
 	then h=1 b= y= ok='definition needed'
 	else h=0
 	fi
@@ -1082,7 +1049,7 @@ case $has_signal,$has_sigaction in
 	$ech >&3 "$0: configuring has_psiginfo $dots"
 	cat >a.c <<EOF
 #include "$A_H"
-static signal_type
+static void
 catchsig(s, i, c) int s; siginfo_t *i; void *c; {
 	if (i)
 		psiginfo(i, "test");
@@ -1103,11 +1070,7 @@ main() {
 	s.sa_flags |= SA_SIGINFO;
 	if (sigaction(SIGINT, &s, (struct sigaction*)0) != 0)
 		return (1);
-#	if has_kill
-		kill(getpid(), SIGINT);
-#	else
-		raise(SIGINT);
-#	endif
+	raise(SIGINT);
 	return (1);
 }
 EOF

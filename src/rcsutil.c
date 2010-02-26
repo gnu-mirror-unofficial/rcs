@@ -277,19 +277,19 @@ my_psignal (int sig, char const *s)
 }
 #endif
 
-static signal_type catchsig (int);
+static void catchsig (int);
 #ifdef SA_SIGINFO
-static signal_type catchsigaction (int, siginfo_t *, void *);
+static void catchsigaction (int, siginfo_t *, void *);
 #endif
 
-static signal_type
+static void
 catchsig (int s)
 #ifdef SA_SIGINFO
 {
   catchsigaction (s, (siginfo_t *) 0, (void *) 0);
 }
 
-static signal_type
+static void
 catchsigaction (int s, siginfo_t *i, void *c)
 #endif
 {
