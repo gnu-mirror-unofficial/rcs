@@ -1,3 +1,9 @@
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move check for system headers into configure.in.
+
+	* configure.in (AC_CHECK_HEADERS_ONCE): New.
+
 2010-02-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Require a C99-capable compiler.

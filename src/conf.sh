@@ -181,6 +181,11 @@ cat <<'EOF'
 #include <errno.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
 
 /* Comment out #include lines below that do not work.  */
 EOF
@@ -220,32 +225,20 @@ CS_OK="test -s $o"
 echo >&3 $CS
 
 # standard include files
-# sys/types.h and sys/stat.h must come first because others depend on them.
+# This list must be synced with ../configure.in, q.v.
 has_signal=1
 for h in \
-	sys/types sys/stat \
 	dirent fcntl limits mach/mach net/errno \
-	pwd siginfo signal stdlib string \
+	pwd siginfo signal \
 	sys/mman sys/wait ucontext unistd utime vfork
 do
 	i="#include <$h.h>"
 	$ech >&3 "$0: configuring $i $dots"
-	cat >a.c <<EOF
-#include "$A_H"
-$i
-int main(){ return (0); }
-EOF
 	ok=OK
-	$PREPARE_CC || exit
-	$CS a.c $LS >&2 && $CS_OK || {
-		case $h in
-		string)
-			i='#include <strings.h>'
-			ok="$i instead";;
-		*)
-			i="/* $i */"
-			ok="commenting it out"
-		esac
+	guard=$(echo HAVE_${h}_H | sed y,/abcdefghijklmnopqrstuvwxyz,_ABCDEFGHIJKLMNOPQRSTUVWXYZ,)
+	grep "#define $guard 1" auto-sussed.h >/dev/null || {
+		i="/* $i */"
+		ok="commenting it out"
 		case $h in
 		signal) has_signal=0
 		esac
@@ -259,36 +252,12 @@ cat <<'EOF'
 /* Define boolean symbols to be 0 (false, the default), or 1 (true).  */
 EOF
 
-# has_sys_param_h
-$ech >&3 "$0: configuring has_sys_param_h $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#include <sys/param.h>
-int main() { return (0); }
-EOF
-$PREPARE_CC || exit
-if $CS a.c $LS >&2 && $CS_OK
-then h=1 ok=OK
-else h=0 ok=absent
+$ech >&3 "$0: checking <sys/param.h> $dots"
+if grep "#define HAVE_SYS_PARAM_H 1" auto-sussed.h >/dev/null
+then ok=OK ; echo '#define HAVE_SYS_PARAM_H 1'
+else ok=absent
 fi
 echo >&3 $ok
-echo "#define has_sys_param_h $h /* Does #include <sys/param.h> work?  */"
-
-# We must do errno next, because has_readlink needs it.
-/* <errno.h> */
-$ech >&3 "$0: configuring errno $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (errno != errno); }
-EOF
-$PREPARE_CC || exit
-if $CS a.c $LS >&2
-then a='/* ' z=' */' ok=OK
-else a= z= ok='declaration missing'
-fi
-echo >&3 $ok
-echo "${a}extern int errno;$z /* Uncomment if <errno.h> doesn't declare errno.  */"
-rm -f a.c || exit
 
 # We must do has_readlink next, because it might generate
 # #include directives that affect later definitions.
@@ -323,7 +292,7 @@ cat <<EOF
 #define readlink_isreg_errno $readlink_isreg_errno /* errno after readlink on regular file */
 
 #if has_readlink && !defined(MAXSYMLINKS)
-#	if has_sys_param_h
+#	ifdef HAVE_SYS_PARAM_H
 #		include <sys/param.h>
 #	endif
 #	ifndef MAXSYMLINKS
@@ -431,8 +400,6 @@ EOF
 done
 
 cat - <<EOF
-
-#include <stdarg.h>
 
 #if O_BINARY
 	/* Text and binary i/o behave differently.  */

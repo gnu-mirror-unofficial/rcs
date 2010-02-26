@@ -281,6 +281,14 @@ fi
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+# headers
+AC_CHECK_HEADERS_ONCE([
+  dirent.h fcntl.h limits.h mach/mach.h net/errno.h
+  pwd.h siginfo.h signal.h
+  sys/mman.h sys/wait.h ucontext.h unistd.h utime.h vfork.h
+  sys/param.h
+])
+
 AC_CONFIG_FILES([
   Makefile
   man/Makefile

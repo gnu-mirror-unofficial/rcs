@@ -1,5 +1,15 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move check for system headers into configure.in.
+
+	* conf.sh: Arrange to #include unconditionally <sys/types.h>,
+	<sys/stat.h>, <stdlib.h>, <string.h>.  Convert checks for
+	system headers from compiler-based to grep auto-sussed.h.
+	Likewise for <sys/param.h>; re-#define/use HAVE_SYS_PARAM_H.
+	Remove handling for <errno.h> that doesn't declare `errno'.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] To return from `main', use `return' directly.
 
 	* ci.c (main): Use `return', not `exitmain'.
