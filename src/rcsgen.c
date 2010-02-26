@@ -213,7 +213,7 @@ yesorno (int default_answer, char const *question, ...)
   if (!quietflag && ttystdin ())
     {
       oflush ();
-      vararg_start (args, question);
+      va_start (args, question);
       fvfprintf (stderr, question, args);
       va_end (args);
       eflush ();

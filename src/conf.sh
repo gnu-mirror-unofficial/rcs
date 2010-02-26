@@ -440,86 +440,9 @@ EOF
 	echo "$a#define $i$z"
 done
 
-$ech >&3 "$0: configuring has_stdarg, has_varargs, va_start_args $dots"
-cat >a.ha <<'EOF'
-#if has_stdarg
-#	include <stdarg.h>
-#else
-#	if has_varargs
-#		include <varargs.h>
-#	else
-		typedef char *va_list;
-#		define va_dcl int va_alist;
-#		define va_start(ap) ((ap) = (va_list)&va_alist)
-#		define va_arg(ap,t) (((t*) ((ap)+=sizeof(t)))  [-1])
-#		define va_end(ap)
-#	endif
-#endif
-#if va_start_args == 2
-#	define vararg_start va_start
-#else
-#	define vararg_start(ap,p) va_start(ap)
-#endif
-EOF
-cat >a.c <<EOF
-#include "$A_H"
-#include "a.ha"
+cat - <<EOF
 
-struct buf { int x; };
-int pairnames (int,char**,FILE*(*) (struct buf*,struct stat*,int),int,int); /* a la rcsbase.h */
-FILE *(*rcsopen) (struct buf*,struct stat*,int);  /* a la rcsfnms.c */
-
-static char *e(p,i) char **p; int i; { return p[i]; }
-static char *f(char *(*g)(char**,int), char **p, ...)
-{
-	char *s;
-	va_list v;
-	vararg_start(v,p);
-	s = g(p, va_arg(v,int));
-	va_end(v);
-	return s;
-}
-int main (int, char**);
-int
-main(argc, argv) int argc; char **argv; {
-	exitmain(f(e,argv,0) != argv[0]  ||  f(e,argv,1) != argv[1]);
-}
-EOF
-for has_stdarg in 1 v 0
-do
-	case $has_stdarg in
-	1) has_varargs=-1;;
-	v) has_varargs=1 has_stdarg=0;;
-	*) has_varargs=0
-	esac
-	case $has_stdarg in
-	0) as='1 2';;
-	1) as='2 1'
-	esac
-	for va_start_args in $as
-	do
-		$PREPARE_CC || exit
-		$CL \
-			-Dhas_stdarg=$has_stdarg \
-			-Dhas_varargs=$has_varargs \
-			-Dva_start_args=$va_start_args \
-			a.c $L >&2 && $aout && break
-	done && break
-done || {
-	echo >&3 $0: cannot deduce has_stdarg, va_start_args
-	exit 1
-}
-echo >&3 $has_stdarg, $has_varargs, $va_start_args
-case $has_varargs in
--1) a='/* ' z='*/ ' has_varargs='?';;
-*) a= z=
-esac
-cat - a.ha <<EOF
-
-/* Define boolean symbols to be 0 (false, the default), or 1 (true).  */
-#define has_stdarg $has_stdarg /* Does <stdarg.h> work?  */
-$a#define has_varargs $has_varargs $z/* Does <varargs.h> work?  */
-#define va_start_args $va_start_args /* How many args does va_start() take?  */
+#include <stdarg.h>
 
 #if O_BINARY
 	/* Text and binary i/o behave differently.  */
@@ -1739,7 +1662,7 @@ int p(char const*format,...)
 {
 	int r;
 	va_list args;
-	vararg_start(args, format);
+	va_start (args, format);
 	r = vfprintf(stderr, format, args);
 	va_end(args);
 	return r;
@@ -1793,7 +1716,7 @@ static int
 p(char const*format,...)
 {
 	va_list args;
-	vararg_start(args, format);
+	va_start (args, format);
 #	if TRY__DOPRINTF
 		_doprintf(stderr, format, args);
 #	else

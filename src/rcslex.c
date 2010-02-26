@@ -1204,7 +1204,7 @@ error (char const *format, ...)
 {
   va_list args;
   errsay ((char const *) 0);
-  vararg_start (args, format);
+  va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
   afputc ('\n', stderr);
@@ -1217,7 +1217,7 @@ rcserror (char const *format, ...)
 {
   va_list args;
   errsay (RCSname);
-  vararg_start (args, format);
+  va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
   afputc ('\n', stderr);
@@ -1230,7 +1230,7 @@ workerror (char const *format, ...)
 {
   va_list args;
   errsay (workname);
-  vararg_start (args, format);
+  va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
   afputc ('\n', stderr);
@@ -1244,7 +1244,7 @@ fatserror (char const *format, ...)
   va_list args;
   oflush ();
   fprintf (stderr, "%s: %s:%ld: ", cmdid, RCSname, rcsline);
-  vararg_start (args, format);
+  va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
   fatcleanup (false);
@@ -1256,7 +1256,7 @@ faterror (char const *format, ...)
 {
   va_list args;
   fatsay ((char const *) 0);
-  vararg_start (args, format);
+  va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
   fatcleanup (false);
@@ -1268,7 +1268,7 @@ rcsfaterror (char const *format, ...)
 {
   va_list args;
   fatsay (RCSname);
-  vararg_start (args, format);
+  va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
   fatcleanup (false);
@@ -1282,7 +1282,7 @@ warn (char const *format, ...)
   if (!quietflag)
     {
       warnsay ((char *) 0);
-      vararg_start (args, format);
+      va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);
       afputc ('\n', stderr);
@@ -1298,7 +1298,7 @@ rcswarn (char const *format, ...)
   if (!quietflag)
     {
       warnsay (RCSname);
-      vararg_start (args, format);
+      va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);
       afputc ('\n', stderr);
@@ -1314,7 +1314,7 @@ workwarn (char const *format, ...)
   if (!quietflag)
     {
       warnsay (workname);
-      vararg_start (args, format);
+      va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);
       afputc ('\n', stderr);
@@ -1339,7 +1339,7 @@ diagnose (char const *format, ...)
   if (!quietflag)
     {
       oflush ();
-      vararg_start (args, format);
+      va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);
       eflush ();
@@ -1398,7 +1398,7 @@ aprintf (FILE * iop, char const *fmt, ...)
  */
 {
   va_list ap;
-  vararg_start (ap, fmt);
+  va_start (ap, fmt);
   fvfprintf (iop, fmt, ap);
   va_end (ap);
 }

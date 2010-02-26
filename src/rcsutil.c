@@ -997,7 +997,7 @@ run (int infd, char const *outname, ...)
   va_list ap;
   char const *rgargs[CARGSMAX];
   register int i;
-  vararg_start (ap, outname);
+  va_start (ap, outname);
   for (i = 1; (rgargs[i++] = va_arg (ap, char const *));)
     if (CARGSMAX <= i)
       faterror ("too many command arguments");

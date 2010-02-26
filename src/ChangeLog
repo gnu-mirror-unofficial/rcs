@@ -1,5 +1,16 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Presume availability of <stdarg.h>.
+
+	* rcsgen.c (yesorno): Use `va_start' directly.
+	* rcslex.c (error, rcserror, workerror, fatserror, faterror)
+	(rcsfaterror, warn, rcswarn, workwarn, diagnose, aprintf): Likewise.
+	* rcsutil.c (run): Likewise.
+	* conf.sh: Remove section probing <stdarg.h>;
+	arrange to #include <stdarg.h> unconditionally in conf.h.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Define `cmdid', `main' directly.
 
 	* ci.c (cmdid, main): Define directly.
