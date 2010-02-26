@@ -264,7 +264,7 @@ bufalloc (register struct buf *b, size_t size)
       if (b->size)
         tfree (b->string);
       else
-        b->size = sizeof (malloc_type);
+        b->size = sizeof (void *);
       while (b->size < size)
         b->size <<= 1;
       b->string = tnalloc (char, b->size);

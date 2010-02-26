@@ -30,36 +30,36 @@
  */
 struct alloclist
 {
-  malloc_type alloc;
+  void *alloc;
   struct alloclist *nextalloc;
 };
 static struct alloclist *alloced;
 
-static malloc_type okalloc (malloc_type);
-static malloc_type
-okalloc (malloc_type p)
+static void *okalloc (void *);
+static void *
+okalloc (void * p)
 {
   if (!p)
     faterror ("out of memory");
   return p;
 }
 
-malloc_type
+void *
 testalloc (size_t size)
 /* Allocate a block, testing that the allocation succeeded.  */
 {
   return okalloc (malloc (size));
 }
 
-malloc_type
-testrealloc (malloc_type ptr, size_t size)
+void *
+testrealloc (void *ptr, size_t size)
 /* Reallocate a block, testing that the allocation succeeded.  */
 {
   return okalloc (realloc (ptr, size));
 }
 
-malloc_type
-fremember (malloc_type ptr)
+void *
+fremember (void *ptr)
 /* Remember PTR in 'alloced' so that it can be freed later.  Yield PTR.  */
 {
   register struct alloclist *q = talloc (struct alloclist);
@@ -68,7 +68,7 @@ fremember (malloc_type ptr)
   return q->alloc = ptr;
 }
 
-malloc_type
+void *
 ftestalloc (size_t size)
 /* Allocate a block, putting it in 'alloced' so it can be freed later. */
 {

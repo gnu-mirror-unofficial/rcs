@@ -527,17 +527,17 @@ int fdSafer (int);
 int getRCSINIT (int, char **, char ***);
 int run (int, char const *, ...);
 int runv (int, char const *, char const **);
-malloc_type fremember (malloc_type);
-malloc_type ftestalloc (size_t);
-malloc_type testalloc (size_t);
-malloc_type testrealloc (malloc_type, size_t);
+void *fremember (void *);
+void *ftestalloc (size_t);
+void *testalloc (size_t);
+void *testrealloc (void *, size_t);
 #define ftalloc(T) ftnalloc(T,1)
 #define talloc(T) tnalloc(T,1)
 
 #define ftnalloc(T,n) ((T*) ftestalloc(sizeof(T)*(n)))
 #define tnalloc(T,n) ((T*) testalloc(sizeof(T)*(n)))
-#define trealloc(T,p,n) ((T*) testrealloc((malloc_type)(p), sizeof(T)*(n)))
-#define tfree(p) free((malloc_type)(p))
+#define trealloc(T,p,n) ((T*) testrealloc((void *)(p), sizeof(T)*(n)))
+#define tfree(p) free((void *)(p))
 
 time_t now (void);
 void awrite (char const *, size_t, FILE *);

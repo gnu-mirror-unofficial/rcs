@@ -1042,25 +1042,6 @@ typedef $fread_type fread_type; /* type returned by fread() and fwrite() */
 typedef $freadarg_type freadarg_type; /* type of their size arguments */
 EOF
 
-$ech >&3 "$0: configuring malloc_type $dots"
-cat >a.c <<EOF
-#include "$A_H"
-typedef void *malloc_type;
-#ifndef malloc
-	malloc_type malloc();
-#endif
-static malloc_type identity (malloc_type);
-static malloc_type identity(x) malloc_type x; { return x; }
-int main() { return (!identity(malloc(1))); }
-EOF
-$PREPARE_CC || exit
-if $CS a.c $LS >&2 && $CS_OK
-then t=void
-else t=char
-fi
-echo >&3 $t
-echo "typedef $t *malloc_type; /* type returned by malloc() */"
-
 $ech >&3 "$0: configuring has_getcwd $dots"
 cat >a.c <<EOF
 #include "$A_H"
@@ -1883,8 +1864,8 @@ char *getlogin (void);
 char *getenv (char const*);
 void _exit (int) exiting;
 void exit (int) exiting;
-malloc_type malloc (size_t);
-malloc_type realloc (malloc_type,size_t);
+void *malloc (size_t);
+void *realloc (void *,size_t);
 #ifndef EXIT_FAILURE
 #define EXIT_FAILURE 1
 #endif

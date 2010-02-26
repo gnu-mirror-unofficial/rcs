@@ -1,5 +1,14 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Assume `malloc' returns `void *'.
+
+	* rcsbase.h: Do s/malloc_type/void */g.
+	* rcsfnms.c: Likewise.
+	* rcsutil.c: Likewise.
+	* conf.sh: Remove check for `malloc' rv type.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Assume `closedir' (from <dirent.h>) returns `int'.
 
 	* rcsclean.c [HAVE_DIRENT_H]: #include <dirent.h>.
