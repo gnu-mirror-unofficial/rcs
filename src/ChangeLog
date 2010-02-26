@@ -1,5 +1,16 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Assume `closedir' (from <dirent.h>) returns `int'.
+
+	* rcsclean.c [HAVE_DIRENT_H]: #include <dirent.h>.
+	(get_directory): For both func decl and function definition, move
+	out of #if has_dirent block and into "ifdef HAVE_DIRENT_H" block.
+	Also, assume unconditionally that `closedir' returns `int'.
+	(main): Use #ifdef HAVE_DIRENT_H instead of #if has_dirent.
+	* conf.sh: Remove checks for <dirent.h>, `closedir' rv.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Presume availability of `memcmp', `memcpy', `memmove'.
 
 	* rcsedit.c (movelines): Move #define to top-level out of

@@ -21,7 +21,8 @@
 
 #include "rcsbase.h"
 
-#if has_dirent
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
 static int get_directory (char const *, char ***);
 #endif
 
@@ -64,7 +65,7 @@ main (int argc, char **argv)
     {
       if (--argc < 1)
         {
-#			if has_dirent
+#			ifdef HAVE_DIRENT_H
           argc = get_directory (".", &newargv);
           argv = newargv;
           break;
@@ -270,7 +271,7 @@ unlock (struct hshentry *delta)
   return false;
 }
 
-#if has_dirent
+#ifdef HAVE_DIRENT_H
 static int
 get_directory (char const *dirname, char ***aargv)
 /*
@@ -306,12 +307,7 @@ get_directory (char const *dirname, char ***aargv)
       strcpy (a + chars, en);
       chars += s;
     }
-#	if void_closedir
-#		define close_directory(d) (closedir(d), 0)
-#	else
-#		define close_directory(d) closedir(d)
-#	endif
-  if (errno || close_directory (d) != 0)
+  if (errno || closedir (d) != 0)
     efaterror (dirname);
   if (chars)
     a = trealloc (char, a, chars);

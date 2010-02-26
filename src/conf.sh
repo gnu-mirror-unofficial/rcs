@@ -226,9 +226,10 @@ echo >&3 $CS
 
 # standard include files
 # This list must be synced with ../configure.in, q.v.
+# (That is, the one in ../configure.in should be a superset of this one.)
 has_signal=1
 for h in \
-	dirent fcntl limits mach/mach net/errno \
+	fcntl limits mach/mach net/errno \
 	pwd siginfo signal \
 	sys/mman sys/wait ucontext unistd utime vfork
 do
@@ -526,43 +527,6 @@ cat <<EOF
 #endif
 EOF
 rm -f a.c || exit
-
-$ech >&3 "$0: configuring has_dirent, void_closedir $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#if void_closedir
-#	define close_directory(d) (closedir(d), 0)
-#else
-#	define close_directory(d) closedir(d)
-#endif
-int
-main() {
-	DIR *d = opendir(".");
-	struct dirent *e;
-	while ((e = readdir(d)))
-		if (strcmp(e->d_name, "a.c") == 0  &&  close_directory(d) == 0)
-			return (0);
-	return (1);
-}
-EOF
-$PREPARE_CC || exit
-has_dirent=0 ok='does not work'
-void_closedir=? a='/* ' z='*/ '
-for v in 0 1
-do
-	if $CL -Dvoid_closedir=$v a.c $L >&2 && $aout
-	then
-		has_dirent=1 ok=OK
-		void_closedir=$v a= z=
-		case $v in
-		1) ok='OK, but closedir yields void'
-		esac
-		break
-	fi
-done
-echo >&3 $ok
-echo "#define has_dirent $has_dirent /* Do opendir(), readdir(), closedir() work?  */"
-echo "$a#define void_closedir $void_closedir $z/* Does closedir() yield void?  */"
 
 $ech >&3 "$0: configuring has_fchmod $dots"
 cat >a.c <<EOF
