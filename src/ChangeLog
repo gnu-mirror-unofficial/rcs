@@ -1,5 +1,11 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Assume `EXIT_FAILURE' works.
+
+	* conf.sh: Remove check for `EXIT_FAILURE'.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Presume availability of `vfprintf'.
 
 	* rcslex.c (fvfprintf): Move code in #if has_vfprintf

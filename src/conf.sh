@@ -1486,19 +1486,6 @@ cat <<EOF
 #endif
 EOF
 
-$ech >&3 "$0: configuring EXIT_FAILURE $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (EXIT_FAILURE); }
-EOF
-$PREPARE_CC || exit
-if $CL a.c $L >&2 && $aout
-then a= z= ok='will work around bug'
-else a='/* ' z='*/ ' ok=OK
-fi
-echo >&3 $ok
-echo "$a#undef EXIT_FAILURE $z/* Uncomment this if EXIT_FAILURE is broken.  */"
-
 : configuring large_memory
 case "$has_map_fd$has_mmap" in
 *1*) l=1;;
