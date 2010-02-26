@@ -54,7 +54,7 @@ main (int argc, char **argv)
 
         default:
           fprintf (stderr, "ident: usage: ident -{qV} [file...]\n");
-          exitmain (EXIT_FAILURE);
+          return EXIT_FAILURE;
           break;
         }
 
@@ -82,7 +82,7 @@ main (int argc, char **argv)
       reportError ("standard output");
       status = EXIT_FAILURE;
     }
-  exitmain (status);
+  return status;
 }
 
 void

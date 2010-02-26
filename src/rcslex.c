@@ -1414,7 +1414,7 @@ main (int argc, char *argv[])
   if (argc < 2)
     {
       aputs ("No input file\n", stderr);
-      exitmain (EXIT_FAILURE);
+      return EXIT_FAILURE;
     }
   if (!(finptr = Iopen (argv[1], FOPEN_R, (struct stat *) 0)))
     {
@@ -1463,7 +1463,7 @@ main (int argc, char *argv[])
       printf (" | ");
       nextlex ();
     }
-  exitmain (EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
 
 void

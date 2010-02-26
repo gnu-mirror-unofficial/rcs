@@ -379,6 +379,6 @@ main (int argc, char *argv[])
          *argv, prevrev.string, prevdate.string, prevauthor.string,
          prevname.string, prevstate.string);
     }
-  exitmain (EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
 #endif

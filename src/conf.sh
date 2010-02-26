@@ -91,7 +91,7 @@ $CL a.c $L >&2 && {
 }
 echo >&3 OK
 
-$ech >&3 "$0: configuring exitmain $dots"
+$ech >&3 "$0: determining default compiler output file name $dots"
 cat >a.c <<EOF
 #include "a.h"
 int main(argc,argv) int argc; char **argv; { return argc-1; }
@@ -121,17 +121,7 @@ else
 	echo >&3 "$n$0: C compiler creates neither a.out nor a.exe."
 	exit 1
 fi
-e='exit(n), 3 /* lint fodder */'
-if $aout -
-then :
-elif $aout
-then e=n
-fi
-case $e in
-n) echo >&3 OK;;
-*) echo >&3 "return does not work; using exit instead"
-esac
-echo "#define exitmain(n) return $e /* how to exit from main() */"
+echo >&3 $aout
 
 : PREPARE_CC
 case $A_H in
@@ -158,7 +148,7 @@ main() {
 #		define f(x) (*p)(x)
 #	endif
 	/* Some buggy linkers seem to need the getchar.  */
-	exitmain(getchar() != '#' || fileno(stdout) != 1);
+	return (getchar() != '#' || fileno(stdout) != 1);
 }
 #if syntax_error
 syntax error
@@ -243,7 +233,7 @@ do
 	cat >a.c <<EOF
 #include "$A_H"
 $i
-int main(){ exitmain(0); }
+int main(){ return (0); }
 EOF
 	ok=OK
 	$PREPARE_CC || exit
@@ -274,7 +264,7 @@ $ech >&3 "$0: configuring has_sys_param_h $dots"
 cat >a.c <<EOF
 #include "$A_H"
 #include <sys/param.h>
-int main() { exitmain(0); }
+int main() { return (0); }
 EOF
 $PREPARE_CC || exit
 if $CS a.c $LS >&2 && $CS_OK
@@ -289,7 +279,7 @@ echo "#define has_sys_param_h $h /* Does #include <sys/param.h> work?  */"
 $ech >&3 "$0: configuring errno $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(errno != errno); }
+int main() { return (errno != errno); }
 EOF
 $PREPARE_CC || exit
 if $CS a.c $LS >&2
@@ -316,9 +306,9 @@ main() {
 			printf("EINVAL\n");
 		else
 			printf("%d\n", errno);
-		exitmain(ferror(stdout) || fclose(stdout)!=0);
+		return (ferror(stdout) || fclose(stdout)!=0);
 	}
-	exitmain(1);
+	return (1);
 }
 EOF
 $PREPARE_CC a.sym* || exit
@@ -351,7 +341,7 @@ EOF
 cat >a.c <<EOF
 #include "$A_H"
 t x;
-int main() { exitmain(0); }
+int main() { return (0); }
 EOF
 for t in mode_t off_t pid_t sig_atomic_t size_t ssize_t time_t uid_t
 do
@@ -398,8 +388,8 @@ do
 	int main() {
 		enum Boolean *p = arzero[sigzero];
 		switch (zero) {
-			case false: exitmain(!p || **aazero);
-			default: exitmain(hpux8_05barf(1));
+			case false: return (!p || **aazero);
+			default: return (hpux8_05barf(1));
 		}
 	}
 EOF
@@ -483,7 +473,7 @@ cat >a.c <<EOF
 int
 main() {
 	int f;
-	exitmain(
+	return (
 		(f = open("a.c", O_RDONLY)) < 0 ||
 		chmod("a.c", 0) != 0 ||
 		close(f) != 0
@@ -511,7 +501,7 @@ char buf[17000];
 int
 main() {
 	int f;
-	exitmain(
+	return (
 		(f = creat0("a.d")) < 0  ||
 		write(f, buf, sizeof(buf)) != sizeof(buf) ||
 		close(f) != 0
@@ -530,7 +520,7 @@ rm -f a.d || exit
 $ech >&3 "$0: configuring bad_fopen_wplus $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(!fopen("a.d","w+")); }
+int main() { return (!fopen("a.d","w+")); }
 EOF
 $PREPARE_CC || exit
 if echo nonempty >a.d && $CL a.c $L >&2 && $aout && test ! -s a.d
@@ -584,8 +574,8 @@ main() {
 	struct dirent *e;
 	while ((e = readdir(d)))
 		if (strcmp(e->d_name, "a.c") == 0  &&  close_directory(d) == 0)
-			exitmain(0);
-	exitmain(1);
+			return (0);
+	return (1);
 }
 EOF
 $PREPARE_CC || exit
@@ -613,7 +603,7 @@ cat >a.c <<EOF
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
 #endif
-int main() { exitmain(fchmod(STDIN_FILENO,0) != 0); }
+int main() { return (fchmod(STDIN_FILENO,0) != 0); }
 EOF
 $PREPARE_CC || exit
 if $CL a.c $L >&2 && $aout <a.c && test ! -r a.c
@@ -637,7 +627,7 @@ cat >a.c <<EOF
 #define STDIN_FILENO 0
 #endif
 int main() {
-	exitmain(
+	return (
 		getchar() == EOF
 		|| fseek(stdin, 0L, SEEK_SET) != 0
 		|| fflush(stdin) != 0
@@ -657,7 +647,7 @@ rm -f a.c || exit
 $ech >&3 "$0: configuring has_fputs $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(fputs("Hello\"\nworld", stdout) < 0); }
+int main() { return (fputs("Hello\"\nworld", stdout) < 0); }
 EOF
 Hello='Hello"
 world'
@@ -689,8 +679,8 @@ int
 main(argc, argv) int argc; char **argv; {
 	int f = creat0200(argv[1]);
 	if (f<0 || write(f,"abc",3)!=3 || ftruncate(f,(off_t)0)!=0 || close(f)!=0)
-		exitmain(1);
-	exitmain(0);
+		return (1);
+	return (0);
 }
 EOF
 $PREPARE_CC a.a || exit
@@ -704,7 +694,7 @@ echo "#define has_ftruncate $h /* Does ftruncate() work?  */"
 $ech >&3 "$0: configuring has_getuid $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(getuid()!=getuid()); }
+int main() { return (getuid()!=getuid()); }
 EOF
 $PREPARE_CC || exit
 if ($CL a.c $L && $aout) >&2
@@ -722,7 +712,7 @@ case $has_getuid in
 	a= z=
 	cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(!getpwuid(0)); }
+int main() { return (!getpwuid(0)); }
 EOF
 	$PREPARE_CC || exit
 	if ($CL a.c $L && $aout) >&2
@@ -736,7 +726,7 @@ echo "$a#define has_getpwuid $h $z/* Does getpwuid() work?  */"
 $ech >&3 "$0: configuring has_kill $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(kill(getpid(), 0) != 0); }
+int main() { return (kill(getpid(), 0) != 0); }
 EOF
 $PREPARE_CC || exit
 if ($CL a.c $L && $aout) >&2
@@ -749,7 +739,7 @@ echo >&3 $ok
 $ech >&3 "$0: configuring has_memcmp $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(memcmp("beautiful","beautiful",10) != 0); }
+int main() { return (memcmp("beautiful","beautiful",10) != 0); }
 EOF
 $PREPARE_CC || exit
 if ($CL a.c $L && $aout) >&2
@@ -766,7 +756,7 @@ char a[3];
 int
 main() {
 	memcpy(a,"xy",3);
-	exitmain(strcmp(a,"xy")!=0);
+	return (strcmp(a,"xy")!=0);
 }
 EOF
 $PREPARE_CC || exit
@@ -785,7 +775,7 @@ int
 main() {
 	strcpy(a, "xy");
 	memmove(a+1, a, 3);
-	exitmain(strcmp(a,"xxy")!=0);
+	return (strcmp(a,"xxy")!=0);
 }
 EOF
 $PREPARE_CC || exit
@@ -829,13 +819,13 @@ main(argc, argv) int argc; char **argv; {
 
 	if (fstat(STDIN_FILENO, &b) != 0) {
 		perror("fstat");
-		exitmain(1);
+		return (1);
 	}
 #	if TRY_MAP_FD
 		kr = map_fd(STDIN_FILENO, 0, &va, TRUE, b.st_size);
 		if (kr != KERN_SUCCESS) {
 			mach_error("map_fd", kr);
-			exitmain(1);
+			return (1);
 		}
 		a = (char *) va;
 #	else
@@ -845,15 +835,15 @@ main(argc, argv) int argc; char **argv; {
 		);
 		if (a == (char *)MAP_FAILED) {
 			perror("mmap");
-			exitmain(1);
+			return (1);
 		}
 		if (!MADVISE_OK) {
 			perror("madvise");
-			exitmain(1);
+			return (1);
 		}
 #	endif
 	if (*a != CHAR1)
-		exitmain(1);
+		return (1);
 	if (1 < argc) {
 		pid_t p, w;
 		int f = creat(argv[1], 0);
@@ -867,11 +857,11 @@ main(argc, argv) int argc; char **argv; {
 #		endif
 		if (f<0 ? errno!=ETXTBSY : close(f)!=0) {
 			perror(argv[1]);
-			exitmain(1);
+			return (1);
 		}
 		if ((p = fork()) < 0) {
 			perror("fork");
-			exitmain(1);
+			return (1);
 		}
 		if (!p)
 			/* Refer to nonexistent storage, causing a signal in the child.  */
@@ -879,7 +869,7 @@ main(argc, argv) int argc; char **argv; {
 		while ((w = wait(&s)) != p)
 			if (w < 0) {
 				perror("wait");
-				exitmain(1);
+				return (1);
 			}
 		s = WIFSIGNALED(s) ? WTERMSIG(s) : 0;
 	}
@@ -887,12 +877,12 @@ main(argc, argv) int argc; char **argv; {
 		kr = vm_deallocate(task_self(), va, (vm_size_t) b.st_size);
 		if (kr != KERN_SUCCESS) {
 			mach_error("vm_deallocate", kr);
-			exitmain(1);
+			return (1);
 		}
 #	else
 		if (munmap(a, b.st_size)  !=  0) {
 			perror("munmap");
-			exitmain(1);
+			return (1);
 		}
 #	endif
 	if (1 < argc) {
@@ -904,7 +894,7 @@ main(argc, argv) int argc; char **argv; {
 #		endif
 		if (s) printf("%d\n", s);
 	}
-	exitmain(ferror(stdout) || fclose(stdout)!=0);
+	return (ferror(stdout) || fclose(stdout)!=0);
 }
 EOF
 # AIX 3.2.0 read-only mmap updates last-modified time of file!  Check for this.
@@ -978,7 +968,7 @@ echo "$a#define mmap_signal $mmap_signal $z/* signal received if you reference n
 $ech >&3 "$0: configuring has_rename, bad_a_rename, bad_b_rename $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(rename("a.a","a.b") != 0); }
+int main() { return (rename("a.a","a.b") != 0); }
 EOF
 echo a >a.a && $PREPARE_CC a.b || exit
 if ($CL a.c $L && $aout && test -f a.b) >&2
@@ -1018,9 +1008,9 @@ main() {
 /* Guess, don't test.  Ugh.  Testing would require running conf.sh setuid.  */
 /* If the guess is wrong, a setuid RCS will detect the problem at runtime.  */
 #if !_POSIX_VERSION
-	exitmain(1);
+	return (1);
 #else
-	exitmain(seteuid(geteuid()) != 0);
+	return (seteuid(geteuid()) != 0);
 #endif
 }
 EOF
@@ -1041,7 +1031,7 @@ case $h in
 0)
 	cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(setuid(getuid()) != 0); }
+int main() { return (setuid(getuid()) != 0); }
 EOF
 	$PREPARE_CC || exit
 	($CL a.c $L && $aout) >&2 && h=1 ok='OK, I guess'
@@ -1062,7 +1052,7 @@ int
 main(argc, argv) int argc; char **argv; {
 	struct sigaction s;
 	if (sigaction(SIGINT, (struct sigaction*)0, &s) != 0)
-		exitmain(1);
+		return (1);
 #	if has_sa_sigaction
 		s.sa_sigaction = catchsig;
 #	else
@@ -1072,15 +1062,15 @@ main(argc, argv) int argc; char **argv; {
 		s.sa_flags |= SA_SIGINFO;
 #	endif
 	if (sigaddset(&s.sa_mask, SIGINT) != 0)
-		exitmain(1);
+		return (1);
 	if (sigaction(SIGINT, &s, (struct sigaction*)0) != 0)
-		exitmain(1);
+		return (1);
 #	if has_kill
 		kill(getpid(), SIGINT);
 #	else
 		raise(SIGINT);
 #	endif
-	exitmain(gotsig != 1);
+	return (gotsig != 1);
 }
 EOF
 $PREPARE_CC || exit
@@ -1117,10 +1107,10 @@ main(argc, argv) int argc; char **argv; {
 #	if has_kill
 		while (--argc)
 			kill(getpid(), SIGINT);
-		exitmain(0);
+		return (0);
 #	else
 		/* Pretend that sig_zaps_handler; better safe than sorry.  */
-		exitmain(2 < argc);
+		return (2 < argc);
 #	endif
 }
 EOF
@@ -1177,9 +1167,9 @@ int
 main() {
 	sigblock(sigmask(SIGHUP));
 #	if has_kill
-		exitmain(kill(getpid(), SIGHUP) != 0);
+		return (kill(getpid(), SIGHUP) != 0);
 #	else
-		exitmain(raise(SIGHUP) != 0);
+		return (raise(SIGHUP) != 0);
 #	endif
 }
 EOF
@@ -1208,7 +1198,7 @@ cat >a.c <<EOF
 int
 main() {
 	char b;
-	exitmain(!(
+	return (!(
 		fread(&b, (freadarg_type)1, (freadarg_type)1, stdin) == 1  &&
 		b==CHAR1
 	));
@@ -1250,7 +1240,7 @@ typedef void *malloc_type;
 #endif
 static malloc_type identity (malloc_type);
 static malloc_type identity(x) malloc_type x; { return x; }
-int main() { exitmain(!identity(malloc(1))); }
+int main() { return (!identity(malloc(1))); }
 EOF
 $PREPARE_CC || exit
 if $CS a.c $LS >&2 && $CS_OK
@@ -1267,7 +1257,7 @@ cat >a.c <<EOF
 	char *getcwd();
 #endif
 static char buf[10000];
-int main() { exitmain(!getcwd(buf,10000)); }
+int main() { return (!getcwd(buf,10000)); }
 EOF
 $PREPARE_CC || exit
 if ($CL a.c $L && $aout) >&2
@@ -1290,7 +1280,7 @@ case $has_getcwd in
 	char *getwd();
 #endif
 static char buf[MAXPATHLEN];
-int main() { exitmain(!getwd(buf)); }
+int main() { return (!getwd(buf)); }
 EOF
 	$PREPARE_CC || exit
 	if ($CL a.c $L && $aout) >&2
@@ -1312,7 +1302,7 @@ int
 main() {
 	char b[9];
 	strcpy(b, "a.XXXXXX");
-	exitmain(!mktemp(b));
+	return (!mktemp(b));
 }
 EOF
 $PREPARE_CC || exit
@@ -1343,23 +1333,23 @@ int
 main() {
 	struct sigaction s;
 	if (sigaction(SIGINT, (struct sigaction*)0, &s) != 0)
-		exitmain(1);
+		return (1);
 #	if has_sa_sigaction
 		s.sa_sigaction = catchsig;
 #	else
 		s.sa_handler = catchsig;
 #	endif
 	if (sigaddset(&s.sa_mask, SIGINT) != 0)
-		exitmain(1);
+		return (1);
 	s.sa_flags |= SA_SIGINFO;
 	if (sigaction(SIGINT, &s, (struct sigaction*)0) != 0)
-		exitmain(1);
+		return (1);
 #	if has_kill
 		kill(getpid(), SIGINT);
 #	else
 		raise(SIGINT);
 #	endif
-	exitmain(1);
+	return (1);
 }
 EOF
 	$PREPARE_CC || exit
@@ -1376,7 +1366,7 @@ case $has_signal in
 	$ech >&3 "$0: configuring has_psignal $dots"
 	cat >a.c <<EOF
 #include "$A_H"
-int main() { psignal(SIGINT, ""); exitmain(0); }
+int main() { psignal(SIGINT, ""); return (0); }
 EOF
 	$PREPARE_CC || exit
 	if ($CL a.c $L && $aout) >&2
@@ -1394,7 +1384,7 @@ case $has_psiginfo in
 	cat >a.c <<EOF
 #include "$A_H"
 siginfo_t a;
-int main() { exitmain(a.si_errno); }
+int main() { return (a.si_errno); }
 EOF
 	$PREPARE_CC || exit
 	if $CS a.c $LS >&2 && $CS_OK
@@ -1415,7 +1405,7 @@ case $has_signal,$has_psignal in
 #if !defined(sys_siglist) && declare_sys_siglist
 	extern char const * const sys_siglist[];
 #endif
-int main() { exitmain(!sys_siglist[1][0]); }
+int main() { return (!sys_siglist[1][0]); }
 EOF
 	$PREPARE_CC || exit
 	h=0 ok=absent
@@ -1435,7 +1425,7 @@ cat >a.c <<EOF
 #ifndef strchr
 	char *strchr();
 #endif
-int main() {exitmain(!strchr("abc", 'c'));}
+int main() {return (!strchr("abc", 'c'));}
 EOF
 $PREPARE_CC || exit
 if ($CL a.c $L && $aout) >&2
@@ -1451,7 +1441,7 @@ cat >a.c <<EOF
 #ifndef strrchr
 	char *strrchr();
 #endif
-int main() {exitmain(!strrchr("abc", 'c'));}
+int main() {return (!strrchr("abc", 'c'));}
 EOF
 $PREPARE_CC || exit
 if ($CL a.c $L && $aout) >&2
@@ -1464,7 +1454,7 @@ echo "$a#define strrchr rindex $z/* Use old-fashioned name for strrchr()?  */"
 $ech >&3 "$0: configuring bad_unlink $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(unlink("a.c") != 0); }
+int main() { return (unlink("a.c") != 0); }
 EOF
 $PREPARE_CC && chmod -w a.c || exit
 if ($CL a.c $L && $aout) >&2 && test ! -f a.c
@@ -1596,26 +1586,26 @@ int main() {
 		pid_t p = fork();
 		if (p < 0) {
 			perror("fork");
-			exitmain(2);
+			return (2);
 		}
 		if (p == 0)
 			_exit(0);
 		while (wait(&status) != p) {
 			if (errno == ECHILD)
-				exitmain(1);
+				return (1);
 			if (errno != EINTR) {
 				perror("wait");
-				exitmain(2);
+				return (2);
 			}
 		}
 #	else
 #		if has_system
 			if (system("true") != 0)
-				exitmain(1);
+				return (1);
 #		endif
 #	endif
 	}
-	exitmain(0);
+	return (0);
 }
 EOF
 $PREPARE_CC || exit
@@ -1639,7 +1629,7 @@ echo '#define RCS_SHELL "/bin/sh" /* shell to run RCS subprograms */'
 $ech >&3 "$0: configuring has_printf_dot $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { printf("%.2d", 1); exitmain(ferror(stdout) || fclose(stdout)!=0); }
+int main() { printf("%.2d", 1); return (ferror(stdout) || fclose(stdout)!=0); }
 EOF
 $PREPARE_CC && $CL a.c $L >&2 && r=`$aout` || exit
 case $r in
@@ -1667,7 +1657,7 @@ int p(char const*format,...)
 	va_end(args);
 	return r;
 }
-int main() { exitmain(p("hello") != 5); }
+int main() { return (p("hello") != 5); }
 EOF
 $PREPARE_CC || exit
 h=0 p=0
@@ -1724,7 +1714,7 @@ p(char const*format,...)
 #	endif
 	va_end(args);
 }
-int main() { p(""); exitmain(0); }
+int main() { p(""); return (0); }
 EOF
 	$PREPARE_CC || exit
 	if ($CL -DTRY__DOPRINTF=1 a.c $L && $aout) >&2
@@ -1752,7 +1742,7 @@ echo "$a#define has__doprnt $h $z/* Does _doprnt() work?  */"
 $ech >&3 "$0: configuring EXIT_FAILURE $dots"
 cat >a.c <<EOF
 #include "$A_H"
-int main() { exitmain(EXIT_FAILURE); }
+int main() { return (EXIT_FAILURE); }
 EOF
 $PREPARE_CC || exit
 if $CL a.c $L >&2 && $aout
@@ -1781,7 +1771,7 @@ main() {
 	printf("#ifndef LONG_MAX\n");
 	printf("#define LONG_MAX %ldL /* long maximum */\n", long_max);
 	printf("#endif\n");
-	exitmain(ferror(stdout) || fclose(stdout)!=0);
+	return (ferror(stdout) || fclose(stdout)!=0);
 }
 EOF
 $PREPARE_CC && $CL a.c $L >&2 && $aout || exit
@@ -1795,7 +1785,7 @@ $ech >&3 "$0: configuring struct utimbuf $dots"
 cat >a.c <<EOF
 #include "$A_H"
 static struct utimbuf s;
-int main() { s.actime = s.modtime = 1; exitmain(utime("a.c", &s) != 0); }
+int main() { s.actime = s.modtime = 1; return (utime("a.c", &s) != 0); }
 EOF
 $PREPARE_CC || exit
 if ($CL a.c $L && $aout) >&2
@@ -1875,9 +1865,9 @@ static struct stat s, ss;
 static char f[3];
 int
 main() {
-	f[0] = SLASH; if (stat(f, &s ) != 0) exitmain(1);
-	f[1] = SLASH; if (stat(f, &ss) != 0) exitmain(1);
-	exitmain(!same_file(s, ss, 0));
+	f[0] = SLASH; if (stat(f, &s ) != 0) return (1);
+	f[1] = SLASH; if (stat(f, &ss) != 0) return (1);
+	return (!same_file(s, ss, 0));
 }
 EOF
 $PREPARE_CC || exit
@@ -1899,7 +1889,7 @@ isSLASH(c) int c; {
 #endif
 int
 main(argc, argv) int argc; char **argv; {
-	exitmain(1<argc && !ROOTPATH(argv[1]));
+	return (1<argc && !ROOTPATH(argv[1]));
 }
 EOF
 $PREPARE_CC && ($CL a.c $L && $aout) >&2 || exit
@@ -2113,7 +2103,7 @@ cat >a.c <<EOF
 #else
 #	include "a.hb"
 #endif
-int main() { exitmain(0); }
+int main() { return (0); }
 EOF
 
 # Comment out lines in a.ha that the compiler rejects.

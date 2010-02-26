@@ -398,8 +398,7 @@ main (int argc, char **argv)
 
   tempunlink ();
   Ofclose (workstdout);
-  exitmain (exitstatus);
-
+  return exitstatus;
 }                               /* end of main (co) */
 
 static void

@@ -352,7 +352,7 @@ main (int argc, char **argv)
            out);
       }
   Ofclose (out);
-  exitmain (exitstatus);
+  return exitstatus;
 }
 
 static void

@@ -198,7 +198,7 @@ main (int argc, char **argv)
         }
     }
   tempunlink ();
-  exitmain (nerror ? DIFF_TROUBLE : status);
+  return nerror ? DIFF_TROUBLE : status;
 }
 
 void

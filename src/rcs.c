@@ -512,7 +512,7 @@ main (int argc, char **argv)
       }
 
   tempunlink ();
-  exitmain (exitstatus);
+  return exitstatus;
 }                               /* end of main (rcs) */
 
 static void

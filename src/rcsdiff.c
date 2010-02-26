@@ -380,7 +380,7 @@ main (int argc, char **argv)
       }
 
   tempunlink ();
-  exitmain (exitstatus);
+  return exitstatus;
 }
 
 static void

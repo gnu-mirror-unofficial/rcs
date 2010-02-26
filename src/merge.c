@@ -73,7 +73,7 @@ main (int argc, char **argv)
 
         case 'V':
           printf ("%s%s", cmdid, COMMAND_VERSION);
-          exitmain (0);
+          return 0;
 
         default:
           badoption (a - 2);
@@ -96,7 +96,7 @@ main (int argc, char **argv)
 
   if (nerror)
     exiterr ();
-  exitmain (merge (tostdout, edarg, label, arg));
+  return merge (tostdout, edarg, label, arg);
 }
 
 void

@@ -1,5 +1,25 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] To return from `main', use `return' directly.
+
+	* ci.c (main): Use `return', not `exitmain'.
+	* co.c (main): Likewise.
+	* ident.c (main): Likewise.
+	* merge.c (main): Likewise.
+	* rcs.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcskeep.c (main): Likewise.
+	* rcslex.c (main): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rcsrev.c (main): Likewise.
+	* rcssyn.c (main): Likewise.
+	* rlog.c (main): Likewise.
+	* conf.sh: Remove section probing validity of
+	`return' from `main'.  Also, do s/exitmain/return/g.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add braces to disambiguate `else' clause.
 
 	* ci.c (removelock): Add braces to disambiguate `else'.

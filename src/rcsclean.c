@@ -230,7 +230,7 @@ main (int argc, char **argv)
   tempunlink ();
   if (!quietflag)
     Ofclose (stdout);
-  exitmain (exitstatus);
+  return exitstatus;
 }
 
 static void
