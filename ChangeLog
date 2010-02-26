@@ -1,5 +1,11 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Don't bother checking `const', `volatile' handling.
+
+	* conf.sh: Remove checks for `const', `volatile' handling.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move check for system headers into configure.in.
 
 	* configure.in (AC_CHECK_HEADERS_ONCE): New.
