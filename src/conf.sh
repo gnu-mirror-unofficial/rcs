@@ -1431,7 +1431,7 @@ esac
 echo >&3 $ok
 echo "#define has_printf_dot $h /* Does \"%.2d\" print leading 0?  */"
 
-$ech >&3 "$0: configuring has_vfprintf, has_attribute_format_printf $dots"
+$ech >&3 "$0: configuring has_attribute_format_printf $dots"
 cat >a.c <<EOF
 #include "$A_H"
 #if has_attribute_format_printf
@@ -1470,8 +1470,8 @@ $0: Please use a working stdio library instead."
 	fi
 fi
 echo >&3 $h, $p
+h=1
 cat <<EOF
-#define has_vfprintf $h /* Does vfprintf() work?  */
 #define has_attribute_format_printf $p /* Does __attribute__((format(printf,N,N+1))) work?  */
 #if has_attribute_format_printf
 #	define printf_string(m, n) __attribute__((format(printf, m, n)))
@@ -1485,51 +1485,6 @@ cat <<EOF
 #	define printf_string_exiting(m, n) printf_string(m, n) exiting
 #endif
 EOF
-
-case $h in
-1)
-	h=? a='/* ' z='*/ ';;
-*)
-	$ech >&3 "$0: configuring has__doprintf $dots"
-	a= z=
-	cat >a.c <<EOF
-#include "$A_H"
-static int
-p(char const*format,...)
-{
-	va_list args;
-	va_start (args, format);
-#	if TRY__DOPRINTF
-		_doprintf(stderr, format, args);
-#	else
-		_doprnt(format, args, stderr);
-#	endif
-	va_end(args);
-}
-int main() { p(""); return (0); }
-EOF
-	$PREPARE_CC || exit
-	if ($CL -DTRY__DOPRINTF=1 a.c $L && $aout) >&2
-	then h=1 ok=OK
-	else h=0 ok='does not work'
-	fi
-	echo >&3 $ok
-esac
-echo "$a#define has__doprintf $h $z/* Does _doprintf() work?  */"
-case $h in
-0)
-	$ech >&3 "$0: configuring has__doprnt $dots"
-	$PREPARE_CC || exit
-	if ($CL a.c $L && $aout) >&2
-	then h=1 ok=OK
-	else h=0 ok='does not work'
-	fi
-	echo >&3 $ok
-	a= z=;;
-*)
-	h=? a='/* ' z='*/ '
-esac
-echo "$a#define has__doprnt $h $z/* Does _doprnt() work?  */"
 
 $ech >&3 "$0: configuring EXIT_FAILURE $dots"
 cat >a.c <<EOF

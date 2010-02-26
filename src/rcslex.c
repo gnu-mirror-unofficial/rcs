@@ -1370,25 +1370,8 @@ void
 fvfprintf (FILE * stream, char const *format, va_list args)
 /* like vfprintf, except abort program on error */
 {
-#if has_vfprintf
   if (vfprintf (stream, format, args) < 0)
     Oerror ();
-#else
-#	if has__doprintf
-  _doprintf (stream, format, args);
-#	else
-#	if has__doprnt
-  _doprnt (format, args, stream);
-#	else
-  int *a = (int *) args;
-  fprintf (stream, format,
-           a[0], a[1], a[2], a[3], a[4],
-           a[5], a[6], a[7], a[8], a[9]);
-#	endif
-#	endif
-  if (ferror (stream))
-    Oerror ();
-#endif
 }
 
 void

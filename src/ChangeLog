@@ -1,5 +1,13 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Presume availability of `vfprintf'.
+
+	* rcslex.c (fvfprintf): Move code in #if has_vfprintf
+	block up; delete #else block.
+	* conf.sh: Remove checks for `vfprintf', `_doprintf', `_doprnt'.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Assume `malloc' returns `void *'.
 
 	* rcsbase.h: Do s/malloc_type/void */g.
