@@ -168,7 +168,7 @@ nextlex (void)
  * Assumption: nextc contains the next character.
  */
 {
-  register c;
+  register int c;
   declarecache;
   register FILE *frew;
   register char *sp;
@@ -573,7 +573,7 @@ readstring (void)
 /* If foutptr is set, copy every character read to foutptr.    */
 /* Does not advance nextlex at the end.                        */
 {
-  register c;
+  register int c;
   declarecache;
   register FILE *frew;
   register RILE *fin;
@@ -610,7 +610,7 @@ printstring (void)
  * Does not advance nextlex at the end.
  */
 {
-  register c;
+  register int c;
   declarecache;
   register FILE *fout;
   register RILE *fin;
@@ -649,7 +649,7 @@ savestring (struct buf *target)
  * Yield a copy of *TARGET, except with exact length.
  */
 {
-  register c;
+  register int c;
   declarecache;
   register FILE *frew;
   register char *tp;

@@ -55,7 +55,7 @@ mainProg (rcsdiffId, "rcsdiff")
   struct hshentry *target;
   char *a, *dcp, **newargv;
   int no_diff_means_no_output;
-  register c;
+  register int c;
 
   exitstatus = DIFF_SUCCESS;
 

@@ -1,5 +1,16 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Say "register int c", not just "register c".
+
+	* rcxlex.c (nextlex, readstring)
+	(printstring, savestring): Say "register int c".
+	* rcsedit.c (copystring, expandline): Likewise.
+	* rcs.c (getaccessor, getstates): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rlog.c (getauthor): Likewise.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use Standard C syntax for function definitions.
 
 	* ci.c: Throughout, use Standard C syntax for function definitions.

@@ -592,7 +592,7 @@ getaccessor (char *opt, enum changeaccess command)
 /*		and store in chaccess				*/
 
 {
-  register c;
+  register int c;
   register char *sp;
 
   sp = opt;
@@ -655,7 +655,7 @@ getstates (char *sp)
 {
   char const *temp;
   struct Status *pt;
-  register c;
+  register int c;
 
   while ((c = *++sp) == ' ' || c == '\t' || c == '\n')
     continue;
