@@ -687,22 +687,24 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
             continue;
 
           if (!*bp)
-            if (s || *sp != '.')
-              break;
-            else
-              {
-                /* Insert default branch before initial `.'.  */
-                char const *b;
-                if (Dbranch)
-                  b = Dbranch;
-                else if (Head)
-                  b = Head->num;
-                else
-                  break;
-                getbranchno (b, target);
-                bp = tp = target->string;
-                tlim = tp + target->size;
-              }
+            {
+              if (s || *sp != '.')
+                break;
+              else
+                {
+                  /* Insert default branch before initial `.'.  */
+                  char const *b;
+                  if (Dbranch)
+                    b = Dbranch;
+                  else if (Head)
+                    b = Head->num;
+                  else
+                    break;
+                  getbranchno (b, target);
+                  bp = tp = target->string;
+                  tlim = tp + target->size;
+                }
+            }
         }
 
       while ((*tp++ = *bp++))

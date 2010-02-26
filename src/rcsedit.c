@@ -917,13 +917,15 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
                    RCSv == VERSION (3) && delta->lockedby ? "Locked"
                    : delta->state);
           if (delta->lockedby)
-            if (VERSION (5) <= RCSv)
-              {
-                if (locker_expansion || exp == KEYVALLOCK_EXPAND)
-                  aprintf (out, " %s", delta->lockedby);
-              }
-            else if (RCSv == VERSION (4))
-              aprintf (out, " Locker: %s", delta->lockedby);
+            {
+              if (VERSION (5) <= RCSv)
+                {
+                  if (locker_expansion || exp == KEYVALLOCK_EXPAND)
+                    aprintf (out, " %s", delta->lockedby);
+                }
+              else if (RCSv == VERSION (4))
+                aprintf (out, " Locker: %s", delta->lockedby);
+            }
           break;
         case Locker:
           if (delta->lockedby)
@@ -1594,15 +1596,17 @@ addlock (struct hshentry *delta, int verbose)
 
   for (next = Locks; next; next = next->nextlock)
     if (cmpnum (delta->num, next->delta->num) == 0)
-      if (strcmp (getcaller (), next->login) == 0)
-        return 0;
-      else
-        {
-          if (verbose)
-            rcserror ("Revision %s is already locked by %s.",
-                      delta->num, next->login);
-          return -1;
-        }
+      {
+        if (strcmp (getcaller (), next->login) == 0)
+          return 0;
+        else
+          {
+            if (verbose)
+              rcserror ("Revision %s is already locked by %s.",
+                        delta->num, next->login);
+            return -1;
+          }
+      }
   next = ftalloc (struct rcslock);
   delta->lockedby = next->login = getcaller ();
   next->delta = delta;
@@ -1624,18 +1628,20 @@ addsymbol (char const *num, char const *name, int rebind)
 
   for (next = Symbols; next; next = next->nextassoc)
     if (strcmp (name, next->symbol) == 0)
-      if (strcmp (next->num, num) == 0)
-        return 0;
-      else if (rebind)
-        {
-          next->num = num;
-          return 1;
-        }
-      else
-        {
-          rcserror ("symbolic name %s already bound to %s", name, next->num);
-          return -1;
-        }
+      {
+        if (strcmp (next->num, num) == 0)
+          return 0;
+        else if (rebind)
+          {
+            next->num = num;
+            return 1;
+          }
+        else
+          {
+            rcserror ("symbolic name %s already bound to %s", name, next->num);
+            return -1;
+          }
+      }
   next = ftalloc (struct assoc);
   next->symbol = name;
   next->num = num;
@@ -1694,45 +1700,47 @@ dorewrite (int lockflag, int changed)
   int r = 0, e;
 
   if (lockflag)
-    if (changed)
-      {
-        if (changed < 0)
-          return -1;
-        putadmin ();
-        puttree (Head, frewrite);
-        aprintf (frewrite, "\n\n%s%c", Kdesc, nextc);
-        foutptr = frewrite;
-      }
-    else
-      {
+    {
+      if (changed)
+        {
+          if (changed < 0)
+            return -1;
+          putadmin ();
+          puttree (Head, frewrite);
+          aprintf (frewrite, "\n\n%s%c", Kdesc, nextc);
+          foutptr = frewrite;
+        }
+      else
+        {
 #			if bad_creat0
-        int nr = !!frewrite, ne = 0;
+          int nr = !!frewrite, ne = 0;
 #			endif
-        ORCSclose ();
-        seteid ();
-        ignoreints ();
+          ORCSclose ();
+          seteid ();
+          ignoreints ();
 #			if bad_creat0
-        if (nr)
-          {
-            nr = un_link (newRCSname);
-            ne = errno;
-            keepdirtemp (newRCSname);
-          }
+          if (nr)
+            {
+              nr = un_link (newRCSname);
+              ne = errno;
+              keepdirtemp (newRCSname);
+            }
 #			endif
-        r = un_link (lockname);
-        e = errno;
-        keepdirtemp (lockname);
-        restoreints ();
-        setrid ();
-        if (r != 0)
-          enerror (e, lockname);
+          r = un_link (lockname);
+          e = errno;
+          keepdirtemp (lockname);
+          restoreints ();
+          setrid ();
+          if (r != 0)
+            enerror (e, lockname);
 #			if bad_creat0
-        if (nr != 0)
-          {
-            enerror (ne, newRCSname);
-            r = -1;
-          }
+          if (nr != 0)
+            {
+              enerror (ne, newRCSname);
+              r = -1;
+            }
 #			endif
+        }
       }
   return r;
 }

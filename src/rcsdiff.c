@@ -295,14 +295,16 @@ main (int argc, char **argv)
         Izclose (&workptr);
 #if DIFF_L
         if (diff_label2)
-          if (revnums == 2)
-            *diff_label2 =
-              setup_label (&labelbuf[1], target->num, target->date);
-          else
-            {
-              time2date (workstat.st_mtime, date2);
-              *diff_label2 = setup_label (&labelbuf[1], (char *) 0, date2);
-            }
+          {
+            if (revnums == 2)
+              *diff_label2 =
+                setup_label (&labelbuf[1], target->num, target->date);
+            else
+              {
+                time2date (workstat.st_mtime, date2);
+                *diff_label2 = setup_label (&labelbuf[1], (char *) 0, date2);
+              }
+          }
 #endif
 
         diagnose ("retrieving revision %s\n", xrev1);

@@ -333,17 +333,19 @@ getsstdin (char const *option, char const *name,
        c = getcstdin (), !feof (stdin);
        bufrealloc (buf, i + 1), p = buf->string, p[i++] = c)
     if (c == '\n')
-      if (i && p[i - 1] == '.' && (i == 1 || p[i - 2] == '\n'))
-        {
-          /* Remove trailing '.'.  */
-          --i;
-          break;
-        }
-      else if (tty)
-        {
-          aputs (">> ", stderr);
-          eflush ();
-        }
+      {
+        if (i && p[i - 1] == '.' && (i == 1 || p[i - 2] == '\n'))
+          {
+            /* Remove trailing '.'.  */
+            --i;
+            break;
+          }
+        else if (tty)
+          {
+            aputs (">> ", stderr);
+            eflush ();
+          }
+      }
   return cleanlogmsg (p, i);
 }
 

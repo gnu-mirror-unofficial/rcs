@@ -1314,11 +1314,13 @@ dolocks (void)
           genrevs (numrev.string, (char *) 0, (char *) 0, (char *) 0,
                    &gendeltas);
         if (target)
-          if (!(countnumflds (numrev.string) & 1)
-              && cmpnum (target->num, numrev.string))
-            rcserror ("can't unlock nonexisting revision %s", lockpt->revno);
-          else
-            changed |= breaklock (target);
+          {
+            if (!(countnumflds (numrev.string) & 1)
+                && cmpnum (target->num, numrev.string))
+              rcserror ("can't unlock nonexisting revision %s", lockpt->revno);
+            else
+              changed |= breaklock (target);
+          }
         /* breaklock does its own diagnose */
       }
 
@@ -1327,12 +1329,14 @@ dolocks (void)
     changed |= setlock (lockpt->revno);
 
   if (lockhead)                 /*  lock default branch or head  */
-    if (Dbranch)
-      changed |= setlock (Dbranch);
-    else if (Head)
-      changed |= setlock (Head->num);
-    else
-      rcswarn ("can't lock an empty tree");
+    {
+      if (Dbranch)
+        changed |= setlock (Dbranch);
+      else if (Head)
+        changed |= setlock (Head->num);
+      else
+        rcswarn ("can't lock an empty tree");
+    }
   return changed;
 }
 
@@ -1350,20 +1354,22 @@ setlock (char const *rev)
       target = genrevs (numrev.string, (char *) 0, (char *) 0,
                         (char *) 0, &gendeltas);
       if (target)
-        if (!(countnumflds (numrev.string) & 1)
-            && cmpnum (target->num, numrev.string))
-          rcserror ("can't lock nonexisting revision %s", numrev.string);
-        else
-          {
-            if ((r = addlock (target, false)) < 0 && breaklock (target))
-              r = addlock (target, true);
-            if (0 <= r)
-              {
-                if (r)
-                  diagnose ("%s locked\n", target->num);
-                return r;
-              }
-          }
+        {
+          if (!(countnumflds (numrev.string) & 1)
+              && cmpnum (target->num, numrev.string))
+            rcserror ("can't lock nonexisting revision %s", numrev.string);
+          else
+            {
+              if ((r = addlock (target, false)) < 0 && breaklock (target))
+                r = addlock (target, true);
+              if (0 <= r)
+                {
+                  if (r)
+                    diagnose ("%s locked\n", target->num);
+                  return r;
+                }
+            }
+        }
     }
   return 0;
 }
@@ -1404,15 +1410,17 @@ rcs_setstate (char const *rev, char const *status)
       target = genrevs (numrev.string, (char *) 0, (char *) 0,
                         (char *) 0, &gendeltas);
       if (target)
-        if (!(countnumflds (numrev.string) & 1)
-            && cmpnum (target->num, numrev.string))
-          rcserror ("can't set state of nonexisting revision %s",
-                    numrev.string);
-        else if (strcmp (target->state, status) != 0)
-          {
-            target->state = status;
-            return true;
-          }
+        {
+          if (!(countnumflds (numrev.string) & 1)
+              && cmpnum (target->num, numrev.string))
+            rcserror ("can't set state of nonexisting revision %s",
+                      numrev.string);
+          else if (strcmp (target->state, status) != 0)
+            {
+              target->state = status;
+              return true;
+            }
+        }
     }
   return false;
 }

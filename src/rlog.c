@@ -451,12 +451,14 @@ putadelta (register struct hshentry const *node,
            date2str (node->date, datebuf), node->author, node->state);
 
   if (editscript)
-    if (trunk)
-      aprintf (out, insDelFormat,
-               editscript->deletelns, editscript->insertlns);
-    else
-      aprintf (out, insDelFormat,
-               editscript->insertlns, editscript->deletelns);
+    {
+      if (trunk)
+        aprintf (out, insDelFormat,
+                 editscript->deletelns, editscript->insertlns);
+      else
+        aprintf (out, insDelFormat,
+                 editscript->insertlns, editscript->deletelns);
+    }
 
   newbranch = node->branches;
   if (newbranch)

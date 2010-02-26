@@ -1,5 +1,18 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add braces to disambiguate `else' clause.
+
+	* ci.c (removelock): Add braces to disambiguate `else'.
+	* ident.c (main): Likewise.
+	* rcs.c (dolocks, setlock, rcs_setstate): Likewise.
+	* rcsdiff.c (main) [DIFF_L]: Likewise.
+	* rcsedit.c (keyreplace, addlock, addsymbol, dorewrite): Likewise.
+	* rcsgen.c (getsstdin): Likewise.
+	* rcsrev.c (fexpandsym): Likewise.
+	* rlog.c (putadelta): Likewise.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Presume availability of <stdarg.h>.
 
 	* rcsgen.c (yesorno): Use `va_start' directly.

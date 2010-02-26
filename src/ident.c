@@ -59,21 +59,23 @@ main (int argc, char **argv)
         }
 
   if (0 <= quiet)
-    if (!a)
-      scanfile (stdin, (char *) 0, quiet);
-    else
-      do
-        {
-          if (!(fp = fopen (a, FOPEN_RB)))
-            {
-              reportError (a);
-              status = EXIT_FAILURE;
-            }
-          else if (scanfile (fp, a, quiet) != 0
-                   || (argv[1] && putchar ('\n') == EOF))
-            break;
-        }
-      while ((a = *++argv));
+    {
+      if (!a)
+        scanfile (stdin, (char *) 0, quiet);
+      else
+        do
+          {
+            if (!(fp = fopen (a, FOPEN_RB)))
+              {
+                reportError (a);
+                status = EXIT_FAILURE;
+              }
+            else if (scanfile (fp, a, quiet) != 0
+                     || (argv[1] && putchar ('\n') == EOF))
+              break;
+          }
+        while ((a = *++argv));
+    }
 
   if (ferror (stdout) || fclose (stdout) != 0)
     {
