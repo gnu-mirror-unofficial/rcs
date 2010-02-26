@@ -1,5 +1,13 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move checks for GCC __attribute__ handling to configure.in
+
+	* conf.sh: Remove checks for GCC attributes `noreturn' and
+	`format_printf'; use `GCC_HAS_ATTRIBUTE_NORETURN' and
+	`GCC_HAS_ATTRIBUTE_FORMAT' from auto-sussed.h directly.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Assume `EXIT_FAILURE' works.
 
 	* conf.sh: Remove check for `EXIT_FAILURE'.

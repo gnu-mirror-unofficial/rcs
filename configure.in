@@ -278,6 +278,27 @@ if test x"$ac_cv_prog_cc_c99" = xno ; then
    AC_MSG_ERROR([Could not find a C99-capable compiler])
 fi
 
+AC_DEFUN([RCS_CHECK_GCC_ATTRIBUTE],[
+AS_VAR_PUSHDEF([GAV],[rcs_cv_gcc_$1])dnl
+  if test yes = "$GCC" ; then
+    AC_CACHE_CHECK([if gcc supports "$1" attribute],[GAV],
+      [AC_TRY_COMPILE([$2],,GAV=yes, GAV=no)])
+  fi
+  if test yes = "$GAV" ; then
+    AC_DEFINE([GCC_HAS_ATTRIBUTE_]m4_toupper($1),[1],
+     [Define if gcc supports attribute "$1".])
+  fi
+AS_VAR_POPDEF([GAV])dnl
+])
+
+RCS_CHECK_GCC_ATTRIBUTE([noreturn],[
+  extern void func (void) __attribute__ ((noreturn));
+])
+RCS_CHECK_GCC_ATTRIBUTE([format],[
+  extern void func (const char *, ...)
+     __attribute__ ((format (printf, 1, 2)));
+])
+
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 

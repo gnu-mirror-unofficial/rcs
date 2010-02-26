@@ -430,27 +430,9 @@ echo "#define bad_fopen_wplus $b /* Does fopen(f,\"w+\") fail to truncate f?  */
 
 echo "#define getlogin_is_secure 0 /* Is getlogin() secure?  Usually it's not.  */"
 
-$ech >&3 "$0: configuring has_attribute_noreturn $dots"
-cat >a.c <<EOF
-#include "$A_H"
-static void e (int) __attribute__((noreturn));
-static void e(i) int i; { exit(i); }
-int main() { e(0); }
-EOF
-$PREPARE_CC || exit
-h=0 ok='does not work'
-if out=`$CS a.c $LS 2>&1`
-then
-	case $out in
-	*noreturn*) ;;
-	*) h=1 ok=OK
-	esac
-fi
-echo >&2 "$out"
-echo >&3 $ok
+grep '#define GCC_HAS_ATTRIBUTE_NORETURN 1' auto-sussed.h
 cat <<EOF
-#define has_attribute_noreturn $h /* Does __attribute__((noreturn)) work?  */
-#if has_attribute_noreturn
+#ifdef GCC_HAS_ATTRIBUTE_NORETURN
 #	define exiting __attribute__((noreturn))
 #else
 #	define exiting
@@ -1431,54 +1413,14 @@ esac
 echo >&3 $ok
 echo "#define has_printf_dot $h /* Does \"%.2d\" print leading 0?  */"
 
-$ech >&3 "$0: configuring has_attribute_format_printf $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#if has_attribute_format_printf
-#	define printf_string(m, n) __attribute__((format(printf, m, n)))
-#else
-#	define printf_string(m, n)
-#endif
-int p (char const*,...) printf_string(1, 2);
-int p(char const*format,...)
-{
-	int r;
-	va_list args;
-	va_start (args, format);
-	r = vfprintf(stderr, format, args);
-	va_end(args);
-	return r;
-}
-int main() { return (p("hello") != 5); }
-EOF
-$PREPARE_CC || exit
-h=0 p=0
-if ($CL a.c $L && sh -c 'pid=$$; (sleep 3; kill $pid)& exec '$aout) >&2
-then
-	h=1
-	$PREPARE_CC || exit
-	$CS -Dhas_attribute_format_printf=1 a.c >&2 && $CS_OK && p=1
-else
-	status=$?
-	sh -c 'pid=$$; (sleep 3; kill $pid)& exec sleep 6' >&2
-	if test $? = $status
-	then
-		echo >&3 "$0: stdio library loops forever.  Giving up.
-$0: (Perhaps you are using Solaris 2.x /usr/ucb/cc?)
-$0: Please use a working stdio library instead."
-		exit 1
-	fi
-fi
-echo >&3 $h, $p
-h=1
+grep '#define GCC_HAS_ATTRIBUTE_FORMAT 1' auto-sussed.h
 cat <<EOF
-#define has_attribute_format_printf $p /* Does __attribute__((format(printf,N,N+1))) work?  */
-#if has_attribute_format_printf
+#ifdef GCC_HAS_ATTRIBUTE_FORMAT
 #	define printf_string(m, n) __attribute__((format(printf, m, n)))
 #else
 #	define printf_string(m, n)
 #endif
-#if has_attribute_format_printf && has_attribute_noreturn
+#if defined GCC_HAS_ATTRIBUTE_FORMAT && defined GCC_HAS_ATTRIBUTE_NORETURN
 	/* Work around a bug in GCC 2.5.x.  */
 #	define printf_string_exiting(m, n) __attribute__((format(printf, m, n), noreturn))
 #else
