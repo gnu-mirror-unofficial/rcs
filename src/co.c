@@ -45,7 +45,10 @@ static struct hshentries *gendeltas;    /* deltas to be generated       */
 static struct hshentry *targetdelta;    /* final delta to be generated  */
 static struct stat workstat;
 
-mainProg (coId, "co")
+char const cmdid[] = "co";
+
+int
+main (int argc, char **argv)
 {
   static char const cmdusage[] =
     "\nco usage: co -{fIlMpqru}[rev] -ddate -jjoins -ksubst -sstate -T -w[who] -Vn -xsuff -zzone file ...";

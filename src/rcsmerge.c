@@ -24,7 +24,10 @@
 
 static char const co[] = CO;
 
-mainProg (rcsmergeId, "rcsmerge")
+char const cmdid[] = "rcsmerge";
+
+int
+main (int argc, char **argv)
 {
   static char const cmdusage[] =
     "\nrcsmerge usage: rcsmerge -rrev1 [-rrev2] -ksubst -{pq}[rev] -Vn -xsuff -zzone file";

@@ -26,7 +26,10 @@ static int match (FILE *);
 static int scanfile (FILE *, char const *, int);
 static void reportError (char const *);
 
-mainProg (identId, "ident")
+char const cmdid[] = "ident";
+
+int
+main (int argc, char **argv)
 /*  Ident searches the named files for all occurrences
  *  of the pattern $@: text $ where @ is a keyword.
  */

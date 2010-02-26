@@ -237,8 +237,6 @@ struct assoc
   struct assoc *nextassoc;
 };
 
-#define mainProg(n,c) char const Copyright[] = "Copyright 1982,1988,1989 Walter F. Tichy, Purdue CS\nCopyright 1990,1991,1992,1993,1994,1995 Paul Eggert", cmdid[] = c; int main (int argc, char** argv)
-
 /*
  * Markers for keyword expansion (used in co and ident)
  *	Every byte must have class LETTER or Letter.

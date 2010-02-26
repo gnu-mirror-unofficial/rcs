@@ -102,7 +102,10 @@ static struct delrevpair delrev;
 static struct hshentry *cuthead, *cuttail, *delstrt;
 static struct hshentries *gendeltas;
 
-mainProg (rcsId, "rcs")
+char const cmdid[] = "rcs";
+
+int
+main (int argc, char **argv)
 {
   static char const cmdusage[] =
     "\nrcs usage: rcs -{ae}logins -Afile -{blu}[rev] -cstring -{iILqTU} -ksubst -mrev:msg -{nN}name[:[rev]] -orange -sstate[:rev] -t[text] -Vn -xsuff -zzone file ...";

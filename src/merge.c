@@ -32,7 +32,10 @@ badoption (char const *a)
   error ("unknown option: %s%s", a, usage);
 }
 
-mainProg (mergeId, "merge")
+char const cmdid[] = "merge";
+
+int
+main (int argc, char **argv)
 {
   register char const *a;
   char const *arg[3], *label[3], *edarg = 0;

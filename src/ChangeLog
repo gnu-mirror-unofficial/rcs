@@ -1,5 +1,20 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Define `cmdid', `main' directly.
+
+	* ci.c (cmdid, main): Define directly.
+	* co.c (cmdid, main): Likewise.
+	* ident.c (cmdid, main): Likewise.
+	* merge.c (cmdid, main): Likewise.
+	* rcs.c (cmdid, main): Likewise.
+	* rcsclean.c (cmdid, main): Likewise.
+	* rcsdiff.c (cmdid, main): Likewise.
+	* rcsmerge.c (cmdid, main): Likewise.
+	* rlog.c (cmdid, main): Likewise.
+	* rcsbase.h (mainProg): Delete macro.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Say "register int c", not just "register c".
 
 	* rcxlex.c (nextlex, readstring)

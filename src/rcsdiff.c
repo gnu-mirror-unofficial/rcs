@@ -31,7 +31,10 @@ static int exitstatus;
 static RILE *workptr;
 static struct stat workstat;
 
-mainProg (rcsdiffId, "rcsdiff")
+char const cmdid[] = "rcsdiff";
+
+int
+main (int argc, char **argv)
 {
   static char const cmdusage[] =
     "\nrcsdiff usage: rcsdiff -ksubst -q -rrev1 [-rrev2] -Vn -xsuff -zzone [diff options] file ...";
