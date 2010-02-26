@@ -703,56 +703,6 @@ fi
 echo >&3 $ok
 # Used only by this script, not by RCS, so we don't output it to stdout.
 
-$ech >&3 "$0: configuring has_memcmp $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (memcmp("beautiful","beautiful",10) != 0); }
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_memcmp $h /* Does memcmp() work?  */"
-
-$ech >&3 "$0: configuring has_memcpy $dots"
-cat >a.c <<EOF
-#include "$A_H"
-char a[3];
-int
-main() {
-	memcpy(a,"xy",3);
-	return (strcmp(a,"xy")!=0);
-}
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_memcpy $h /* Does memcpy() work?  */"
-
-$ech >&3 "$0: configuring has_memmove $dots"
-cat >a.c <<EOF
-#include "$A_H"
-static char a[4];
-int
-main() {
-	strcpy(a, "xy");
-	memmove(a+1, a, 3);
-	return (strcmp(a,"xxy")!=0);
-}
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_memmove $h /* Does memmove() work?  */"
-
 $ech >&3 "$0: configuring has_map_fd, has_mmap, has_madvise, mmap_signal $dots"
 rm -f a.c a.d a.e || exit
 cat >a.c <<EOF
@@ -2053,9 +2003,7 @@ char *strcpy (char*,char const*);
 char *strchr (char const*,int);
 char *strrchr (char const*,int);
 void *memcpy (void*,void const*,size_t);
-#if has_memmove
-	void *memmove (void*,void const*,size_t);
-#endif
+void *memmove (void*,void const*,size_t);
 
 /* <time.h> */
 time_t time (time_t*);

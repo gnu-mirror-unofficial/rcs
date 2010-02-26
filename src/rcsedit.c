@@ -129,32 +129,7 @@ editLineNumberOverflow (void)
 
 #if large_memory
 
-#if has_memmove
-#	define movelines(s1, s2, n) memmove(s1, s2, (n)*sizeof(Iptr_type))
-#else
-static void movelines (Iptr_type *, Iptr_type const *, long);
-static void
-movelines (register Iptr_type *s1, register Iptr_type const *s2,
-           register long n)
-{
-  if (s1 < s2)
-    do
-      {
-        *s1++ = *s2++;
-      }
-    while (--n);
-  else
-    {
-      s1 += n;
-      s2 += n;
-      do
-        {
-          *--s1 = *--s2;
-        }
-      while (--n);
-    }
-}
-#endif
+#define movelines(s1, s2, n) memmove(s1, s2, (n)*sizeof(Iptr_type))
 
 static void deletelines (long, long);
 static void finisheditline (RILE *, FILE *, Iptr_type, struct hshentry const *);

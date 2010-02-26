@@ -1,5 +1,15 @@
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Presume availability of `memcmp', `memcpy', `memmove'.
+
+	* rcsedit.c (movelines): Move #define to top-level out of
+	"#if has_memmove" block, deleting the #else /*!has_memmove */ block.
+	* rcsutil.c [!has_memcmp] (memcmp): Delete func.
+	[!has_memcpy] (memcpy): Likewise.
+	* conf.sh: Remove checks for `memcmp', `memcpy', `memmove'.
+
+2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move check for system headers into configure.in.
 
 	* conf.sh: Arrange to #include unconditionally <sys/types.h>,

@@ -22,32 +22,6 @@
 
 #include "rcsbase.h"
 
-#if !has_memcmp
-int
-memcmp (void const *s1, void const *s2, size_t n)
-{
-  register unsigned char const
-    *p1 = (unsigned char const *) s1, *p2 = (unsigned char const *) s2;
-  register size_t i = n;
-  register int r = 0;
-  while (i-- && !(r = (*p1++ - *p2++)))
-    ;
-  return r;
-}
-#endif
-
-#if !has_memcpy
-void *
-memcpy (void *s1, void const *s2, size_t n)
-{
-  register char *p1 = (char *) s1;
-  register char const *p2 = (char const *) s2;
-  while (n--)
-    *p1++ = *p2++;
-  return s1;
-}
-#endif
-
 /*
  * list of blocks allocated with ftestalloc()
  * These blocks can be freed by ffree when we're done with the current file.
