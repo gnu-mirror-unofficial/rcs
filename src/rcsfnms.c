@@ -109,7 +109,7 @@ static struct compair const comtable[] = {
   {0,      "# "}                /* default for unknown suffix; must be last */
 };
 
-#if has_mktemp
+#if defined HAVE_MKTEMP
 static char const *tmp (void);
 static char const *
 tmp (void)
@@ -141,7 +141,7 @@ maketemp (int n)
 
   catchints ();
   {
-#	if has_mktemp
+#	if defined HAVE_MKTEMP
     char const *tp = tmp ();
     size_t tplen = dir_useful_len (tp);
     p = testalloc (tplen + 10);

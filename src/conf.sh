@@ -817,27 +817,6 @@ echo "$b#define sigmask(s) (1 << ((s)-1)) $y/* Yield mask for signal number.  */
 
 echo "#define needs_getabsname 0 /* Must we define getabsname?  */"
 
-$ech >&3 "$0: configuring has_mktemp $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef mktemp
-	char *mktemp();
-#endif
-int
-main() {
-	char b[9];
-	strcpy(b, "a.XXXXXX");
-	return (!mktemp(b));
-}
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then h=1 ok=OK
-else h=0 ok=absent
-fi
-echo >&3 $ok
-echo "#define has_mktemp $h /* Does mktemp() work?  */"
-
 : configuring has_NFS
 echo "#define has_NFS 1 /* Might NFS be used?  */"
 

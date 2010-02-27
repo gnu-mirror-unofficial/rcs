@@ -332,6 +332,7 @@ AC_CHECK_FUNCS_ONCE([
   getpwuid
   getuid
   getwd
+  mktemp
   readlink
 ])
 

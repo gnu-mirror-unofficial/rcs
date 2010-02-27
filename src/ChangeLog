@@ -1,6 +1,14 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	[build] Move `getuid', `getpwuid' checks to configure.in
+	[build] Move `mktemp' check to configure.in.
+
+	* rcsedit.c: Do s/has_mktemp/defined HAVE_MKTEMP/g.
+	* rcsfnms.c: Likewise.
+	* conf.sh: Remove check for `mktemp'.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move `getuid', `getpwuid' checks to configure.in.
 
 	* rcsbase.h: Do s/has_getuid/defined HAVE_GETUID/g.
 	* ci.c: Likewise.

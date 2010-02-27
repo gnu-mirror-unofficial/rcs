@@ -1342,7 +1342,7 @@ makedirtemp (int isworkfile)
   dl = basefilename (name) - name;
   bn = &dirtpname[newRCSdirtp_index + isworkfile];
   bufalloc (bn,
-#		if has_mktemp
+#		if defined HAVE_MKTEMP
             dl + 9
 #		else
             strlen (name) + 3
@@ -1354,7 +1354,7 @@ makedirtemp (int isworkfile)
   *tp++ = '_';
   *tp++ = '0' + isworkfile;
   catchints ();
-#	if has_mktemp
+#	if defined HAVE_MKTEMP
   strcpy (tp, "XXXXXX");
   if (!mktemp (np) || !*np)
     faterror ("can't make temporary pathname `%.*s_%cXXXXXX'",
