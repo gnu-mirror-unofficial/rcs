@@ -1,5 +1,17 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move a mass of boilerplate from conf.sh to rcsbase.h.
+
+	In the process, we also remove (by selectively not copying)
+	redundant func decls meant to augment missing entries in
+	<stdio.h>, <stdlib.h>, <string.h>, <time.h>.
+
+	* rcsbase.h: Add boilerplate code.
+	* conf.sh: Delete eof boilerplate; don't bother doing the
+	"Comment out lines in a.ha that the compiler rejects" step.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move checks for missing type definitions to configure.in.
 
 	* conf.sh Remove checks for missing type definitions;

@@ -23,6 +23,115 @@
 #include "auto-sussed.h"
 #include "conf.h"
 
+/* begin cruft formerly from from conf.h */
+
+#if has_sys_siglist && !defined(sys_siglist)
+	extern char const * const sys_siglist[];
+#endif
+
+/* <fcntl.h> */
+#ifdef O_CREAT
+#	define open_can_creat 1
+#else
+#	define open_can_creat 0
+#	define O_RDONLY 0
+#	define O_WRONLY 1
+#	define O_RDWR 2
+#	define O_CREAT 01000
+#	define O_TRUNC 02000
+#endif
+#ifndef O_EXCL
+#define O_EXCL 0
+#endif
+
+/* <sys/stat.h> */
+#ifndef S_IRUSR
+#	ifdef S_IREAD
+#		define S_IRUSR S_IREAD
+#	else
+#		define S_IRUSR 0400
+#	endif
+#	ifdef S_IWRITE
+#		define S_IWUSR S_IWRITE
+#	else
+#		define S_IWUSR (S_IRUSR/2)
+#	endif
+#endif
+#ifndef S_IRGRP
+#	if has_getuid
+#		define S_IRGRP (S_IRUSR / 0010)
+#		define S_IWGRP (S_IWUSR / 0010)
+#		define S_IROTH (S_IRUSR / 0100)
+#		define S_IWOTH (S_IWUSR / 0100)
+#	else
+		/* single user OS -- not Posix or Unix */
+#		define S_IRGRP 0
+#		define S_IWGRP 0
+#		define S_IROTH 0
+#		define S_IWOTH 0
+#	endif
+#endif
+#ifndef S_ISREG
+#define S_ISREG(n) (((n) & S_IFMT) == S_IFREG)
+#endif
+
+/* <sys/wait.h> */
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(stat_val) ((unsigned)(stat_val) >> 8)
+#undef WIFEXITED /* Avoid 4.3BSD incompatibility with Posix.  */
+#endif
+#ifndef WIFEXITED
+#define WIFEXITED(stat_val) (((stat_val)  &  0377) == 0)
+#endif
+#ifndef WTERMSIG
+#define WTERMSIG(stat_val) ((stat_val) & 0177)
+#undef WIFSIGNALED /* Avoid 4.3BSD incompatibility with Posix.  */
+#endif
+#ifndef WIFSIGNALED
+#define WIFSIGNALED(stat_val) ((unsigned)(stat_val) - 1  <  0377)
+#endif
+
+/* <unistd.h> */
+char *getlogin (void);
+#ifndef STDIN_FILENO
+#	define STDIN_FILENO 0
+#	define STDOUT_FILENO 1
+#	define STDERR_FILENO 2
+#endif
+#if has_fork && !has_vfork
+#	undef vfork
+#	define vfork fork
+#endif
+#if has_getcwd || !has_getwd
+	char *getcwd (char*,size_t);
+#else
+	char *getwd (char*);
+#endif
+#if has_setuid && !has_seteuid
+#	undef seteuid
+#	define seteuid setuid
+#endif
+#if has_spawn
+#	if ALL_ABSOLUTE
+#		define spawn_RCS spawnv
+#	else
+#		define spawn_RCS spawnvp
+#	endif
+#else
+#	if ALL_ABSOLUTE
+#		define exec_RCS execv
+#	else
+#		define exec_RCS execvp
+#	endif
+#endif
+
+/* utime.h */
+#if !has_utimbuf
+	struct utimbuf { time_t actime, modtime; };
+#endif
+
+/* end cruft formerly from from conf.h */
+
 #define EXIT_TROUBLE DIFF_TROUBLE
 
 #ifdef _POSIX_PATH_MAX
