@@ -1028,7 +1028,7 @@ fixwork (mode_t newworkmode, time_t mtime)
     || (newworkmode & S_IWUSR && !myself (workstat.st_uid))
     || setmtime (workname, mtime) != 0
     ? -1 : workstat.st_mode == newworkmode ? 0
-#if has_fchmod
+#ifdef HAVE_FCHMOD
     : fchmod (Ifileno (workptr), newworkmode) == 0 ? 0
 #endif
 #if bad_chmod_close

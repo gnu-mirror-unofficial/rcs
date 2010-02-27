@@ -327,6 +327,7 @@ AC_CHECK_TYPE([sig_atomic_t],,[dnl
 # funcs
 
 AC_CHECK_FUNCS_ONCE([
+  fchmod
   getcwd
   getwd
   readlink

@@ -1433,7 +1433,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
     set_mode = 1;
 #	endif
 
-#	if has_fchmod
+#	ifdef HAVE_FCHMOD
   if (0 < set_mode && fchmod (fileno (*fromp), mode_while_renaming) == 0)
     fchmod_set_mode = set_mode;
 #	endif

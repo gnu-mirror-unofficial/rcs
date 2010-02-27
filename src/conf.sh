@@ -367,23 +367,6 @@ cat <<EOF
 EOF
 rm -f a.c || exit
 
-$ech >&3 "$0: configuring has_fchmod $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef STDIN_FILENO
-#define STDIN_FILENO 0
-#endif
-int main() { return (fchmod(STDIN_FILENO,0) != 0); }
-EOF
-$PREPARE_CC || exit
-if $CL a.c $L >&2 && $aout <a.c && test ! -r a.c
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_fchmod $h /* Does fchmod() work?  */"
-rm -f a.c || exit
-
 $ech >&3 "$0: configuring has_fflush_input $dots"
 cat >a.c <<EOF
 #include "$A_H"
