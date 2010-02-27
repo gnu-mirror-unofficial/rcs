@@ -932,49 +932,6 @@ esac
 echo "$a#define has_sigblock $h $z/* Does sigblock() work?  */"
 echo "$b#define sigmask(s) (1 << ((s)-1)) $y/* Yield mask for signal number.  */"
 
-$ech >&3 "$0: configuring fread_type, freadarg_type $dots"
-cat >a.c <<EOF
-#define CHAR1 '#' /* the first character in this file */
-#include "$A_H"
-#if !defined(fread) && declare_fread
-	fread_type fread (void*,freadarg_type,freadarg_type,FILE*);
-#endif
-int
-main() {
-	char b;
-	return (!(
-		fread(&b, (freadarg_type)1, (freadarg_type)1, stdin) == 1  &&
-		b==CHAR1
-	));
-}
-EOF
-for declare_fread in 1 0
-do
-	for fread_type in ssize_t size_t int unsigned
-	do
-		for freadarg_type in size_t ssize_t unsigned int
-		do
-			$PREPARE_CC || exit
-			(
-				$CL \
-					-Ddeclare_fread=$declare_fread \
-					-Dfreadarg_type=$freadarg_type \
-					-Dfread_type=$fread_type \
-					a.c $L &&
-				$aout <a.c
-			) >&2 && break
-		done && break
-	done && break
-done || {
-	echo >&3 $0: cannot deduce fread types
-	exit 1
-}
-echo >&3 $fread_type, $freadarg_type
-cat <<EOF
-typedef $fread_type fread_type; /* type returned by fread() and fwrite() */
-typedef $freadarg_type freadarg_type; /* type of their size arguments */
-EOF
-
 $ech >&3 "$0: configuring has_getcwd $dots"
 cat >a.c <<EOF
 #include "$A_H"

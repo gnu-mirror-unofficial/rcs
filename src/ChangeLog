@@ -1,5 +1,15 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume `fread' rv and arg types are both `size_t'.
+
+	* rcslex.c (Igetmore): Use `size_t' and `fread' directly.
+	* rcsutil.c (fastcopy): Likewise.
+	(awrite): Use `fwrite' directly.
+	* rcsbase.h (Fread, Fwrite): Delete macros.
+	* conf.sh: Remove checks for `fread' rv type, arg type.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Presume <stdio.h> provides `rename', `strchr', `strrchr'.
 
 	* rcsedit.c [!has_rename] (do_link): Delete macro, func.

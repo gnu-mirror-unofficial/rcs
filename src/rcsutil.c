@@ -575,12 +575,12 @@ fastcopy (register RILE *inf, FILE *outf)
 #	endif
 #else
   char buf[BUFSIZ * 8];
-  register fread_type rcount;
+  register size_t rcount;
 
   /*now read the rest of the file in blocks */
   while (!feof (inf))
     {
-      if (!(rcount = Fread (buf, sizeof (*buf), sizeof (buf), inf)))
+      if (!(rcount = fread (buf, sizeof (*buf), sizeof (buf), inf)))
         {
           testIerror (inf);
           return;
@@ -602,13 +602,13 @@ awrite (char const *buf, size_t chars, FILE *f)
   /* Posix 1003.1-1990 ssize_t hack */
   while (SSIZE_MAX < chars)
     {
-      if (Fwrite (buf, sizeof (*buf), SSIZE_MAX, f) != SSIZE_MAX)
+      if (fwrite (buf, sizeof (*buf), SSIZE_MAX, f) != SSIZE_MAX)
         Oerror ();
       buf += SSIZE_MAX;
       chars -= SSIZE_MAX;
     }
 
-  if (Fwrite (buf, sizeof (*buf), chars, f) != chars)
+  if (fwrite (buf, sizeof (*buf), chars, f) != chars)
     Oerror ();
 }
 

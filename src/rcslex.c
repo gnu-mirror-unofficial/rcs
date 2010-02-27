@@ -980,12 +980,12 @@ fd2RILE (int fd, char const *name, char const *type,
 int
 Igetmore (register RILE *f)
 {
-  register fread_type r;
+  register size_t r;
   register size_t s = f->lim - f->readlim;
 
   if (BUFSIZ < s)
     s = BUFSIZ;
-  if (! (r = Fread (f->readlim, sizeof (*f->readlim), s, f->stream)))
+  if (! (r = fread (f->readlim, sizeof (*f->readlim), s, f->stream)))
     {
       testIerror (f->stream);
       f->lim = f->readlim;  /* The file might have shrunk!  */

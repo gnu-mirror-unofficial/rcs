@@ -31,10 +31,6 @@
 #	define SIZEABLE_PATH 255        /* size of a large path; not a hard limit */
 #endif
 
-/* for traditional C hosts with unusual size arguments */
-#define Fread(p,s,n,f)  fread(p, (freadarg_type)(s), (freadarg_type)(n), f)
-#define Fwrite(p,s,n,f)  fwrite(p, (freadarg_type)(s), (freadarg_type)(n), f)
-
 /*
  * Parameters
  */
