@@ -102,11 +102,6 @@ char *getlogin (void);
 #	undef vfork
 #	define vfork fork
 #endif
-#if has_getcwd || !has_getwd
-	char *getcwd (char*,size_t);
-#else
-	char *getwd (char*);
-#endif
 #if has_setuid && !has_seteuid
 #	undef seteuid
 #	define seteuid setuid

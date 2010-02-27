@@ -1,5 +1,14 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `getcwd', `getwd' check to configure.in.
+
+	* rcsfnms.c: Do s/has_getcwd/defined HAVE_GETCWD/g;
+	do s/has_getwd/defined HAVE_GETWD/g.
+	* rcsbase.h (getcwd, getwd): Delete func decls.
+	* conf.sh: Remove checks for `getcwd', `getwd'.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `readlink' check to configure.in; use _POSIX_SYMLOOP_MAX.
 
 	* rcsedit.c: Do s/#if has_readlink/#ifdef HAVE_READLINK/g.

@@ -859,46 +859,6 @@ esac
 echo "$a#define has_sigblock $h $z/* Does sigblock() work?  */"
 echo "$b#define sigmask(s) (1 << ((s)-1)) $y/* Yield mask for signal number.  */"
 
-$ech >&3 "$0: configuring has_getcwd $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef getcwd
-	char *getcwd();
-#endif
-static char buf[10000];
-int main() { return (!getcwd(buf,10000)); }
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then has_getcwd=1 ok=OK
-else has_getcwd=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_getcwd $has_getcwd /* Does getcwd() work?  */"
-
-case $has_getcwd in
-1)
-	a='/* ' z='*/ ' h=?;;
-*)
-	a= z=
-	$ech >&3 "$0: configuring has_getwd $dots"
-	cat >a.c <<EOF
-#include "$A_H"
-#include <sys/param.h>
-#ifndef getwd
-	char *getwd();
-#endif
-static char buf[MAXPATHLEN];
-int main() { return (!getwd(buf)); }
-EOF
-	$PREPARE_CC || exit
-	if ($CL a.c $L && $aout) >&2
-	then h=1 ok=OK
-	else h=0 ok='does not work'
-	fi
-	echo >&3 $ok
-esac
-echo "$a#define has_getwd $h $z/* Does getwd() work?  */"
 echo "#define needs_getabsname 0 /* Must we define getabsname?  */"
 
 $ech >&3 "$0: configuring has_mktemp $dots"

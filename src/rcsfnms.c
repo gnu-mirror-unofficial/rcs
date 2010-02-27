@@ -681,7 +681,7 @@ getfullRCSname (void)
                 stat (".", &dotstat) == 0 && same_file (PWDstat, dotstat, 1)))
             {
               bufalloc (&wdbuf, SIZEABLE_PATH + 1);
-#			if has_getcwd || !has_getwd
+#			if defined HAVE_GETCWD || !defined HAVE_GETWD
               while (!(d = getcwd (wdbuf.string, wdbuf.size)))
                 if (errno == ERANGE)
                   bufalloc (&wdbuf, wdbuf.size << 1);
@@ -756,7 +756,7 @@ isSLASH (int c)
 }
 #endif
 
-#if !has_getcwd && !has_getwd
+#if !defined HAVE_GETWD && !defined HAVE_GETWD
 
 char *
 getcwd (char *path, size_t size)
