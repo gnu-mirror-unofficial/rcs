@@ -1,5 +1,15 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `readlink' check to configure.in; use _POSIX_SYMLOOP_MAX.
+
+	* rcsedit.c: Do s/#if has_readlink/#ifdef HAVE_READLINK/g.
+	[HAVE_READLINK] (resolve_symlink): Use `_POSIX_SYMLOOP_MAX'.
+	Also, assume `EINVAL' for error-on-non-symlink situation.
+	* conf.sh: Remove "check" for <sys/param.h>; remove check
+	for `readlink' and its error-on-non-symlink return value.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move a mass of boilerplate from conf.sh to rcsbase.h.
 
 	In the process, we also remove (by selectively not copying)

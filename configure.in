@@ -307,7 +307,6 @@ AC_CHECK_HEADERS_ONCE([
   dirent.h fcntl.h limits.h mach/mach.h net/errno.h
   pwd.h siginfo.h signal.h
   sys/mman.h sys/wait.h ucontext.h unistd.h utime.h vfork.h
-  sys/param.h
 ])
 
 # types -- see also: (info "(autoconf) Particular Types")
@@ -323,6 +322,12 @@ AC_CHECK_TYPE([sig_atomic_t],,[dnl
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
+])
+
+# funcs
+
+AC_CHECK_FUNCS_ONCE([
+  readlink
 ])
 
 AC_CONFIG_FILES([

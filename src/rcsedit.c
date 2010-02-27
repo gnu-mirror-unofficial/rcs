@@ -1052,7 +1052,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
     }
 }
 
-#if has_readlink
+#ifdef HAVE_READLINK
 static int resolve_symlink (struct buf *);
 static int
 resolve_symlink (struct buf *L)
@@ -1068,7 +1068,7 @@ resolve_symlink (struct buf *L)
   size_t s;
   ssize_t r;
   struct buf bigbuf;
-  int linkcount = MAXSYMLINKS;
+  int linkcount = _POSIX_SYMLOOP_MAX;
 
   b = a;
   s = sizeof (a);
@@ -1105,7 +1105,7 @@ resolve_symlink (struct buf *L)
   errno = e;
   switch (e)
     {
-    case readlink_isreg_errno:
+    case EINVAL:
       return 1;
     case ENOENT:
       return 0;
@@ -1136,7 +1136,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
 
   waslocked = 0 <= fdlock;
   exists =
-#		if has_readlink
+#		ifdef HAVE_READLINK
     resolve_symlink (RCSbuf);
 #		else
     stat (RCSbuf->string, &statbuf) == 0 ? 1 : errno == ENOENT ? 0 : -1;
@@ -1156,7 +1156,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
   bufscpy (dirt, RCSpath);
   tp = dirt->string + l;
   x = rcssuffix (RCSpath);
-#	if has_readlink
+#	ifdef HAVE_READLINK
   if (!x)
     {
       error ("symbolic link to non RCS file `%s'", RCSpath);

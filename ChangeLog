@@ -1,5 +1,12 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `readlink' check to configure.in; use _POSIX_SYMLOOP_MAX.
+
+	* configure.in (AC_CHECK_HEADERS_ONCE): Remove sys/param.h.
+	(AC_CHECK_FUNCS_ONCE): New, with one item: `readlink'.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move checks for missing type definitions to configure.in.
 
 	* configure.in (AC_TYPE_MODE_T, AC_TYPE_OFF_T)

@@ -248,60 +248,6 @@ do
 	echo "$i"
 done
 
-cat <<'EOF'
-
-/* Define boolean symbols to be 0 (false, the default), or 1 (true).  */
-EOF
-
-$ech >&3 "$0: checking <sys/param.h> $dots"
-if grep "#define HAVE_SYS_PARAM_H 1" auto-sussed.h >/dev/null
-then ok=OK ; echo '#define HAVE_SYS_PARAM_H 1'
-else ok=absent
-fi
-echo >&3 $ok
-
-# We must do has_readlink next, because it might generate
-# #include directives that affect later definitions.
-
-$ech >&3 "$0: configuring has_readlink, readlink_isreg_errno $dots"
-cat >a.c <<EOF
-#include "$A_H"
-static char b[7];
-int
-main() {
-	if (readlink("a.sym2",b,7) == 6  &&  strcmp(b,"a.sym1") == 0  &&
-		readlink("a.c",b,7) == -1  &&  errno != ENOENT
-	) {
-		if (errno == EINVAL)
-			printf("EINVAL\n");
-		else
-			printf("%d\n", errno);
-		return (ferror(stdout) || fclose(stdout)!=0);
-	}
-	return (1);
-}
-EOF
-$PREPARE_CC a.sym* || exit
-readlink_isreg_errno='?'
-if (ln -s a.sym1 a.sym2 && $CL a.c $L) >&2 && readlink_isreg_errno=`$aout`
-then h=1
-else h=0
-fi
-echo >&3 $h, $readlink_isreg_errno
-cat <<EOF
-#define has_readlink $h /* Does readlink() work?  */
-#define readlink_isreg_errno $readlink_isreg_errno /* errno after readlink on regular file */
-
-#if has_readlink && !defined(MAXSYMLINKS)
-#	ifdef HAVE_SYS_PARAM_H
-#		include <sys/param.h>
-#	endif
-#	ifndef MAXSYMLINKS
-#		define MAXSYMLINKS 20 /* BSD; not standard yet */
-#	endif
-#endif
-EOF
-
 # *_t
 all_types='mode_t off_t pid_t sig_atomic_t size_t ssize_t time_t uid_t'
 $ech >&3 "$0: checking types: $all_types $dots"
