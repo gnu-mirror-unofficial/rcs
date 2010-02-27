@@ -58,7 +58,7 @@
 #	endif
 #endif
 #ifndef S_IRGRP
-#	if has_getuid
+#	if defined HAVE_GETUID
 #		define S_IRGRP (S_IRUSR / 0010)
 #		define S_IWGRP (S_IWUSR / 0010)
 #		define S_IROTH (S_IRUSR / 0100)
@@ -662,7 +662,7 @@ void readAccessFilenameBuffer (char const *, unsigned char const *);
 #	define catchmmapints()
 #   endif
 #endif
-#if has_getuid
+#if defined HAVE_GETUID
 uid_t ruid (void);
 #	define myself(u) ((u) == ruid())
 #else

@@ -429,38 +429,6 @@ fi
 echo >&3 $ok
 echo "#define has_ftruncate $h /* Does ftruncate() work?  */"
 
-$ech >&3 "$0: configuring has_getuid $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (getuid()!=getuid()); }
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then has_getuid=1 ok=OK
-else has_getuid=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_getuid $has_getuid /* Does getuid() work?  */"
-
-case $has_getuid in
-0)
-	a='/* ' z='*/ ' h=?;;
-*)
-	$ech >&3 "$0: configuring has_getpwuid $dots"
-	a= z=
-	cat >a.c <<EOF
-#include "$A_H"
-int main() { return (!getpwuid(0)); }
-EOF
-	$PREPARE_CC || exit
-	if ($CL a.c $L && $aout) >&2
-	then h=1 ok=OK
-	else h=0 ok='does not work'
-	fi
-	echo >&3 $ok
-esac
-echo "$a#define has_getpwuid $h $z/* Does getpwuid() work?  */"
-
 $ech >&3 "$0: configuring has_map_fd, has_mmap, has_madvise, mmap_signal $dots"
 rm -f a.c a.d a.e || exit
 cat >a.c <<EOF
@@ -668,6 +636,11 @@ echo >&3 $h, $a, $b
 echo "#define bad_a_rename $a /* Does rename(A,B) fail if A is unwritable?  */"
 echo "#define bad_b_rename $b /* Does rename(A,B) fail if B is unwritable?  */"
 echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
+
+if grep '#define HAVE_GETUID 1' auto-sussed.h >/dev/null
+then has_getuid=1
+else has_getuid=0
+fi
 
 case $has_getuid in
 0)

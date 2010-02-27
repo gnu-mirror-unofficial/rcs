@@ -146,7 +146,7 @@ getusername (int suspicious)
 #		    endif
         )
         {
-#if has_getuid && has_getpwuid
+#if defined HAVE_GETUID && defined HAVE_GETPWUID
           struct passwd const *pw = getpwuid (ruid ());
           if (!pw)
             faterror ("no password entry for userid %lu",
@@ -1112,7 +1112,7 @@ getRCSINIT (int argc, char **argv, char ***newargv)
 
 #define cacheid(E) static uid_t i; static int s; if (!s){ s=1; i=(E); } return i
 
-#if has_getuid
+#if defined HAVE_GETUID
 uid_t
 ruid (void)
 {

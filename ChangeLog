@@ -1,5 +1,11 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `getuid', `getpwuid' checks to configure.in
+
+	* configure.in (getpwuid, getuid): Add to `AC_CHECK_FUNCS_ONCE'.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `fchmod' check to configure.in.
 
 	* configure.in (fchmod): Add to `AC_CHECK_FUNCS_ONCE'.

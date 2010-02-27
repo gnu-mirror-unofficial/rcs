@@ -1,5 +1,14 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `getuid', `getpwuid' checks to configure.in
+
+	* rcsbase.h: Do s/has_getuid/defined HAVE_GETUID/g.
+	* ci.c: Likewise.
+	* rcsutil.c: Likewise; also s/has_getpwuid/defined HAVE_GETPWUID/g.
+	* conf.sh: Remove checks for `getuid', `getpwuid'.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `fchmod' check to configure.in.
 
 	* ci.c: Do s/if has_fchmod/ifdef HAVE_FCHMOD/g.
