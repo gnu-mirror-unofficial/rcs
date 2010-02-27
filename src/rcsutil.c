@@ -911,7 +911,7 @@ runv (int infd, char const *outname, char const **args)
       }
     if (pid < 0)
       efaterror ("fork");
-#	if has_waitpid
+#	if defined HAVE_WAITPID
     if (waitpid (pid, &wstatus, 0) < 0)
       efaterror ("waitpid");
 #	else

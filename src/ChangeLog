@@ -1,5 +1,13 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `waitpid' check to configure.in.
+
+	* rcsfnms.c: Do s/has_waitpid/defined HAVE_WAITPID/g.
+	* rcsutil.c: Likewise.
+	* conf.sh: Remove check for `waitpid'.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use `HAVE_SIGNAL_H' directly.
 
 	* rcsbase.h: Do s/has_signal/defined HAVE_SIGNAL_H/g.

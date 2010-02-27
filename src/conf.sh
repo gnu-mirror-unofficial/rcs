@@ -1029,15 +1029,7 @@ case $h in
 	echo >&3 $ok
 esac
 echo "#define has_fork $h /* Does fork() work?  */"
-$PREPARE_CC || exit
-$ech >&3 "$0: configuring has_waitpid $dots"
-if ($CL -DTRY_VFORK=$has_vfork -DTRY_WAITPID=1 a.c $L && $aout) >&2
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
 echo "#define has_spawn 0 /* Does spawn*() work?  */"
-echo "#define has_waitpid $h /* Does waitpid() work?  */"
 
 $ech >&3 "$0: configuring bad_wait_if_SIGCHLD_ignored $dots"
 cat >a.c <<EOF

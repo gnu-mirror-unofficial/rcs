@@ -833,7 +833,7 @@ getcwd (char *path, size_t size)
                 }
             }
         }
-#		if has_waitpid
+#		if defined HAVE_WAITPID
       if (waitpid (child, &wstatus, 0) < 0)
         wstatus = 1;
 #		else

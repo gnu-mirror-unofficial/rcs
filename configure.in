@@ -334,6 +334,7 @@ AC_CHECK_FUNCS_ONCE([
   getwd
   mktemp
   readlink
+  waitpid
 ])
 
 AC_CONFIG_FILES([

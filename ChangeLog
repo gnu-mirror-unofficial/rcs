@@ -1,5 +1,11 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `waitpid' check to configure.in.
+
+	* configure.in (waitpid): Add to `AC_CHECK_FUNCS_ONCE'.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `mktemp' check to configure.in.
 
 	* configure.in (mktemp): Add to `AC_CHECK_FUNCS_ONCE'.
