@@ -645,7 +645,7 @@ void fastcopy (RILE *, FILE *);
 void ffree (void);
 void ffree1 (char const *);
 void setRCSversion (char const *);
-#if has_signal
+#if defined HAVE_SIGNAL_H
 void catchints (void);
 void ignoreints (void);
 void restoreints (void);

@@ -1,5 +1,13 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use `HAVE_SIGNAL_H' directly.
+
+	* rcsbase.h: Do s/has_signal/defined HAVE_SIGNAL_H/g.
+	* rcsutil.c: Likewise.
+	* conf.sh: Don't propagate `has_signal' to conf.h.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `mktemp' check to configure.in.
 
 	* rcsedit.c: Do s/has_mktemp/defined HAVE_MKTEMP/g.

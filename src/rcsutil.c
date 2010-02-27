@@ -165,7 +165,7 @@ getusername (int suspicious)
   return name;
 }
 
-#if has_signal
+#if defined HAVE_SIGNAL_H
 
 /*
  *	 Signal handling
@@ -551,7 +551,7 @@ catchmmapints (void)
 }
 #endif
 
-#endif /* has_signal */
+#endif /* defined HAVE_SIGNAL_H */
 
 void
 fastcopy (register RILE *inf, FILE *outf)

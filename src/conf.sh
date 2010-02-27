@@ -735,7 +735,7 @@ esac
 echo >&3 $ok
 echo "#define has_sa_sigaction $has_sa_sigaction /* Does struct sigaction have sa_sigaction?  */"
 
-$ech >&3 "$0: configuring has_signal, sig_zaps_handler $dots"
+$ech >&3 "$0: configuring sig_zaps_handler $dots"
 case $has_signal,$has_sigaction in
 1,0)
 	cat >a.c <<EOF
@@ -773,9 +773,8 @@ EOF
 *)
 	sig_zaps_handler=0
 esac
-echo >&3 $has_signal, $sig_zaps_handler
+echo >&3 $sig_zaps_handler
 cat <<EOF
-#define has_signal $has_signal /* Does signal() work?  */
 #define sig_zaps_handler $sig_zaps_handler /* Must a signal handler reinvoke signal()?  */
 EOF
 
