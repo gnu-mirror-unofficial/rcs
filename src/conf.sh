@@ -303,32 +303,13 @@ cat <<EOF
 EOF
 
 # *_t
-cat <<'EOF'
-
-/* Comment out the typedefs below if the types are already declared.  */
-/* Fix any uncommented typedefs that are wrong.  */
-EOF
-cat >a.c <<EOF
-#include "$A_H"
-t x;
-int main() { return (0); }
-EOF
-for t in mode_t off_t pid_t sig_atomic_t size_t ssize_t time_t uid_t
+all_types='mode_t off_t pid_t sig_atomic_t size_t ssize_t time_t uid_t'
+$ech >&3 "$0: checking types: $all_types $dots"
+for t in $all_types
 do
-	$ech >&3 "$0: configuring $t $dots"
-	case $t in
-	size_t) i=unsigned;;
-	off_t|time_t) i=long;;
-	*) i=int;;
-	esac
-	$PREPARE_CC || exit
-	if $CS -Dt=$t a.c $LS >&2 && $CS_OK
-	then ok=OK a='/* ' z=' */'
-	else ok=$i a= z=
-	fi
-	echo >&3 $ok
-	echo "${a}typedef $i $t;$z"
+        grep "#define $t " auto-sussed.h
 done
+echo >&3 OK
 
 cat - <<EOF
 

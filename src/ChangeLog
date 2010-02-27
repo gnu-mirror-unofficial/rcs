@@ -1,5 +1,12 @@
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move checks for missing type definitions to configure.in.
+
+	* conf.sh Remove checks for missing type definitions;
+	instead, grep auto-sussed.h directly.
+
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume `fread' rv and arg types are both `size_t'.
 
 	* rcslex.c (Igetmore): Use `size_t' and `fread' directly.

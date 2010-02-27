@@ -1,3 +1,11 @@
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move checks for missing type definitions to configure.in.
+
+	* configure.in (AC_TYPE_MODE_T, AC_TYPE_OFF_T)
+	(AC_TYPE_PID_T, AC_TYPE_SSIZE_T, AC_TYPE_UID_T): New
+	(sig_atomic_t): New AC_CHECK_TYPE.
+
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move checks for GCC __attribute__ handling to configure.in
