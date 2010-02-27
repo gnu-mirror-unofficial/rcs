@@ -1,3 +1,12 @@
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Presume <stdio.h> provides `rename', `strchr', `strrchr'.
+
+	* rcsedit.c [!has_rename] (do_link): Delete macro, func.
+	(chnamemod): Move code out of #if has_rename block,
+	deleting #else block as well; simplify #if expression.
+	* conf.sh: Remove checks for `rename', `strchr', `strrchr'.
+
 2010-02-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Assume signal handlers return `void'.

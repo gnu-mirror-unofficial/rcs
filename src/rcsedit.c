@@ -92,29 +92,6 @@ int un_link (char const *s)
 }
 #endif
 
-#if !has_rename
-#  if !has_NFS
-#	define do_link(s,t) link(s,t)
-#  else
-static int do_link (char const *, char const *);
-static int
-do_link (char const *s, char const *t)
-/* Link S to T, ignoring bogus EEXIST problems due to NFS failures.  */
-{
-  int r = link (s, t);
-
-  if (r != 0 && errno == EEXIST)
-    {
-      struct stat sb, tb;
-      if (stat (s, &sb) == 0 && stat (t, &tb) == 0 && same_file (sb, tb, 0))
-        r = 0;
-      errno = EEXIST;
-    }
-  return r;
-}
-#  endif
-#endif
-
 static void
 editEndsPrematurely (void)
 {
@@ -1468,7 +1445,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
   if (setmtime (from, mtime) != 0)
     return -1;
 
-#	if !has_rename || bad_b_rename
+#	if bad_b_rename
   /*
    * There's a short window of inconsistency
    * during which TO does not exist.
@@ -1477,13 +1454,8 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
     return -1;
 #	endif
 
-#	if has_rename
   if (rename (from, to) != 0 && !(has_NFS && errno == ENOENT))
     return -1;
-#	else
-  if (do_link (from, to) != 0 || un_link (from) != 0)
-    return -1;
-#	endif
 
 #	if bad_NFS_rename
   {

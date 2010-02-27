@@ -730,7 +730,7 @@ case $mmap_signal in
 esac
 echo "$a#define mmap_signal $mmap_signal $z/* signal received if you reference nonexistent part of mmapped file */"
 
-$ech >&3 "$0: configuring has_rename, bad_a_rename, bad_b_rename $dots"
+$ech >&3 "$0: configuring bad_a_rename, bad_b_rename $dots"
 cat >a.c <<EOF
 #include "$A_H"
 int main() { return (rename("a.a","a.b") != 0); }
@@ -755,7 +755,6 @@ then
 else h=0 a=0 b=0
 fi
 echo >&3 $h, $a, $b
-echo "#define has_rename $h /* Does rename() work?  */"
 echo "#define bad_a_rename $a /* Does rename(A,B) fail if A is unwritable?  */"
 echo "#define bad_b_rename $b /* Does rename(A,B) fail if B is unwritable?  */"
 echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
@@ -1140,38 +1139,6 @@ EOF
 *)	h=? a='/* ' z='*/ '
 esac
 echo "$a#define has_sys_siglist $h $z/* Does sys_siglist[] work?  */"
-
-$ech >&3 "$0: configuring strchr $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef strchr
-	char *strchr();
-#endif
-int main() {return (!strchr("abc", 'c'));}
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then a='/* ' z='*/ ' ok=OK
-else a= z= ok='does not work'
-fi
-echo >&3 $ok
-echo "$a#define strchr index $z/* Use old-fashioned name for strchr()?  */"
-
-$ech >&3 "$0: configuring strrchr $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef strrchr
-	char *strrchr();
-#endif
-int main() {return (!strrchr("abc", 'c'));}
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then a='/* ' z='*/ ' ok=OK
-else a= z= ok='does not work'
-fi
-echo >&3 $ok
-echo "$a#define strrchr rindex $z/* Use old-fashioned name for strrchr()?  */"
 
 $ech >&3 "$0: configuring bad_unlink $dots"
 cat >a.c <<EOF
