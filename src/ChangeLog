@@ -1,5 +1,12 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `sigblock' check to configure.in.
+
+	* rcsutil.c: Do s/has_sigblock/defined HAVE_SIGBLOCK/g;
+	* conf.sh: Remove check for `sigblock'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] When using `sigblock', compute `sigmask' manually.
 
 	* rcsutil.c [has_sigblock] (setup_catchsig): Don't

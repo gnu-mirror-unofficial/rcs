@@ -1,5 +1,11 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `sigblock' check to configure.in.
+
+	* configure.in (sigblock): Add to `AC_CHECK_FUNCS_ONCE'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `sigaction' check to configure.in.
 
 	* configure.in (sigaction): Add to `AC_CHECK_FUNCS_ONCE'.

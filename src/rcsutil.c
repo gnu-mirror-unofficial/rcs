@@ -448,7 +448,7 @@ setup_catchsig (int const *sig, int sigs)
 }
 
 #else
-#if has_sigblock
+#if defined HAVE_SIGBLOCK
 
 static void
 setup_catchsig (int const *sig, int sigs)

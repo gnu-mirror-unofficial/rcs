@@ -340,6 +340,7 @@ AC_CHECK_FUNCS_ONCE([
   seteuid
   setuid
   sigaction
+  sigblock
   waitpid
 ])
 

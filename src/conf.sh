@@ -626,33 +626,6 @@ cat <<EOF
 #define sig_zaps_handler $sig_zaps_handler /* Must a signal handler reinvoke signal()?  */
 EOF
 
-a='/* ' z='*/ '
-case $has_sigaction in
-1)
-	h=?;;
-*)
-	$ech >&3 "$0: configuring has_sigblock $dots"
-	ok=OK
-	a= z=
-	cat >a.c <<EOF
-#include "$A_H"
-#include <signal.h>
-int
-main() {
-	sigblock(1 << ((SIGHUP) - 1));
-	return (raise(SIGHUP) != 0);
-}
-EOF
-	if
-		$PREPARE_CC || exit
-		($CL a.c $L && $aout) >&2
-	then h=1
-	else h=0
-	fi
-	echo >&3 "$h, $ok"
-esac
-echo "$a#define has_sigblock $h $z/* Does sigblock() work?  */"
-
 echo "#define needs_getabsname 0 /* Must we define getabsname?  */"
 
 : configuring has_NFS
