@@ -398,38 +398,6 @@ echo >&3 $ok
 echo "#define has_fflush_input $h /* Does fflush() work on input files?  */"
 rm -f a.c || exit
 
-$ech >&3 "$0: configuring has_ftruncate $dots"
-cat >a.c <<EOF
-#include "$A_H"
-/*
- * We'd like to test ftruncate(creat(f,0), 0),
- * since that's the way RCS uses it,
- * but a common bug causes it to fail over NFS.
- * Since we must defend against this bug at run time anyway,
- * we don't bother to check for it at compile time.
- * So we test ftruncate(creat(f,0200), 0) instead.
- */
-#if defined(O_CREAT) && defined(O_WRONLY) && defined(S_IWUSR)
-#	define creat0200(f) open(f, O_CREAT|O_WRONLY, S_IWUSR)
-#else
-#	define creat0200(f) creat(f, 0200)
-#endif
-int
-main(argc, argv) int argc; char **argv; {
-	int f = creat0200(argv[1]);
-	if (f<0 || write(f,"abc",3)!=3 || ftruncate(f,(off_t)0)!=0 || close(f)!=0)
-		return (1);
-	return (0);
-}
-EOF
-$PREPARE_CC a.a || exit
-if ($CL a.c $L && $aout a.a && test -w a.a && test ! -s a.a) >&2
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_ftruncate $h /* Does ftruncate() work?  */"
-
 $ech >&3 "$0: configuring has_map_fd, has_mmap, has_madvise, mmap_signal $dots"
 rm -f a.c a.d a.e || exit
 cat >a.c <<EOF

@@ -1,3 +1,10 @@
+2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move `ftruncate' check to configure.in.
+
+	* ci.c: Do s/has_ftruncate/defined HAVE_FTRUNCATE/g.
+	* conf.sh: Remove check for `ftruncate'.
+
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move `vfork', `fork' checks to configure.in.

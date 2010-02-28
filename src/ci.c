@@ -452,7 +452,7 @@ main (int argc, char **argv)
                      * Also, Posix 1003.1b-1993 sec 5.6.7.2 p 128 l 1022
                      * says ftruncate might fail because it's not supported.
                      */
-#			if !has_ftruncate
+#			if !defined HAVE_FTRUNCATE
 #			    undef ftruncate
 #			    define ftruncate(fd,length) (-1)
 #			endif
