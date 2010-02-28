@@ -360,7 +360,7 @@ putadmin (void)
 
   if (!(fout = frewrite))
     {
-#		if bad_creat0
+#		if BAD_CREAT0
       ORCSclose ();
       fout = fopenSafer (makedirtemp (0), FOPEN_WB);
 #		else

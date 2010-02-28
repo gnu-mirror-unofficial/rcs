@@ -49,7 +49,7 @@ static long linecorr;      /* #adds - #deletes in each edit run.                
 
 /* indexes into dirtpname */
 #define lockdirtp_index 0
-#define newRCSdirtp_index bad_creat0
+#define newRCSdirtp_index BAD_CREAT0
 #define newworkdirtp_index (newRCSdirtp_index+1)
 #define DIRTEMPNAMES (newworkdirtp_index + 1)
 
@@ -1659,13 +1659,13 @@ dorewrite (int lockflag, int changed)
         }
       else
         {
-#			if bad_creat0
+#			if BAD_CREAT0
           int nr = !!frewrite, ne = 0;
 #			endif
           ORCSclose ();
           seteid ();
           ignoreints ();
-#			if bad_creat0
+#			if BAD_CREAT0
           if (nr)
             {
               nr = un_link (newRCSname);
@@ -1680,7 +1680,7 @@ dorewrite (int lockflag, int changed)
           setrid ();
           if (r != 0)
             enerror (e, lockname);
-#			if bad_creat0
+#			if BAD_CREAT0
           if (nr != 0)
             {
               enerror (ne, newRCSname);
@@ -1702,7 +1702,7 @@ donerewrite (int changed, time_t newRCStime)
  */
 {
   int r = 0, e = 0;
-#	if bad_creat0
+#	if BAD_CREAT0
   int lr, le;
 #	endif
 
@@ -1724,7 +1724,7 @@ donerewrite (int changed, time_t newRCStime)
                                            S_IWOTH), newRCStime);
       e = errno;
       keepdirtemp (newRCSname);
-#		if bad_creat0
+#		if BAD_CREAT0
       lr = un_link (lockname);
       le = errno;
       keepdirtemp (lockname);
@@ -1736,7 +1736,7 @@ donerewrite (int changed, time_t newRCStime)
           enerror (e, RCSname);
           error ("saved in %s", newRCSname);
         }
-#		if bad_creat0
+#		if BAD_CREAT0
       if (lr != 0)
         {
           enerror (le, lockname);

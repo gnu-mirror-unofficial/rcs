@@ -493,7 +493,7 @@ main (int argc, char **argv)
             /* Adjust things for donerewrite's sake.  */
             if (stat (workname, &RCSstat) != 0)
               {
-#		    if bad_creat0
+#		    if BAD_CREAT0
                 mode_t m = umask (0);
                 (void) umask (m);
                 RCSstat.st_mode = (S_IRUSR | S_IRGRP | S_IROTH) & ~m;

@@ -290,34 +290,6 @@ cat - <<EOF
 /* Define or comment out the following symbols as needed.  */
 EOF
 
-$ech >&3 "$0: configuring bad_creat0 $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#if defined(O_CREAT) && defined(O_WRONLY)
-#	define creat0(f) open(f, O_CREAT|O_WRONLY, 0)
-#else
-#	define creat0(f) creat(f, 0)
-#endif
-char buf[17000];
-int
-main() {
-	int f;
-	return (
-		(f = creat0("a.d")) < 0  ||
-		write(f, buf, sizeof(buf)) != sizeof(buf) ||
-		close(f) != 0
-	);
-}
-EOF
-$PREPARE_CC a.d || exit
-if $CL a.c $L >&2 && $aout && test -f a.d && test ! -w a.d
-then b=0 ok=OK
-else b=1 ok='will work around bug'
-fi
-echo >&3 $ok
-echo "#define bad_creat0 $b /* Do writes fail after creat(f,0)?  */"
-rm -f a.d || exit
-
 $ech >&3 "$0: configuring bad_fopen_wplus $dots"
 cat >a.c <<EOF
 #include "$A_H"

@@ -1,5 +1,14 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "`write' after `creat (F, 0)'" check to configure.in.
+
+	* configure.in: Add check for write(2) after
+	creat(2) with mode 0 failing in the "wrong" way.
+	(RCS_CBOOL): New AC_DEFUN.
+	(BAD_CREAT0): New AC_DEFINE_UNQUOTED.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `psiginfo' check to configure.in.
 
 	* configure.in (psiginfo): Add to `AC_CHECK_FUNCS_ONCE'.

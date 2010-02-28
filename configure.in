@@ -345,6 +345,48 @@ AC_CHECK_FUNCS_ONCE([
   waitpid
 ])
 
+# specific behaviors (that unfortunately require running a program to check)
+
+AC_DEFUN([RCS_CBOOL],[dnl
+dnl $1 -- C variable (actually #define) name
+dnl $2 -- sense that maps to "1" {yes, no}
+dnl $3 -- shell variable name to check
+dnl $4 -- description for the config header file
+if test $2 = $[]$3 ; then cbool=1 ; else cbool=0 ; fi
+AC_DEFINE_UNQUOTED([$1],[$cbool],[$4])dnl
+])dnl
+
+AC_CACHE_CHECK([if `write' after `creat (F, 0)' works],[rcs_cv_wac_ok],[
+  rm -f conftest.data
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#if defined(O_CREAT) && defined(O_WRONLY)
+#	define creat0(f) open(f, O_CREAT|O_WRONLY, 0)
+#else
+#	define creat0(f) creat(f, 0)
+#endif
+char buf[17000];
+]],[[
+  int f;
+  return (0 > (f = creat0 ("conftest.data"))
+          || sizeof (buf) != write (f, buf, sizeof (buf))
+          || 0 > close (f));
+]])
+],[res=yes],[res=no])
+  if test yes = "$res" && test -f conftest.data && test ! -w conftest.data
+    then :
+    else res=no
+  fi
+  rcs_cv_wac_ok=$res
+])
+RCS_CBOOL([BAD_CREAT0],[no],[rcs_cv_wac_ok],
+  [Does `write' after `creat (F, 0)' fail in the wrong way?])
+
+# write it out
+
 AC_CONFIG_FILES([
   Makefile
   man/Makefile

@@ -1,5 +1,14 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "`write' after `creat (F, 0)'" check to configure.in.
+
+	* rcs.c: Do s/bad_creat0/BAD_CREAT0/g.
+	* rcsedit.c: Likewise.
+	* rcsgen.c: Likewise.
+	* conf.sh: Remove "write after creat0 fails" check.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `psiginfo' check to configure.in.
 
 	* rcsutil.c: Do s/has_psiginfo/defined HAVE_PSIGINFO/g.
