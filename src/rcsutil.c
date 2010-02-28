@@ -424,11 +424,7 @@ setup_catchsig (int const *sig, int sigs)
 #		ifdef SA_SIGINFO
           if (!unsupported_SA_SIGINFO)
             {
-#			if has_sa_sigaction
               act.sa_sigaction = catchsigaction;
-#			else
-              act.sa_handler = catchsigaction;
-#			endif
               act.sa_flags |= SA_SIGINFO;
             }
 #		endif

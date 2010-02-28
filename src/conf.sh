@@ -620,17 +620,6 @@ else has_sigaction=0 ok='does not work'
 fi
 echo >&3 $ok
 echo "#define has_sigaction $has_sigaction /* Does struct sigaction work?  */"
-$ech >&3 "$0: configuring has_sa_sigaction $dots"
-has_sa_sigaction=0 ok='does not work'
-case $has_sigaction in
-1)
-	$PREPARE_CC || exit
-	if ($CL -Dhas_sa_sigaction=1 a.c $L && $aout) >&2
-	then has_sa_sigaction=1 ok=OK
-	fi
-esac
-echo >&3 $ok
-echo "#define has_sa_sigaction $has_sa_sigaction /* Does struct sigaction have sa_sigaction?  */"
 
 $ech >&3 "$0: configuring sig_zaps_handler $dots"
 case $has_signal,$has_sigaction in

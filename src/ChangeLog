@@ -1,5 +1,13 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume `sigaction.sa_sigaction' is POSIX.
+
+	* rcsutil.c: For #if has_sa_sigaction FOO #else
+	BAR #endif block, delete everything except FOO.
+	* conf.sh: Remove check for `sigaction.sa_sigaction'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `psignal' check to configure.in.
 
 	* rcsutil.c: Do s/has_psignal/defined HAVE_PSIGNAL/g.
