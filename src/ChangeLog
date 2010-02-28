@@ -1,5 +1,16 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Drop support for "spawn" (fork(2) analog).
+
+	* rcsbase.h: For #if has_spawn FOO #else BAR #endif
+	block, delete everything except BAR.
+	* rcsutil.c [has_spawn] (redirect): Delete func.
+	Also: delete #if has_spawn FOO #endif blocks;
+	where there is `has_spawn', subtitute w/ 0 and simplify.
+	* conf.sh: Don't define `has_spawn'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Drop support for "map_fd" (HPUX mmap(2) precursor).
 
 	* rcsbsae.h (maps_memory): Do s/has_map_fd/0/.

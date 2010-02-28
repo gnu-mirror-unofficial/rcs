@@ -702,7 +702,6 @@ echo >&3 $ok
 echo "#define bad_unlink $b /* Does unlink() fail on unwritable files?  */"
 
 grep '#define HAVE_WORKING_V*FORK 1' auto-sussed.h
-echo "#define has_spawn 0 /* Does spawn*() work?  */"
 
 $ech >&3 "$0: configuring bad_wait_if_SIGCHLD_ignored $dots"
 cat >a.c <<EOF

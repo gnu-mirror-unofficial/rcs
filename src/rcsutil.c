@@ -679,7 +679,7 @@ fopenSafer (char const *filename, char const *type)
 #	define dup(fd) fcntl(fd, F_DUPFD, 0)
 #endif
 
-#if defined HAVE_WORKING_FORK || has_spawn
+#if defined HAVE_WORKING_FORK
 
 static int movefd (int, int);
 static int
@@ -709,22 +709,7 @@ fdreopen (int fd, char const *file, int flags)
   return movefd (newfd, fd);
 }
 
-#if has_spawn
-static void redirect (int, int);
-static void
-redirect (int old, int new)
-/*
-* Move file descriptor OLD to NEW.
-* If OLD is -1, do nothing.
-* If OLD is -2, just close NEW.
-*/
-{
-  if ((old != -1 && close (new) != 0) || (0 <= old && movefd (old, new) < 0))
-    efaterror ("spawn I/O redirection");
-}
-#endif
-
-#else /* !defined HAVE_WORKING_FORK && !has_spawn */
+#else /* !defined HAVE_WORKING_FORK */
 
 static void bufargcat (struct buf *, int, char const *);
 static void
@@ -758,7 +743,7 @@ bufargcat (register struct buf *b, int c, register char const *s)
 
 #endif
 
-#if !has_spawn && defined HAVE_WORKING_FORK
+#if defined HAVE_WORKING_FORK
 /*
 * Output the string S to stderr, without touching any I/O buffers.
 * This is useful if you are a child process, whose buffers are usually wrong.
@@ -800,61 +785,6 @@ runv (int infd, char const *outname, char const **args)
   oflush ();
   eflush ();
   {
-#if has_spawn
-    int in, out;
-    char const *file;
-
-    in = -1;
-    if (infd != -1 && infd != STDIN_FILENO)
-      {
-        if ((in = dup (STDIN_FILENO)) < 0)
-          {
-            if (errno != EBADF)
-              efaterror ("spawn input setup");
-            in = -2;
-          }
-        else
-          {
-#		ifdef F_DUPFD
-            if (close (STDIN_FILENO) != 0)
-              efaterror ("spawn input close");
-#		endif
-          }
-        if (
-#		ifdef F_DUPFD
-             fcntl (infd, F_DUPFD, STDIN_FILENO) != STDIN_FILENO
-#		else
-             dup2 (infd, STDIN_FILENO) != STDIN_FILENO
-#		endif
-          )
-          efaterror ("spawn input redirection");
-      }
-
-    out = -1;
-    if (outname)
-      {
-        if ((out = dup (STDOUT_FILENO)) < 0)
-          {
-            if (errno != EBADF)
-              efaterror ("spawn output setup");
-            out = -2;
-          }
-        if (fdreopen (STDOUT_FILENO, outname,
-                      O_CREAT | O_TRUNC | O_WRONLY) < 0)
-          efaterror (outname);
-      }
-
-    wstatus = spawn_RCS (0, args[1], (char **) (args + 1));
-#	ifdef RCS_SHELL
-    if (wstatus == -1 && errno == ENOEXEC)
-      {
-        args[0] = RCS_SHELL;
-        wstatus = spawnv (0, args[0], (char **) args);
-      }
-#	endif
-    redirect (in, STDIN_FILENO);
-    redirect (out, STDOUT_FILENO);
-#else
 #if defined HAVE_WORKING_FORK
     pid_t pid;
     if (!(pid = vfork ()))
@@ -939,7 +869,6 @@ runv (int infd, char const *outname, char const **args)
     if (outname)
       bufargcat (&b, '>', outname);
     wstatus = system (b.string);
-#endif
 #endif
   }
   if (!WIFEXITED (wstatus))
@@ -1142,7 +1071,7 @@ set_uid_to (uid_t u)
 
   if (euid () == ruid ())
     return;
-#if (defined HAVE_WORKING_FORK || has_spawn) && DIFF_ABSOLUTE
+#if defined HAVE_WORKING_FORK && DIFF_ABSOLUTE
 #	if has_setreuid
   if (setreuid (u == euid ()? ruid () : euid (), u) != 0)
     efaterror ("setuid");

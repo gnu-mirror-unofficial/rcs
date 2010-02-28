@@ -106,18 +106,10 @@ char *getlogin (void);
 #	undef seteuid
 #	define seteuid setuid
 #endif
-#if has_spawn
-#	if ALL_ABSOLUTE
-#		define spawn_RCS spawnv
-#	else
-#		define spawn_RCS spawnvp
-#	endif
+#if ALL_ABSOLUTE
+#	define exec_RCS execv
 #else
-#	if ALL_ABSOLUTE
-#		define exec_RCS execv
-#	else
-#		define exec_RCS execvp
-#	endif
+#	define exec_RCS execvp
 #endif
 
 /* end cruft formerly from from conf.h */
