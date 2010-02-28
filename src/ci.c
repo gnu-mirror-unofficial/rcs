@@ -1031,11 +1031,7 @@ fixwork (mode_t newworkmode, time_t mtime)
 #ifdef HAVE_FCHMOD
     : fchmod (Ifileno (workptr), newworkmode) == 0 ? 0
 #endif
-#if bad_chmod_close
-    : -1
-#else
-:  chmod (workname, newworkmode)
-#endif
+    : chmod (workname, newworkmode)
     ;
 }
 

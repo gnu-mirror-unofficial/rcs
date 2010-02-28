@@ -290,31 +290,6 @@ cat - <<EOF
 /* Define or comment out the following symbols as needed.  */
 EOF
 
-$ech >&3 "$0: configuring bad_chmod_close $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef O_RDONLY
-#	define O_RDONLY 0
-#endif
-int
-main() {
-	int f;
-	return (
-		(f = open("a.c", O_RDONLY)) < 0 ||
-		chmod("a.c", 0) != 0 ||
-		close(f) != 0
-	);
-}
-EOF
-$PREPARE_CC || exit
-if $CL a.c $L >&2 && $aout
-then b=0 ok=OK
-else b=1 ok='will work around bug'
-fi
-echo >&3 $ok
-echo "#define bad_chmod_close $b /* Can chmod() close file descriptors?  */"
-rm -f a.c || exit
-
 $ech >&3 "$0: configuring bad_creat0 $dots"
 cat >a.c <<EOF
 #include "$A_H"

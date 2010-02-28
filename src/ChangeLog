@@ -1,5 +1,13 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume availability of `chmod'.
+
+	* ci.c: For #if bad_chmod_close FOO #else BAR #endif
+	block, delete everything except BAR.
+	* conf.sh: Remove check for `chmod'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `seteuid', `setuid' checks to configure.in.
 
 	* rcsbase.h: Do s/has_seteuid/defined HAVE_SETEUID/g;
