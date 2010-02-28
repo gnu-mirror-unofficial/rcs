@@ -627,23 +627,19 @@ cat <<EOF
 EOF
 
 a='/* ' z='*/ '
-b='/* ' y='*/ '
 case $has_sigaction in
 1)
 	h=?;;
 *)
-	$ech >&3 "$0: configuring has_sigblock, sigmask $dots"
+	$ech >&3 "$0: configuring has_sigblock $dots"
 	ok=OK
 	a= z=
 	cat >a.c <<EOF
 #include "$A_H"
 #include <signal.h>
-#if define_sigmask
-#	define sigmask(s) (1 << ((s)-1))
-#endif
 int
 main() {
-	sigblock(sigmask(SIGHUP));
+	sigblock(1 << ((SIGHUP) - 1));
 	return (raise(SIGHUP) != 0);
 }
 EOF
@@ -651,16 +647,11 @@ EOF
 		$PREPARE_CC || exit
 		($CL a.c $L && $aout) >&2
 	then h=1
-	elif
-		$PREPARE_CC || exit
-		($CL -Ddefine_sigmask=1 a.c $L && $aout) >&2
-	then h=1 b= y= ok='definition needed'
 	else h=0
 	fi
 	echo >&3 "$h, $ok"
 esac
 echo "$a#define has_sigblock $h $z/* Does sigblock() work?  */"
-echo "$b#define sigmask(s) (1 << ((s)-1)) $y/* Yield mask for signal number.  */"
 
 echo "#define needs_getabsname 0 /* Must we define getabsname?  */"
 

@@ -1,5 +1,13 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] When using `sigblock', compute `sigmask' manually.
+
+	* rcsutil.c [has_sigblock] (setup_catchsig): Don't
+	use `sigmask; instead, do the subtract and shift manually.
+	* conf.sh: Remove computation of `sigmask'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `sigaction' check to configure.in.
 
 	* rcsutil.c: Do s/has_sigaction/defined HAVE_SIGACTION/g.

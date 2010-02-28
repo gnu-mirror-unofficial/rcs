@@ -458,7 +458,7 @@ setup_catchsig (int const *sig, int sigs)
 
   mask = 0;
   for (i = sigs; 0 <= --i;)
-    mask |= sigmask (sig[i]);
+    mask |= 1 << (sig[i] - 1);
   mask = sigblock (mask);
   for (i = sigs; 0 <= --i;)
     if (signal (sig[i], catchsig) == SIG_IGN &&
