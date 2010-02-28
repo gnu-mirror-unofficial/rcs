@@ -315,36 +315,6 @@ cat <<EOF
 EOF
 rm -f a.c || exit
 
-$ech >&3 "$0: configuring has_fflush_input $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef SEEK_SET
-#define SEEK_SET 0
-#endif
-#ifndef SEEK_CUR
-#define SEEK_CUR 1
-#endif
-#ifndef STDIN_FILENO
-#define STDIN_FILENO 0
-#endif
-int main() {
-	return (
-		getchar() == EOF
-		|| fseek(stdin, 0L, SEEK_SET) != 0
-		|| fflush(stdin) != 0
-		|| lseek(STDIN_FILENO, (off_t)0, SEEK_CUR) != 0
-	);
-}
-EOF
-$PREPARE_CC || exit
-if $CL a.c $L >&2 && $aout <a.c
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_fflush_input $h /* Does fflush() work on input files?  */"
-rm -f a.c || exit
-
 $ech >&3 "$0: configuring has_mmap, has_madvise, mmap_signal $dots"
 rm -f a.c a.d a.e || exit
 cat >a.c <<EOF

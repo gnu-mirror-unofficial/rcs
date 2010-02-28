@@ -1,5 +1,12 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "fflush input" check to configure.in.
+
+	* ci.c: Do s/has_fflush_input/CAN_FFLUSH_IN/g.
+	* conf.sh: Remove "fflush input" check.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "`write' after `creat (F, 0)'" check to configure.in.
 
 	* rcs.c: Do s/bad_creat0/BAD_CREAT0/g.

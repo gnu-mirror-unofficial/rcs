@@ -493,7 +493,7 @@ main (int argc, char **argv)
                 FILE *wfile = workptr->stream;
                 long wfile_off;
 #		    endif
-#		    if !has_fflush_input && !(large_memory && maps_memory)
+#		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 off_t wfd_off;
 #		    endif
 
@@ -502,7 +502,7 @@ main (int argc, char **argv)
                 newdelta.log = getlogmsg ();
 #		    if !large_memory
                 Irewind (workptr);
-#			if has_fflush_input
+#			if CAN_FFLUSH_IN
                 if (fflush (workptr) != 0)
                   Ierror ();
 #			endif
@@ -510,14 +510,14 @@ main (int argc, char **argv)
 #			if !maps_memory
                 if ((wfile_off = ftell (wfile)) == -1
                     || fseek (wfile, 0L, SEEK_SET) != 0
-#			     if has_fflush_input
+#			     if CAN_FFLUSH_IN
                     || fflush (wfile) != 0
 #			     endif
                   )
                   Ierror ();
 #			endif
 #		    endif
-#		    if !has_fflush_input && !(large_memory && maps_memory)
+#		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 wfd_off = lseek (wfd, (off_t) 0, SEEK_CUR);
                 if (wfd_off == -1
                     || (wfd_off != 0
@@ -542,7 +542,7 @@ main (int argc, char **argv)
                   default:
                     rcsfaterror ("diff failed");
                   }
-#		    if !has_fflush_input && !(large_memory && maps_memory)
+#		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 if (lseek (wfd, wfd_off, SEEK_CUR) == -1)
                   Ierror ();
 #		    endif
