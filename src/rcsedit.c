@@ -1437,7 +1437,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
   if (0 < set_mode && fchmod (fileno (*fromp), mode_while_renaming) == 0)
     fchmod_set_mode = set_mode;
 #	endif
-  /* If bad_chmod_close, we must close before chmod.  */
+  /* On some systems, we must close before chmod.  */
   Ozclose (fromp);
   if (fchmod_set_mode < set_mode && chmod (from, mode_while_renaming) != 0)
     return -1;
