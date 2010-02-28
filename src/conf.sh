@@ -789,19 +789,6 @@ echo "#define bad_wait_if_SIGCHLD_ignored $b /* Does ignoring SIGCHLD break wait
 
 echo '#define RCS_SHELL "/bin/sh" /* shell to run RCS subprograms */'
 
-$ech >&3 "$0: configuring has_printf_dot $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { printf("%.2d", 1); return (ferror(stdout) || fclose(stdout)!=0); }
-EOF
-$PREPARE_CC && $CL a.c $L >&2 && r=`$aout` || exit
-case $r in
-01)	h=1 ok=OK;;
-*)	h=0 ok='does not work'
-esac
-echo >&3 $ok
-echo "#define has_printf_dot $h /* Does \"%.2d\" print leading 0?  */"
-
 grep '#define GCC_HAS_ATTRIBUTE_FORMAT 1' auto-sussed.h
 cat <<EOF
 #ifdef GCC_HAS_ATTRIBUTE_FORMAT

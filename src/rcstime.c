@@ -26,6 +26,27 @@
 static long zone_offset;        /* seconds east of UTC, or TM_LOCAL_ZONE */
 static int use_zone_offset;     /* if zero, use UTC without zone indication */
 
+/* Return the first string if printf "%.2" prints a leading "0".
+   Otherwise, return the second string.  */
+static const char *
+proper_dot_2 (const char a[], const char b[])
+{
+  static int checkedp = 0;
+  static int dtrt = -1;
+
+  if (! checkedp)
+    {
+      char buf[4];
+
+      sprintf (buf, "%.2d", 1);
+      dtrt = ('0' == buf[0]);
+      checkedp = 1;
+    }
+  return dtrt
+    ? a
+    : b;
+}
+
 /*
 * Convert Unix time to RCS format.
 * For compatibility with older versions of RCS,
@@ -35,12 +56,8 @@ void
 time2date (time_t unixtime, char date[datesize])
 {
   register struct tm const *tm = time2tm (unixtime, RCSversion < VERSION (5));
-  sprintf (date,
-#		if has_printf_dot
-           "%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",
-#		else
-           "%02d.%02d.%02d.%02d.%02d.%02d",
-#		endif
+  sprintf (date, proper_dot_2 ("%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",
+                               "%02d.%02d.%02d.%02d.%02d.%02d"),
            tm->tm_year + ((unsigned) tm->tm_year < 100 ? 0 : 1900),
            tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
@@ -142,22 +159,16 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
           zone = -zone;
           c = '-';
         }
-      sprintf (datebuf,
-#		if has_printf_dot
-               "%.2d-%.2d-%.2d %.2d:%.2d:%.2d%c%.2d",
-#		else
-               "%02d-%02d-%02d %02d:%02d:%02d%c%02d",
-#		endif
+      sprintf (datebuf, proper_dot_2 ("%.2d-%.2d-%.2d %.2d:%.2d:%.2d%c%.2d",
+                                      "%02d-%02d-%02d %02d:%02d:%02d%c%02d"),
                z->tm_year + 1900,
                z->tm_mon + 1, z->tm_mday, z->tm_hour, z->tm_min, z->tm_sec,
                c, (int) (zone / (60 * 60)));
       if ((non_hour = zone % (60 * 60)))
         {
-#		if has_printf_dot
-          static char const fmt[] = ":%.2d";
-#		else
-          static char const fmt[] = ":%02d";
-#		endif
+          const char *fmt = proper_dot_2 (":%.2d",
+                                          ":%02d");
+
           sprintf (datebuf + strlen (datebuf), fmt, non_hour / 60);
           if ((non_hour %= 60))
             sprintf (datebuf + strlen (datebuf), fmt, non_hour);

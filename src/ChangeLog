@@ -1,5 +1,14 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move check for proper `printf' "%.2" behavior to runtime.
+
+	* rcstime.c (proper_dot_2): New static func.
+	(time2date): For #if has_printf_dot FOO #else BAR #endif
+	blocks, replace with `proper_dot_2 (FOO, BAR)'.
+	* conf.sh: Remove check for proper `printf' "%.2" behavior.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume <limits.h> defines `LONG_MAX'.
 
 	* conf.sh: Remove computation of `LONG_MAX'.
