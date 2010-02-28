@@ -1,5 +1,11 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume <limits.h> defines `LONG_MAX'.
+
+	* conf.sh: Remove computation of `LONG_MAX'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `sigblock' check to configure.in.
 
 	* rcsutil.c: Do s/has_sigblock/defined HAVE_SIGBLOCK/g;

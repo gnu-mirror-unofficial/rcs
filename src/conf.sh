@@ -824,24 +824,6 @@ case "$has_map_fd$has_mmap" in
 esac
 echo "#define large_memory $l /* Can main memory hold entire RCS files?  */"
 
-$ech >&3 "$0: configuring LONG_MAX $dots"
-cat >a.c <<EOF
-#include "$A_H"
-static unsigned long ulong_max;
-static long long_max;
-int
-main() {
-	ulong_max--;
-	long_max = ulong_max >> 1;
-	printf("#ifndef LONG_MAX\n");
-	printf("#define LONG_MAX %ldL /* long maximum */\n", long_max);
-	printf("#endif\n");
-	return (ferror(stdout) || fclose(stdout)!=0);
-}
-EOF
-$PREPARE_CC && $CL a.c $L >&2 && $aout || exit
-echo >&3 OK
-
 : configuring same_file
 echo "/* Do struct stat s and t describe the same file?  Answer d if unknown.  */"
 echo "#define same_file(s,t,d) ((s).st_ino==(t).st_ino && (s).st_dev==(t).st_dev)"
