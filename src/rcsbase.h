@@ -120,11 +120,6 @@ char *getlogin (void);
 #	endif
 #endif
 
-/* utime.h */
-#if !has_utimbuf
-	struct utimbuf { time_t actime, modtime; };
-#endif
-
 /* end cruft formerly from from conf.h */
 
 #define EXIT_TROUBLE DIFF_TROUBLE

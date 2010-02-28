@@ -943,20 +943,6 @@ echo >&3 OK
 echo "/* Do struct stat s and t describe the same file?  Answer d if unknown.  */"
 echo "#define same_file(s,t,d) ((s).st_ino==(t).st_ino && (s).st_dev==(t).st_dev)"
 
-$ech >&3 "$0: configuring struct utimbuf $dots"
-cat >a.c <<EOF
-#include "$A_H"
-static struct utimbuf s;
-int main() { s.actime = s.modtime = 1; return (utime("a.c", &s) != 0); }
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then h=1 ok=OK
-else h=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_utimbuf $h /* Does struct utimbuf work?  */"
-
 : configuring CO
 echo "#define CO \"${RCSPREFIX}co\" /* name of 'co' program */"
 

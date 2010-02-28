@@ -1,5 +1,12 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume <utime.h> declares `struct utimbuf'.
+
+	* rcsbase.h [!has_utimbuf] (utimbuf): Delete struct decl.
+	* conf.sh: Remove check for `struct utimbuf'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume availability of `chmod'.
 
 	* ci.c: For #if bad_chmod_close FOO #else BAR #endif
