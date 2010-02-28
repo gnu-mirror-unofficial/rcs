@@ -1,3 +1,13 @@
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move `vfork', `fork' checks to configure.in.
+
+	* rcsbase.h: Do s/has_fork/defined HAVE_WORKING_FORK/g;
+	do s/has_vfork/defined HAVE_WORKING_VFORK/g.
+	* rcsutil.c: Likewise.
+	* conf.sh: Remove checks for `vfork', `fork'.
+	Do s/has_fork/defined HAVE_WORKING_FORK/g.
+
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move `waitpid' check to configure.in.

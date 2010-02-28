@@ -98,7 +98,7 @@ char *getlogin (void);
 #	define STDOUT_FILENO 1
 #	define STDERR_FILENO 2
 #endif
-#if has_fork && !has_vfork
+#if defined HAVE_WORKING_FORK && !defined HAVE_WORKING_VFORK
 #	undef vfork
 #	define vfork fork
 #endif

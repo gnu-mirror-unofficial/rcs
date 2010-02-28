@@ -1,3 +1,10 @@
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move `vfork', `fork' checks to configure.in.
+
+	* configure.in (vfork.h): Remove from `AC_CHECK_HEADERS_ONCE'.
+	(AC_FUNC_FORK): New.
+
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move `waitpid' check to configure.in.

@@ -683,7 +683,7 @@ fopenSafer (char const *filename, char const *type)
 #	define dup(fd) fcntl(fd, F_DUPFD, 0)
 #endif
 
-#if has_fork || has_spawn
+#if defined HAVE_WORKING_FORK || has_spawn
 
 static int movefd (int, int);
 static int
@@ -728,7 +728,7 @@ redirect (int old, int new)
 }
 #endif
 
-#else /* !has_fork && !has_spawn */
+#else /* !defined HAVE_WORKING_FORK && !has_spawn */
 
 static void bufargcat (struct buf *, int, char const *);
 static void
@@ -762,7 +762,7 @@ bufargcat (register struct buf *b, int c, register char const *s)
 
 #endif
 
-#if !has_spawn && has_fork
+#if !has_spawn && defined HAVE_WORKING_FORK
 /*
 * Output the string S to stderr, without touching any I/O buffers.
 * This is useful if you are a child process, whose buffers are usually wrong.
@@ -859,7 +859,7 @@ runv (int infd, char const *outname, char const **args)
     redirect (in, STDIN_FILENO);
     redirect (out, STDOUT_FILENO);
 #else
-#if has_fork
+#if defined HAVE_WORKING_FORK
     pid_t pid;
     if (!(pid = vfork ()))
       {
@@ -1146,7 +1146,7 @@ set_uid_to (uid_t u)
 
   if (euid () == ruid ())
     return;
-#if (has_fork||has_spawn) && DIFF_ABSOLUTE
+#if (defined HAVE_WORKING_FORK || has_spawn) && DIFF_ABSOLUTE
 #	if has_setreuid
   if (setreuid (u == euid ()? ruid () : euid (), u) != 0)
     efaterror ("setuid");
