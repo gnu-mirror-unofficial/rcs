@@ -293,7 +293,7 @@ static void
 catchsigaction (int s, siginfo_t *i, void *c)
 #endif
 {
-#   if sig_zaps_handler
+#   if SIG_ZAPS_HANDLER
   /* If a signal arrives before we reset the handler, we lose. */
   signal (s, SIG_IGN);
 #   endif

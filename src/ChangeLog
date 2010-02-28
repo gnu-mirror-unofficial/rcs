@@ -1,5 +1,12 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "signal zaps handler" check to configure.in.
+
+	* rcsutil.c: Do s/sig_zaps_handler/SIG_ZAPS_HANDLER/g.
+	* conf.sh: Remove "signal zaps handler" check.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "fflush input" check to configure.in.
 
 	* ci.c: Do s/has_fflush_input/CAN_FFLUSH_IN/g.

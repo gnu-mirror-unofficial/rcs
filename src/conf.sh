@@ -494,49 +494,6 @@ echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
 
 echo "#define has_setreuid 0 /* Does setreuid() work?  See ../INSTALL.RCS.  */"
 
-$ech >&3 "$0: configuring sig_zaps_handler $dots"
-case $has_signal,$has_sigaction in
-1,0)
-	cat >a.c <<EOF
-#include "$A_H"
-#if !defined(signal) && declare_signal
-	void (*signal (int, void(*)signal_args))signal_args;
-#endif
-static void nothing(i) int i; {}
-int
-main(argc, argv) int argc; char **argv; {
-	signal(SIGINT, nothing);
-	while (--argc)
-		raise(SIGINT);
-	return (0);
-}
-EOF
-	for declare_signal in 1 0
-	do
-		for signal_args in '(int)' '()'
-		do
-			$PREPARE_CC || exit
-			($CL \
-				-Ddeclare_signal=$declare_signal \
-				-Dsignal_args="$signal_args" \
-					a.c $L && $aout 1) >&2 && break
-		done && break
-	done || {
-		echo >&3 $0: cannot deduce signal type
-		exit 1
-	}
-	if $aout 1 2 >&2
-	then sig_zaps_handler=0
-	else sig_zaps_handler=1
-	fi;;
-*)
-	sig_zaps_handler=0
-esac
-echo >&3 $sig_zaps_handler
-cat <<EOF
-#define sig_zaps_handler $sig_zaps_handler /* Must a signal handler reinvoke signal()?  */
-EOF
-
 echo "#define needs_getabsname 0 /* Must we define getabsname?  */"
 
 : configuring has_NFS

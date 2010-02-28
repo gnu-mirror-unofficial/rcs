@@ -356,6 +356,26 @@ if test $2 = $[]$3 ; then cbool=1 ; else cbool=0 ; fi
 AC_DEFINE_UNQUOTED([$1],[$cbool],[$4])dnl
 ])dnl
 
+if test yes = $ac_cv_header_signal_h &&
+   test  no = $ac_cv_func_sigaction ; then
+AC_CACHE_CHECK([if signal zaps the handler],[rcs_cv_sig_zaps],[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <signal.h>
+static void nothing (i) int i; {}
+]],[[
+  int count = 2;
+  signal (SIGINT, nothing);
+  while (--count)
+    raise (SIGINT);
+]])
+],[res=no],[res=yes])
+  rcs_cv_sig_zaps=$res
+])
+else rcs_cv_sig_zaps=no
+fi
+RCS_CBOOL([SIG_ZAPS_HANDLER],[yes],[rcs_cv_sig_zaps],
+  [Does a signal zap its handler (requiring another call to `signal')?])
+
 AC_CACHE_CHECK([if `write' after `creat (F, 0)' works],[rcs_cv_wac_ok],[
   rm -f conftest.data
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[

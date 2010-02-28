@@ -1,5 +1,13 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "signal zaps handler" check to configure.in.
+
+	* configure.in: Add check for signal zapping handlers,
+	but only do this if we have <signal.h> and not `sigaction'.
+	(SIG_ZAPS_HANDLER): New AC_DEFINE_UNQUOTED.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "fflush input" check to configure.in.
 
 	* configure.in: Add check for fflush on input stream.
