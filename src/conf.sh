@@ -757,22 +757,10 @@ EOF
 esac
 echo "#define has_psiginfo $has_psiginfo /* Does psiginfo() work?  */"
 
-case $has_signal in
-1)
-	$ech >&3 "$0: configuring has_psignal $dots"
-	cat >a.c <<EOF
-#include "$A_H"
-int main() { psignal(SIGINT, ""); return (0); }
-EOF
-	$PREPARE_CC || exit
-	if ($CL a.c $L && $aout) >&2
-	then has_psignal=1 ok=OK
-	else has_psignal=0 ok=absent
-	fi
-	echo >&3 $ok;;
-*)	has_psignal=0
-esac
-echo "#define has_psignal $has_psignal /* Does psignal() work?  */"
+if grep '#define HAVE_PSIGNAL 1' auto-sussed.h >/dev/null
+then has_psignal=1
+else has_psignal=0
+fi
 
 case $has_psiginfo in
 1)

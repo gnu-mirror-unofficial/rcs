@@ -335,6 +335,7 @@ AC_CHECK_FUNCS_ONCE([
   getuid
   getwd
   mktemp
+  psignal
   readlink
   seteuid
   setuid

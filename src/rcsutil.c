@@ -197,7 +197,7 @@ readAccessFilenameBuffer (char const *filename, unsigned char const *p)
 #   define accessName ((char const *) 0)
 #endif
 
-#if !has_psignal
+#if !defined HAVE_PSIGNAL
 
 # define psignal my_psignal
 static void my_psignal (int, char const *);

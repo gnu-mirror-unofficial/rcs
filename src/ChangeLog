@@ -1,5 +1,12 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `psignal' check to configure.in.
+
+	* rcsutil.c: Do s/has_psignal/defined HAVE_PSIGNAL/g.
+	* conf.sh: Remove check for `psignal'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume <utime.h> declares `struct utimbuf'.
 
 	* rcsbase.h [!has_utimbuf] (utimbuf): Delete struct decl.
