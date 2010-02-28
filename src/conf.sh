@@ -606,54 +606,7 @@ echo "#define bad_a_rename $a /* Does rename(A,B) fail if A is unwritable?  */"
 echo "#define bad_b_rename $b /* Does rename(A,B) fail if B is unwritable?  */"
 echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
 
-if grep '#define HAVE_GETUID 1' auto-sussed.h >/dev/null
-then has_getuid=1
-else has_getuid=0
-fi
-
-case $has_getuid in
-0)
-	a='/* ' z='*/ ' has_seteuid=?;;
-*)
-	$ech >&3 "$0: configuring has_seteuid $dots"
-	a= z=
-	cat >a.c <<EOF
-#include "$A_H"
-int
-main() {
-/* Guess, don't test.  Ugh.  Testing would require running conf.sh setuid.  */
-/* If the guess is wrong, a setuid RCS will detect the problem at runtime.  */
-#if !_POSIX_VERSION
-	return (1);
-#else
-	return (seteuid(geteuid()) != 0);
-#endif
-}
-EOF
-	$PREPARE_CC || exit
-	if ($CL a.c $L && $aout) >&2
-	then has_seteuid=1 ok='OK, I guess'
-	else has_seteuid=0 ok='does not work'
-	fi
-	echo >&3 $ok
-esac
-echo "$a#define has_seteuid $has_seteuid $z/* Does seteuid() work?  See ../INSTALL.RCS.  */"
-
 echo "#define has_setreuid 0 /* Does setreuid() work?  See ../INSTALL.RCS.  */"
-
-$ech >&3 "$0: configuring has_setuid $dots"
-h=$has_seteuid
-case $h in
-0)
-	cat >a.c <<EOF
-#include "$A_H"
-int main() { return (setuid(getuid()) != 0); }
-EOF
-	$PREPARE_CC || exit
-	($CL a.c $L && $aout) >&2 && h=1 ok='OK, I guess'
-esac
-echo >&3 $ok
-echo "$a#define has_setuid $h $z/* Does setuid() exist?  */"
 
 $ech >&3 "$0: configuring has_sigaction $dots"
 cat >a.c <<EOF

@@ -336,6 +336,8 @@ AC_CHECK_FUNCS_ONCE([
   getwd
   mktemp
   readlink
+  seteuid
+  setuid
   waitpid
 ])
 

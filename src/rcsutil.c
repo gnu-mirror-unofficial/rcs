@@ -153,7 +153,7 @@ getusername (int suspicious)
                       (unsigned long) ruid ());
           name = pw->pw_name;
 #else
-#if has_setuid
+#if defined HAVE_SETUID
           faterror ("setuid not supported");
 #else
           faterror ("Who are you?  Please setenv LOGNAME.");
@@ -1119,7 +1119,7 @@ ruid (void)
   cacheid (getuid ());
 }
 #endif
-#if has_setuid
+#if defined HAVE_SETUID
 uid_t
 euid (void)
 {
@@ -1127,7 +1127,7 @@ euid (void)
 }
 #endif
 
-#if has_setuid
+#if defined HAVE_SETUID
 
 /*
  * Setuid execution really works only with Posix 1003.1a Draft 5 seteuid(),

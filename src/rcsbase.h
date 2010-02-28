@@ -102,7 +102,7 @@ char *getlogin (void);
 #	undef vfork
 #	define vfork fork
 #endif
-#if has_setuid && !has_seteuid
+#if defined HAVE_SETUID && !defined HAVE_SETEUID
 #	undef seteuid
 #	define seteuid setuid
 #endif
@@ -668,7 +668,7 @@ uid_t ruid (void);
 #else
 #	define myself(u) true
 #endif
-#if has_setuid
+#if defined HAVE_SETUID
 uid_t euid (void);
 void nosetid (void);
 void seteid (void);

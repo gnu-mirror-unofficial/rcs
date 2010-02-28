@@ -1,3 +1,14 @@
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move `seteuid', `setuid' checks to configure.in.
+
+	* rcsbase.h: Do s/has_seteuid/defined HAVE_SETEUID/g;
+	do s/has_setuid/defined HAVE_SETUID/g.
+	* ci.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsutil.c: Likewise.
+	* conf.sh: Remove checks for `seteuid', `setuid'.
+
 2010-02-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move `ftruncate' check to configure.in.

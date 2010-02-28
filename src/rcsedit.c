@@ -1601,7 +1601,7 @@ char const *
 getcaller (void)
 /* Get the caller's login name.  */
 {
-#	if has_setuid
+#	if defined HAVE_SETUID
   return getusername (euid () != ruid ());
 #	else
   return getusername (false);

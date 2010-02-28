@@ -256,7 +256,7 @@ main (int argc, char **argv)
           {
 
           case -1:             /* New RCS file */
-#		if has_setuid && defined HAVE_GETUID
+#		if defined HAVE_SETUID && defined HAVE_GETUID
             if (euid () != ruid ())
               {
                 workerror
