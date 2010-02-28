@@ -341,7 +341,7 @@ catchsigaction (int s, siginfo_t *i, void *c)
               perror (nRCS++);
             }
 #	    endif
-#	    if defined(SA_SIGINFO) && has_psiginfo
+#	    if defined(SA_SIGINFO) && defined HAVE_PSIGINFO
           if (i)
             psiginfo (i, nRCS);
           else

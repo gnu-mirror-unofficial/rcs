@@ -600,50 +600,14 @@ echo "#define needs_getabsname 0 /* Must we define getabsname?  */"
 : configuring has_NFS
 echo "#define has_NFS 1 /* Might NFS be used?  */"
 
-case $has_signal,$has_sigaction in
-1,0)
-	has_psiginfo=0;;
-*)
-	$ech >&3 "$0: configuring has_psiginfo $dots"
-	cat >a.c <<EOF
-#include "$A_H"
-static void
-catchsig(s, i, c) int s; siginfo_t *i; void *c; {
-	if (i)
-		psiginfo(i, "test");
-	exit(0);
-}
-int
-main() {
-	struct sigaction s;
-	if (sigaction(SIGINT, (struct sigaction*)0, &s) != 0)
-		return (1);
-#	if has_sa_sigaction
-		s.sa_sigaction = catchsig;
-#	else
-		s.sa_handler = catchsig;
-#	endif
-	if (sigaddset(&s.sa_mask, SIGINT) != 0)
-		return (1);
-	s.sa_flags |= SA_SIGINFO;
-	if (sigaction(SIGINT, &s, (struct sigaction*)0) != 0)
-		return (1);
-	raise(SIGINT);
-	return (1);
-}
-EOF
-	$PREPARE_CC || exit
-	if ($CL a.c $L && $aout) >&2
-	then has_psiginfo=1 ok=OK
-	else has_psiginfo=0 ok=absent
-	fi
-	echo >&3 $ok
-esac
-echo "#define has_psiginfo $has_psiginfo /* Does psiginfo() work?  */"
-
 if grep '#define HAVE_PSIGNAL 1' auto-sussed.h >/dev/null
 then has_psignal=1
 else has_psignal=0
+fi
+
+if grep '#define HAVE_PSIGINFO 1' auto-sussed.h >/dev/null
+then has_psiginfo=1
+else has_psiginfo=0
 fi
 
 case $has_psiginfo in

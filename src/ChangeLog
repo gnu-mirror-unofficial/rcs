@@ -1,5 +1,12 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `psiginfo' check to configure.in.
+
+	* rcsutil.c: Do s/has_psiginfo/defined HAVE_PSIGINFO/g.
+	* conf.sh: Remove check for `psiginfo'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Drop support for "spawn" (fork(2) analog).
 
 	* rcsbase.h: For #if has_spawn FOO #else BAR #endif
