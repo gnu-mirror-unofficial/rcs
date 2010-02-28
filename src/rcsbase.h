@@ -177,7 +177,7 @@ char *getlogin (void);
  * Following such macros with `; else' results in a syntax error.
  */
 
-#define maps_memory (has_map_fd || has_mmap)
+#define maps_memory (0 || has_mmap)
 
 #if large_memory
 typedef unsigned char const *Iptr_type;

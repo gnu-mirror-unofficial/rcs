@@ -1,5 +1,14 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Drop support for "map_fd" (HPUX mmap(2) precursor).
+
+	* rcsbsae.h (maps_memory): Do s/has_map_fd/0/.
+	* rcslex.c [has_map_fd] (map_fd_deallocate): Delete func.
+	(fd2RILE) [has_map_fd]: Delete allocation sequence.
+	* conf.sh: Don't check for "map_fd"; don't define `has_map_fd'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move check for proper `printf' "%.2" behavior to runtime.
 
 	* rcstime.c (proper_dot_2): New static func.

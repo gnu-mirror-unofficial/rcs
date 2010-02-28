@@ -373,7 +373,7 @@ echo >&3 $ok
 echo "#define has_fflush_input $h /* Does fflush() work on input files?  */"
 rm -f a.c || exit
 
-$ech >&3 "$0: configuring has_map_fd, has_mmap, has_madvise, mmap_signal $dots"
+$ech >&3 "$0: configuring has_mmap, has_madvise, mmap_signal $dots"
 rm -f a.c a.d a.e || exit
 cat >a.c <<EOF
 #define CHAR1 '#' /* the first character in this file */
@@ -399,36 +399,23 @@ static struct stat b;
 int
 main(argc, argv) int argc; char **argv; {
 	int s = 0;
-#if TRY_MAP_FD
-	kern_return_t kr;
-	vm_address_t va;
-#endif
 
 	if (fstat(STDIN_FILENO, &b) != 0) {
 		perror("fstat");
 		return (1);
 	}
-#	if TRY_MAP_FD
-		kr = map_fd(STDIN_FILENO, 0, &va, TRUE, b.st_size);
-		if (kr != KERN_SUCCESS) {
-			mach_error("map_fd", kr);
-			return (1);
-		}
-		a = (char *) va;
-#	else
-		a = mmap(
-			(char *)0, b.st_size, PROT_READ, MAP_SHARED,
-			STDIN_FILENO, (off_t)0
-		);
-		if (a == (char *)MAP_FAILED) {
-			perror("mmap");
-			return (1);
-		}
-		if (!MADVISE_OK) {
-			perror("madvise");
-			return (1);
-		}
-#	endif
+	a = mmap(
+		(char *)0, b.st_size, PROT_READ, MAP_SHARED,
+		STDIN_FILENO, (off_t)0
+	);
+	if (a == (char *)MAP_FAILED) {
+		perror("mmap");
+		return (1);
+	}
+	if (!MADVISE_OK) {
+		perror("madvise");
+		return (1);
+	}
 	if (*a != CHAR1)
 		return (1);
 	if (1 < argc) {
@@ -460,18 +447,10 @@ main(argc, argv) int argc; char **argv; {
 			}
 		s = WIFSIGNALED(s) ? WTERMSIG(s) : 0;
 	}
-#	if TRY_MAP_FD
-		kr = vm_deallocate(task_self(), va, (vm_size_t) b.st_size);
-		if (kr != KERN_SUCCESS) {
-			mach_error("vm_deallocate", kr);
-			return (1);
-		}
-#	else
-		if (munmap(a, b.st_size)  !=  0) {
-			perror("munmap");
-			return (1);
-		}
-#	endif
+	if (munmap(a, b.st_size)  !=  0) {
+		perror("munmap");
+		return (1);
+	}
 	if (1 < argc) {
 #		ifdef SIGBUS
 			if (s == SIGBUS) { printf("SIGBUS\n"); s = 0; }
@@ -488,7 +467,7 @@ EOF
 sleep 2
 cp a.c a.d || exit
 sleep 2
-has_map_fd=? has_mmap=? has_madvise=? mmap_signal=
+has_mmap=? has_madvise=? mmap_signal=
 case `(uname -s -r -v) 2>/dev/null` in
 'HP-UX '[A-Z].08.07*) ;;
 	# mmap can crash the OS under HP-UX 8.07, so don't even test for it.
@@ -505,28 +484,23 @@ case `(uname -s -r -v) 2>/dev/null` in
 	# This has been reported to be fixed as of patch 101945-10.
 *)
 	$PREPARE_CC || exit
-	if ($CL -DTRY_MAP_FD=1 a.c $L && $aout <a.c) >&2
+	has_mmap=0 has_madvise=0
+	if ($CL -DMADVISE_OK=1 a.c $L && $aout <a.c) >&2
 	then
-		has_map_fd=1
-	else
-		has_map_fd=0 has_mmap=0 has_madvise=0
-		if ($CL -DMADVISE_OK=1 a.c $L && $aout <a.c) >&2
-		then
-			case `ls -t a.c a.d` in
-			a.d*)
-				has_mmap=1
-				rm -f a.ous
-				mv $aout a.ous
-				$PREPARE_CC || exit
-				if ($CL a.c $L && $aout <a.c) >&2
-				then has_madvise=1; rm -f a.ous
-				else rm -f $aout && mv a.ous $aout
-				fi || exit
-			esac
-		fi
+		case `ls -t a.c a.d` in
+		a.d*)
+			has_mmap=1
+			rm -f a.ous
+			mv $aout a.ous
+			$PREPARE_CC || exit
+			if ($CL a.c $L && $aout <a.c) >&2
+			then has_madvise=1; rm -f a.ous
+			else rm -f $aout && mv a.ous $aout
+			fi || exit
+		esac
 	fi
-	case $has_map_fd$has_mmap in
-	*1*)
+	case $has_mmap in
+	1)
 		# Find out what signal is sent to RCS
 		# when someone unexpectedly truncates a file
 		# while RCS has it mmapped.
@@ -534,12 +508,7 @@ case `(uname -s -r -v) 2>/dev/null` in
 		mmap_signal=`$aout a.e <a.e` || exit
 	esac
 esac
-echo >&3 $has_map_fd, $has_mmap, $has_madvise, $mmap_signal
-case $has_map_fd in
-'?') a='/* ' z='*/ ';;
-*) a= z=;;
-esac
-echo "$a#define has_map_fd $has_map_fd $z/* Does map_fd() work?  */"
+echo >&3 $has_mmap, $has_madvise, $mmap_signal
 case $has_mmap in
 '?') a='/* ' z='*/ ';;
 *) a= z=;;
@@ -805,8 +774,8 @@ cat <<EOF
 EOF
 
 : configuring large_memory
-case "$has_map_fd$has_mmap" in
-*1*) l=1;;
+case $has_mmap in
+1) l=1;;
 *) l=0
 esac
 echo "#define large_memory $l /* Can main memory hold entire RCS files?  */"

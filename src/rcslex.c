@@ -792,19 +792,6 @@ Iclose (register RILE *f)
   return close (f->fd);
 }
 
-#   if has_map_fd
-static void
-map_fd_deallocate (RILE *);
-static void
-map_fd_deallocate (register RILE *f)
-{
-  if (vm_deallocate (task_self (),
-                     (vm_address_t) f->base,
-                     (vm_size_t) (f->lim - f->base)) !=
-      KERN_SUCCESS)
-    efaterror ("vm_deallocate");
-}
-#   endif
 #   if has_mmap
 static void mmap_deallocate (RILE *);
 static void
@@ -888,12 +875,6 @@ fd2RILE (int fd, char const *name, char const *type,
         else
           {
             f->base = 0;
-#		    if has_map_fd
-            map_fd (fd, (vm_offset_t) 0,
-                    (vm_address_t *) & f->base, TRUE,
-                    (vm_size_t) s);
-            f->deallocate = map_fd_deallocate;
-#		    endif
 #		    if has_mmap
             if (!f->base)
               {
