@@ -339,6 +339,7 @@ AC_CHECK_FUNCS_ONCE([
   readlink
   seteuid
   setuid
+  sigaction
   waitpid
 ])
 

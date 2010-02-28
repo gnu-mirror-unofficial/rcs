@@ -399,7 +399,7 @@ restoreints (void)
 
 static void setup_catchsig (int const *, int);
 
-#if has_sigaction
+#if defined HAVE_SIGACTION
 
 static void check_sig (int);
 static void

@@ -583,44 +583,6 @@ echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
 
 echo "#define has_setreuid 0 /* Does setreuid() work?  See ../INSTALL.RCS.  */"
 
-$ech >&3 "$0: configuring has_sigaction $dots"
-cat >a.c <<EOF
-#include "$A_H"
-static sig_atomic_t volatile gotsig;
-#ifdef SA_SIGINFO
-  static void catchsig(i, s, v) int i; siginfo_t *s; void *v; { gotsig = 1; }
-#else
-  static void catchsig(i) int i; { gotsig = 1; }
-#endif
-int
-main(argc, argv) int argc; char **argv; {
-	struct sigaction s;
-	if (sigaction(SIGINT, (struct sigaction*)0, &s) != 0)
-		return (1);
-#	if has_sa_sigaction
-		s.sa_sigaction = catchsig;
-#	else
-		s.sa_handler = catchsig;
-#	endif
-#	ifdef SA_SIGINFO
-		s.sa_flags |= SA_SIGINFO;
-#	endif
-	if (sigaddset(&s.sa_mask, SIGINT) != 0)
-		return (1);
-	if (sigaction(SIGINT, &s, (struct sigaction*)0) != 0)
-		return (1);
-	raise(SIGINT);
-	return (gotsig != 1);
-}
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then has_sigaction=1 ok=OK
-else has_sigaction=0 ok='does not work'
-fi
-echo >&3 $ok
-echo "#define has_sigaction $has_sigaction /* Does struct sigaction work?  */"
-
 $ech >&3 "$0: configuring sig_zaps_handler $dots"
 case $has_signal,$has_sigaction in
 1,0)

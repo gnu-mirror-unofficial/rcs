@@ -1,5 +1,12 @@
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `sigaction' check to configure.in.
+
+	* rcsutil.c: Do s/has_sigaction/defined HAVE_SIGACTION/g.
+	* conf.sh: Remove check for `sigaction'.
+
+2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume `sigaction.sa_sigaction' is POSIX.
 
 	* rcsutil.c: For #if has_sa_sigaction FOO #else
