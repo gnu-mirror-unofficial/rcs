@@ -228,7 +228,7 @@ static FILE *fopen_update_truncate (char const *);
 static FILE *
 fopen_update_truncate (char const *name)
 {
-  if (bad_fopen_wplus && un_link (name) != 0)
+  if (BAD_FOPEN_WPLUS && un_link (name) != 0)
     efaterror (name);
   return fopenSafer (name, FOPEN_WPLUS_WORK);
 }

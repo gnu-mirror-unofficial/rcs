@@ -290,19 +290,6 @@ cat - <<EOF
 /* Define or comment out the following symbols as needed.  */
 EOF
 
-$ech >&3 "$0: configuring bad_fopen_wplus $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (!fopen("a.d","w+")); }
-EOF
-$PREPARE_CC || exit
-if echo nonempty >a.d && $CL a.c $L >&2 && $aout && test ! -s a.d
-then b=0 ok=OK
-else b=1 ok='will work around bug'
-fi
-echo >&3 $ok
-echo "#define bad_fopen_wplus $b /* Does fopen(f,\"w+\") fail to truncate f?  */"
-
 echo "#define getlogin_is_secure 0 /* Is getlogin() secure?  Usually it's not.  */"
 
 grep '#define GCC_HAS_ATTRIBUTE_NORETURN 1' auto-sussed.h

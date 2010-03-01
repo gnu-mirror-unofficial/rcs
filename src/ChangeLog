@@ -1,3 +1,10 @@
+2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move "fopen w+ truncates" check to configure.in.
+
+	* rcsedit.c: Do s/bad_fopen_wplus/BAD_FOPEN_WPLUS/g.
+	* conf.sh: Remove "fopen w+ truncates" check.
+
 2010-02-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move "signal zaps handler" check to configure.in.

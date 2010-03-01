@@ -356,6 +356,20 @@ if test $2 = $[]$3 ; then cbool=1 ; else cbool=0 ; fi
 AC_DEFINE_UNQUOTED([$1],[$cbool],[$4])dnl
 ])dnl
 
+AC_CACHE_CHECK([if `fopen (F, "w+")' truncates],[rcs_cv_fopen_truncates],[
+  echo nonempty > conftest.data
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <stdio.h>
+]],[[
+  return ! fopen ("conftest.data", "w+");
+]])
+],[res=yes],[res=no])
+  test yes = $res && test ! -s conftest.data || res=no
+  rcs_cv_fopen_truncates=$res
+])
+RCS_CBOOL([BAD_FOPEN_WPLUS],[no],[rcs_cv_fopen_truncates],
+  [Does `fopen (F, "w+")' fail to truncate?])
+
 if test yes = $ac_cv_header_signal_h &&
    test  no = $ac_cv_func_sigaction ; then
 AC_CACHE_CHECK([if signal zaps the handler],[rcs_cv_sig_zaps],[
