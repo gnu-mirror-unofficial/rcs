@@ -1,5 +1,14 @@
 2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `sys_siglist' check to configure.in.
+
+	* rcsbase.h (sys_siglist): Remove array decl.
+	* rcsutil.c: Do s/has_sys_siglist/defined HAVE_SYS_SIGLIST/g.
+	* conf.sh: Remove `sys_siglist' check, and also
+	for supporting shell vars `has_signal', `has_psignal'.
+
+2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "siginfo_t .si_errno" check to configure.in.
 
 	* rcsutil.c: Do s/has_si_errno/defined HAVE_SI_ERRNO/g.

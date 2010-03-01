@@ -205,7 +205,7 @@ static void
 my_psignal (int sig, char const *s)
 {
   char const *sname = "Unknown signal";
-#	if has_sys_siglist && defined(NSIG)
+#	if defined HAVE_SYS_SIGLIST && defined(NSIG)
   if ((unsigned) sig < NSIG)
     sname = sys_siglist[sig];
 #	else

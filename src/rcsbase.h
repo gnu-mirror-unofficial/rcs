@@ -25,10 +25,6 @@
 
 /* begin cruft formerly from from conf.h */
 
-#if has_sys_siglist && !defined(sys_siglist)
-	extern char const * const sys_siglist[];
-#endif
-
 /* <fcntl.h> */
 #ifdef O_CREAT
 #	define open_can_creat 1

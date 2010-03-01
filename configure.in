@@ -342,6 +342,7 @@ AC_CHECK_FUNCS_ONCE([
   setuid
   sigaction
   sigblock
+  sys_siglist
   waitpid
 ])
 

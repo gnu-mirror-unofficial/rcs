@@ -228,7 +228,6 @@ echo >&3 $CS
 # This list must be synced with ../configure.in, q.v.
 # (That is, the one in ../configure.in should be a superset of this one.)
 # (The unique exception is vfork, which is checked as part of AC_FUNC_FORK.)
-has_signal=1
 for h in \
 	fcntl limits mach/mach net/errno \
 	pwd siginfo signal \
@@ -241,9 +240,6 @@ do
 	grep "#define $guard 1" auto-sussed.h >/dev/null || {
 		i="/* $i */"
 		ok="commenting it out"
-		case $h in
-		signal) has_signal=0
-		esac
 	}
 	echo >&3 "$ok"
 	echo "$i"
@@ -485,33 +481,6 @@ echo "#define needs_getabsname 0 /* Must we define getabsname?  */"
 
 : configuring has_NFS
 echo "#define has_NFS 1 /* Might NFS be used?  */"
-
-if grep '#define HAVE_PSIGNAL 1' auto-sussed.h >/dev/null
-then has_psignal=1
-else has_psignal=0
-fi
-
-case $has_signal,$has_psignal in
-1,0)
-	$ech >&3 "$0: configuring has_sys_siglist $dots"
-	cat >a.c <<EOF
-#include "$A_H"
-#if !defined(sys_siglist) && declare_sys_siglist
-	extern char const * const sys_siglist[];
-#endif
-int main() { return (!sys_siglist[1][0]); }
-EOF
-	$PREPARE_CC || exit
-	h=0 ok=absent
-	for d in 1 0
-	do ($CL -Ddeclare_sys_siglist=$d a.c $L && $aout) >&2 &&
-		h=1 && ok=OK && break
-	done
-	echo >&3 $ok
-	a= z=;;
-*)	h=? a='/* ' z='*/ '
-esac
-echo "$a#define has_sys_siglist $h $z/* Does sys_siglist[] work?  */"
 
 grep '#define HAVE_WORKING_V*FORK 1' auto-sussed.h
 
