@@ -21,8 +21,4 @@ See the following files and directories for more information.
 
 If you lack troff, you can get GNU groff to format the documentation.
 
-Report problems and direct all questions to:
- 
-	 rcs-bugs@cs.purdue.edu
-
 $Id: README,v 5.24 1995/06/16 06:19:24 eggert Exp $
