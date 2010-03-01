@@ -334,7 +334,7 @@ catchsigaction (int s, siginfo_t *i, void *c)
           ))
         {
           char const *nRCS = "\nRCS";
-#	    if defined(SA_SIGINFO) && has_si_errno && has_mmap && large_memory && mmap_signal
+#	    if defined(SA_SIGINFO) && defined HAVE_SI_ERRNO && has_mmap && large_memory && mmap_signal
           if (s == mmap_signal && i && i->si_errno)
             {
               errno = i->si_errno;

@@ -1,5 +1,12 @@
 2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "siginfo_t .si_errno" check to configure.in.
+
+	* configure.in: Add check for "siginfo_t .si_errno".
+	(HAVE_SI_ERRNO): New AC_DEFINE.
+
+2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "unlink on unwritable files" check to configure.in.
 
 	* configure.in: Add check for "unlink on unwritable files".

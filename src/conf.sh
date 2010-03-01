@@ -491,30 +491,6 @@ then has_psignal=1
 else has_psignal=0
 fi
 
-if grep '#define HAVE_PSIGINFO 1' auto-sussed.h >/dev/null
-then has_psiginfo=1
-else has_psiginfo=0
-fi
-
-case $has_psiginfo in
-1)
-	$ech >&3 "$0: configuring has_si_errno $dots"
-	cat >a.c <<EOF
-#include "$A_H"
-siginfo_t a;
-int main() { return (a.si_errno); }
-EOF
-	$PREPARE_CC || exit
-	if $CS a.c $LS >&2 && $CS_OK
-	then h=1 ok=OK
-	else h=0 ok=absent
-	fi
-	echo >&3 $ok
-	a= z=;;
-*)	h=? a='/* ' z='*/ '
-esac
-echo "$a#define has_si_errno $h $z/* Does siginfo_t have si_errno?  */"
-
 case $has_signal,$has_psignal in
 1,0)
 	$ech >&3 "$0: configuring has_sys_siglist $dots"
