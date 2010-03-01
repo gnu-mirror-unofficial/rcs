@@ -59,14 +59,14 @@ static enum maker volatile dirtpmaker[DIRTEMPNAMES];       /* if these are set *
 #define lockname (dirtpname[lockdirtp_index].string)
 #define newRCSname (dirtpname[newRCSdirtp_index].string)
 
-#if has_NFS || bad_unlink
+#if has_NFS || BAD_UNLINK
 int un_link (char const *s)
 /*
  * Remove S, even if it is unwritable.
  * Ignore unlink() ENOENT failures; NFS generates bogus ones.
  */
 {
-#	if bad_unlink
+#	if BAD_UNLINK
   if (unlink (s) == 0)
     return 0;
   else

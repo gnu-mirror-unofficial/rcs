@@ -439,6 +439,21 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 RCS_CBOOL([CAN_FFLUSH_IN],[yes],[rcs_cv_flush_in_ok],
   [Does `fflush' work on input streams?])
 
+AC_CACHE_CHECK([if `unlink' works on unwritable files],[rcs_cv_unlink_mw_ok],[
+  touch conftest.data
+  chmod -w conftest.data
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <unistd.h>
+]],[
+  return 0 > unlink ("conftest.data");
+])
+],[res=yes],[res=no])
+  test yes = $res && test -f conftest.data && res=no
+  rcs_cv_unlink_mw_ok=$res
+])
+RCS_CBOOL([BAD_UNLINK],[no],[rcs_cv_unlink_mw_ok],
+  [Does `unlink' fail on unwritable files?])
+
 # write it out
 
 AC_CONFIG_FILES([

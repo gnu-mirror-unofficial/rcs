@@ -537,20 +537,6 @@ EOF
 esac
 echo "$a#define has_sys_siglist $h $z/* Does sys_siglist[] work?  */"
 
-$ech >&3 "$0: configuring bad_unlink $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (unlink("a.c") != 0); }
-EOF
-$PREPARE_CC && chmod -w a.c || exit
-if ($CL a.c $L && $aout) >&2 && test ! -f a.c
-then b=0 ok=OK
-else b=1 ok='will work around bug'
-fi
-rm -f a.c || exit
-echo >&3 $ok
-echo "#define bad_unlink $b /* Does unlink() fail on unwritable files?  */"
-
 grep '#define HAVE_WORKING_V*FORK 1' auto-sussed.h
 
 $ech >&3 "$0: configuring bad_wait_if_SIGCHLD_ignored $dots"

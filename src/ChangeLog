@@ -1,5 +1,13 @@
 2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "unlink on unwritable files" check to configure.in.
+
+	* rcsbase.h: Do s/bad_unlink/BAD_UNLINK/g.
+	* rcsedit.c: Likewise.
+	* conf.sh: Remove "unlink on unwritable files" check.
+
+2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "fopen w+ truncates" check to configure.in.
 
 	* rcsedit.c: Do s/bad_fopen_wplus/BAD_FOPEN_WPLUS/g.

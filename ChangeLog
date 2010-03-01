@@ -1,5 +1,12 @@
 2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "unlink on unwritable files" check to configure.in.
+
+	* configure.in: Add check for "unlink on unwritable files".
+	(BAD_UNLINK): New AC_DEFINE_UNQUOTED.
+
+2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "fopen w+ truncates" check to configure.in.
 
 	* configure.in: Add check for "fopen w+ truncates".
