@@ -400,26 +400,6 @@ $isSLASH /* Is arg a filename separator?  */
 #define X_DEFAULT "$X_DEFAULT" /* default value for -x option */
 EOF
 
-$ech >&3 "$0: configuring SLASHSLASH_is_SLASH $dots"
-cat >a.c <<EOF
-#include "$A_H"
-static struct stat s, ss;
-static char f[3];
-int
-main() {
-	f[0] = SLASH; if (stat(f, &s ) != 0) return (1);
-	f[1] = SLASH; if (stat(f, &ss) != 0) return (1);
-	return (!same_file(s, ss, 0));
-}
-EOF
-$PREPARE_CC || exit
-if ($CL a.c $L && $aout) >&2
-then eq=1 ok=OK
-else eq=0 ok=no
-fi
-echo >&3 $ok
-echo "#define SLASHSLASH_is_SLASH $eq /* Are // and / the same directory?  */"
-
 $ech >&3 "$0: configuring ALL_ABSOLUTE, DIFF_ABSOLUTE $dots"
 cat >a.c <<EOF
 #include "$A_H"

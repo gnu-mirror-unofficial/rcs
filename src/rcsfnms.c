@@ -730,11 +730,8 @@ dir_useful_len (char const *d)
 * but some non-Posix systems misbehave unless the slashes are omitted.
 */
 {
-#	ifndef SLASHSLASH_is_SLASH
-#	define SLASHSLASH_is_SLASH 0
-#	endif
   size_t dlen = strlen (d);
-  if (!SLASHSLASH_is_SLASH && dlen == 2 && isSLASH (d[0]) && isSLASH (d[1]))
+  if (!SLASHSLASH_IS_SLASH && dlen == 2 && isSLASH (d[0]) && isSLASH (d[1]))
     --dlen;
   else
     while (dlen && isSLASH (d[dlen - 1]))

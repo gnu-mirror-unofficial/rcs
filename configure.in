@@ -604,6 +604,21 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 RCS_CBOOL([BAD_WAIT_IF_SIGCHLD_IGNORED],[no],[rcs_cv_tolerant_wait],
   [Does ignoring SIGCHLD break `wait'?])
 
+# miscellaneous
+
+AC_CACHE_CHECK([if // and / are the same],[rcs_cv_slsl_is_sl],[
+m4_pushdef([inode],[ls -d -i $1 | sed 's/^ *//;s/ .*//'])dnl
+  cwd=`pwd`
+  AS_IF([test 1 = `expr "$cwd" : '/*'`],[cwd=/],[cwd=\\])
+  if test `inode([$cwd])` = `inode([${cwd}${cwd}])`
+  then rcs_cv_slsl_is_sl=yes
+  else rcs_cv_slsl_is_sl=no
+  fi
+popdef([inode])dnl
+])
+RCS_CBOOL([SLASHSLASH_IS_SLASH],[yes],[rcs_cv_slsl_is_sl],
+  [Are // and / the same directory?])
+
 # write it out
 
 AC_CONFIG_FILES([

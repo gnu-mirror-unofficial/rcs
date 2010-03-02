@@ -1,5 +1,12 @@
 2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "// is /" check to configure.in.
+
+	* configure.in: Add check for "// is /".
+	(SLASHSLASH_IS_SLASH): New AC_DEFINE_UNQUOTED.
+
+2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "bad wait if SIGCHLD ignored" check to configure.in.
 
 	* configure.in: Add check for `wait' that handles ignored SIGCHLD.
