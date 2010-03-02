@@ -1,5 +1,13 @@
 2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move "bad wait if SIGCHLD ignored" check to configure.in.
+
+	* rcsfnms.c: Do s/bad_wait_if_SIGCHLD_ignored/BAD_WAIT_IF_SIGCHLD_IGNORED/g.
+	* rcsutil.c: Likewise.
+	* conf.sh: Remove "bad wait if SIGCHLD ignored" check.
+
+2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move mmap-related checks to configure.in.
 
 	* rcslex.c: Do s/has_madvise/defined HAVE_MADVISE/g; do

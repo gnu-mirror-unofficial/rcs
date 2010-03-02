@@ -777,7 +777,7 @@ getcwd (char *path, size_t size)
     }
   if (pipe (fd) != 0)
     return 0;
-#	if bad_wait_if_SIGCHLD_ignored
+#	if BAD_WAIT_IF_SIGCHLD_IGNORED
 #		ifndef SIGCHLD
 #		define SIGCHLD SIGCLD
 #		endif

@@ -309,58 +309,6 @@ echo "#define has_NFS 1 /* Might NFS be used?  */"
 
 grep '#define HAVE_WORKING_V*FORK 1' auto-sussed.h
 
-$ech >&3 "$0: configuring bad_wait_if_SIGCHLD_ignored $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef SIGCHLD
-#define SIGCHLD SIGCLD
-#endif
-int main() {
-	signal(SIGCHLD, SIG_IGN);
-	{
-#	if defined HAVE_WORKING_FORK
-		int status;
-		pid_t p = fork();
-		if (p < 0) {
-			perror("fork");
-			return (2);
-		}
-		if (p == 0)
-			_exit(0);
-		while (wait(&status) != p) {
-			if (errno == ECHILD)
-				return (1);
-			if (errno != EINTR) {
-				perror("wait");
-				return (2);
-			}
-		}
-#	else
-#		if has_system
-			if (system("true") != 0)
-				return (1);
-#		endif
-#	endif
-	}
-	return (0);
-}
-EOF
-$PREPARE_CC || exit
-b=0 ok=OK
-if $CL a.c $L >&2
-then
-	$aout >&2
-	case $? in
-	0) ;;
-	1) b=1 ok='will work around bug';;
-	*) exit
-	esac
-fi
-rm -f a.c || exit
-echo >&3 $ok
-echo "#define bad_wait_if_SIGCHLD_ignored $b /* Does ignoring SIGCHLD break wait()?  */"
-
-
 echo '#define RCS_SHELL "/bin/sh" /* shell to run RCS subprograms */'
 
 grep '#define GCC_HAS_ATTRIBUTE_FORMAT 1' auto-sussed.h

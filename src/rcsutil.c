@@ -770,7 +770,7 @@ runv (int infd, char const *outname, char const **args)
 {
   int wstatus;
 
-#if bad_wait_if_SIGCHLD_ignored
+#if BAD_WAIT_IF_SIGCHLD_IGNORED
   static int fixed_SIGCHLD;
   if (!fixed_SIGCHLD)
     {

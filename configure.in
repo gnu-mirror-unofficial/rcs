@@ -562,6 +562,48 @@ AC_DEFINE_UNQUOTED([MMAP_SIGNAL],[$rcs_cv_mmap_signal],
   fi
 fi
 
+AC_CACHE_CHECK([if `wait' can handle ignored SIGCHLD],[rcs_cv_tolerant_wait],[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <unistd.h>
+]],[
+  signal (SIGCHLD, SIG_IGN);
+#ifdef HAVE_WORKING_FORK
+  {
+    int status;
+    pid_t p = fork ();
+    if (p < 0)
+      {
+	perror ("fork");
+	return 2;
+      }
+    if (!p)
+      _exit (0);
+    while (wait (&status) != p)
+      {
+	if (ECHILD == errno)
+          return 1;
+        if (EINTR != errno)
+          {
+	    perror ("wait");
+	    return 2;
+	  }
+      }
+  }
+#else
+  if (0 > system ("true"))
+    return 1;
+#endif
+])dnl
+],[res=yes],[res=no])
+  rcs_cv_tolerant_wait=$res
+])
+RCS_CBOOL([BAD_WAIT_IF_SIGCHLD_IGNORED],[no],[rcs_cv_tolerant_wait],
+  [Does ignoring SIGCHLD break `wait'?])
+
 # write it out
 
 AC_CONFIG_FILES([
