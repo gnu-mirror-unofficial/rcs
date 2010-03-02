@@ -1,5 +1,16 @@
 2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move mmap-related checks to configure.in.
+
+	* rcslex.c: Do s/has_madvise/defined HAVE_MADVISE/g; do
+	s/has_mmap/defined HAVE_MMAP/g; do s/mmap_signal/MMAP_SIGNAL/g.
+	* rcsutil.c: Likewise.
+	* rcsbase.h: Likewise, but if `MMAP_SIGNAL'
+	is 0, #undef `HAVE_MMAP', `HAVE_MADVISE' first.
+	* conf.sh: Remove mmap-related checks.
+
+2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "bad rename" checks to configure.in.
 
 	* rcsedit.c: Do s/bad_a_rename/BAD_A_RENAME/g;

@@ -1,5 +1,13 @@
 2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move mmap-related checks to configure.in.
+
+	* configure.in: Add checks for mmap-related quirks.
+	(madvise, mmap): Add to `AC_CHECK_FUNCS_ONCE'.
+	(SIMPLE_MMAP_PROGRAM): New AC_DEFUN.
+
+2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move "bad rename" checks to configure.in.
 
 	* configure.in: Add checks for "bad rename".

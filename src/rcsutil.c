@@ -182,7 +182,7 @@ static siginfo_t bufsiginfo;
 static siginfo_t *volatile heldsiginfo;
 #endif
 
-#if has_NFS && has_mmap && large_memory && mmap_signal
+#if has_NFS && defined HAVE_MMAP && large_memory && MMAP_SIGNAL
 static char const *accessName;
 
 void
@@ -246,13 +246,13 @@ my_psignal (int sig, char const *s)
       sname = "Filesize limit exceeded";
       break;
 #	       endif
-#	      if has_mmap && large_memory
-#	       if defined(SIGBUS) && mmap_signal==SIGBUS
+#	      if defined HAVE_MMAP && large_memory
+#	       if defined(SIGBUS) && MMAP_SIGNAL==SIGBUS
     case SIGBUS:
       sname = "Bus error";
       break;
 #	       endif
-#	       if defined(SIGSEGV) && mmap_signal==SIGSEGV
+#	       if defined(SIGSEGV) && MMAP_SIGNAL==SIGSEGV
     case SIGSEGV:
       sname = "Segmentation fault";
       break;
@@ -325,17 +325,17 @@ catchsigaction (int s, siginfo_t *i, void *c)
       char buf[BUFSIZ], *b = buf;
 
       if (!(
-#		if has_mmap && large_memory && mmap_signal
+#		if defined HAVE_MMAP && large_memory && MMAP_SIGNAL
              /* Check whether this signal was planned.  */
-             s == mmap_signal && accessName
+             s == MMAP_SIGNAL && accessName
 #		else
              0
 #		endif
           ))
         {
           char const *nRCS = "\nRCS";
-#	    if defined(SA_SIGINFO) && defined HAVE_SI_ERRNO && has_mmap && large_memory && mmap_signal
-          if (s == mmap_signal && i && i->si_errno)
+#	    if defined(SA_SIGINFO) && defined HAVE_SI_ERRNO && defined HAVE_MMAP && large_memory && MMAP_SIGNAL
+          if (s == MMAP_SIGNAL && i && i->si_errno)
             {
               errno = i->si_errno;
               perror (nRCS++);
@@ -353,8 +353,8 @@ catchsigaction (int s, siginfo_t *i, void *c)
 
       for (p = "RCS: "; *p; *b++ = *p++)
         continue;
-#	if has_mmap && large_memory && mmap_signal
-      if (s == mmap_signal)
+#	if defined HAVE_MMAP && large_memory && MMAP_SIGNAL
+      if (s == MMAP_SIGNAL)
         {
           p = accessName;
           if (!p)
@@ -518,7 +518,7 @@ catchints (void)
     }
 }
 
-#if has_mmap && large_memory && mmap_signal
+#if defined HAVE_MMAP && large_memory && MMAP_SIGNAL
 
     /*
      * If you mmap an NFS file, and someone on another client removes the last
@@ -532,7 +532,7 @@ catchints (void)
      * This can also occur if someone truncates the file, even without NFS.
      */
 
-static int const mmapsigs[] = { mmap_signal };
+static int const mmapsigs[] = { MMAP_SIGNAL };
 
 void
 catchmmapints (void)

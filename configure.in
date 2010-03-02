@@ -334,7 +334,9 @@ AC_CHECK_FUNCS_ONCE([
   getpwuid
   getuid
   getwd
+  madvise
   mktemp
+  mmap
   psiginfo
   psignal
   readlink
@@ -500,6 +502,65 @@ RCS_CBOOL([BAD_A_RENAME],[no],[rename_source],
   [Does `rename' fail if the source is unwritable?])
 RCS_CBOOL([BAD_B_RENAME],[no],[rename_target],
   [Does `rename' fail if the target is unwritable?])
+
+AC_DEFUN([SIMPLE_MMAP_PROGRAM],[AC_LANG_PROGRAM([[
+#include <stdio.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+]],[
+  struct stat b;
+  char *a;
+  int fd, fc;
+
+  fd = open ("conftest.data", O_RDONLY);
+  fstat (fd, &b);
+  a = mmap (NULL, b.st_size, PROT_READ, MAP_SHARED, fd, 0);
+  if ((char *) MAP_FAILED == a)
+    {
+      perror ("mmap");
+      return 1;
+    }
+  /* Finish.  */
+$1
+])])dnl
+
+if test yes = $ac_cv_func_mmap &&
+   test yes = $ac_cv_header_sys_mman_h ; then
+AC_CACHE_CHECK([that `mmap' is sane],[rcs_cv_sane_mmap],[
+  rcs_cv_sane_mmap=yes
+  # AIX 3.2.0 read-only mmap updates last-modified time of file!
+  if uname -a | grep AIX >/dev/null ; then
+    echo nonempty > conftest.data
+    bef=`date -r conftest.data`
+    sleep 2
+    AC_RUN_IFELSE([SIMPLE_MMAP_PROGRAM])
+    aft=`date -r conftest.data`
+    test "$bef" = "$aft" || rcs_cv_sane_mmap=no
+  fi
+])
+  if test yes = "$rcs_cv_sane_mmap" ; then
+AC_CACHE_CHECK([signal received if referencing nonexistent part of mmapped file],
+               [rcs_cv_mmap_signal],[
+    res=SIGBUS
+    echo nonempty > conftest.data
+    AC_RUN_IFELSE([SIMPLE_MMAP_PROGRAM([dnl
+      fc = creat ("conftest.data", 0);
+      /* Refer to nonexistent storage, causing a signal.  */
+      printf ("%d %c\n", fc, *a);
+])],[res=unknown],[res=$?])
+    # If there is no signal, better to disable mmap entirely.
+    AS_IF([test unknown = $res],[res=0],
+          [test SIGBUS = $res],[:],
+          [test 128 -ge $res],[res=SIGBUS],
+          [AS_VAR_ARITH([res],[$res - 128])])
+    rcs_cv_mmap_signal=$res
+])
+AC_DEFINE_UNQUOTED([MMAP_SIGNAL],[$rcs_cv_mmap_signal],
+  [Signal received if referencing nonexistent part of mmapped file.])
+  fi
+fi
 
 # write it out
 

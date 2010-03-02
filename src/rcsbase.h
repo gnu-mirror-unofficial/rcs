@@ -165,7 +165,14 @@ char *getlogin (void);
  * Following such macros with `; else' results in a syntax error.
  */
 
-#define maps_memory (0 || has_mmap)
+/* If there is no signal, better to disable mmap entirely.  */
+#if !MMAP_SIGNAL
+#undef HAVE_MMAP
+#undef HAVE_MADVISE
+#undef MMAP_SIGNAL
+#endif
+
+#define maps_memory (0 || defined HAVE_MMAP)
 
 #if large_memory
 typedef unsigned char const *Iptr_type;
@@ -511,7 +518,7 @@ void warn (char const *, ...) printf_string (1, 2);
 void warnignore (void);
 void workerror (char const *, ...) printf_string (1, 2);
 void workwarn (char const *, ...) printf_string (1, 2);
-#if has_madvise && has_mmap && large_memory
+#if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
 void advise_access (RILE *, int);
 #	define if_advise_access(p,f,advice) if (p) advise_access(f,advice)
 #else
@@ -637,8 +644,8 @@ void restoreints (void);
 #	define ignoreints()
 #	define restoreints()
 #endif
-#if has_mmap && large_memory
-#   if has_NFS && mmap_signal
+#if defined HAVE_MMAP && large_memory
+#   if has_NFS && MMAP_SIGNAL
 void catchmmapints (void);
 void readAccessFilenameBuffer (char const *, unsigned char const *);
 #   else

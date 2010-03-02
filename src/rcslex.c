@@ -792,7 +792,7 @@ Iclose (register RILE *f)
   return close (f->fd);
 }
 
-#   if has_mmap
+#   if defined HAVE_MMAP
 static void mmap_deallocate (RILE *);
 static void
 mmap_deallocate (register RILE *f)
@@ -875,7 +875,7 @@ fd2RILE (int fd, char const *name, char const *type,
         else
           {
             f->base = 0;
-#		    if has_mmap
+#		    if defined HAVE_MMAP
             if (!f->base)
               {
                 catchmmapints ();
@@ -890,7 +890,7 @@ fd2RILE (int fd, char const *name, char const *type,
                   f->base = 0;
                 else
                   {
-#				if has_NFS && mmap_signal
+#				if has_NFS && MMAP_SIGNAL
                     /*
                      * On many hosts, the superuser
                      * can mmap an NFS file it can't read.
@@ -977,7 +977,7 @@ Igetmore (register RILE *f)
 }
 #endif
 
-#if has_madvise && has_mmap && large_memory
+#if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
 void
 advise_access (register RILE *f, int advice)
 {

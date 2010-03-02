@@ -298,154 +298,6 @@ cat <<EOF
 EOF
 rm -f a.c || exit
 
-$ech >&3 "$0: configuring has_mmap, has_madvise, mmap_signal $dots"
-rm -f a.c a.d a.e || exit
-cat >a.c <<EOF
-#define CHAR1 '#' /* the first character in this file */
-#include "$A_H"
-static char *a;
-static struct stat b;
-#ifndef MADVISE_OK
-#define MADVISE_OK (madvise(a,b.st_size,MADV_SEQUENTIAL)==0 && madvise(a,b.st_size,MADV_NORMAL)==0)
-#endif
-#ifndef WTERMSIG
-#define WTERMSIG(s) ((s)&0177)
-#undef WIFSIGNALED /* Avoid 4.3BSD incompatibility with Posix.  */
-#endif
-#ifndef WIFSIGNALED
-#define WIFSIGNALED(s) (((s)&0377) != 0177  &&  WTERMSIG(s) != 0)
-#endif
-#ifndef MAP_FAILED
-#define MAP_FAILED (-1)
-#endif
-#ifndef STDIN_FILENO
-#define STDIN_FILENO 0
-#endif
-int
-main(argc, argv) int argc; char **argv; {
-	int s = 0;
-
-	if (fstat(STDIN_FILENO, &b) != 0) {
-		perror("fstat");
-		return (1);
-	}
-	a = mmap(
-		(char *)0, b.st_size, PROT_READ, MAP_SHARED,
-		STDIN_FILENO, (off_t)0
-	);
-	if (a == (char *)MAP_FAILED) {
-		perror("mmap");
-		return (1);
-	}
-	if (!MADVISE_OK) {
-		perror("madvise");
-		return (1);
-	}
-	if (*a != CHAR1)
-		return (1);
-	if (1 < argc) {
-		pid_t p, w;
-		int f = creat(argv[1], 0);
-		/*
-		* Some buggy hosts yield ETXTBSY if you try to use creat
-		* to truncate a file that is mmapped.  On such hosts,
-		* don't bother to try to figure out what mmap_signal is.
-		*/
-#		ifndef ETXTBSY
-#			define ETXTBSY (-1)
-#		endif
-		if (f<0 ? errno!=ETXTBSY : close(f)!=0) {
-			perror(argv[1]);
-			return (1);
-		}
-		if ((p = fork()) < 0) {
-			perror("fork");
-			return (1);
-		}
-		if (!p)
-			/* Refer to nonexistent storage, causing a signal in the child.  */
-			_exit(a[0] != 0);
-		while ((w = wait(&s)) != p)
-			if (w < 0) {
-				perror("wait");
-				return (1);
-			}
-		s = WIFSIGNALED(s) ? WTERMSIG(s) : 0;
-	}
-	if (munmap(a, b.st_size)  !=  0) {
-		perror("munmap");
-		return (1);
-	}
-	if (1 < argc) {
-#		ifdef SIGBUS
-			if (s == SIGBUS) { printf("SIGBUS\n"); s = 0; }
-#		endif
-#		ifdef SIGSEGV
-			if (s == SIGSEGV) { printf("SIGSEGV\n"); s = 0; }
-#		endif
-		if (s) printf("%d\n", s);
-	}
-	return (ferror(stdout) || fclose(stdout)!=0);
-}
-EOF
-# AIX 3.2.0 read-only mmap updates last-modified time of file!  Check for this.
-sleep 2
-cp a.c a.d || exit
-sleep 2
-has_mmap=? has_madvise=? mmap_signal=
-case `(uname -s -r -v) 2>/dev/null` in
-'HP-UX '[A-Z].08.07*) ;;
-	# mmap can crash the OS under HP-UX 8.07, so don't even test for it.
-'HP-UX '[A-Z].09.*) ;;
-	# HP-UX 9.0[135]? s700 mmap has a data integrity problem
-	# when a diskless cnode accesses data on the cnode's server disks.
-	# We don't know of any way to test whether the bug is present.
-	# HP patches PHKL_4605 and PHKL_4607 should fix the bug;
-	# see <http://support.mayfield.hp.com/slx/html/ptc_hpux.html>.
-	# The above code (perhaps rashly) assumes HP-UX 10 supports mmap.
-'SunOS 5.4 Generic' | 'SunOS 5.4 Generic_101945-?') ;;
-	# Early editions of SunOS 5.4 are reported to have problems with mmap
-	# that generate NUL bytes in RCS files with a Solaris 2.2 NFS server.
-	# This has been reported to be fixed as of patch 101945-10.
-*)
-	$PREPARE_CC || exit
-	has_mmap=0 has_madvise=0
-	if ($CL -DMADVISE_OK=1 a.c $L && $aout <a.c) >&2
-	then
-		case `ls -t a.c a.d` in
-		a.d*)
-			has_mmap=1
-			rm -f a.ous
-			mv $aout a.ous
-			$PREPARE_CC || exit
-			if ($CL a.c $L && $aout <a.c) >&2
-			then has_madvise=1; rm -f a.ous
-			else rm -f $aout && mv a.ous $aout
-			fi || exit
-		esac
-	fi
-	case $has_mmap in
-	1)
-		# Find out what signal is sent to RCS
-		# when someone unexpectedly truncates a file
-		# while RCS has it mmapped.
-		rm -f a.e && cp a.c a.e &&
-		mmap_signal=`$aout a.e <a.e` || exit
-	esac
-esac
-echo >&3 $has_mmap, $has_madvise, $mmap_signal
-case $has_mmap in
-'?') a='/* ' z='*/ ';;
-*) a= z=;;
-esac
-echo "$a#define has_mmap $has_mmap $z/* Does mmap() work on regular files?  */"
-echo "$a#define has_madvise $has_madvise $z/* Does madvise() work?  */"
-case $mmap_signal in
-?*) a= z=;;
-'') a='/* ' z='*/ ' mmap_signal='?'
-esac
-echo "$a#define mmap_signal $mmap_signal $z/* signal received if you reference nonexistent part of mmapped file */"
-
 echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
 
 echo "#define has_setreuid 0 /* Does setreuid() work?  See ../INSTALL.RCS.  */"
@@ -527,10 +379,10 @@ cat <<EOF
 EOF
 
 : configuring large_memory
-case $has_mmap in
-1) l=1;;
-*) l=0
-esac
+if grep '#define MMAP_SIGNAL 0' auto-sussed.h >/dev/null
+then l=0
+else l=1
+fi
 echo "#define large_memory $l /* Can main memory hold entire RCS files?  */"
 
 : configuring same_file
