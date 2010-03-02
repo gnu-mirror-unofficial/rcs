@@ -1,3 +1,11 @@
+2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move "bad rename" checks to configure.in.
+
+	* configure.in: Add checks for "bad rename".
+	(BAD_A_RENAME): New AC_DEFINE_UNQUOTED.
+	(BAD_B_RENAME): Likewise.
+
 2010-03-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move `sys_siglist' check to configure.in.

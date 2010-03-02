@@ -446,33 +446,6 @@ case $mmap_signal in
 esac
 echo "$a#define mmap_signal $mmap_signal $z/* signal received if you reference nonexistent part of mmapped file */"
 
-$ech >&3 "$0: configuring bad_a_rename, bad_b_rename $dots"
-cat >a.c <<EOF
-#include "$A_H"
-int main() { return (rename("a.a","a.b") != 0); }
-EOF
-echo a >a.a && $PREPARE_CC a.b || exit
-if ($CL a.c $L && $aout && test -f a.b) >&2
-then
-	h=1
-	rm -f a.a a.b &&
-	echo a >a.a && chmod -w a.a || exit
-	if $aout && test ! -f a.a && test -f a.b
-	then a=0
-	else a=1
-	fi
-	rm -f a.a a.b &&
-	echo a >a.a && echo b >a.b && chmod -w a.b || exit
-	if $aout && test ! -f a.a && test -f a.b
-	then b=0
-	else b=1
-	fi
-	rm -f a.a a.b || exit
-else h=0 a=0 b=0
-fi
-echo >&3 $h, $a, $b
-echo "#define bad_a_rename $a /* Does rename(A,B) fail if A is unwritable?  */"
-echo "#define bad_b_rename $b /* Does rename(A,B) fail if B is unwritable?  */"
 echo "#define bad_NFS_rename 0 /* Can rename(A,B) falsely report success?  */"
 
 echo "#define has_setreuid 0 /* Does setreuid() work?  See ../INSTALL.RCS.  */"

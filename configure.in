@@ -464,6 +464,43 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 RCS_CBOOL([BAD_UNLINK],[no],[rcs_cv_unlink_mw_ok],
   [Does `unlink' fail on unwritable files?])
 
+AC_CACHE_CHECK([if `rename' handles unwritable source/target],
+               [rcs_cv_rename_mw],[
+m4_pushdef([ZONK],[rm -f conftest-A conftest-B && echo A > conftest-A])dnl
+m4_pushdef([GOOD],[test ! -f conftest-A && test -f conftest-B])dnl
+m4_pushdef([HMMM],[./conftest$EXEEXT && GOOD])dnl
+  ZONK
+  res=hopeless
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <unistd.h>
+]],[
+  return 0 > rename ("conftest-A", "conftest-B");
+])
+],[
+  if GOOD ; then
+    res=ok
+    # unwritable source
+    ZONK ; chmod -w conftest-A
+    HMMM && AS_VAR_APPEND([res],[,source=ok])
+    # unwritable target
+    ZONK ; echo B > conftest-B ; chmod -w conftest-B
+    HMMM && AS_VAR_APPEND([res],[,target=ok])
+  fi
+])
+  rcs_cv_rename_mw=$res
+m4_popdef([HMMM])dnl
+m4_popdef([GOOD])dnl
+m4_popdef([ZONK])dnl
+])
+rename_source=no
+rename_target=no
+AS_IF([test hopeless = $rcs_cv_rename_mw],,
+  [eval `echo $rcs_cv_rename_mw | sed 's/^..//;s/,/ rename_/g'`])
+RCS_CBOOL([BAD_A_RENAME],[no],[rename_source],
+  [Does `rename' fail if the source is unwritable?])
+RCS_CBOOL([BAD_B_RENAME],[no],[rename_target],
+  [Does `rename' fail if the target is unwritable?])
+
 # write it out
 
 AC_CONFIG_FILES([

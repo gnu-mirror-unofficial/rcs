@@ -1412,18 +1412,18 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
   mode_t mode_while_renaming = mode;
   int fchmod_set_mode = 0;
 
-#	if bad_a_rename || bad_NFS_rename
+#	if BAD_A_RENAME || bad_NFS_rename
   struct stat st;
-  if (bad_NFS_rename || (bad_a_rename && set_mode <= 0))
+  if (bad_NFS_rename || (BAD_A_RENAME && set_mode <= 0))
     {
       if (fstat (fileno (*fromp), &st) != 0)
         return -1;
-      if (bad_a_rename && set_mode <= 0)
+      if (BAD_A_RENAME && set_mode <= 0)
         mode = st.st_mode;
     }
 #	endif
 
-#	if bad_a_rename
+#	if BAD_A_RENAME
   /*
    * There's a short window of inconsistency
    * during which the lock file is writable.
@@ -1445,7 +1445,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
   if (setmtime (from, mtime) != 0)
     return -1;
 
-#	if bad_b_rename
+#	if BAD_B_RENAME
   /*
    * There's a short window of inconsistency
    * during which TO does not exist.
@@ -1474,7 +1474,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
   }
 #	endif
 
-#	if bad_a_rename
+#	if BAD_A_RENAME
   if (0 < set_mode && chmod (to, mode) != 0)
     return -1;
 #	endif
