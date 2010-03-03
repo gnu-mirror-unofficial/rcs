@@ -1,5 +1,12 @@
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[admin] Rename file CREDITS to AUTHORS.
+
+	* AUTHORS: Rename from CREDITS; refill.
+	* Makefile.in (dist): Update.
+
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Detect "absolute-filename-p" without compiling.
 
 	* build-aux/abs-p.in: New file.

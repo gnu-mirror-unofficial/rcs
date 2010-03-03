@@ -49,7 +49,7 @@ dist :: $(srcdir)/configure
 	d='$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)' && \
 	rm -fr $$d && \
 	mkdir $$d $$d/build-aux $$d/man $$d/src && \
-	ln *.ms ChangeLog configure configure.in COPYING CREDITS \
+	ln *.ms ChangeLog configure configure.in AUTHORS COPYING \
 		INSTALL INSTALL.RCS \
 		Makefile.in NEWS README REFS $$d && \
 	(cd build-aux && ln install-sh mkinstalldirs \
