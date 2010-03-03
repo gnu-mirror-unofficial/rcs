@@ -1,5 +1,14 @@
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Make compilation output file a little more obvious.
+
+	* Makefile.in (.c$o): Add "-o $@" to compile command line.
+	(ci$x, co$x, ident$x, merge$x, rlog$x, rcs$x)
+	(rcsclean$x, rcsdiff$x, rcsmerge$x): Move "-o $@"
+	forward in the command line, following $(LINK).
+
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Reduce dependency-transitivity of src/Makefile variables.
 
 	* Makefile.in (ALL_CFLAGS): Remove -Dhas_conf_h.
