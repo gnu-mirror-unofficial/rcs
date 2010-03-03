@@ -14,7 +14,6 @@ See the following files and directories for more information.
  NEWS - recent changes
  man/ - sources for manual page entries
  rcs.ms - troff source for the paper `RCS--A System for Version Control'
- rcs_func.ms - brief overview
  src/ - sources for programs
 
 If you lack troff, you can get GNU groff to format the documentation.

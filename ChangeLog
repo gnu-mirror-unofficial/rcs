@@ -1,5 +1,12 @@
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[admin] Don't distribute rcs_func.ms.
+
+	* rcs_func.ms: Delete file.
+	* README: Update.
+
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[admin] Don't distribute REFS.
 
 	* REFS: Delete file.
