@@ -59,7 +59,7 @@ SENDMAIL = @SENDMAIL@
 
  bindir = $(exec_prefix)/bin
 
- ALL_CFLAGS = $(CPPFLAGS) -Dhas_conf_h $(DEFS) -I. -I$(srcdir) $(CFLAGS)
+ ALL_CFLAGS = $(CPPFLAGS) $(DEFS) -I. -I$(srcdir) $(CFLAGS)
 
  COMPAT2 = 0
 #COMPAT2 = 1
@@ -94,7 +94,7 @@ SHELL = /bin/sh
 PROGRAMS = ci$x co$x ident$x merge$x \
 	rcs$x rcsclean$x rcsdiff$x rcsmerge$x rlog$x
 
-all :: $(PROGRAMS)
+all :: bother.h $(PROGRAMS)
 
 .SUFFIXES :
 .SUFFIXES : .c $o
@@ -130,37 +130,54 @@ clean ::
 	$(REMOVE) a.* RCS/a.*
 	$(REMOVE) *$o
 	$(REMOVE) $(PROGRAMS)
-	$(REMOVE) conf.err core core.* *.core
+	$(REMOVE) core core.* *.core
 
 mostlyclean :: clean
 
 distclean :: mostlyclean
-	$(REMOVE) conf.h Makefile
+	$(REMOVE) bother.h Makefile
 
 maintainer-clean :: distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	$(REMOVE) TAGS
 
-#(Unix
-conf.h : conf.sh Makefile
-	$(REMOVE) a.*
-	ALL_CFLAGS='$(ALL_CFLAGS)' \
-	CC='$(CC)' \
-	COMPAT2='$(COMPAT2)' \
-	DIFF3='$(DIFF3)' DIFF3_BIN='$(DIFF3_BIN)' \
-	DIFF='$(DIFF)' DIFFFLAGS='$(DIFFFLAGS)' DIFF_L='$(DIFF_L)' \
-	DIFF_SUCCESS='$(DIFF_SUCCESS)' \
-	DIFF_FAILURE='$(DIFF_FAILURE)' \
-	DIFF_TROUBLE='$(DIFF_TROUBLE)' \
-	ED='$(ED)' \
-	LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' \
-	RCSPREFIX='$(RCSPREFIX)' \
-	SENDMAIL='$(SENDMAIL)' \
-	$(SHELL) -x $(srcdir)/conf.sh 3>&1 >a.h 2>conf.err
-	mv a.h $@
-	$(REMOVE) a.* core core.* *.core
-#)
+merger$o : bother.h
+rcs$o : bother.h
+rcsdiff$o : bother.h
+rcssyn$o : bother.h
+rcsutil$o : bother.h
+
+absp = ../build-aux/abs-p
+
+bother.h: FORCE
+	@( echo '/* brooked other (shared mother) */' ; \
+	   echo '#define CO "$(RCSPREFIX)co"' ; \
+	   echo '#define MERGE "$(RCSPREFIX)merge"' ; \
+	   echo '#define DIFF "$(DIFF)"' ; \
+	   echo '#define DIFF_L $(DIFF_L)' ; \
+	   echo '#define DIFF3 "$(DIFF3)"' ; \
+	   echo '#define DIFF3_BIN $(DIFF3_BIN)' ; \
+	   echo '#define DIFFFLAGS "$(DIFFFLAGS)"' ; \
+	   echo '#define DIFF_SUCCESS $(DIFF_SUCCESS)' ; \
+	   echo '#define DIFF_FAILURE $(DIFF_FAILURE)' ; \
+	   echo '#define DIFF_TROUBLE $(DIFF_TROUBLE)' ; \
+	   echo '#define ED "$(ED)"' ; \
+	   if [ 1 = $(COMPAT2) ] ; \
+	     then echo '#define COMPAT2 $(COMPAT2)' ; \
+	     else echo '#undef COMPAT2' ; \
+	   fi ; \
+	   if [ "$(SENDMAIL)" ] ; \
+	     then echo '#define SENDMAIL $(SENDMAIL)' ; \
+	     else echo '#undef SENDMAIL' ; \
+	   fi ; \
+	   $(absp) ALL '$(DIFF)' '$(DIFF3)' '$(ED)' \
+	               '$(RCSPREFIX)' '$(SENDMAIL)' ; \
+	   $(absp) DIFF '$(DIFF)' ) > $@T
+	@if [ -f $@ ] && cmp -s $@T $@ ; \
+	  then rm -f $@T ; \
+	  else mv $@T $@ ; echo Created $@ ; \
+	fi
 
 ci = ci$o rcslex$o rcssyn$o rcsgen$o rcsedit$o rcskeys$o rcsmap$o \
 	rcsrev$o rcsutil$o rcsfnms$o maketime$o partime$o rcstime$o rcskeep$o \
@@ -229,7 +246,8 @@ TAGS : $(SOURCE)
 
 dvi info ::
 
-conf_h = conf.h
-$(OBJECT) : $(conf_h) rcsbase.h
+$(OBJECT) : rcsbase.h
 maketime$o partime$o rcstime$o : partime.h
 maketime$o rcstime$o : maketime.h
+
+FORCE:

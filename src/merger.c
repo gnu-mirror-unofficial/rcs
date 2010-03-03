@@ -20,6 +20,7 @@
 */
 
 #include "rcsbase.h"
+#include "bother.h"
 
 static char const *normalize_arg (char const *, char **);
 static char const *
@@ -51,7 +52,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
  * where TOSTDOUT specifies whether -p is present,
  * EDARG gives the editing type (e.g. "-A", or null for the default),
  * LABEL gives l0, l1 and l2, and ARGV gives a0, a1 and a2.
- * Yield DIFF_SUCCESS or DIFF_FAILURE.
+ * Yield `diff_success' or `diff_failure'.
  */
 {
   register int i;
@@ -75,19 +76,13 @@ merge (int tostdout, char const *edarg, char const *const label[3],
   if (!tostdout)
     t = maketemp (0);
   s = run (-1, t,
-           DIFF3, edarg, "-am",
+           prog_diff3, edarg, "-am",
            "-L", label[0],
            "-L", label[1], "-L", label[2], a[0], a[1], a[2], (char *) 0);
-  switch (s)
-    {
-    case DIFF_SUCCESS:
-      break;
-    case DIFF_FAILURE:
-      warn ("conflicts during merge");
-      break;
-    default:
-      exiterr ();
-    }
+  if (diff_trouble == s)
+    exiterr ();
+  if (diff_failure == s)
+    warn ("conflicts during merge");
   if (t)
     {
       if (!(f = fopenSafer (argv[0], "w")))
@@ -100,21 +95,16 @@ merge (int tostdout, char const *edarg, char const *const label[3],
     }
 #else
   for (i = 0; i < 2; i++)
-    switch (run (-1, d[i] = maketemp (i), DIFF, a[i], a[2], (char *) 0))
-      {
-      case DIFF_FAILURE:
-      case DIFF_SUCCESS:
-        break;
-      default:
-        faterror ("diff failed");
-      }
+    if (diff_trouble == run (-1, d[i] = maketemp (i), prog_diff,
+                             a[i], a[2], (char *) 0))
+      faterror ("diff failed");
   t = maketemp (2);
   s = run (-1, t,
-           DIFF3, edarg, d[0], d[1], a[0], a[1], a[2],
+           prog_diff3, edarg, d[0], d[1], a[0], a[1], a[2],
            label[0], label[2], (char *) 0);
-  if (s != DIFF_SUCCESS)
+  if (s != diff_success)
     {
-      s = DIFF_FAILURE;
+      s = diff_failure;
       warn ("overlaps or other problems during merge");
     }
   if (!(f = fopenSafer (t, "a+")))
@@ -122,7 +112,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
   aputs (tostdout ? "1,$p\n" : "w\n", f);
   Orewind (f);
   aflush (f);
-  if (run (fileno (f), (char *) 0, ED, "-", a[0], (char *) 0))
+  if (run (fileno (f), (char *) 0, prog_ed, "-", a[0], (char *) 0))
     exiterr ();
   Ofclose (f);
 #endif

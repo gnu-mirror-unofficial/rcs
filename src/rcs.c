@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include "bother.h"
 
 struct Lockrev
 {
@@ -1465,8 +1466,8 @@ buildeltatext (struct hshentries const *deltas)
       char const *diffname = maketemp (0);
       char const *diffv[6 + !!OPEN_O_BINARY];
       char const **diffp = diffv;
-      *++diffp = DIFF;
-      *++diffp = DIFFFLAGS;
+      *++diffp = prog_diff;
+      *++diffp = diff_flags;
 #	    if OPEN_O_BINARY
       if (Expand == BINARY_EXPAND)
         *++diffp == "--binary";
@@ -1474,14 +1475,8 @@ buildeltatext (struct hshentries const *deltas)
       *++diffp = "-";
       *++diffp = resultname;
       *++diffp = 0;
-      switch (runv (fileno (fcut), diffname, diffv))
-        {
-        case DIFF_FAILURE:
-        case DIFF_SUCCESS:
-          break;
-        default:
-          rcsfaterror ("diff failed");
-        }
+      if (diff_trouble == runv (fileno (fcut), diffname, diffv))
+        rcsfaterror ("diff failed");
       Ofclose (fcut);
       return putdtext (cuttail, diffname, frewrite, true);
     }

@@ -1,5 +1,74 @@
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Reduce dependency-transitivity of src/Makefile variables.
+
+	* Makefile.in (ALL_CFLAGS): Remove -Dhas_conf_h.
+	(all): Depend on bother.h.
+	(clean): Remove conf.err from list of files to delete.
+	(distclean): Don't delete conf.h; delete bother.h, instead.
+	(conf.h): Delete target.
+	(merger$o): Depend explicitly on bother.h.
+	(rcs$o, rcsdiff$o, rcssyn$o, rcsutil$o): Likewise.
+	(absp): New var.
+	(bother.h): New target.
+	(conf_h): Delete var.
+	($(OBJECT)): Don't depend on $(conf_h).
+	(FORCE): New target.
+	* rcsbase.h: Don't #include "conf.h".
+	#include <errno.h>, <stdio.h>, <time.h>, <sys/types.h>,
+	<sys/stat.h>, <stdlib.h>, <stdarg.h>, <string.h>.
+	[HAVE_FCNTL_H]: #include <fcntl.h>
+	[HAVE_LIMITS_H]: #include <limits.h>
+	[HAVE_MACH_MACH_H]: #include <mach/mach.h>.
+	[HAVE_NET_ERRNO_H]: #include <net/errno.h>.
+	[HAVE_PWD_H]: #include <pwd.h>.
+	[HAVE_SIGINFO_H]: #include <siginfo.h>.
+	[HAVE_SIGNAL_H]: #include <signal.h>.
+	[HAVE_SYS_MMAN_H]: #include <sys/mman.h>.
+	[HAVE_SYS_WAIT_H]: #include <sys/wait.h>.
+	[HAVE_UCONTEXT_H]: #include <ucontext.h>.
+	[HAVE_UNISTD_H]: #include <unistd.h>.
+	[HAVE_UTIME_H]: #include <utime.h>.
+	[HAVE_VFORK_H]: #include <vfork.h>.
+	(exiting, printf_string, printf_string_exiting): New macros.
+	(FOPEN_RB, FOPEN_R_WORK, FOPEN_WB, FOPEN_W_WORK, FOPEN_WPLUS_WORK)
+	(OPEN_O_BINARY, OPEN_CREAT_READONLY, OPEN_O_LOCK, OPEN_O_WRONLY)
+	(getlogin_is_secure, bad_NFS_rename, has_setreuid, needs_getabsname)
+	(has_NFS, RCS_SHELL, large_memory, TMPDIR, SLASH, SLASHes)
+	(ROOTPATH, X_DEFAULT, TZ_must_be_set): Likewise.
+	(exec_RCS, EXIT_TROUBLE): Delete macros.
+	(isSLASH): New func decl.
+	(prog_co, prog_co, prog_merge, prog_diff, prog_diff3, diff_flags)
+	(diff_success, diff_failure, diff_trouble, prog_ed): New var decls.
+	* rcsutil.c: #include "bother.h".
+	(prog_co, prog_merge, prog_diff, prog_diff3, diff_flags)
+	(diff_success, diff_failure, diff_trouble, prog_ed): New vars.
+	(write_error): Use `diff_trouble'.
+	(exec_RCS): New macro, moved from rcsbase.h.
+	(runv): Use `diff_trouble'.
+	* ci.c (main): Use `prog_diff', `diff_flags', `diff_trouble'.
+	* co.c (buildjoin): Use `prog_co', `prog_merge', `diff_trouble'.
+	* merge.c (exiterr): Use `diff_trouble'.
+	* merger.c: #include "bother.h".
+	(merge): Use `prog_diff3', `diff_trouble', `diff_failure',
+	`prog_diff', `diff_success', `prog_ed'.
+	* rcs.c: #include "bother.h".
+	(buildeltatext): Use `prog_diff', `diff_flags', `diff_trouble'.
+	* rcsdiff.c: #include "bother.h".
+	(main): Use `diff_success', `prog_diff', `prog_co', `diff_trouble',
+	`diff_failure'.
+	(cleanup, exiterr): Use `diff_trouble'.
+	* rcsfnms.c (isSLASH): Define func unconditionally.
+	(isSLASH) [!WOE]: Just check that the char is `SLASH'.
+	* rcsmerge.c (co): Delete var.
+	(main): Use `prog_co', `diff_trouble'.
+	(exiterr): Use `diff_trouble'.
+	* rcssyn.c: #include "bother.h".
+	* conf.heg: Delete file.
+	* conf.sh: Delete file.
+
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Detect "absolute-filename-p" without compiling.
 
 	* conf.sh: Use `WOE' value from auto-sussed.h directly to select

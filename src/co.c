@@ -672,7 +672,7 @@ buildjoin (char const *initialfile)
   rev2 = maketemp (0);
   rev3 = maketemp (3);          /* buildrevision() may use 1 and 2 */
 
-  cov[1] = CO;
+  cov[1] = prog_co;
   /* cov[2] setup below */
   p = &cov[3];
   if (expandarg)
@@ -687,7 +687,7 @@ buildjoin (char const *initialfile)
   *p++ = RCSname;
   *p = 0;
 
-  mergev[1] = MERGE;
+  mergev[1] = prog_merge;
   mergev[2] = mergev[4] = "-L";
   /* rest of mergev setup below */
 
@@ -728,14 +728,8 @@ buildjoin (char const *initialfile)
       *p++ = rev2;
       *p++ = rev3;
       *p = 0;
-      switch (runv (-1, (char *) 0, mergev))
-        {
-        case DIFF_FAILURE:
-        case DIFF_SUCCESS:
-          break;
-        default:
+      if (diff_trouble == runv (-1, (char *) 0, mergev))
           goto badmerge;
-        }
       i = i + 2;
     }
   bufautoend (&commarg);

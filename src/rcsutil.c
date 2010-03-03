@@ -21,6 +21,17 @@
 */
 
 #include "rcsbase.h"
+#include "bother.h"
+
+const char const prog_co[] = CO;
+const char const prog_merge[] = MERGE;
+const char const prog_diff[] = DIFF;
+const char const prog_diff3[] = DIFF3;
+const char const diff_flags[] = DIFFFLAGS;
+const int diff_success = DIFF_SUCCESS;
+const int diff_failure = DIFF_FAILURE;
+const int diff_trouble = DIFF_TROUBLE;
+const char const prog_ed[] = ED;
 
 /*
  * list of blocks allocated with ftestalloc()
@@ -755,8 +766,14 @@ write_stderr (char const *s)
 {
   size_t slen = strlen (s);
   if (write (STDERR_FILENO, s, slen) != slen)
-    _exit (EXIT_TROUBLE);
+    _exit (diff_trouble);
 }
+#endif
+
+#if ALL_ABSOLUTE
+#	define exec_RCS execv
+#else
+#	define exec_RCS execvp
 #endif
 
 /*
@@ -806,7 +823,7 @@ runv (int infd, char const *outname, char const **args)
             /* Avoid perror since it may misuse buffers.  */
             write_stderr (args[1]);
             write_stderr (": I/O redirection failed\n");
-            _exit (EXIT_TROUBLE);
+            _exit (diff_trouble);
           }
 
         if (outname)
@@ -818,7 +835,7 @@ runv (int infd, char const *outname, char const **args)
               write_stderr (": ");
               write_stderr (outname);
               write_stderr (": cannot create\n");
-              _exit (EXIT_TROUBLE);
+              _exit (diff_trouble);
             }
         exec_RCS (args[1], (char **) (args + 1));
         notfound = args[1];
@@ -833,7 +850,7 @@ runv (int infd, char const *outname, char const **args)
         /* Avoid perror since it may misuse buffers.  */
         write_stderr (notfound);
         write_stderr (": not found\n");
-        _exit (EXIT_TROUBLE);
+        _exit (diff_trouble);
       }
     if (pid < 0)
       efaterror ("fork");

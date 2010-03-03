@@ -739,10 +739,12 @@ dir_useful_len (char const *d)
   return dlen;
 }
 
-#ifndef isSLASH
 int
 isSLASH (int c)
 {
+#if !WOE
+  return (SLASH == c);
+#else
   switch (c)
     {
     case SLASHes:
@@ -750,8 +752,8 @@ isSLASH (int c)
     default:
       return false;
     }
-}
 #endif
+}
 
 #if !defined HAVE_GETWD && !defined HAVE_GETWD
 

@@ -21,9 +21,156 @@
 */
 
 #include "auto-sussed.h"
-#include "conf.h"
 
 /* begin cruft formerly from from conf.h */
+
+#include <errno.h>
+#include <stdio.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#ifdef HAVE_FCNTL_H
+#	include <fcntl.h>
+#endif
+#ifdef HAVE_LIMITS_H
+#	  include <limits.h>
+#endif
+#ifdef HAVE_MACH_MACH_H
+#	  include <mach/mach.h>
+#endif
+#ifdef HAVE_NET_ERRNO_H
+#	  include <net/errno.h>
+#endif
+#ifdef HAVE_PWD_H
+#	  include <pwd.h>
+#endif
+#ifdef HAVE_SIGINFO_H
+#	  include <siginfo.h>
+#endif
+#ifdef HAVE_SIGNAL_H
+#	  include <signal.h>
+#endif
+#ifdef HAVE_SYS_MMAN_H
+#	  include <sys/mman.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
+#	  include <sys/wait.h>
+#endif
+#ifdef HAVE_UCONTEXT_H
+#	  include <ucontext.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#	  include <unistd.h>
+#endif
+#ifdef HAVE_UTIME_H
+#	  include <utime.h>
+#endif
+#ifdef HAVE_VFORK_H
+#	  include <vfork.h>
+#endif
+
+/* GCC attributes  */
+
+#ifdef GCC_HAS_ATTRIBUTE_NORETURN
+#	define exiting __attribute__ ((noreturn))
+#else
+#	define exiting
+#endif
+
+#ifdef GCC_HAS_ATTRIBUTE_FORMAT
+#	define printf_string(m, n) __attribute__ ((format(printf, m, n)))
+#else
+#	define printf_string(m, n)
+#endif
+
+#if defined GCC_HAS_ATTRIBUTE_FORMAT && defined GCC_HAS_ATTRIBUTE_NORETURN
+	/* Work around a bug in GCC 2.5.x.  */
+#	define printf_string_exiting(m, n) __attribute__ ((format(printf, m, n), noreturn))
+#else
+#	define printf_string_exiting(m, n) printf_string (m, n) exiting
+#endif
+
+#if O_BINARY
+	/* Text and binary i/o behave differently.  */
+	/* This is incompatible with Posix and Unix.  */
+#	define FOPEN_RB "rb"
+#	define FOPEN_R_WORK (Expand==BINARY_EXPAND ? "r" : "rb")
+#	define FOPEN_WB "wb"
+#	define FOPEN_W_WORK (Expand==BINARY_EXPAND ? "w" : "wb")
+#	define FOPEN_WPLUS_WORK (Expand==BINARY_EXPAND ? "w+" : "w+b")
+#	define OPEN_O_BINARY O_BINARY
+#else
+	/*
+	* Text and binary i/o behave the same.
+	* Omit "b", since some nonstandard hosts reject it.
+	*/
+#	define FOPEN_RB "r"
+#	define FOPEN_R_WORK "r"
+#	define FOPEN_WB "w"
+#	define FOPEN_W_WORK "w"
+#	define FOPEN_WPLUS_WORK "w+"
+#	define OPEN_O_BINARY 0
+#endif
+
+/* This may need changing on non-Unix systems (notably DOS).  */
+#define OPEN_CREAT_READONLY (S_IRUSR|S_IRGRP|S_IROTH) /* lock file mode */
+#define OPEN_O_LOCK 0 /* extra open flags for creating lock file */
+#define OPEN_O_WRONLY O_WRONLY /* main open flag for creating a lock file */
+
+/* Is getlogin() secure?  Usually it's not.  */
+#define getlogin_is_secure 0
+
+/* Can rename(A,B) falsely report success?  */
+#define bad_NFS_rename 0
+
+/* Does setreuid() work?  See ../INSTALL.RCS.  */
+#define has_setreuid 0
+
+/* Must we define getabsname?  */
+#define needs_getabsname 0
+
+/* Might NFS be used?  */
+#define has_NFS 1
+
+/* Shell to run RCS subprograms.  */
+#define RCS_SHELL "/bin/sh"
+
+/* Can main memory hold entire RCS files?  */
+#if MMAP_SIGNAL
+#	define large_memory 1
+#else
+#	define large_memory 0
+#endif
+
+/* Do struct stat s and t describe the same file?  Answer d if unknown.  */
+#define same_file(s,t,d) ((s).st_ino==(t).st_ino && (s).st_dev==(t).st_dev)
+
+/* Filename component separation.
+   TMPDIR -- string -- default directory for temporary files.
+   SLASH -- char -- principal filename separator.
+   SLASHes -- `case SLASHes:' --  labels all filename separators.
+   ROOTPATH(p) -- expression -- Is p an absolute pathname?
+   X_DEFAULT -- string -- default value for -x option
+*/
+#if !WOE
+#	define TMPDIR "/tmp"
+#	define SLASH '/'
+#	define SLASHes '/'
+#	define ROOTPATH(p)  (isSLASH ((p)[0]))
+#	define X_DEFAULT ",v"
+#else /* WOE */
+#	define TMPDIR "\\tmp"
+#	define SLASH "'\\'"
+#	define SLASHes '\\': case '/': case ':'
+#	define ROOTPATH(p)  (isSLASH ((p)[0]) || (p)[0] && (p)[1] == ':')
+#	define X_DEFAULT "\\,v"
+#endif
+
+/* Must TZ be set for gmtime() to work?  */
+#define TZ_must_be_set 0
 
 /* <fcntl.h> */
 #ifdef O_CREAT
@@ -102,15 +249,8 @@ char *getlogin (void);
 #	undef seteuid
 #	define seteuid setuid
 #endif
-#if ALL_ABSOLUTE
-#	define exec_RCS execv
-#else
-#	define exec_RCS execvp
-#endif
 
 /* end cruft formerly from from conf.h */
-
-#define EXIT_TROUBLE DIFF_TROUBLE
 
 #ifdef _POSIX_PATH_MAX
 #	define SIZEABLE_PATH _POSIX_PATH_MAX
@@ -669,6 +809,8 @@ void setrid (void);
 #	define setrid()
 #endif
 
+extern int isSLASH (int c);
+
 /* version */
 #define COMMAND_VERSION                                         \
   (" (" PACKAGE_NAME ") " PACKAGE_VERSION "\n"                  \
@@ -680,3 +822,21 @@ void setrid (void);
    "This is free software: you are free"                        \
    " to change and redistribute it.\n"                          \
    "There is NO WARRANTY, to the extent permitted by law.\n")
+
+/* The locations of RCS programs, for internal use.  */
+extern const char const prog_co[];
+extern const char const prog_merge[];
+extern const char const prog_diff[];
+extern const char const prog_diff3[];
+
+/* Flags to make diff(1) work with RCS.  These
+   should be a single argument (no internal spaces).  */
+extern const char const diff_flags[];
+
+/* Return values for diff(1).  */
+extern const int diff_success;
+extern const int diff_failure;
+extern const int diff_trouble;
+
+/* The original!  */
+extern const char const prog_ed[];

@@ -103,5 +103,5 @@ void
 exiterr (void)
 {
   tempunlink ();
-  _exit (DIFF_TROUBLE);
+  _exit (diff_trouble);
 }

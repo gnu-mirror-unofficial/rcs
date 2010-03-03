@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include "bother.h"
 
 #if DIFF_L
 static char const *setup_label (struct buf *, char const *, char const[datesize]);
@@ -60,7 +61,7 @@ main (int argc, char **argv)
   int no_diff_means_no_output;
   register int c;
 
-  exitstatus = DIFF_SUCCESS;
+  exitstatus = diff_success;
 
   bufautobegin (&commarg);
   bufautobegin (&numericrev);
@@ -79,7 +80,7 @@ main (int argc, char **argv)
    */
   diffv = tnalloc (char const *, 1 + argc + !!OPEN_O_BINARY + 2 * DIFF_L + 2);
   diffp = diffv + 1;
-  *diffp++ = DIFF;
+  *diffp++ = prog_diff;
 
   argc = getRCSINIT (argc, argv, &newargv);
   argv = newargv;
@@ -217,7 +218,7 @@ main (int argc, char **argv)
 #endif
   diffpend = diffp;
 
-  cov[1] = CO;
+  cov[1] = prog_co;
   cov[2] = "-q";
 #   if !DIFF_L
   cov[3] = "-M";
@@ -366,17 +367,15 @@ main (int argc, char **argv)
           diagnose ("diff%s -r%s -r%s\n", diffvstr, xrev1, xrev2);
 
         diffp[2] = 0;
-        switch (runv (-1, (char *) 0, diffv))
-          {
-          case DIFF_SUCCESS:
-            break;
-          case DIFF_FAILURE:
-            if (exitstatus == DIFF_SUCCESS)
-              exitstatus = DIFF_FAILURE;
-            break;
-          default:
+        {
+          int s = runv (-1, (char *) 0, diffv);
+
+          if (diff_trouble == s)
             workerror ("diff failed");
-          }
+          if (diff_failure == s
+              && diff_success == exitstatus)
+            exitstatus = s;
+        }
       }
 
   tempunlink ();
@@ -387,7 +386,7 @@ static void
 cleanup (void)
 {
   if (nerror)
-    exitstatus = DIFF_TROUBLE;
+    exitstatus = diff_trouble;
   Izclose (&finptr);
   Izclose (&workptr);
 }
@@ -396,7 +395,7 @@ void
 exiterr (void)
 {
   tempunlink ();
-  _exit (DIFF_TROUBLE);
+  _exit (diff_trouble);
 }
 
 #if DIFF_L

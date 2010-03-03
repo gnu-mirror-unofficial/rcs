@@ -22,8 +22,6 @@
 
 #include "rcsbase.h"
 
-static char const co[] = CO;
-
 char const cmdid[] = "rcsmerge";
 
 int
@@ -178,7 +176,7 @@ main (int argc, char **argv)
                           if (run (-1,
                                    /* Do not collide with merger.c maketemp().  */
                                    arg[i] = maketemp (i + 2),
-                                   co, quietarg, commarg.string,
+                                   prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
                                    RCSname, (char *) 0))
                             rcsfaterror ("co failed");
@@ -198,12 +196,12 @@ main (int argc, char **argv)
         }
     }
   tempunlink ();
-  return nerror ? DIFF_TROUBLE : status;
+  return nerror ? diff_trouble : status;
 }
 
 void
 exiterr (void)
 {
   tempunlink ();
-  _exit (DIFF_TROUBLE);
+  _exit (diff_trouble);
 }

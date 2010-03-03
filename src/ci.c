@@ -525,8 +525,8 @@ main (int argc, char **argv)
                   Ierror ();
 #		    endif
                 diffp = diffv;
-                *++diffp = DIFF;
-                *++diffp = DIFFFLAGS;
+                *++diffp = prog_diff;
+                *++diffp = diff_flags;
 #		    if OPEN_O_BINARY
                 if (Expand == BINARY_EXPAND)
                   *++diffp = "--binary";
@@ -534,14 +534,8 @@ main (int argc, char **argv)
                 *++diffp = newhead ? "-" : expname;
                 *++diffp = newhead ? expname : "-";
                 *++diffp = 0;
-                switch (runv (wfd, diffname, diffv))
-                  {
-                  case DIFF_FAILURE:
-                  case DIFF_SUCCESS:
-                    break;
-                  default:
-                    rcsfaterror ("diff failed");
-                  }
+                if (diff_trouble == runv (wfd, diffname, diffv))
+                  rcsfaterror ("diff failed");
 #		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 if (lseek (wfd, wfd_off, SEEK_CUR) == -1)
                   Ierror ();
