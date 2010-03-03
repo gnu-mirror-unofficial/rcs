@@ -51,7 +51,7 @@ dist :: $(srcdir)/configure
 	mkdir $$d $$d/build-aux $$d/man $$d/src && \
 	ln *.ms ChangeLog configure configure.in AUTHORS COPYING \
 		INSTALL INSTALL.RCS \
-		Makefile.in NEWS README REFS $$d && \
+		Makefile.in NEWS README $$d && \
 	(cd build-aux && ln install-sh mkinstalldirs \
 		../$$d/build-aux) && \
 	(cd man && ln ChangeLog Makefile.in ../$$d/man && \

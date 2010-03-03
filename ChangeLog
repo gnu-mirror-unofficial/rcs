@@ -1,5 +1,12 @@
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[admin] Don't distribute REFS.
+
+	* REFS: Delete file.
+	* Makefile.in (dist): Update.
+
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[admin] Rename file CREDITS to AUTHORS.
 
 	* AUTHORS: Rename from CREDITS; refill.
