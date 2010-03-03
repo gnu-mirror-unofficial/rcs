@@ -66,7 +66,7 @@ SENDMAIL = @SENDMAIL@
 
  LIBOBJS =
 
- LINK = $(CC) $(LDFLAGS) $(CFLAGS)
+ LINK = $(CC)
 
  LINT = lint -abchx# traditional and BSD lint
 #LINT = lint# System V lint
@@ -127,7 +127,7 @@ installdebug ::
 	$(RCSTEST) -v
 
 clean ::
-	$(REMOVE) a.* RCS/a.*
+	$(REMOVE) librcsparts.a
 	$(REMOVE) *$o
 	$(REMOVE) $(PROGRAMS)
 	$(REMOVE) core core.* *.core
@@ -179,67 +179,21 @@ bother.h: FORCE
 	  else mv $@T $@ ; echo Created $@ ; \
 	fi
 
-ci = ci$o rcslex$o rcssyn$o rcsgen$o rcsedit$o rcskeys$o rcsmap$o \
-	rcsrev$o rcsutil$o rcsfnms$o maketime$o partime$o rcstime$o rcskeep$o \
-	rcsfcmp$o $(LIBOBJS)
-ci$x : $(ci)
-	$(LINK) -o $@ $(ci) $(LIBS)
-
-co = co$o rcslex$o rcssyn$o rcsgen$o rcsedit$o rcskeys$o rcsmap$o \
-	rcsrev$o rcsutil$o rcsfnms$o maketime$o partime$o rcstime$o rcskeep$o \
-	$(LIBOBJS)
-co$x : $(co)
-	$(LINK) -o $@ $(co) $(LIBS)
-
-ident = ident$o rcsmap$o $(LIBOBJS)
-ident$x : $(ident)
-	$(LINK) -o $@ $(ident) $(LIBS)
-
-merge = merge$o merger$o rcsfnms$o rcslex$o \
-	rcsmap$o rcsrev$o rcssyn$o rcsutil$o \
-	rcskeep$o rcskeys$o maketime$o partime$o rcstime$o \
-	$(LIBOBJS)
-merge$x : $(merge)
-	$(LINK) -o $@ $(merge) $(LIBS)
-
-rlog = rlog$o rcslex$o rcsmap$o rcssyn$o rcsrev$o rcsutil$o \
-	maketime$o partime$o rcstime$o rcsfnms$o rcskeep$o rcskeys$o \
-	$(LIBOBJS)
-rlog$x : $(rlog)
-	$(LINK) -o $@ $(rlog) $(LIBS)
-
-rcs = rcs$o rcslex$o rcssyn$o rcsrev$o rcsutil$o rcsgen$o \
-	rcsedit$o rcskeys$o rcsmap$o rcsfnms$o rcskeep$o \
-	maketime$o partime$o rcstime$o $(LIBOBJS)
-rcs$x : $(rcs)
-	$(LINK) -o $@ $(rcs) $(LIBS)
-
-rcsclean = rcsclean$o rcsedit$o rcsfcmp$o rcsfnms$o rcsgen$o rcskeys$o \
-	rcslex$o rcsmap$o rcsrev$o rcssyn$o rcsutil$o rcskeep$o \
-	maketime$o partime$o rcstime$o $(LIBOBJS)
-rcsclean$x : $(rcsclean)
-	$(LINK) -o $@ $(rcsclean) $(LIBS)
-
-rcsdiff = rcsdiff$o rcsutil$o rcsfnms$o rcsmap$o rcsrev$o rcssyn$o \
-	rcslex$o maketime$o partime$o rcstime$o rcskeep$o rcskeys$o \
-	$(LIBOBJS)
-rcsdiff$x : $(rcsdiff)
-	$(LINK) -o $@ $(rcsdiff) $(LIBS)
-
-rcsmerge = rcsmerge$o merger$o rcsutil$o rcsfnms$o rcsmap$o rcsrev$o \
-	rcssyn$o rcslex$o rcskeep$o rcskeys$o \
-	maketime$o partime$o rcstime$o $(LIBOBJS)
-rcsmerge$x : $(rcsmerge)
-	$(LINK) -o $@ $(rcsmerge) $(LIBS)
+%$x : %$o librcsparts.a
+	$(LINK) -o $@ $< -L. -lrcsparts $(LIBS)
 
 SOURCE=	ci.c co.c ident.c maketime.c merge.c merger.c partime.c rcs.c \
 	rcsclean.c rcsdiff.c rcsedit.c rcsfcmp.c rcsfnms.c rcsgen.c \
 	rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsmerge.c rcsrev.c rcssyn.c \
 	rcstime.c rcsutil.c rlog.c
-OBJECT=	ci$o co$o ident$o maketime$o merge$o merger$o partime$o rcs$o \
-	rcsclean$o rcsdiff$o rcsedit$o rcsfcmp$o rcsfnms$o rcsgen$o \
-	rcskeep$o rcskeys$o rcslex$o rcsmap$o rcsmerge$o rcsrev$o rcssyn$o \
-	rcstime$o rcsutil$o rlog$o
+PROGS=	ci$o co$o ident$o merge$o rcs$o rcsclean$o rcsdiff$o rcsmerge$o rlog$o
+PARTS=	maketime$o merger$o partime$o rcsedit$o rcsfcmp$o rcsfnms$o \
+	rcsgen$o rcskeep$o rcskeys$o rcslex$o rcsmap$o rcsrev$o rcssyn$o \
+	rcstime$o rcsutil$o
+OBJECT=	$(PROGS) $(PARTS)
+
+librcsparts.a: librcsparts.a($(PARTS))
+	ranlib $@
 
 TAGS : $(SOURCE)
 	etags $(SOURCE)

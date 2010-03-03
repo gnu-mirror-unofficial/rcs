@@ -1,5 +1,25 @@
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use an object archive instead of specifying long lists.
+
+	* Makefile.in (LINK): Remove $(LDFLAGS), $(CFLAGS).
+	(clean): Don't delete a.*, RCS/a.*; instead delete librcsparts.a.
+	(ci, ci$x): Delete this var and pattern rule, respectively.
+	(co, co$x): Likewise.
+	(ident, ident$x): Likewise.
+	(merge, merge$x): Likewise.
+	(rlog, rlog$x): Likewise.
+	(rcs, rcs$x): Likewise.
+	(rcsclean, rcsclean$x): Likewise.
+	(rcsdiff, rcsdiff$x): Likewise.
+	(rcsmerge, rcsmerge$x): Likewise.
+	(%$x : %$o): New pattern rule.
+	(PROGS, PARTS): New vars.
+	(OBJECT): Rewrite var in terms of $(PROGS), $(PARTS).
+	(librcsparts.a): New target.
+
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Make compilation output file a little more obvious.
 
 	* Makefile.in (.c$o): Add "-o $@" to compile command line.
