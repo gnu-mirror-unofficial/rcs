@@ -1,3 +1,15 @@
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Detect "absolute-filename-p" without compiling.
+
+	* build-aux/abs-p.in: New file.
+	* configure.in: Add check for MS-DOS filenames.
+	(WOE): New AC_DEFINE_UNQUOTED.
+	(WOEMUX): New AC_DEFUN.
+	(ABSFILENAMEGLOB): New AC_SUBST.
+	(rcs_cv_slsl_is_sl): Use `WOEMUX'; rename local var.
+	(build-aux/abs-p): New AC_CONFIG_FILES.
+
 2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move "// is /" check to configure.in.

@@ -1,3 +1,11 @@
+2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Detect "absolute-filename-p" without compiling.
+
+	* conf.sh: Use `WOE' value from auto-sussed.h directly to select
+	set of #define values.  For `ALL_ABSOLUTE', `DIFF_ARBITRARY'
+	computation, use ../build-aux/abs-p.
+
 2010-03-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move "// is /" check to configure.in.

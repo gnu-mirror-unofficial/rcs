@@ -372,25 +372,22 @@ echo "#define ED \"${ED}\" /* name of 'ed' program (used only if !DIFF3_BIN) */"
 echo "#define MERGE \"${RCSPREFIX}merge\" /* name of 'merge' program */"
 
 : configuring '*SLASH*', ROOTPATH, TMPDIR, X_DEFAULT
-case ${PWD-`pwd`} in
-/*) # Posix
+if grep '#define WOE 0' auto-sussed.h >/dev/null
+then
 	SLASH=/
 	qSLASH="'/'"
 	SLASHes=$qSLASH
 	isSLASH='#define isSLASH(c) ((c) == SLASH)'
 	ROOTPATH='isSLASH((p)[0])'
-	X_DEFAULT=",v$SLASH";;
-?:[/\\\\]*) # MS-DOS # \\\\ instead of \\ doesn't hurt, and avoids common bugs
+	X_DEFAULT=",v$SLASH"
+else
 	SLASH='\'
 	qSLASH="'\\\\'"
 	SLASHes="$qSLASH: case '/': case ':'"
 	isSLASH='int isSLASH (int);'
 	ROOTPATH="(isSLASH((p)[0]) || (p)[0] && (p)[1]==':')"
-	X_DEFAULT="$SLASH,v";;
-*)
-	echo >&3 $0: cannot deduce SLASH
-	exit 1
-esac
+	X_DEFAULT="$SLASH,v"
+fi
 cat <<EOF
 #define TMPDIR "${SLASH}tmp" /* default directory for temporary files */
 #define SLASH $qSLASH /* principal filename separator */
@@ -401,36 +398,10 @@ $isSLASH /* Is arg a filename separator?  */
 EOF
 
 $ech >&3 "$0: configuring ALL_ABSOLUTE, DIFF_ABSOLUTE $dots"
-cat >a.c <<EOF
-#include "$A_H"
-#ifndef isSLASH
-static int
-isSLASH(c) int c; {
-	switch (c) { case SLASHes: return 1; } return 0;
-}
-#endif
-int
-main(argc, argv) int argc; char **argv; {
-	return (1<argc && !ROOTPATH(argv[1]));
-}
-EOF
-$PREPARE_CC && ($CL a.c $L && $aout) >&2 || exit
-a=1
-for i in "$DIFF" "$DIFF3" "$ED" "$RCSPREFIX" "$SENDMAIL"
-do
-	case $i in
-	\"*\") i=`expr "$i" : '"\(.*\)"'`
-	esac
-	case $i in
-	?*) $aout "$i" || { a=0; break; }
-	esac
-done
-echo "#define ALL_ABSOLUTE $a /* Do all subprograms satisfy ROOTPATH?  */"
-if $aout "$DIFF"
-then a=1
-else a=0
-fi
-echo "#define DIFF_ABSOLUTE $a /* Is ROOTPATH(DIFF) true?  */"
+echo '/* Do all subprograms satisfy ROOTPATH?  */'
+../build-aux/abs-p ALL "$DIFF" "$DIFF3" "$ED" "$RCSPREFIX" "$SENDMAIL"
+echo '/* Is ROOTPATH(DIFF) true?  */'
+../build-aux/abs-p DIFF "$DIFF"
 echo >&3 OK
 
 : configuring SENDMAIL

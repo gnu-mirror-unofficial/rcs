@@ -1,0 +1,59 @@
+#!/bin/sh
+# abs-p
+#
+# Copyright (C) 2010 Thien-Thi Nguyen
+#
+# This file is part of GNU RCS.
+#
+# GNU RCS is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# GNU RCS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+# Usage: abs-p TAG [FILENAME ...]
+#
+# Write a line "#define TAG_ABSOLUTE CBOOL" to stdout,
+# where CBOOL is 1 if every FILENAME is absolute, else 0.
+# An absolute filename matches glob "@ABSFILENAMEGLOB@" (see configure script).
+##
+
+version='1.0'
+
+usage ()
+{
+    sed '/^##/,/^##/!d;/^##/d;s/^# //g;s/^#$//g' $0
+}
+
+showversion ()
+{
+    echo "abs-p (RCS) $version"
+}
+
+if [ x"$1" = x--help ] ; then showversion ; echo ; usage ; exit 0 ; fi
+if [ x"$1" = x--version ] ; then showversion ; exit 0 ; fi
+if [ x"$1" = x ] ; then echo "ERROR: Missing argument, try --help" ; exit 1 ; fi
+
+tag=$1 ; shift
+cbool=1
+for i in "$@"
+do
+    # Strip double quotes, if any.
+    case "$i" in
+	\"*\") i=`expr "$i" : '"\(.*\)"'`
+    esac
+    case "$i" in
+	?*) test 0 = `expr "$i" : '@ABSFILENAMEGLOB@'` &&
+            { cbool=0 ; break ; }
+    esac
+done
+echo '#define' ${tag}_ABSOLUTE $cbool
+
+# abs-p ends here

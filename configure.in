@@ -606,11 +606,18 @@ RCS_CBOOL([BAD_WAIT_IF_SIGCHLD_IGNORED],[no],[rcs_cv_tolerant_wait],
 
 # miscellaneous
 
+AS_IF([test 1 = `expr "$ac_pwd" : '/*'`],[woe=no],[woe=yes])
+RCS_CBOOL([WOE],[yes],[woe],[Are we trying to "support" MS-DOS?])
+
+AC_DEFUN([WOEMUX],[AS_IF([test yes = $woe],[$2],[$1])])
+
+WOEMUX([ABSFILENAMEGLOB='/*'],[ABSFILENAMEGLOB='?:*'])
+AC_SUBST([ABSFILENAMEGLOB])
+
 AC_CACHE_CHECK([if // and / are the same],[rcs_cv_slsl_is_sl],[
 m4_pushdef([inode],[ls -d -i $1 | sed 's/^ *//;s/ .*//'])dnl
-  cwd=`pwd`
-  AS_IF([test 1 = `expr "$cwd" : '/*'`],[cwd=/],[cwd=\\])
-  if test `inode([$cwd])` = `inode([${cwd}${cwd}])`
+  WOEMUX([fsrootdir=/],[fsrootdir=\\])
+  if test `inode([$fsrootdir])` = `inode([${fsrootdir}${fsrootdir}])`
   then rcs_cv_slsl_is_sl=yes
   else rcs_cv_slsl_is_sl=no
   fi
@@ -626,5 +633,6 @@ AC_CONFIG_FILES([
   man/Makefile
   src/Makefile
 ])
+AC_CONFIG_FILES([build-aux/abs-p],[chmod +x build-aux/abs-p])
 
 AC_OUTPUT
