@@ -21,14 +21,35 @@
 */
 
 #include "rcsbase.h"
+#include "rcsmerge-help.c"
 
 char const cmdid[] = "rcsmerge";
+
+/*:help
+[options] file
+
+Incorporate the changes between two revisions of an RCS file
+into the corresponding working file.
+
+One or two revisions must be specified (using -p, -q, or -r).
+If only one is specified, use the latest revision on the default
+branch to be the second revision.
+
+Options:
+  -p[REV] -- write to stdout instead of overwriting the working file
+  -q[rev] -- quiet mode
+  -rREV   -- (one or two times) specify a revision
+  -kSUBST -- substitute using mode SUBST (see co(1))
+  -V[N]   -- if N is not specified, behave like --version;
+             otherwise, N specifies the RCS version to emulate
+  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
+             used to identify RCS file names
+  -zZONE  -- specify date output format in keyword-substitution
+*/
 
 int
 main (int argc, char **argv)
 {
-  static char const cmdusage[] =
-    "\nrcsmerge usage: rcsmerge -rrev1 [-rrev2] -ksubst -{pq}[rev] -Vn -xsuff -zzone file";
   static char const quietarg[] = "-q";
 
   register int i;
@@ -43,6 +64,8 @@ main (int argc, char **argv)
   struct buf numericrev;        /* holds expanded revision number */
   struct hshentries *gendeltas; /* deltas to be generated */
   struct hshentry *target;
+
+  CHECK_HV ();
 
   bufautobegin (&commarg);
   bufautobegin (&numericrev);
@@ -110,7 +133,7 @@ main (int argc, char **argv)
           /* fall into */
         default:
         unknown:
-          error ("unknown option: %s%s", *argv, cmdusage);
+          error ("unknown option: %s", *argv);
         };
     }                           /* end of option processing */
 
@@ -122,7 +145,7 @@ main (int argc, char **argv)
   if (!nerror)
     {
       if (argc < 1)
-        faterror ("no input file%s", cmdusage);
+        faterror ("no input file");
       if (0 < pairnames (argc, argv, rcsreadopen, true, false))
         {
 

@@ -22,6 +22,7 @@
 
 #include "rcsbase.h"
 #include "bother.h"
+#include "rcs-help.c"
 
 struct Lockrev
 {
@@ -105,12 +106,55 @@ static struct hshentries *gendeltas;
 
 char const cmdid[] = "rcs";
 
+/*:help
+[options] file ...
+
+Create new RCS files or change attributes of existing ones.
+FILE... names the working file, or the RCS file, or a series
+of alternating WORKING-FILE RCS-FILE pairs.
+
+Options:
+  -i         -- create and initialize a new RCS file
+  -{LU}      -- set locking to strict (L) or non-strict (U)
+  -M         -- don't send mail when breaking someone else's lock
+  -T         -- preserve the modification time on the RCS file
+                unless a revision is removed
+  -I         -- interactive
+  -q         -- quiet mode
+  -aLOGINS   -- append LOGINS (comma-separated) to access-list
+  -e[LOGINS] -- erase LOGINS (all if unspecified) from access-list
+  -AFILE     -- append access list according to FILE (FIXME GROKME DOCME)
+  -b[REV]    -- set default branch to that of REV or
+                highest branch on trunk if REV is omitted
+  -{lu}[REV] -- lock (l) or unlock (u) the revision REV or
+                latest on the default branch if REV is omitted
+  -cSTRING   -- set comment leader to STRING; don't use: obsolete
+  -kSUBST    -- set default keyword substitution to SUBST (see co(1))
+  -mREV:MSG  -- replace REV's log message with MSG
+  -{nN}WHICH -- WHICH has the form NAME[:[REV]]; if :REV is omitted,
+                delete the symbolic NAME, otherwise associate NAME with
+                REV (or latest on default branch if : given but REV empty);
+                for n, signal error if NAME exists; for N, overwrite
+  -oRANGE    -- outdate revisions in RANGE:
+                  REV       -- single revision
+                  BR        -- latest revision on branch BR
+                  REV1:REV2 -- REV1 to REV2 on same branch
+                  :REV      -- beginning of branch to REV
+                  REV:      -- REV to end of branch
+  -sWHICH    -- WHICH has the form STATE[:REV]; set state of REV
+                (or latest revision on default branch) to STATE
+  -t[TEXT]   -- replace description in RCS file; if TEXT begins with
+                hyphen (-), use it directly, otherwise it names a file
+  -V[N]      -- if N is not specified, behave like --version;
+                otherwise, N specifies the RCS version to emulate
+  -xSUFF     -- specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names
+  -zZONE     -- no effect; included for compatibility with other commands
+*/
+
 int
 main (int argc, char **argv)
 {
-  static char const cmdusage[] =
-    "\nrcs usage: rcs -{ae}logins -Afile -{blu}[rev] -cstring -{iILqTU} -ksubst -mrev:msg -{nN}name[:[rev]] -orange -sstate[:rev] -t[text] -Vn -xsuff -zzone file ...";
-
   char *a, **newargv, *textfile;
   char const *branchsym, *commsyml;
   int branchflag, changed, expmode, initflag;
@@ -121,6 +165,8 @@ main (int argc, char **argv)
   struct Lockrev *lockpt;
   struct Lockrev **curlock, **rmvlock;
   struct Status *curstate;
+
+  CHECK_HV ();
 
   nosetid ();
 
@@ -330,7 +376,7 @@ main (int argc, char **argv)
           /* fall into */
         default:
         unknown:
-          error ("unknown option: %s%s", *argv, cmdusage);
+          error ("unknown option: %s", *argv);
         };
     }                           /* end processing of options */
 
@@ -338,7 +384,7 @@ main (int argc, char **argv)
   if (nerror)
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file%s", cmdusage);
+    faterror ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {

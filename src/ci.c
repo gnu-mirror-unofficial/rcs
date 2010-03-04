@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include "ci-help.c"
 
 struct Symrev
 {
@@ -56,11 +57,67 @@ static struct Symrev *assoclst, **nextassoc;
 
 char const cmdid[] = "ci";
 
+/*:help
+[options] file...
+
+Store a new revision of the working file into the RCS file.
+FILE... names the working file, or the RCS file, or a series
+of alternating WORKING-FILE RCS-FILE pairs.
+
+Options:
+
+  -{fiIjklMqru}[REV]
+
+        Multiple flags in {fiIjklMqru} may be used, except for
+        -l, -r, -u, which are mutually exclusive.
+
+        f -- force new entry, even if no content changed
+        i -- initial checkin; error if RCS file already exists
+        I -- interactive
+        j -- just checkin, don't initialize; error if RCS file does not exist
+        k -- compute revision from working file keywords
+        q -- quiet mode
+        r -- normal, if REV is specified; otherwise,
+             release lock and delete working file
+        l -- like r, but immediately checkout locked (co -l) afterwards
+        u -- like l, but checkout unlocked (co -u)
+        M -- reset working file mtime (relevant for -l, -u)
+
+        If specified, REV can be symbolic, numeric, or mixed:
+          symbolic -- must have been defined previously (see -n, -N)
+          $        -- determine the revision number from keyword values
+                      in the working file
+          .N       -- prepend default branch => DEFBR.N
+          BR.N     -- use this, but N must be greater than any existing
+                      on BR, or BR must be new
+          BR       -- latest revision on branch BR + 1 => BR.(L+1),
+                      or BR.1 if new branch
+        If REV is omitted, compute it from the last lock (co -l), perhaps
+        starting a new branch.  If there is no lock, use DEFBR.(L+1).
+
+  -d[DATE]  -- use DATE (or working file mtime)
+  -mMSG     -- use MSG as the log message
+  -{nN}NAME -- assign symbolic NAME to the entry; -n signals error if
+               NAME already exists; -N overrides any previous assignment
+  -sSTATE   -- set state to STATE (default: Exp)
+  -tTEXT    -- set description; if TEXT starts with a hyphen (-),
+               use it directly, otherwise it names a file to read
+               (only valid on initial checkin, ignored afterwards)
+  -T        -- set the RCS file’s modification time to the new revision’s
+               time if the former precedes the latter and there is a new
+               revision; preserve the RCS file’s modification time otherwise
+  -V[N]     -- if N is not specified, behave like --version;
+               otherwise, N specifies the RCS version to emulate
+  -wWHO     -- use WHO as the author
+  -xSUFF    -- specify SUFF as a slash-separated list of suffixes
+               used to identify RCS file names
+  -zZONE    -- specify date output format in keyword-substitution
+               and also the default timezone for -dDATE
+*/
+
 int
 main (int argc, char **argv)
 {
-  static char const cmdusage[] =
-    "\nci usage: ci -{fIklMqru}[rev] -d[date] -mmsg -{nN}name -sstate -ttext -T -Vn -wwho -xsuff -zzone file ...";
   static char const default_state[] = DEFAULTSTATE;
 
   char altdate[datesize];
@@ -79,6 +136,8 @@ main (int argc, char **argv)
   mode_t newworkmode;           /* mode for working file */
   time_t mtime, wtime;
   struct hshentry *workdelta;
+
+  CHECK_HV ();
 
   setrid ();
 
@@ -237,7 +296,7 @@ main (int argc, char **argv)
             }
           /* fall into */
         default:
-          error ("unknown option: %s%s", *argv, cmdusage);
+          error ("unknown option: %s", *argv);
         };
     }                           /* end processing of options */
 
@@ -245,7 +304,7 @@ main (int argc, char **argv)
   if (nerror)
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file%s", cmdusage);
+    faterror ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {

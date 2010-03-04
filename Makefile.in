@@ -52,7 +52,8 @@ dist :: $(srcdir)/configure
 	ln *.ms ChangeLog configure configure.in AUTHORS COPYING \
 		INSTALL INSTALL.RCS \
 		Makefile.in NEWS README $$d && \
-	(cd build-aux && ln install-sh mkinstalldirs \
+	(cd build-aux && ln extract-help \
+		install-sh mkinstalldirs \
 		../$$d/build-aux) && \
 	(cd man && ln ChangeLog Makefile.in ../$$d/man && \
 		{ echo '.ds Rv $(PACKAGE_VERSION)' ; \
@@ -63,6 +64,8 @@ dist :: $(srcdir)/configure
 		rm -f TMP) && \
 	(cd src && ln *.[ch] *.heg *.sh ChangeLog \
 		Makefile.in rcstest TAGS ../$$d/src) && \
+	sed -i 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/' \
+	  $$d/src/rcsfreeze.sh && \
 	tar -cf - $$d | gzip -9 >$$d.tar.gz && \
 	rm -fr $$d
 

@@ -20,6 +20,7 @@
 */
 
 #include "rcsbase.h"
+#include "rcsclean-help.c"
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -34,12 +35,37 @@ static int exitstatus;
 
 char const cmdid[] = "rcsclean";
 
+/*:help
+[options] file ...
+
+Remove and perhaps unlock files that are not being worked on.
+FILE... names the working file, or the RCS file, or a series
+of alternating WORKING-FILE RCS-FILE pairs.
+
+Options:
+
+  -{qrnu}[REV] -- operate in different modes on REV, or latest
+                  in default branch if REV is omitted
+                    r -- specify revision
+                    u -- unlock if is locked and no differences found
+                    n -- dry run (no act, don't operate)
+                    q -- quiet mode
+
+  -kSUBST -- substitute using mode SUBST (see co(1))
+  -T      -- preserve the modification time on the RCS file even
+             if the RCS file changes because a lock is removed
+  -V[N]   -- if N is not specified, behave like --version;
+             otherwise, N specifies the RCS version to emulate
+  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
+             used to identify RCS file names
+  -zZONE  -- specify date output format in keyword-substitution
+*/
+
 int
 main (int argc, char **argv)
 {
   static char const usage[] =
     "\nrcsclean: usage: rcsclean -ksubst -{nqru}[rev] -T -Vn -xsuff -zzone file ...";
-
   static struct buf revision;
 
   char *a, **newargv;
@@ -49,6 +75,8 @@ main (int argc, char **argv)
   struct hshentries *deltas;
   struct hshentry *delta;
   struct stat workstat;
+
+  CHECK_HV ();
 
   setrid ();
 

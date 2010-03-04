@@ -22,6 +22,7 @@
 
 #include "rcsbase.h"
 #include "bother.h"
+#include "rcsdiff-help.c"
 
 #if DIFF_L
 static char const *setup_label (struct buf *, char const *, char const[datesize]);
@@ -34,12 +35,32 @@ static struct stat workstat;
 
 char const cmdid[] = "rcsdiff";
 
+/*:help
+[options] file ...
+
+Run diff(1) to compare two revisions of each file given.
+FILE... names the working file, or the RCS file, or a series
+of alternating WORKING-FILE RCS-FILE pairs.
+
+If REV1 and REV2 are specified, compare those revisions.
+If only REV1 is specified, compare the working file with it.
+If no revisions are specified, compare the working file with
+the latest revision on the default branch.
+
+Options:
+  -rREV   -- (zero, one, or two times) name a revision
+  -kSUBST -- substitute using mode SUBST (see co(1))
+  -q      -- quiet mode
+  -V[N]   -- if N is not specified, behave like --version;
+             otherwise, N specifies the RCS version to emulate
+  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
+             used to identify RCS file names
+  -zZONE  -- specify date output format in keyword-substitution
+*/
+
 int
 main (int argc, char **argv)
 {
-  static char const cmdusage[] =
-    "\nrcsdiff usage: rcsdiff -ksubst -q -rrev1 [-rrev2] -Vn -xsuff -zzone [diff options] file ...";
-
   int revnums;                  /* counter for revision numbers given */
   char const *rev1, *rev2;      /* revision numbers from command line */
   char const *xrev1, *xrev2;    /* expanded revision numbers */
@@ -60,6 +81,8 @@ main (int argc, char **argv)
   char *a, *dcp, **newargv;
   int no_diff_means_no_output;
   register int c;
+
+  CHECK_HV ();
 
   exitstatus = diff_success;
 
@@ -124,7 +147,7 @@ main (int argc, char **argv)
             else
               {
                 if (!--argc)
-                  faterror ("-%c needs following argument%s", c, cmdusage);
+                  faterror ("-%c needs following argument", c);
                 *diffp++ = *argv++;
               }
             break;
@@ -185,7 +208,7 @@ main (int argc, char **argv)
             /* fall into */
           default:
           unknown:
-            error ("unknown option: %s%s", *argv, cmdusage);
+            error ("unknown option: %s", *argv);
           };
     option_handled:
       if (dcp != *argv + 1)
@@ -228,7 +251,7 @@ main (int argc, char **argv)
   if (nerror)
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file%s", cmdusage);
+    faterror ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {

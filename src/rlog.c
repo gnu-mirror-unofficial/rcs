@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include "rlog-help.c"
 
 struct rcslockers
 {                               /* lockers in locker option; stored   */
@@ -89,12 +90,46 @@ static struct stateattri *statelist;
 
 char const cmdid[] = "rlog";
 
+/*:help
+[options] file ...
+
+Display information about RCS files.  FILE... names the
+working file, or the RCS file, or a series of alternating
+WORKING-FILE RCS-FILE pairs.
+
+Options:
+  -L        -- ignore RCS files with no locks set
+  -R        -- print only the name of the RCS file
+  -h        -- print only the "header" information
+  -t        -- like h, but also include the description
+  -N        -- omit symbolic names
+  -b        -- select the default branch
+  -dDATES   -- select revisions in the range DATES, with spec:
+                 D      -- single revision D or earlier
+                 D1<D2  -- between D1 and D2, exclusive
+                 D2>D1  -- likewise
+                 <D, D> -- before D
+                 >D, D< -- after D
+               use <= or >= to make ranges inclusive; DATES
+               may also be a list of semicolon-spearated specs
+  -l[WHO]   -- select revisions locked by WHO (comma-separated list)
+               only, or by anyone if WHO is omitted
+  -r[REVS]  -- select revisions in REVS, a comma-separated list of
+               range specs, one of: REV, REV:, :REV, REV1:REV2
+  -sSTATES  -- select revisions with state in STATES (comma-separated list)
+  -w[WHO]   -- select revisions commited by WHO (comma-separated list),
+               or by the user if WHO is omitted
+  -V[N]     -- if N is not specified, behave like --version;
+               otherwise, N specifies the RCS version to emulate
+  -xSUFF    -- specify SUFF as a slash-separated list of suffixes
+               used to identify RCS file names
+  -zZONE    -- specify date output format in keyword-substitution
+  -q        -- no effect, included for consistency with other commands
+*/
+
 int
 main (int argc, char **argv)
 {
-  static char const cmdusage[] =
-    "\nrlog usage: rlog -{bhLNRt} -ddates -l[lockers] -r[revs] -sstates -Vn -w[logins] -xsuff -zzone file ...";
-
   register FILE *out;
   char *a, **newargv;
   struct Datepairs *currdate;
@@ -110,6 +145,8 @@ main (int argc, char **argv)
   int pre5;
   int shownames;
   int revno;
+
+  CHECK_HV ();
 
   descflag = selectflag = shownames = true;
   onlylockflag = onlyRCSflag = false;
@@ -193,7 +230,7 @@ main (int argc, char **argv)
 
         default:
         unknown:
-          error ("unknown option: %s%s", *argv, cmdusage);
+          error ("unknown option: %s", *argv);
 
         };
     }                           /* end of option processing */
@@ -228,7 +265,7 @@ main (int argc, char **argv)
   if (nerror)
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file%s", cmdusage);
+    faterror ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {

@@ -949,7 +949,7 @@ setRCSversion (char const *str)
     }
   else
     {
-      printf ("%s%s", cmdid, COMMAND_VERSION);
+      display_version (cmdid);
       exit (0);
     }
 }

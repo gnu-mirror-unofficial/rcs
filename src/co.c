@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include "co-help.c"
 
 static char *addjoin (char *);
 static char const *getancestor (char const *, char const *);
@@ -47,12 +48,72 @@ static struct stat workstat;
 
 char const cmdid[] = "co";
 
+/*:help
+[options] file ...
+
+Retrieve a revision from each RCS file and store it in the
+corresponding working file.  FILE... names the working file, or the
+RCS file, or a series of alternating WORKING-FILE RCS-FILE pairs.
+
+Options:
+
+  -{fIlMpqru}[REV]
+
+        Multiple flags in {fIlMpqru} may be used, except for
+        -l, -r, -u, which are mutually exclusive.
+
+        f -- force overwrite of working file
+        I -- interactive
+        p -- write to stdout instead of the working file
+        q -- quiet mode
+        r -- normal checkout
+        l -- like r, but also lock
+        u -- like l, but unlock
+        M -- reset working file mtime (relevant for -l, -u)
+
+        If specified, REV can be symbolic, numeric, or mixed:
+          symbolic -- must have been defined previously (see ci(1))
+          $        -- determine the revision number from keyword values
+                      in the working file
+          .N       -- prepend default branch => DEFBR.N
+          BR.N     -- use this
+          BR       -- latest revision on branch BR
+        If REV is omitted, take it to be the latest on the default branch.
+
+  -kSUBST
+
+        Generate keyword substitutions depending on SUBST:
+
+        kv  -- (default) default form: $KEYWORD: VALUE $
+               with locker name in Header, Id, Locker fields only
+               if the RCS file is being locked (via ci -l, co -l)
+        kvl -- like kv, but always insert locker name
+        k   -- only keyword: $KEYWORD$
+        o   -- old value (before checkin): $KEYWORD: OLD-VALUE $
+        b   -- like o, except all i/o is done in binary-mode
+        v   -- only value: VALUE
+
+  -dDATE  -- select latest before or on DATE
+  -jJOINS -- merge using JOINS, a list of REV:REV pairs;
+             this option is obsolete -- see rcsmerge(1)
+  -sSTATE -- select matching state STATE
+  -T      -- preserve the modification time on the RCS file even if the
+             RCS file changes because a lock is added or removed
+  -wWHO   -- select matching login WHO
+  -V[N]   -- if N is not specified, behave like --version;
+             otherwise, N specifies the RCS version to emulate
+  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
+             used to identify RCS file names
+  -zZONE  -- specify date output format in keyword-substitution
+             and also the default timezone for -dDATE
+
+When the selection options are applied in combination, co
+retrieves the latest revision that satisfies all of them.
+*/
+
 int
 main (int argc, char **argv)
 {
-  static char const cmdusage[] =
-    "\nco usage: co -{fIlMpqru}[rev] -ddate -jjoins -ksubst -sstate -T -w[who] -Vn -xsuff -zzone file ...";
-
   char *a, *joinflag, **newargv;
   char const *author, *date, *rev, *state;
   char const *joinname, *newdate, *neworkname;
@@ -64,6 +125,8 @@ main (int argc, char **argv)
 #	if OPEN_O_BINARY
   int stdout_mode = 0;
 #	endif
+
+  CHECK_HV ();
 
   setrid ();
   author = date = rev = state = 0;
@@ -191,7 +254,7 @@ main (int argc, char **argv)
           /* fall into */
         default:
         unknown:
-          error ("unknown option: %s%s", *argv, cmdusage);
+          error ("unknown option: %s", *argv);
 
         };
     }                           /* end of option processing */
@@ -200,7 +263,7 @@ main (int argc, char **argv)
   if (nerror)
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file%s", cmdusage);
+    faterror ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {

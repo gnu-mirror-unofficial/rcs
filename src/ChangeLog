@@ -1,5 +1,43 @@
 2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Add --help, --version handling for all programs.
+
+	In the following, for program source PROG.c:
+	Implicit: #include "ci-help.c"; add /*:help ...*/ comment.
+	C means: Check for "--help" and "--version"; handle them.
+	B means: Don't display usage summary on bad option.
+	* gnu-h-v.h: New file.
+	* gnu-h-v.c: New file.
+	* ci.c (main): C; B.
+	* co.c (main): C; B.
+	* ident.c (main): C; use `display_version'.
+	* merge.c (main): Likewise.
+	* rcs.c (main): C; B.
+	* rcsclean.c (main): C.
+	* rcsdiff.c (main): C; B.
+	* rcsfreeze.sh: Add copyright and license notices.
+	Add handling for --help, --version.
+	(version): New var.
+	(usage): New func.
+	* rcsmerge.c (main): C; B.
+	* rcsutil.c (setRCSversion): Use `display_version'.
+	* rlog.c (main): C; B.
+	* rcsbase.h (COMMAND_VERSION): Delete macro.
+	* Makefile.in (%-help.c : %.c): New pattern rule.
+	(SOURCE): Add gnu-h-v.c.
+	(PARTS): Add gnu-h-v$o.
+	(ci$o): Depend on ci-help.c.
+	(co$o): Depend on co-help.c.
+	(ident$o): Depend on ident-help.c.
+	(merge$o): Depend on merge-help.c.
+	(rcs$o): Depend on rcs-help.c.
+	(rcsclean$o): Depend on rcsclean-help.c.
+	(rcsdiff$o): Depend on rcsdiff-help.c.
+	(rcsmerge$o): Depend on rcsmerge-help.c.
+	(rlog$o): Depend on rlog-help.c.
+
+2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move some Makefile vars out of "tailorable" section.
 
 	* Makefile.in (bindir): Move up; use @bindir@ directly.

@@ -176,12 +176,17 @@ bother.h: FORCE
 %$x : %$o librcsparts.a
 	$(LINK) -o $@ $< -L. -lrcsparts $(LIBS)
 
-SOURCE=	ci.c co.c ident.c maketime.c merge.c merger.c partime.c rcs.c \
+%-help.c : %.c
+	$(bauxdir)/extract-help -o $@ $<
+
+SOURCE=	gnu-h-v.c \
+	ci.c co.c ident.c maketime.c merge.c merger.c partime.c rcs.c \
 	rcsclean.c rcsdiff.c rcsedit.c rcsfcmp.c rcsfnms.c rcsgen.c \
 	rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsmerge.c rcsrev.c rcssyn.c \
 	rcstime.c rcsutil.c rlog.c
 PROGS=	ci$o co$o ident$o merge$o rcs$o rcsclean$o rcsdiff$o rcsmerge$o rlog$o
-PARTS=	maketime$o merger$o partime$o rcsedit$o rcsfcmp$o rcsfnms$o \
+PARTS=	gnu-h-v$o \
+	maketime$o merger$o partime$o rcsedit$o rcsfcmp$o rcsfnms$o \
 	rcsgen$o rcskeep$o rcskeys$o rcslex$o rcsmap$o rcsrev$o rcssyn$o \
 	rcstime$o rcsutil$o
 OBJECT=	$(PROGS) $(PARTS)
@@ -197,5 +202,16 @@ dvi info ::
 $(OBJECT) : rcsbase.h
 maketime$o partime$o rcstime$o : partime.h
 maketime$o rcstime$o : maketime.h
+
+# gross
+ci$o : ci-help.c
+co$o : co-help.c
+ident$o : ident-help.c
+merge$o : merge-help.c
+rcs$o : rcs-help.c
+rcsclean$o : rcsclean-help.c
+rcsdiff$o : rcsdiff-help.c
+rcsmerge$o : rcsmerge-help.c
+rlog$o : rlog-help.c
 
 FORCE:

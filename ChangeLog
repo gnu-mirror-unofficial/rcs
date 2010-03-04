@@ -1,3 +1,11 @@
+2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Add --help, --version handling for all programs.
+
+	* build-aux/extract-help: New file.
+	* Makefile.in (dist): Distribute build-aux/extract-help.
+	Also, substitute package version into $d/src/rcsfreeze.sh.
+
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[admin] Don't distribute rcs_func.ms.

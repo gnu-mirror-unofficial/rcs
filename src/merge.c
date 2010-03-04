@@ -20,6 +20,7 @@
 */
 
 #include "rcsbase.h"
+#include "merge-help.c"
 
 static void badoption (char const *);
 
@@ -34,12 +35,30 @@ badoption (char const *a)
 
 char const cmdid[] = "merge";
 
+/*:help
+[options] file1 file2 file3
+
+Incorporate all changes that lead from FILE2 to FILE3 into FILE1.
+Typically, FILE2 is the parent, and FILE1 and FILE3 are siblings.
+
+Options:
+  -{AEe}  -- output conflicts using the respective diff3 style;
+             default is -E; with -e, emit no warnings
+  -p      -- write to stdout instead of overwriting FILE1
+  -q      -- quiet mode; suppress conflict warnings
+  -LLABEL -- (up to three times) specify the conflict labels
+             for FILE1, FILE2 and FILE, respectively
+  -V      -- like --version
+*/
+
 int
 main (int argc, char **argv)
 {
   register char const *a;
   char const *arg[3], *label[3], *edarg = 0;
   int labels, tostdout;
+
+  CHECK_HV ();
 
   labels = 0;
   tostdout = false;
@@ -72,7 +91,7 @@ main (int argc, char **argv)
           break;
 
         case 'V':
-          printf ("%s%s", cmdid, COMMAND_VERSION);
+          display_version (cmdid);
           return 0;
 
         default:

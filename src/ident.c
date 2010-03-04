@@ -21,12 +21,24 @@
 */
 
 #include  "rcsbase.h"
+#include "ident-help.c"
 
 static int match (FILE *);
 static int scanfile (FILE *, char const *, int);
 static void reportError (char const *);
 
 char const cmdid[] = "ident";
+
+/*:help
+[-q] [-V] [file ...]
+
+Search for all instances of the pattern $KEYWORD: TEXT $ in the
+named files or, if no files are named, the standard input.
+
+Options:
+  -q -- suppress warnings if no patterns are found
+  -V -- like --version
+*/
 
 int
 main (int argc, char **argv)
@@ -39,6 +51,8 @@ main (int argc, char **argv)
   int status = EXIT_SUCCESS;
   char const *a;
 
+  CHECK_HV ();
+
   while ((a = *++argv) && *a == '-')
     while (*++a)
       switch (*a)
@@ -48,7 +62,7 @@ main (int argc, char **argv)
           break;
 
         case 'V':
-          printf ("%s%s", cmdid, COMMAND_VERSION);
+          display_version (cmdid);
           quiet = -1;
           break;
 
