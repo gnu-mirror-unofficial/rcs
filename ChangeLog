@@ -1,5 +1,14 @@
 2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Fix omission bug: Distribute build-aux/abs-p.in, as well.
+
+	This fixes the omission in commit:
+	[build] Detect "absolute-filename-p" without compiling.
+
+	* Makefile.in (dist): Distribute build-aux/abs-p.in.
+
+2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Add --help, --version handling for all programs.
 
 	* build-aux/extract-help: New file.
