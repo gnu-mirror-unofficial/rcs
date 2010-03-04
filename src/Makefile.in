@@ -32,6 +32,7 @@ bauxdir = $(srcdir)/../build-aux
 VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
+bindir = @bindir@
 
 CC = @CC@
 CPPFLAGS = @CPPFLAGS@
@@ -52,19 +53,17 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 SENDMAIL = @SENDMAIL@
-
+x = @EXEEXT@
+o = .@OBJEXT@
+LIBOBJS = @LIBOBJS@
 
 # The following definitions can be tailored by hand;
 # this shouldn't be needed for ordinary installations.
-
- bindir = $(exec_prefix)/bin
 
  ALL_CFLAGS = $(CPPFLAGS) $(DEFS) -I. -I$(srcdir) $(CFLAGS)
 
  COMPAT2 = 0
 #COMPAT2 = 1
-
- LIBOBJS =
 
  LINK = $(CC)
 
@@ -75,11 +74,6 @@ SENDMAIL = @SENDMAIL@
  RCSPREFIX = $(bindir)/
 
  REMOVE = rm -f
-
- o = .o
-#o = .s# Minix/PC with ACK cc
-
- x =
 
 #)
 # On non-Unix hosts you must manually create and edit conf.h from conf.heg.

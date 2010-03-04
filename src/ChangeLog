@@ -1,3 +1,12 @@
+2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move some Makefile vars out of "tailorable" section.
+
+	* Makefile.in (bindir): Move up; use @bindir@ directly.
+	(x): Move up; use @EXEEXT@.
+	(o): Move up; use .@OBJEXT@ -- NB leading dot.
+	(LIBOBJS): Move up; use @LIBOBJS@.
+
 2010-03-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use an object archive instead of specifying long lists.
