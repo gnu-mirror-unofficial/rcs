@@ -36,6 +36,20 @@ fi
 AC_DEFINE_UNQUOTED([COMPAT2],[$enable_compat2],
   [Support reading RCS 2.x files?])
 
+AC_ARG_WITH([mailer],
+ [AS_HELP_STRING([--with-mailer=PROG],[use PROG to send mail
+   when a lock is broken (default: don't send mail)])],[
+  if test no = "$withval" ; then
+    AS_UNSET([with_mailer])
+  elif test 0 = `expr "$withval" : '/*'` ; then
+    AC_MSG_ERROR([--with-mailer PROG not absolute: $withval])
+  fi
+])
+if test "$with_mailer" ; then
+AC_DEFINE_UNQUOTED([SENDMAIL],["$with_mailer"],
+  [Program used to send mail when a lock is broken.])
+fi
+
 # Set up simple `diff' test.
 echo 0 >conftest0
 echo 0 >conftest0c
@@ -278,14 +292,6 @@ if test 0 = $DIFF3_BIN ; then
   AC_PATH_PROG([ED], [ed], [ed])
   AC_DEFINE_UNQUOTED([ED],["$ED"],eddesc)
 fi
-
-ac_save_path=$PATH
-PATH=/usr/lib:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
-AC_PATH_PROGS(SENDMAIL, sendmail mail mailx)
-PATH=$ac_save_path
-case $SENDMAIL in
-?*) SENDMAIL=\"$SENDMAIL\"
-esac
 
 # Use the GNU pic -n option if available; it avoids GNU extensions,
 # which is need for proper operation to generate a portable man page.

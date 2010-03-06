@@ -1,5 +1,12 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `SENDMAIL' configuration to configure.in.
+
+	* rcs.1 (OPTIONS): Mention that mail-on-lock-break
+	only happens if RCS was configured `--with-mailer'.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Improve aesthetic of  labels in rcsfile.5 diagram.
 
 	* rcsfile.5in <diagram> (triangle_down, triangle_up):

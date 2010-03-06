@@ -73,6 +73,18 @@ you can migrate the file to a recent format as follows:
 
 !!! NB: This option (and 2.x compatability) will be removed in GNU RCS 6.x.
 
+Another option is `--with-mailer=PROG'.  This specifies that PROG (an
+absolute filename) should be used to send mail to the original locker when
+a lock is broken.  PROG will be called with one argument, the recipient,
+and its standard input will be:
+
+  Subject: Broken lock on <FILENAME>
+
+  <REASON>
+
+That is, the first line is the subject, followed by an empty line, followed
+by the message body.  Omitting this option disables sending mail.
+
 If your system type is in the following list,
 look for the corresponding strings in the notes below before configuring.
 
@@ -195,13 +207,6 @@ It is used only if you edit the documentation or make `maintainer-clean'.
 
 prefix and exec_prefix establish the binary installation directory;
 they are affected by the --prefix and --exec-prefix option of `configure'.
-
-SENDMAIL is a comma-separated list of strings (using C syntax)
-that are a command to send mail.
-The name of the addressee will be appended as a separate argument,
-and the standard input will be the message
-(first line `Subject: xxxx', second line empty).
-If your host cannot send mail, leave SENDMAIL empty.
 
 
 __________

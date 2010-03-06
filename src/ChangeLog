@@ -1,5 +1,14 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `SENDMAIL' configuration to configure.in.
+
+	* rcs.c: Don't #include "bother.h".
+	* Makefile.in (SENDMAIL): Delete var.
+	(rcs$o): No longer depend on "bother.h".
+	(bother.h): Remove `SENDMAIL' #define/#undef generation.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `ED' configuration into configure.in.
 
 	* Makefile.in (ED): Delete var.

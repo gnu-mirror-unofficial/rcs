@@ -1,5 +1,14 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `SENDMAIL' configuration to configure.in.
+
+	* configure.in (mailer): New AC_ARG_WITH.
+	(SENDMAIL): New AC_DEFINE_UNQUOTED, if `--with-mailer=PROG'.
+	(SENDMAIL): Delete AC_PATH_PROGS, and related followup.
+	* README: Update.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `ED' configuration into configure.in.
 
 	* configure.in (eddesc): New AC_DEFUN.

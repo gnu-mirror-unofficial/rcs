@@ -49,7 +49,6 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-SENDMAIL = @SENDMAIL@
 x = @EXEEXT@
 o = .@OBJEXT@
 LIBOBJS = @LIBOBJS@
@@ -128,7 +127,6 @@ maintainer-clean :: distclean
 	$(REMOVE) TAGS
 
 merger$o : bother.h
-rcs$o : bother.h
 rcsdiff$o : bother.h
 rcsutil$o : bother.h
 
@@ -146,12 +144,8 @@ bother.h: FORCE
 	   echo '#define DIFF_SUCCESS $(DIFF_SUCCESS)' ; \
 	   echo '#define DIFF_FAILURE $(DIFF_FAILURE)' ; \
 	   echo '#define DIFF_TROUBLE $(DIFF_TROUBLE)' ; \
-	   if [ "$(SENDMAIL)" ] ; \
-	     then echo '#define SENDMAIL $(SENDMAIL)' ; \
-	     else echo '#undef SENDMAIL' ; \
-	   fi ; \
 	   $(absp) ALL '$(DIFF)' '$(DIFF3)' \
-	               '$(RCSPREFIX)' '$(SENDMAIL)' ; \
+	               '$(RCSPREFIX)' ; \
 	   $(absp) DIFF '$(DIFF)' ) > $@T
 	@if [ -f $@ ] && cmp -s $@T $@ ; \
 	  then rm -f $@T ; \
