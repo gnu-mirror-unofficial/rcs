@@ -46,7 +46,9 @@ Copyright (C) 2010 Thien-Thi Nguyen
 Copyright (C) 1990-1995 Paul Eggert
 License GPLv2+; GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.'
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Stephan v. Bechtolsheim.'
 
 usage ()
 {
@@ -54,19 +56,7 @@ usage ()
 }
 
 if [ x"$1" = x--help ] ; then usage ; exit 0 ; fi
-if [ x"$1" = x--version ] ; then
-    cat <<EOF
-rcsfreeze (GNU RCS) PACKAGE_VERSION
-Copyright (C) 2010 Thien-Thi Nguyen
-Copyright (C) 1990-1995 Paul Eggert
-License GPLv2+; GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
-
-Written by Stephan v. Bechtolsheim.
-EOF
-    exit 0
-fi
+if [ x"$1" = x--version ] ; then echo "$version" ; exit 0 ; fi
 
 PATH=/usr/local/bin:/bin:/usr/bin:/usr/ucb:$PATH
 export PATH
