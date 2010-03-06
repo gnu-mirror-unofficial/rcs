@@ -28,14 +28,12 @@
  ******************************************************************************
  */
 
-
 /* version COMPAT2 reads files of the format of release 2 and 3, but
  * generates files of release 3 format. Need not be defined if no
  * old RCS files generated with release 2 exist.
  */
 
 #include "rcsbase.h"
-#include "bother.h"
 
 static char const *getkeyval (char const *, enum tokens, int);
 static int getdelta (void);

@@ -1,5 +1,14 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `COMPAT2' configuration into configure.in.
+
+	* Makefile.in (COMPAT2): Delete var.
+	(bother.h): Remove `COMPAT2' #define/#undef generation.
+	(rcssyn$o): No longer depend on "bother.h".
+	* rcssyn.c: Don't #include "bother.h".
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[dist] Don't distribute INSTALL.RCS.
 
 	* Makefile.in: Comment munging; nfc.

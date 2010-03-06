@@ -60,6 +60,19 @@ RCS's `configure' script has the option `--with-diffutils',
 and is affected by environment variables;
 see `Configuration environment' below.
 
+Another option is `--enable-compat2'.  It enables reading RCS 2.x file
+formats.  Most likely you can safely ignore this (that file format became
+obsolete in 1982).  However, if you do indeed find a version 2 file around,
+you can migrate the file to a recent format as follows:
+
+      Suppose the working file was `f.c'; rename the RCS file `f.c.v' to
+      `f.c,v', and the RCS file `f.v' to `f.c,v'.  Thus suffixes are no
+      longer dropped and RCS files end in `,v' rather than `.v'.  After
+      all version 2 RCS files have been updated with new versions of ci
+      or rcs, you can remake RCS with --enable-compat2=no.
+
+!!! NB: This option (and 2.x compatability) will be removed in GNU RCS 6.x.
+
 If your system type is in the following list,
 look for the corresponding strings in the notes below before configuring.
 

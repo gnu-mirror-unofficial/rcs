@@ -60,9 +60,6 @@ LIBOBJS = @LIBOBJS@
 
  ALL_CFLAGS = $(CPPFLAGS) $(DEFS) -I. -I$(srcdir) $(CFLAGS)
 
- COMPAT2 = 0
-#COMPAT2 = 1
-
  LINK = $(CC)
 
  LINT = lint -abchx# traditional and BSD lint
@@ -134,7 +131,6 @@ maintainer-clean :: distclean
 merger$o : bother.h
 rcs$o : bother.h
 rcsdiff$o : bother.h
-rcssyn$o : bother.h
 rcsutil$o : bother.h
 
 absp = ../build-aux/abs-p
@@ -152,10 +148,6 @@ bother.h: FORCE
 	   echo '#define DIFF_FAILURE $(DIFF_FAILURE)' ; \
 	   echo '#define DIFF_TROUBLE $(DIFF_TROUBLE)' ; \
 	   echo '#define ED "$(ED)"' ; \
-	   if [ 1 = $(COMPAT2) ] ; \
-	     then echo '#define COMPAT2 $(COMPAT2)' ; \
-	     else echo '#undef COMPAT2' ; \
-	   fi ; \
 	   if [ "$(SENDMAIL)" ] ; \
 	     then echo '#define SENDMAIL $(SENDMAIL)' ; \
 	     else echo '#undef SENDMAIL' ; \

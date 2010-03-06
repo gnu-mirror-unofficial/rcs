@@ -1,5 +1,13 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `COMPAT2' configuration into configure.in.
+
+	* configure.in (compat2): New AC_ARG_ENABLE.
+	(COMPAT2): New AC_DEFINE_UNQUOTED.
+	* README: Update.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[dist] Don't distribute INSTALL.RCS.
 
 	* README: Incorporate INSTALL.RCS.
