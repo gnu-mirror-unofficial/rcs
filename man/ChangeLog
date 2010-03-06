@@ -1,3 +1,22 @@
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[man] Spiff "SEE ALSO" section.
+
+	* ci.1: Make sure "SEE ALSO" is in quotes; use
+	.BR in front of command names; use .PP to separate
+	list of command names and Tichy paper citation.
+	* co.1: Likewise.
+	* ident.1: Likewise.
+	* merge.1: Likewise.
+	* rcs.1: Likewise.
+	* rcsclean.1: Likewise.
+	* rcsdiff.1: Likewise.
+	* rcsfile.5in: Likewise.
+	* rcsfreeze.1: Likewise.
+	* rcsintro.1: Likewise.
+	* rcsmerge.1: Likewise.
+	* rlog.1: Likewise.
+
 2010-02-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[man] Fix small merge.1 omission; plus other minor cleanups.
