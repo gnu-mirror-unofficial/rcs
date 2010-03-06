@@ -25,8 +25,6 @@ default :: all
 # See the file INSTALL.RCS for more information on the configuration section.
 # ----- start of configuration section -----
 
-#(Unix
-
 srcdir = @srcdir@
 bauxdir = $(srcdir)/../build-aux
 VPATH = @srcdir@
@@ -74,9 +72,6 @@ LIBOBJS = @LIBOBJS@
  RCSPREFIX = $(bindir)/
 
  REMOVE = rm -f
-
-#)
-# On non-Unix hosts you must manually create and edit conf.h from conf.heg.
 
 # ----- end of configuration section -----
 # You shouldn't have to change anything past this point.

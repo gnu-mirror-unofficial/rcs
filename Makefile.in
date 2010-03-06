@@ -62,7 +62,7 @@ dist :: $(srcdir)/configure
 		  cat TMP $$f > ../$$d/man/$$f ; \
 		done ; \
 		rm -f TMP) && \
-	(cd src && ln *.[ch] *.heg *.sh ChangeLog \
+	(cd src && ln *.[ch] *.sh ChangeLog \
 		Makefile.in rcstest TAGS ../$$d/src) && \
 	sed -i 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/' \
 	  $$d/src/rcsfreeze.sh && \

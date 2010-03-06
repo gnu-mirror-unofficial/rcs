@@ -1,5 +1,12 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Don't distribute (now-defunct) conf.heg.
+
+	* Makefile.in (dist): Remove "*.heg" from
+	list of files to distribute in the src/ subdir.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[sec] Use `mkstemp' instead of `mktemp'.
 
 	* configure.in (mktemp): Remove from `AC_CHECK_FUNCS_ONCE'.
