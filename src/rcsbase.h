@@ -830,6 +830,3 @@ extern const char const diff_flags[];
 extern const int diff_success;
 extern const int diff_failure;
 extern const int diff_trouble;
-
-/* The original!  */
-extern const char const prog_ed[];

@@ -271,7 +271,13 @@ esac
 # Clean up simple `diff' test.
 rm -f conftest*
 
-AC_PATH_PROG(ED, ed, ed)
+AC_DEFUN([eddesc],
+  [[The singular ed(1), necessary only if we don't have diff3(1).]])
+AC_ARG_VAR([ED],eddesc)
+if test 0 = $DIFF3_BIN ; then
+  AC_PATH_PROG([ED], [ed], [ed])
+  AC_DEFINE_UNQUOTED([ED],["$ED"],eddesc)
+fi
 
 ac_save_path=$PATH
 PATH=/usr/lib:/usr/bin:/bin:/usr/sbin:/sbin:$PATH

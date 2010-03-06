@@ -1,5 +1,16 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `ED' configuration into configure.in.
+
+	* Makefile.in (ED): Delete var.
+	(bother.h): Remove `ED' #define.
+	Also, don't bother checking it for absoluteness.
+	* merger.c (merge): Use `ED'.
+	* rcsbase.h (prog_ed): Delete var decl.
+	* rcsutil.c (prog_ed): Delete var.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `COMPAT2' configuration into configure.in.
 
 	* Makefile.in (COMPAT2): Delete var.

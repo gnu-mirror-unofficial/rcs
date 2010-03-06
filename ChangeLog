@@ -1,5 +1,14 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `ED' configuration into configure.in.
+
+	* configure.in (eddesc): New AC_DEFUN.
+	(ED): New AC_ARG_VAR.
+	(ED): Do this AC_PATH_PROG only if diff3(1) is not a user program.
+	(ED): New AC_DEFINE_UNQUOTED.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `COMPAT2' configuration into configure.in.
 
 	* configure.in (compat2): New AC_ARG_ENABLE.

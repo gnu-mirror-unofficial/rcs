@@ -112,7 +112,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
   aputs (tostdout ? "1,$p\n" : "w\n", f);
   Orewind (f);
   aflush (f);
-  if (run (fileno (f), (char *) 0, prog_ed, "-", a[0], (char *) 0))
+  if (run (fileno (f), (char *) 0, ED, "-", a[0], (char *) 0))
     exiterr ();
   Ofclose (f);
 #endif

@@ -44,7 +44,6 @@ DIFF_L = @DIFF_L@
 DIFF_FAILURE = @DIFF_FAILURE@
 DIFF_SUCCESS = @DIFF_SUCCESS@
 DIFF_TROUBLE = @DIFF_TROUBLE@
-ED = @ED@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -147,12 +146,11 @@ bother.h: FORCE
 	   echo '#define DIFF_SUCCESS $(DIFF_SUCCESS)' ; \
 	   echo '#define DIFF_FAILURE $(DIFF_FAILURE)' ; \
 	   echo '#define DIFF_TROUBLE $(DIFF_TROUBLE)' ; \
-	   echo '#define ED "$(ED)"' ; \
 	   if [ "$(SENDMAIL)" ] ; \
 	     then echo '#define SENDMAIL $(SENDMAIL)' ; \
 	     else echo '#undef SENDMAIL' ; \
 	   fi ; \
-	   $(absp) ALL '$(DIFF)' '$(DIFF3)' '$(ED)' \
+	   $(absp) ALL '$(DIFF)' '$(DIFF3)' \
 	               '$(RCSPREFIX)' '$(SENDMAIL)' ; \
 	   $(absp) DIFF '$(DIFF)' ) > $@T
 	@if [ -f $@ ] && cmp -s $@T $@ ; \

@@ -31,7 +31,6 @@ const char const diff_flags[] = DIFFFLAGS;
 const int diff_success = DIFF_SUCCESS;
 const int diff_failure = DIFF_FAILURE;
 const int diff_trouble = DIFF_TROUBLE;
-const char const prog_ed[] = ED;
 
 /*
  * list of blocks allocated with ftestalloc()
