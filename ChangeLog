@@ -1,3 +1,10 @@
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[sec] Use `mkstemp' instead of `mktemp'.
+
+	* configure.in (mktemp): Remove from `AC_CHECK_FUNCS_ONCE'.
+	(mkstemp): Add to `AC_CHECK_FUNCS_ONCE'.
+
 2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Fix omission bug: Distribute build-aux/abs-p.in, as well.

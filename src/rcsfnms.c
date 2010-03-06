@@ -28,6 +28,7 @@
  */
 
 #include "rcsbase.h"
+#include <stdint.h>
 
 static char const *bindex (char const *, int);
 static int fin2open (char const *, size_t, char const *, size_t,
@@ -109,21 +110,116 @@ static struct compair const comtable[] = {
   {0,      "# "}                /* default for unknown suffix; must be last */
 };
 
-#if defined HAVE_MKTEMP
-static char const *tmp (void);
-static char const *
-tmp (void)
-/* Yield the name of the tmp directory.  */
+#ifndef HAVE_MKSTEMP
+int
+homegrown_mkstemp (char *template)
+/* Like mkstemp(2), but never return EINVAL.  That is, never check for
+   missing "XXXXXX" since we know the unique caller DTRT.  */
 {
-  static char const *s;
-  if (!s && !(s = cgetenv ("TMPDIR"))   /* Unix tradition */
-      && !(s = cgetenv ("TMP")) /* DOS tradition */
-      && !(s = cgetenv ("TEMP"))        /* another DOS tradition */
-    )
-    s = TMPDIR;
-  return s;
+  int pid = getpid ();
+  char *end = template + strlen (template);
+  static char const xrep[] = ("abcdefghijklmnopqrstuvwxyz"
+                              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                              /* Omit '0' => `strlen (xrep)' is prime.  */
+                              "123456789");
+  struct timeval tv;
+  uint64_t n;
+  int fd = -1;
+
+  for (int patience = 42 * 42;
+       0 > fd && patience;
+       patience--)
+    {
+      if (0 > gettimeofday (&tv, NULL))
+        return -1;
+      /* Cast to ensure 64-bit shift.  */
+      n = pid | (uint64_t)(tv.tv_sec ^ tv.tv_usec) << 32;
+      fprintf (stderr, "BEF: %s %llx [%lu.%lu]\n", end - 6, n, tv.tv_sec, tv.tv_usec);
+      for (char *w = end - 6; n && w < end; w++)
+        {
+          *w = xrep[n % 61];
+          n = n / 61;
+        }
+      fd = open (template, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+      fprintf (stderr, "AFT: %s %d\n", end - 6, 42 * 42 - patience);
+    }
+  if (0 > fd)
+    errno = EEXIST;
+  return fd;
 }
-#endif
+
+#define mkstemp  homegrown_mkstemp
+#endif  /* !defined HAVE_MKSTEMP */
+
+/* Set contents of FILENAME to the name of a temporary file made from a
+   template with that starts with PREFIX.  If PREFIX is NULL, use the system
+   "temporary directory".  (Specify the empty string for cwd.)  If no name is
+   possible, signal a fatal error.  */
+void
+set_temporary_file_name (struct buf *filename, const char *prefix)
+{
+  static struct buf tmpdir =
+    {
+      .string = NULL,
+      .size = 0
+    };
+  struct buf template;
+  int fd;
+
+  bufautobegin (&template);
+  if (prefix)
+    bufscpy (&template, prefix);
+  else
+    {
+      if (! tmpdir.string)
+        {
+          char *v;
+
+#define TRY(envvarname)                         \
+          if (! tmpdir.string                   \
+              && (v = cgetenv (#envvarname)))   \
+            bufscpy (&tmpdir, v)
+          TRY (TMPDIR);                 /* Unix tradition */
+          TRY (TMP);                    /* DOS tradition */
+          TRY (TEMP);                   /* another DOS tradition */
+#undef TRY
+          if (! tmpdir.string)
+            {
+              char slash[2] = { SLASH, '\0' };
+
+              bufscpy (&tmpdir, P_tmpdir);
+              bufscat (&tmpdir, slash);
+            }
+        }
+      bufscpy (&template, tmpdir.string);
+    }
+  /* Support the 8.3 MS-DOG restriction, blech.  Truncate the non-directory
+     filename component to two bytes so that the maximum non-extension name
+     is 2 + 6 (Xs) = 8.  The extension is left empty.  What a waste.  */
+  if ('/' != SLASH)
+    {
+      char *end = template.string + template.size;
+      char *lastsep = strrchr (template.string, SLASH);
+      char *ndfc = lastsep ? 1 + lastsep : template.string;
+      char *dot;
+
+      if (ndfc + 2 < end)
+        *(ndfc + 2) = '\0';
+      /* If any of the (up to 2) remaining bytes are '.', replace it
+         with the lowest (decimal) digit of the pid.  Double blech.  */
+      if ((dot = strchr (ndfc, '.')))
+        *dot = '0' + getpid () % 10;
+    }
+  bufscat (&template, "XXXXXX");
+
+  if (0 > (fd = mkstemp (template.string)))
+    faterror ("could not make temporary file name (template \"%s\")",
+              template.string);
+
+  bufscpy (filename, template.string);
+  bufautoend (&template);
+  close (fd);
+}
 
 char const *
 maketemp (int n)
@@ -133,36 +229,20 @@ maketemp (int n)
  * Return a pointer to the pathname created.
  */
 {
-  char *p;
-  char const *t = tpnames[n];
+  struct buf rv;
+  char *t = tpnames[n];
 
   if (t)
     return t;
 
   catchints ();
-  {
-#	if defined HAVE_MKTEMP
-    char const *tp = tmp ();
-    size_t tplen = dir_useful_len (tp);
-    p = testalloc (tplen + 10);
-    sprintf (p, "%.*s%cT%cXXXXXX", (int) tplen, tp, SLASH, '0' + n);
-    if (!mktemp (p) || !*p)
-      faterror ("can't make temporary pathname `%.*s%cT%cXXXXXX'",
-                (int) tplen, tp, SLASH, '0' + n);
-#	else
-    static char tpnamebuf[TEMPNAMES][L_tmpnam];
-    p = tpnamebuf[n];
-    if (!tmpnam (p) || !*p)
-#		ifdef P_tmpdir
-      faterror ("can't make temporary pathname `%s...'", P_tmpdir);
-#		else
-      faterror ("can't make temporary pathname");
-#		endif
-#	endif
-  }
-
-  tpnames[n] = p;
-  return p;
+  bufautobegin (&rv);
+  set_temporary_file_name (&rv, NULL);
+  t = testalloc (rv.size);
+  strcpy (t, rv.string);
+  bufautoend (&rv);
+  tpnames[n] = t;
+  return t;
 }
 
 void

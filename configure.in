@@ -335,7 +335,7 @@ AC_CHECK_FUNCS_ONCE([
   getuid
   getwd
   madvise
-  mktemp
+  mkstemp
   mmap
   psiginfo
   psignal

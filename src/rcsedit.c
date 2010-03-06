@@ -1334,47 +1334,11 @@ makedirtemp (int isworkfile)
  * if 0, put the unique file in RCSfile's directory.
  */
 {
-  register char *tp, *np;
-  register size_t dl;
-  register struct buf *bn;
-  register char const *name = isworkfile ? workname : RCSname;
+  int slot = newRCSdirtp_index + isworkfile;
 
-  dl = basefilename (name) - name;
-  bn = &dirtpname[newRCSdirtp_index + isworkfile];
-  bufalloc (bn,
-#		if defined HAVE_MKTEMP
-            dl + 9
-#		else
-            strlen (name) + 3
-#		endif
-    );
-  bufscpy (bn, name);
-  np = tp = bn->string;
-  tp += dl;
-  *tp++ = '_';
-  *tp++ = '0' + isworkfile;
-  catchints ();
-#	if defined HAVE_MKTEMP
-  strcpy (tp, "XXXXXX");
-  if (!mktemp (np) || !*np)
-    faterror ("can't make temporary pathname `%.*s_%cXXXXXX'",
-              (int) dl, name, '0' + isworkfile);
-#	else
-  /*
-   * Posix 1003.1-1990 has no reliable way
-   * to create a unique file in a named directory.
-   * We fudge here.  If the filename is abcde,
-   * the temp filename is _Ncde where N is a digit.
-   */
-  name += dl;
-  if (*name)
-    name++;
-  if (*name)
-    name++;
-  strcpy (tp, name);
-#	endif
-  dirtpmaker[newRCSdirtp_index + isworkfile] = real;
-  return np;
+  set_temporary_file_name (&dirtpname[slot], isworkfile ? workname : RCSname);
+  dirtpmaker[slot] = real;
+  return dirtpname[slot].string;
 }
 
 void

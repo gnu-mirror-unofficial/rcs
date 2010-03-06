@@ -169,6 +169,10 @@
 #	define X_DEFAULT "\\,v"
 #endif
 
+#ifndef P_tmpdir
+#define P_tmpdir  TMPDIR
+#endif
+
 /* Must TZ be set for gmtime() to work?  */
 #define TZ_must_be_set 0
 
@@ -559,6 +563,7 @@ RILE *rcsreadopen (struct buf *, struct stat *, int);
 char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
 char const *getfullRCSname (void);
+void set_temporary_file_name (struct buf *filename, const char *prefix);
 char const *maketemp (int);
 char const *rcssuffix (char const *);
 int pairnames (int, char **,

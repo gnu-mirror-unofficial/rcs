@@ -1,3 +1,17 @@
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[sec] Use `mkstemp' instead of `mktemp'.
+
+	* rcsbase.h (P_tmpdir): New #define, but only not already.
+	(set_temporary_file_name): New func decl.
+	* rcsfnms.c: #include <stdint.h>.
+	[HAVE_MKTEMP] (tmp): Delete func and surrounding #ifdef.
+	[!HAVE_MKSTEMP] (homegrown_mkstemp): New func.
+	[!HAVE_MKSTEMP] (mkstemp): #define to `homegrown_mkstemp'.
+	(set_temporary_file_name): New func.
+	(maketemp): Use `set_temporary_file_name'.
+	* rcsedit.c (makedirtemp): Use `set_temporary_file_name'.
+
 2010-03-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Add --help, --version handling for all programs.
