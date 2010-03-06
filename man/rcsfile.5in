@@ -226,11 +226,13 @@ The following diagram shows an example of an \*r file's organization.
 .if \np \{\
 .PS
 define triangle_down '
-	box invis $1 ""
+	box invis
+	{ $1 at last box.c + (0, 0.05) }
 	{ line from last box.s to last box.nw to last box.ne to last box.s }
 '
 define triangle_up '
-	box invis "" $1
+	box invis
+	{ $1 at last box.c - (0, 0.15) }
 	{ line from last box.n to last box.sw to last box.se to last box.n }
 '
 	down

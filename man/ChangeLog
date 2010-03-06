@@ -1,5 +1,12 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[man] Improve aesthetic of  labels in rcsfile.5 diagram.
+
+	* rcsfile.5in <diagram> (triangle_down, triangle_up):
+	Manually position the text slightly higher and lower, respectively.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Spiff "SEE ALSO" section.
 
 	* ci.1: Make sure "SEE ALSO" is in quotes; use
