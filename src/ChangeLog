@@ -1,5 +1,12 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[dist] Don't distribute INSTALL.RCS.
+
+	* Makefile.in: Comment munging; nfc.
+	* rcsbase.h: Likewise.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[sec] Use `mkstemp' instead of `mktemp'.
 
 	* rcsbase.h (P_tmpdir): New #define, but only not already.

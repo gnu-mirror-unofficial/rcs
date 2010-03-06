@@ -1,5 +1,13 @@
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[dist] Don't distribute INSTALL.RCS.
+
+	* README: Incorporate INSTALL.RCS.
+	* Makefile.in (dist): Don't distribute INSTALL.RCS.
+	* INSTALL.RCS: Delete file.
+
+2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Don't distribute (now-defunct) conf.heg.
 
 	* Makefile.in (dist): Remove "*.heg" from

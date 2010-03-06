@@ -50,7 +50,7 @@ dist :: $(srcdir)/configure
 	rm -fr $$d && \
 	mkdir $$d $$d/build-aux $$d/man $$d/src && \
 	ln *.ms ChangeLog configure configure.in AUTHORS COPYING \
-		INSTALL INSTALL.RCS \
+		INSTALL \
 		Makefile.in NEWS README $$d && \
 	(cd build-aux && ln abs-p.in extract-help \
 		install-sh mkinstalldirs \

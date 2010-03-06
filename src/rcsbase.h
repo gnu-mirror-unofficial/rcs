@@ -126,7 +126,7 @@
 /* Can rename(A,B) falsely report success?  */
 #define bad_NFS_rename 0
 
-/* Does setreuid() work?  See ../INSTALL.RCS.  */
+/* Does setreuid() work?  See top-level README.  */
 #define has_setreuid 0
 
 /* Must we define getabsname?  */

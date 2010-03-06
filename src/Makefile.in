@@ -22,7 +22,7 @@
 # default target
 default :: all
 
-# See the file INSTALL.RCS for more information on the configuration section.
+# See the top-level README for more information on the configuration section.
 # ----- start of configuration section -----
 
 srcdir = @srcdir@
