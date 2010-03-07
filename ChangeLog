@@ -1,5 +1,17 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Require absolute filenames for external programs.
+
+	* configure.in (RCS_ABSOLUTE_PROGRAM): New AC_DEFUN.
+	(mailer): Don't check absoluteness here.
+	(SENDMAIL, DIFF, DIFF3, ED): Use `RCS_ABSOLUTE_PROGRAM'.
+	(build-aux/abs-p): Delete AC_CONFIG_FILES.
+	* Makefile.in (dist): Update.
+	* README: Update.
+	* build-aux/abs-p.in: Delete file.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build int] New abstration: RCS_MUSTHAVE
 
 	* configure.in (RCS_MUSTHAVE): New AC_DEFUN.

@@ -122,17 +122,14 @@ maintainer-clean :: distclean
 
 rcsutil$o : bother.h
 
-absp = ../build-aux/abs-p
-
 bother.h: FORCE
 	@( echo '/* brooked other (shared mother) */' ; \
-	   echo '#define CO "$(RCSPREFIX)co"' ; \
-	   echo '#define MERGE "$(RCSPREFIX)merge"' ; \
+           pre="$$(cd $(RCSPREFIX) ; pwd)" ; \
+	   echo "#define CO \"$$pre/co\"" ; \
+	   echo "#define MERGE \"$$pre/merge\"" ; \
 	   echo '#define DIFF "$(DIFF)"' ; \
 	   echo '#define DIFF3 "$(DIFF3)"' ; \
-	   $(absp) ALL '$(DIFF)' '$(DIFF3)' \
-	               '$(RCSPREFIX)' ; \
-	   $(absp) DIFF '$(DIFF)' ) > $@T
+	   ) > $@T
 	@if [ -f $@ ] && cmp -s $@T $@ ; \
 	  then rm -f $@T ; \
 	  else mv $@T $@ ; echo Created $@ ; \

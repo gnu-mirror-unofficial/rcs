@@ -769,11 +769,7 @@ write_stderr (char const *s)
 }
 #endif
 
-#if ALL_ABSOLUTE
-#	define exec_RCS execv
-#else
-#	define exec_RCS execvp
-#endif
+#define exec_RCS execv
 
 /*
 * Run a command.
@@ -1087,7 +1083,7 @@ set_uid_to (uid_t u)
 
   if (euid () == ruid ())
     return;
-#if defined HAVE_WORKING_FORK && DIFF_ABSOLUTE
+#if defined HAVE_WORKING_FORK
 #	if has_setreuid
   if (setreuid (u == euid ()? ruid () : euid (), u) != 0)
     efaterror ("setuid");

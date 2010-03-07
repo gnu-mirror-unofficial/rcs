@@ -1,5 +1,15 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Require absolute filenames for external programs.
+
+	* Makefile.in (absp): Delete var.
+	(bother.h): Use absolute $(RCSPREFIX), via pwd(1);
+	don't bother computing `ALL_ABSOLUTE', `DIFF_ABSOLUTE'.
+	* rcsutil.c (exec_RCS): Move #define out of conditional.
+	(set_uid_to): Update #if condition, taking DIFF_ABSOLUTE as 1.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move non-filename DIFF* configuration to configure.in.
 
 	* merger.c: Don't #include "bother.h".
