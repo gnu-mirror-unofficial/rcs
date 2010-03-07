@@ -38,12 +38,6 @@ CFLAGS = @CFLAGS@
 DEFS = @DEFS@
 DIFF = @DIFF@
 DIFF3 = @DIFF3@
-DIFF3_BIN = @DIFF3_BIN@
-DIFFFLAGS = @DIFFFLAGS@
-DIFF_L = @DIFF_L@
-DIFF_FAILURE = @DIFF_FAILURE@
-DIFF_SUCCESS = @DIFF_SUCCESS@
-DIFF_TROUBLE = @DIFF_TROUBLE@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -126,8 +120,6 @@ maintainer-clean :: distclean
 	@echo "it deletes files that may require special tools to rebuild."
 	$(REMOVE) TAGS
 
-merger$o : bother.h
-rcsdiff$o : bother.h
 rcsutil$o : bother.h
 
 absp = ../build-aux/abs-p
@@ -137,13 +129,7 @@ bother.h: FORCE
 	   echo '#define CO "$(RCSPREFIX)co"' ; \
 	   echo '#define MERGE "$(RCSPREFIX)merge"' ; \
 	   echo '#define DIFF "$(DIFF)"' ; \
-	   echo '#define DIFF_L $(DIFF_L)' ; \
 	   echo '#define DIFF3 "$(DIFF3)"' ; \
-	   echo '#define DIFF3_BIN $(DIFF3_BIN)' ; \
-	   echo '#define DIFFFLAGS "$(DIFFFLAGS)"' ; \
-	   echo '#define DIFF_SUCCESS $(DIFF_SUCCESS)' ; \
-	   echo '#define DIFF_FAILURE $(DIFF_FAILURE)' ; \
-	   echo '#define DIFF_TROUBLE $(DIFF_TROUBLE)' ; \
 	   $(absp) ALL '$(DIFF)' '$(DIFF3)' \
 	               '$(RCSPREFIX)' ; \
 	   $(absp) DIFF '$(DIFF)' ) > $@T

@@ -1,3 +1,15 @@
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move non-filename DIFF* configuration to configure.in.
+
+	* merger.c: Don't #include "bother.h".
+	* rcsdiff.c: Likewise.
+	* Makefile.in (DIFF3_BIN, DIFFFLAGS, DIFF_L)
+	(DIFF_FAILURE, DIFF_SUCCESS, DIFF_TROUBLE): Delete vars.
+	(merger$o, rcsdiff$o): No longer depend on "bother.h".
+	(bother.h): Remove #define generation for `DIFF_L', `DIFF3_BIN',
+	`DIFFFLAGS', `DIFF_SUCCESS', `DIFF_FAILURE', `DIFF_TROUBLE'.
+
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move `SENDMAIL' configuration to configure.in.

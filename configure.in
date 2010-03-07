@@ -50,33 +50,26 @@ AC_DEFINE_UNQUOTED([SENDMAIL],["$with_mailer"],
   [Program used to send mail when a lock is broken.])
 fi
 
+AC_ARG_WITH([diffutils],
+ [AS_HELP_STRING([--with-diffutils],
+                 [assume GNU diffutils is similarly installed])],[
+  if test yes = "$withval" ; then
+    : ${DIFF='$(bindir)/diff'}
+    : ${DIFF3=${DIFF}3}
+    : ${DIFF3_BIN=1}
+    : ${DIFFFLAGS=-an}
+    : ${DIFF_FAILURE=1}
+    : ${DIFF_L=1}
+    : ${DIFF_SUCCESS=0}
+    : ${DIFF_TROUBLE=2}
+  fi
+])
+
 # Set up simple `diff' test.
 echo 0 >conftest0
 echo 0 >conftest0c
 echo 1 >conftest1
-cat >conftestok <<'EOF'
-d1 1
-a1 1
-1
-EOF
-
-AC_ARG_WITH(diffutils,
-  [  --with-diffutils        assume GNU diffutils is similarly installed],
-  [with_diffutils=$withval],
-  [with_diffutils=no]
-)
-
-case $with_diffutils in
-yes)
-  : ${DIFF='$(bindir)/diff'}
-  : ${DIFF3=${DIFF}3}
-  : ${DIFF3_BIN=1}
-  : ${DIFFFLAGS=-an}
-  : ${DIFF_FAILURE=1}
-  : ${DIFF_L=1}
-  : ${DIFF_SUCCESS=0}
-  : ${DIFF_TROUBLE=2}
-esac
+{ echo d1 1 ; echo a1 1 ; echo 1 ; } >conftestok
 
 # Set DIFF to the name of the `diff' program to be run.
 # On some systems, the RCS-compatible diff program is called `rdiff';
@@ -110,7 +103,6 @@ AC_PATH_PROG(DIFF, $DIFF, $DIFF)
 
 # Set DIFF_SUCCESS, DIFF_FAILURE, DIFF_TROUBLE to diff's exit status
 # when it finds no differences, some differences, or trouble.
-AC_SUBST(DIFF_SUCCESS)
 AC_MSG_CHECKING([diff success status])
 AC_CACHE_VAL(rcs_cv_status_diff_success, [
   rcs_cv_status_diff_success=$DIFF_SUCCESS
@@ -125,8 +117,9 @@ AC_CACHE_VAL(rcs_cv_status_diff_success, [
 ])
 DIFF_SUCCESS=$rcs_cv_status_diff_success
 AC_MSG_RESULT($DIFF_SUCCESS)
+AC_DEFINE_UNQUOTED([DIFF_SUCCESS],[$DIFF_SUCCESS],
+  [Exit status when diff(1) finds no differences.])
 #
-AC_SUBST(DIFF_FAILURE)
 AC_MSG_CHECKING([diff failure status])
 AC_CACHE_VAL(rcs_cv_status_diff_failure, [
   rcs_cv_status_diff_failure=$DIFF_FAILURE
@@ -139,8 +132,9 @@ AC_CACHE_VAL(rcs_cv_status_diff_failure, [
 ])
 DIFF_FAILURE=$rcs_cv_status_diff_failure
 AC_MSG_RESULT($DIFF_FAILURE)
+AC_DEFINE_UNQUOTED([DIFF_FAILURE],[$DIFF_FAILURE],
+  [Exit status when diff(1) finds some differences.])
 #
-AC_SUBST(DIFF_TROUBLE)
 AC_MSG_CHECKING([diff trouble status])
 AC_CACHE_VAL(rcs_cv_status_diff_trouble, [
   rcs_cv_status_diff_trouble=$DIFF_TROUBLE
@@ -153,10 +147,11 @@ AC_CACHE_VAL(rcs_cv_status_diff_trouble, [
 ])
 DIFF_TROUBLE=$rcs_cv_status_diff_trouble
 AC_MSG_RESULT($DIFF_TROUBLE)
+AC_DEFINE_UNQUOTED([DIFF_TROUBLE],[$DIFF_TROUBLE],
+  [Exit status when diff(1) finds trouble.])
 
 # Set DIFFFLAGS to the options of the `diff' program to be run.
 # Use -an if possible, -n otherwise.
-AC_SUBST(DIFFFLAGS)
 AC_MSG_CHECKING([diff options for RCS])
 AC_CACHE_VAL(rcs_cv_options_diff, [
   rcs_cv_options_diff=$DIFFFLAGS
@@ -176,9 +171,10 @@ AC_CACHE_VAL(rcs_cv_options_diff, [
 ])
 DIFFFLAGS=$rcs_cv_options_diff
 AC_MSG_RESULT($DIFFFLAGS)
+AC_DEFINE_UNQUOTED([DIFFFLAGS],["$DIFFFLAGS"],
+  [Options of the `diff' program to be run.])
 
 # Set DIFF_L to 1 if diff understands the L option, 0 otherwise.
-AC_SUBST(DIFF_L)
 AC_MSG_CHECKING([diff -L])
 AC_CACHE_VAL(rcs_cv_options_diff_l, [
   rcs_cv_options_diff_l=$DIFF_L
@@ -209,6 +205,8 @@ case $DIFF_L in
 1) AC_MSG_RESULT(yes);;
 *) AC_MSG_RESULT(no);;
 esac
+AC_DEFINE_UNQUOTED([DIFF_L],[$DIFF_L],
+  [Does diff(3) understand -L?])
 
 # Set DIFF3 to the name of the diff3 program.
 # In some systems (e.g. BSD/OS 2.0), diffutils diff3 lives in /usr/libexec.
@@ -272,7 +270,6 @@ case $rcs_cv_prog_diff3_bin in
   ;;
 esac
 
-AC_SUBST(DIFF3_BIN)
 case $DIFF3_BIN in
 '')
   case $rcs_cv_prog_diff3_bin in
@@ -281,6 +278,8 @@ case $DIFF3_BIN in
   esac
   ;;
 esac
+AC_DEFINE_UNQUOTED([DIFF3_BIN],[$DIFF3_BIN],
+  [Is the diff3 program the user-visible GNU diff3?])
 
 # Clean up simple `diff' test.
 rm -f conftest*

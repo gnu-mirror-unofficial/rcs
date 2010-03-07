@@ -20,7 +20,6 @@
 */
 
 #include "rcsbase.h"
-#include "bother.h"
 
 static char const *normalize_arg (char const *, char **);
 static char const *

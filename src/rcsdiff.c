@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include "bother.h"
 #include "rcsdiff-help.c"
 
 #if DIFF_L
