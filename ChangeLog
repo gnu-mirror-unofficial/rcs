@@ -1,5 +1,12 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build int] New abstration: RCS_MUSTHAVE
+
+	* configure.in (RCS_MUSTHAVE): New AC_DEFUN.
+	(DIFF, DIFF3, ac_cv_prog_cc_c99): Use `RCS_MUSTHAVE'.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build int] Use `RCS_CBOOL' more.
 
 	* configure.in (COMPAT2): Use `RCS_CBOOL'.
