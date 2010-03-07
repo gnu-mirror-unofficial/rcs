@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include "gnu-h-v.h"
 #include "bother.h"
 
 const char const prog_co[] = CO;
