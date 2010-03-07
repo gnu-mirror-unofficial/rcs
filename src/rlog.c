@@ -586,13 +586,13 @@ getscript (struct hshentry *Delta)
           {
             for (;;)
               {
-                cacheget_ (c)
+                cacheget (c);
                 switch (c)
                   {
                   default:
                     continue;
                   case SDELIM:
-                    cacheget_ (c)
+                    cacheget (c);
                     if (c == SDELIM)
                       continue;
                     if (--i)

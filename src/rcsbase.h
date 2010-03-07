@@ -307,7 +307,7 @@ char *getlogin (void);
  * Igeteof_(f,c,s) - get a char c from f, executing statement s at EOF
  * cachegeteof_(c,s) - Igeteof_ applied to the local RILE
  * Iget_(f,c) - like Igeteof_, except EOF is an error
- * cacheget_(c) - Iget_ applied to the local RILE
+ * cacheget(c) - Iget_ applied to the local RILE
  * cacheunget_(f,c,s) - read c backwards from cached f, executing s at BOF
  * Ifileno, Ioffset_type, Irewind, Itell - analogs to stdio routines
  *
@@ -353,7 +353,7 @@ int Igetmore (RILE *);
 #	define uncache(f) ((f)->ptr = ptr)
 #	define cache(f) (ptr = (f)->ptr)
 #	define Iget_(f,c) Igeteof_(f,c,Ieof();)
-#	define cacheget_(c) cachegeteof_(c,Ieof();)
+#	define cacheget(c)  do { cachegeteof_(c,Ieof();); } while (0)
 #	define cacheunget_(f,c) (c)=(--ptr)[-1];
 #	define Ioffset_type size_t
 #	define Itell(f) ((f)->ptr - (f)->base)
@@ -369,8 +369,8 @@ int Igetmore (RILE *);
 #	define Igeteof_(f,c,s) {if(((c)=getc(f))==EOF){testIerror(f);if(feof(f))s}}
 #	define cachegeteof_(c,s) Igeteof_(ptr,c,s)
 #	define Iget_(f,c) { if (((c)=getc(f))==EOF) testIeof(f); }
-#	define cacheget_(c) Iget_(ptr,c)
-#	define cacheunget_(f,c) if(fseek(ptr,-2L,SEEK_CUR))Ierror();else cacheget_(c)
+#	define cacheget(c)  do { Iget_(ptr,c); } while (0)
+#	define cacheunget_(f,c) if(fseek(ptr,-2L,SEEK_CUR))Ierror();else cacheget(c)
 #	define Ioffset_type long
 #	define Itell(f) ftell(f)
 #	define Ifileno(f) fileno(f)
@@ -380,7 +380,7 @@ int Igetmore (RILE *);
 #define aputc_(c,o) { if (putc(c,o)==EOF) testOerror(o); }
 
 /* Get a character from an RCS file, perhaps copying to a new RCS file.  */
-#define GETC(o,c) do { cacheget_ (c) if (o) aputc_(c,o) } while (0)
+#define GETC(o,c) do { cacheget (c); if (o) aputc_(c,o) } while (0)
 
 #define WORKMODE(RCSmode, writable) (((RCSmode)&(mode_t)~(S_IWUSR|S_IWGRP|S_IWOTH)) | ((writable)?S_IWUSR:0))
 /* computes mode of working file: same as RCSmode, but write permission     */

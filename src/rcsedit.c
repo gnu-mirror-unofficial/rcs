@@ -955,14 +955,14 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
                   cacheunget_ (infile, c)
                   if (c != SDELIM)
                     {
-                      cacheget_ (c)
+                      cacheget (c);
                       break;
                     }
                 }
               cs += kdelim_found;
               kdelim_found |= c == KDELIM;
             }
-          cacheget_ (c)
+          cacheget (c);
         done_backing_up:
           ;
 
@@ -973,8 +973,8 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
             {
               leader.string[cw] = c;
               if (c == SDELIM && delimstuffed)
-                cacheget_ (c)
-              cacheget_ (c)
+                cacheget (c);
+              cacheget (c);
             }
 
           /* Convert traditional C or Pascal leader to ` *'.  */
@@ -999,9 +999,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
 
           /* Skip `$Log ... $' string.  */
           do
-            {
-              cacheget_ (c)
-            }
+            cacheget (c);
           while (c != KDELIM);
           uncache (infile);
         }

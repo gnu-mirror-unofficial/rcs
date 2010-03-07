@@ -1,5 +1,16 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Add do-while for `cacheget_'; rename.
+
+	* rcsbase.h (cacheget): Rename from `cacheget_'; add do-while.
+	(cacheunget_, GETC): Use `cacheget'.
+	* rcsedit.c (keyreplace): Likewise.
+	* rcslex.c (getphrases, printstring): Likewise.
+	* rcssyn.c (getdiffcmd): Likewise.
+	* rlog.c (getscript): Likewise.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Add do-while for `GETC_'; rename to `GET'.
 
 	* rcsbase.h (GETCeof_): Delete unused macro.

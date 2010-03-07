@@ -450,7 +450,7 @@ getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
     {
       if (c == SDELIM)
         {
-          cacheget_ (c)
+          cacheget (c);
           if (c == SDELIM)
             {
               buf[0] = c;

@@ -489,14 +489,14 @@ getphrases (char const *key)
                     }
                   continue;
                 case SEMI:
-                  cacheget_ (c)
+                  cacheget (c);
                   if (ctab[c] == NEWLN)
                     {
                       if (frew)
                         aputc_ (c, frew)
                       ++ rcsline;
                       savech_ (c)
-                      cacheget_ (c)
+                      cacheget (c);
                     }
 #			if large_memory
                   r.size = (char const *) cacheptr () - 1 - r.string;
@@ -509,7 +509,7 @@ getphrases (char const *key)
                           ++rcsline;
                           /* fall into */
                         case SPACE:
-                          cacheget_ (c)
+                          cacheget (c);
                           continue;
 
                         default:
@@ -620,14 +620,14 @@ printstring (void)
   cache (fin);
   for (;;)
     {
-      cacheget_ (c)
+      cacheget (c);
       switch (c)
         {
         case '\n':
           ++rcsline;
           break;
         case SDELIM:
-          cacheget_ (c)
+          cacheget (c);
           if (c != SDELIM)
             {
               nextc = c;
