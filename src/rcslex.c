@@ -197,7 +197,7 @@ nextlex (void)
           /* Note: falls into next case */
 
         case SPACE:
-          GETC_ (frew, c)
+          GETC (frew, c);
           continue;
 
         case IDCHAR:
@@ -212,7 +212,7 @@ nextlex (void)
           *sp++ = c;
           for (;;)
             {
-              GETC_ (frew, c)
+              GETC (frew, c);
               switch (ctab[c])
                 {
                 case IDCHAR:
@@ -253,7 +253,7 @@ nextlex (void)
 
         case COLON:
         case SEMI:
-          GETC_ (frew, c)
+          GETC (frew, c);
           break;
         }
       break;
@@ -460,14 +460,14 @@ getphrases (char const *key)
                 case Letter:
                 case PERIOD:
                 case SPACE:
-                  GETC_ (frew, c)
+                  GETC (frew, c);
                   continue;
                 case SBEGIN:     /* long string */
                   for (;;)
                     {
                       for (;;)
                         {
-                          GETC_ (frew, c)
+                          GETC (frew, c);
                           savech_ (c)
                           switch (c)
                             {
@@ -482,7 +482,7 @@ getphrases (char const *key)
                             }
                           break;
                         }
-                      GETC_ (frew, c)
+                      GETC (frew, c);
                       if (c != SDELIM)
                         break;
                       savech_ (c)
@@ -526,7 +526,7 @@ getphrases (char const *key)
           if (ctab[c] == Letter)
             {
               for (kn = key; c && *kn == c; kn++)
-                GETC_ (frew, c)
+                GETC (frew, c);
               if (!*kn)
                 switch (ctab[c])
                   {
@@ -583,7 +583,7 @@ readstring (void)
   cache (fin);
   for (;;)
     {
-      GETC_ (frew, c)
+      GETC (frew, c);
       switch (c)
         {
         case '\n':
@@ -591,7 +591,7 @@ readstring (void)
           break;
 
         case SDELIM:
-          GETC_ (frew, c)
+          GETC (frew, c);
           if (c != SDELIM)
             {
               /* end of string */
@@ -665,14 +665,14 @@ savestring (struct buf *target)
   limit = tp + target->size;
   for (;;)
     {
-      GETC_ (frew, c)
+      GETC (frew, c);
       switch (c)
         {
         case '\n':
           ++rcsline;
           break;
         case SDELIM:
-          GETC_ (frew, c)
+          GETC (frew, c);
           if (c != SDELIM)
             {
               /* end of string */

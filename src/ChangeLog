@@ -1,5 +1,15 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Add do-while for `GETC_'; rename to `GET'.
+
+	* rcsbase.h (GETCeof_): Delete unused macro.
+	(GETC): Rename from `GETC_'; add do-while.
+	* rcsedit.c (copystring): Use `GETC'.
+	(enterstring, editstring, expandline): Likewise.
+	* rcslex.c (nextlex, getphrases, readstring, savestring): Likewise.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Mark some parameters RCS_UNUSED.
 
 	* rcsfnms.c (rcsreadopen): Mark `mustread' RCS_UNUSED.

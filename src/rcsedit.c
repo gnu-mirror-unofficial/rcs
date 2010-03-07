@@ -394,7 +394,7 @@ copystring (void)
   amidline = false;
   for (;;)
     {
-      GETC_ (frew, c)
+      GETC (frew, c);
       switch (c)
         {
         case '\n':
@@ -403,7 +403,7 @@ copystring (void)
           amidline = false;
           break;
         case SDELIM:
-          GETC_ (frew, c)
+          GETC (frew, c);
           if (c != SDELIM)
             {
               /* end of string */
@@ -454,7 +454,7 @@ enterstring (void)
   for (;;)
     {
       optr = cacheptr ();
-      GETC_ (frew, c)
+      GETC (frew, c);
       oamidline = amidline;
       oe = e;
       switch (c)
@@ -465,7 +465,7 @@ enterstring (void)
           amidline = false;
           break;
         case SDELIM:
-          GETC_ (frew, c)
+          GETC (frew, c);
           if (c != SDELIM)
             {
               /* end of string */
@@ -601,10 +601,10 @@ editstring (struct hshentry const *delta)
 #				endif
                 for (;;)
                   {
-                    GETC_ (frew, c)
+                    GETC (frew, c);
                     if (c == SDELIM)
                       {
-                        GETC_ (frew, c)
+                        GETC (frew, c);
                         if (c != SDELIM)
                           {
                             if (--i)
@@ -665,7 +665,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
   for (;;)
     {
       if (ds)
-        GETC_ (frew, c)
+        GETC (frew, c);
       else
         cachegeteof_ (c, goto uncache_exit; )
       for (;;)
@@ -675,7 +675,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
             case SDELIM:
               if (ds)
                 {
-                  GETC_ (frew, c)
+                  GETC (frew, c);
                   if (c != SDELIM)
                     {
                       /* end of string */
@@ -704,7 +704,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
               for (;;)
                 {
                   if (ds)
-                    GETC_ (frew, c)
+                    GETC (frew, c);
                   else
                     cachegeteof_ (c, goto keystring_eof; )
                   if (tp <= &keyval.string[keylength])
@@ -737,7 +737,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                   for (;;)
                     {
                       if (ds)
-                        GETC_ (frew, c)
+                        GETC (frew, c);
                       else
                         cachegeteof_ (c, goto keystring_eof; )
                       if (c == '\n' || c == KDELIM)
@@ -747,7 +747,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                         tp = bufenlarge (&keyval, &tlim);
                       if (c == SDELIM && ds)
                         {       /*skip next SDELIM */
-                          GETC_ (frew, c)
+                          GETC (frew, c);
                           if (c != SDELIM)
                             {
                               /* end of string before closing KDELIM or newline */

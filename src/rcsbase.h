@@ -380,8 +380,7 @@ int Igetmore (RILE *);
 #define aputc_(c,o) { if (putc(c,o)==EOF) testOerror(o); }
 
 /* Get a character from an RCS file, perhaps copying to a new RCS file.  */
-#define GETCeof_(o,c,s) { cachegeteof_(c,s) if (o) aputc_(c,o) }
-#define GETC_(o,c) { cacheget_(c) if (o) aputc_(c,o) }
+#define GETC(o,c) do { cacheget_ (c) if (o) aputc_(c,o) } while (0)
 
 #define WORKMODE(RCSmode, writable) (((RCSmode)&(mode_t)~(S_IWUSR|S_IWGRP|S_IWOTH)) | ((writable)?S_IWUSR:0))
 /* computes mode of working file: same as RCSmode, but write permission     */
