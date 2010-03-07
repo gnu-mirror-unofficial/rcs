@@ -199,6 +199,9 @@ AS_VAR_PUSHDEF([GAV],[rcs_cv_gcc_$1])dnl
 AS_VAR_POPDEF([GAV])dnl
 ])
 
+RCS_CHECK_GCC_ATTRIBUTE([unused],[
+  extern int f (int n __attribute__ ((unused))) { return 0; }
+])
 RCS_CHECK_GCC_ATTRIBUTE([noreturn],[
   extern void func (void) __attribute__ ((noreturn));
 ])

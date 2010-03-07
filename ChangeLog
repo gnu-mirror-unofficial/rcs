@@ -1,5 +1,11 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Add check for GCC attribute `unused'.
+
+	* configure.in (unused): New RCS_CHECK_GCC_ATTRIBUTE.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move all DIFF* config to configure.in; assume diffutils.
 
 	* configure.in (RCS_SET_VN): New AC_DEFUN.

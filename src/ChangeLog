@@ -1,5 +1,11 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Add check for GCC attribute `unused'.
+
+	* rcsbase.h (RCS_UNUSED): New #define.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Declare `display_version' for rcsutil.c.
 
 	* rcsutil.c: #include "gnu-h-v.h".

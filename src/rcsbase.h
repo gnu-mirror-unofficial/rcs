@@ -74,6 +74,12 @@
 
 /* GCC attributes  */
 
+#ifdef GCC_HAS_ATTRIBUTE_UNUSED
+#	define RCS_UNUSED __attribute__ ((unused))
+#else
+#	define RCS_UNUSED
+#endif
+
 #ifdef GCC_HAS_ATTRIBUTE_NORETURN
 #	define exiting __attribute__ ((noreturn))
 #else
