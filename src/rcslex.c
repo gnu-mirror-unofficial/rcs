@@ -294,11 +294,11 @@ eoflex (void)
           ++rcsline;
           /* fall into */
         case SPACE:
-          cachegeteof_ (c,
-                        {
-                        uncache (fin);
-                        return true;
-                        })
+          cachegeteof (c,
+                       {
+                         uncache (fin);
+                         return true;
+                       });
           break;
         }
       if (fout)

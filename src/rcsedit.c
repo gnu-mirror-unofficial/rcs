@@ -348,7 +348,7 @@ copylines (register long upto, struct hshentry const *delta)
           {
             do
               {
-                cachegeteof_ (c, editLineNumberOverflow (); )
+                cachegeteof (c, editLineNumberOverflow ());
                 aputc_ (c, fc)
               }
             while (c != '\n');
@@ -667,7 +667,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
       if (ds)
         GETC (frew, c);
       else
-        cachegeteof_ (c, goto uncache_exit; )
+        cachegeteof (c, goto uncache_exit);
       for (;;)
         {
           switch (c)
@@ -706,7 +706,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                   if (ds)
                     GETC (frew, c);
                   else
-                    cachegeteof_ (c, goto keystring_eof; )
+                    cachegeteof (c, goto keystring_eof);
                   if (tp <= &keyval.string[keylength])
                     switch (ctab[c])
                       {
@@ -739,7 +739,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                       if (ds)
                         GETC (frew, c);
                       else
-                        cachegeteof_ (c, goto keystring_eof; )
+                        cachegeteof (c, goto keystring_eof);
                       if (c == '\n' || c == KDELIM)
                         break;
                       *tp++ = c;

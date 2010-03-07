@@ -1,5 +1,16 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Add do-while for `cachegeteof_'; rename.
+
+	* rcsbase.h (cachegeteof): Rename from `cachegeteof_'; add do-while.
+	[large_memory] (cacheget): Use `cachegeteof'.
+	* rcsedit.c (copylines, expandline): Likewise.
+	* rcsgen.c (putdftext): Likewise.
+	* rcslex.c (eoflex): Likewise.
+	* rcssyn.c (getdiffcmd): Likewise.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Add do-while for `cacheunget_'; rename.
 
 	* rcsbase.h (cacheunget): Rename from `cacheunget_'; add do-while.

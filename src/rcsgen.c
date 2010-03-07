@@ -544,11 +544,13 @@ putdftext (struct hshentry const *delta, RILE *finfile,
       cache (fin);
       for (;;)
         {
-          cachegeteof_ (c, break; )
+          cachegeteof (c, goto done);
           if (c == SDELIM)
             aputc_ (SDELIM, fout)       /*double up SDELIM */
           aputc_ (c, fout)
         }
+    done:
+      ;
     }
   else
     {
@@ -560,12 +562,12 @@ putdftext (struct hshentry const *delta, RILE *finfile,
             while (dc.nlines--)
               do
                 {
-                  cachegeteof_ (c,
-                                {
-                                  if (!dc.nlines)
-                                    goto OK_EOF;
-                                  unexpected_EOF ();
-                                })
+                  cachegeteof (c,
+                               {
+                                 if (!dc.nlines)
+                                   goto OK_EOF;
+                                 unexpected_EOF ();
+                               });
                   if (c == SDELIM)
                     aputc_ (SDELIM, fout)
                   aputc_ (c, fout)

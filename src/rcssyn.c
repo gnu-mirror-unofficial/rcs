@@ -440,12 +440,12 @@ getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
   fout = foutfile;
   setupcache (fin);
   cache (fin);
-  cachegeteof_ (c,
-                {
-                  if (delimiter)
-                    unexpected_EOF ();
-                  return -1;
-                })
+  cachegeteof (c,
+               {
+                 if (delimiter)
+                   unexpected_EOF ();
+                 return -1;
+               });
   if (delimiter)
     {
       if (c == SDELIM)
@@ -472,7 +472,7 @@ getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
           rcsfaterror ("diff output command line too long");
         }
       *p++ = c;
-      cachegeteof_ (c, unexpected_EOF ();)
+      cachegeteof (c, unexpected_EOF ());
     }
   while (c != '\n');
   uncache (fin);
