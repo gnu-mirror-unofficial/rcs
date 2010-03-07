@@ -22,6 +22,19 @@ AC_INIT([GNU RCS],[5.8-dev],[bug-rcs@gnu.org])
 AC_CONFIG_HEADERS([src/auto-sussed.h])
 AC_CONFIG_AUX_DIR([build-aux])
 
+# syntax terrors
+
+AC_DEFUN([RCS_CBOOL],[dnl
+dnl $1 -- C variable (actually #define) name
+dnl $2 -- sense that maps to "1" (yes, no, set, etc.)
+dnl $3 -- shell variable name to check
+dnl $4 -- description for the config header file
+AS_IF([test $2 = $[]$3],[cbool=1],[cbool=0])
+AC_DEFINE_UNQUOTED([$1],[$cbool],[$4])dnl
+])dnl
+
+# --enable, --with
+
 AC_ARG_ENABLE([compat2],
  [AS_HELP_STRING([--enable-compat2],[enable reading of RCS 2.x
    files (really ancient, prior to GNU RCS).  If you enable this,
@@ -383,15 +396,6 @@ AC_CHECK_MEMBER([struct siginfo_t.si_errno],[
 fi
 
 # specific behaviors (that unfortunately require running a program to check)
-
-AC_DEFUN([RCS_CBOOL],[dnl
-dnl $1 -- C variable (actually #define) name
-dnl $2 -- sense that maps to "1" {yes, no}
-dnl $3 -- shell variable name to check
-dnl $4 -- description for the config header file
-if test $2 = $[]$3 ; then cbool=1 ; else cbool=0 ; fi
-AC_DEFINE_UNQUOTED([$1],[$cbool],[$4])dnl
-])dnl
 
 AC_CACHE_CHECK([if `fopen (F, "w+")' truncates],[rcs_cv_fopen_truncates],[
   echo nonempty > conftest.data
