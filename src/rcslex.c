@@ -810,7 +810,7 @@ read_deallocate (RILE *f)
 
 static void nothing_to_deallocate (RILE *);
 static void
-nothing_to_deallocate (RILE *f)
+nothing_to_deallocate (RILE *f RCS_UNUSED)
 {
 }
 # endif

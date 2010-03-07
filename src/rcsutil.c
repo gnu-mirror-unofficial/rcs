@@ -301,7 +301,7 @@ catchsig (int s)
 }
 
 static void
-catchsigaction (int s, siginfo_t *i, void *c)
+catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
 #endif
 {
 #   if SIG_ZAPS_HANDLER

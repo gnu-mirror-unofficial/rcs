@@ -491,7 +491,7 @@ rcssuffix (char const *name)
 }
 
 RILE *
-rcsreadopen (struct buf *RCSpath, struct stat *status, int mustread)
+rcsreadopen (struct buf *RCSpath, struct stat *status, int mustread RCS_UNUSED)
 /* Open RCSPATH for reading and yield its FILE* descriptor.
  * If successful, set *STATUS to its status.
  * Pass this routine to pairnames() for read-only access to the file.  */

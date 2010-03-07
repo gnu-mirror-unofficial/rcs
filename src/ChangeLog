@@ -1,5 +1,13 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Mark some parameters RCS_UNUSED.
+
+	* rcsfnms.c (rcsreadopen): Mark `mustread' RCS_UNUSED.
+	* rcslex.c (nothing_to_deallocate): Likewise for `f'.
+	* rcsutil.c (catchsigaction): Likewise for `c'.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Add check for GCC attribute `unused'.
 
 	* rcsbase.h (RCS_UNUSED): New #define.
