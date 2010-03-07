@@ -945,14 +945,14 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
             {
               if (!--chars_read)
                 goto done_backing_up;
-              cacheunget_ (infile, c)
+              cacheunget (infile, c);
               if (c == '\n')
                 break;
               if (c == SDELIM && delimstuffed)
                 {
                   if (!--chars_read)
                     break;
-                  cacheunget_ (infile, c)
+                  cacheunget (infile, c);
                   if (c != SDELIM)
                     {
                       cacheget (c);

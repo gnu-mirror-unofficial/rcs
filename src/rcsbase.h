@@ -308,7 +308,7 @@ char *getlogin (void);
  * cachegeteof_(c,s) - Igeteof_ applied to the local RILE
  * Iget_(f,c) - like Igeteof_, except EOF is an error
  * cacheget(c) - Iget_ applied to the local RILE
- * cacheunget_(f,c,s) - read c backwards from cached f, executing s at BOF
+ * cacheunget(f,c) - read c backwards from cached f
  * Ifileno, Ioffset_type, Irewind, Itell - analogs to stdio routines
  *
  * By conventions, macros whose names end in _ are statements, not expressions.
@@ -354,7 +354,7 @@ int Igetmore (RILE *);
 #	define cache(f) (ptr = (f)->ptr)
 #	define Iget_(f,c) Igeteof_(f,c,Ieof();)
 #	define cacheget(c)  do { cachegeteof_(c,Ieof();); } while (0)
-#	define cacheunget_(f,c) (c)=(--ptr)[-1];
+#	define cacheunget(f,c)  ((c) = (--ptr)[-1])
 #	define Ioffset_type size_t
 #	define Itell(f) ((f)->ptr - (f)->base)
 #	define Irewind(f) ((f)->ptr = (f)->base)
@@ -370,7 +370,12 @@ int Igetmore (RILE *);
 #	define cachegeteof_(c,s) Igeteof_(ptr,c,s)
 #	define Iget_(f,c) { if (((c)=getc(f))==EOF) testIeof(f); }
 #	define cacheget(c)  do { Iget_(ptr,c); } while (0)
-#	define cacheunget_(f,c) if(fseek(ptr,-2L,SEEK_CUR))Ierror();else cacheget(c)
+#	define cacheunget(f,c)  do              \
+    if (fseek (ptr, -2L, SEEK_CUR))             \
+      Ierror ();                                \
+    else                                        \
+      cacheget (c);                             \
+  while (0)
 #	define Ioffset_type long
 #	define Itell(f) ftell(f)
 #	define Ifileno(f) fileno(f)
