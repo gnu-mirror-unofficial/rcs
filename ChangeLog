@@ -1,5 +1,11 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build int] Use `RCS_CBOOL' more.
+
+	* configure.in (COMPAT2): Use `RCS_CBOOL'.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build int] Use `AS_IF' more.
 
 	* configure.in (RCS_CBOOL): Use `AS_IF'.
