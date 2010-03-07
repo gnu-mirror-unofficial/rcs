@@ -36,8 +36,6 @@ CC = @CC@
 CPPFLAGS = @CPPFLAGS@
 CFLAGS = @CFLAGS@
 DEFS = @DEFS@
-DIFF = @DIFF@
-DIFF3 = @DIFF3@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -95,7 +93,7 @@ uninstall ::
 # Install RCS and (if applicable) GNU diff before running these tests.
 # To test RCS before installing it, see the file INSTALL.RCS.
 RCSTEST = \
-	ALL_CFLAGS='$(ALL_CFLAGS)' CC='$(CC)' DIFF='$(DIFF)' \
+	ALL_CFLAGS='$(ALL_CFLAGS)' CC='$(CC)' \
 	LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' \
 	PATH=$(bindir):$$PATH \
 	sh $(srcdir)/rcstest
@@ -127,8 +125,6 @@ bother.h: FORCE
            pre="$$(cd $(RCSPREFIX) ; pwd)" ; \
 	   echo "#define CO \"$$pre/co\"" ; \
 	   echo "#define MERGE \"$$pre/merge\"" ; \
-	   echo '#define DIFF "$(DIFF)"' ; \
-	   echo '#define DIFF3 "$(DIFF3)"' ; \
 	   ) > $@T
 	@if [ -f $@ ] && cmp -s $@T $@ ; \
 	  then rm -f $@T ; \

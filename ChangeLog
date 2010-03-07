@@ -1,5 +1,24 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move all DIFF* config to configure.in; assume diffutils.
+
+	* configure.in (RCS_SET_VN): New AC_DEFUN.
+	(diffutils): Delete AC_ARG_WITH.
+	(DIFF_MAYBE): New AC_DEFUN.
+	(DIFF): Document with AC_VAR_ARG; search list DIFF_MAYBE; check
+	that specified program behaves like GNU diff, else error out.
+	(RCS_CHECK_STATUS): New AC_DEFUN.
+	(DIFF_SUCCESS, DIFF_FAILURE, DIFF_TROUBLE): Use `RCS_CHECK_STATUS'.
+	(DIFF3_MAYBE): New AC_DEFUN.
+	(DIFF3): Document with AC_VAR_ARG; search list DIFF3_MAYBE; if
+	specified program does not behave like GNU diff3, don't bother
+	looking for one under /usr/lib, etc, just let ed(1) handle it.
+	(DIFFFLAGS, DIFF_L, DIFF3_BIN): Compute vars
+	internally; don't let environment influence them.
+	* README: Update.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Require absolute filenames for external programs.
 
 	* configure.in (RCS_ABSOLUTE_PROGRAM): New AC_DEFUN.

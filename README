@@ -56,9 +56,8 @@ __________
 Configuration and installation
 
 See INSTALL for general instructions on configuring and building RCS.
-RCS's `configure' script has the option `--with-diffutils',
-and is affected by environment variables;
-see `Configuration environment' below.
+Use `configure --help' to see a list of options for customizing the
+installation directories (.e.g, --prefix).
 
 Another option is `--enable-compat2'.  It enables reading RCS 2.x file
 formats.  Most likely you can safely ignore this (that file format became
@@ -98,31 +97,12 @@ look for the corresponding strings in the notes below before configuring.
 	SCO Unix V.3.2 - has_rename
 	Ultrix - has_seteuid
 
-RCS configuration is a two-step process:
-general configuration as described in INSTALL,
-and the build of src/conf.h, which is done by `make'.
-The second step runs several test programs, so if you are cross-compiling,
-create a src/conf.h appropriate for the target host before invoking `make'.
-
-If making src/conf.h fails, look in src/conf.err to see what went wrong.
-Check the resulting src/conf.h for plausibility,
-e.g. by running `diff src/conf.heg src/conf.h'; see ``src/conf.h notes'' below.
-If src/conf.h is wrong, and the mistake isn't listed in ``src/conf.h notes'',
-there is a bug in src/conf.sh; please report it.
-You can patch src/conf.h if you're in a hurry, but it's better to fix it;
-look at src/a.h and src/conf.err for ideas.
-If all else fails, copy src/conf.heg to src/conf.h and edit it by hand.
-
-If installation succeeds, make `installcheck';
+If building succeeds, make `installcheck';
 if this fails, make `installdebug' for detailed info.
 
 If you want to test RCS before installing it,
 build it from scratch with `cd src; make RCSPREFIX= bindir=. installcheck'.
 Be sure rebuild RCS without these options before actually installing it.
-
-If you want to maintain RCS with itself,
-preserve the original revision numbers, dates, etc.
-by checking the files in with the -k option.
 
 
 ----
@@ -167,28 +147,10 @@ otherwise you may introduce a security hole.
 On some versions of Unix, the standard diff does not support RCS
 and you must instead use diffutils, or something like /usr/lib/rdiff.
 
-DIFFFLAGS are diff's options for RCS format output, probably -n.
-If available, also include the -a option for comparing arbitrary files.
-
-DIFF_L is 1 if diff and diff3 understand the -L LABEL option
-for labeling context diff output, 0 otherwise.
-This option was introduced with GNU diffutils 2.1.
-
-DIFF_SUCCESS, DIFF_FAILURE, and DIFF_TROUBLE are integer constants
-representing diff's exit status when it finds
-no differences, some differences, or trouble respectively.
-The first two should be <stdlib.h>'s EXIT_SUCCESS and EXIT_FAILURE
-but this doesn't work on some broken hosts.
-
 DIFF3 is the name of the diff3 program.
 With GNU diffutils, this is simply its user-visible diff3 program.
 But with traditional diff3 it is the name of the undocumented diff3 auxiliary,
 whose name is /usr/lib/diff3 or /usr/5lib/rdiff3prog or something similar.
-
-DIFF3_BIN is 1 if DIFF3 is the user-visible GNU diff3 program (see DIFF3).
-Before setting this to 1, make sure your diff3 understands -a, -L, and and -m;
-e.g. the command `echo x | diff3 -m -L 0 -L 1 -L 2 /dev/null /dev/null -'
-should output `x'.
 
 INSTALL is the command that installs commands, e.g. `../install-sh'.
 INSTALL_DATA installs data, and
@@ -214,16 +176,6 @@ in unusual installations.
 
 ALL_CFLAGS are all the options passed to the C compiler.
 
-COMPAT2 is 1 if you still have version 2 RCS files around.
-(Version 2 became obsolete in 1982, so this isn't likely.)
-COMPAT2 assures that version 2 RCS files can still be read.
-When you have the new RCS installed, rename old version 2 RCS files as follows.
-Suppose the working file was `f.c';
-rename the RCS file `f.c.v' to `f.c,v', and the RCS file `f.v' to `f.c,v'.
-Thus suffixes are no longer dropped and RCS files end in `,v' rather than `.v'.
-After all version 2 RCS files have been updated with new versions of ci or rcs,
-you can remake RCS with COMPAT2 set to 0.
-
 DEFS are configuration options for the C preprocessor.
 It should include any extra -D and -I options needed on your system.
 
@@ -246,17 +198,10 @@ this makes RCS look in just one place, and makes execution faster.
 
 REMOVE is how to remove a file.
 
-o is the filename extension your host uses for object files.
-It includes the `.'.  It is typically `.o' on Unix hosts.
-
-x is the filename extension your host uses for executables.
-It includes any `.'.  It is empty on Unix hosts,
-which traditionally lack extensions on executables.
-
 
 __________
 
-src/conf.h notes
+src/conf.h notes [WARNING: information most likely out of date --ttn]
 
 See src/conf.sh for details about the definitions in src/conf.h.
 Comments below cover unusual situations requiring hand patches to src/conf.h.

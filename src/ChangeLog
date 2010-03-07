@@ -1,5 +1,13 @@
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move all DIFF* config to configure.in; assume diffutils.
+
+	* Makefile.in (DIFF, DIFF3): Delete vars.
+	(RCSTEST): Remove DIFF='$(DIFF)'.
+	(bother.h): Don't output #define:s for `DIFF', `DIFF3'.
+
+2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Require absolute filenames for external programs.
 
 	* Makefile.in (absp): Delete var.
