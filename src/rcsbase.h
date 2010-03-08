@@ -306,8 +306,8 @@ char *getlogin (void);
  *	(uncache,cache) is needed around functions that advance the RILE pointer
  * Igeteof_(f,c,s) - get a char c from f, executing statement s at EOF
  * cachegeteof(c,s) - Igeteof_ applied to the local RILE
- * Iget_(f,c) - like Igeteof_, except EOF is an error
- * cacheget(c) - Iget_ applied to the local RILE
+ * Iget(f,c) - like Igeteof_, except EOF is an error
+ * cacheget(c) - Iget applied to the local RILE
  * cacheunget(f,c) - read c backwards from cached f
  * Ifileno, Ioffset_type, Irewind, Itell - analogs to stdio routines
  *
@@ -363,7 +363,7 @@ int Igetmore (RILE *);
 #	endif
 #	define uncache(f) ((f)->ptr = ptr)
 #	define cache(f) (ptr = (f)->ptr)
-#	define Iget_(f,c) Igeteof_(f,c,Ieof();)
+#	define Iget(f,c)  do { Igeteof_(f,c,Ieof();); } while (0)
 #	define cacheget(c)  cachegeteof (c, Ieof ())
 #	define cacheunget(f,c)  ((c) = (--ptr)[-1])
 #	define Ioffset_type size_t
@@ -379,8 +379,11 @@ int Igetmore (RILE *);
 #	define cache(f)
 #	define Igeteof_(f,c,s) {if(((c)=getc(f))==EOF){testIerror(f);if(feof(f))s}}
 #	define cachegeteof(c,s)  do { Igeteof_(ptr,c,s); } while (0)
-#	define Iget_(f,c) { if (((c)=getc(f))==EOF) testIeof(f); }
-#	define cacheget(c)  do { Iget_(ptr,c); } while (0)
+#	define Iget(f,c)  do                    \
+    if (((c) = getc (f)) == EOF)                \
+      testIeof (f);                             \
+  while (0)
+#	define cacheget(c)  Iget (ptr, c)
 #	define cacheunget(f,c)  do              \
     if (fseek (ptr, -2L, SEEK_CUR))             \
       Ierror ();                                \

@@ -153,7 +153,7 @@ Lexinit (void)
       ignored_phrases = false;
       rcsline = 1;
       bufrealloc (&tokbuf, 2);
-      Iget_ (finptr, nextc)
+      Iget (finptr, nextc);
       nextlex (); /*initial token */
     }
 }
