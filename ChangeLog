@@ -1,5 +1,12 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[dist] Distribute the config header template.
+
+	* Makefile.in (dist) For subdir src/, specify *.in
+	to include both Makefile.in and auto-sussed.h.in.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add basic "make check" support.
 
 	* Makefile.in (standard_GNU_targets): Remove check.

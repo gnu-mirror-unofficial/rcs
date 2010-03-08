@@ -66,7 +66,7 @@ dist :: $(srcdir)/configure
 		done ; \
 		rm -f TMP) && \
 	(cd src && ln *.[ch] *.sh ChangeLog \
-		Makefile.in alive.test TAGS ../$$d/src) && \
+		*.in alive.test TAGS ../$$d/src) && \
 	sed -i 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/' \
 	  $$d/src/rcsfreeze.sh && \
 	tar -cf - $$d | gzip -9 >$$d.tar.gz && \
