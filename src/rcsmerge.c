@@ -165,15 +165,13 @@ main (int argc, char **argv)
           if (!*rev[1])
             rev[1] = Dbranch ? Dbranch : Head->num;
           if (fexpandsym (rev[1], &numericrev, workptr)
-              && (target = genrevs (numericrev.string, NULL, NULL, NULL,
-                                    &gendeltas)))
+              && (target = gr_revno (numericrev.string, &gendeltas)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
                 rev[2] = Dbranch ? Dbranch : Head->num;
               if (fexpandsym (rev[2], &numericrev, workptr)
-                  && (target = genrevs (numericrev.string, NULL, NULL, NULL,
-                                        &gendeltas)))
+                  && (target = gr_revno (numericrev.string, &gendeltas)))
                 {
                   xrev[2] = target->num;
 

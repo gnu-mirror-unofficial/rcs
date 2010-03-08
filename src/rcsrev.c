@@ -440,6 +440,14 @@ norev:
   return 0;
 }
 
+struct hshentry *
+gr_revno (char const *revno, struct hshentries **store)
+/* Function: An abbreviated form of genrevs, when you don't care
+   about the date, author, or state.  */
+{
+  return genrevs (revno, NULL, NULL, NULL, store);
+}
+
 static struct hshentry *
 genbranch (struct hshentry const *bpoint, char const *revno,
            int length, char const *date, char const *author,
@@ -774,7 +782,7 @@ branchtip (char const *branch)
   struct hshentry *h;
   struct hshentries *hs;
 
-  h = genrevs (branch, NULL, NULL, NULL, &hs);
+  h = gr_revno (branch, &hs);
   return h ? h->num : NULL;
 }
 

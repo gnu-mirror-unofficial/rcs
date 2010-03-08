@@ -521,9 +521,7 @@ main (int argc, char **argv)
                     Lexinit ();
                     getadmin ();
                     gettree ();
-                    if (! (workdelta = genrevs (targetdelta->num,
-                                                NULL, NULL, NULL,
-                                                &gendeltas)))
+                    if (! (workdelta = gr_revno (targetdelta->num, &gendeltas)))
                       continue;
                     workdelta->log = targetdelta->log;
                     if (newdelta.state != default_state)
@@ -775,7 +773,7 @@ addelta (void)
         case 1:
           /* found an old lock */
           /* check whether locked revision exists */
-          if (!genrevs (targetdelta->num, NULL, NULL, NULL, &gendeltas))
+          if (!gr_revno (targetdelta->num, &gendeltas))
             return -1;
           if (targetdelta == Head)
             {
@@ -838,7 +836,7 @@ addelta (void)
       targetdelta = Head;
       if (0 <= (removedlock = removelock (Head)))
         {
-          if (!genrevs (Head->num, NULL, NULL, NULL, &gendeltas))
+          if (!gr_revno (Head->num, &gendeltas))
             return -1;
           newdelta.next = Head;
           Head = &newdelta;
@@ -854,8 +852,7 @@ addelta (void)
         while (*tp++ != '.')
           continue;
       *--tp = 0;                /* Kill final dot to get old delta temporarily. */
-      if (! (targetdelta = genrevs (newdelnum.string, NULL, NULL, NULL,
-                                    &gendeltas)))
+      if (! (targetdelta = gr_revno (newdelnum.string, &gendeltas)))
         return -1;
       if (cmpnum (targetdelta->num, newdelnum.string) != 0)
         {
@@ -943,8 +940,7 @@ addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
           /* branch exists; append to end */
           bufautobegin (&branchnum);
           getbranchno (num->string, &branchnum);
-          targetdelta = genrevs (branchnum.string, NULL, NULL, NULL,
-                                 &gendeltas);
+          targetdelta = gr_revno (branchnum.string, &gendeltas);
           bufautoend (&branchnum);
           if (!targetdelta)
             return -1;

@@ -603,7 +603,7 @@ addjoin (char *joinrev)
   bufautobegin (&numrev);
   d = 0;
   if (expandsym (joinrev, &numrev))
-    d = genrevs (numrev.string, NULL, NULL, NULL, &joindeltas);
+    d = gr_revno (numrev.string, &joindeltas);
   bufautoend (&numrev);
   *j = terminator;
   if (d)

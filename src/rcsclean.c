@@ -203,9 +203,7 @@ main (int argc, char **argv)
             }
         delta = 0;
         deltas = 0;             /* Keep lint happy.  */
-        if (p
-            && !(delta =
-                 genrevs (p, NULL, NULL, NULL, &deltas)))
+        if (p && !(delta = gr_revno (p, &deltas)))
           continue;
 
         waslocked = delta && delta->lockedby;

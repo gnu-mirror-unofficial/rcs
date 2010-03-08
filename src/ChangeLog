@@ -1,5 +1,20 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: gr_revno
+
+	* rcsbase.h (gr_revno): New func decl.
+	* rcsrev.c (gr_revno): New func.
+	(branchtip): Use it.
+	* ci.c: Replace `genrevs (foo, NULL, NULL, NULL, bar)'
+	with `gr_revno (foo, bar)', throughout.
+	* co.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsmerge.c: Likewise.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `NULL' more.
 
 	* ci.c: Throughout, replace `(foo *) 0' with `NULL'.

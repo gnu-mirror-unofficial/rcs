@@ -505,7 +505,7 @@ main (int argc, char **argv)
           {
             /*  rebuild delta tree if some deltas are deleted   */
             if (cuttail)
-              genrevs (cuttail->num, NULL, NULL, NULL, &gendeltas);
+              gr_revno (cuttail->num, &gendeltas);
             buildtree ();
             changed = true;
             keepRCStime = false;
@@ -1101,8 +1101,7 @@ removerevs (void)
 
   if (!expandsym (delrev.strt, &numrev))
     return 0;
-  target =
-    genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
+  target = gr_revno (numrev.string, &gendeltas);
   if (!target)
     return 0;
   cmp = cmpnum (target->num, numrev.string);
@@ -1179,7 +1178,7 @@ removerevs (void)
           else
             temp = searchcutpt (target->num, length, gendeltas);
           getbranchno (temp->num, &numrev);     /* get branch number */
-          genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
+          gr_revno (numrev.string, &gendeltas);
         }
       if (branchpoint (temp, cuttail))
         {
@@ -1200,8 +1199,7 @@ removerevs (void)
       return 0;
     }
 
-  target2 =
-    genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
+  target2 = gr_revno (numrev.string, &gendeltas);
   if (!target2)
     return 0;
 
@@ -1354,7 +1352,7 @@ dolocks (void)
   for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->nextrev)
     if (expandsym (lockpt->revno, &numrev))
       {
-        target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
+        target = gr_revno (numrev.string, &gendeltas);
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
@@ -1393,7 +1391,7 @@ setlock (char const *rev)
 
   if (expandsym (rev, &numrev))
     {
-      target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
+      target = gr_revno (numrev.string, &gendeltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -1424,7 +1422,7 @@ domessages (void)
 
   for (p = messagelst; p; p = p->nextmessage)
     if (expandsym (p->revno, &numrev) &&
-        (target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas)))
+        (target = gr_revno (numrev.string, &gendeltas)))
       {
         /*
          * We can't check the old log -- it's much later in the file.
@@ -1446,7 +1444,7 @@ rcs_setstate (char const *rev, char const *status)
 
   if (expandsym (rev, &numrev))
     {
-      target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
+      target = gr_revno (numrev.string, &gendeltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)

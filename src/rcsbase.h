@@ -741,6 +741,7 @@ int expandsym (char const *, struct buf *);
 int fexpandsym (char const *, struct buf *, RILE *);
 struct hshentry *genrevs (char const *, char const *, char const *,
                           char const *, struct hshentries **);
+struct hshentry *gr_revno (char const *revno, struct hshentries **store);
 int countnumflds (char const *);
 void getbranchno (char const *, struct buf *);
 

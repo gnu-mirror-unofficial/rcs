@@ -283,8 +283,7 @@ main (int argc, char **argv)
 
         if (!fexpandsym (rev1, &numericrev, workptr))
           continue;
-        if (! (target = genrevs (numericrev.string, NULL, NULL, NULL,
-                                 &gendeltas)))
+        if (! (target = gr_revno (numericrev.string, &gendeltas)))
           continue;
         xrev1 = target->num;
 #if DIFF_L
@@ -299,8 +298,7 @@ main (int argc, char **argv)
             if (!fexpandsym (*rev2 ? rev2 : Dbranch ? Dbranch : Head->num,
                              &numericrev, workptr))
               continue;
-            if (! (target = genrevs (numericrev.string, NULL, NULL, NULL,
-                                     &gendeltas)))
+            if (! (target = gr_revno (numericrev.string, &gendeltas)))
               continue;
             xrev2 = target->num;
             if (no_diff_means_no_output && xrev1 == xrev2)
