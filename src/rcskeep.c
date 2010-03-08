@@ -85,7 +85,7 @@ getoldkeys (register RILE *fp)
               tp = keyword;
               for (;;)
                 {
-                  Igeteof_ (fp, c, goto ok; )
+                  Igeteof (fp, c, goto ok);
                   switch (c)
                     {
                     default:
@@ -106,7 +106,7 @@ getoldkeys (register RILE *fp)
           if (c != VDELIM)
             continue;
           *tp = c;
-          Igeteof_ (fp, c, break; )
+          Igeteof (fp, c, goto ok);
           switch (c)
             {
             case ' ':
@@ -178,7 +178,7 @@ getoldkeys (register RILE *fp)
               continue;
             }
           if (!c)
-            Igeteof_ (fp, c, c = 0; )
+            Igeteof (fp, c, c = 0);
           if (c != KDELIM)
             {
               workerror ("closing %c missing on keyword", KDELIM);
@@ -189,7 +189,7 @@ getoldkeys (register RILE *fp)
               *prevrev.string && *prevstate.string)
             break;
         }
-      Igeteof_ (fp, c, break; )
+      Igeteof (fp, c, goto ok);
     }
 
  ok:
@@ -217,7 +217,7 @@ getval (register RILE *fp, struct buf *target, int optional)
  */
 {
   int c;
-  Igeteof_ (fp, c, return badly_terminated (); )
+  Igeteof (fp, c, return badly_terminated ());
   return get0val (c, fp, target, optional);
 }
 
@@ -273,7 +273,7 @@ get0val (register int c, register RILE *fp, struct buf *target, int optional)
         case 0:
           return badly_terminated ();
         }
-      Igeteof_ (fp, c, return badly_terminated (); )
+      Igeteof (fp, c, return badly_terminated ());
     }
 }
 
@@ -293,7 +293,7 @@ keepdate (RILE *fp)
       bufautobegin (&prevtime);
       if (getval (fp, &prevtime, false))
         {
-          Igeteof_ (fp, c, c = 0; )
+          Igeteof (fp, c, c = 0);
           if (c)
             {
               register char const *d = prevday.string, *t = prevtime.string;
@@ -317,7 +317,7 @@ keepid (int c, RILE *fp, struct buf *b)
 /* Get previous identifier from C+FP into B.  */
 {
   if (!c)
-    Igeteof_ (fp, c, return false; )
+    Igeteof (fp, c, return false);
   if (!get0val (c, fp, b, false))
     return false;
   checksid (b->string);

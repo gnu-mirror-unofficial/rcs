@@ -1,5 +1,17 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Add do-while for `Igeteof_'; rename.
+
+	* rcsbase.h (Igeteof): Rename from `Igeteof_'; add do-while.
+	[large_memory] (Iget): Use `Igeteof'.
+	[!large_memory] (cachegeteof): Likewise.
+	* rcsedit.c (editstring): Likewise.
+	* rcsfcmp.c (discardkeyval, rcsfcmp): Likewise.
+	* rcskeep.c (getoldkeys, getval)
+	(get0val, keepdate, keepid): Likewise.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Add do-while for `Iget_'; rename.
 
 	* rcsbase.h (Iget): Rename from `Iget_'; add do-while.

@@ -549,17 +549,16 @@ editstring (struct hshentry const *delta)
         do
           {
             /*skip next line */
-            do
-              {
-                Igeteof_ (fe, c,
-                          {
-                            if (i != 1)
-                              editLineNumberOverflow ();
-                            line_lim = dc.dafter;
-                            break;
-                          })
-              }
+            do Igeteof (fe, c,
+                        {
+                          if (i != 1)
+                            editLineNumberOverflow ();
+                          line_lim = dc.dafter;
+                          goto done;
+                        });
             while (c != '\n');
+          done:
+            ;
           }
         while (--i);
 #			endif

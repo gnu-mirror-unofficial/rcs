@@ -304,9 +304,9 @@ char *getlogin (void);
  * setupcache - sets up the local RILE cache, but does not initialize it
  * cache, uncache - caches and uncaches the local RILE;
  *	(uncache,cache) is needed around functions that advance the RILE pointer
- * Igeteof_(f,c,s) - get a char c from f, executing statement s at EOF
- * cachegeteof(c,s) - Igeteof_ applied to the local RILE
- * Iget(f,c) - like Igeteof_, except EOF is an error
+ * Igeteof(f,c,s) - get a char c from f, executing statement s at EOF
+ * cachegeteof(c,s) - Igeteof applied to the local RILE
+ * Iget(f,c) - like Igeteof, except EOF is an error
  * cacheget(c) - Iget applied to the local RILE
  * cacheunget(f,c) - read c backwards from cached f
  * Ifileno, Ioffset_type, Irewind, Itell - analogs to stdio routines
@@ -341,7 +341,12 @@ typedef struct RILE
 #	if maps_memory
 #		define declarecache register Iptr_type ptr, lim
 #		define setupcache(f) (lim = (f)->lim)
-#		define Igeteof_(f,c,s) if ((f)->ptr==(f)->lim) s else (c)= *(f)->ptr++;
+#		define Igeteof(f,c,s)  do       \
+    if ((f)->ptr == (f)->lim)                   \
+      { s; }                                    \
+    else                                        \
+      (c) = *(f)->ptr++;                        \
+  while (0)
 #		define cachegeteof(c,s)  do     \
     if (ptr==lim)                               \
       { s; }                                    \
@@ -352,7 +357,13 @@ typedef struct RILE
 int Igetmore (RILE *);
 #		define declarecache register Iptr_type ptr; register RILE *rRILE
 #		define setupcache(f) (rRILE = (f))
-#		define Igeteof_(f,c,s) if ((f)->ptr==(f)->readlim && !Igetmore(f)) s else (c)= *(f)->ptr++;
+#		define Igeteof(f,c,s)  do       \
+    if ((f)->ptr == (f)->readlim                \
+        && !Igetmore (f))                       \
+      { s; }                                    \
+    else                                        \
+      (c) = *(f)->ptr++;                        \
+  while (0)
 #		define cachegeteof(c,s)  do     \
     if (ptr == rRILE->readlim                   \
         && !Igetmore (rRILE))                   \
@@ -363,7 +374,7 @@ int Igetmore (RILE *);
 #	endif
 #	define uncache(f) ((f)->ptr = ptr)
 #	define cache(f) (ptr = (f)->ptr)
-#	define Iget(f,c)  do { Igeteof_(f,c,Ieof();); } while (0)
+#	define Iget(f,c)  Igeteof (f, c, Ieof ())
 #	define cacheget(c)  cachegeteof (c, Ieof ())
 #	define cacheunget(f,c)  ((c) = (--ptr)[-1])
 #	define Ioffset_type size_t
@@ -377,8 +388,15 @@ int Igetmore (RILE *);
 #	define setupcache(f) (ptr = (f))
 #	define uncache(f)
 #	define cache(f)
-#	define Igeteof_(f,c,s) {if(((c)=getc(f))==EOF){testIerror(f);if(feof(f))s}}
-#	define cachegeteof(c,s)  do { Igeteof_(ptr,c,s); } while (0)
+#	define Igeteof(f,c,s)  do               \
+    if (((c) = getc (f)) == EOF)                \
+      {                                         \
+        testIerror (f);                         \
+        if (feof (f))                           \
+          { s; }                                \
+      }                                         \
+  while (0)
+#	define cachegeteof(c,s)  Igeteof (ptr, c, s)
 #	define Iget(f,c)  do                    \
     if (((c) = getc (f)) == EOF)                \
       testIeof (f);                             \

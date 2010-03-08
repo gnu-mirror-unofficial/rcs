@@ -46,7 +46,7 @@ discardkeyval (register int c, register RILE *f)
       case '\n':
         return c;
       default:
-        Igeteof_ (f, c, return EOF; )
+        Igeteof (f, c, return EOF);
         break;
       }
 }
@@ -94,8 +94,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
           for (;;)
             {
               /* get the next characters */
-              Igeteof_ (xfp, xc, xeof = true; )
-              Igeteof_ (ufp, uc, ueof = true; )
+              Igeteof (xfp, xc, xeof = true);
+              Igeteof (ufp, uc, ueof = true);
               if (xeof | ueof)
                 goto eof;
               if (xc != uc)
@@ -116,8 +116,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
           if (xc != KDELIM)
             {
               /* get the next characters */
-              Igeteof_ (xfp, xc, xeof = true; )
-              Igeteof_ (ufp, uc, ueof = true; )
+              Igeteof (xfp, xc, xeof = true);
+              Igeteof (ufp, uc, ueof = true);
               if (xeof | ueof)
                 goto eof;
             }
@@ -127,8 +127,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
               tp = xkeyword;
               for (;;)
                 {
-                  Igeteof_ (xfp, xc, xeof = true; )
-                  Igeteof_ (ufp, uc, ueof = true; )
+                  Igeteof (xfp, xc, xeof = true);
+                  Igeteof (ufp, uc, ueof = true);
                   if (xeof | ueof)
                     goto eof;
                   if (xc != uc)
@@ -169,8 +169,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                       switch (xc)
                         {
                         default:
-                          Igeteof_ (xfp, xc, xeof = true; )
-                          Igeteof_ (ufp, uc, ueof = true; )
+                          Igeteof (xfp, xc, xeof = true);
+                          Igeteof (ufp, uc, ueof = true);
                           if (xeof | ueof)
                             goto eof;
                           continue;
@@ -187,8 +187,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                   if (xc == KDELIM)
                     {
                       /* Skip closing KDELIM.  */
-                      Igeteof_ (xfp, xc, xeof = true; )
-                      Igeteof_ (ufp, uc, ueof = true; )
+                      Igeteof (xfp, xc, xeof = true);
+                      Igeteof (ufp, uc, ueof = true);
                       if (xeof | ueof)
                         goto eof;
                       /* if the keyword is LOG, also skip the log message in xfp */
@@ -221,7 +221,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                   if (xc == '\n')
                                     if (--lncnt == 0)
                                       break;
-                                  Igeteof_ (xfp, xc, goto returnresult; )
+                                  Igeteof (xfp, xc, goto returnresult);
                                 }
                               /* skip last comment leader */
                               /* Can't just skip another line here, because there may be */
@@ -231,7 +231,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                 VERSION (5) ? Comment.size : leaderlen;
                               do
                                 {
-                                  Igeteof_ (xfp, xc, goto returnresult; )
+                                  Igeteof (xfp, xc, goto returnresult);
                                   /*
                                    * Read to the end of the comment leader or '\n',
                                    * whatever comes first, because the leader's
