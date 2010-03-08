@@ -6,8 +6,8 @@ It lives in the repo but is not included in the distribution.
 * 5.8
 *** build/packaging
 ***** better autoconf usage
-******* no-fuss "make check" (hide or get rid of RCSPREFIX grot)
-******* precious env vars
+******* DONE no-fuss "make check"
+******* DONE precious env vars
 ******* general spiffing
 ***** automake
 *** bugfixes
