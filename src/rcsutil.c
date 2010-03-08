@@ -764,7 +764,7 @@ static void write_stderr (char const *);
 static void
 write_stderr (char const *s)
 {
-  size_t slen = strlen (s);
+  int slen = strlen (s);
   if (write (STDERR_FILENO, s, slen) != slen)
     _exit (diff_trouble);
 }

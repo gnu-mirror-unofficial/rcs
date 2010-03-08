@@ -857,7 +857,7 @@ fd2RILE (int fd, char const *name, char const *type,
         static RILE rilebuf[RILES];
 
         register RILE *f;
-        size_t s = status->st_size;
+        off_t s = status->st_size;
 
         if (s != status->st_size)
           faterror ("%s: too large", name);

@@ -1,5 +1,18 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Avoid comparing signed/unsigned.
+
+	* rcsedit.c (deletelines): Take `unsigned long' (both args).
+	Also, use `unsigned long' for local var.
+	(insertline): Change type of first arg to `unsigned long'.
+	(resolve_symlink): Use `ssize_t' for local var.
+	* rcsfnms.c (pairnames): Add cast to `size_t' for `strlen' rv.
+	Also, transform `baselen' comparison algebraically.
+	* rcslex.c (fd2RILE): Use `off_t' for local var.
+	* rcsutil.c (write_stderr): Use `int' for local var.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Add do-while for `aputc_'; rename.
 
 	* rcsbase.h (aputc): Rename from `aputc_'; add do-while.

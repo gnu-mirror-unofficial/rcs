@@ -108,9 +108,9 @@ editLineNumberOverflow (void)
 
 #define movelines(s1, s2, n) memmove(s1, s2, (n)*sizeof(Iptr_type))
 
-static void deletelines (long, long);
+static void deletelines (unsigned long, unsigned long);
 static void finisheditline (RILE *, FILE *, Iptr_type, struct hshentry const *);
-static void insertline (long, Iptr_type);
+static void insertline (unsigned long, Iptr_type);
 static void snapshotline (FILE *, Iptr_type);
 
 /*
@@ -126,7 +126,7 @@ static Iptr_type *line;
 static size_t gap, gapsize, linelim;
 
 static void
-insertline (long n, Iptr_type l)
+insertline (unsigned long n, Iptr_type l)
 /* Before line N, insert line L.  N is 0-origin.  */
 {
   if (linelim - gapsize < n)
@@ -147,10 +147,10 @@ insertline (long n, Iptr_type l)
 }
 
 static void
-deletelines (long n, long nlines)
+deletelines (unsigned long n, unsigned long nlines)
 /* Delete lines N through N+NLINES-1.  N is 0-origin.  */
 {
-  long l = n + nlines;
+  unsigned long l = n + nlines;
   if (linelim - gapsize < l || l < n)
     editLineNumberOverflow ();
   if (l < gap)
@@ -1062,8 +1062,7 @@ resolve_symlink (struct buf *L)
 {
   char *b, a[SIZEABLE_PATH];
   int e;
-  size_t s;
-  ssize_t r;
+  ssize_t r, s;
   struct buf bigbuf;
   int linkcount = _POSIX_SYMLOOP_MAX;
 

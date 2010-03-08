@@ -625,7 +625,7 @@ pairnames (int argc, char **argv,
       baselen = x - base;
       if (1 < argc &&
           !rcssuffix (workname = p = argv[1]) &&
-          baselen <= (arglen = strlen (p)) &&
+          baselen <= (arglen = (size_t) strlen (p)) &&
           ((p += arglen - baselen) == workname || isSLASH (p[-1])) &&
           memcmp (base, p, baselen) == 0)
         {
@@ -647,7 +647,7 @@ pairnames (int argc, char **argv,
       /* Derive RCS pathname.  */
       if (1 < argc &&
           (x = rcssuffix (RCS1 = argv[1])) &&
-          baselen <= x - RCS1 &&
+          RCS1 + baselen <= x &&
           ((RCSbase = x - baselen) == RCS1 || isSLASH (RCSbase[-1])) &&
           memcmp (base, RCSbase, baselen) == 0)
         {
