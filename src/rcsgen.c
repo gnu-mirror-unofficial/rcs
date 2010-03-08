@@ -76,10 +76,10 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
       if (expandflag || outfile)
         {
           /* first, get to beginning of file */
-          finishedit ((struct hshentry *) 0, outfile, false);
+          finishedit (NULL, outfile, false);
         }
       scandeltatext (target, expandflag ? edit_expand : edit, true);
-      finishedit (expandflag ? target : (struct hshentry *) 0, outfile, true);
+      finishedit (expandflag ? target : NULL, outfile, true);
       if (outfile)
         return 0;
       Ozclose (&fcopy);
@@ -141,7 +141,7 @@ scandeltatext (struct hshentry *delta, enum stringwork func, int needlog)
       xpandstring (delta);
       break;
     case edit:
-      editstring ((struct hshentry *) 0);
+      editstring (NULL);
       break;
     case edit_expand:
       editstring (delta);
@@ -478,7 +478,7 @@ putdtext (struct hshentry const *delta, char const *srcname,
  */
 {
   RILE *fin;
-  if (!(fin = Iopen (srcname, "r", (struct stat *) 0)))
+  if (!(fin = Iopen (srcname, "r", NULL)))
     {
       eerror (srcname);
       return false;

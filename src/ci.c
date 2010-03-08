@@ -475,7 +475,7 @@ main (int argc, char **argv)
             if (!newhead)
               foutptr = frewrite;
             expname =
-              buildrevision (gendeltas, targetdelta, (FILE *) 0, false);
+              buildrevision (gendeltas, targetdelta, NULL, false);
             if (!forceciflag
                 && strcmp (newdelta.state, targetdelta->state) == 0
                 && (changework =
@@ -521,10 +521,9 @@ main (int argc, char **argv)
                     Lexinit ();
                     getadmin ();
                     gettree ();
-                    if (!
-                        (workdelta =
-                         genrevs (targetdelta->num, (char *) 0, (char *) 0,
-                                  (char *) 0, &gendeltas)))
+                    if (! (workdelta = genrevs (targetdelta->num,
+                                                NULL, NULL, NULL,
+                                                &gendeltas)))
                       continue;
                     workdelta->log = targetdelta->log;
                     if (newdelta.state != default_state)
@@ -776,9 +775,7 @@ addelta (void)
         case 1:
           /* found an old lock */
           /* check whether locked revision exists */
-          if (!genrevs
-              (targetdelta->num, (char *) 0, (char *) 0, (char *) 0,
-               &gendeltas))
+          if (!genrevs (targetdelta->num, NULL, NULL, NULL, &gendeltas))
             return -1;
           if (targetdelta == Head)
             {
@@ -841,8 +838,7 @@ addelta (void)
       targetdelta = Head;
       if (0 <= (removedlock = removelock (Head)))
         {
-          if (!genrevs
-              (Head->num, (char *) 0, (char *) 0, (char *) 0, &gendeltas))
+          if (!genrevs (Head->num, NULL, NULL, NULL, &gendeltas))
             return -1;
           newdelta.next = Head;
           Head = &newdelta;
@@ -858,10 +854,8 @@ addelta (void)
         while (*tp++ != '.')
           continue;
       *--tp = 0;                /* Kill final dot to get old delta temporarily. */
-      if (!
-          (targetdelta =
-           genrevs (newdelnum.string, (char *) 0, (char *) 0, (char *) 0,
-                    &gendeltas)))
+      if (! (targetdelta = genrevs (newdelnum.string, NULL, NULL, NULL,
+                                    &gendeltas)))
         return -1;
       if (cmpnum (targetdelta->num, newdelnum.string) != 0)
         {
@@ -949,9 +943,8 @@ addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
           /* branch exists; append to end */
           bufautobegin (&branchnum);
           getbranchno (num->string, &branchnum);
-          targetdelta =
-            genrevs (branchnum.string, (char *) 0, (char *) 0, (char *) 0,
-                     &gendeltas);
+          targetdelta = genrevs (branchnum.string, NULL, NULL, NULL,
+                                 &gendeltas);
           bufautoend (&branchnum);
           if (!targetdelta)
             return -1;
@@ -1116,7 +1109,7 @@ xpandfile (RILE *unexfile, struct hshentry const *delta,
     {
       for (;;)
         {
-          e = expandline (unexfile, exfile, delta, false, (FILE *) 0, dolog);
+          e = expandline (unexfile, exfile, delta, false, NULL, dolog);
           if (e < 0)
             break;
           r |= e;

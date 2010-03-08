@@ -606,7 +606,7 @@ expandsym (char const *source, struct buf *target)
  * returns false on error;
  */
 {
-  return fexpandsym (source, target, (RILE *) 0);
+  return fexpandsym (source, target, NULL);
 }
 
 int
@@ -774,14 +774,14 @@ branchtip (char const *branch)
   struct hshentry *h;
   struct hshentries *hs;
 
-  h = genrevs (branch, (char *) 0, (char *) 0, (char *) 0, &hs);
-  return h ? h->num : (char const *) 0;
+  h = genrevs (branch, NULL, NULL, NULL, &hs);
+  return h ? h->num : NULL;
 }
 
 char const *
 tiprev (void)
 {
-  return Dbranch ? branchtip (Dbranch) : Head ? Head->num : (char const *) 0;
+  return Dbranch ? branchtip (Dbranch) : Head ? Head->num : NULL;
 }
 
 #ifdef REVTEST
@@ -810,7 +810,7 @@ main (int argc, char *argv[])
       aputs ("No input file\n", stderr);
       return EXIT_FAILURE;
     }
-  if (!(finptr = Iopen (argv[1], FOPEN_R, (struct stat *) 0)))
+  if (!(finptr = Iopen (argv[1], FOPEN_R, NULL)))
     {
       faterror ("can't open input file %s", argv[1]);
     }
@@ -843,8 +843,8 @@ main (int argc, char *argv[])
       gets (state);
       aprintf (stderr, "%s;\n", state);
       target =
-        genrevs (numricrevno.string, *date ? date : (char *) 0,
-                 *author ? author : (char *) 0, *state ? state : (char *) 0,
+        genrevs (numricrevno.string, *date ? date : NULL,
+                 *author ? author : NULL, *state ? state : NULL,
                  &gendeltas);
       if (target)
         {

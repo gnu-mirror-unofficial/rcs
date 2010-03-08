@@ -573,7 +573,7 @@ getscript (struct hshentry *Delta)
   fin = finptr;
   setupcache (fin);
   initdiffcmd (&dc);
-  while (0 <= (ed = getdiffcmd (fin, true, (FILE *) 0, &dc)))
+  while (0 <= (ed = getdiffcmd (fin, true, NULL, &dc)))
     if (!ed)
       Delta->deletelns += dc.nlines;
     else

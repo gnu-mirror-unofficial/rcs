@@ -283,10 +283,8 @@ main (int argc, char **argv)
 
         if (!fexpandsym (rev1, &numericrev, workptr))
           continue;
-        if (!
-            (target =
-             genrevs (numericrev.string, (char *) 0, (char *) 0, (char *) 0,
-                      &gendeltas)))
+        if (! (target = genrevs (numericrev.string, NULL, NULL, NULL,
+                                 &gendeltas)))
           continue;
         xrev1 = target->num;
 #if DIFF_L
@@ -301,10 +299,8 @@ main (int argc, char **argv)
             if (!fexpandsym (*rev2 ? rev2 : Dbranch ? Dbranch : Head->num,
                              &numericrev, workptr))
               continue;
-            if (!
-                (target =
-                 genrevs (numericrev.string, (char *) 0, (char *) 0,
-                          (char *) 0, &gendeltas)))
+            if (! (target = genrevs (numericrev.string, NULL, NULL, NULL,
+                                     &gendeltas)))
               continue;
             xrev2 = target->num;
             if (no_diff_means_no_output && xrev1 == xrev2)
@@ -325,7 +321,7 @@ main (int argc, char **argv)
             else
               {
                 time2date (workstat.st_mtime, date2);
-                *diff_label2 = setup_label (&labelbuf[1], (char *) 0, date2);
+                *diff_label2 = setup_label (&labelbuf[1], NULL, date2);
               }
           }
 #endif
@@ -390,7 +386,7 @@ main (int argc, char **argv)
 
         diffp[2] = 0;
         {
-          int s = runv (-1, (char *) 0, diffv);
+          int s = runv (-1, NULL, diffv);
 
           if (diff_trouble == s)
             workerror ("diff failed");

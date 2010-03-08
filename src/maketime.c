@@ -317,7 +317,7 @@ str2time (char const *source, time_t default_time, long default_zone)
 int
 main (int argc, char **argv)
 {
-  time_t default_time = time ((time_t *) 0);
+  time_t default_time = time (NULL);
   long default_zone = argv[1] ? atol (argv[1]) : 0;
   char buf[1000];
   while (gets (buf))

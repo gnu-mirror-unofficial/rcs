@@ -202,7 +202,7 @@ readAccessFilenameBuffer (char const *filename, unsigned char const *p)
   accessName = 0;
 }
 #else
-#   define accessName ((char const *) 0)
+#   define accessName (NULL)
 #endif
 
 #if !defined HAVE_PSIGNAL
@@ -294,7 +294,7 @@ static void
 catchsig (int s)
 #ifdef SA_SIGINFO
 {
-  catchsigaction (s, (siginfo_t *) 0, (void *) 0);
+  catchsigaction (s, NULL, NULL);
 }
 
 static void
@@ -399,7 +399,7 @@ restoreints (void)
 {
   if (!--holdlevel && heldsignal)
 #	    ifdef SA_SIGINFO
-    catchsigaction (heldsignal, heldsiginfo, (void *) 0);
+    catchsigaction (heldsignal, heldsiginfo, NULL);
 #	    else
     catchsig (heldsignal);
 #	    endif
@@ -425,7 +425,7 @@ setup_catchsig (int const *sig, int sigs)
 
   for (i = sigs; 0 <= --i;)
     {
-      check_sig (sigaction (sig[i], (struct sigaction *) 0, &act));
+      check_sig (sigaction (sig[i], NULL, &act));
       if (act.sa_handler != SIG_IGN)
         {
           act.sa_handler = catchsig;
@@ -438,7 +438,7 @@ setup_catchsig (int const *sig, int sigs)
 #		endif
           for (j = sigs; 0 <= --j;)
             check_sig (sigaddset (&act.sa_mask, sig[j]));
-          if (sigaction (sig[i], &act, (struct sigaction *) 0) != 0)
+          if (sigaction (sig[i], &act, NULL) != 0)
             {
 #		    if defined(SA_SIGINFO) && defined(ENOTSUP)
               if (errno == ENOTSUP && !unsupported_SA_SIGINFO)

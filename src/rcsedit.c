@@ -190,7 +190,7 @@ static void
 finisheditline (RILE *fin, FILE *fout, Iptr_type l, struct hshentry const *delta)
 {
   fin->ptr = l;
-  if (expandline (fin, fout, delta, true, (FILE *) 0, true) < 0)
+  if (expandline (fin, fout, delta, true, NULL, true) < 0)
     faterror ("finisheditline internal error");
 }
 
@@ -272,7 +272,7 @@ void
 snapshotedit (FILE *f)
 /* Copy the current state of the edits to F.  */
 {
-  finishedit ((struct hshentry *) 0, (FILE *) 0, false);
+  finishedit (NULL, NULL, false);
   fastcopy (fedit, f);
   Irewind (fedit);
 }
@@ -293,7 +293,7 @@ finishedit (struct hshentry const *delta, FILE *outfile, int done)
       fc = fcopy;
       if (delta)
         {
-          while (1 < expandline (fe, fc, delta, false, (FILE *) 0, true))
+          while (1 < expandline (fe, fc, delta, false, NULL, true))
             ;
         }
       else
@@ -327,7 +327,7 @@ copylines (register long upto, struct hshentry const *delta)
   if (upto < editline)
     {
       /* swap files */
-      finishedit ((struct hshentry *) 0, (FILE *) 0, false);
+      finishedit (NULL, NULL, false);
       /* assumes edit only during last pass, from the beginning */
     }
   fe = fedit;
@@ -336,7 +336,7 @@ copylines (register long upto, struct hshentry const *delta)
     if (delta)
       do
         {
-          if (expandline (fe, fc, delta, false, (FILE *) 0, true) <= 1)
+          if (expandline (fe, fc, delta, false, NULL, true) <= 1)
             editLineNumberOverflow ();
         }
       while (++editline < upto);

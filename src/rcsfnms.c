@@ -874,8 +874,8 @@ getcwd (char *path, size_t size)
                                  == STDOUT_FILENO && close (fd[1]) == 0))
         {
           close (STDERR_FILENO);
-          execl (binpwd, binpwd, (char *) 0);
-          execl (usrbinpwd, usrbinpwd, (char *) 0);
+          execl (binpwd, binpwd, NULL);
+          execl (usrbinpwd, usrbinpwd, NULL);
         }
       _exit (EXIT_FAILURE);
     }

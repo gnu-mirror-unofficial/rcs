@@ -292,7 +292,7 @@ main (int argc, char *argv[])
   delta.log.string = argv[2];
   delta.log.size = strlen (argv[2]);
   if (rcsfcmp
-      (Iopen (argv[3], FOPEN_R_WORK, (struct stat *) 0), argv[4], &delta))
+      (Iopen (argv[3], FOPEN_R_WORK, NULL), argv[4], &delta))
     printf ("files are the same\n");
   else
     printf ("files are different\n");

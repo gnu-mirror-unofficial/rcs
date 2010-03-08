@@ -205,7 +205,7 @@ main (int argc, char **argv)
         deltas = 0;             /* Keep lint happy.  */
         if (p
             && !(delta =
-                 genrevs (p, (char *) 0, (char *) 0, (char *) 0, &deltas)))
+                 genrevs (p, NULL, NULL, NULL, &deltas)))
           continue;
 
         waslocked = delta && delta->lockedby;
@@ -232,7 +232,7 @@ main (int argc, char **argv)
 
         if (!delta ? workstat.st_size != 0 :
             0 < rcsfcmp (workptr, &workstat,
-                         buildrevision (deltas, delta, (FILE *) 0, false),
+                         buildrevision (deltas, delta, NULL, false),
                          delta))
           continue;
 

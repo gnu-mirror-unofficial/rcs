@@ -879,7 +879,7 @@ fd2RILE (int fd, char const *name, char const *type,
             if (!f->base)
               {
                 catchmmapints ();
-                f->base = (unsigned char *) mmap ((char *) 0, s,
+                f->base = (unsigned char *) mmap (NULL, s,
                                                   PROT_READ,
                                                   MAP_SHARED, fd,
                                                   (off_t) 0);
@@ -1158,7 +1158,7 @@ eerror (char const *s)
 void
 enerror (int e, char const *s)
 {
-  errsay ((char const *) 0);
+  errsay (NULL);
   errno = e;
   perror (s);
   eflush ();
@@ -1173,7 +1173,7 @@ efaterror (char const *s)
 void
 enfaterror (int e, char const *s)
 {
-  fatsay ((char const *) 0);
+  fatsay (NULL);
   errno = e;
   perror (s);
   fatcleanup (true);
@@ -1184,7 +1184,7 @@ error (char const *format, ...)
 /* non-fatal error */
 {
   va_list args;
-  errsay ((char const *) 0);
+  errsay (NULL);
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1236,7 +1236,7 @@ faterror (char const *format, ...)
 /* fatal error, terminates program after cleanup */
 {
   va_list args;
-  fatsay ((char const *) 0);
+  fatsay (NULL);
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1262,7 +1262,7 @@ warn (char const *format, ...)
   va_list args;
   if (!quietflag)
     {
-      warnsay ((char *) 0);
+      warnsay (NULL);
       va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);
@@ -1376,7 +1376,7 @@ main (int argc, char *argv[])
       aputs ("No input file\n", stderr);
       return EXIT_FAILURE;
     }
-  if (!(finptr = Iopen (argv[1], FOPEN_R, (struct stat *) 0)))
+  if (!(finptr = Iopen (argv[1], FOPEN_R, NULL)))
     {
       faterror ("can't open input file %s", argv[1]);
     }

@@ -58,7 +58,7 @@ getoldkeys (register RILE *fp)
   needs_closing = false;
   if (!fp)
     {
-      if (!(fp = Iopen (workname, FOPEN_R_WORK, (struct stat *) 0)))
+      if (!(fp = Iopen (workname, FOPEN_R_WORK, NULL)))
         {
           eerror (workname);
           return false;
@@ -129,15 +129,15 @@ getoldkeys (register RILE *fp)
               break;
             case Header:
             case Id:
-              if (!(getval (fp, (struct buf *) 0, false) &&
+              if (!(getval (fp, NULL, false) &&
                     keeprev (fp) &&
                     (c = keepdate (fp)) &&
                     keepid (c, fp, &prevauthor) &&
                     keepid (0, fp, &prevstate)))
                 return false;
               /* Skip either ``who'' (new form) or ``Locker: who'' (old).  */
-              if (getval (fp, (struct buf *) 0, true) &&
-                  getval (fp, (struct buf *) 0, true))
+              if (getval (fp, NULL, true) &&
+                  getval (fp, NULL, true))
                 c = 0;
               else if (nerror)
                 return false;
@@ -145,13 +145,13 @@ getoldkeys (register RILE *fp)
                 c = KDELIM;
               break;
             case Locker:
-              (void) getval (fp, (struct buf *) 0, false);
+              (void) getval (fp, NULL, false);
               c = 0;
               break;
             case Log:
             case RCSfile:
             case Source:
-              if (!getval (fp, (struct buf *) 0, false))
+              if (!getval (fp, NULL, false))
                 return false;
               c = 0;
               break;
@@ -373,7 +373,7 @@ main (int argc, char *argv[])
   while (*(++argv))
     {
       workname = *argv;
-      getoldkeys ((RILE *) 0);
+      getoldkeys (NULL);
       printf
         ("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
          *argv, prevrev.string, prevdate.string, prevauthor.string,

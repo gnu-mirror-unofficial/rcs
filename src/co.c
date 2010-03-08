@@ -400,8 +400,7 @@ main (int argc, char **argv)
             locker_expansion = 0 < lockflag;
             targetdelta->name = namedrev (rev, targetdelta);
             joinname = buildrevision (gendeltas, targetdelta,
-                                      joinflag
-                                      && tostdout ? (FILE *) 0 : neworkptr,
+                                      joinflag && tostdout ? NULL : neworkptr,
                                       Expand < MIN_UNEXPAND);
 #		if !large_memory
             if (fcopy == neworkptr)
@@ -604,9 +603,7 @@ addjoin (char *joinrev)
   bufautobegin (&numrev);
   d = 0;
   if (expandsym (joinrev, &numrev))
-    d =
-      genrevs (numrev.string, (char *) 0, (char *) 0, (char *) 0,
-               &joindeltas);
+    d = genrevs (numrev.string, NULL, NULL, NULL, &joindeltas);
   bufautoend (&numrev);
   *j = terminator;
   if (d)
@@ -791,7 +788,7 @@ buildjoin (char const *initialfile)
       *p++ = rev2;
       *p++ = rev3;
       *p = 0;
-      if (diff_trouble == runv (-1, (char *) 0, mergev))
+      if (diff_trouble == runv (-1, NULL, mergev))
           goto badmerge;
       i = i + 2;
     }

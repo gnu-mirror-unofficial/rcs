@@ -77,7 +77,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
   s = run (-1, t,
            prog_diff3, edarg, "-am",
            "-L", label[0],
-           "-L", label[1], "-L", label[2], a[0], a[1], a[2], (char *) 0);
+           "-L", label[1], "-L", label[2], a[0], a[1], a[2], NULL);
   if (diff_trouble == s)
     exiterr ();
   if (diff_failure == s)
@@ -86,7 +86,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
     {
       if (!(f = fopenSafer (argv[0], "w")))
         efaterror (argv[0]);
-      if (!(rt = Iopen (t, "r", (struct stat *) 0)))
+      if (!(rt = Iopen (t, "r", NULL)))
         efaterror (t);
       fastcopy (rt, f);
       Ifclose (rt);
@@ -95,12 +95,12 @@ merge (int tostdout, char const *edarg, char const *const label[3],
 #else
   for (i = 0; i < 2; i++)
     if (diff_trouble == run (-1, d[i] = maketemp (i), prog_diff,
-                             a[i], a[2], (char *) 0))
+                             a[i], a[2], NULL))
       faterror ("diff failed");
   t = maketemp (2);
   s = run (-1, t,
            prog_diff3, edarg, d[0], d[1], a[0], a[1], a[2],
-           label[0], label[2], (char *) 0);
+           label[0], label[2], NULL);
   if (s != diff_success)
     {
       s = diff_failure;
@@ -111,7 +111,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
   aputs (tostdout ? "1,$p\n" : "w\n", f);
   Orewind (f);
   aflush (f);
-  if (run (fileno (f), (char *) 0, ED, "-", a[0], (char *) 0))
+  if (run (fileno (f), NULL, ED, "-", a[0], NULL))
     exiterr ();
   Ofclose (f);
 #endif

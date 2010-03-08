@@ -154,7 +154,7 @@ main (int argc, char **argv)
           if (Expand == BINARY_EXPAND)
             workerror ("merging binary files");
           diagnose ("RCS file: %s\n", RCSname);
-          if (!(workptr = Iopen (workname, FOPEN_R_WORK, (struct stat *) 0)))
+          if (!(workptr = Iopen (workname, FOPEN_R_WORK, NULL)))
             efaterror (workname);
 
           gettree ();           /* reads in the delta tree */
@@ -165,17 +165,15 @@ main (int argc, char **argv)
           if (!*rev[1])
             rev[1] = Dbranch ? Dbranch : Head->num;
           if (fexpandsym (rev[1], &numericrev, workptr)
-              && (target =
-                  genrevs (numericrev.string, (char *) 0, (char *) 0,
-                           (char *) 0, &gendeltas)))
+              && (target = genrevs (numericrev.string, NULL, NULL, NULL,
+                                    &gendeltas)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
                 rev[2] = Dbranch ? Dbranch : Head->num;
               if (fexpandsym (rev[2], &numericrev, workptr)
-                  && (target =
-                      genrevs (numericrev.string, (char *) 0, (char *) 0,
-                               (char *) 0, &gendeltas)))
+                  && (target = genrevs (numericrev.string, NULL, NULL, NULL,
+                                        &gendeltas)))
                 {
                   xrev[2] = target->num;
 
@@ -201,7 +199,7 @@ main (int argc, char **argv)
                                    arg[i] = maketemp (i + 2),
                                    prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
-                                   RCSname, (char *) 0))
+                                   RCSname, NULL))
                             rcsfaterror ("co failed");
                         }
                       diagnose

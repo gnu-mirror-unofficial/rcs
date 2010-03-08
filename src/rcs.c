@@ -505,8 +505,7 @@ main (int argc, char **argv)
           {
             /*  rebuild delta tree if some deltas are deleted   */
             if (cuttail)
-              genrevs (cuttail->num, (char *) 0, (char *) 0, (char *) 0,
-                       &gendeltas);
+              genrevs (cuttail->num, NULL, NULL, NULL, &gendeltas);
             buildtree ();
             changed = true;
             keepRCStime = false;
@@ -527,7 +526,7 @@ main (int argc, char **argv)
                 if (!cuttail || buildeltatext (gendeltas))
                   {
                     advise_access (finptr, MADV_SEQUENTIAL);
-                    scanlogtext ((struct hshentry *) 0, false);
+                    scanlogtext (NULL, false);
                     /* copy rest of delta text nodes that are not deleted      */
                     changed = true;
                   }
@@ -651,7 +650,7 @@ getaccessor (char *opt, enum changeaccess command)
     {
       if (command == erase && sp - opt == 1)
         {
-          getchaccess ((char *) 0, command);
+          getchaccess (NULL, command);
           return;
         }
       error ("missing login name after option -a or -e");
@@ -870,7 +869,7 @@ scanlogtext (struct hshentry *delta, int edit)
     }
   /* got the one we're looking for */
   if (edit)
-    editstring ((struct hshentry *) 0);
+    editstring (NULL);
   else
     enterstring ();
 }
@@ -1001,7 +1000,7 @@ sendmail (char const *Delta, char const *who)
     }
   Orewind (mailmess);
   aflush (mailmess);
-  status = run (fileno (mailmess), (char *) 0, SENDMAIL, who, (char *) 0);
+  status = run (fileno (mailmess), NULL, SENDMAIL, who, NULL);
   Ozclose (&mailmess);
   if (status == 0)
     return true;
@@ -1103,7 +1102,7 @@ removerevs (void)
   if (!expandsym (delrev.strt, &numrev))
     return 0;
   target =
-    genrevs (numrev.string, (char *) 0, (char *) 0, (char *) 0, &gendeltas);
+    genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
   if (!target)
     return 0;
   cmp = cmpnum (target->num, numrev.string);
@@ -1180,8 +1179,7 @@ removerevs (void)
           else
             temp = searchcutpt (target->num, length, gendeltas);
           getbranchno (temp->num, &numrev);     /* get branch number */
-          genrevs (numrev.string, (char *) 0, (char *) 0, (char *) 0,
-                   &gendeltas);
+          genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
         }
       if (branchpoint (temp, cuttail))
         {
@@ -1203,7 +1201,7 @@ removerevs (void)
     }
 
   target2 =
-    genrevs (numrev.string, (char *) 0, (char *) 0, (char *) 0, &gendeltas);
+    genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
   if (!target2)
     return 0;
 
@@ -1356,9 +1354,7 @@ dolocks (void)
   for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->nextrev)
     if (expandsym (lockpt->revno, &numrev))
       {
-        target =
-          genrevs (numrev.string, (char *) 0, (char *) 0, (char *) 0,
-                   &gendeltas);
+        target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
@@ -1397,8 +1393,7 @@ setlock (char const *rev)
 
   if (expandsym (rev, &numrev))
     {
-      target = genrevs (numrev.string, (char *) 0, (char *) 0,
-                        (char *) 0, &gendeltas);
+      target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -1429,9 +1424,7 @@ domessages (void)
 
   for (p = messagelst; p; p = p->nextmessage)
     if (expandsym (p->revno, &numrev) &&
-        (target =
-         genrevs (numrev.string, (char *) 0, (char *) 0, (char *) 0,
-                  &gendeltas)))
+        (target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas)))
       {
         /*
          * We can't check the old log -- it's much later in the file.
@@ -1453,8 +1446,7 @@ rcs_setstate (char const *rev, char const *status)
 
   if (expandsym (rev, &numrev))
     {
-      target = genrevs (numrev.string, (char *) 0, (char *) 0,
-                        (char *) 0, &gendeltas);
+      target = genrevs (numrev.string, NULL, NULL, NULL, &gendeltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -1503,7 +1495,7 @@ buildeltatext (struct hshentries const *deltas)
 
   while (deltas->first != cuttail)
     scanlogtext ((deltas = deltas->rest)->first, true);
-  finishedit ((struct hshentry *) 0, (FILE *) 0, true);
+  finishedit (NULL, NULL, true);
   Ozclose (&fcopy);
 
   if (fcut)

@@ -1,5 +1,29 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `NULL' more.
+
+	* ci.c: Throughout, replace `(foo *) 0' with `NULL'.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* maketime.c: Likewise.
+	* merger.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add basic "make check" support.
 
 	* rcsutil.c: Don't #include "bother.h".

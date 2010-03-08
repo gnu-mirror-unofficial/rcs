@@ -75,7 +75,7 @@ main (int argc, char **argv)
   if (0 <= quiet)
     {
       if (!a)
-        scanfile (stdin, (char *) 0, quiet);
+        scanfile (stdin, NULL, quiet);
       else
         do
           {
