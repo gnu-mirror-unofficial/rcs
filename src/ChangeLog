@@ -1,5 +1,30 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add basic "make check" support.
+
+	* rcsutil.c: Don't #include "bother.h".
+	(prog_co, prog_merge): Delete var definitions.
+	* Makefile.in (PATHPREFIX): New var.
+	(TESTS_ENVIRONMENT, TESTS): Likewise.
+	(RCSPREFIX): Delete var.
+	(all): Remove bother.h from dependency list.
+	(check): New target.
+	(RCSTEST): Delete var.
+	(installcheck): Depend on `test-prep'; redirect to `check'.
+	(installdebug): Delete target.
+	(test-clean): New target.
+	(clean): Depend on `test-clean'.
+	(distclean): Delete bother.c, not bother.h.
+	(rcsutil$o): Delete dependency on bother.h.
+	(bother.h): Delete target.
+	(bother.c): New target.
+	(PARTS): Add `bother$o'.
+	(test-prep, xorlf): New targets.
+	* alive.test: Rename from rcstest; make sensitive
+	to env var DEBUG; don't compile a "fake tr"; chmod -x.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Avoid comparing signed/unsigned.
 
 	* rcsedit.c (deletelines): Take `unsigned long' (both args).

@@ -31,7 +31,7 @@ default :: all
 
 standard_GNU_targets = \
 	all install uninstall clean distclean mostlyclean maintainer-clean \
-	TAGS info dvi check
+	TAGS info dvi
 
 maintainer-clean ::
 	@echo "This command is intended for maintainers to use;"
@@ -39,6 +39,9 @@ maintainer-clean ::
 
 $(standard_GNU_targets) installcheck installdebug ::
 	cd man && $(MAKE) $@
+	cd src && $(MAKE) $@
+
+check ::
 	cd src && $(MAKE) $@
 
 dist :: $(srcdir)/configure
@@ -63,7 +66,7 @@ dist :: $(srcdir)/configure
 		done ; \
 		rm -f TMP) && \
 	(cd src && ln *.[ch] *.sh ChangeLog \
-		Makefile.in rcstest TAGS ../$$d/src) && \
+		Makefile.in alive.test TAGS ../$$d/src) && \
 	sed -i 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/' \
 	  $$d/src/rcsfreeze.sh && \
 	tar -cf - $$d | gzip -9 >$$d.tar.gz && \

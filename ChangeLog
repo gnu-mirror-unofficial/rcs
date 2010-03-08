@@ -1,3 +1,12 @@
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add basic "make check" support.
+
+	* Makefile.in (standard_GNU_targets): Remove check.
+	(check): New target.
+	(dist): Update name of test program to distribute.
+	* README: Update; no longer mention RCSPREFIX, installdebug.
+
 2010-03-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add check for GCC attribute `unused'.

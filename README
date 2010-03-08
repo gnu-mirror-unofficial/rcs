@@ -97,12 +97,8 @@ look for the corresponding strings in the notes below before configuring.
 	SCO Unix V.3.2 - has_rename
 	Ultrix - has_seteuid
 
-If building succeeds, make `installcheck';
-if this fails, make `installdebug' for detailed info.
-
-If you want to test RCS before installing it,
-build it from scratch with `cd src; make RCSPREFIX= bindir=. installcheck'.
-Be sure rebuild RCS without these options before actually installing it.
+If building succeeds, make `check' (optional) and make `install'.
+To check the installation, make `installcheck'.
 
 
 ----
@@ -188,13 +184,6 @@ LIBS are the loader libraries you need, e.g. -lbsd, -lBSD, -ljobs, -lPW, -lx.
 LINK is the command used to link together an executable.
 
 LINT is the name and usual arguments of your lint program.
-
-RCSPREFIX is the prefix for subsidiary RCS commands like ci.
-If empty, RCS will search the PATH for these commands;
-this lets you move RCS commands after building them, and permits
-multiple instances of setuid RCS commands on the same host for different users.
-If nonempty, it should be a path followed by /;
-this makes RCS look in just one place, and makes execution faster.
 
 REMOVE is how to remove a file.
 

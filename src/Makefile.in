@@ -45,6 +45,13 @@ x = @EXEEXT@
 o = .@OBJEXT@
 LIBOBJS = @LIBOBJS@
 
+# This is for the benefit of "make installcheck".
+# Note that it should end in ":".
+PATHPREFIX =
+
+TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$$(pwd)/0pre/bin:$$PATH" sh
+TESTS = alive.test
+
 # The following definitions can be tailored by hand;
 # this shouldn't be needed for ordinary installations.
 
@@ -54,9 +61,6 @@ LIBOBJS = @LIBOBJS@
 
  LINT = lint -abchx# traditional and BSD lint
 #LINT = lint# System V lint
-
-#RCSPREFIX should end in `/' if it is not empty.
- RCSPREFIX = $(bindir)/
 
  REMOVE = rm -f
 
@@ -70,7 +74,7 @@ SHELL = /bin/sh
 PROGRAMS = ci$x co$x ident$x merge$x \
 	rcs$x rcsclean$x rcsdiff$x rcsmerge$x rlog$x
 
-all :: bother.h $(PROGRAMS)
+all :: $(PROGRAMS)
 
 .SUFFIXES :
 .SUFFIXES : .c $o
@@ -90,19 +94,27 @@ uninstall ::
 	  $(REMOVE) $(bindir)/$$p; \
 	done
 
-# Install RCS and (if applicable) GNU diff before running these tests.
-# To test RCS before installing it, see the file INSTALL.RCS.
-RCSTEST = \
-	ALL_CFLAGS='$(ALL_CFLAGS)' CC='$(CC)' \
-	LDFLAGS='$(LDFLAGS)' LIBS='$(LIBS)' \
-	PATH=$(bindir):$$PATH \
-	sh $(srcdir)/rcstest
-installcheck ::
-	$(RCSTEST)
-installdebug ::
-	$(RCSTEST) -v
+check: test-prep
+	@ls='$(TESTS)' ; if [ "$$ls" ] ; then	\
+	  if [ '.' = '$(srcdir)' ] ; then d= ;	\
+	    else d='$(srcdir)/' ; fi ;		\
+	  for t in "$$ls" ; do			\
+	    if $(TESTS_ENVIRONMENT) "$$d$$t" ;	\
+	    then echo "PASS: $$t" ;		\
+	    else echo "FAIL: $$t" ;		\
+	    fi ;				\
+	  done ;				\
+	fi
 
-clean ::
+# Install RCS and (if applicable) GNU diff before running these tests.
+installcheck :: test-prep
+	$(MAKE) check PATHPREFIX='$(bindir):'
+
+test-clean:
+	rm -rf 0pre RCS
+	rm -f a.* xorlf*
+
+clean :: test-clean
 	$(REMOVE) librcsparts.a
 	$(REMOVE) *$o
 	$(REMOVE) $(PROGRAMS)
@@ -111,20 +123,17 @@ clean ::
 mostlyclean :: clean
 
 distclean :: mostlyclean
-	$(REMOVE) bother.h Makefile
+	$(REMOVE) bother.c Makefile
 
 maintainer-clean :: distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	$(REMOVE) TAGS
 
-rcsutil$o : bother.h
-
-bother.h: FORCE
+bother.c: FORCE
 	@( echo '/* brooked other (shared mother) */' ; \
-           pre="$$(cd $(RCSPREFIX) ; pwd)" ; \
-	   echo "#define CO \"$$pre/co\"" ; \
-	   echo "#define MERGE \"$$pre/merge\"" ; \
+	   echo 'const char const prog_co[] = "$(bindir)/co";' ; \
+	   echo 'const char const prog_merge[] = "$(bindir)/merge";' ; \
 	   ) > $@T
 	@if [ -f $@ ] && cmp -s $@T $@ ; \
 	  then rm -f $@T ; \
@@ -143,7 +152,7 @@ SOURCE=	gnu-h-v.c \
 	rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsmerge.c rcsrev.c rcssyn.c \
 	rcstime.c rcsutil.c rlog.c
 PROGS=	ci$o co$o ident$o merge$o rcs$o rcsclean$o rcsdiff$o rcsmerge$o rlog$o
-PARTS=	gnu-h-v$o \
+PARTS=	gnu-h-v$o bother$o \
 	maketime$o merger$o partime$o rcsedit$o rcsfcmp$o rcsfnms$o \
 	rcsgen$o rcskeep$o rcskeys$o rcslex$o rcsmap$o rcsrev$o rcssyn$o \
 	rcstime$o rcsutil$o
@@ -173,3 +182,28 @@ rcsmerge$o : rcsmerge-help.c
 rlog$o : rlog-help.c
 
 FORCE:
+
+test-prep: all
+	@if [ -d 0pre ] &&					\
+	    [ 0pre = $$(ls -1td 0pre $(PROGRAMS) | sed 1q) ] ;	\
+        then : ; else						\
+	  rm -rf 0pre ; mkdir 0pre 0pre/bin 0pre/stash ;	\
+	  cp -p $(PROGRAMS) *$o *.a bother.c 0pre/stash ;	\
+	  $(MAKE) all bindir=$$(pwd)/0pre/bin >/dev/null ;	\
+	  $(MAKE) xorlf >/dev/null ;				\
+	  mv -v $(PROGRAMS) xorlf 0pre/bin ;			\
+	  cp -pf 0pre/stash/* . ;				\
+	fi
+
+xorlf:
+	@{ echo '#include <stdio.h>'               ;	\
+	   echo 'int main ()'                      ;	\
+	   echo '{'                                ;	\
+	   echo '  int c;'                         ;	\
+	   echo '  while (EOF != (c = getchar()))' ;	\
+	   echo '    putchar (c ^ 012);'           ;	\
+	   echo '  return 0;'                      ;	\
+	   echo '}'                                ;	\
+	} > $@.c
+	$(CC) -o $@ $@.c
+	$(REMOVE) $@.c
