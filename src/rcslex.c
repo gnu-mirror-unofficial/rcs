@@ -302,7 +302,7 @@ eoflex (void)
           break;
         }
       if (fout)
-        aputc_ (c, fout)
+        aputc (c, fout);
     }
 }
 
@@ -493,7 +493,7 @@ getphrases (char const *key)
                   if (ctab[c] == NEWLN)
                     {
                       if (frew)
-                        aputc_ (c, frew)
+                        aputc (c, frew);
                       ++ rcsline;
                       savech_ (c)
                       cacheget (c);
@@ -518,7 +518,7 @@ getphrases (char const *key)
                       break;
                     }
                   if (frew)
-                    aputc_ (c, frew)
+                    aputc (c, frew);
                   break;
                 }
               break;
@@ -636,7 +636,7 @@ printstring (void)
             }
           break;
         }
-      aputc_ (c, fout)
+      aputc (c, fout);
     }
 }
 
@@ -1329,9 +1329,9 @@ diagnose (char const *format, ...)
 
 void
 afputc (int c, register FILE *f)
-/* afputc(c,f); acts like aputc_(c,f) but is smaller and slower.  */
+/* afputc(c,f) acts like aputc(c,f) but is smaller and slower.  */
 {
-  aputc_ (c, f)
+  aputc (c, f);
 }
 
 void

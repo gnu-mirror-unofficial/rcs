@@ -305,7 +305,7 @@ putdesc (int textflag, char *textfile)
           desclean = cleanlogmsg (p, s);
         }
       putstring (frew, false, desclean, true);
-      aputc_ ('\n', frew)
+      aputc ('\n', frew);
     }
 }
 
@@ -377,7 +377,7 @@ putadmin (void)
    * Output the first character with putc, not printf.
    * Otherwise, an SVR4 stdio bug buffers output inefficiently.
    */
-  aputc_ (*Khead, fout)
+  aputc (*Khead, fout);
   aprintf (fout, "%s\t%s;\n", Khead + 1, Head ? Head->num : "");
   if (Dbranch && VERSION (4) <= RCSversion)
     aprintf (fout, "%s\t%s;\n", Kbranch, Dbranch);
@@ -416,7 +416,7 @@ putadmin (void)
     aprintf (fout, "%s\t%c%s%c;\n",
              Kexpand, SDELIM, expand_names[Expand], SDELIM);
   awrite (Ignored.string, Ignored.size, fout);
-  aputc_ ('\n', fout)
+  aputc ('\n', fout);
 }
 
 static void
@@ -499,17 +499,17 @@ putstring (register FILE *out, int delim, struct cbuf s, int log)
   register size_t ss;
 
   if (delim)
-    aputc_ (SDELIM, out)
+    aputc (SDELIM, out);
   sp = s.string;
   for (ss = s.size; ss; --ss)
     {
       if (*sp == SDELIM)
-        aputc_ (SDELIM, out)
-      aputc_ (*sp++, out)
+        aputc (SDELIM, out);
+      aputc (*sp++, out);
     }
   if (s.size && log)
-    aputc_ ('\n', out)
-  aputc_ (SDELIM, out)
+    aputc ('\n', out);
+  aputc (SDELIM, out);
 }
 
 void
@@ -529,7 +529,7 @@ putdftext (struct hshentry const *delta, RILE *finfile,
 
   /* put log */
   putstring (fout, true, delta->log, true);
-  aputc_ ('\n', fout)
+  aputc ('\n', fout);
   /* put ignored phrases */
   awrite (delta->igtext.string, delta->igtext.size, fout);
 
@@ -546,8 +546,8 @@ putdftext (struct hshentry const *delta, RILE *finfile,
         {
           cachegeteof (c, goto done);
           if (c == SDELIM)
-            aputc_ (SDELIM, fout)       /*double up SDELIM */
-          aputc_ (c, fout)
+            aputc (SDELIM, fout);       /*double up SDELIM */
+          aputc (c, fout);
         }
     done:
       ;
@@ -569,8 +569,8 @@ putdftext (struct hshentry const *delta, RILE *finfile,
                                  unexpected_EOF ();
                                });
                   if (c == SDELIM)
-                    aputc_ (SDELIM, fout)
-                  aputc_ (c, fout)
+                    aputc (SDELIM, fout);
+                  aputc (c, fout);
                 }
               while (c != '\n');
             uncache (fin);

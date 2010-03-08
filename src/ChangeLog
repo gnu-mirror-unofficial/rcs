@@ -1,5 +1,18 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Add do-while for `aputc_'; rename.
+
+	* rcsbase.h (aputc): Rename from `aputc_'; add do-while.
+	(GETC): Use `aputc'.
+	* rcsedit.c (snapshotline, copylines, copystring, editstring)
+	(expandline, escape_string): Likewise.
+	* rcsgen.c (putdesc, putadmin, putstring, putdftext): Likewise.
+	* rcslex.c (eoflex, getphrases)
+	(getphrases, printstring, diagnose): Likewise.
+	* rlog.c (main): Likewise.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Add do-while for `Igeteof_'; rename.
 
 	* rcsbase.h (Igeteof): Rename from `Igeteof_'; add do-while.

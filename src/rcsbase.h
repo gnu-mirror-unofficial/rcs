@@ -414,10 +414,13 @@ int Igetmore (RILE *);
 #endif
 
 /* Print a char, but abort on write error.  */
-#define aputc_(c,o) { if (putc(c,o)==EOF) testOerror(o); }
+#define aputc(c,o)  do                          \
+    if (putc (c, o) == EOF)                     \
+      testOerror (o);                           \
+  while (0)
 
 /* Get a character from an RCS file, perhaps copying to a new RCS file.  */
-#define GETC(o,c) do { cacheget (c); if (o) aputc_(c,o) } while (0)
+#define GETC(o,c) do { cacheget (c); if (o) aputc (c, o); } while (0)
 
 #define WORKMODE(RCSmode, writable) (((RCSmode)&(mode_t)~(S_IWUSR|S_IWGRP|S_IWOTH)) | ((writable)?S_IWUSR:0))
 /* computes mode of working file: same as RCSmode, but write permission     */

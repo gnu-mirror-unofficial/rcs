@@ -303,7 +303,7 @@ main (int argc, char **argv)
          * Output the first character with putc, not printf.
          * Otherwise, an SVR4 stdio bug buffers output inefficiently.
          */
-        aputc_ ('\n', out)
+        aputc ('\n', out);
         /*   print RCS pathname, working pathname and optional
              administrative information                         */
         /* could use getfullRCSname() here, but that is very slow */

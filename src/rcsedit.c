@@ -170,7 +170,7 @@ snapshotline (register FILE *f, register Iptr_type l)
     {
       if ((c = *l++) == SDELIM && *l++ != SDELIM)
         return;
-      aputc_ (c, f)
+      aputc (c, f);
     }
   while (c != '\n');
 }
@@ -349,7 +349,7 @@ copylines (register long upto, struct hshentry const *delta)
             do
               {
                 cachegeteof (c, editLineNumberOverflow ());
-                aputc_ (c, fc)
+                aputc (c, fc);
               }
             while (c != '\n');
           }
@@ -417,7 +417,7 @@ copystring (void)
           amidline = true;
           break;
         }
-      aputc_ (c, fcop)
+      aputc (c, fcop);
     }
 }
 
@@ -614,7 +614,7 @@ editstring (struct hshentry const *delta)
                           }
                       }
 #				    if !large_memory
-                    aputc_ (c, f)
+                    aputc (c, f);
 #				    endif
                     if (c == '\n')
                       break;
@@ -684,13 +684,13 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                 }
               /* fall into */
             default:
-              aputc_ (c, out)
+              aputc (c, out);
               r = 0;
               break;
 
             case '\n':
               rcsline += ds;
-              aputc_ (c, out)
+              aputc (c, out);
               r = 2;
               goto uncache_exit;
 
@@ -812,7 +812,7 @@ escape_string (register FILE *out, register char const *s)
           }
         /* fall into */
       default:
-        aputc_ (c, out)
+        aputc (c, out);
         break;
       }
 }
