@@ -116,7 +116,7 @@ test-clean:
 
 clean :: test-clean
 	$(REMOVE) librcsparts.a
-	$(REMOVE) *$o
+	$(REMOVE) *$o *-help.c
 	$(REMOVE) $(PROGRAMS)
 	$(REMOVE) core core.* *.core
 

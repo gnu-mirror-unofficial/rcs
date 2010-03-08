@@ -1,5 +1,11 @@
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Delete src/foo-help.c files on "make clean".
+
+	* Makefile.in (clean): Also delete *-help.c.
+
+2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: gr_revno
 
 	* rcsbase.h (gr_revno): New func decl.
