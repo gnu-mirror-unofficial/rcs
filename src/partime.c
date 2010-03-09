@@ -324,6 +324,7 @@ parse_decimal (char const *s, int digits, int lo, int hi,
 */
 {
   s = parse_fixed (s, digits, res);
+  *fres = 0;
   if (s && lo <= *res && *res <= hi)
     {
       int f = 0;

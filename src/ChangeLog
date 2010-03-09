@@ -1,3 +1,10 @@
+2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int C] Ensure `parse_decimal' never leaves junk fraction.
+
+	* partime.c (parse_decimal): Make sure
+	out-param `fres' always contains a valid value.
+
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Delete src/foo-help.c files on "make clean".
