@@ -1,0 +1,24 @@
+# t000.test                                             -*- shell-script -*-
+
+# known to fail with RCS 5.7, not yet fixed for RCS 5.8
+exit 77
+
+. common
+dontsplit
+
+w=$wd/x
+v=$wd/x,v
+
+# Initialize empty RCS file.
+do_and_show 'rcs -i -t-t000 $v' ; do_rlog ; cp $v ${v}SAVE
+# Add a revision.
+echo nonempty > $w
+do_and_show 'ci -u -r4.20 -mHELLO $w'
+# Outdate it.
+do_and_show 'rcs -q -o4.20 $w' ; do_rlog | tee $wd/last-rlog
+
+# We expect the RCS file to be empty again.
+grep 'total revisions: 0' $wd/last-rlog \
+    && cmp $v ${v}SAVE
+
+# t000.test ends here

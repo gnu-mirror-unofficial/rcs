@@ -1,0 +1,9 @@
+2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add a directory dedicated to verification.
+
+	* Makefile.in: New file.
+	* alive.test: New file.
+	* common.in: New file.
+	* t000.test: New file.
+

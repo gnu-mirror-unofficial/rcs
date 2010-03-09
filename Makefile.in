@@ -37,12 +37,13 @@ maintainer-clean ::
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
-$(standard_GNU_targets) installcheck installdebug ::
+$(standard_GNU_targets) installdebug ::
 	cd man && $(MAKE) $@
 	cd src && $(MAKE) $@
 
-check ::
+check installcheck ::
 	cd src && $(MAKE) $@
+	cd v && $(MAKE) $@
 
 doc ::
 	cd doc && $(MAKE)

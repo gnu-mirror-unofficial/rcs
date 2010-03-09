@@ -1,0 +1,11 @@
+#!/bin/sh
+. common
+type ci
+type co
+type ident
+type merge
+type rcs
+type rcsclean
+type rcsdiff
+type rcsmerge
+type rlog

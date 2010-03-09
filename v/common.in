@@ -1,0 +1,53 @@
+# common subroutines
+
+# Copyright (C) 2010 Thien-Thi Nguyen
+#
+# This file is part of GNU RCS.
+#
+# GNU RCS is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# GNU RCS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+srcdir='@srcdir@'
+
+stem=$(basename $0 .test)
+wd=${stem}.d
+
+dontsplit ()
+{
+    exec 2>&1
+}
+
+copyall ()
+{
+    all="${srcdir}/${stem}.test"
+    data="${srcdir}/${stem}.data"
+    test -f "$data" && all="$all $data"
+    cp -p "$all" ${stem}.d
+}
+
+do_and_show ()
+{
+    echo __________________________________________________
+    echo DOING: $1
+    eval "$1"
+    echo RESULT: $?
+    sed 's/^/|/' $v
+}
+
+do_rlog ()
+{
+    echo _________________________________________ rlog "$@"
+    rlog "$@" $w | sed 's/^/|/'
+}
+
+# common ends here
