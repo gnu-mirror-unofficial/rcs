@@ -40,14 +40,13 @@
                         && !strncmp (k, s, sizeof (k) - 1))
 
 void
-display_version (const char *cmdid)
+display_version (void)
 {
   printf ("%s%s", cmdid, COMMAND_VERSION);
 }
 
 void
 check_hv (int argc, char **argv,
-          const char const cmdid[],
           const char const help[])
 {
   if (1 >= argc)
@@ -61,7 +60,7 @@ check_hv (int argc, char **argv,
 
   if (EXACTLY ("--version", argv[1]))
     {
-      display_version (cmdid);
+      display_version ();
       exit (EXIT_SUCCESS);
     }
 }

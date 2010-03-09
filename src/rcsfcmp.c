@@ -33,7 +33,7 @@
  * except for keywords
  */
 
-#include  "rcsbase.h"
+#include "rcsbase.h"
 
 static int discardkeyval (int, RILE *);
 static int

@@ -91,7 +91,7 @@ main (int argc, char **argv)
           break;
 
         case 'V':
-          display_version (cmdid);
+          display_version ();
           return 0;
 
         default:

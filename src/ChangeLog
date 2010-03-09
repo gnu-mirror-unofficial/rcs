@@ -1,5 +1,33 @@
 2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Do some small changes to quieten GCC warnings.
+
+	* ci.c: #include <ctype.h>.
+	* gnu-h-v.c (display_version): Don't take CMDID; use global.
+	(check_hv): Don't take CMDID; update call to `display_version'.
+	* gnu-h-v.h (display_version, check_hv): Update func decls.
+	(CHECK_HV): Update call to `check_hv'.
+	* ident.c (main): Update call to `display_version'.
+	* maketime.c: #include "rcsbase.h";
+	remove vestigal "#if has_conf_h #else ... #endif" block.
+	[TEST]: Use `#ifdef', not `#if'.
+	* merge.c (main): Update call to `display_version'.
+	* partime.c: #include "rcsbase.h";
+	remove vestigal "#if has_conf_h #else ... #endif" block.
+	(isdigit): Delete #undef, #define.
+	(parzone, partime): Change return type to `char const*'.
+	* partime.h (partime, parzone): Update func decls.
+	* rcsbase.h (O_BINARY): Use "#ifdef", not "#if".
+	(isdigit): Delete #define.
+	* rcsfcmp.c: Whitespace munging; nfc.
+	* rcskeep.c: #include <ctype.h>.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcsutil.c: Likewise.
+	(setRCSversion): Update call to `display_version'.
+
+2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Ensure `parse_decimal' never leaves junk fraction.
 
 	* partime.c (parse_decimal): Make sure

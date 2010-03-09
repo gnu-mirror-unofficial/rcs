@@ -34,6 +34,7 @@
  */
 
 #include "rcsbase.h"
+#include <ctype.h>
 
 static char const *getkeyval (char const *, enum tokens, int);
 static int getdelta (void);

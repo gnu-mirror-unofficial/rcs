@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include  "rcsbase.h"
+#include "rcsbase.h"
 #include "ident-help.c"
 
 static int match (FILE *);
@@ -62,7 +62,7 @@ main (int argc, char **argv)
           break;
 
         case 'V':
-          display_version (cmdid);
+          display_version ();
           quiet = -1;
           break;
 

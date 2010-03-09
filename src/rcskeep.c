@@ -20,7 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include  "rcsbase.h"
+#include "rcsbase.h"
+#include <ctype.h>
 
 static int badly_terminated (void);
 static int checknum (char const *);

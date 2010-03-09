@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <ctype.h>                      /* isdigit */
 #include "ci-help.c"
 
 struct Symrev

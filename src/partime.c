@@ -19,23 +19,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if has_conf_h
-#	include "conf.h"
-#else
-#	ifdef __STDC__
-#		define P(x) x
-#	else
-#		define const
-#		define P(x) ()
-#	endif
-#	include <limits.h>
-#	include <time.h>
-#endif
-
+#include "rcsbase.h"
 #include <ctype.h>
-#undef isdigit
-#define isdigit(c) (((unsigned)(c)-'0') <= 9)   /* faster than stock */
-
 #include "partime.h"
 
 /* Lookup tables for names of months, weekdays, time zones.  */
@@ -347,7 +332,7 @@ parse_decimal (char const *s, int digits, int lo, int hi,
   return 0;
 }
 
-char *
+char const*
 parzone (char const *s, long *zone)
 /*
 * Parse an initial prefix of S; it must denote a time zone.
@@ -386,7 +371,7 @@ parzone (char const *s, long *zone)
       if (minutesEastOfUTC == 1)
         {
           *zone = TM_LOCAL_ZONE;
-          return (char *) s;
+          return s;
         }
 
       z = minutesEastOfUTC * 60L;
@@ -403,7 +388,7 @@ parzone (char const *s, long *zone)
           s += 3;
         trailing_dst:
           *zone = z + 60 * 60;
-          return (char *) s;
+          return s;
         }
 
       switch (*s)
@@ -412,7 +397,7 @@ parzone (char const *s, long *zone)
         case '+':
           break;
         default:
-          return (char *) s;
+          return s;
         }
     }
   sign = *s++;
@@ -440,7 +425,7 @@ parzone (char const *s, long *zone)
    * ?? Are fractions allowed here?
    * If so, they're not implemented.
    */
-  return (char *) s;
+  return s;
 }
 
 static char const *
@@ -690,7 +675,7 @@ merge_partime (struct partime *t, struct partime const *u)
   return 0;
 }
 
-char *
+char const*
 partime (char const *s, struct partime *t)
 /*
 * Parse a date/time prefix of S, putting the parsed result into *T.
@@ -709,10 +694,10 @@ partime (char const *s, struct partime *t)
       do
         {
           if (!(s1 = parse_prefix (s, &p, &i)))
-            return (char *) s;
+            return s;
         }
       while (merge_partime (t, &p) != 0);
       s = s1;
     }
-  return (char *) s;
+  return s;
 }

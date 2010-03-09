@@ -99,7 +99,7 @@
 #	define printf_string_exiting(m, n) printf_string (m, n) exiting
 #endif
 
-#if O_BINARY
+#ifdef O_BINARY
 	/* Text and binary i/o behave differently.  */
 	/* This is incompatible with Posix and Unix.  */
 #	define FOPEN_RB "rb"
@@ -440,8 +440,6 @@ enum tokens
 /* SDELIM must be consistent with ctab[], so that ctab[SDELIM]==SBEGIN.
  * there should be no overlap among SDELIM, KDELIM, and VDELIM
  */
-
-#define isdigit(c) (((unsigned)(c)-'0') <= 9)   /* faster than ctab[c]==DIGIT */
 
 /***************************************
  * Data structures for the symbol table

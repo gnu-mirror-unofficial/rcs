@@ -23,17 +23,17 @@
    | ...
    and ending with newline.  */
 extern void
-display_version (const char *cmdid);
+display_version (void);
 
 /* If ARGC is less than 2, do nothing.
    If ARGV[1] is "--version", use `display_version' and exit successfully.
    If ARGV[1] is "--help", display the help blurb, starting with:
    | CMDID HELP
-   and exit successfully.  */
+   and exit successfully.  CMDID is the value of global var `cmdid'.  */
 extern void
-check_hv (int argc, char **argv, const char *cmdid, const char *help);
+check_hv (int argc, char **argv, const char *help);
 
 /* Idiom.  */
-#define CHECK_HV()  check_hv (argc, argv, cmdid, help)
+#define CHECK_HV()  check_hv (argc, argv, help)
 
 /* gnu-h-v.h ends here */

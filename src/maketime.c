@@ -19,19 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if has_conf_h
-#	include "conf.h"
-#else
-#	ifdef __STDC__
-#		define P(x) x
-#	else
-#		define const
-#		define P(x) ()
-#	endif
-#	include <stdlib.h>
-#	include <time.h>
-#endif
-
+#include "rcsbase.h"
 #include "partime.h"
 #include "maketime.h"
 
@@ -312,7 +300,7 @@ str2time (char const *source, time_t default_time, long default_zone)
   return maketime (&pt, default_time);
 }
 
-#if TEST
+#ifdef TEST
 #include <stdio.h>
 int
 main (int argc, char **argv)

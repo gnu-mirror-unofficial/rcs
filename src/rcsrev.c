@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <ctype.h>
 
 static char const *branchtip (char const *);
 static char const *lookupsym (char const *);

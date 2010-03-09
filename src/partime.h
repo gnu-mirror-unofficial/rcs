@@ -55,5 +55,5 @@ struct partime
   long zone;
 };
 
-char *partime (char const *, struct partime *);
-char *parzone (char const *, long *);
+char const *partime (char const *, struct partime *);
+char const *parzone (char const *, long *);

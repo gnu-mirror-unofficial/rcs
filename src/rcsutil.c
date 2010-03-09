@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <ctype.h>
 #include "gnu-h-v.h"
 
 const char const prog_diff[] = DIFF;
@@ -942,7 +943,7 @@ setRCSversion (char const *str)
     }
   else
     {
-      display_version (cmdid);
+      display_version ();
       exit (0);
     }
 }
