@@ -1,5 +1,11 @@
 2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Distribute subdir v/, as well.
+
+	* Makefile.in (v): Distribute v/ contents, as well.
+
+2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a directory dedicated to verification.
 
 	* configure.in (AC_CONFIG_FILES): Add v/Makefile, v/common.

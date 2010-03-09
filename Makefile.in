@@ -55,7 +55,7 @@ dist :: $(srcdir)/configure
 	set -x && \
 	d='$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)' && \
 	rm -fr $$d && \
-	mkdir $$d $$d/build-aux $$d/doc $$d/man $$d/src && \
+	mkdir $$d $$d/build-aux $$d/doc $$d/man $$d/src $$d/v && \
 	ln *.ms ChangeLog configure configure.in AUTHORS COPYING \
 		INSTALL \
 		Makefile.in NEWS README $$d && \
@@ -74,6 +74,7 @@ dist :: $(srcdir)/configure
 		rm -f TMP) && \
 	(cd src && ln *.[ch] *.sh ChangeLog \
 		*.in alive.test TAGS ../$$d/src) && \
+	(cd v && ln *.test *.in ChangeLog ../$$d/v) && \
 	sed -i 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/' \
 	  $$d/src/rcsfreeze.sh && \
 	tar -cf - $$d | gzip -9 >$$d.tar.gz && \
