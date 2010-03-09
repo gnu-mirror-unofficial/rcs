@@ -1,3 +1,17 @@
+2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Add texinfo manual.
+
+	* doc: New directory.
+	* doc/fdl.texi: New file (from gnulib fdl-1.3.texi).
+	* doc/texinfo.tex: New file (from texinfo 4.13).
+	* doc/Makefile.in: New file.
+	* doc/rcs.texi: New file.
+	* configure.in (AC_CONFIG_FILES): Add doc/Makefile.
+	* Makefile.in (doc): New target.
+	(dist): Make `doc' before `distclean'.
+	In dist dir, create subdir doc/; populate it from doc/.
+
 2010-03-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[dist] Distribute the config header template.

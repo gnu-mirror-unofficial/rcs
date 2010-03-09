@@ -1,0 +1,52 @@
+# Make RCS info pages (and other formats, too).
+
+# Copyright (C) 2010 Thien-Thi Nguyen
+# Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
+# Copyright (C) 1982, 1988, 1989 Walter Tichy
+#
+# This file is part of GNU RCS.
+#
+# GNU RCS is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# GNU RCS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+prefix = @prefix@
+datarootdir = @datarootdir@
+infodir = @infodir@
+
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
+all :: info
+
+info :: rcs.info
+
+pdf :: rcs.pdf
+
+rcs.info :: version.texi
+
+version.texi :: $(srcdir)/../configure
+	@{ echo @set VERSION $(PACKAGE_VERSION) ;		\
+	   echo @set UPDATED $$(date -r $< +'%Y-%m-%d') ;	\
+	} > $@
+
+%.pdf : %.texi
+	texi2pdf -o $@ $<
+	rm -f rcs.{aux,cp,cps,fn,ky,log,pg,toc,tp,vr}
+
+clean ::
+	rm -f rcs.{aux,cp,cps,fn,ky,log,pg,toc,tp,vr}
+
+maintainer-clean :: clean
+	rm -f rcs.{info,html,pdf}

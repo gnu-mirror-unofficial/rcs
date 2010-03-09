@@ -30,110 +30,27 @@ It lives in the repo but is not included in the distribution.
 ***** format: while hacking, ttn-style; on release, scrunch to GNU
 ***** changes titled with suffix "; nfc." can be excluded
 
-* possible future changes					       :ARCHIVE:
+* possible future changes (see manual for the more feasible ones)      :ARCHIVE:
 
 *** Bring back sccstorcs.
-
-*** Add an option to `rcsmerge' so that it can use an arbitrary program
-    to do the 3-way merge, instead of the default `merge'.  Likewise for
-    `rcsdiff' and `diff'.  It should be possible to pass arbitrary options to
-    these programs, and to the subsidiary `co's.
-
-*** Add format options for finer control over the output of ident and rlog.
-    E.g. there should be an easy way for rlog to output lines like `src/main.c
-    2.4 wft', one for each locked revision.  rlog options should have three
-    orthogonal types: selecting files, selecting revisions, and selecting rlog
-    format.
-
-*** Add format options for finer control over the output of keyword strings.
-    E.g. there should be some way to prepend @(#), and there should be some
-    way to change $ to some other character to disable further substitution.
-    These options should make the resulting files uneditable, like -kv.
-
-*** Add long options, e.g. `--version'.  Unfortunately RCS's option syntax
-    is incompatible with getopt.  Perhaps the best way is to overload `rcs',
-    e.g.  `rcs diff --keyword-substitution=old file' instead of `rcsdiff -ko
-    file'.
 
 *** Add a way to put only the interesting part of the path into the $Header
     keyword expansion.
 
-*** rlog -rM:N should work even if M and N have different numbers of fields,
-    so long as M is an ancestor of N or vice versa.
-
-*** rcs should evaluate options in order; this allows rcs -oS -nS.
-
 *** rcs should be able to fix minor mistakes in checkin dates and authors.
-
-*** Be able to redo your most recent checkin with minor changes.
-
-*** co -u shouldn't complain about a +w working file if contents don't change.
 
 *** Add a new option to rcs that behaves like -o, but that doesn't lose the
     nonempty log messages, but instead merges them with the next revision if
     it exists, perhaps with a 1-line header containing author, date, etc.
 
-*** Add a `-' option to take the list of pathnames from standard input.
-    Perhaps the pathnames should be null-terminated, not newline-terminated,
-    so that pathnames that contain newlines are handled properly.
-
-*** Permit multiple option-pathname pairs, e.g. co -r1.4 a -r1.5 b.
-
 *** Add options to allow arbitrary combinations of working file names
     with RCS file names -- they shouldn't have to match.
-
-*** Add an option to break a symbolic link to an RCS file,
-    instead of breaking the hard link that it points to.
-
-*** Add ways to specify the earliest revision, the most recent revision,
-    the earliest or latest revision on a particular branch, and the parent
-    or child of some other revision.
-
-*** If a user has multiple locks, perhaps ci should fall back on ci -k's
-    method to figure out which revision to use.
 
 *** Add an option to rcs -o so that old log messages are not deleted if
     the next undeleted revision exists, but are merely appended to the log
     message of that revision.
 
 *** ci -k should be able to get keyword values from the first `$Log' entry.
-
-*** Add an option to rcsclean to clean directories recursively.
-
-*** Write an rcsck program that repairs corrupted RCS files,
-    much as fsck repairs corrupted file systems.  For example, it should
-    remove stale lock files.
-
-*** Update the date parser to use the more modern getdate.y by Bellovin,
-    Salz, and Berets, or the even more modern getdate by Moraes.  None of
-    these getdate implementations are as robust as RCS's old warhorse in
-    avoiding problems like arithmetic overflow, so they'll have to be fixed
-    first.
-
-*** Break up the code into a library so that it's easier to write new programs
-    that manipulate RCS files, and so that useless code is removed from the
-    existing programs.  For example, the rcs command contains unnecessary
-    keyword substitution baggage, and the merge command can be greatly pruned.
-
-*** Make it easier to use your favorite text editor to edit log messages,
-    etc. instead of having to type them in irretrievably at the terminal.
-
-*** Let the user specify a search path for default branches,
-    e.g. to use L as the default branch if it works, and M otherwise.  Let the
-    user require that at least one entry in the default branch path works.
-    Let the user say that later entries in the default branch path are read
-    only, i.e. one cannot check in changes to them.  This should be an option
-    settable by RCSINIT.
-
-*** Add a way for a user to see which revisions affected which lines.
-
-*** Have `rlog -nN F' print just the revision number that N translates to.
-    E.g. `rlog -nB. F' would print the highest revision on the branch B.  Use
-    this to add an option -bB to rcsbranch, to freeze the named branch.  This
-    should interact well with default branches.
-
-*** Add a co option that prints the revision number before each line,
-    as SCCS's `get -m' does.
 
 * require a change to RCS file format				       :ARCHIVE:
 

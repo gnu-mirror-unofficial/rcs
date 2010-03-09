@@ -532,6 +532,7 @@ RCS_CBOOL([SLASHSLASH_IS_SLASH],[yes],[rcs_cv_slsl_is_sl],
 
 AC_CONFIG_FILES([
   Makefile
+  doc/Makefile
   man/Makefile
   src/Makefile
 ])
