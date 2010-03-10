@@ -1,5 +1,30 @@
 2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `NULL' more.
+
+	* ci.c: Throughout, replace `0' in a pointer context with `NULL'.
+	* co.c: Likewise.
+	* maketime.c: Likewise.
+	* merge.c: Likewise.
+	* merger.c: Likewise.
+	* partime.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcskeys.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Fix bug: Remove all log messages when removing all revisions.
 
 	* rcs.c (main): When outdating, allow `scanlogtext' to

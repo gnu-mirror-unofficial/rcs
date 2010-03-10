@@ -71,7 +71,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
     edarg = "-E";
 
 #if DIFF3_BIN
-  t = 0;
+  t = NULL;
   if (!tostdout)
     t = maketemp (0);
   s = run (-1, t,

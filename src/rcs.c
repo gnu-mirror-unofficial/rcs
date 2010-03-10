@@ -173,7 +173,7 @@ main (int argc, char **argv)
   nextchaccess = &chaccess;
   nextmessage = &messagelst;
   nextstate = &statelst;
-  branchsym = commsyml = textfile = 0;
+  branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
   bufautobegin (&branchnum);
   commsymlen = 0;
@@ -249,7 +249,7 @@ main (int argc, char **argv)
             }
           *curlock = lockpt = talloc (struct Lockrev);
           lockpt->revno = a;
-          lockpt->nextrev = 0;
+          lockpt->nextrev = NULL;
           curlock = &lockpt->nextrev;
           break;
 
@@ -261,7 +261,7 @@ main (int argc, char **argv)
             }
           *rmvlock = lockpt = talloc (struct Lockrev);
           lockpt->revno = a;
-          lockpt->nextrev = 0;
+          lockpt->nextrev = NULL;
           rmvlock = &lockpt->nextrev;
           curlock = rmnewlocklst (lockpt->revno);
           break;
@@ -467,7 +467,7 @@ main (int argc, char **argv)
               }
             else if (Dbranch)
               {
-                Dbranch = 0;
+                Dbranch = NULL;
                 changed = true;
               }
           }
@@ -500,7 +500,7 @@ main (int argc, char **argv)
         for (curstate = statelst; curstate; curstate = curstate->nextstatus)
           changed |= rcs_setstate (curstate->revno, curstate->status);
 
-        cuthead = cuttail = 0;
+        cuthead = cuttail = NULL;
         if (delrev.strt && removerevs ())
           {
             /*  rebuild delta tree if some deltas are deleted   */
@@ -614,14 +614,14 @@ getassoclst (int flag, char *sp)
   pt->ssymbol = temp;
   pt->override = flag;
   if (c == '\0')                /*  delete symbol  */
-    pt->revno = 0;
+    pt->revno = NULL;
   else
     {
       while ((c = *++sp) == ' ' || c == '\n' || c == '\t')
         continue;
       pt->revno = sp;
     }
-  pt->nextsym = 0;
+  pt->nextsym = NULL;
   *nextassoc = pt;
   nextassoc = &pt->nextsym;
 }
@@ -634,7 +634,7 @@ getchaccess (char const *login, enum changeaccess command)
   pt = talloc (struct chaccess);
   pt->login = login;
   pt->command = command;
-  pt->nextchaccess = 0;
+  pt->nextchaccess = NULL;
   *nextchaccess = pt;
   nextchaccess = &pt->nextchaccess;
 }
@@ -695,7 +695,7 @@ getmessage (char *option)
   pt = talloc (struct Message);
   pt->revno = option;
   pt->message = cb;
-  pt->nextmessage = 0;
+  pt->nextmessage = NULL;
   *nextmessage = pt;
   nextmessage = &pt->nextmessage;
 }
@@ -736,7 +736,7 @@ getstates (char *sp)
   pt = talloc (struct Status);
   pt->status = temp;
   pt->revno = sp;
-  pt->nextstatus = 0;
+  pt->nextstatus = NULL;
   *nextstate = pt;
   nextstate = &pt->nextstatus;
 }
@@ -773,7 +773,7 @@ getdelrev (char *sp)
       while (c != ' ' && c != '\n' && c != '\t' && c != '\0')
         c = (*++sp);
       *sp = '\0';
-      pt->end = 0;
+      pt->end = NULL;
       return;
     }
   else
@@ -788,7 +788,7 @@ getdelrev (char *sp)
       if (c == '\0')
         {                       /*   -o rev or branch   */
           pt->code = 0;
-          pt->end = 0;
+          pt->end = NULL;
           return;
         }
       if (c != separator)
@@ -800,7 +800,7 @@ getdelrev (char *sp)
       if (!c)
         {                       /* -orev: */
           pt->code = 2;
-          pt->end = 0;
+          pt->end = NULL;
           return;
         }
     }
@@ -827,7 +827,7 @@ scanlogtext (struct hshentry *delta, int edit)
 
   for (;;)
     {
-      foutptr = 0;
+      foutptr = NULL;
       if (eoflex ())
         {
           if (delta)
@@ -855,7 +855,7 @@ scanlogtext (struct hshentry *delta, int edit)
         {
           if (nextdelta->log.string && nextdelta->selector)
             {
-              foutptr = 0;
+              foutptr = NULL;
               readstring ();
               foutptr = frewrite;
               putstring (foutptr, false, nextdelta->log, true);
@@ -913,7 +913,7 @@ doaccess (void)
             {
               if (AccessList)
                 {
-                  AccessList = 0;
+                  AccessList = NULL;
                   changed = true;
                 }
             }
@@ -932,7 +932,7 @@ doaccess (void)
               {
                 *p = t = ftalloc (struct access);
                 t->login = ch->login;
-                t->nextaccess = 0;
+                t->nextaccess = NULL;
                 changed = true;
                 break;
               }
@@ -1039,7 +1039,7 @@ breaklock (struct hshentry const *delta)
           }
         diagnose ("%s unlocked\n", next->delta->num);
         *trail = next->nextlock;
-        next->delta->lockedby = 0;
+        next->delta->lockedby = NULL;
         return true;
       }
   rcserror ("no lock set on revision %s", num);
@@ -1053,7 +1053,7 @@ searchcutpt (char const *object, int length, struct hshentries *store)
 /*              is the entry point to the one with number being object  */
 
 {
-  cuthead = 0;
+  cuthead = NULL;
   while (compartial (store->first->num, object, length))
     {
       cuthead = store->first;
@@ -1126,7 +1126,7 @@ removerevs (void)
       cuttail = target->next;
       if (branchpoint (temp, cuttail))
         {
-          cuttail = 0;
+          cuttail = NULL;
           return 0;
         }
       delstrt = temp;           /* first revision to be removed   */
@@ -1155,7 +1155,7 @@ removerevs (void)
         }
       if (branchpoint (temp, cuttail))
         {
-          cuttail = 0;
+          cuttail = NULL;
           return 0;
         }
       delstrt = temp;
@@ -1187,7 +1187,7 @@ removerevs (void)
         }
       if (branchpoint (temp, cuttail))
         {
-          cuttail = 0;
+          cuttail = NULL;
           return 0;
         }
       delstrt = temp;
@@ -1258,7 +1258,7 @@ removerevs (void)
     }
   if (branchpoint (temp, cuttail))
     {
-      cuttail = 0;
+      cuttail = NULL;
       return 0;
     }
   delstrt = temp;
@@ -1298,7 +1298,7 @@ doassoc (void)
         {
           if (curassoc->revno[0])
             {
-              p = 0;
+              p = NULL;
               if (expandsym (curassoc->revno, &numrev))
                 p = fstr_save (numrev.string);
             }
@@ -1474,7 +1474,7 @@ buildeltatext (struct hshentries const *deltas)
   register FILE *fcut;          /* temporary file to rebuild delta tree */
   char const *cutname;
 
-  fcut = 0;
+  fcut = NULL;
   cuttail->selector = false;
   scanlogtext (deltas->first, false);
   if (cuthead)

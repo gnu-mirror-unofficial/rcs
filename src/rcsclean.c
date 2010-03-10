@@ -81,7 +81,7 @@ main (int argc, char **argv)
   setrid ();
 
   expmode = -1;
-  rev = 0;
+  rev = NULL;
   suffixes = X_DEFAULT;
   perform = true;
   unlockflag = false;
@@ -182,7 +182,7 @@ main (int argc, char **argv)
 
         gettree ();
 
-        p = 0;
+        p = NULL;
         if (rev)
           {
             if (!fexpandsym (rev, &revision, workptr))
@@ -201,8 +201,8 @@ main (int argc, char **argv)
               p = delta->num;
               break;
             }
-        delta = 0;
-        deltas = 0;             /* Keep lint happy.  */
+        delta = NULL;
+        deltas = NULL;                  /* Keep lint happy.  */
         if (p && !(delta = gr_revno (p, &deltas)))
           continue;
 
@@ -291,7 +291,7 @@ unlock (struct hshentry *delta)
       if (l->delta == delta)
         {
           *al = l->nextlock;
-          delta->lockedby = 0;
+          delta->lockedby = NULL;
           return true;
         }
   return false;

@@ -107,7 +107,7 @@ static struct compair const comtable[] = {
   {"sty",  "% "},               /* LaTeX style */
   {"tex",  "% "},               /* TeX */
   {"y",    " * "},              /* yacc */
-  {0,      "# "}                /* default for unknown suffix; must be last */
+  {NULL,   "# "}                /* default for unknown suffix; must be last */
 };
 
 #ifndef HAVE_MKSTEMP
@@ -262,7 +262,7 @@ tempunlink (void)
          * but this might dump core if we're handing a signal.
          * We're about to exit anyway, so we won't bother.
          */
-        tpnames[i] = 0;
+        tpnames[i] = NULL;
       }
 }
 
@@ -313,11 +313,11 @@ InitAdmin (void)
   register char const *Suffix;
   register int i;
 
-  Head = 0;
-  Dbranch = 0;
-  AccessList = 0;
-  Symbols = 0;
-  Locks = 0;
+  Head = NULL;
+  Dbranch = NULL;
+  AccessList = NULL;
+  Symbols = NULL;
+  Locks = NULL;
   StrictLocks = STRICT_LOCKING;
 
   /* guess the comment leader from the suffix */
@@ -463,7 +463,7 @@ suffixlen (char const *x)
 
 char const *
 rcssuffix (char const *name)
-/* Yield the suffix of NAME if it is an RCS pathname, 0 otherwise.  */
+/* Yield the suffix of NAME if it is an RCS pathname, NULL otherwise.  */
 {
   char const *x, *p, *nz;
   size_t nl, xl;
@@ -487,7 +487,7 @@ rcssuffix (char const *name)
       x += xl;
     }
   while (*x++);
-  return 0;
+  return NULL;
 }
 
 RILE *
@@ -629,7 +629,7 @@ pairnames (int argc, char **argv,
           ((p += arglen - baselen) == workname || isSLASH (p[-1])) &&
           memcmp (base, p, baselen) == 0)
         {
-          argv[1] = 0;
+          argv[1] = NULL;
           paired = true;
         }
       else
@@ -651,11 +651,11 @@ pairnames (int argc, char **argv,
           ((RCSbase = x - baselen) == RCS1 || isSLASH (RCSbase[-1])) &&
           memcmp (base, RCSbase, baselen) == 0)
         {
-          argv[1] = 0;
+          argv[1] = NULL;
           paired = true;
         }
       else
-        RCSbase = RCS1 = 0;
+        RCSbase = RCS1 = NULL;
     }
   /* Now we have a (tentative) RCS pathname in RCS1 and workname.  */
   /* Second, try to find the right RCS file */
@@ -852,10 +852,10 @@ getcwd (char *path, size_t size)
   if (!size)
     {
       errno = EINVAL;
-      return 0;
+      return NULL;
     }
   if (pipe (fd) != 0)
-    return 0;
+    return NULL;
 #	if BAD_WAIT_IF_SIGCHLD_IGNORED
 #		ifndef SIGCHLD
 #		define SIGCHLD SIGCLD
@@ -882,7 +882,7 @@ getcwd (char *path, size_t size)
   e = errno;
   closeerror = close (fd[1]);
   closeerrno = errno;
-  fp = 0;
+  fp = NULL;
   readerror = toolong = wstatus = 0;
   p = path;
   if (0 <= child)
@@ -934,29 +934,29 @@ getcwd (char *path, size_t size)
     {
       close (fd[0]);
       errno = e;
-      return 0;
+      return NULL;
     }
   if (fclose (fp) != 0)
-    return 0;
+    return NULL;
   if (readerror)
     {
       errno = e;
-      return 0;
+      return NULL;
     }
   if (closeerror)
     {
       errno = closeerrno;
-      return 0;
+      return NULL;
     }
   if (toolong)
     {
       errno = ERANGE;
-      return 0;
+      return NULL;
     }
   if (wstatus || p == path || *--p != '\n')
     {
       errno = EACCES;
-      return 0;
+      return NULL;
     }
   *p = '\0';
   return path;
@@ -997,7 +997,7 @@ main (int argc, char *argv[])
 
   do
     {
-      RCSname = workname = 0;
+      RCSname = workname = NULL;
       result = pairnames (argc, argv, rcsreadopen, !initflag, quietflag);
       if (result != 0)
         {

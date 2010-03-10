@@ -69,7 +69,7 @@ main (int argc, char **argv)
 
   bufautobegin (&commarg);
   bufautobegin (&numericrev);
-  edarg = rev[1] = rev[2] = 0;
+  edarg = rev[1] = rev[2] = NULL;
   status = 0;                   /* Keep lint happy.  */
   tostdout = false;
   expandarg = suffixarg = versionarg = zonearg = quietarg;      /* no-op */

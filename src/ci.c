@@ -142,7 +142,7 @@ main (int argc, char **argv)
 
   setrid ();
 
-  author = rev = state = textfile = 0;
+  author = rev = state = textfile = NULL;
   initflag = lockflag = mustread = false;
   mtimeflag = false;
   Ttimeflag = false;
@@ -309,7 +309,7 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
-        targetdelta = 0;
+        targetdelta = NULL;
         ffree ();
 
         switch (pairnames (argc, argv, rcswriteopen, mustread, false))
@@ -398,10 +398,10 @@ main (int argc, char **argv)
           continue;
 
         newdelta.num = newdelnum.string;
-        newdelta.branches = 0;
-        newdelta.lockedby = 0;  /* This might be changed by addlock().  */
+        newdelta.branches = NULL;
+        newdelta.lockedby = NULL;   /* This might be changed by addlock().  */
         newdelta.selector = true;
-        newdelta.name = 0;
+        newdelta.name = NULL;
         clear_buf (&newdelta.ig);
         clear_buf (&newdelta.igtext);
         /* set author */
@@ -590,7 +590,7 @@ main (int argc, char **argv)
 #		    endif
                 *++diffp = newhead ? "-" : expname;
                 *++diffp = newhead ? expname : "-";
-                *++diffp = 0;
+                *++diffp = NULL;
                 if (diff_trouble == runv (wfd, diffname, diffv))
                   rcsfaterror ("diff failed");
 #		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
@@ -758,7 +758,7 @@ addelta (void)
           return -1;
         }                       /* newdnumlength == 2 is OK;  */
       Head = &newdelta;
-      newdelta.next = 0;
+      newdelta.next = NULL;
       return 0;
     }
   if (newdnumlength == 0)
@@ -786,7 +786,7 @@ addelta (void)
             {
               /* new tip revision on side branch */
               targetdelta->next = &newdelta;
-              newdelta.next = 0;
+              newdelta.next = NULL;
             }
           else
             {
@@ -895,7 +895,7 @@ addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
         }
       else if (numlength & 1)
         bufscat (num, ".1");
-      newbranch.nextbranch = 0;
+      newbranch.nextbranch = NULL;
 
     }
   else if (numlength == 0)
@@ -910,7 +910,7 @@ addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
       incnum (branchnum.string, num);
       bufautoend (&branchnum);
       bufscat (num, ".1");
-      newbranch.nextbranch = 0;
+      newbranch.nextbranch = NULL;
     }
   else
     {
@@ -956,14 +956,14 @@ addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
               if (numlength & 1)
                 incnum (targetdelta->num, num);
               targetdelta->next = &newdelta;
-              newdelta.next = 0;
+              newdelta.next = NULL;
             }
           return removedlock;
           /* Don't do anything to newbranch.  */
         }
     }
   newbranch.hsh = &newdelta;
-  newdelta.next = 0;
+  newdelta.next = NULL;
   if (branchpoint->lockedby)
     if (strcmp (branchpoint->lockedby, getcaller ()) == 0)
       return removelock (branchpoint);  /* This returns 1.  */
@@ -1037,7 +1037,7 @@ removelock (struct hshentry *delta)
           {
             /* We found a lock on delta by caller; delete it.  */
             *trail = next->nextlock;
-            delta->lockedby = 0;
+            delta->lockedby = NULL;
             return 1;
           }
         else
@@ -1191,7 +1191,7 @@ addassoclst (int flag, char const *sp)
   pt = talloc (struct Symrev);
   pt->ssymbol = sp;
   pt->override = flag;
-  pt->nextsym = 0;
+  pt->nextsym = NULL;
   *nextassoc = pt;
   nextassoc = &pt->nextsym;
 }

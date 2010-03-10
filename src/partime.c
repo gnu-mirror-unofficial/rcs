@@ -211,7 +211,7 @@ static char const *const patterns[] = {
   "h:m:s$", "hms$", "h:m$", "hm$", "h$", "-m:s$", "-ms$", "-m$", "--s$",
   "Y", "Z",
 
-  0
+  NULL
 };
 
 static char const *
@@ -229,7 +229,7 @@ parse_prefix (char const *str, struct partime *t, int *pi)
   unsigned char c;
 
   if (i < 0)
-    return 0;
+    return NULL;
 
   /* Remove initial noise.  */
   while (!isalnum (c = *str) && c != '-' && c != '+')
@@ -244,7 +244,7 @@ parse_prefix (char const *str, struct partime *t, int *pi)
     }
 
   /* Try a pattern until one succeeds.  */
-  while ((pat = patterns[i++]) != 0)
+  while ((pat = patterns[i++]) != NULL)
     {
       char const *s = str;
       undefine (t);
@@ -256,10 +256,10 @@ parse_prefix (char const *str, struct partime *t, int *pi)
               return s;
             }
         }
-      while ((s = parse_pattern_letter (s, c, t)) != 0);
+      while ((s = parse_pattern_letter (s, c, t)) != NULL);
     }
 
-  return 0;
+  return NULL;
 }
 
 static char const *
@@ -276,7 +276,7 @@ parse_fixed (char const *s, int digits, int *res)
     {
       unsigned d = *s++ - '0';
       if (9 < d)
-        return 0;
+        return NULL;
       n = 10 * n + d;
     }
   *res = n;
@@ -293,7 +293,7 @@ parse_ranged (char const *s, int digits, int lo, int hi, int *res)
 */
 {
   s = parse_fixed (s, digits, res);
-  return s && lo <= *res && *res <= hi ? s : 0;
+  return s && lo <= *res && *res <= hi ? s : NULL;
 }
 
 static char const *
@@ -324,12 +324,12 @@ parse_decimal (char const *s, int digits, int lo, int hi,
           f = (product + (denom10 >> 1)) / denom10;
           f -= f & (product % denom10 == denom10 >> 1); /* round to even */
           if (f < 0 || product / resolution != num10)
-            return 0;           /* overflow */
+            return NULL;                /* overflow */
         }
       *fres = f;
       return s;
     }
-  return 0;
+  return NULL;
 }
 
 char const*
@@ -361,7 +361,7 @@ parzone (char const *s, long *zone)
     default:
       minutesEastOfUTC = lookup (s, zone_names);
       if (minutesEastOfUTC == -1)
-        return 0;
+        return NULL;
 
       /* Don't bother to check rest of spelling.  */
       while (isalpha ((unsigned char) *s))
@@ -403,22 +403,22 @@ parzone (char const *s, long *zone)
   sign = *s++;
 
   if (!(s = parse_ranged (s, 2, 0, 23, &hh)))
-    return 0;
+    return NULL;
   mm = ss = 0;
   if (*s == ':')
     s++;
   if (isdigit ((unsigned char) *s))
     {
       if (!(s = parse_ranged (s, 2, 0, 59, &mm)))
-        return 0;
+        return NULL;
       if (*s == ':' && s[-3] == ':' && isdigit ((unsigned char) s[1]))
         {
           if (!(s = parse_ranged (s + 1, 2, 0, 59, &ss)))
-            return 0;
+            return NULL;
         }
     }
   if (isdigit ((unsigned char) *s))
-    return 0;
+    return NULL;
   offset = (hh * 60 + mm) * 60L + ss;
   *zone = z + (sign == '-' ? -offset : offset);
   /*
@@ -440,7 +440,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
     {
     case '$':                  /* The next character must be a non-digit.  */
       if (isdigit ((unsigned char) *s))
-        return 0;
+        return NULL;
       break;
 
     case '-':
@@ -448,7 +448,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
     case ':':
       /* These characters stand for themselves.  */
       if (*s++ != c)
-        return 0;
+        return NULL;
       break;
 
     case '4':                  /* 4-digit year */
@@ -480,7 +480,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
           break;
 
         default:
-          return 0;
+          return NULL;
         }
       switch (*s)
         {
@@ -490,7 +490,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
           break;
         }
       if (isalnum (*s))
-        return 0;
+        return NULL;
       break;
 
     case 'D':                  /* day of month [01-31] */
@@ -523,7 +523,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
 
     case 'n':                  /* month name [e.g. "Jan"] */
       if (!TM_DEFINED (t->tm.tm_mon = lookup (s, month_names)))
-        return 0;
+        return NULL;
       /* Don't bother to check rest of spelling.  */
       while (isalpha ((unsigned char) *s))
         s++;
@@ -560,7 +560,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
         case 't':
           break;
         default:
-          return 0;
+          return NULL;
         }
       break;
 
@@ -579,7 +579,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
         case 'w':
           break;
         default:
-          return 0;
+          return NULL;
         }
       break;
 
@@ -590,7 +590,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
         case 'w':
           break;
         default:
-          return 0;
+          return NULL;
         }
       s = parse_ranged (s, 2, 0, 53, &t->yweek);
       break;
@@ -602,7 +602,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
 
     case 'x':                  /* weekday name [e.g. "Sun"] */
       if (!TM_DEFINED (t->tm.tm_wday = lookup (s, weekday_names)))
-        return 0;
+        return NULL;
       /* Don't bother to check rest of spelling.  */
       while (isalpha ((unsigned char) *s))
         s++;
@@ -619,7 +619,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
         while (isdigit ((unsigned char) s[len]))
           len++;
         if (len < 4)
-          return 0;
+          return NULL;
         s = parse_fixed (s, len, &t->tm.tm_year);
       }
       break;
@@ -634,7 +634,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
       break;
 
     default:                   /* bad pattern */
-      return 0;
+      return NULL;
     }
   return s;
 }

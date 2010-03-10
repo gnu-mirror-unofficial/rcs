@@ -426,8 +426,8 @@ enterstring (void)
 /* Like copystring, except the string is put into the edit data structure.  */
 {
 #if !large_memory
-  editname = 0;
-  fedit = 0;
+  editname = NULL;
+  fedit = NULL;
   editline = linecorr = 0;
   resultname = maketemp (1);
   if (!(fcopy = fopen_update_truncate (resultname)))
@@ -1143,7 +1143,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
      * or the RCS file doesn't exist,
      * and we must read or we already have a lock elsewhere.
      */
-    return 0;
+    return NULL;
 
   RCSpath = RCSbuf->string;
   sp = basefilename (RCSpath);
@@ -1157,14 +1157,14 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
     {
       error ("symbolic link to non RCS file `%s'", RCSpath);
       errno = EINVAL;
-      return 0;
+      return NULL;
     }
 #	endif
   if (*sp == *x)
     {
       error ("RCS pathname `%s' incompatible with suffix `%s'", sp, x);
       errno = EINVAL;
-      return 0;
+      return NULL;
     }
   /* Create a lock filename that is a function of the RCS filename.  */
   if (*x)
@@ -1195,14 +1195,14 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
         {
           error ("RCS pathname `%s' ends with `%c'", RCSpath, *tp);
           errno = EINVAL;
-          return 0;
+          return NULL;
         }
       *tp = '_';
     }
 
   sp = dirt->string;
 
-  f = 0;
+  f = NULL;
 
   /*
    * good news:
@@ -1484,7 +1484,7 @@ findlock (int delete, struct hshentry **target)
   *target = next->delta;
   if (delete)
     {
-      next->delta->lockedby = 0;
+      next->delta->lockedby = NULL;
       *found = next->nextlock;
     }
   return 1;

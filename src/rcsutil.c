@@ -95,7 +95,7 @@ ffree (void)
       tfree (p->alloc);
       tfree (p);
     }
-  alloced = 0;
+  alloced = NULL;
 }
 
 void
@@ -200,7 +200,7 @@ readAccessFilenameBuffer (char const *filename, unsigned char const *p)
   unsigned char volatile t;
   accessName = filename;
   t = *p;
-  accessName = 0;
+  accessName = NULL;
 }
 #else
 #   define accessName (NULL)
@@ -309,7 +309,7 @@ catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
 
 #   ifdef SA_SIGINFO
   if (!unsupported_SA_SIGINFO)
-    i = 0;
+    i = NULL;
 #   endif
 
   if (holdlevel)
@@ -668,14 +668,14 @@ fopenSafer (char const *filename, char const *type)
               int e = errno;
               fclose (stream);
               errno = e;
-              return 0;
+              return NULL;
             }
           if (fclose (stream) != 0)
             {
               int e = errno;
               close (f);
               errno = e;
-              return 0;
+              return NULL;
             }
           stream = fdopen (f, type);
         }

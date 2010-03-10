@@ -88,11 +88,11 @@ main (int argc, char **argv)
   bufautobegin (&commarg);
   bufautobegin (&numericrev);
   revnums = 0;
-  rev1 = rev2 = xrev2 = 0;
+  rev1 = rev2 = xrev2 = NULL;
 #if DIFF_L
   file_labels = 0;
 #endif
-  expandarg = suffixarg = versionarg = zonearg = 0;
+  expandarg = suffixarg = versionarg = zonearg = NULL;
   no_diff_means_no_output = true;
   suffixes = X_DEFAULT;
 
@@ -230,7 +230,7 @@ main (int argc, char **argv)
   *a = 0;
 
 #if DIFF_L
-  diff_label1 = diff_label2 = 0;
+  diff_label1 = diff_label2 = NULL;
   if (file_labels < 2)
     {
       if (!file_labels)

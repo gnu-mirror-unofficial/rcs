@@ -56,7 +56,7 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
       openfcopy (outfile);
       scandeltatext (target, expandflag ? expand : copy, true);
       if (outfile)
-        return 0;
+        return NULL;
       else
         {
           Ozclose (&fcopy);
@@ -81,7 +81,7 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
       scandeltatext (target, expandflag ? edit_expand : edit, true);
       finishedit (expandflag ? target : NULL, outfile, true);
       if (outfile)
-        return 0;
+        return NULL;
       Ozclose (&fcopy);
       return resultname;
     }
@@ -256,11 +256,11 @@ putdesc (int textflag, char *textfile)
       aprintf (frew, "\n\n%s%c", Kdesc, nextc);
       foutptr = frewrite;
       getdesc (false);
-      foutptr = 0;
+      foutptr = NULL;
     }
   else
     {
-      foutptr = 0;
+      foutptr = NULL;
       /* get new description */
       if (finptr)
         {

@@ -129,8 +129,8 @@ main (int argc, char **argv)
   CHECK_HV ();
 
   setrid ();
-  author = date = rev = state = 0;
-  joinflag = 0;
+  author = date = rev = state = NULL;
+  joinflag = NULL;
   bufautobegin (&numericrev);
   expmode = -1;
   suffixes = X_DEFAULT;
@@ -294,7 +294,7 @@ main (int argc, char **argv)
                 setmode (STDOUT_FILENO, newmode);
               }
 #		endif
-            neworkname = 0;
+            neworkname = NULL;
             neworkptr = workstdout = stdout;
           }
         else
@@ -332,7 +332,7 @@ main (int argc, char **argv)
               if (!rmworkfile ())
                 continue;
             changelock = 0;
-            newdate = 0;
+            newdate = NULL;
           }
         else
           {
@@ -404,7 +404,7 @@ main (int argc, char **argv)
                                       Expand < MIN_UNEXPAND);
 #		if !large_memory
             if (fcopy == neworkptr)
-              fcopy = 0;        /* Don't close it twice.  */
+              fcopy = NULL;             /* Don't close it twice.  */
 #		endif
             if_advise_access (changelock && gendeltas->first != targetdelta,
                               finptr, MADV_SEQUENTIAL);
@@ -424,7 +424,7 @@ main (int argc, char **argv)
             newdate = targetdelta->date;
             if (joinflag)
               {
-                newdate = 0;
+                newdate = NULL;
                 if (!joinname)
                   {
                     aflush (neworkptr);
@@ -557,7 +557,7 @@ rmlock (struct hshentry const *delta)
       /*found one; delete it */
       trail->nextlock = next->nextlock;
       Locks = dummy.nextlock;
-      next->delta->lockedby = 0;
+      next->delta->lockedby = NULL;
       return 1;                 /*success */
     }
   else
@@ -601,7 +601,7 @@ addjoin (char *joinrev)
   terminator = *--j;
   *j = 0;
   bufautobegin (&numrev);
-  d = 0;
+  d = NULL;
   if (expandsym (joinrev, &numrev))
     d = gr_revno (numrev.string, &joindeltas);
   bufautoend (&numrev);
@@ -611,7 +611,7 @@ addjoin (char *joinrev)
       joinlist[++lastjoin] = d->num;
       return j;
     }
-  return 0;
+  return NULL;
 }
 
 static int
@@ -710,7 +710,7 @@ getancestor (char const *r1, char const *r2)
         return partialno (&t1, r1, l3);
     }
   rcserror ("common ancestor of %s and %s undefined", r1, r2);
-  return 0;
+  return NULL;
 }
 
 static int

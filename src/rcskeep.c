@@ -239,7 +239,7 @@ get0val (register int c, register RILE *fp, struct buf *target, int optional)
       tlim = tp + target->size;
     }
   else
-    tlim = tp = 0;
+    tlim = tp = NULL;
   got1 = false;
   for (;;)
     {

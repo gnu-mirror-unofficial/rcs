@@ -227,10 +227,10 @@ maketime (struct partime const *pt, time_t default_time)
 {
   int localzone, wday;
   struct tm tm;
-  struct tm *tm0 = 0;
+  struct tm *tm0 = NULL;
   time_t r;
 
-  tm0 = 0;                      /* Keep gcc -Wall happy.  */
+  tm0 = NULL;                           /* Keep gcc -Wall happy.  */
   localzone = pt->zone == TM_LOCAL_ZONE;
 
   tm = pt->tm;

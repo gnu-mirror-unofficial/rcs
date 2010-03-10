@@ -24,7 +24,7 @@
 
 char const *const Keyword[] = {
   /* This must be in the same order as rcsbase.h's enum markers type. */
-  0,
+  NULL,
   AUTHOR, DATE, HEADER, IDH,
   LOCKER, LOG, NAME, RCSFILE, REVISION, SOURCE, STATE
 };

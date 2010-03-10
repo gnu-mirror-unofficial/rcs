@@ -63,7 +63,7 @@ RILE *finptr;                   /*input file descriptor                         
 
 FILE *frewrite;                 /*file descriptor for echoing input             */
 
-FILE *foutptr;                  /* copy of frewrite, but 0 to suppress echo  */
+FILE *foutptr;                  /* copy of frewrite, but NULL to suppress echo  */
 
 static struct buf tokbuf;       /* token buffer                                 */
 
@@ -118,7 +118,7 @@ lookup (char const *str)
         /* empty slot found */
         *p = n = ftalloc (struct hshentry);
         n->num = fstr_save (str);
-        n->nexthsh = 0;
+        n->nexthsh = NULL;
 #			ifdef LEXDB
         printf ("\nEntered: %s at %u ", str, ihash);
 #			endif
@@ -135,20 +135,20 @@ void
 Lexinit (void)
 /* Function: Initialization of lexical analyzer:
  * initializes the hashtable,
- * initializes nextc, nexttok if finptr != 0
+ * initializes nextc, nexttok if finptr != NULL
  */
 {
   register int c;
 
   for (c = hshsize; 0 <= --c;)
     {
-      hshtab[c] = 0;
+      hshtab[c] = NULL;
     }
 
   nerror = 0;
   if (finptr)
     {
-      foutptr = 0;
+      foutptr = NULL;
       hshenter = true;
       ignored_phrases = false;
       rcsline = 1;
@@ -365,7 +365,7 @@ char const *
 getid (void)
 /* Function: Checks if nexttok is an identifier. If so,
  * advances the input by calling nextlex and returns a pointer
- * to the identifier; otherwise returns 0.
+ * to the identifier; otherwise returns NULL.
  * Treats keywords as identifiers.
  */
 {
@@ -377,14 +377,14 @@ getid (void)
       return name;
     }
   else
-    return 0;
+    return NULL;
 }
 
 struct hshentry *
 getnum (void)
 /* Function: Checks if nexttok is a number. If so,
  * advances the input by calling nextlex and returns a pointer
- * to the hashtable entry.  Otherwise returns 0.
+ * to the hashtable entry.  Otherwise returns NULL.
  * Doesn't work if hshenter is false.
  */
 {
@@ -396,7 +396,7 @@ getnum (void)
       return num;
     }
   else
-    return 0;
+    return NULL;
 }
 
 struct cbuf
@@ -779,7 +779,7 @@ static int
 Iclose (register RILE *f)
 {
   tfree (f->base);
-  f->base = 0;
+  f->base = NULL;
   return fclose (f->stream);
 }
 # else
@@ -788,7 +788,7 @@ static int
 Iclose (register RILE *f)
 {
   (*f->deallocate) (f);
-  f->base = 0;
+  f->base = NULL;
   return close (f->fd);
 }
 
@@ -838,7 +838,7 @@ fd2RILE (int fd, char const *name, char const *type,
       error ("`%s' is not a regular file", name);
       close (fd);
       errno = EINVAL;
-      return 0;
+      return NULL;
     }
   else
     {
@@ -874,7 +874,7 @@ fd2RILE (int fd, char const *name, char const *type,
           }
         else
           {
-            f->base = 0;
+            f->base = NULL;
 #		    if defined HAVE_MMAP
             if (!f->base)
               {
@@ -887,7 +887,7 @@ fd2RILE (int fd, char const *name, char const *type,
 #			    define MAP_FAILED (-1)
 #			    endif
                 if (f->base == (unsigned char *) MAP_FAILED)
-                  f->base = 0;
+                  f->base = NULL;
                 else
                   {
 #				if has_NFS && MMAP_SIGNAL
@@ -1004,7 +1004,7 @@ Iopen (char const *name, char const *type, struct stat *status)
                           ));
 
   if (fd < 0)
-    return 0;
+    return NULL;
 #	if large_memory && maps_memory
   return fd2_RILE (fd, name, status);
 #	else
@@ -1062,13 +1062,13 @@ void
 Izclose (RILE **p)
 {
   Ifclose (*p);
-  *p = 0;
+  *p = NULL;
 }
 void
 Ozclose (FILE **p)
 {
   Ofclose (*p);
-  *p = 0;
+  *p = NULL;
 }
 
 #if !large_memory

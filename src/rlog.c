@@ -623,7 +623,7 @@ exttree (struct hshentry *root)
     return;
 
   root->selector = extractdelta (root);
-  root->log.string = 0;
+  root->log.string = NULL;
   exttree (root->next);
 
   newbranch = root->branches;
@@ -648,7 +648,7 @@ getlocker (char *argv)
     continue;
   if (c == '\0')
     {
-      lockerlist = 0;
+      lockerlist = NULL;
       return;
     }
 
@@ -687,7 +687,7 @@ getauthor (char *argv)
     {
       authorlist = talloc (struct authors);
       authorlist->login = getusername (false);
-      authorlist->nextauthor = 0;
+      authorlist->nextauthor = NULL;
       return;
     }
 
@@ -1000,7 +1000,7 @@ getnumericrev (void)
   char const *lrev;
   struct buf const *rstart, *rend;
 
-  Revlst = 0;
+  Revlst = NULL;
   ptr = revlist;
   bufautobegin (&s);
   bufautobegin (&e);

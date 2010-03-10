@@ -118,7 +118,7 @@ getadmin (void)
   Head = getdnum ();
   getsemi (Khead);
 
-  Dbranch = 0;
+  Dbranch = NULL;
   if (getkeyopt (Kbranch))
     {
       if ((delta = getnum ()))
@@ -152,7 +152,7 @@ getadmin (void)
       *LastAccess = newaccess;
       LastAccess = &newaccess->nextaccess;
     }
-  *LastAccess = 0;
+  *LastAccess = NULL;
   getsemi (Kaccess);
 
   getkey (Ksymbols);
@@ -174,7 +174,7 @@ getadmin (void)
           LastSymbol = &newassoc->nextassoc;
         }
     }
-  *LastSymbol = 0;
+  *LastSymbol = NULL;
   getsemi (Ksymbols);
 
   getkey (Klocks);
@@ -196,7 +196,7 @@ getadmin (void)
           LastLock = &newlock->nextlock;
         }
     }
-  *LastLock = 0;
+  *LastLock = NULL;
   getsemi (Klocks);
 
   if ((StrictLocks = getkeyopt (Kstrict)))
@@ -233,7 +233,7 @@ getadmin (void)
 char const *const expand_names[] = {
   /* These must agree with *_EXPAND in rcsbase.h.  */
   "kv", "kvl", "k", "v", "o", "b",
-  0
+  NULL
 };
 
 int
@@ -320,14 +320,14 @@ getdelta (void)
       *LastBranch = NewBranch;
       LastBranch = &NewBranch->nextbranch;
     }
-  *LastBranch = 0;
+  *LastBranch = NULL;
   getsemi (K_branches);
 
   getkey (Knext);
   Delta->next = num = getdnum ();
   getsemi (Knext);
-  Delta->lockedby = 0;
-  Delta->log.string = 0;
+  Delta->lockedby = NULL;
+  Delta->log.string = NULL;
   Delta->selector = true;
   Delta->ig = getphrases (Kdesc);
   TotalDeltas++;
@@ -376,7 +376,7 @@ getkeyval (char const *keyword, enum tokens token, int optional)
  * the actual character string of <id> or <num> is returned.
  */
 {
-  register char const *val = 0;
+  register char const *val = NULL;
 
   getkey (keyword);
   if (nexttok == token)

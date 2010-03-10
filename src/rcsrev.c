@@ -319,7 +319,7 @@ genrevs (char const *revno, char const *date, char const *author,
  * revision given by revno, date, author, and state, and stores pointers
  * to these deltas into a list whose starting address is given by store.
  * The last delta (target delta) is returned.
- * If the proper delta could not be found, 0 is returned.
+ * If the proper delta could not be found, NULL is returned.
  */
 {
   int length;
@@ -382,7 +382,7 @@ genrevs (char const *revno, char const *date, char const *author,
         {
           store1 (&store, next);
         }
-      *store = 0;
+      *store = NULL;
       return next;
     }
 
@@ -419,26 +419,26 @@ genrevs (char const *revno, char const *date, char const *author,
         {
           rcserror ("Revision %s has date %s.",
                     next->num, date2str (next->date, datebuf));
-          return 0;
+          return NULL;
         }
       if (author && strcmp (author, next->author) != 0)
         {
           rcserror ("Revision %s has author %s.", next->num, next->author);
-          return 0;
+          return NULL;
         }
       if (state && strcmp (state, next->state) != 0)
         {
           rcserror ("Revision %s has state %s.",
                     next->num, next->state ? next->state : "<empty>");
-          return 0;
+          return NULL;
         }
-      *store = 0;
+      *store = NULL;
       return next;
     }
 
 norev:
   bufautoend (&t);
-  return 0;
+  return NULL;
 }
 
 struct hshentry *
@@ -458,7 +458,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
  * from the branch point on.
  * Pointers to the found deltas are stored in a list beginning with store.
  * revno must be on a side branch.
- * Return 0 on error.
+ * Return NULL on error.
  */
 {
   int field;
@@ -479,7 +479,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           rcserror ("no side branches present for %s",
                     partialno (&t, revno, field - 1));
           bufautoend (&t);
-          return 0;
+          return NULL;
         }
 
       /*find branch head */
@@ -493,21 +493,21 @@ genbranch (struct hshentry const *bpoint, char const *revno,
               rcserror ("branch number %s too high",
                         partialno (&t, revno, field));
               bufautoend (&t);
-              return 0;
+              return NULL;
             }
         }
 
       if (result < 0)
         {
           absent (revno, field);
-          return 0;
+          return NULL;
         }
 
       next = bhead->hsh;
       if (length == field)
         {
           /* pick latest one on that branch */
-          trail = 0;
+          trail = NULL;
           do
             {
               if ((!date || cmpdate (date, next->date) >= 0) &&
@@ -521,7 +521,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           if (!trail)
             {
               cantfindbranch (revno, date, author, state);
-              return 0;
+              return NULL;
             }
           else
             {                   /* print up to last one suitable */
@@ -533,7 +533,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
                 }
               store1 (&store, next);
             }
-          *store = 0;
+          *store = NULL;
           return next;
         }
 
@@ -546,7 +546,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           rcserror ("revision number %s too low",
                     partialno (&t, revno, field + 1));
           bufautoend (&t);
-          return 0;
+          return NULL;
         }
       do
         {
@@ -560,7 +560,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           (cmpnumfld (revno, trail->num, field + 1) != 0))
         {
           absent (revno, field + 1);
-          return 0;
+          return NULL;
         }
       if (length == field + 1)
         {
@@ -568,26 +568,26 @@ genbranch (struct hshentry const *bpoint, char const *revno,
             {
               rcserror ("Revision %s has date %s.",
                         trail->num, date2str (trail->date, datebuf));
-              return 0;
+              return NULL;
             }
           if (author && strcmp (author, trail->author) != 0)
             {
               rcserror ("Revision %s has author %s.",
                         trail->num, trail->author);
-              return 0;
+              return NULL;
             }
           if (state && strcmp (state, trail->state) != 0)
             {
               rcserror ("Revision %s has state %s.",
                         trail->num, trail->state ? trail->state : "<empty>");
-              return 0;
+              return NULL;
             }
         }
       bhead = trail->branches;
 
     }
   while ((field += 2) <= length);
-  *store = 0;
+  *store = NULL;
   return trail;
 }
 
@@ -595,14 +595,14 @@ static char const *
 lookupsym (char const *id)
 /* Function: looks up id in the list of symbolic names starting
  * with pointer SYMBOLS, and returns a pointer to the corresponding
- * revision number.  Return 0 if not present.
+ * revision number.  Return NULL if not present.
  */
 {
   register struct assoc const *next;
   for (next = Symbols; next; next = next->nextassoc)
     if (strcmp (id, next->symbol) == 0)
       return next->num;
-  return 0;
+  return NULL;
 }
 
 int
@@ -748,11 +748,11 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
 
 char const *
 namedrev (char const *name, struct hshentry *delta)
-/* Yield NAME if it names DELTA, 0 otherwise.  */
+/* Yield NAME if it names DELTA, NULL otherwise.  */
 {
   if (name)
     {
-      char const *id = 0, *p, *val;
+      char const *id = NULL, *p, *val;
       for (p = name;; p++)
         switch (ctab[(unsigned char) *p])
           {
@@ -771,10 +771,10 @@ namedrev (char const *name, struct hshentry *delta)
               return id;
             /* fall into */
           default:
-            return 0;
+            return NULL;
           }
     }
-  return 0;
+  return NULL;
 }
 
 static char const *

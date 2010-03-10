@@ -55,7 +55,7 @@ int
 main (int argc, char **argv)
 {
   register char const *a;
-  char const *arg[3], *label[3], *edarg = 0;
+  char const *arg[3], *label[3], *edarg = NULL;
   int labels, tostdout;
 
   CHECK_HV ();
