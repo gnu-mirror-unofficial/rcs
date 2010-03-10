@@ -1,5 +1,12 @@
 2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `printf %.2d' check to configure.ac.
+
+	* configure.ac: Add check for `printf %.2d' DTRT.
+	(PRINTF_DOT2_OK): New AC_DEFINE_UNQUOTED.
+
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[admin] Rename configure.in to configure.ac.
 
 	* Makefile.in (dist, $(srcdir)/configure): Update.

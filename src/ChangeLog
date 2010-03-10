@@ -1,5 +1,11 @@
 2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move `printf %.2d' check to configure.ac.
+
+	* rcstime.c (proper_dot_2): Rewrite func as simple macro.
+
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use <stdbool.h>.
 
 	* rcsbase.h (true, false): Delete #define:s.

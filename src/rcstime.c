@@ -26,26 +26,7 @@
 static long zone_offset;        /* seconds east of UTC, or TM_LOCAL_ZONE */
 static int use_zone_offset;     /* if zero, use UTC without zone indication */
 
-/* Return the first string if printf "%.2" prints a leading "0".
-   Otherwise, return the second string.  */
-static const char *
-proper_dot_2 (const char a[], const char b[])
-{
-  static int checkedp = 0;
-  static int dtrt = -1;
-
-  if (! checkedp)
-    {
-      char buf[4];
-
-      sprintf (buf, "%.2d", 1);
-      dtrt = ('0' == buf[0]);
-      checkedp = 1;
-    }
-  return dtrt
-    ? a
-    : b;
-}
+#define proper_dot_2(a,b)  (PRINTF_DOT2_OK ? (a) : (b))
 
 /*
 * Convert Unix time to RCS format.

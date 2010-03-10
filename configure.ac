@@ -270,6 +270,19 @@ fi
 
 # specific behaviors (that unfortunately require running a program to check)
 
+AC_CACHE_CHECK([if printf "%.2d" produces a leading "0"],[rcs_cv_dot2_ok],[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <stdio.h>
+]],[[
+  char buf[4] = "xxx";
+  sprintf (buf, "%.2d", 1);
+  return ('0' != buf[0]);
+]])
+],[rcs_cv_dot2_ok=yes],[rcs_cv_dot2_ok=no])
+])
+RCS_CBOOL([PRINTF_DOT2_OK],[yes],[rcs_cv_dot2_ok],
+  [Does `printf "%.2d"' properly produce a leading "0"?])
+
 AC_CACHE_CHECK([if `fopen (F, "w+")' truncates],[rcs_cv_fopen_truncates],[
   echo nonempty > conftest.data
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
