@@ -1,5 +1,11 @@
 2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Cause "make check" to fail if any test fails.
+
+	* Makefile.in (check): If any test fails, fail overall.
+
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use '\0' more.
 
 	* ci.c: Throughout, replace `0' a char context with '\0'.

@@ -95,16 +95,18 @@ uninstall ::
 	done
 
 check: test-prep
-	@ls='$(TESTS)' ; if [ "$$ls" ] ; then	\
+	@overall=true ;				\
+	ls='$(TESTS)' ; if [ "$$ls" ] ; then	\
 	  if [ '.' = '$(srcdir)' ] ; then d= ;	\
 	    else d='$(srcdir)/' ; fi ;		\
 	  for t in "$$ls" ; do			\
 	    if $(TESTS_ENVIRONMENT) "$$d$$t" ;	\
 	    then echo "PASS: $$t" ;		\
 	    else echo "FAIL: $$t" ;		\
+	         overall=false ;		\
 	    fi ;				\
 	  done ;				\
-	fi
+	fi ; $$overall
 
 # Install RCS and (if applicable) GNU diff before running these tests.
 installcheck :: test-prep
