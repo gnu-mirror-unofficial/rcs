@@ -759,7 +759,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                   if (c != KDELIM)
                     {
                       /* couldn't find closing KDELIM -- give up */
-                      *tp = 0;
+                      *tp = '\0';
                       aputs (keyval.string, out);
                       continue; /* last c handled properly */
                     }
@@ -776,7 +776,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
     }
 
 keystring_eof:
-  *tp = 0;
+  *tp = '\0';
   aputs (keyval.string, out);
 uncache_exit:
   uncache (infile);
@@ -1180,7 +1180,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
       *tp++ = *x;
       while (*sp)
         *tp++ = *sp++;
-      *--tp = 0;
+      *--tp = '\0';
     }
   else
     {

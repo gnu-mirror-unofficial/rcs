@@ -686,7 +686,7 @@ getmessage (char *option)
       error ("-m option lacks revision number");
       return;
     }
-  *m++ = 0;
+  *m++ = '\0';
   cb = cleanlogmsg (m, strlen (m));
   if (!cb.size)
     {
@@ -1515,7 +1515,7 @@ buildeltatext (struct hshentries const *deltas)
 #	    endif
       *++diffp = "-";
       *++diffp = resultname;
-      *++diffp = 0;
+      *++diffp = '\0';
       if (diff_trouble == runv (fileno (fcut), diffname, diffv))
         rcsfaterror ("diff failed");
       Ofclose (fcut);

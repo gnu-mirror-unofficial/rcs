@@ -38,7 +38,7 @@ normalize_arg (char const *s, char **b)
     }
   else
     {
-      *b = 0;
+      *b = '\0';
       return s;
     }
 }

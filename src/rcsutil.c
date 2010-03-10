@@ -748,7 +748,7 @@ bufargcat (register struct buf *b, int c, register char const *s)
       *p++ = *s++;
     }
   *p++ = '\'';
-  *p = 0;
+  *p = '\0';
 }
 
 #endif

@@ -1,5 +1,21 @@
 2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use '\0' more.
+
+	* ci.c: Throughout, replace `0' a char context with '\0'.
+	* co.c: Likewise.
+	* merger.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcsutil.c: Likewise.
+
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move `printf %.2d' check to configure.ac.
 
 	* rcstime.c (proper_dot_2): Rewrite func as simple macro.

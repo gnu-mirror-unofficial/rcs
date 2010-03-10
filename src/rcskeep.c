@@ -260,7 +260,7 @@ get0val (register int c, register RILE *fp, struct buf *target, int optional)
         case '\t':
           if (tp)
             {
-              *tp = 0;
+              *tp = '\0';
 #		    ifdef KEEPTEST
               printf ("getval: %s\n", target);
 #		    endif

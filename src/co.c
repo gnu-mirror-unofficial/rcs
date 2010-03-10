@@ -600,7 +600,7 @@ addjoin (char *joinrev)
       break;
     }
   terminator = *--j;
-  *j = 0;
+  *j = '\0';
   bufautobegin (&numrev);
   d = NULL;
   if (expandsym (joinrev, &numrev))
@@ -746,7 +746,7 @@ buildjoin (char const *initialfile)
     *p++ = zonearg;
   *p++ = quietarg;
   *p++ = RCSname;
-  *p = 0;
+  *p = '\0';
 
   mergev[1] = prog_merge;
   mergev[2] = mergev[4] = "-L";
@@ -788,7 +788,7 @@ buildjoin (char const *initialfile)
       *p++ = initialfile;
       *p++ = rev2;
       *p++ = rev3;
-      *p = 0;
+      *p = '\0';
       if (diff_trouble == runv (-1, NULL, mergev))
           goto badmerge;
       i = i + 2;

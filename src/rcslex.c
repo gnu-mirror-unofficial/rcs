@@ -233,7 +233,7 @@ nextlex (void)
                 }
               break;
             }
-          *sp = 0;
+          *sp = '\0';
           if (d == DIGIT || d == PERIOD)
             {
               d = NUM;

@@ -213,7 +213,7 @@ main (int argc, char **argv)
     option_handled:
       if (dcp != *argv + 1)
         {
-          *dcp = 0;
+          *dcp = '\0';
           *diffp++ = *argv;
         }
     }                           /* end of option processing */
@@ -228,7 +228,7 @@ main (int argc, char **argv)
       while ((*a = *p++))
         a++;
     }
-  *a = 0;
+  *a = '\0';
 
 #if DIFF_L
   diff_label1 = diff_label2 = NULL;
@@ -340,7 +340,7 @@ main (int argc, char **argv)
         if (zonearg)
           *pp++ = zonearg;
         *pp++ = RCSname;
-        *pp = 0;
+        *pp = '\0';
 
         diffp = diffpend;
 #	    if OPEN_O_BINARY

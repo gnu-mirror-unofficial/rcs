@@ -853,7 +853,7 @@ addelta (void)
       for (i = newdnumlength - ((newdnumlength & 1) ^ 1); --i;)
         while (*tp++ != '.')
           continue;
-      *--tp = 0;                /* Kill final dot to get old delta temporarily. */
+      *--tp = '\0';         /* Kill final dot to get old delta temporarily. */
       if (! (targetdelta = gr_revno (newdelnum.string, &gendeltas)))
         return -1;
       if (cmpnum (targetdelta->num, newdelnum.string) != 0)
@@ -1014,7 +1014,7 @@ incnum (char const *onum, struct buf *nnum)
   *tp = '1';
   tp = np + l;
   *tp++ = '0';
-  *tp = 0;
+  *tp = '\0';
 }
 
 static int

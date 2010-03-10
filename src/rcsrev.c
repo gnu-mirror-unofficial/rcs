@@ -678,7 +678,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
         }
       if (tlim <= p)
         p = bufenlarge (target, &tlim);
-      *p = 0;
+      *p = '\0';
       tp = target->string + s;
 
       if (id)

@@ -343,7 +343,7 @@ get_directory (char const *dirname, char ***aargv)
   *aargv = p = tnalloc (char *, entries + 1);
   for (i = 0; i < entries; i++)
     *p++ = a + offset[i];
-  *p = 0;
+  *p = '\0';
   tfree (offset);
   return entries;
 }
