@@ -1,5 +1,30 @@
 2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use <stdbool.h>.
+
+	* rcsbase.h (true, false): Delete #define:s.
+	* ci.c: #include <stdbool.h>.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merge.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsbase.h: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `NULL' more.
 
 	* ci.c: Throughout, replace `0' in a pointer context with `NULL'.

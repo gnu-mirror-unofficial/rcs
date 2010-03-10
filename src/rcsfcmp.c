@@ -34,6 +34,7 @@
  */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 
 static int discardkeyval (int, RILE *);
 static int

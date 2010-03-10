@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 #include "ident-help.c"
 
 static int match (FILE *);

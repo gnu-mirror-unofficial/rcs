@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 
 int interactiveflag;            /* Should we act as if stdin is a tty?  */
 struct buf curlogbuf;           /* buffer for current log message */

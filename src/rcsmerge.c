@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 #include "rcsmerge-help.c"
 
 char const cmdid[] = "rcsmerge";

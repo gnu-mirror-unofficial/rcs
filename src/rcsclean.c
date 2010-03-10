@@ -20,6 +20,7 @@
 */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 #include "rcsclean-help.c"
 
 #ifdef HAVE_DIRENT_H

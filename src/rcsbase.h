@@ -295,9 +295,6 @@ char *getlogin (void);
 #define VDELIM            ':'   /* separates keywords from values             */
 #define DEFAULTSTATE    "Exp"   /* default state of revisions                 */
 
-#define true     1
-#define false    0
-
 /*
  * RILE - readonly file
  * declarecache; - declares local cache for RILE variable(s)

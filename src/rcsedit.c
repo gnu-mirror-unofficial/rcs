@@ -28,6 +28,7 @@
  */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 
 static void editEndsPrematurely (void) exiting;
 static void editLineNumberOverflow (void) exiting;

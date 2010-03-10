@@ -20,6 +20,7 @@
 */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 #include "merge-help.c"
 
 static void badoption (char const *);

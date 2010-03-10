@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 #include <ctype.h>                      /* isdigit */
 #include "ci-help.c"
 

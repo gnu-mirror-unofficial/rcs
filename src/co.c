@@ -21,6 +21,7 @@
 */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 #include "co-help.c"
 
 static char *addjoin (char *);

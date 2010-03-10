@@ -40,6 +40,7 @@
  */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 
 static char *checkidentifier (char *, int, int);
 static void errsay (char const *);

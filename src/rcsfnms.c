@@ -28,6 +28,7 @@
  */
 
 #include "rcsbase.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 static char const *bindex (char const *, int);
