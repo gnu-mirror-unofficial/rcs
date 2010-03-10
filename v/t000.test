@@ -1,8 +1,5 @@
 # t000.test                                             -*- shell-script -*-
 
-# known to fail with RCS 5.7, not yet fixed for RCS 5.8
-exit 77
-
 . common
 dontsplit
 
@@ -19,6 +16,23 @@ do_and_show 'rcs -q -o4.20 $w' ; do_rlog | tee $wd/last-rlog
 
 # We expect the RCS file to be empty again.
 grep 'total revisions: 0' $wd/last-rlog \
-    && cmp $v ${v}SAVE
+    && cmp $v ${v}SAVE \
+    || exit 1
+
+# Add a revision.
+echo nonempty > $w
+do_and_show 'ci -u -r4.20 -mHELLO $w'
+# Add another
+do_and_show 'co -l $w'
+echo morejunk >> $w
+do_and_show 'ci -u -mANOTHER $w'
+# Outdate the first one, but not the second.
+do_and_show 'rcs -q -o4.20 $w' ; do_rlog | tee $wd/last-rlog
+
+# We expect the RCS file to have only the second revision/log.
+grep 'total revisions: 1' $wd/last-rlog \
+    && grep '^@ANOTHER' $v \
+    && { if grep '^@HELLO' $v ; then false ; else true ; fi ; } \
+    || exit 1
 
 # t000.test ends here

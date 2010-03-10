@@ -1,3 +1,11 @@
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Fix bug: Remove all log messages when removing all revisions.
+
+	* rcs.c (main): When outdating, allow `scanlogtext' to
+	do its job regardless of the presence of revisions finally.
+	Reported by Jeff Sheinberg <jeffsh@erols.com>.
+
 2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Do some small changes to quieten GCC warnings.

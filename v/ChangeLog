@@ -1,3 +1,10 @@
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Fix bug: Remove all log messages when removing all revisions.
+
+	* t000.test: Enable.  Also, add test
+	to check outdating non-tip root revision.
+
 2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add a directory dedicated to verification.

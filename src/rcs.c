@@ -519,7 +519,12 @@ main (int argc, char **argv)
           puttree (Head, frewrite);
         putdesc (textflag, textfile);
 
-        if (Head)
+        /* Don't conditionalize on non-NULL `Head'; that prevents
+           `scanlogtext' from advancing the input pointer to EOF, in
+           the process "marking" the intervening log messages to be
+           discarded later.  The result is bogus log messages.  See
+           <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=69193>.  */
+        if (1)
           {
             if (delrev.strt || messagelst)
               {
