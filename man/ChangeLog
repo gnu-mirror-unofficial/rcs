@@ -1,3 +1,9 @@
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[man] Document rlog -q.
+
+	* rlog.1: Document placebo option `-q'.
+
 2010-03-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move `SENDMAIL' configuration to configure.in.
