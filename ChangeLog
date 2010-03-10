@@ -1,3 +1,10 @@
+2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[admin] Rename configure.in to configure.ac.
+
+	* Makefile.in (dist, $(srcdir)/configure): Update.
+	* configure.ac: Rename from configure.in.
+
 2010-03-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Distribute subdir v/, as well.
