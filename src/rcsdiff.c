@@ -134,6 +134,7 @@ main (int argc, char **argv)
           case 'F':
           case 'I':
           case 'L':
+          case 'U':
           case 'W':
 #if DIFF_L
             if (c == 'L' && ++file_labels == 2)
