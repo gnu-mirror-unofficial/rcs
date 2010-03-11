@@ -871,3 +871,6 @@ extern const char const diff_flags[];
 extern const int diff_success;
 extern const int diff_failure;
 extern const int diff_trouble;
+
+/* A string of 77 '=' followed by '\n'.  */
+extern char const equal_line[];

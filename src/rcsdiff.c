@@ -267,9 +267,7 @@ main (int argc, char **argv)
 
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
           continue;
-        diagnose
-          ("===================================================================\nRCS file: %s\n",
-           RCSname);
+        diagnose ("%sRCS file: %s\n", equal_line + 10, RCSname);
         if (!rev2)
           {
             /* Make sure work file is readable, and get its status.  */

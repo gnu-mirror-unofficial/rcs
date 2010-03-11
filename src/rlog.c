@@ -385,9 +385,7 @@ main (int argc, char **argv)
             putrunk ();
             putree (Head);
           }
-        aputs
-          ("=============================================================================\n",
-           out);
+        aputs (equal_line, out);
       }
   Ofclose (out);
   return exitstatus;

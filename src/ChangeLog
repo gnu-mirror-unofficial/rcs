@@ -1,5 +1,14 @@
 2010-03-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Factor string of '='.
+
+	* rcsbase.h (equal_line): New var decl.
+	* rcsutil.c (equal_line): New const string.
+	* rcsdiff.c (main): Use `equal_line'.
+	* rlog.c (main): Likewise.
+
+2010-03-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Document rcsdiff(1) options passed to underyling diff(1).
 
 	* rcsdiff.c (:help comment): Expand.
