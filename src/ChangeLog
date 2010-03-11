@@ -1,5 +1,18 @@
 2010-03-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	rcsdiff: Refine "same-revision don't call diff" optimization.
+
+	* rcsdiff.c (unique): New struct def.
+	(s_unique): New typedef.
+	(minus_y, minus_D): New static `s_unique' objects.
+	(longopt_maybe_p): New static func.
+	(main) <option parsing>: No longer disable "same-revision
+	don't call diff" optimization on any long opt.  Instead, disable
+	only for `--side-by-side', `--ifdef', or unique portions thereof.
+	Reported by Aaron S. Hawley <ashawley@gnu.uvm.edu>.
+
+2010-03-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Factor string of '='.
 
 	* rcsbase.h (equal_line): New var decl.

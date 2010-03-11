@@ -33,6 +33,53 @@ static int exitstatus;
 static RILE *workptr;
 static struct stat workstat;
 
+/* Normally, if the two revisions specified are the same, we avoid calling
+   the underlying diff on the theory that it will produce no output.  This
+   does not, hold generally for -y (--side-by-side) and -D (--ifdef), such
+   as when the revision specified is by different symbolic names, so we
+   need to detect those options and disable the optimization.
+
+   The `s_unique', `minus_y' `minus_D', and `longopt_maybe_p' are for
+   detecting the long variants in a GNU getopt_long(3)-compatible way.  */
+
+struct unique
+{
+  /* Can this option take a value preceded by '=' (--OPT=VAL)?  */
+  bool eqval_p;
+  /* Minimum length of bytes that must match (including "--").  */
+  size_t minlen;
+  /* The full longopt name (including "--").  */
+  char const full[];
+};
+typedef struct unique s_unique;
+
+static const s_unique const minus_y =
+  {
+    .eqval_p = false,
+    .minlen = 4,
+    .full = "--side-by-side"
+  };
+static const s_unique const minus_D =
+  {
+    .eqval_p = true,
+    .minlen = 4,
+    .full = "--ifdef"
+  };
+
+static inline bool
+longopt_maybe_p (const char *arg, const s_unique const *u)
+{
+  const char *equal = u->eqval_p
+    ? strchr (arg, '=')
+    : NULL;
+  size_t len = equal
+    ? (size_t)(equal - arg)
+    : strlen (arg);
+
+  return !(u->minlen > len)
+    && (0 == strncmp (arg, u->full, len));
+}
+
 char const cmdid[] = "rcsdiff";
 
 /*:help
@@ -135,7 +182,12 @@ main (int argc, char **argv)
             goto option_handled;
           case '-':
           case 'D':
-            no_diff_means_no_output = false;
+            if ('D' == c
+                /* Previously, any long opt would disable the
+                   optimization.  Now, we are more refined.  */
+                || longopt_maybe_p (*argv, &minus_D)
+                || longopt_maybe_p (*argv, &minus_y))
+              no_diff_means_no_output = false;
             /* fall into */
           case 'C':
           case 'F':
