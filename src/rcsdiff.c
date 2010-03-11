@@ -56,6 +56,13 @@ Options:
   -xSUFF  -- specify SUFF as a slash-separated list of suffixes
              used to identify RCS file names
   -zZONE  -- specify date output format in keyword-substitution
+
+Additionally, the following options (and their argument, if any) are
+passed to the underlying diff(1) command:
+  -0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -B, -B, -C, -D, -F, -H, -I,
+  -L, -U, -W, -a, -b, -c, -d, -e, -f, -h, -i, -n, -p, -t, -u, -w, -y,
+  [long options (that start with "--")].
+(Not all of these options are meaningful.)
 */
 
 int
