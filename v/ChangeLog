@@ -1,3 +1,9 @@
+2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Also check expected `co' behavior on no-rev RCS file.
+
+	* t000.test <empty>: Check that `co -p' produces no output.
+
 2010-03-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Fix bug: Remove all log messages when removing all revisions.

@@ -17,6 +17,7 @@ do_and_show 'rcs -q -o4.20 $w' ; do_rlog | tee $wd/last-rlog
 # We expect the RCS file to be empty again.
 grep 'total revisions: 0' $wd/last-rlog \
     && cmp $v ${v}SAVE \
+    && test -z "$(co -q -p $v)" \
     || exit 1
 
 # Add a revision.
