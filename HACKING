@@ -16,7 +16,7 @@ It lives in the repo but is not included in the distribution.
 ***** add documentation in texinfo format
 ***** DONE rcsdiff longopt handling (debian #334004)
 ***** DONE document rlog -q (debian #69257)
-***** temp file security hole in rcsfreeze (debian #27845)
+***** DONE temp file security hole in rcsfreeze (debian #27845)
 *** features
 ***** recognize keyword `commitid' (debian #352527)
 ***** ident accept numbers as well as letters (debian #157891)
