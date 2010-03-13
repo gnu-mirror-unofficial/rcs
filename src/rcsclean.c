@@ -123,28 +123,21 @@ get_directory (char const *dirname, char ***aargv)
 
 /*:help
 [options] file ...
-
-Remove and perhaps unlock files that are not being worked on.
-FILE... names the working file, or the RCS file, or a series
-of alternating WORKING-FILE RCS-FILE pairs.
-
 Options:
+  -r[REV]       Specify revision.
+  -u[REV]       Unlock if is locked and no differences found.
+  -n[REV]       Dry run (no act, don't operate).
+  -q[REV]       Quiet mode.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -T            Preserve the modification time on the RCS file even
+                if the RCS file changes because a lock is removed.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
 
-  -{qrnu}[REV] -- operate in different modes on REV, or latest
-                  in default branch if REV is omitted
-                    r -- specify revision
-                    u -- unlock if is locked and no differences found
-                    n -- dry run (no act, don't operate)
-                    q -- quiet mode
-
-  -kSUBST -- substitute using mode SUBST (see co(1))
-  -T      -- preserve the modification time on the RCS file even
-             if the RCS file changes because a lock is removed
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
+REV defaults to the latest revision on the default branch.
 */
 
 int

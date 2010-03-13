@@ -143,14 +143,12 @@ scanfile (register FILE *file, char const *name, int quiet)
 }
 
 /*:help
-[-q] [-V] [file ...]
-
-Search for all instances of the pattern $KEYWORD: TEXT $ in the
-named files or, if no files are named, the standard input.
-
+[options] [file ...]
 Options:
-  -q -- suppress warnings if no patterns are found
-  -V -- like --version
+  -q            Suppress warnings if no patterns are found.
+  -V            Like --version.
+
+If no FILE is specified, scan standard input.
 */
 
 int

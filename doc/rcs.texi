@@ -481,60 +481,46 @@ environment variable.  This is a space-separated list of options.
 @TODO Convert to texinfo; expand; add links.
 @verbatim
 Usage: ci [options] file...
-
-Store a new revision of the working file into the RCS file.
-FILE... names the working file, or the RCS file, or a series
-of alternating WORKING-FILE RCS-FILE pairs.
-
 Options:
+  -f[REV]       Force new entry, even if no content changed.
+  -I[REV]       Interactive.
+  -i[REV]       Initial checkin; error if RCS file already exists.
+  -j[REV]       Just checkin, don't initialize; error if RCS file does not exist.
+  -k[REV]       Compute revision from working file keywords.
+  -q[REV]       Quiet mode.
+  -r[REV]       Do normal checkin, if REV is specified;
+                otherwise, release lock and delete working file.
+  -l[REV]       Like -r, but immediately checkout locked (co -l) afterwards.
+  -u[REV]       Like -l, but checkout unlocked (co -u).
+  -M[REV]       Reset working file mtime (relevant for -l, -u).
+  -d[DATE]      Use DATE (or working file mtime).
+  -mMSG         Use MSG as the log message.
+  -nNAME        Assign symbolic NAME to the entry; NAME must be new.
+  -NNAME        Like -n, but overwrite any previous assignment.
+  -sSTATE       Set state to STATE.
+  -t-TEXT       Set description to TEXT.
+  -tFILENAME    Set description from text read from FILENAME.
+  -T            Set the RCS file’s modification time to the new revision’s
+                time if the former precedes the latter and there is a new
+                revision; preserve the RCS file’s modification time otherwise.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -wWHO         Use WHO as the author.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution
+                and also the default timezone for -dDATE.
 
-  -{fiIjklMqru}[REV]
-
-        Multiple flags in {fiIjklMqru} may be used, except for
-        -l, -r, -u, which are mutually exclusive.
-
-        f -- force new entry, even if no content changed
-        i -- initial checkin; error if RCS file already exists
-        I -- interactive
-        j -- just checkin, don't initialize; error if RCS file does not exist
-        k -- compute revision from working file keywords
-        q -- quiet mode
-        r -- normal, if REV is specified; otherwise,
-             release lock and delete working file
-        l -- like r, but immediately checkout locked (co -l) afterwards
-        u -- like l, but checkout unlocked (co -u)
-        M -- reset working file mtime (relevant for -l, -u)
-
-        If specified, REV can be symbolic, numeric, or mixed:
-          symbolic -- must have been defined previously (see -n, -N)
-          $        -- determine the revision number from keyword values
-                      in the working file
-          .N       -- prepend default branch => DEFBR.N
-          BR.N     -- use this, but N must be greater than any existing
-                      on BR, or BR must be new
-          BR       -- latest revision on branch BR + 1 => BR.(L+1),
-                      or BR.1 if new branch
-        If REV is omitted, compute it from the last lock (co -l), perhaps
-        starting a new branch.  If there is no lock, use DEFBR.(L+1).
-
-  -d[DATE]  -- use DATE (or working file mtime)
-  -mMSG     -- use MSG as the log message
-  -{nN}NAME -- assign symbolic NAME to the entry; -n signals error if
-               NAME already exists; -N overrides any previous assignment
-  -sSTATE   -- set state to STATE (default: Exp)
-  -tTEXT    -- set description; if TEXT starts with a hyphen (-),
-               use it directly, otherwise it names a file to read
-               (only valid on initial checkin, ignored afterwards)
-  -T        -- set the RCS file’s modification time to the new revision’s
-               time if the former precedes the latter and there is a new
-               revision; preserve the RCS file’s modification time otherwise
-  -V[N]     -- if N is not specified, behave like --version;
-               otherwise, N specifies the RCS version to emulate
-  -wWHO     -- use WHO as the author
-  -xSUFF    -- specify SUFF as a slash-separated list of suffixes
-               used to identify RCS file names
-  -zZONE    -- specify date output format in keyword-substitution
-               and also the default timezone for -dDATE
+Multiple flags in {fiIjklMqru} may be used, except for -r, -l, -u, which are
+mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
+  symbolic -- must have been defined previously (see -n, -N)
+  $        -- determine revision number from keyword values in the working file
+  .N       -- prepend default branch => DEFBR.N
+  BR.N     -- use this, but N must be greater than any existing
+              on BR, or BR must be new
+  BR       -- latest rev on branch BR + 1 => BR.(L+1), or BR.1 if new branch
+If REV is omitted, compute it from the last lock (co -l), perhaps
+starting a new branch.  If there is no lock, use DEFBR.(L+1).
 @end verbatim
 
 @node co
@@ -546,65 +532,39 @@ Options:
 @TODO Convert to texinfo; expand; add links.
 @verbatim
 Usage: co [options] file ...
-
-Retrieve a revision from each RCS file and store it in the
-corresponding working file.  FILE... names the working file, or the
-RCS file, or a series of alternating WORKING-FILE RCS-FILE pairs.
-
 Options:
+  -f[REV]       Force overwrite of working file.
+  -I[REV]       Interactive.
+  -p[REV]       Write to stdout instead of the working file.
+  -q[REV]       Quiet mode.
+  -r[REV]       Normal checkout.
+  -l[REV]       Like -r, but also lock.
+  -u[REV]       Like -l, but unlock.
+  -M[REV]       Reset working file mtime (relevant for -l, -u).
+  -kSUBST       Use SUBST substitution, one of: kv, kvl, k, o, b, v.
+  -dDATE        Select latest before or on DATE.
+  -jJOINS       Merge using JOINS, a list of REV:REV pairs;
+                this option is obsolete -- see rcsmerge(1).
+  -sSTATE       Select matching state STATE.
+  -T            Preserve the modification time on the RCS file even if
+                the RCS file changes because a lock is added or removed.
+  -wWHO         Select matching login WHO.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution
+                and also the default timezone for -dDATE.
 
-  -{fIlMpqru}[REV]
-
-        Multiple flags in {fIlMpqru} may be used, except for
-        -l, -r, -u, which are mutually exclusive.
-
-        f -- force overwrite of working file
-        I -- interactive
-        p -- write to stdout instead of the working file
-        q -- quiet mode
-        r -- normal checkout
-        l -- like r, but also lock
-        u -- like l, but unlock
-        M -- reset working file mtime (relevant for -l, -u)
-
-        If specified, REV can be symbolic, numeric, or mixed:
-          symbolic -- must have been defined previously (see ci(1))
-          $        -- determine the revision number from keyword values
-                      in the working file
-          .N       -- prepend default branch => DEFBR.N
-          BR.N     -- use this
-          BR       -- latest revision on branch BR
-        If REV is omitted, take it to be the latest on the default branch.
-
-  -kSUBST
-
-        Generate keyword substitutions depending on SUBST:
-
-        kv  -- (default) default form: $KEYWORD: VALUE $
-               with locker name in Header, Id, Locker fields only
-               if the RCS file is being locked (via ci -l, co -l)
-        kvl -- like kv, but always insert locker name
-        k   -- only keyword: $KEYWORD$
-        o   -- old value (before checkin): $KEYWORD: OLD-VALUE $
-        b   -- like o, except all i/o is done in binary-mode
-        v   -- only value: VALUE
-
-  -dDATE  -- select latest before or on DATE
-  -jJOINS -- merge using JOINS, a list of REV:REV pairs;
-             this option is obsolete -- see rcsmerge(1)
-  -sSTATE -- select matching state STATE
-  -T      -- preserve the modification time on the RCS file even if the
-             RCS file changes because a lock is added or removed
-  -wWHO   -- select matching login WHO
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
-             and also the default timezone for -dDATE
-
-When the selection options are applied in combination, co
-retrieves the latest revision that satisfies all of them.
+Multiple flags in {fIlMpqru} may be used, except for -r, -l, -u, which are
+mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
+  symbolic -- must have been defined previously (see ci(1))
+  $        -- determine the revision number from keyword values
+              in the working file
+  .N       -- prepend default branch => DEFBR.N
+  BR.N     -- use this
+  BR       -- latest revision on branch BR
+If REV is omitted, take it to be the latest on the default branch.
 @end verbatim
 
 @node ident
@@ -615,14 +575,12 @@ retrieves the latest revision that satisfies all of them.
 
 @TODO Convert to texinfo; expand; add links.
 @verbatim
-Usage: ident [-q] [-V] [file ...]
-
-Search for all instances of the pattern $KEYWORD: TEXT $ in the
-named files or, if no files are named, the standard input.
-
+Usage: ident [options] [file ...]
 Options:
-  -q -- suppress warnings if no patterns are found
-  -V -- like --version
+  -q            Suppress warnings if no patterns are found.
+  -V            Like --version.
+
+If no FILE is specified, scan standard input.
 @end verbatim
 
 @node merge
@@ -633,19 +591,16 @@ Options:
 
 @TODO Convert to texinfo; expand; add links.
 @verbatim
-Usage: merge [options] file1 file2 file3
-
-Incorporate all changes that lead from FILE2 to FILE3 into FILE1.
-Typically, FILE2 is the parent, and FILE1 and FILE3 are siblings.
-
+Usage: merge [options] receiving-sibling parent other-sibling
 Options:
-  -{AEe}  -- output conflicts using the respective diff3 style;
-             default is -E; with -e, emit no warnings
-  -p      -- write to stdout instead of overwriting FILE1
-  -q      -- quiet mode; suppress conflict warnings
-  -LLABEL -- (up to three times) specify the conflict labels
-             for FILE1, FILE2 and FILE, respectively
-  -V      -- like --version
+  -A            Use `diff3 -A' style.
+  -E            Use `diff3 -E' style (default).
+  -e            Use `diff3 -e' style.
+  -p            Write to stdout instead of overwriting RECEIVING-SIBLING.
+  -q            Quiet mode; suppress conflict warnings.
+  -LLABEL       (up to three times) Specify the conflict labels for
+                RECEIVING-SIBLING, PARENT and OTHER-SIBLING, respectively.
+  -V            Like --version.
 @end verbatim
 
 @node rcs
@@ -657,48 +612,44 @@ Options:
 @TODO Convert to texinfo; expand; add links.
 @verbatim
 Usage: rcs [options] file ...
-
-Create new RCS files or change attributes of existing ones.
-FILE... names the working file, or the RCS file, or a series
-of alternating WORKING-FILE RCS-FILE pairs.
-
 Options:
-  -i         -- create and initialize a new RCS file
-  -{LU}      -- set locking to strict (L) or non-strict (U)
-  -M         -- don't send mail when breaking someone else's lock
-  -T         -- preserve the modification time on the RCS file
-                unless a revision is removed
-  -I         -- interactive
-  -q         -- quiet mode
-  -aLOGINS   -- append LOGINS (comma-separated) to access-list
-  -e[LOGINS] -- erase LOGINS (all if unspecified) from access-list
-  -AFILE     -- append access list according to FILE (FIXME GROKME DOCME)
-  -b[REV]    -- set default branch to that of REV or
-                highest branch on trunk if REV is omitted
-  -{lu}[REV] -- lock (l) or unlock (u) the revision REV or
-                latest on the default branch if REV is omitted
-  -cSTRING   -- set comment leader to STRING; don't use: obsolete
-  -kSUBST    -- set default keyword substitution to SUBST (see co(1))
-  -mREV:MSG  -- replace REV's log message with MSG
-  -{nN}WHICH -- WHICH has the form NAME[:[REV]]; if :REV is omitted,
-                delete the symbolic NAME, otherwise associate NAME with
-                REV (or latest on default branch if : given but REV empty);
-                for n, signal error if NAME exists; for N, overwrite
-  -oRANGE    -- outdate revisions in RANGE:
-                  REV       -- single revision
-                  BR        -- latest revision on branch BR
-                  REV1:REV2 -- REV1 to REV2 on same branch
-                  :REV      -- beginning of branch to REV
-                  REV:      -- REV to end of branch
-  -sWHICH    -- WHICH has the form STATE[:REV]; set state of REV
-                (or latest revision on default branch) to STATE
-  -t[TEXT]   -- replace description in RCS file; if TEXT begins with
-                hyphen (-), use it directly, otherwise it names a file
-  -V[N]      -- if N is not specified, behave like --version;
-                otherwise, N specifies the RCS version to emulate
-  -xSUFF     -- specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names
-  -zZONE     -- no effect; included for compatibility with other commands
+  -i              Create and initialize a new RCS file.
+  -L              Set strict locking.
+  -U              Set non-strict locking.
+  -M              Don't send mail when breaking someone else's lock.
+  -T              Preserve the modification time on the RCS file
+                  unless a revision is removed.
+  -I              Interactive.
+  -q              Quiet mode.
+  -aLOGINS        Append LOGINS (comma-separated) to access-list.
+  -e[LOGINS]      Erase LOGINS (all if unspecified) from access-list.
+  -AFILENAME      Append access-list of FILENAME to current access-list.
+  -b[REV]         Set default branch to that of REV or
+                  highest branch on trunk if REV is omitted.
+  -l[REV]         Lock revision REV.
+  -u[REV]         Unlock revision REV.
+  -cSTRING        Set comment leader to STRING; don't use: obsolete.
+  -kSUBST         Set default keyword substitution to SUBST (see co(1)).
+  -mREV:MSG       Replace REV's log message with MSG.
+  -nNAME[:[REV]]  If :REV is omitted, delete symbolic NAME.
+                  Otherwise, associate NAME with REV; NAME must be new.
+  -NNAME[:[REV]]  Like -n, but overwrite any previous assignment.
+  -oRANGE         Outdate revisions in RANGE:
+                    REV       -- single revision
+                    BR        -- latest revision on branch BR
+                    REV1:REV2 -- REV1 to REV2 on same branch
+                    :REV      -- beginning of branch to REV
+                    REV:      -- REV to end of branch
+  -sSTATE[:REV]   Set state of REV to STATE.
+  -t-TEXT         Replace description in RCS file with TEXT.
+  -tFILENAME      Replace description in RCS file with contents of FILENAME.
+  -V              Like --version.
+  -VN             Emulate RCS version N.
+  -xSUFF          Specify SUFF as a slash-separated list of suffixes
+                  used to identify RCS file names.
+  -zZONE          No effect; included for compatibility with other commands.
+
+REV defaults to the latest revision on the default branch.
 @end verbatim
 
 @node rcsclean
@@ -710,28 +661,21 @@ Options:
 @TODO Convert to texinfo; expand; add links.
 @verbatim
 Usage: rcsclean [options] file ...
-
-Remove and perhaps unlock files that are not being worked on.
-FILE... names the working file, or the RCS file, or a series
-of alternating WORKING-FILE RCS-FILE pairs.
-
 Options:
+  -r[REV]       Specify revision.
+  -u[REV]       Unlock if is locked and no differences found.
+  -n[REV]       Dry run (no act, don't operate).
+  -q[REV]       Quiet mode.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -T            Preserve the modification time on the RCS file even
+                if the RCS file changes because a lock is removed.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
 
-  -{qrnu}[REV] -- operate in different modes on REV, or latest
-                  in default branch if REV is omitted
-                    r -- specify revision
-                    u -- unlock if is locked and no differences found
-                    n -- dry run (no act, don't operate)
-                    q -- quiet mode
-
-  -kSUBST -- substitute using mode SUBST (see co(1))
-  -T      -- preserve the modification time on the RCS file even
-             if the RCS file changes because a lock is removed
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
+REV defaults to the latest revision on the default branch.
 @end verbatim
 
 @node rcsdiff
@@ -743,25 +687,20 @@ Options:
 @TODO Convert to texinfo; expand; add links.
 @verbatim
 Usage: rcsdiff [options] file ...
-
-Run diff(1) to compare two revisions of each file given.
-FILE... names the working file, or the RCS file, or a series
-of alternating WORKING-FILE RCS-FILE pairs.
-
-If REV1 and REV2 are specified, compare those revisions.
-If only REV1 is specified, compare the working file with it.
-If no revisions are specified, compare the working file with
-the latest revision on the default branch.
-
 Options:
-  -rREV   -- (zero, one, or two times) name a revision
-  -kSUBST -- substitute using mode SUBST (see co(1))
-  -q      -- quiet mode
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
+  -rREV         (zero, one, or two times) Name a revision.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -q            Quiet mode.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
+
+If given two revisions (-rREV1 -rREV2), compare those revisions.
+If given only one revision (-rREV), compare the working file with it.
+If given no revisions, compare the working file with the latest
+revision on the default branch.
 
 Additionally, the following options (and their argument, if any) are
 passed to the underlying diff(1) command:
@@ -780,24 +719,20 @@ passed to the underlying diff(1) command:
 @TODO Convert to texinfo; expand; add links.
 @verbatim
 Usage: rcsmerge [options] file
-
-Incorporate the changes between two revisions of an RCS file
-into the corresponding working file.
+Options:
+  -p[REV]       Write to stdout instead of overwriting the working file.
+  -q[REV]       Quiet mode.
+  -rREV         (one or two times) specify a revision.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
 
 One or two revisions must be specified (using -p, -q, or -r).
 If only one is specified, use the latest revision on the default
 branch to be the second revision.
-
-Options:
-  -p[REV] -- write to stdout instead of overwriting the working file
-  -q[rev] -- quiet mode
-  -rREV   -- (one or two times) specify a revision
-  -kSUBST -- substitute using mode SUBST (see co(1))
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
 @end verbatim
 
 @node rlog
@@ -809,39 +744,34 @@ Options:
 @TODO Convert to texinfo; expand; add links.
 @verbatim
 Usage: rlog [options] file ...
-
-Display information about RCS files.  FILE... names the
-working file, or the RCS file, or a series of alternating
-WORKING-FILE RCS-FILE pairs.
-
 Options:
-  -L        -- ignore RCS files with no locks set
-  -R        -- print only the name of the RCS file
-  -h        -- print only the "header" information
-  -t        -- like h, but also include the description
-  -N        -- omit symbolic names
-  -b        -- select the default branch
-  -dDATES   -- select revisions in the range DATES, with spec:
-                 D      -- single revision D or earlier
-                 D1<D2  -- between D1 and D2, exclusive
-                 D2>D1  -- likewise
-                 <D, D> -- before D
-                 >D, D< -- after D
-               use <= or >= to make ranges inclusive; DATES
-               may also be a list of semicolon-spearated specs
-  -l[WHO]   -- select revisions locked by WHO (comma-separated list)
-               only, or by anyone if WHO is omitted
-  -r[REVS]  -- select revisions in REVS, a comma-separated list of
-               range specs, one of: REV, REV:, :REV, REV1:REV2
-  -sSTATES  -- select revisions with state in STATES (comma-separated list)
-  -w[WHO]   -- select revisions commited by WHO (comma-separated list),
-               or by the user if WHO is omitted
-  -V[N]     -- if N is not specified, behave like --version;
-               otherwise, N specifies the RCS version to emulate
-  -xSUFF    -- specify SUFF as a slash-separated list of suffixes
-               used to identify RCS file names
-  -zZONE    -- specify date output format in keyword-substitution
-  -q        -- no effect, included for consistency with other commands
+  -L            Ignore RCS files with no locks set.
+  -R            Print only the name of the RCS file.
+  -h            Print only the "header" information.
+  -t            Like -h, but also include the description.
+  -N            Omit symbolic names.
+  -b            Select the default branch.
+  -dDATES       Select revisions in the range DATES, with spec:
+                  D      -- single revision D or earlier
+                  D1<D2  -- between D1 and D2, exclusive
+                  D2>D1  -- likewise
+                  <D, D> -- before D
+                  >D, D< -- after D
+                Use <= or >= to make ranges inclusive; DATES
+                may also be a list of semicolon-spearated specs.
+  -l[WHO]       Select revisions locked by WHO (comma-separated list)
+                only, or by anyone if WHO is omitted.
+  -r[REVS]      Select revisions in REVS, a comma-separated list of
+                range specs, one of: REV, REV:, :REV, REV1:REV2
+  -sSTATES      Select revisions with state in STATES (comma-separated list).
+  -w[WHO]       Select revisions commited by WHO (comma-separated list),
+                or by the user if WHO is omitted.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
+  -q            No effect, included for consistency with other commands.
 @end verbatim
 
 

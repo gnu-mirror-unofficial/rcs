@@ -114,25 +114,20 @@ setup_label (struct buf *b, char const *num, char const date[datesize])
 
 /*:help
 [options] file ...
-
-Run diff(1) to compare two revisions of each file given.
-FILE... names the working file, or the RCS file, or a series
-of alternating WORKING-FILE RCS-FILE pairs.
-
-If REV1 and REV2 are specified, compare those revisions.
-If only REV1 is specified, compare the working file with it.
-If no revisions are specified, compare the working file with
-the latest revision on the default branch.
-
 Options:
-  -rREV   -- (zero, one, or two times) name a revision
-  -kSUBST -- substitute using mode SUBST (see co(1))
-  -q      -- quiet mode
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
+  -rREV         (zero, one, or two times) Name a revision.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -q            Quiet mode.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
+
+If given two revisions (-rREV1 -rREV2), compare those revisions.
+If given only one revision (-rREV), compare the working file with it.
+If given no revisions, compare the working file with the latest
+revision on the default branch.
 
 Additionally, the following options (and their argument, if any) are
 passed to the underlying diff(1) command:

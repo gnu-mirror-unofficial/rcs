@@ -374,65 +374,39 @@ badmerge:
 
 /*:help
 [options] file ...
-
-Retrieve a revision from each RCS file and store it in the
-corresponding working file.  FILE... names the working file, or the
-RCS file, or a series of alternating WORKING-FILE RCS-FILE pairs.
-
 Options:
+  -f[REV]       Force overwrite of working file.
+  -I[REV]       Interactive.
+  -p[REV]       Write to stdout instead of the working file.
+  -q[REV]       Quiet mode.
+  -r[REV]       Normal checkout.
+  -l[REV]       Like -r, but also lock.
+  -u[REV]       Like -l, but unlock.
+  -M[REV]       Reset working file mtime (relevant for -l, -u).
+  -kSUBST       Use SUBST substitution, one of: kv, kvl, k, o, b, v.
+  -dDATE        Select latest before or on DATE.
+  -jJOINS       Merge using JOINS, a list of REV:REV pairs;
+                this option is obsolete -- see rcsmerge(1).
+  -sSTATE       Select matching state STATE.
+  -T            Preserve the modification time on the RCS file even if
+                the RCS file changes because a lock is added or removed.
+  -wWHO         Select matching login WHO.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution
+                and also the default timezone for -dDATE.
 
-  -{fIlMpqru}[REV]
-
-        Multiple flags in {fIlMpqru} may be used, except for
-        -l, -r, -u, which are mutually exclusive.
-
-        f -- force overwrite of working file
-        I -- interactive
-        p -- write to stdout instead of the working file
-        q -- quiet mode
-        r -- normal checkout
-        l -- like r, but also lock
-        u -- like l, but unlock
-        M -- reset working file mtime (relevant for -l, -u)
-
-        If specified, REV can be symbolic, numeric, or mixed:
-          symbolic -- must have been defined previously (see ci(1))
-          $        -- determine the revision number from keyword values
-                      in the working file
-          .N       -- prepend default branch => DEFBR.N
-          BR.N     -- use this
-          BR       -- latest revision on branch BR
-        If REV is omitted, take it to be the latest on the default branch.
-
-  -kSUBST
-
-        Generate keyword substitutions depending on SUBST:
-
-        kv  -- (default) default form: $KEYWORD: VALUE $
-               with locker name in Header, Id, Locker fields only
-               if the RCS file is being locked (via ci -l, co -l)
-        kvl -- like kv, but always insert locker name
-        k   -- only keyword: $KEYWORD$
-        o   -- old value (before checkin): $KEYWORD: OLD-VALUE $
-        b   -- like o, except all i/o is done in binary-mode
-        v   -- only value: VALUE
-
-  -dDATE  -- select latest before or on DATE
-  -jJOINS -- merge using JOINS, a list of REV:REV pairs;
-             this option is obsolete -- see rcsmerge(1)
-  -sSTATE -- select matching state STATE
-  -T      -- preserve the modification time on the RCS file even if the
-             RCS file changes because a lock is added or removed
-  -wWHO   -- select matching login WHO
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
-             and also the default timezone for -dDATE
-
-When the selection options are applied in combination, co
-retrieves the latest revision that satisfies all of them.
+Multiple flags in {fIlMpqru} may be used, except for -r, -l, -u, which are
+mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
+  symbolic -- must have been defined previously (see ci(1))
+  $        -- determine the revision number from keyword values
+              in the working file
+  .N       -- prepend default branch => DEFBR.N
+  BR.N     -- use this
+  BR       -- latest revision on branch BR
+If REV is omitted, take it to be the latest on the default branch.
 */
 
 int

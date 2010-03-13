@@ -1,5 +1,20 @@
 2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Revise output for --help option.
+
+	* ci.c (:help comment): Remove description blurb;
+	use uppercase letters and a period; flatten/reorg a bit.
+	* co.c (:help comment): Likewise.
+	* ident.c (:help comment): Likewise.
+	* merge.c (:help comment): Likewise.
+	* rcs.c (:help comment): Likewise.
+	* rcsclean.c (:help comment): Likewise.
+	* rcsdiff.c (:help comment): Likewise.
+	* rcsmerge.c (:help comment): Likewise.
+	* rlog.c (:help comment): Likewise.
+
+2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Topo-sort top-level; eliminate redundant forward func decls.
 
 	* ci.c: Delete forward func decls; reorder top-level;

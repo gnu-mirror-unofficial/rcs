@@ -42,19 +42,16 @@ exiterr (void)
 }
 
 /*:help
-[options] file1 file2 file3
-
-Incorporate all changes that lead from FILE2 to FILE3 into FILE1.
-Typically, FILE2 is the parent, and FILE1 and FILE3 are siblings.
-
+[options] receiving-sibling parent other-sibling
 Options:
-  -{AEe}  -- output conflicts using the respective diff3 style;
-             default is -E; with -e, emit no warnings
-  -p      -- write to stdout instead of overwriting FILE1
-  -q      -- quiet mode; suppress conflict warnings
-  -LLABEL -- (up to three times) specify the conflict labels
-             for FILE1, FILE2 and FILE, respectively
-  -V      -- like --version
+  -A            Use `diff3 -A' style.
+  -E            Use `diff3 -E' style (default).
+  -e            Use `diff3 -e' style.
+  -p            Write to stdout instead of overwriting RECEIVING-SIBLING.
+  -q            Quiet mode; suppress conflict warnings.
+  -LLABEL       (up to three times) Specify the conflict labels for
+                RECEIVING-SIBLING, PARENT and OTHER-SIBLING, respectively.
+  -V            Like --version.
 */
 
 int

@@ -1,3 +1,10 @@
+2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Revise output for --help option.
+
+	* doc/rcs.texi (ci): Update provisionary @verbatim block.
+	(co, ident, merge, rcs, rcsclean, rcsdiff, rcsmerge, rlog): Likewise.
+
 2010-03-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Document rcsdiff(1) options passed to underyling diff(1).

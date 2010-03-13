@@ -548,60 +548,46 @@ addassoclst (int flag, char const *sp)
 
 /*:help
 [options] file...
-
-Store a new revision of the working file into the RCS file.
-FILE... names the working file, or the RCS file, or a series
-of alternating WORKING-FILE RCS-FILE pairs.
-
 Options:
+  -f[REV]       Force new entry, even if no content changed.
+  -I[REV]       Interactive.
+  -i[REV]       Initial checkin; error if RCS file already exists.
+  -j[REV]       Just checkin, don't initialize; error if RCS file does not exist.
+  -k[REV]       Compute revision from working file keywords.
+  -q[REV]       Quiet mode.
+  -r[REV]       Do normal checkin, if REV is specified;
+                otherwise, release lock and delete working file.
+  -l[REV]       Like -r, but immediately checkout locked (co -l) afterwards.
+  -u[REV]       Like -l, but checkout unlocked (co -u).
+  -M[REV]       Reset working file mtime (relevant for -l, -u).
+  -d[DATE]      Use DATE (or working file mtime).
+  -mMSG         Use MSG as the log message.
+  -nNAME        Assign symbolic NAME to the entry; NAME must be new.
+  -NNAME        Like -n, but overwrite any previous assignment.
+  -sSTATE       Set state to STATE.
+  -t-TEXT       Set description to TEXT.
+  -tFILENAME    Set description from text read from FILENAME.
+  -T            Set the RCS file’s modification time to the new revision’s
+                time if the former precedes the latter and there is a new
+                revision; preserve the RCS file’s modification time otherwise.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -wWHO         Use WHO as the author.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution
+                and also the default timezone for -dDATE.
 
-  -{fiIjklMqru}[REV]
-
-        Multiple flags in {fiIjklMqru} may be used, except for
-        -l, -r, -u, which are mutually exclusive.
-
-        f -- force new entry, even if no content changed
-        i -- initial checkin; error if RCS file already exists
-        I -- interactive
-        j -- just checkin, don't initialize; error if RCS file does not exist
-        k -- compute revision from working file keywords
-        q -- quiet mode
-        r -- normal, if REV is specified; otherwise,
-             release lock and delete working file
-        l -- like r, but immediately checkout locked (co -l) afterwards
-        u -- like l, but checkout unlocked (co -u)
-        M -- reset working file mtime (relevant for -l, -u)
-
-        If specified, REV can be symbolic, numeric, or mixed:
-          symbolic -- must have been defined previously (see -n, -N)
-          $        -- determine the revision number from keyword values
-                      in the working file
-          .N       -- prepend default branch => DEFBR.N
-          BR.N     -- use this, but N must be greater than any existing
-                      on BR, or BR must be new
-          BR       -- latest revision on branch BR + 1 => BR.(L+1),
-                      or BR.1 if new branch
-        If REV is omitted, compute it from the last lock (co -l), perhaps
-        starting a new branch.  If there is no lock, use DEFBR.(L+1).
-
-  -d[DATE]  -- use DATE (or working file mtime)
-  -mMSG     -- use MSG as the log message
-  -{nN}NAME -- assign symbolic NAME to the entry; -n signals error if
-               NAME already exists; -N overrides any previous assignment
-  -sSTATE   -- set state to STATE (default: Exp)
-  -tTEXT    -- set description; if TEXT starts with a hyphen (-),
-               use it directly, otherwise it names a file to read
-               (only valid on initial checkin, ignored afterwards)
-  -T        -- set the RCS file’s modification time to the new revision’s
-               time if the former precedes the latter and there is a new
-               revision; preserve the RCS file’s modification time otherwise
-  -V[N]     -- if N is not specified, behave like --version;
-               otherwise, N specifies the RCS version to emulate
-  -wWHO     -- use WHO as the author
-  -xSUFF    -- specify SUFF as a slash-separated list of suffixes
-               used to identify RCS file names
-  -zZONE    -- specify date output format in keyword-substitution
-               and also the default timezone for -dDATE
+Multiple flags in {fiIjklMqru} may be used, except for -r, -l, -u, which are
+mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
+  symbolic -- must have been defined previously (see -n, -N)
+  $        -- determine revision number from keyword values in the working file
+  .N       -- prepend default branch => DEFBR.N
+  BR.N     -- use this, but N must be greater than any existing
+              on BR, or BR must be new
+  BR       -- latest rev on branch BR + 1 => BR.(L+1), or BR.1 if new branch
+If REV is omitted, compute it from the last lock (co -l), perhaps
+starting a new branch.  If there is no lock, use DEFBR.(L+1).
 */
 
 int

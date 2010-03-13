@@ -35,24 +35,20 @@ char const cmdid[] = "rcsmerge";
 
 /*:help
 [options] file
-
-Incorporate the changes between two revisions of an RCS file
-into the corresponding working file.
+Options:
+  -p[REV]       Write to stdout instead of overwriting the working file.
+  -q[REV]       Quiet mode.
+  -rREV         (one or two times) specify a revision.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
 
 One or two revisions must be specified (using -p, -q, or -r).
 If only one is specified, use the latest revision on the default
 branch to be the second revision.
-
-Options:
-  -p[REV] -- write to stdout instead of overwriting the working file
-  -q[rev] -- quiet mode
-  -rREV   -- (one or two times) specify a revision
-  -kSUBST -- substitute using mode SUBST (see co(1))
-  -V[N]   -- if N is not specified, behave like --version;
-             otherwise, N specifies the RCS version to emulate
-  -xSUFF  -- specify SUFF as a slash-separated list of suffixes
-             used to identify RCS file names
-  -zZONE  -- specify date output format in keyword-substitution
 */
 
 int
