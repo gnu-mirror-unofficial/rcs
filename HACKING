@@ -15,7 +15,6 @@ It lives in the repo but is not included in the distribution.
 ***** DONE avoid mktemp (debian #291542)
 ***** add documentation in texinfo format
 ***** DONE rcsdiff longopt handling (debian #334004)
-***** avoid NULL-deref in rcs.c `scanlogtext' (debian #69193)
 ***** DONE document rlog -q (debian #69257)
 ***** temp file security hole in rcsfreeze (debian #27845)
 *** features
