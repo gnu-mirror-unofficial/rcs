@@ -1,3 +1,9 @@
+2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[sec] Use mktemp(1) instead of homegrown tmporary file naming.
+
+	* rcsfreeze.sh (TMPLOG): Use mktemp(1); exit if not successful.
+
 2010-03-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	rcsdiff: Refine "same-revision don't call diff" optimization.
