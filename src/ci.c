@@ -25,6 +25,15 @@
 #include <ctype.h>                      /* isdigit */
 #include "ci-help.c"
 
+/* Work around a common `ftruncate' bug: NFS won't let you truncate a file
+   that you currently lack permissions for, even if you had permissions when
+   you opened it.  Also, Posix 1003.1b-1993 sec 5.6.7.2 p 128 l 1022 says
+   ftruncate might fail because it's not supported.  */
+#ifndef HAVE_FTRUNCATE
+#undef ftruncate
+#define ftruncate(fd,length) (-1)
+#endif
+
 struct Symrev
 {
   char const *ssymbol;
@@ -32,32 +41,510 @@ struct Symrev
   struct Symrev *nextsym;
 };
 
-static char const *getcurdate (void);
-static int addbranch (struct hshentry *, struct buf *, int);
-static int addelta (void);
-static int addsyms (char const *);
-static int fixwork (mode_t, time_t);
-static int removelock (struct hshentry *);
-static int xpandfile (RILE *, struct hshentry const *, char const **, int);
-static struct cbuf getlogmsg (void);
-static void cleanup (void);
-static void incnum (char const *, struct buf *);
-static void addassoclst (int, char const *);
-
 static FILE *exfile;
-static RILE *workptr;           /* working file pointer         */
-static struct buf newdelnum;    /* new revision number          */
+/* Working file pointer.  */
+static RILE *workptr;
+/* New revision number.  */
+static struct buf newdelnum;
 static struct cbuf msg;
 static int exitstatus;
-static int forceciflag;         /* forces check in              */
+/* Forces check-in.  */
+static int forceciflag;
 static int keepflag, keepworkingfile, rcsinitflag;
-static struct hshentries *gendeltas;    /* deltas to be generated       */
-static struct hshentry *targetdelta;    /* old delta to be generated    */
-static struct hshentry newdelta;        /* new delta to be inserted     */
+/* Deltas to be generated.  */
+static struct hshentries *gendeltas;
+/* Old delta to be generated.  */
+static struct hshentry *targetdelta;
+/* New delta to be inserted.  */
+static struct hshentry newdelta;
 static struct stat workstat;
 static struct Symrev *assoclst, **nextassoc;
 
 char const cmdid[] = "ci";
+
+static void
+cleanup (void)
+{
+  if (nerror)
+    exitstatus = EXIT_FAILURE;
+  Izclose (&finptr);
+  Izclose (&workptr);
+  Ozclose (&exfile);
+  Ozclose (&fcopy);
+  ORCSclose ();
+  dirtempunlink ();
+}
+
+void
+exiterr (void)
+{
+  ORCSerror ();
+  dirtempunlink ();
+  tempunlink ();
+  _exit (EXIT_FAILURE);
+}
+
+static void
+incnum (char const *onum, struct buf *nnum)
+/* Increment the last field of revision number `onum'
+   by one and place the result into `nnum'.  */
+{
+  register char *tp, *np;
+  register size_t l;
+
+  l = strlen (onum);
+  bufalloc (nnum, l + 2);
+  np = tp = nnum->string;
+  strcpy (np, onum);
+  for (tp = np + l; np != tp;)
+    if (isdigit (*--tp))
+      {
+        if (*tp != '9')
+          {
+            ++*tp;
+            return;
+          }
+        *tp = '0';
+      }
+    else
+      {
+        tp++;
+        break;
+      }
+  /* We changed 999 to 000; now change it to 1000.  */
+  *tp = '1';
+  tp = np + l;
+  *tp++ = '0';
+  *tp = '\0';
+}
+
+static int
+removelock (struct hshentry *delta)
+/* Find the lock held by caller on `delta',
+   remove it, and return nonzero if successful.
+   Print an error message and return -1 if there is no such lock.
+   An exception is if `!StrictLocks', and caller is the owner of
+   the RCS file.  If caller does not have a lock in this case,
+   return 0; return 1 if a lock is actually removed.  */
+{
+  register struct rcslock *next, **trail;
+  char const *num;
+
+  num = delta->num;
+  for (trail = &Locks; (next = *trail); trail = &next->nextlock)
+    if (next->delta == delta)
+      {
+        if (strcmp (getcaller (), next->login) == 0)
+          {
+            /* We found a lock on delta by caller; delete it.  */
+            *trail = next->nextlock;
+            delta->lockedby = NULL;
+            return 1;
+          }
+        else
+          {
+            rcserror ("revision %s locked by %s", num, next->login);
+            return -1;
+          }
+      }
+  if (!StrictLocks && myself (RCSstat.st_uid))
+    return 0;
+  rcserror ("no lock set by %s for revision %s", getcaller (), num);
+  return -1;
+}
+
+static int
+addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
+/* Add a new branch and branch delta at `branchpoint'.
+   If `num' is the null string, append the new branch, incrementing
+   the highest branch number (initially 1), and setting the level number to 1.
+   the new delta and branchhead are in globals `newdelta' and `newbranch', resp.
+   the new number is placed into `num'.
+   Return -1 on error, 1 if a lock is removed, 0 otherwise.
+   If `removedlock' is 1, a lock was already removed.  */
+{
+  struct branchhead *bhead, **btrail;
+  struct buf branchnum;
+  int result;
+  int field, numlength;
+  static struct branchhead newbranch;   /* new branch to be inserted */
+
+  numlength = countnumflds (num->string);
+
+  if (!branchpoint->branches)
+    {
+      /* Start first branch.  */
+      branchpoint->branches = &newbranch;
+      if (numlength == 0)
+        {
+          bufscpy (num, branchpoint->num);
+          bufscat (num, ".1.1");
+        }
+      else if (numlength & 1)
+        bufscat (num, ".1");
+      newbranch.nextbranch = NULL;
+
+    }
+  else if (numlength == 0)
+    {
+      /* Append new branch to the end.  */
+      bhead = branchpoint->branches;
+      while (bhead->nextbranch)
+        bhead = bhead->nextbranch;
+      bhead->nextbranch = &newbranch;
+      bufautobegin (&branchnum);
+      getbranchno (bhead->hsh->num, &branchnum);
+      incnum (branchnum.string, num);
+      bufautoend (&branchnum);
+      bufscat (num, ".1");
+      newbranch.nextbranch = NULL;
+    }
+  else
+    {
+      /* Place the branch properly.  */
+      field = numlength - ((numlength & 1) ^ 1);
+      /* Field of branch number.  */
+      btrail = &branchpoint->branches;
+      while (0 < (result = cmpnumfld (num->string, (*btrail)->hsh->num,
+                                      field)))
+        {
+          btrail = &(*btrail)->nextbranch;
+          if (!*btrail)
+            {
+              result = -1;
+              break;
+            }
+        }
+      if (result < 0)
+        {
+          /* Insert/append new branchhead.  */
+          newbranch.nextbranch = *btrail;
+          *btrail = &newbranch;
+          if (numlength & 1)
+            bufscat (num, ".1");
+        }
+      else
+        {
+          /* Branch exists; append to end.  */
+          bufautobegin (&branchnum);
+          getbranchno (num->string, &branchnum);
+          targetdelta = gr_revno (branchnum.string, &gendeltas);
+          bufautoend (&branchnum);
+          if (!targetdelta)
+            return -1;
+          if (cmpnum (num->string, targetdelta->num) <= 0)
+            {
+              rcserror ("revision %s too low; must be higher than %s",
+                        num->string, targetdelta->num);
+              return -1;
+            }
+          if (!removedlock && 0 <= (removedlock = removelock (targetdelta)))
+            {
+              if (numlength & 1)
+                incnum (targetdelta->num, num);
+              targetdelta->next = &newdelta;
+              newdelta.next = NULL;
+            }
+          return removedlock;
+          /* Don't do anything to newbranch.  */
+        }
+    }
+  newbranch.hsh = &newdelta;
+  newdelta.next = NULL;
+  if (branchpoint->lockedby)
+    if (strcmp (branchpoint->lockedby, getcaller ()) == 0)
+      return removelock (branchpoint);  /* This returns 1.  */
+  return removedlock;
+}
+
+static int
+addelta (void)
+/* Append a delta to the delta tree, whose number is given by
+   `newdelnum'.  Update `Head', `newdelnum', `newdelnumlength',
+   and the links in newdelta.
+   Return -1 on error, 1 if a lock is removed, 0 otherwise.  */
+{
+  register char *tp;
+  register int i;
+  int removedlock;
+  int newdnumlength;            /* actual length of new rev. num. */
+
+  newdnumlength = countnumflds (newdelnum.string);
+
+  if (rcsinitflag)
+    {
+      /* This covers non-existing RCS file,
+         and a file initialized with `rcs -i'.  */
+      if (newdnumlength == 0 && Dbranch)
+        {
+          bufscpy (&newdelnum, Dbranch);
+          newdnumlength = countnumflds (Dbranch);
+        }
+      if (newdnumlength == 0)
+        bufscpy (&newdelnum, "1.1");
+      else if (newdnumlength == 1)
+        bufscat (&newdelnum, ".1");
+      else if (newdnumlength > 2)
+        {
+          rcserror ("Branch point doesn't exist for revision %s.",
+                    newdelnum.string);
+          return -1;
+        }
+      /* (`newdnumlength' == 2 is OK.)  */
+      Head = &newdelta;
+      newdelta.next = NULL;
+      return 0;
+    }
+  if (newdnumlength == 0)
+    {
+      /* Derive new revision number from locks.  */
+      switch (findlock (true, &targetdelta))
+        {
+
+        default:
+          /* Found two or more old locks.  */
+          return -1;
+
+        case 1:
+          /* Found an old lock.  Check whether locked revision exists.  */
+          if (!gr_revno (targetdelta->num, &gendeltas))
+            return -1;
+          if (targetdelta == Head)
+            {
+              /* Make new head.  */
+              newdelta.next = Head;
+              Head = &newdelta;
+            }
+          else if (!targetdelta->next && countnumflds (targetdelta->num) > 2)
+            {
+              /* New tip revision on side branch.  */
+              targetdelta->next = &newdelta;
+              newdelta.next = NULL;
+            }
+          else
+            {
+              /* Middle revision; start a new branch.  */
+              bufscpy (&newdelnum, "");
+              return addbranch (targetdelta, &newdelnum, 1);
+            }
+          incnum (targetdelta->num, &newdelnum);
+          /* Successful use of existing lock.  */
+          return 1;
+
+        case 0:
+          /* No existing lock; try `Dbranch'.  Update `newdelnum'.  */
+          if (StrictLocks || !myself (RCSstat.st_uid))
+            {
+              rcserror ("no lock set by %s", getcaller ());
+              return -1;
+            }
+          if (Dbranch)
+            {
+              bufscpy (&newdelnum, Dbranch);
+            }
+          else
+            {
+              incnum (Head->num, &newdelnum);
+            }
+          newdnumlength = countnumflds (newdelnum.string);
+          /* Now fall into next statement.  */
+        }
+    }
+  if (newdnumlength <= 2)
+    {
+      /* Add new head per given number.  */
+      if (newdnumlength == 1)
+        {
+          /* Make a two-field number out of it.  */
+          if (cmpnumfld (newdelnum.string, Head->num, 1) == 0)
+            incnum (Head->num, &newdelnum);
+          else
+            bufscat (&newdelnum, ".1");
+        }
+      if (cmpnum (newdelnum.string, Head->num) <= 0)
+        {
+          rcserror ("revision %s too low; must be higher than %s",
+                    newdelnum.string, Head->num);
+          return -1;
+        }
+      targetdelta = Head;
+      if (0 <= (removedlock = removelock (Head)))
+        {
+          if (!gr_revno (Head->num, &gendeltas))
+            return -1;
+          newdelta.next = Head;
+          Head = &newdelta;
+        }
+      return removedlock;
+    }
+  else
+    {
+      /* Put new revision on side branch.  First, get branch point.  */
+      tp = newdelnum.string;
+      for (i = newdnumlength - ((newdnumlength & 1) ^ 1); --i;)
+        while (*tp++ != '.')
+          continue;
+      /* Kill final dot to get old delta temporarily.  */
+      *--tp = '\0';
+      if (! (targetdelta = gr_revno (newdelnum.string, &gendeltas)))
+        return -1;
+      if (cmpnum (targetdelta->num, newdelnum.string) != 0)
+        {
+          rcserror ("can't find branch point %s", newdelnum.string);
+          return -1;
+        }
+      /* Restore final dot.  */
+      *tp = '.';
+      return addbranch (targetdelta, &newdelnum, 0);
+    }
+}
+
+static int
+addsyms (char const *num)
+{
+  register struct Symrev *p;
+
+  for (p = assoclst; p; p = p->nextsym)
+    if (addsymbol (num, p->ssymbol, p->override) < 0)
+      return false;
+  return true;
+}
+
+static char const *
+getcurdate (void)
+/* Return a pointer to the current date.  */
+{
+  static char buffer[datesize];
+
+  if (!buffer[0])
+    time2date (now (), buffer);
+  return buffer;
+}
+
+static int
+fixwork (mode_t newworkmode, time_t mtime)
+{
+  return
+    1 < workstat.st_nlink
+    || (newworkmode & S_IWUSR && !myself (workstat.st_uid))
+    || setmtime (workname, mtime) != 0
+    ? -1 : workstat.st_mode == newworkmode ? 0
+#ifdef HAVE_FCHMOD
+    : fchmod (Ifileno (workptr), newworkmode) == 0 ? 0
+#endif
+    : chmod (workname, newworkmode)
+    ;
+}
+
+static int
+xpandfile (RILE *unexfile, struct hshentry const *delta,
+           char const **exname, int dolog)
+/* Read `unexfile' and copy it to a file, performing keyword
+   substitution with data from `delta'.
+   Return -1 if unsuccessful, 1 if expansion occurred, 0 otherwise.
+   If successful, store the name into `*exname'.  */
+{
+  char const *targetname;
+  int e, r;
+
+  targetname = makedirtemp (1);
+  if (!(exfile = fopenSafer (targetname, FOPEN_W_WORK)))
+    {
+      eerror (targetname);
+      workerror ("can't build working file");
+      return -1;
+    }
+  r = 0;
+  if (MIN_UNEXPAND <= Expand)
+    fastcopy (unexfile, exfile);
+  else
+    {
+      for (;;)
+        {
+          e = expandline (unexfile, exfile, delta, false, NULL, dolog);
+          if (e < 0)
+            break;
+          r |= e;
+          if (e <= 1)
+            break;
+        }
+    }
+  *exname = targetname;
+  return r & 1;
+}
+
+/* --------------------- G E T L O G M S G --------------------------------*/
+
+static struct cbuf
+getlogmsg (void)
+/* Obtain and return a log message.
+   If a log message is given with `-m', return that message.
+   If this is the initial revision, return a standard log message.
+   Otherwise, read a character string from the terminal.
+   Stop after reading EOF or a single '.' on a line.
+   Prompt the first time called for the log message; during all
+   later calls ask whether the previous log message can be reused.  */
+{
+  static char const emptych[] = EMPTYLOG, initialch[] = "Initial revision";
+  static struct cbuf const
+    emptylog = { emptych, sizeof (emptych) - sizeof (char) },
+    initiallog = { initialch, sizeof (initialch) - sizeof (char)};
+  static struct buf logbuf;
+  static struct cbuf logmsg;
+  register char *tp;
+  register size_t i;
+  char const *caller;
+
+  if (msg.size)
+    return msg;
+
+  if (keepflag)
+    {
+      /* Generate standard log message.  */
+      caller = getcaller ();
+      i = sizeof (ciklog) + strlen (caller) + 3;
+      bufalloc (&logbuf, i + datesize + zonelenmax);
+      tp = logbuf.string;
+      sprintf (tp, "%s%s at ", ciklog, caller);
+      date2str (getcurdate (), tp + i);
+      logmsg.string = tp;
+      logmsg.size = strlen (tp);
+      return logmsg;
+    }
+
+  if (!targetdelta && (cmpnum (newdelnum.string, "1.1") == 0
+                       || cmpnum (newdelnum.string, "1.0") == 0))
+    return initiallog;
+
+  if (logmsg.size)
+    {
+      /*Previous log available.  */
+      if (yesorno (true, "reuse log message of previous file? [yn](y): "))
+        return logmsg;
+    }
+
+  /* Now read string from stdin.  */
+  logmsg = getsstdin ("m", "log message", "", &logbuf);
+
+  /* Now check whether the log message is not empty.  */
+  if (logmsg.size)
+    return logmsg;
+  return emptylog;
+}
+
+static void
+addassoclst (int flag, char const *sp)
+/* Make a linked list of Symbolic names.  */
+{
+  struct Symrev *pt;
+
+  pt = talloc (struct Symrev);
+  pt->ssymbol = sp;
+  pt->override = flag;
+  pt->nextsym = NULL;
+  *nextassoc = pt;
+  nextassoc = &pt->nextsym;
+}
 
 /*:help
 [options] file...
@@ -121,7 +608,6 @@ int
 main (int argc, char **argv)
 {
   static char const default_state[] = DEFAULTSTATE;
-
   char altdate[datesize];
   char olddate[datesize];
   char newdatebuf[datesize + zonelenmax];
@@ -300,7 +786,8 @@ main (int argc, char **argv)
         default:
           error ("unknown option: %s", *argv);
         };
-    }                           /* end processing of options */
+    }
+  /* (End processing of options.)  */
 
   /* Handle all pathnames.  */
   if (nerror)
@@ -316,22 +803,25 @@ main (int argc, char **argv)
         switch (pairnames (argc, argv, rcswriteopen, mustread, false))
           {
 
-          case -1:             /* New RCS file */
-#		if defined HAVE_SETUID && defined HAVE_GETUID
+          case -1:
+            /* New RCS file.  */
+#if defined HAVE_SETUID && defined HAVE_GETUID
             if (euid () != ruid ())
               {
                 workerror
                   ("setuid initial checkin prohibited; use `rcs -i -a' first");
                 continue;
               }
-#		endif
+#endif
             rcsinitflag = true;
             break;
 
-          case 0:              /* Error */
+          case 0:
+            /* Error.  */
             continue;
 
-          case 1:              /* Normal checkin with prev . RCS file */
+          case 1:
+            /* Normal checkin with previous RCS file.  */
             if (initflag)
               {
                 rcserror ("already exists");
@@ -340,12 +830,10 @@ main (int argc, char **argv)
             rcsinitflag = !Head;
           }
 
-        /*
-         * RCSname contains the name of the RCS file, and
-         * workname contains the name of the working file.
-         * If the RCS file exists, finptr contains the file descriptor for the
-         * RCS file, and RCSstat is set. The admin node is initialized.
-         */
+        /* `RCSname' contains the name of the RCS file, and `workname'
+          contains the name of the working file.  If the RCS file exists,
+          `finptr' contains the file descriptor for the RCS file, and
+          `RCSstat' is set.  The admin node is initialized.  */
 
         diagnose ("%s  <--  %s\n", RCSname, workname);
 
@@ -384,45 +872,58 @@ main (int argc, char **argv)
               workwarn ("can't find an author");
             if (!*prevstate.string && !state)
               workwarn ("can't find a state");
-          }                     /* end processing keepflag */
+          }
+        /* (End processing keepflag.)  */
 
         /* Read the delta tree.  */
         if (finptr)
           gettree ();
 
-        /* expand symbolic revision number */
+        /* Expand symbolic revision number.  */
         if (!fexpandsym (krev, &newdelnum, workptr))
           continue;
 
-        /* splice new delta into tree */
+        /* Splice new delta into tree.  */
         if ((removedlock = addelta ()) < 0)
           continue;
 
         newdelta.num = newdelnum.string;
         newdelta.branches = NULL;
-        newdelta.lockedby = NULL;   /* This might be changed by addlock().  */
+        /* This might be changed by `addlock'.  */
+        newdelta.lockedby = NULL;
         newdelta.selector = true;
         newdelta.name = NULL;
         clear_buf (&newdelta.ig);
         clear_buf (&newdelta.igtext);
-        /* set author */
+
+        /* Set author.  */
         if (author)
-          newdelta.author = author;     /* set author given by -w         */
+          /* Given by `-w'.  */
+          newdelta.author = author;
         else if (keepflag && *prevauthor.string)
-          newdelta.author = prevauthor.string;  /* preserve old author if possible */
+            /* Preserve old author if possible.  */
+          newdelta.author = prevauthor.string;
         else
-          newdelta.author = getcaller ();       /* otherwise use caller's id      */
+          /* Otherwise use caller's id.  */
+          newdelta.author = getcaller ();
+
+        /* Set state.  */
         newdelta.state = default_state;
         if (state)
-          newdelta.state = state;       /* set state given by -s          */
+          /* Given by `-s'.  */
+          newdelta.state = state;
         else if (keepflag && *prevstate.string)
-          newdelta.state = prevstate.string;    /* preserve old state if possible */
+          /* Preserve old state if possible.  */
+          newdelta.state = prevstate.string;
+
+        /* Compute date.  */
         if (usestatdate)
           {
             time2date (workstat.st_mtime, altdate);
           }
         if (*altdate != '\0')
-          newdelta.date = altdate;      /* set date given by -d           */
+          /* Given by `-d'.  */
+          newdelta.date = altdate;
         else if (keepflag && *prevdate.string)
           {
             /* Preserve old date if possible.  */
@@ -430,8 +931,9 @@ main (int argc, char **argv)
             newdelta.date = olddate;
           }
         else
-          newdelta.date = getcurdate ();        /* use current date */
-        /* now check validity of date -- needed because of -d and -k          */
+          /* Use current date.  */
+          newdelta.date = getcurdate ();
+        /* Now check validity of date -- needed because of `-d' and `-k'.  */
         if (targetdelta && cmpdate (newdelta.date, targetdelta->date) < 0)
           {
             rcserror ("Date %s precedes %s in revision %s.",
@@ -459,11 +961,11 @@ main (int argc, char **argv)
         lockthis = lockflag;
         workdelta = &newdelta;
 
-        /* build rest of file */
+        /* Build rest of file.  */
         if (rcsinitflag)
           {
             diagnose ("initial revision: %s\n", newdelta.num);
-            /* get logmessage */
+            /* Get logmessage.  */
             newdelta.log = getlogmsg ();
             putdftext (&newdelta, workptr, frewrite, false);
             RCSstat.st_mode = workstat.st_mode;
@@ -480,8 +982,9 @@ main (int argc, char **argv)
               buildrevision (gendeltas, targetdelta, NULL, false);
             if (!forceciflag
                 && strcmp (newdelta.state, targetdelta->state) == 0
-                && (changework =
-                    rcsfcmp (workptr, &workstat, expname, targetdelta)) <= 0)
+                && ((changework = rcsfcmp (workptr, &workstat, expname,
+                                          targetdelta))
+                    <= 0))
               {
                 diagnose
                   ("file is unchanged; reverting to previous revision %s\n",
@@ -496,27 +999,13 @@ main (int argc, char **argv)
                 if (!(changedRCS = lockflag < removedlock || assoclst))
                   workdelta = targetdelta;
                 else
+                  /* We have started to build the wrong new RCS file.
+                     Start over from the beginning.  */
                   {
-                    /*
-                     * We have started to build the wrong new RCS file.
-                     * Start over from the beginning.
-                     */
                     long hwm = ftell (frewrite);
                     int bad_truncate;
-                    Orewind (frewrite);
 
-                    /*
-                     * Work around a common ftruncate() bug:
-                     * NFS won't let you truncate a file that you
-                     * currently lack permissions for, even if you
-                     * had permissions when you opened it.
-                     * Also, Posix 1003.1b-1993 sec 5.6.7.2 p 128 l 1022
-                     * says ftruncate might fail because it's not supported.
-                     */
-#			if !defined HAVE_FTRUNCATE
-#			    undef ftruncate
-#			    define ftruncate(fd,length) (-1)
-#			endif
+                    Orewind (frewrite);
                     bad_truncate = ftruncate (fileno (frewrite), (off_t) 0);
 
                     Irewind (finptr);
@@ -537,8 +1026,8 @@ main (int argc, char **argv)
                     fastcopy (finptr, frewrite);
                     if (bad_truncate)
                       while (ftell (frewrite) < hwm)
-                        /* White out any earlier mistake with '\n's.  */
-                        /* This is unlikely.  */
+                        /* White out any earlier mistake with '\n's.
+                           This is unlikely.  */
                         afputc ('\n', frewrite);
                   }
               }
@@ -547,61 +1036,61 @@ main (int argc, char **argv)
                 int wfd = Ifileno (workptr);
                 struct stat checkworkstat;
                 char const *diffv[6 + !!OPEN_O_BINARY], **diffp;
-#		    if large_memory && !maps_memory
+#if large_memory && !maps_memory
                 FILE *wfile = workptr->stream;
                 long wfile_off;
-#		    endif
-#		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
+#endif
+#if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 off_t wfd_off;
-#		    endif
+#endif
 
                 diagnose ("new revision: %s; previous revision: %s\n",
                           newdelta.num, targetdelta->num);
                 newdelta.log = getlogmsg ();
-#		    if !large_memory
+#if !large_memory
                 Irewind (workptr);
-#			if CAN_FFLUSH_IN
+#if CAN_FFLUSH_IN
                 if (fflush (workptr) != 0)
                   Ierror ();
-#			endif
-#		    else
-#			if !maps_memory
+#endif
+#else  /* !large_memory */
+#if !maps_memory
                 if ((wfile_off = ftell (wfile)) == -1
                     || fseek (wfile, 0L, SEEK_SET) != 0
-#			     if CAN_FFLUSH_IN
+#if CAN_FFLUSH_IN
                     || fflush (wfile) != 0
-#			     endif
+#endif
                   )
                   Ierror ();
-#			endif
-#		    endif
-#		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
+#endif  /* !maps_memory */
+#endif  /* !large_memory */
+#if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 wfd_off = lseek (wfd, (off_t) 0, SEEK_CUR);
                 if (wfd_off == -1
                     || (wfd_off != 0
                         && lseek (wfd, (off_t) 0, SEEK_SET) != 0))
                   Ierror ();
-#		    endif
+#endif
                 diffp = diffv;
                 *++diffp = prog_diff;
                 *++diffp = diff_flags;
-#		    if OPEN_O_BINARY
+#if OPEN_O_BINARY
                 if (Expand == BINARY_EXPAND)
                   *++diffp = "--binary";
-#		    endif
+#endif
                 *++diffp = newhead ? "-" : expname;
                 *++diffp = newhead ? expname : "-";
                 *++diffp = NULL;
                 if (diff_trouble == runv (wfd, diffname, diffv))
                   rcsfaterror ("diff failed");
-#		    if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
+#if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 if (lseek (wfd, wfd_off, SEEK_CUR) == -1)
                   Ierror ();
-#		    endif
-#		    if large_memory && !maps_memory
+#endif
+#if large_memory && !maps_memory
                 if (fseek (wfile, wfile_off, SEEK_SET) != 0)
                   Ierror ();
-#		    endif
+#endif
                 if (newhead)
                   {
                     Irewind (workptr);
@@ -612,10 +1101,8 @@ main (int argc, char **argv)
                 else if (!putdtext (&newdelta, diffname, frewrite, true))
                   continue;
 
-                /*
-                 * Check whether the working file changed during checkin,
-                 * to avoid producing an inconsistent RCS file.
-                 */
+                /* Check whether the working file changed during checkin,
+                   to avoid producing an inconsistent RCS file.  */
                 if (fstat (wfd, &checkworkstat) != 0
                     || workstat.st_mtime != checkworkstat.st_mtime
                     || workstat.st_size != checkworkstat.st_size)
@@ -628,22 +1115,24 @@ main (int argc, char **argv)
               }
           }
 
-        /* Deduce time_t of new revision if it is needed later.  */
+        /* Deduce `time_t' of new revision if it is needed later.  */
         wtime = (time_t) - 1;
         if (mtimeflag | Ttimeflag)
           wtime = date2time (workdelta->date);
 
-        if (donerewrite (changedRCS,
-                         !Ttimeflag ? (time_t) - 1
-                         : finptr
-                         && wtime <
-                         RCSstat.st_mtime ? RCSstat.st_mtime : wtime) != 0)
+        if (donerewrite (changedRCS, !Ttimeflag
+                         ? (time_t) - 1
+                         : finptr && wtime < (RCSstat.st_mtime
+                                              ? RCSstat.st_mtime
+                                              : wtime))
+            != 0)
           continue;
 
         if (!keepworkingfile)
           {
             Izclose (&workptr);
-            r = un_link (workname);     /* Get rid of old file */
+            /* Get rid of old file.  */
+            r = un_link (workname);
           }
         else
           {
@@ -668,10 +1157,8 @@ main (int argc, char **argv)
                     continue;
 
                   case 0:
-                    /*
-                     * No expansion occurred; try to reuse working file
-                     * unless we already tried and failed.
-                     */
+                    /* No expansion occurred; try to reuse working file
+                       unless we already tried and failed.  */
                     if (changework)
                       if ((r = fixwork (newworkmode, mtime)) == 0)
                         break;
@@ -698,501 +1185,6 @@ main (int argc, char **argv)
 
   tempunlink ();
   return exitstatus;
-}                               /* end of main (ci) */
-
-static void
-cleanup (void)
-{
-  if (nerror)
-    exitstatus = EXIT_FAILURE;
-  Izclose (&finptr);
-  Izclose (&workptr);
-  Ozclose (&exfile);
-  Ozclose (&fcopy);
-  ORCSclose ();
-  dirtempunlink ();
 }
 
-void
-exiterr (void)
-{
-  ORCSerror ();
-  dirtempunlink ();
-  tempunlink ();
-  _exit (EXIT_FAILURE);
-}
-
-/*****************************************************************/
-/* the rest are auxiliary routines                               */
-
-static int
-addelta (void)
-/* Function: Appends a delta to the delta tree, whose number is
- * given by newdelnum.  Updates Head, newdelnum, newdelnumlength,
- * and the links in newdelta.
- * Return -1 on error, 1 if a lock is removed, 0 otherwise.
- */
-{
-  register char *tp;
-  register int i;
-  int removedlock;
-  int newdnumlength;            /* actual length of new rev. num. */
-
-  newdnumlength = countnumflds (newdelnum.string);
-
-  if (rcsinitflag)
-    {
-      /* this covers non-existing RCS file and a file initialized with rcs -i */
-      if (newdnumlength == 0 && Dbranch)
-        {
-          bufscpy (&newdelnum, Dbranch);
-          newdnumlength = countnumflds (Dbranch);
-        }
-      if (newdnumlength == 0)
-        bufscpy (&newdelnum, "1.1");
-      else if (newdnumlength == 1)
-        bufscat (&newdelnum, ".1");
-      else if (newdnumlength > 2)
-        {
-          rcserror ("Branch point doesn't exist for revision %s.",
-                    newdelnum.string);
-          return -1;
-        }                       /* newdnumlength == 2 is OK;  */
-      Head = &newdelta;
-      newdelta.next = NULL;
-      return 0;
-    }
-  if (newdnumlength == 0)
-    {
-      /* derive new revision number from locks */
-      switch (findlock (true, &targetdelta))
-        {
-
-        default:
-          /* found two or more old locks */
-          return -1;
-
-        case 1:
-          /* found an old lock */
-          /* check whether locked revision exists */
-          if (!gr_revno (targetdelta->num, &gendeltas))
-            return -1;
-          if (targetdelta == Head)
-            {
-              /* make new head */
-              newdelta.next = Head;
-              Head = &newdelta;
-            }
-          else if (!targetdelta->next && countnumflds (targetdelta->num) > 2)
-            {
-              /* new tip revision on side branch */
-              targetdelta->next = &newdelta;
-              newdelta.next = NULL;
-            }
-          else
-            {
-              /* middle revision; start a new branch */
-              bufscpy (&newdelnum, "");
-              return addbranch (targetdelta, &newdelnum, 1);
-            }
-          incnum (targetdelta->num, &newdelnum);
-          return 1;             /* successful use of existing lock */
-
-        case 0:
-          /* no existing lock; try Dbranch */
-          /* update newdelnum */
-          if (StrictLocks || !myself (RCSstat.st_uid))
-            {
-              rcserror ("no lock set by %s", getcaller ());
-              return -1;
-            }
-          if (Dbranch)
-            {
-              bufscpy (&newdelnum, Dbranch);
-            }
-          else
-            {
-              incnum (Head->num, &newdelnum);
-            }
-          newdnumlength = countnumflds (newdelnum.string);
-          /* now fall into next statement */
-        }
-    }
-  if (newdnumlength <= 2)
-    {
-      /* add new head per given number */
-      if (newdnumlength == 1)
-        {
-          /* make a two-field number out of it */
-          if (cmpnumfld (newdelnum.string, Head->num, 1) == 0)
-            incnum (Head->num, &newdelnum);
-          else
-            bufscat (&newdelnum, ".1");
-        }
-      if (cmpnum (newdelnum.string, Head->num) <= 0)
-        {
-          rcserror ("revision %s too low; must be higher than %s",
-                    newdelnum.string, Head->num);
-          return -1;
-        }
-      targetdelta = Head;
-      if (0 <= (removedlock = removelock (Head)))
-        {
-          if (!gr_revno (Head->num, &gendeltas))
-            return -1;
-          newdelta.next = Head;
-          Head = &newdelta;
-        }
-      return removedlock;
-    }
-  else
-    {
-      /* put new revision on side branch */
-      /*first, get branch point */
-      tp = newdelnum.string;
-      for (i = newdnumlength - ((newdnumlength & 1) ^ 1); --i;)
-        while (*tp++ != '.')
-          continue;
-      *--tp = '\0';         /* Kill final dot to get old delta temporarily. */
-      if (! (targetdelta = gr_revno (newdelnum.string, &gendeltas)))
-        return -1;
-      if (cmpnum (targetdelta->num, newdelnum.string) != 0)
-        {
-          rcserror ("can't find branch point %s", newdelnum.string);
-          return -1;
-        }
-      *tp = '.';                /* Restore final dot. */
-      return addbranch (targetdelta, &newdelnum, 0);
-    }
-}
-
-static int
-addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
-/* adds a new branch and branch delta at branchpoint.
- * If num is the null string, appends the new branch, incrementing
- * the highest branch number (initially 1), and setting the level number to 1.
- * the new delta and branchhead are in globals newdelta and newbranch, resp.
- * the new number is placed into num.
- * Return -1 on error, 1 if a lock is removed, 0 otherwise.
- * If REMOVEDLOCK is 1, a lock was already removed.
- */
-{
-  struct branchhead *bhead, **btrail;
-  struct buf branchnum;
-  int result;
-  int field, numlength;
-  static struct branchhead newbranch;   /* new branch to be inserted */
-
-  numlength = countnumflds (num->string);
-
-  if (!branchpoint->branches)
-    {
-      /* start first branch */
-      branchpoint->branches = &newbranch;
-      if (numlength == 0)
-        {
-          bufscpy (num, branchpoint->num);
-          bufscat (num, ".1.1");
-        }
-      else if (numlength & 1)
-        bufscat (num, ".1");
-      newbranch.nextbranch = NULL;
-
-    }
-  else if (numlength == 0)
-    {
-      /* append new branch to the end */
-      bhead = branchpoint->branches;
-      while (bhead->nextbranch)
-        bhead = bhead->nextbranch;
-      bhead->nextbranch = &newbranch;
-      bufautobegin (&branchnum);
-      getbranchno (bhead->hsh->num, &branchnum);
-      incnum (branchnum.string, num);
-      bufautoend (&branchnum);
-      bufscat (num, ".1");
-      newbranch.nextbranch = NULL;
-    }
-  else
-    {
-      /* place the branch properly */
-      field = numlength - ((numlength & 1) ^ 1);
-      /* field of branch number */
-      btrail = &branchpoint->branches;
-      while (0 <
-             (result = cmpnumfld (num->string, (*btrail)->hsh->num, field)))
-        {
-          btrail = &(*btrail)->nextbranch;
-          if (!*btrail)
-            {
-              result = -1;
-              break;
-            }
-        }
-      if (result < 0)
-        {
-          /* insert/append new branchhead */
-          newbranch.nextbranch = *btrail;
-          *btrail = &newbranch;
-          if (numlength & 1)
-            bufscat (num, ".1");
-        }
-      else
-        {
-          /* branch exists; append to end */
-          bufautobegin (&branchnum);
-          getbranchno (num->string, &branchnum);
-          targetdelta = gr_revno (branchnum.string, &gendeltas);
-          bufautoend (&branchnum);
-          if (!targetdelta)
-            return -1;
-          if (cmpnum (num->string, targetdelta->num) <= 0)
-            {
-              rcserror ("revision %s too low; must be higher than %s",
-                        num->string, targetdelta->num);
-              return -1;
-            }
-          if (!removedlock && 0 <= (removedlock = removelock (targetdelta)))
-            {
-              if (numlength & 1)
-                incnum (targetdelta->num, num);
-              targetdelta->next = &newdelta;
-              newdelta.next = NULL;
-            }
-          return removedlock;
-          /* Don't do anything to newbranch.  */
-        }
-    }
-  newbranch.hsh = &newdelta;
-  newdelta.next = NULL;
-  if (branchpoint->lockedby)
-    if (strcmp (branchpoint->lockedby, getcaller ()) == 0)
-      return removelock (branchpoint);  /* This returns 1.  */
-  return removedlock;
-}
-
-static int
-addsyms (char const *num)
-{
-  register struct Symrev *p;
-
-  for (p = assoclst; p; p = p->nextsym)
-    if (addsymbol (num, p->ssymbol, p->override) < 0)
-      return false;
-  return true;
-}
-
-static void
-incnum (char const *onum, struct buf *nnum)
-/* Increment the last field of revision number onum by one and
- * place the result into nnum.
- */
-{
-  register char *tp, *np;
-  register size_t l;
-
-  l = strlen (onum);
-  bufalloc (nnum, l + 2);
-  np = tp = nnum->string;
-  strcpy (np, onum);
-  for (tp = np + l; np != tp;)
-    if (isdigit (*--tp))
-      {
-        if (*tp != '9')
-          {
-            ++*tp;
-            return;
-          }
-        *tp = '0';
-      }
-    else
-      {
-        tp++;
-        break;
-      }
-  /* We changed 999 to 000; now change it to 1000.  */
-  *tp = '1';
-  tp = np + l;
-  *tp++ = '0';
-  *tp = '\0';
-}
-
-static int
-removelock (struct hshentry *delta)
-/* function: Finds the lock held by caller on delta,
- * removes it, and returns nonzero if successful.
- * Print an error message and return -1 if there is no such lock.
- * An exception is if !StrictLocks, and caller is the owner of
- * the RCS file. If caller does not have a lock in this case,
- * return 0; return 1 if a lock is actually removed.
- */
-{
-  register struct rcslock *next, **trail;
-  char const *num;
-
-  num = delta->num;
-  for (trail = &Locks; (next = *trail); trail = &next->nextlock)
-    if (next->delta == delta)
-      {
-        if (strcmp (getcaller (), next->login) == 0)
-          {
-            /* We found a lock on delta by caller; delete it.  */
-            *trail = next->nextlock;
-            delta->lockedby = NULL;
-            return 1;
-          }
-        else
-          {
-            rcserror ("revision %s locked by %s", num, next->login);
-            return -1;
-          }
-      }
-  if (!StrictLocks && myself (RCSstat.st_uid))
-    return 0;
-  rcserror ("no lock set by %s for revision %s", getcaller (), num);
-  return -1;
-}
-
-static char const *
-getcurdate (void)
-/* Return a pointer to the current date.  */
-{
-  static char buffer[datesize]; /* date buffer */
-
-  if (!buffer[0])
-    time2date (now (), buffer);
-  return buffer;
-}
-
-static int
-fixwork (mode_t newworkmode, time_t mtime)
-{
-  return
-    1 < workstat.st_nlink
-    || (newworkmode & S_IWUSR && !myself (workstat.st_uid))
-    || setmtime (workname, mtime) != 0
-    ? -1 : workstat.st_mode == newworkmode ? 0
-#ifdef HAVE_FCHMOD
-    : fchmod (Ifileno (workptr), newworkmode) == 0 ? 0
-#endif
-    : chmod (workname, newworkmode)
-    ;
-}
-
-static int
-xpandfile (RILE *unexfile, struct hshentry const *delta,
-           char const **exname, int dolog)
-/*
- * Read unexfile and copy it to a
- * file, performing keyword substitution with data from delta.
- * Return -1 if unsuccessful, 1 if expansion occurred, 0 otherwise.
- * If successful, stores the stream descriptor into *EXFILEP
- * and its name into *EXNAME.
- */
-{
-  char const *targetname;
-  int e, r;
-
-  targetname = makedirtemp (1);
-  if (!(exfile = fopenSafer (targetname, FOPEN_W_WORK)))
-    {
-      eerror (targetname);
-      workerror ("can't build working file");
-      return -1;
-    }
-  r = 0;
-  if (MIN_UNEXPAND <= Expand)
-    fastcopy (unexfile, exfile);
-  else
-    {
-      for (;;)
-        {
-          e = expandline (unexfile, exfile, delta, false, NULL, dolog);
-          if (e < 0)
-            break;
-          r |= e;
-          if (e <= 1)
-            break;
-        }
-    }
-  *exname = targetname;
-  return r & 1;
-}
-
-/* --------------------- G E T L O G M S G --------------------------------*/
-
-static struct cbuf
-getlogmsg (void)
-/* Obtain and yield a log message.
- * If a log message is given with -m, yield that message.
- * If this is the initial revision, yield a standard log message.
- * Otherwise, reads a character string from the terminal.
- * Stops after reading EOF or a single '.' on a
- * line. getlogmsg prompts the first time it is called for the
- * log message; during all later calls it asks whether the previous
- * log message can be reused.
- */
-{
-  static char const emptych[] = EMPTYLOG, initialch[] = "Initial revision";
-  static struct cbuf const
-    emptylog = { emptych, sizeof (emptych) - sizeof (char) }, initiallog =
-  {
-  initialch, sizeof (initialch) - sizeof (char)};
-  static struct buf logbuf;
-  static struct cbuf logmsg;
-
-  register char *tp;
-  register size_t i;
-  char const *caller;
-
-  if (msg.size)
-    return msg;
-
-  if (keepflag)
-    {
-      /* generate std. log message */
-      caller = getcaller ();
-      i = sizeof (ciklog) + strlen (caller) + 3;
-      bufalloc (&logbuf, i + datesize + zonelenmax);
-      tp = logbuf.string;
-      sprintf (tp, "%s%s at ", ciklog, caller);
-      date2str (getcurdate (), tp + i);
-      logmsg.string = tp;
-      logmsg.size = strlen (tp);
-      return logmsg;
-    }
-
-  if (!targetdelta && (cmpnum (newdelnum.string, "1.1") == 0 ||
-                       cmpnum (newdelnum.string, "1.0") == 0))
-    return initiallog;
-
-  if (logmsg.size)
-    {
-      /*previous log available */
-      if (yesorno (true, "reuse log message of previous file? [yn](y): "))
-        return logmsg;
-    }
-
-  /* now read string from stdin */
-  logmsg = getsstdin ("m", "log message", "", &logbuf);
-
-  /* now check whether the log message is not empty */
-  if (logmsg.size)
-    return logmsg;
-  return emptylog;
-}
-
-/*  Make a linked list of Symbolic names  */
-
-static void
-addassoclst (int flag, char const *sp)
-{
-  struct Symrev *pt;
-
-  pt = talloc (struct Symrev);
-  pt->ssymbol = sp;
-  pt->override = flag;
-  pt->nextsym = NULL;
-  *nextassoc = pt;
-  nextassoc = &pt->nextsym;
-}
+/* ci.c ends here */

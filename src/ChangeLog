@@ -1,5 +1,21 @@
 2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Topo-sort top-level; eliminate redundant forward func decls.
+
+	* ci.c: Delete forward func decls; reorder top-level;
+	do other whitespace and comment changes.
+	(main): Move to end.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merge.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[sec] Use mktemp(1) instead of homegrown tmporary file naming.
 
 	* rcsfreeze.sh (TMPLOG): Use mktemp(1); exit if not successful.

@@ -24,6 +24,13 @@
 #include <stdbool.h>
 #include "rcsmerge-help.c"
 
+void
+exiterr (void)
+{
+  tempunlink ();
+  _exit (diff_trouble);
+}
+
 char const cmdid[] = "rcsmerge";
 
 /*:help
@@ -52,18 +59,17 @@ int
 main (int argc, char **argv)
 {
   static char const quietarg[] = "-q";
-
   register int i;
   char *a, **newargv;
   char const *arg[3];
-  char const *rev[3], *xrev[3]; /*revision numbers */
+  char const *rev[3], *xrev[3];         /*revision numbers */
   char const *edarg, *expandarg, *suffixarg, *versionarg, *zonearg;
   int tostdout;
   int status;
   RILE *workptr;
   struct buf commarg;
-  struct buf numericrev;        /* holds expanded revision number */
-  struct hshentries *gendeltas; /* deltas to be generated */
+  struct buf numericrev;                /* holds expanded revision number */
+  struct hshentries *gendeltas;         /* deltas to be generated */
   struct hshentry *target;
 
   CHECK_HV ();
@@ -71,7 +77,7 @@ main (int argc, char **argv)
   bufautobegin (&commarg);
   bufautobegin (&numericrev);
   edarg = rev[1] = rev[2] = NULL;
-  status = 0;                   /* Keep lint happy.  */
+  status = 0;                           /* Keep lint happy.  */
   tostdout = false;
   expandarg = suffixarg = versionarg = zonearg = quietarg;      /* no-op */
   suffixes = X_DEFAULT;
@@ -118,7 +124,7 @@ main (int argc, char **argv)
           zone_set (a);
           break;
         case 'T':
-          /* Ignore -T, so that RCSINIT can contain -T.  */
+          /* Ignore `-T', so that env var `RCSINIT' can contain `-T'.  */
           if (*a)
             goto unknown;
           break;
@@ -136,13 +142,13 @@ main (int argc, char **argv)
         unknown:
           error ("unknown option: %s", *argv);
         };
-    }                           /* end of option processing */
+    }
+  /* (End of option processing.)  */
 
   if (!rev[1])
     faterror ("no base revision number given");
 
   /* Now handle all pathnames.  */
-
   if (!nerror)
     {
       if (argc < 1)
@@ -158,7 +164,8 @@ main (int argc, char **argv)
           if (!(workptr = Iopen (workname, FOPEN_R_WORK, NULL)))
             efaterror (workname);
 
-          gettree ();           /* reads in the delta tree */
+          /* Read in the delta tree.  */
+          gettree ();
 
           if (!Head)
             rcsfaterror ("no revisions present");
@@ -192,9 +199,10 @@ main (int argc, char **argv)
                         {
                           diagnose ("retrieving revision %s\n", xrev[i]);
                           bufscpy (&commarg, "-p");
-                          bufscat (&commarg, rev[i]);   /* not xrev[i], for $Name's sake */
+                          /* Not `xrev[i]', for $Name's sake.  */
+                          bufscat (&commarg, rev[i]);
                           if (run (-1,
-                                   /* Do not collide with merger.c maketemp().  */
+                                   /* Don't collide with merger.c `maketemp'.  */
                                    arg[i] = maketemp (i + 2),
                                    prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
@@ -219,9 +227,4 @@ main (int argc, char **argv)
   return nerror ? diff_trouble : status;
 }
 
-void
-exiterr (void)
-{
-  tempunlink ();
-  _exit (diff_trouble);
-}
+/* rcsmerge.c ends here */

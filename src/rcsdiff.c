@@ -24,15 +24,6 @@
 #include <stdbool.h>
 #include "rcsdiff-help.c"
 
-#if DIFF_L
-static char const *setup_label (struct buf *, char const *, char const[datesize]);
-#endif
-static void cleanup (void);
-
-static int exitstatus;
-static RILE *workptr;
-static struct stat workstat;
-
 /* Normally, if the two revisions specified are the same, we avoid calling
    the underlying diff on the theory that it will produce no output.  This
    does not, hold generally for -y (--side-by-side) and -D (--ifdef), such
@@ -66,6 +57,11 @@ static const s_unique const minus_D =
     .full = "--ifdef"
   };
 
+char const cmdid[] = "rcsdiff";
+static int exitstatus;
+static RILE *workptr;
+static struct stat workstat;
+
 static inline bool
 longopt_maybe_p (const char *arg, const s_unique const *u)
 {
@@ -80,7 +76,41 @@ longopt_maybe_p (const char *arg, const s_unique const *u)
     && (0 == strncmp (arg, u->full, len));
 }
 
-char const cmdid[] = "rcsdiff";
+static void
+cleanup (void)
+{
+  if (nerror)
+    exitstatus = diff_trouble;
+  Izclose (&finptr);
+  Izclose (&workptr);
+}
+
+void
+exiterr (void)
+{
+  tempunlink ();
+  _exit (diff_trouble);
+}
+
+#if DIFF_L
+static char const *
+setup_label (struct buf *b, char const *num, char const date[datesize])
+{
+  char *p;
+  char datestr[datesize + zonelenmax];
+
+  date2str (date, datestr);
+  bufalloc (b,
+            strlen (workname)
+            + sizeof datestr + 4 + (num ? strlen (num) : 0));
+  p = b->string;
+  if (num)
+    sprintf (p, "-L%s\t%s\t%s", workname, datestr, num);
+  else
+    sprintf (p, "-L%s\t%s", workname, datestr);
+  return p;
+}
+#endif
 
 /*:help
 [options] file ...
@@ -151,10 +181,8 @@ main (int argc, char **argv)
   no_diff_means_no_output = true;
   suffixes = X_DEFAULT;
 
-  /*
-   * Room for runv extra + args [+ --binary] [+ 2 labels]
-   * + 1 file + 1 trailing null.
-   */
+  /* Room for runv extra + args [+ --binary] [+ 2 labels]
+     + 1 file + 1 trailing null.  */
   diffv = tnalloc (char const *, 1 + argc + !!OPEN_O_BINARY + 2 * DIFF_L + 2);
   diffp = diffv + 1;
   *diffp++ = prog_diff;
@@ -253,7 +281,7 @@ main (int argc, char **argv)
             zone_set (*argv + 2);
             goto option_handled;
           case 'T':
-            /* Ignore -T, so that RCSINIT can contain -T.  */
+            /* Ignore `-T', so that env var `RCSINIT' can contain `-T'.  */
             if (*a)
               goto unknown;
             break;
@@ -276,7 +304,8 @@ main (int argc, char **argv)
           *dcp = '\0';
           *diffp++ = *argv;
         }
-    }                           /* end of option processing */
+    }
+  /* (End of option processing.)  */
 
   for (pp = diffv + 2, c = 0; pp < diffp;)
     c += strlen (*pp++) + 1;
@@ -303,9 +332,9 @@ main (int argc, char **argv)
 
   cov[1] = prog_co;
   cov[2] = "-q";
-#   if !DIFF_L
+#if !DIFF_L
   cov[3] = "-M";
-#   endif
+#endif
 
   /* Now handle all pathnames.  */
   if (nerror)
@@ -330,7 +359,8 @@ main (int argc, char **argv)
               }
           }
 
-        gettree ();             /* reads in the delta tree */
+        /* Read in the delta tree.  */
+        gettree ();
 
         if (!Head)
           {
@@ -385,7 +415,8 @@ main (int argc, char **argv)
 
         diagnose ("retrieving revision %s\n", xrev1);
         bufscpy (&commarg, "-p");
-        bufscat (&commarg, rev1);       /* not xrev1, for $Name's sake */
+        /* Not `xrev1', for $Name's sake.  */
+        bufscat (&commarg, rev1);
 
         pp = &cov[3 + !DIFF_L];
         *pp++ = commarg.string;
@@ -401,10 +432,10 @@ main (int argc, char **argv)
         *pp = '\0';
 
         diffp = diffpend;
-#	    if OPEN_O_BINARY
+#if OPEN_O_BINARY
         if (Expand == BINARY_EXPAND)
           *diffp++ = "--binary";
-#	    endif
+#endif
         diffp[0] = maketemp (0);
         if (runv (-1, diffp[0], cov))
           {
@@ -427,7 +458,8 @@ main (int argc, char **argv)
           {
             diagnose ("retrieving revision %s\n", xrev2);
             bufscpy (&commarg, "-p");
-            bufscat (&commarg, rev2);   /* not xrev2, for $Name's sake */
+            /* Not `xrev2', for $Name's sake.  */
+            bufscat (&commarg, rev2);
             cov[3 + !DIFF_L] = commarg.string;
             diffp[1] = maketemp (1);
             if (runv (-1, diffp[1], cov))
@@ -457,37 +489,4 @@ main (int argc, char **argv)
   return exitstatus;
 }
 
-static void
-cleanup (void)
-{
-  if (nerror)
-    exitstatus = diff_trouble;
-  Izclose (&finptr);
-  Izclose (&workptr);
-}
-
-void
-exiterr (void)
-{
-  tempunlink ();
-  _exit (diff_trouble);
-}
-
-#if DIFF_L
-static char const *
-setup_label (struct buf *b, char const *num, char const date[datesize])
-{
-  char *p;
-  char datestr[datesize + zonelenmax];
-  date2str (date, datestr);
-  bufalloc (b,
-            strlen (workname)
-            + sizeof datestr + 4 + (num ? strlen (num) : 0));
-  p = b->string;
-  if (num)
-    sprintf (p, "-L%s\t%s\t%s", workname, datestr, num);
-  else
-    sprintf (p, "-L%s\t%s", workname, datestr);
-  return p;
-}
-#endif
+/* rcsdiff.c ends here */

@@ -28,13 +28,98 @@
 static int get_directory (char const *, char ***);
 #endif
 
-static int unlock (struct hshentry *);
-static void cleanup (void);
-
 static RILE *workptr;
 static int exitstatus;
 
 char const cmdid[] = "rcsclean";
+
+static void
+cleanup (void)
+{
+  if (nerror)
+    exitstatus = EXIT_FAILURE;
+  Izclose (&finptr);
+  Izclose (&workptr);
+  Ozclose (&fcopy);
+  ORCSclose ();
+  dirtempunlink ();
+}
+
+void
+exiterr (void)
+{
+  ORCSerror ();
+  dirtempunlink ();
+  tempunlink ();
+  _exit (EXIT_FAILURE);
+}
+
+static int
+unlock (struct hshentry *delta)
+{
+  register struct rcslock **al, *l;
+
+  if (delta && delta->lockedby
+      && strcmp (getcaller (), delta->lockedby) == 0)
+    for (al = &Locks; (l = *al); al = &l->nextlock)
+      if (l->delta == delta)
+        {
+          *al = l->nextlock;
+          delta->lockedby = NULL;
+          return true;
+        }
+  return false;
+}
+
+#ifdef HAVE_DIRENT_H
+static int
+get_directory (char const *dirname, char ***aargv)
+/* Put a vector of all DIRNAME's directory entries names into *AARGV.
+   Ignore names of RCS files.
+   Return the number of entries found.  Terminate the vector with 0.
+   Allocate the storage for the vector and entry names.
+   Do not sort the names.  Do not include '.' and '..'.  */
+{
+  int i, entries = 0, entries_max = 64;
+  size_t chars = 0, chars_max = 1024;
+  size_t *offset = tnalloc (size_t, entries_max);
+  char *a = tnalloc (char, chars_max), **p;
+  DIR *d;
+  struct dirent *e;
+
+  if (!(d = opendir (dirname)))
+    efaterror (dirname);
+  while ((errno = 0, e = readdir (d)))
+    {
+      char const *en = e->d_name;
+      size_t s = strlen (en) + 1;
+
+      if (en[0] == '.' && (!en[1] || (en[1] == '.' && !en[2])))
+        continue;
+      if (rcssuffix (en))
+        continue;
+      while (chars_max < s + chars)
+        a = trealloc (char, a, chars_max <<= 1);
+      if (entries == entries_max)
+        offset = trealloc (size_t, offset, entries_max <<= 1);
+      offset[entries++] = chars;
+      strcpy (a + chars, en);
+      chars += s;
+    }
+  if (errno || closedir (d) != 0)
+    efaterror (dirname);
+  if (chars)
+    a = trealloc (char, a, chars);
+  else
+    tfree (a);
+  *aargv = p = tnalloc (char *, entries + 1);
+  for (i = 0; i < entries; i++)
+    *p++ = a + offset[i];
+  *p = '\0';
+  tfree (offset);
+  return entries;
+}
+#endif
 
 /*:help
 [options] file ...
@@ -68,7 +153,6 @@ main (int argc, char **argv)
   static char const usage[] =
     "\nrcsclean: usage: rcsclean -ksubst -{nqru}[rev] -T -Vn -xsuff -zzone file ...";
   static struct buf revision;
-
   char *a, **newargv;
   char const *rev, *p;
   int dounlock, expmode, perform, unlocked, unlockflag, waslocked;
@@ -94,13 +178,13 @@ main (int argc, char **argv)
     {
       if (--argc < 1)
         {
-#			ifdef HAVE_DIRENT_H
+#ifdef HAVE_DIRENT_H
           argc = get_directory (".", &newargv);
           argv = newargv;
           break;
-#			else
+#else
           faterror ("no pathnames specified");
-#			endif
+#endif
         }
       a = *++argv;
       if (!*a || *a++ != '-')
@@ -171,8 +255,8 @@ main (int argc, char **argv)
 
         if (!(0 < pairnames (argc, argv,
                              dounlock ? rcswriteopen : rcsreadopen,
-                             true, true) &&
-              (workptr = Iopen (workname, FOPEN_R_WORK, &workstat))))
+                             true, true)
+              && (workptr = Iopen (workname, FOPEN_R_WORK, &workstat))))
           continue;
 
         if (same_file (RCSstat, workstat, 0))
@@ -222,17 +306,18 @@ main (int argc, char **argv)
 
         if (0 <= expmode)
           Expand = expmode;
-        else if (waslocked &&
-                 Expand == KEYVAL_EXPAND &&
-                 WORKMODE (RCSstat.st_mode, true) == workstat.st_mode)
+        else if (waslocked
+                 && Expand == KEYVAL_EXPAND
+                 && WORKMODE (RCSstat.st_mode, true) == workstat.st_mode)
           Expand = KEYVALLOCK_EXPAND;
 
         getdesc (false);
 
-        if (!delta ? workstat.st_size != 0 :
-            0 < rcsfcmp (workptr, &workstat,
-                         buildrevision (deltas, delta, NULL, false),
-                         delta))
+        if (!delta
+            ? workstat.st_size != 0
+            : 0 < rcsfcmp (workptr, &workstat,
+                           buildrevision (deltas, delta, NULL, false),
+                           delta))
           continue;
 
         if (quietflag < unlocked)
@@ -242,8 +327,10 @@ main (int argc, char **argv)
           {
             if_advise_access (deltas->first != delta, finptr,
                               MADV_SEQUENTIAL);
-            if (donerewrite
-                (true, Ttimeflag ? RCSstat.st_mtime : (time_t) - 1) != 0)
+            if (donerewrite (true, Ttimeflag
+                             ? RCSstat.st_mtime
+                             : (time_t) - 1)
+                != 0)
               continue;
           }
 
@@ -252,7 +339,6 @@ main (int argc, char **argv)
         Izclose (&workptr);
         if (perform && un_link (workname) != 0)
           eerror (workname);
-
       }
 
   tempunlink ();
@@ -261,90 +347,4 @@ main (int argc, char **argv)
   return exitstatus;
 }
 
-static void
-cleanup (void)
-{
-  if (nerror)
-    exitstatus = EXIT_FAILURE;
-  Izclose (&finptr);
-  Izclose (&workptr);
-  Ozclose (&fcopy);
-  ORCSclose ();
-  dirtempunlink ();
-}
-
-void
-exiterr (void)
-{
-  ORCSerror ();
-  dirtempunlink ();
-  tempunlink ();
-  _exit (EXIT_FAILURE);
-}
-
-static int
-unlock (struct hshentry *delta)
-{
-  register struct rcslock **al, *l;
-
-  if (delta && delta->lockedby && strcmp (getcaller (), delta->lockedby) == 0)
-    for (al = &Locks; (l = *al); al = &l->nextlock)
-      if (l->delta == delta)
-        {
-          *al = l->nextlock;
-          delta->lockedby = NULL;
-          return true;
-        }
-  return false;
-}
-
-#ifdef HAVE_DIRENT_H
-static int
-get_directory (char const *dirname, char ***aargv)
-/*
- * Put a vector of all DIRNAME's directory entries names into *AARGV.
- * Ignore names of RCS files.
- * Yield the number of entries found.  Terminate the vector with 0.
- * Allocate the storage for the vector and entry names.
- * Do not sort the names.  Do not include '.' and '..'.
- */
-{
-  int i, entries = 0, entries_max = 64;
-  size_t chars = 0, chars_max = 1024;
-  size_t *offset = tnalloc (size_t, entries_max);
-  char *a = tnalloc (char, chars_max), **p;
-  DIR *d;
-  struct dirent *e;
-
-  if (!(d = opendir (dirname)))
-    efaterror (dirname);
-  while ((errno = 0, e = readdir (d)))
-    {
-      char const *en = e->d_name;
-      size_t s = strlen (en) + 1;
-      if (en[0] == '.' && (!en[1] || (en[1] == '.' && !en[2])))
-        continue;
-      if (rcssuffix (en))
-        continue;
-      while (chars_max < s + chars)
-        a = trealloc (char, a, chars_max <<= 1);
-      if (entries == entries_max)
-        offset = trealloc (size_t, offset, entries_max <<= 1);
-      offset[entries++] = chars;
-      strcpy (a + chars, en);
-      chars += s;
-    }
-  if (errno || closedir (d) != 0)
-    efaterror (dirname);
-  if (chars)
-    a = trealloc (char, a, chars);
-  else
-    tfree (a);
-  *aargv = p = tnalloc (char *, entries + 1);
-  for (i = 0; i < entries; i++)
-    *p++ = a + offset[i];
-  *p = '\0';
-  tfree (offset);
-  return entries;
-}
-#endif
+/* rcsclean.c ends here */

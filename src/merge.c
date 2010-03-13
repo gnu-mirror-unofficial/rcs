@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include "merge-help.c"
 
-static void badoption (char const *);
+char const cmdid[] = "merge";
 
 static char const usage[] =
   "\nmerge: usage: merge [-AeEpqxX3] [-L lab [-L lab [-L lab]]] file1 file2 file3";
@@ -34,7 +34,12 @@ badoption (char const *a)
   error ("unknown option: %s%s", a, usage);
 }
 
-char const cmdid[] = "merge";
+void
+exiterr (void)
+{
+  tempunlink ();
+  _exit (diff_trouble);
+}
 
 /*:help
 [options] file1 file2 file3
@@ -119,9 +124,4 @@ main (int argc, char **argv)
   return merge (tostdout, edarg, label, arg);
 }
 
-void
-exiterr (void)
-{
-  tempunlink ();
-  _exit (diff_trouble);
-}
+/* merge.c ends here */
