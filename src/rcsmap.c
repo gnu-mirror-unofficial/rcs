@@ -22,8 +22,7 @@
 
 #include "rcsbase.h"
 
-/* map of character types */
-/* ISO 8859/1 (Latin-1) */
+/* Map of character types: ISO 8859/1 (Latin-1).  */
 enum tokens const ctab[] =
   {
     UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,
@@ -59,3 +58,5 @@ enum tokens const ctab[] =
     Letter, Letter, Letter, Letter, Letter, Letter, Letter, IDCHAR,
     Letter, Letter, Letter, Letter, Letter, Letter, Letter, Letter
   };
+
+/* rcsmap.c ends here */

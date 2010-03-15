@@ -24,25 +24,14 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-static char const *branchtip (char const *);
-static char const *lookupsym (char const *);
-static char const *normalizeyear (char const *, char[5]);
-static struct hshentry *genbranch (struct hshentry const *, char const *,
-                                   int, char const *, char const *,
-                                   char const *, struct hshentries **);
-static void absent (char const *, int);
-static void cantfindbranch (char const *, char const[datesize],
-                            char const *, char const *);
-static void store1 (struct hshentries ***, struct hshentry *);
-
 int
 countnumflds (char const *s)
-/* Given a pointer s to a dotted number (date or revision number),
- * countnumflds returns the number of digitfields in s.
- */
+/* Given a pointer `s' to a dotted number (date or revision number),
+   return the number of digitfields in `s'.  */
 {
   register char const *sp;
   register int count;
+
   if (!(sp = s) || !*sp)
     return 0;
   count = 1;
@@ -57,10 +46,9 @@ countnumflds (char const *s)
 
 void
 getbranchno (char const *revno, struct buf *branchno)
-/* Given a revision number revno, getbranchno copies the number of the branch
- * on which revno is into branchno. If revno itself is a branch number,
- * it is copied unchanged.
- */
+/* Given a revision number `revno', copy the number of the branch on which
+   `revno' is into `branchno'.  If `revno' itself is a branch number, copy
+   it unchanged.  */
 {
   register int numflds;
   register char *tp;
@@ -79,11 +67,11 @@ getbranchno (char const *revno, struct buf *branchno)
 
 int
 cmpnum (char const *num1, char const *num2)
-/* compares the two dotted numbers num1 and num2 lexicographically
- * by field. Individual fields are compared numerically.
- * returns <0, 0, >0 if num1<num2, num1==num2, and num1>num2, resp.
- * omitted fields are assumed to be higher than the existing ones.
-*/
+/* Compare the two dotted numbers `num1' and `num2' lexicographically
+   by field.  Individual fields are compared numerically.
+   Return <0, 0, >0 if `num1 < num2', `num1 == num2', `num1 > num2',
+   respectively.  Omitted fields are assumed to be higher than the existing
+   ones.  */
 {
   register char const *s1, *s2;
   register size_t d1, d2;
@@ -118,7 +106,7 @@ cmpnum (char const *num1, char const *num2)
       s1 += d1;
       s2 += d1;
 
-      /* skip '.' */
+      /* Skip '.'.  */
       if (*s1)
         s1++;
       if (*s2)
@@ -128,17 +116,16 @@ cmpnum (char const *num1, char const *num2)
 
 int
 cmpnumfld (char const *num1, char const *num2, int fld)
-/* Compare the two dotted numbers at field fld.
- * num1 and num2 must have at least fld fields.
- * fld must be positive.
-*/
+/* Compare the two dotted numbers at field `fld'.
+   `num1' and `num2' must have at least `fld' fields.
+   `fld' must be positive.  */
 {
   register char const *s1, *s2;
   register size_t d1, d2;
 
   s1 = num1;
   s2 = num2;
-  /* skip fld-1 fields */
+  /* Skip `fld - 1' fields.  */
   while (--fld)
     {
       while (*s1++ != '.')
@@ -146,7 +133,7 @@ cmpnumfld (char const *num1, char const *num2, int fld)
       while (*s2++ != '.')
         continue;
     }
-  /* Now s1 and s2 point to the beginning of the respective fields */
+  /* Now `s1' and `s2' point to the beginning of the respective fields.  */
   while (*s1 == '0')
     ++s1;
   for (d1 = 0; isdigit (*(s1 + d1)); d1++)
@@ -157,31 +144,6 @@ cmpnumfld (char const *num1, char const *num2, int fld)
     continue;
 
   return d1 < d2 ? -1 : d1 == d2 ? memcmp (s1, s2, d1) : 1;
-}
-
-int
-cmpdate (char const *d1, char const *d2)
-/*
-* Compare the two dates.  This is just like cmpnum,
-* except that for compatibility with old versions of RCS,
-* 1900 is added to dates with two-digit years.
-*/
-{
-  char year1[5], year2[5];
-  int r = cmpnumfld (normalizeyear (d1, year1), normalizeyear (d2, year2), 1);
-
-  if (r)
-    return r;
-  else
-    {
-      while (isdigit (*d1))
-        d1++;
-      d1 += *d1 == '.';
-      while (isdigit (*d2))
-        d2++;
-      d2 += *d2 == '.';
-      return cmpnum (d1, d2);
-    }
 }
 
 static char const *
@@ -198,6 +160,29 @@ normalizeyear (char const *date, char year[5])
     }
   else
     return date;
+}
+
+int
+cmpdate (char const *d1, char const *d2)
+/* Compare the two dates.  This is just like `cmpnum',
+   except that for compatibility with old versions of RCS,
+   1900 is added to dates with two-digit years.  */
+{
+  char year1[5], year2[5];
+  int r = cmpnumfld (normalizeyear (d1, year1), normalizeyear (d2, year2), 1);
+
+  if (r)
+    return r;
+  else
+    {
+      while (isdigit (*d1))
+        d1++;
+      d1 += *d1 == '.';
+      while (isdigit (*d2))
+        d2++;
+      d2 += *d2 == '.';
+      return cmpnum (d1, d2);
+    }
 }
 
 static void
@@ -220,6 +205,7 @@ static void
 absent (char const *revno, int field)
 {
   struct buf t;
+
   bufautobegin (&t);
   rcserror ("%s %s absent", field & 1 ? "revision" : "branch",
             partialno (&t, revno, field));
@@ -228,9 +214,9 @@ absent (char const *revno, int field)
 
 int
 compartial (char const *num1, char const *num2, int length)
-/*   compare the first "length" fields of two dot numbers;
-     the omitted field is considered to be larger than any number  */
-/*   restriction:  at least one number has length or more fields   */
+/* Compare the first `length' fields of two dot numbers;
+   the omitted field is considered to be larger than any number.
+   Restriction: At least one number has `length' or more fields.  */
 {
   register char const *s1, *s2;
   register size_t d1, d2;
@@ -278,9 +264,8 @@ compartial (char const *num1, char const *num2, int length)
 
 char *
 partialno (struct buf *rev1, char const *rev2, register int length)
-/* Function: Copies length fields of revision number rev2 into rev1.
- * Return rev1's string.
- */
+/* Copy `length' fields of revision number `rev2' into `rev1'.
+   Return the string of `rev1'.  */
 {
   register char *r1;
 
@@ -293,17 +278,15 @@ partialno (struct buf *rev1, char const *rev2, register int length)
       ++r1;
       length--;
     }
-  /* eliminate last '.' */
+  /* Eliminate last '.'.  */
   *(r1 - 1) = '\0';
   return rev1->string;
 }
 
 static void
 store1 (struct hshentries ***store, struct hshentry *next)
-/*
- * Allocate a new list node that addresses NEXT.
- * Append it to the list that **STORE is the end pointer of.
- */
+/* Allocate a new list node that addresses `next'.
+   Append it to the list that `**store' is the end pointer of.  */
 {
   register struct hshentries *p;
 
@@ -313,153 +296,14 @@ store1 (struct hshentries ***store, struct hshentry *next)
   *store = &p->rest;
 }
 
-struct hshentry *
-genrevs (char const *revno, char const *date, char const *author,
-         char const *state, struct hshentries **store)
-/* Function: finds the deltas needed for reconstructing the
- * revision given by revno, date, author, and state, and stores pointers
- * to these deltas into a list whose starting address is given by store.
- * The last delta (target delta) is returned.
- * If the proper delta could not be found, NULL is returned.
- */
-{
-  int length;
-  register struct hshentry *next;
-  int result;
-  char const *branchnum;
-  struct buf t;
-  char datebuf[datesize + zonelenmax];
-
-  bufautobegin (&t);
-
-  if (!(next = Head))
-    {
-      rcserror ("RCS file empty");
-      goto norev;
-    }
-
-  length = countnumflds (revno);
-
-  if (length >= 1)
-    {
-      /* at least one field; find branch exactly */
-      while ((result = cmpnumfld (revno, next->num, 1)) < 0)
-        {
-          store1 (&store, next);
-          next = next->next;
-          if (!next)
-            {
-              rcserror ("branch number %s too low", partialno (&t, revno, 1));
-              goto norev;
-            }
-        }
-
-      if (result > 0)
-        {
-          absent (revno, 1);
-          goto norev;
-        }
-    }
-  if (length <= 1)
-    {
-      /* pick latest one on given branch */
-      branchnum = next->num;    /* works even for empty revno */
-      while (next &&
-             cmpnumfld (branchnum, next->num, 1) == 0 &&
-             ((date && cmpdate (date, next->date) < 0) ||
-              (author && strcmp (author, next->author) != 0) ||
-              (state && strcmp (state, next->state) != 0)))
-        {
-          store1 (&store, next);
-          next = next->next;
-        }
-      if (!next || (cmpnumfld (branchnum, next->num, 1) != 0))  /*overshot */
-        {
-          cantfindbranch (length ? revno : partialno (&t, branchnum, 1),
-                          date, author, state);
-          goto norev;
-        }
-      else
-        {
-          store1 (&store, next);
-        }
-      *store = NULL;
-      return next;
-    }
-
-  /* length >=2 */
-  /* find revision; may go low if length==2 */
-  while ((result = cmpnumfld (revno, next->num, 2)) < 0 &&
-         (cmpnumfld (revno, next->num, 1) == 0))
-    {
-      store1 (&store, next);
-      next = next->next;
-      if (!next)
-        break;
-    }
-
-  if (!next || cmpnumfld (revno, next->num, 1) != 0)
-    {
-      rcserror ("revision number %s too low", partialno (&t, revno, 2));
-      goto norev;
-    }
-  if ((length > 2) && (result != 0))
-    {
-      absent (revno, 2);
-      goto norev;
-    }
-
-  /* print last one */
-  store1 (&store, next);
-
-  if (length > 2)
-    return genbranch (next, revno, length, date, author, state, store);
-  else
-    {                           /* length == 2 */
-      if (date && cmpdate (date, next->date) < 0)
-        {
-          rcserror ("Revision %s has date %s.",
-                    next->num, date2str (next->date, datebuf));
-          return NULL;
-        }
-      if (author && strcmp (author, next->author) != 0)
-        {
-          rcserror ("Revision %s has author %s.", next->num, next->author);
-          return NULL;
-        }
-      if (state && strcmp (state, next->state) != 0)
-        {
-          rcserror ("Revision %s has state %s.",
-                    next->num, next->state ? next->state : "<empty>");
-          return NULL;
-        }
-      *store = NULL;
-      return next;
-    }
-
-norev:
-  bufautoend (&t);
-  return NULL;
-}
-
-struct hshentry *
-gr_revno (char const *revno, struct hshentries **store)
-/* Function: An abbreviated form of genrevs, when you don't care
-   about the date, author, or state.  */
-{
-  return genrevs (revno, NULL, NULL, NULL, store);
-}
-
 static struct hshentry *
 genbranch (struct hshentry const *bpoint, char const *revno,
            int length, char const *date, char const *author,
            char const *state, struct hshentries **store)
-/* Function: given a branchpoint, a revision number, date, author, and state,
- * genbranch finds the deltas necessary to reconstruct the given revision
- * from the branch point on.
- * Pointers to the found deltas are stored in a list beginning with store.
- * revno must be on a side branch.
- * Return NULL on error.
+/* Given a branchpoint, a revision number, date, author, and state, find the
+   deltas necessary to reconstruct the given revision from the branch point
+   on.  Pointers to the found deltas are stored in a list beginning with
+   `store'.  `revno' must be on a side branch.  Return NULL on error.
  */
 {
   int field;
@@ -483,8 +327,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           return NULL;
         }
 
-      /*find branch head */
-      /*branches are arranged in increasing order */
+      /* Find branch head.  Branches are arranged in increasing order.  */
       while (0 < (result = cmpnumfld (revno, bhead->hsh->num, field)))
         {
           bhead = bhead->nextbranch;
@@ -511,9 +354,9 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           trail = NULL;
           do
             {
-              if ((!date || cmpdate (date, next->date) >= 0) &&
-                  (!author || strcmp (author, next->author) == 0) &&
-                  (!state || strcmp (state, next->state) == 0))
+              if ((!date || cmpdate (date, next->date) >= 0)
+                  && (!author || strcmp (author, next->author) == 0)
+                  && (!state || strcmp (state, next->state) == 0))
                 trail = next;
               next = next->next;
             }
@@ -525,7 +368,8 @@ genbranch (struct hshentry const *bpoint, char const *revno,
               return NULL;
             }
           else
-            {                   /* print up to last one suitable */
+            {
+              /* Print up to last one suitable.  */
               next = bhead->hsh;
               while (next != trail)
                 {
@@ -538,9 +382,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           return next;
         }
 
-      /* length > field */
-      /* find revision */
-      /* check low */
+      /* Length > field.  Find revision.  Check low.  */
       if (cmpnumfld (revno, next->num, field + 1) < 0)
         {
           bufautobegin (&t);
@@ -557,8 +399,9 @@ genbranch (struct hshentry const *bpoint, char const *revno,
         }
       while (next && cmpnumfld (revno, next->num, field + 1) >= 0);
 
-      if ((length > field + 1) &&       /*need exact hit */
-          (cmpnumfld (revno, trail->num, field + 1) != 0))
+      if ((length > field + 1)
+          /* Need exact hit.  */
+          && (cmpnumfld (revno, trail->num, field + 1) != 0))
         {
           absent (revno, field + 1);
           return NULL;
@@ -592,14 +435,148 @@ genbranch (struct hshentry const *bpoint, char const *revno,
   return trail;
 }
 
+struct hshentry *
+genrevs (char const *revno, char const *date, char const *author,
+         char const *state, struct hshentries **store)
+/* Find the deltas needed for reconstructing the revision given by `revno',
+   `date', `author', and `state', and stores pointers to these deltas into a
+   list whose starting address is given by `store'.  Return the last delta
+   (target delta).  If the proper delta could not be found, return NULL.  */
+{
+  int length;
+  register struct hshentry *next;
+  int result;
+  char const *branchnum;
+  struct buf t;
+  char datebuf[datesize + zonelenmax];
+
+  bufautobegin (&t);
+
+  if (!(next = Head))
+    {
+      rcserror ("RCS file empty");
+      goto norev;
+    }
+
+  length = countnumflds (revno);
+
+  if (length >= 1)
+    {
+      /* At least one field; find branch exactly.  */
+      while ((result = cmpnumfld (revno, next->num, 1)) < 0)
+        {
+          store1 (&store, next);
+          next = next->next;
+          if (!next)
+            {
+              rcserror ("branch number %s too low", partialno (&t, revno, 1));
+              goto norev;
+            }
+        }
+
+      if (result > 0)
+        {
+          absent (revno, 1);
+          goto norev;
+        }
+    }
+  if (length <= 1)
+    {
+      /* Pick latest one on given branch.  */
+      branchnum = next->num;    /* works even for empty revno */
+      while (next
+             && cmpnumfld (branchnum, next->num, 1) == 0
+             && ((date && cmpdate (date, next->date) < 0)
+                 || (author && strcmp (author, next->author) != 0)
+                 || (state && strcmp (state, next->state) != 0)))
+        {
+          store1 (&store, next);
+          next = next->next;
+        }
+      if (!next || (cmpnumfld (branchnum, next->num, 1) != 0)) /* overshot */
+        {
+          cantfindbranch (length ? revno : partialno (&t, branchnum, 1),
+                          date, author, state);
+          goto norev;
+        }
+      else
+        {
+          store1 (&store, next);
+        }
+      *store = NULL;
+      return next;
+    }
+
+  /* Length >= 2.  Find revision; may go low if `length == 2'.  */
+  while ((result = cmpnumfld (revno, next->num, 2)) < 0
+         && (cmpnumfld (revno, next->num, 1) == 0))
+    {
+      store1 (&store, next);
+      next = next->next;
+      if (!next)
+        break;
+    }
+
+  if (!next || cmpnumfld (revno, next->num, 1) != 0)
+    {
+      rcserror ("revision number %s too low", partialno (&t, revno, 2));
+      goto norev;
+    }
+  if ((length > 2) && (result != 0))
+    {
+      absent (revno, 2);
+      goto norev;
+    }
+
+  /* Print last one.  */
+  store1 (&store, next);
+
+  if (length > 2)
+    return genbranch (next, revno, length, date, author, state, store);
+  else
+    {                                   /* length == 2 */
+      if (date && cmpdate (date, next->date) < 0)
+        {
+          rcserror ("Revision %s has date %s.",
+                    next->num, date2str (next->date, datebuf));
+          return NULL;
+        }
+      if (author && strcmp (author, next->author) != 0)
+        {
+          rcserror ("Revision %s has author %s.", next->num, next->author);
+          return NULL;
+        }
+      if (state && strcmp (state, next->state) != 0)
+        {
+          rcserror ("Revision %s has state %s.",
+                    next->num, next->state ? next->state : "<empty>");
+          return NULL;
+        }
+      *store = NULL;
+      return next;
+    }
+
+norev:
+  bufautoend (&t);
+  return NULL;
+}
+
+struct hshentry *
+gr_revno (char const *revno, struct hshentries **store)
+/* An abbreviated form of `genrevs', when you don't care
+   about the date, author, or state.  */
+{
+  return genrevs (revno, NULL, NULL, NULL, store);
+}
+
 static char const *
 lookupsym (char const *id)
-/* Function: looks up id in the list of symbolic names starting
- * with pointer SYMBOLS, and returns a pointer to the corresponding
- * revision number.  Return NULL if not present.
- */
+/* Look up `id' in the list of symbolic names starting with pointer
+   `Symbols', and return a pointer to the corresponding revision number.
+   Return NULL if not present.  */
 {
   register struct assoc const *next;
+
   for (next = Symbols; next; next = next->nextassoc)
     if (strcmp (id, next->symbol) == 0)
       return next->num;
@@ -608,20 +585,29 @@ lookupsym (char const *id)
 
 int
 expandsym (char const *source, struct buf *target)
-/* Function: Source points to a revision number. Expandsym copies
- * the number to target, but replaces all symbolic fields in the
- * source number with their numeric values.
- * Expand a branch followed by `.' to the latest revision on that branch.
- * Ignore `.' after a revision.  Remove leading zeros.
- * returns false on error;
- */
+/* `source' points to a revision number.  Copy the number to `target',
+   but replace all symbolic fields in the source number with their
+   numeric values.  Expand a branch followed by `.' to the latest
+   revision on that branch.  Ignore `.' after a revision.  Remove
+   leading zeros.  Return false on error.  */
 {
   return fexpandsym (source, target, NULL);
 }
 
+static char const *
+branchtip (char const *branch)
+{
+  struct hshentry *h;
+  struct hshentries *hs;
+
+  h = gr_revno (branch, &hs);
+  return h ? h->num : NULL;
+}
+
 int
 fexpandsym (char const *source, struct buf *target, RILE *fp)
-/* Same as expandsym, except if FP is nonzero, it is used to expand KDELIM.  */
+/* Same as `expandsym', except if `fp' is non-NULL,
+   it is used to expand `KDELIM'.  */
 {
   register char const *sp, *bp;
   register char *tp;
@@ -632,7 +618,8 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
   bufalloc (target, 1);
   tp = target->string;
   if (!sp || !*sp)
-    {                           /* Accept 0 pointer as a legal value.  */
+    {
+      /* Accept 0 pointer as a legal value.  */
       *tp = '\0';
       return true;
     }
@@ -656,6 +643,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
       register char *p = tp;
       size_t s = tp - target->string;
       int id = false;
+
       for (;;)
         {
           switch (ctab[(unsigned char) *sp])
@@ -692,7 +680,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
         }
       else
         {
-          /* skip leading zeros */
+          /* Skip leading zeros.  */
           for (bp = tp; *bp == '0' && isdigit (bp[1]); bp++)
             continue;
 
@@ -704,6 +692,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
                 {
                   /* Insert default branch before initial `.'.  */
                   char const *b;
+
                   if (Dbranch)
                     b = Dbranch;
                   else if (Head)
@@ -749,11 +738,12 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
 
 char const *
 namedrev (char const *name, struct hshentry *delta)
-/* Yield NAME if it names DELTA, NULL otherwise.  */
+/* Return `name' if it names `delta', NULL otherwise.  */
 {
   if (name)
     {
       char const *id = NULL, *p, *val;
+
       for (p = name;; p++)
         switch (ctab[(unsigned char) *p])
           {
@@ -767,8 +757,9 @@ namedrev (char const *name, struct hshentry *delta)
             break;
 
           case UNKN:
-            if (!*p && id &&
-                (val = lookupsym (id)) && strcmp (val, delta->num) == 0)
+            if (!*p && id
+                && (val = lookupsym (id))
+                && strcmp (val, delta->num) == 0)
               return id;
             /* fall into */
           default:
@@ -778,16 +769,6 @@ namedrev (char const *name, struct hshentry *delta)
   return NULL;
 }
 
-static char const *
-branchtip (char const *branch)
-{
-  struct hshentry *h;
-  struct hshentries *hs;
-
-  h = gr_revno (branch, &hs);
-  return h ? h->num : NULL;
-}
-
 char const *
 tiprev (void)
 {
@@ -795,11 +776,8 @@ tiprev (void)
 }
 
 #ifdef REVTEST
-
-/*
-* Test the routines that generate a sequence of delta numbers
-* needed to regenerate a given delta.
-*/
+/* Test the routines that generate a sequence of delta numbers
+  needed to regenerate a given delta.  */
 
 char const cmdid[] = "revtest";
 
@@ -833,8 +811,8 @@ main (int argc, char *argv[])
 
   do
     {
-      /* all output goes to stderr, to have diagnostics and       */
-      /* errors in sequence.                                      */
+      /* All output goes to stderr, to have diagnostics and
+         errors in sequence.  */
       aputs ("\nEnter revision number or <return> or '.': ", stderr);
       if (!gets (symrevno))
         break;
@@ -876,4 +854,6 @@ exiterr (void)
   _exit (EXIT_FAILURE);
 }
 
-#endif
+#endif  /* defined REVTEST */
+
+/* rcsrev.c ends here */

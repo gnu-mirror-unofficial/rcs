@@ -20,69 +20,60 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/******************************************************************************
- *                     Lexical Analysis.
- *                     hashtable, Lexinit, nextlex, getlex, getkey,
- *                     getid, getnum, readstring, printstring, savestring,
- *                     checkid, fatserror, error, faterror, warn, diagnose
- *                     Testprogram: define LEXDB
- ******************************************************************************
- */
-
-
-/*
-#define LEXDB
-*/
-/* version LEXDB is for testing the lexical analyzer. The testprogram
- * reads a stream of lexemes, enters the revision numbers into the
- * hashtable, and prints the recognized tokens. Keywords are recognized
- * as identifiers.
- */
-
 #include "rcsbase.h"
 #include <stdbool.h>
 
-static char *checkidentifier (char *, int, int);
-static void errsay (char const *);
-static void fatsay (char const *);
-static void lookup (char const *);
-static void startsay (const char *, const char *);
-static void warnsay (char const *);
+/* Pointer to next hash entry, set by `lookup'.  */
+static struct hshentry *nexthsh;
 
-static struct hshentry *nexthsh;        /*pointer to next hash entry, set by lookup */
+/* Next token, set by `nextlex'.  */
+enum tokens nexttok;
 
-enum tokens nexttok;            /*next token, set by nextlex                    */
+/* If true, next suitable lexeme will be entered
+   into the symbol table.  Handle with care.  */
+int hshenter;
 
-int hshenter;                   /*if true, next suitable lexeme will be entered */
-                            /*into the symbol table. Handle with care.      */
-int nextc;                      /*next input character, initialized by Lexinit  */
+/* Next input character, initialized by `Lexinit'.  */
+int nextc;
 
-long rcsline;                   /*current line-number of input                  */
-int nerror;                     /*counter for errors                            */
-int quietflag;                  /*indicates quiet mode                          */
-RILE *finptr;                   /*input file descriptor                         */
+/* Current line-number of input.  */
+long rcsline;
 
-FILE *frewrite;                 /*file descriptor for echoing input             */
+/* Counter for errors.  */
+int nerror;
 
-FILE *foutptr;                  /* copy of frewrite, but NULL to suppress echo  */
+/* Indicates quiet mode.  */
+int quietflag;
 
-static struct buf tokbuf;       /* token buffer                                 */
+/* Input file descriptor.  */
+RILE *finptr;
 
-char const *NextString;         /* next token                                   */
+/* File descriptor for echoing input.  */
+FILE *frewrite;
 
-/*
- * Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
- * so hshsize should be odd.
- * See B J McKenzie, R Harries & T Bell, Selecting a hashing algorithm,
- * Software--practice & experience 20, 2 (Feb 1990), 209-224.
- */
+/* Copy of `frewrite', but NULL to suppress echo.  */
+FILE *foutptr;
+
+/* Token buffer.  */
+static struct buf tokbuf;
+
+/* Next token.  */
+char const *NextString;
+
+/* Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
+   so hshsize should be odd.
+
+   See B J McKenzie, R Harries & T Bell, Selecting a hashing algorithm,
+   Software--practice & experience 20, 2 (Feb 1990), 209-224.  */
 #ifndef hshsize
-#	define hshsize 511
+#define hshsize 511
 #endif
 
-static struct hshentry *hshtab[hshsize];        /*hashtable                        */
+/* Hashtable.  */
+static struct hshentry *hshtab[hshsize];
 
-static int ignored_phrases;     /* have we ignored phrases in this RCS file? */
+/* Have we ignored phrases in this RCS file?  */
+static int ignored_phrases;
 
 void
 warnignore (void)
@@ -96,17 +87,16 @@ warnignore (void)
 
 static void
 lookup (char const *str)
-/* Function: Looks up the character string pointed to by str in the
- * hashtable. If the string is not present, a new entry for it is created.
- * In any case, the address of the corresponding hashtable entry is placed
- * into nexthsh.
- */
+/* Look up the character string pointed to by `str' in the hashtable.
+   If the string is not present, a new entry for it is created.  In any
+   case, the address of the corresponding hashtable entry is placed into
+   `nexthsh'.  */
 {
   register unsigned ihash;      /* index into hashtable */
   register char const *sp;
   register struct hshentry *n, **p;
 
-  /* calculate hash code */
+  /* Calculate hash code.  */
   sp = str;
   ihash = 0;
   while (*sp)
@@ -116,17 +106,17 @@ lookup (char const *str)
   for (p = &hshtab[ihash];; p = &n->nexthsh)
     if (!(n = *p))
       {
-        /* empty slot found */
+        /* Empty slot found.  */
         *p = n = ftalloc (struct hshentry);
         n->num = fstr_save (str);
         n->nexthsh = NULL;
-#			ifdef LEXDB
+#ifdef LEXDB
         printf ("\nEntered: %s at %u ", str, ihash);
-#			endif
+#endif
         break;
       }
     else if (strcmp (str, n->num) == 0)
-      /* match found */
+      /* Match found.  */
       break;
   nexthsh = n;
   NextString = n->num;
@@ -134,10 +124,8 @@ lookup (char const *str)
 
 void
 Lexinit (void)
-/* Function: Initialization of lexical analyzer:
- * initializes the hashtable,
- * initializes nextc, nexttok if finptr != NULL
- */
+/* Initialize lexical analyzer: initialize the hashtable;
+   initialize nextc, nexttok if `finptr' != NULL.  */
 {
   register int c;
 
@@ -155,19 +143,19 @@ Lexinit (void)
       rcsline = 1;
       bufrealloc (&tokbuf, 2);
       Iget (finptr, nextc);
-      nextlex (); /*initial token */
+      /* Initial token.  */
+      nextlex ();
     }
 }
 
 void
 nextlex (void)
-/* Function: Reads the next token and sets nexttok to the next token code.
- * Only if hshenter is set, a revision number is entered into the
- * hashtable and a pointer to it is placed into nexthsh.
- * This is useful for avoiding that dates are placed into the hashtable.
- * For ID's and NUM's, NextString is set to the character string.
- * Assumption: nextc contains the next character.
- */
+/* Read the next token and set `nexttok' to the next token code.
+   Only if `hshenter' is set, a revision number is entered into the
+   hashtable and a pointer to it is placed into `nexthsh'.
+   This is useful for avoiding that dates are placed into the hashtable.
+   For ID's and NUM's, NextString is set to the character string.
+   Assumption: `nextc' contains the next character.  */
 {
   register int c;
   declarecache;
@@ -190,11 +178,11 @@ nextlex (void)
 
         default:
           fatserror ("unknown character `%c'", c);
-         /*NOTREACHED*/ case NEWLN:
+        case NEWLN:
           ++rcsline;
-#               ifdef LEXDB
+#ifdef LEXDB
           afputc ('\n', stdout);
-#               endif
+#endif
           /* Note: falls into next case */
 
         case SPACE:
@@ -248,8 +236,8 @@ nextlex (void)
 
         case SBEGIN:           /* long string */
           d = STRING;
-          /* note: only the initial SBEGIN has been read */
-          /* read the string, and reset nextc afterwards */
+          /* Note: Only the initial SBEGIN has been read.
+             Read the string, and reset `nextc' afterwards.  */
           break;
 
         case COLON:
@@ -266,10 +254,8 @@ nextlex (void)
 
 int
 eoflex (void)
-/*
- * Yield true if we look ahead to the end of the input, false otherwise.
- * nextc becomes undefined at end of file.
- */
+/* Return true if we look ahead to the end of the input, false otherwise.
+   `nextc' becomes undefined at end of file.  */
 {
   register int c;
   declarecache;
@@ -309,11 +295,10 @@ eoflex (void)
 
 int
 getlex (enum tokens token)
-/* Function: Checks if nexttok is the same as token. If so,
- * advances the input by calling nextlex and returns true.
- * otherwise returns false.
- * Doesn't work for strings and keywords; loses the character string for ids.
- */
+/* Check if `nexttok' is the same as `token'.  If so, advance the input
+   by calling `nextlex' and return true.  Otherwise return false.
+   Doesn't work for strings and keywords; loses the character string for
+   ids.  */
 {
   if (nexttok == token)
     {
@@ -326,14 +311,13 @@ getlex (enum tokens token)
 
 int
 getkeyopt (char const *key)
-/* Function: If the current token is a keyword identical to key,
- * advances the input by calling nextlex and returns true;
- * otherwise returns false.
- */
+/* If the current token is a keyword identical to `key',
+   advance the input by calling `nextlex' and return true;
+   otherwise return false.  */
 {
   if (nexttok == ID && strcmp (key, NextString) == 0)
     {
-      /* match found */
+      /* Match found.  */
       ffree1 (NextString);
       nextlex ();
       return (true);
@@ -343,9 +327,8 @@ getkeyopt (char const *key)
 
 void
 getkey (char const *key)
-/* Check that the current input token is a keyword identical to key,
- * and advance the input by calling nextlex.
- */
+/* Check that the current input token is a keyword identical to `key',
+   and advance the input by calling `nextlex'.  */
 {
   if (!getkeyopt (key))
     fatserror ("missing '%s' keyword", key);
@@ -353,9 +336,9 @@ getkey (char const *key)
 
 void
 getkeystring (char const *key)
-/* Check that the current input token is a keyword identical to key,
- * and advance the input by calling nextlex; then look ahead for a string.
- */
+/* Check that the current input token is a keyword identical to `key',
+   and advance the input by calling `nextlex'; then look ahead for a
+   string.  */
 {
   getkey (key);
   if (nexttok != STRING)
@@ -364,13 +347,12 @@ getkeystring (char const *key)
 
 char const *
 getid (void)
-/* Function: Checks if nexttok is an identifier. If so,
- * advances the input by calling nextlex and returns a pointer
- * to the identifier; otherwise returns NULL.
- * Treats keywords as identifiers.
- */
+/* Check if `nexttok' is an identifier.  If so, advance the input by
+   calling `nextlex' and return a pointer to the identifier; otherwise
+   returns NULL.  Treat keywords as identifiers.  */
 {
   register char const *name;
+
   if (nexttok == ID)
     {
       name = NextString;
@@ -383,13 +365,12 @@ getid (void)
 
 struct hshentry *
 getnum (void)
-/* Function: Checks if nexttok is a number. If so,
- * advances the input by calling nextlex and returns a pointer
- * to the hashtable entry.  Otherwise returns NULL.
- * Doesn't work if hshenter is false.
- */
+/* Check if `nexttok' is a number.  If so, advance the input by calling
+   `nextlex' and return a pointer to the hashtable entry.  Otherwise
+   returns NULL.  Doesn't work if `hshenter' is false.  */
 {
   register struct hshentry *num;
+
   if (nexttok == NUM)
     {
       num = nexthsh;
@@ -402,12 +383,11 @@ getnum (void)
 
 struct cbuf
 getphrases (char const *key)
-/*
-* Get a series of phrases that do not start with KEY.  Yield resulting buffer.
-* Stop when the next phrase starts with a token that is not an identifier,
-* or is KEY.  Copy input to foutptr if it is set.  Unlike ignorephrases(),
-* this routine assumes nextlex() has already been invoked before we start.
-*/
+/* Get a series of phrases that do not start with `key'.  Return
+   resulting buffer.  Stop when the next phrase starts with a token that
+   is not an identifier, or is `key'.  Copy input to `foutptr' if it is
+   set.  Unlike `ignorephrases', this routine assumes `nextlex' has
+   already been invoked before we start.  */
 {
   declarecache;
   register int c;
@@ -415,14 +395,14 @@ getphrases (char const *key)
   struct cbuf r;
   register RILE *fin;
   register FILE *frew;
-#   if large_memory
-#	define savech_(c) ;
-#   else
+#if large_memory
+#define savech_(c) ;
+#else  /* !large_memory */
   register char *p;
   char const *limit;
   struct buf b;
-#	define savech_(c) {if (limit<=p)p=bufenlarge(&b,&limit); *p++ =(c);}
-#   endif
+#define savech_(c)  { if (limit <= p) p = bufenlarge (&b, &limit); *p++ = (c); }
+#endif  /* !large_memory */
 
   if (nexttok != ID || strcmp (NextString, key) == 0)
     clear_buf (&r);
@@ -433,14 +413,14 @@ getphrases (char const *key)
       frew = foutptr;
       setupcache (fin);
       cache (fin);
-#	if large_memory
+#if large_memory
       r.string = (char const *) cacheptr () - strlen (NextString) - 1;
-#	else
+#else  /* !large_memory */
       bufautobegin (&b);
       bufscpy (&b, NextString);
       p = b.string + strlen (b.string);
       limit = b.string + b.size;
-#	endif
+#endif  /* !large_memory */
       ffree1 (NextString);
       c = nextc;
       for (;;)
@@ -452,7 +432,7 @@ getphrases (char const *key)
                 {
                 default:
                   fatserror ("unknown character `%c'", c);
-                  /*NOTREACHED*/ case NEWLN:
+                case NEWLN:
                   ++rcsline;
                   /* fall into */
                 case COLON:
@@ -499,9 +479,9 @@ getphrases (char const *key)
                       savech_ (c)
                       cacheget (c);
                     }
-#			if large_memory
+#if large_memory
                   r.size = (char const *) cacheptr () - 1 - r.string;
-#			endif
+#endif
                   for (;;)
                     {
                       switch (ctab[c])
@@ -544,13 +524,14 @@ getphrases (char const *key)
                     uncache (fin);
                     goto returnit;
                   }
-#		    if !large_memory
+#if !large_memory
               {
                 register char const *ki;
+
                 for (ki = key; ki < kn;)
                   savech_ (*ki++)
               }
-#		    endif
+#endif
             }
           else
             {
@@ -561,23 +542,24 @@ getphrases (char const *key)
             }
         }
     returnit:;
-#	if !large_memory
+#if !large_memory
       return bufremember (&b, (size_t) (p - b.string));
-#	endif
+#endif
     }
   return r;
 }
 
 void
 readstring (void)
-/* skip over characters until terminating single SDELIM        */
-/* If foutptr is set, copy every character read to foutptr.    */
-/* Does not advance nextlex at the end.                        */
+/* Skip over characters until terminating single `SDELIM'.
+   If `foutptr' is set, copy every character read to `foutptr'.
+   Do not advance `nextlex' at the end.  */
 {
   register int c;
   declarecache;
   register FILE *frew;
   register RILE *fin;
+
   fin = finptr;
   frew = foutptr;
   setupcache (fin);
@@ -595,7 +577,7 @@ readstring (void)
           GETC (frew, c);
           if (c != SDELIM)
             {
-              /* end of string */
+              /* End of string.  */
               nextc = c;
               uncache (fin);
               return;
@@ -607,14 +589,14 @@ readstring (void)
 
 void
 printstring (void)
-/* Function: copy a string to stdout, until terminated with a single SDELIM.
- * Does not advance nextlex at the end.
- */
+/* Copy a string to stdout, until terminated with a single `SDELIM'.
+   Do not advance `nextlex' at the end.  */
 {
   register int c;
   declarecache;
   register FILE *fout;
   register RILE *fin;
+
   fin = finptr;
   fout = stdout;
   setupcache (fin);
@@ -643,12 +625,11 @@ printstring (void)
 
 struct cbuf
 savestring (struct buf *target)
-/* Copies a string terminated with SDELIM from file finptr to buffer target.
- * Double SDELIM is replaced with SDELIM.
- * If foutptr is set, the string is also copied unchanged to foutptr.
- * Does not advance nextlex at the end.
- * Yield a copy of *TARGET, except with exact length.
- */
+/* Copy a string terminated with `SDELIM' from file `finptr' to buffer
+   `target'.  Double `SDELIM' is replaced with `SDELIM'.  If `foutptr'
+   is set, the string is also copied unchanged to `foutptr'.  Do not
+   advance `nextlex' at the end.  Return a copy of `*target', except
+   with exact length.  */
 {
   register int c;
   declarecache;
@@ -676,7 +657,7 @@ savestring (struct buf *target)
           GETC (frew, c);
           if (c != SDELIM)
             {
-              /* end of string */
+              /* End of string.  */
               nextc = c;
               r.string = target->string;
               r.size = tp - r.string;
@@ -693,13 +674,12 @@ savestring (struct buf *target)
 
 static char *
 checkidentifier (register char *id, int delimiter, register int dotok)
-/*   Function:  check whether the string starting at id is an   */
-/*		identifier and return a pointer to the delimiter*/
-/*		after the identifier.  White space, delim and 0 */
-/*              are legal delimiters.  Aborts the program if not*/
-/*              a legal identifier. Useful for checking commands*/
-/*		If !delim, the only delimiter is 0.		*/
-/*		Allow '.' in identifier only if DOTOK is set.   */
+/* Check whether the string starting at `id' is an identifier and return
+   a pointer to the delimiter after the identifier.  White space,
+   `delimiter' and 0 are legal delimiters.  Abort the program if not a
+   legal identifier.  Useful for checking commands.  If `!delimiter',
+   the only delimiter is 0.  Allow '.' in identifier only if `dotok' is
+   set.  */
 {
   register char *temp;
   register char c;
@@ -730,13 +710,12 @@ checkidentifier (register char *id, int delimiter, register int dotok)
         }
       break;
     }
-  if (!isid
-      || (c
-          && (!delim
-              || (c != delim && c != ' ' && c != '\t'
-                  && c != '\n'))))
+  if (!isid || (c && (!delim || (c != delim
+                                 && c != ' '
+                                 && c != '\t'
+                                 && c != '\n'))))
     {
-      /* append \0 to end of id before error message */
+      /* Append '\0' to end of `id' before error message.  */
       while ((c = *id) && c != ' ' && c != '\t' && c != '\n'
              && c != delim)
         id++;
@@ -760,7 +739,7 @@ checksym (char *sym, int delimiter)
 
 void
 checksid (char *id)
-/* Check whether the string ID is an identifier.  */
+/* Check whether the string `id' is an identifier.  */
 {
   checkid (id, 0);
 }
@@ -772,10 +751,9 @@ checkssym (char *sym)
 }
 
 #if !large_memory
-#   define Iclose(f) fclose(f)
-#else
-# if !maps_memory
-static int Iclose (RILE *);
+#define Iclose(f) fclose(f)
+#else  /* large_memory */
+#if !maps_memory
 static int
 Iclose (register RILE *f)
 {
@@ -783,8 +761,7 @@ Iclose (register RILE *f)
   f->base = NULL;
   return fclose (f->stream);
 }
-# else
-static int Iclose (RILE *);
+#else  /* maps_memory */
 static int
 Iclose (register RILE *f)
 {
@@ -793,36 +770,32 @@ Iclose (register RILE *f)
   return close (f->fd);
 }
 
-#   if defined HAVE_MMAP
-static void mmap_deallocate (RILE *);
+#if defined HAVE_MMAP
 static void
 mmap_deallocate (register RILE *f)
 {
   if (munmap ((char *) f->base, (size_t) (f->lim - f->base)) != 0)
     efaterror ("munmap");
 }
-#   endif
-static void read_deallocate (RILE *);
+#endif  /* defined HAVE_MMAP */
+
 static void
 read_deallocate (RILE *f)
 {
   tfree (f->base);
 }
 
-static void nothing_to_deallocate (RILE *);
 static void
 nothing_to_deallocate (RILE *f RCS_UNUSED)
 {
 }
-# endif
-#endif
+#endif  /* maps_memory */
+#endif  /* large_memory */
 
 #if large_memory && maps_memory
-static RILE *fd2_RILE (int, char const *, struct stat *);
 static RILE *
 fd2_RILE (int fd, char const *name, register struct stat *status)
 #else
-static RILE * fd2RILE (int, char const *, char const *, struct stat *);
 static RILE *
 fd2RILE (int fd, char const *name, char const *type,
          register struct stat *status)
@@ -843,17 +816,17 @@ fd2RILE (int fd, char const *name, char const *type,
     }
   else
     {
-
-#	    if !(large_memory && maps_memory)
+#if !(large_memory && maps_memory)
       FILE *stream;
+
       if (!(stream = fdopen (fd, type)))
         efaterror (name);
-#	    endif
+#endif  /* !(large_memory && maps_memory) */
 
-#	    if !large_memory
+#if !large_memory
       return stream;
-#	    else
-#		define RILES 3
+#else  /* large_memory */
+#define RILES 3
       {
         static RILE rilebuf[RILES];
 
@@ -865,18 +838,19 @@ fd2RILE (int fd, char const *name, char const *type,
         for (f = rilebuf; f->base; f++)
           if (f == rilebuf + RILES)
             faterror ("too many RILEs");
-#		if maps_memory
+#if maps_memory
         f->deallocate = nothing_to_deallocate;
-#		endif
+#endif
         if (!s)
           {
             static unsigned char nothing;
+
             f->base = &nothing;     /* Any nonzero address will do.  */
           }
         else
           {
             f->base = NULL;
-#		    if defined HAVE_MMAP
+#if defined HAVE_MMAP
             if (!f->base)
               {
                 catchmmapints ();
@@ -884,41 +858,38 @@ fd2RILE (int fd, char const *name, char const *type,
                                                   PROT_READ,
                                                   MAP_SHARED, fd,
                                                   (off_t) 0);
-#			    ifndef MAP_FAILED
-#			    define MAP_FAILED (-1)
-#			    endif
+#ifndef MAP_FAILED
+#define MAP_FAILED (-1)
+#endif
                 if (f->base == (unsigned char *) MAP_FAILED)
                   f->base = NULL;
                 else
                   {
-#				if has_NFS && MMAP_SIGNAL
-                    /*
-                     * On many hosts, the superuser
-                     * can mmap an NFS file it can't read.
-                     * So access the first page now, and print
-                     * a nice message if a bus error occurs.
-                     */
+#if has_NFS && MMAP_SIGNAL
+                    /* On many hosts, the superuser can mmap an NFS file
+                       it can't read.  So access the first page now, and
+                       print a nice message if a bus error occurs.  */
                     readAccessFilenameBuffer (name, f->base);
-#				endif
+#endif  /* has_NFS && MMAP_SIGNAL */
                   }
                 f->deallocate = mmap_deallocate;
               }
-#		    endif
+#endif  /* defined HAVE_MMAP */
             if (!f->base)
               {
                 f->base = tnalloc (unsigned char, s);
-#			if maps_memory
+#if maps_memory
                 {
-                  /*
-                   * We can't map the file into memory for some reason.
-                   * Read it into main memory all at once; this is
-                   * the simplest substitute for memory mapping.
-                   */
+                  /* We can't map the file into memory for some reason.
+                     Read it into main memory all at once; this is
+                     the simplest substitute for memory mapping.  */
                   char *bufptr = (char *) f->base;
                   size_t bufsiz = s;
+
                   do
                     {
                       ssize_t r = read (fd, bufptr, bufsiz);
+
                       switch (r)
                         {
                         case -1:
@@ -941,20 +912,20 @@ fd2RILE (int fd, char const *name, char const *type,
                     efaterror (name);
                   f->deallocate = read_deallocate;
                 }
-#			endif
+#endif  /* maps_memory */
               }
           }
         f->ptr = f->base;
         f->lim = f->base + s;
         f->fd = fd;
-#		if !maps_memory
+#if !maps_memory
         f->readlim = f->base;
         f->stream = stream;
-#		endif
+#endif  /* !maps_memory */
         if_advise_access (s, f, MADV_SEQUENTIAL);
         return f;
       }
-#	    endif
+#endif  /* large_memory */
     }
 }
 
@@ -970,13 +941,14 @@ Igetmore (register RILE *f)
   if (! (r = fread (f->readlim, sizeof (*f->readlim), s, f->stream)))
     {
       testIerror (f->stream);
-      f->lim = f->readlim;  /* The file might have shrunk!  */
+      /* The file might have shrunk!  */
+      f->lim = f->readlim;
       return 0;
     }
   f->readlim += r;
   return 1;
 }
-#endif
+#endif  /* !maps_memory && large_memory */
 
 #if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
 void
@@ -993,24 +965,23 @@ RILE *
 I_open (char const *name, struct stat *status)
 #else
 Iopen (char const *name, char const *type, struct stat *status)
-
 #endif
-/* Open NAME for reading, yield its descriptor, and set *STATUS.  */
+/* Open `name' for reading, return its descriptor, and set `*status'.  */
 {
   int fd = fdSafer (open (name, O_RDONLY
-#		if OPEN_O_BINARY
+#if OPEN_O_BINARY
                           | (strchr (type, 'b') ? OPEN_O_BINARY :
                              0)
-#		endif
+#endif
                           ));
 
   if (fd < 0)
     return NULL;
-#	if large_memory && maps_memory
+#if large_memory && maps_memory
   return fd2_RILE (fd, name, status);
-#	else
+#else
   return fd2RILE (fd, name, type, status);
-#	endif
+#endif
 }
 
 static int Oerrloop;
@@ -1029,17 +1000,20 @@ Ieof (void)
 {
   fatserror ("unexpected end of file");
 }
+
 void
 Ierror (void)
 {
   efaterror ("input error");
 }
+
 void
 testIerror (FILE *f)
 {
   if (ferror (f))
     Ierror ();
 }
+
 void
 testOerror (FILE *o)
 {
@@ -1053,18 +1027,21 @@ Ifclose (RILE *f)
   if (f && Iclose (f) != 0)
     Ierror ();
 }
+
 void
 Ofclose (FILE *f)
 {
   if (f && fclose (f) != 0)
     Oerror ();
 }
+
 void
 Izclose (RILE **p)
 {
   Ifclose (*p);
   *p = NULL;
 }
+
 void
 Ozclose (FILE **p)
 {
@@ -1080,13 +1057,14 @@ testIeof (FILE *f)
   if (feof (f))
     Ieof ();
 }
+
 void
 Irewind (FILE *f)
 {
   if (fseek (f, 0L, SEEK_SET) != 0)
     Ierror ();
 }
-#endif
+#endif  /* !large_memory */
 
 void
 Orewind (FILE *f)
@@ -1101,12 +1079,14 @@ aflush (FILE *f)
   if (fflush (f) != 0)
     Oerror ();
 }
+
 void
 eflush (void)
 {
   if (fflush (stderr) != 0 && !Oerrloop)
     Oerror ();
 }
+
 void
 oflush (void)
 {
@@ -1182,9 +1162,10 @@ enfaterror (int e, char const *s)
 
 void
 error (char const *format, ...)
-/* non-fatal error */
+/* Non-fatal error.  */
 {
   va_list args;
+
   errsay (NULL);
   va_start (args, format);
   fvfprintf (stderr, format, args);
@@ -1195,9 +1176,10 @@ error (char const *format, ...)
 
 void
 rcserror (char const *format, ...)
-/* non-fatal RCS file error */
+/* Non-fatal RCS file error.  */
 {
   va_list args;
+
   errsay (RCSname);
   va_start (args, format);
   fvfprintf (stderr, format, args);
@@ -1208,9 +1190,10 @@ rcserror (char const *format, ...)
 
 void
 workerror (char const *format, ...)
-/* non-fatal working file error */
+/* Non-fatal working file error.  */
 {
   va_list args;
+
   errsay (workname);
   va_start (args, format);
   fvfprintf (stderr, format, args);
@@ -1221,9 +1204,10 @@ workerror (char const *format, ...)
 
 void
 fatserror (char const *format, ...)
-/* fatal RCS file syntax error */
+/* Fatal RCS file syntax error.  */
 {
   va_list args;
+
   oflush ();
   fprintf (stderr, "%s: %s:%ld: ", cmdid, RCSname, rcsline);
   va_start (args, format);
@@ -1234,9 +1218,10 @@ fatserror (char const *format, ...)
 
 void
 faterror (char const *format, ...)
-/* fatal error, terminates program after cleanup */
+/* Fatal error.  Terminate program after cleanup.  */
 {
   va_list args;
+
   fatsay (NULL);
   va_start (args, format);
   fvfprintf (stderr, format, args);
@@ -1246,9 +1231,10 @@ faterror (char const *format, ...)
 
 void
 rcsfaterror (char const *format, ...)
-/* fatal RCS file error, terminates program after cleanup */
+/* Fatal RCS file error.  Terminate program after cleanup.  */
 {
   va_list args;
+
   fatsay (RCSname);
   va_start (args, format);
   fvfprintf (stderr, format, args);
@@ -1258,9 +1244,10 @@ rcsfaterror (char const *format, ...)
 
 void
 warn (char const *format, ...)
-/* warning */
+/* Warning.  */
 {
   va_list args;
+
   if (!quietflag)
     {
       warnsay (NULL);
@@ -1274,9 +1261,10 @@ warn (char const *format, ...)
 
 void
 rcswarn (char const *format, ...)
-/* RCS file warning */
+/* RCS file warning.  */
 {
   va_list args;
+
   if (!quietflag)
     {
       warnsay (RCSname);
@@ -1290,9 +1278,10 @@ rcswarn (char const *format, ...)
 
 void
 workwarn (char const *format, ...)
-/* working file warning */
+/* Working file warning.  */
 {
   va_list args;
+
   if (!quietflag)
     {
       warnsay (workname);
@@ -1312,12 +1301,13 @@ redefined (int c)
 
 void
 diagnose (char const *format, ...)
-/* prints a diagnostic message */
-/* Unlike the other routines, it does not append a newline. */
-/* This lets some callers suppress the newline, and is faster */
-/* in implementations that flush stderr just at the end of each printf. */
+/* Print a diagnostic message, but unlike the other routines, do not
+   append a newline.  This lets some callers suppress the newline, and
+   is faster implementations that flush stderr just at the end of each
+   `printf'.  */
 {
   va_list args;
+
   if (!quietflag)
     {
       oflush ();
@@ -1330,15 +1320,14 @@ diagnose (char const *format, ...)
 
 void
 afputc (int c, register FILE *f)
-/* afputc(c,f) acts like aputc(c,f) but is smaller and slower.  */
+/* `afputc (c, f)' acts like `aputc (c, f)' but is smaller and slower.  */
 {
   aputc (c, f);
 }
 
 void
 aputs (char const *s, FILE *iop)
-/* Function: Put string s on file iop, abort on error.
- */
+/* Put string `s' on file `iop', abort on error.  */
 {
   if (fputs (s, iop) < 0)
     Oerror ();
@@ -1346,7 +1335,7 @@ aputs (char const *s, FILE *iop)
 
 void
 fvfprintf (FILE * stream, char const *format, va_list args)
-/* like vfprintf, except abort program on error */
+/* Like `vfprintf', except abort program on error.  */
 {
   if (vfprintf (stream, format, args) < 0)
     Oerror ();
@@ -1354,19 +1343,20 @@ fvfprintf (FILE * stream, char const *format, va_list args)
 
 void
 aprintf (FILE * iop, char const *fmt, ...)
-/* Function: formatted output. Same as fprintf in stdio,
- * but aborts program on error
- */
+/* Formatted output.  Same as `fprintf' in <stdio.h>,
+   but abort program on error.  */
 {
   va_list ap;
+
   va_start (ap, fmt);
   fvfprintf (iop, fmt, ap);
   va_end (ap);
 }
 
 #ifdef LEXDB
-/* test program reading a stream of lexemes and printing the tokens.
- */
+/* The test program reads a stream of lexemes, enters the revision numbers
+   into the hashtable, and prints the recognized tokens.  Keywords are
+   recognized as identifiers.  */
 
 int
 main (int argc, char *argv[])
@@ -1433,4 +1423,6 @@ exiterr (void)
   _exit (EXIT_FAILURE);
 }
 
-#endif
+#endif  /* defined LEXDB */
+
+/* rcslex.c ends here */

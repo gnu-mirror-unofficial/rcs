@@ -23,18 +23,17 @@
 #include "partime.h"
 #include "maketime.h"
 
-static long zone_offset;        /* seconds east of UTC, or TM_LOCAL_ZONE */
-static int use_zone_offset;     /* if zero, use UTC without zone indication */
+/* Seconds east of UTC, or `TM_LOCAL_ZONE'.  */
+static long zone_offset;
+/* If zero, use UTC without zone indication.  */
+static int use_zone_offset;
 
 #define proper_dot_2(a,b)  (PRINTF_DOT2_OK ? (a) : (b))
 
-/*
-* Convert Unix time to RCS format.
-* For compatibility with older versions of RCS,
-* dates from 1900 through 1999 are stored without the leading "19".
-*/
 void
 time2date (time_t unixtime, char date[datesize])
+/* Convert Unix time to RCS format.  For compatibility with older versions of
+   RCS, dates from 1900 through 1999 are stored without the leading "19".  */
 {
   register struct tm const *tm = time2tm (unixtime, RCSversion < VERSION (5));
   sprintf (date, proper_dot_2 ("%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",
@@ -43,46 +42,49 @@ time2date (time_t unixtime, char date[datesize])
            tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
 
-/* Like str2time, except die if an error was found.  */
-static time_t str2time_checked (char const *, time_t, long);
 static time_t
 str2time_checked (char const *source, time_t default_time, long default_zone)
+/* Like `str2time', except die if an error was found.  */
 {
   time_t t = str2time (source, default_time, default_zone);
+
   if (t == -1)
     faterror ("unknown date/time: %s", source);
   return t;
 }
 
-/*
-* Parse a free-format date in SOURCE, convert it
-* into RCS internal format, and store the result into TARGET.
-*/
 void
 str2date (char const *source, char target[datesize])
+/* Parse a free-format date in `source', convert it into
+   RCS internal format, and store the result into `target'.  */
 {
   time2date (str2time_checked (source, now (),
-                               use_zone_offset ? zone_offset
-                               : RCSversion < VERSION (5) ? TM_LOCAL_ZONE
-                               : 0), target);
+                               use_zone_offset
+                               ? zone_offset
+                               : (RCSversion < VERSION (5)
+                                  ? TM_LOCAL_ZONE
+                                  : 0)),
+             target);
 }
 
-/* Convert an RCS internal format date to time_t.  */
 time_t
 date2time (char const source[datesize])
+/* Convert an RCS internal format date to `time_t'.  */
 {
   char s[datesize + zonelenmax];
+
   return str2time_checked (date2str (source, s), (time_t) 0, 0);
 }
 
-/* Set the time zone for date2str output.  */
 void
 zone_set (char const *s)
+/* Set the time zone for `date2str' output.  */
 {
   if ((use_zone_offset = *s))
     {
       long zone;
       char const *zonetail = parzone (s, &zone);
+
       if (!zonetail || *zonetail)
         error ("%s: not a known time zone", s);
       else
@@ -90,12 +92,10 @@ zone_set (char const *s)
     }
 }
 
-/*
-* Format a user-readable form of the RCS format DATE into the buffer DATEBUF.
-* Yield DATEBUF.
-*/
 char const *
 date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
+/* Format a user-readable form of the RCS format `date'
+   into the buffer `datebuf'.  Return `datebuf'.  */
 {
   register char const *p = date;
 
@@ -103,8 +103,8 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
     continue;
   if (!use_zone_offset)
     sprintf (datebuf,
-             "19%.*s/%.2s/%.2s %.2s:%.2s:%s"
-             + (date[2] == '.' && VERSION (5) <= RCSversion ? 0 : 2),
+             ("19%.*s/%.2s/%.2s %.2s:%.2s:%s"
+              + (date[2] == '.' && VERSION (5) <= RCSversion ? 0 : 2)),
              (int) (p - date - 1), date, p, p + 3, p + 6, p + 9, p + 12);
   else
     {
@@ -125,6 +125,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
       if (zone == TM_LOCAL_ZONE)
         {
           time_t u = tm2time (&t, 0), d;
+
           z = localtime (&u);
           d = difftm (z, &t);
           zone = (time_t) - 1 < 0 || d < -d ? d : -(long) -d;
@@ -157,3 +158,5 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
     }
   return datebuf;
 }
+
+/* rcstime.c ends here */

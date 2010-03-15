@@ -23,16 +23,10 @@
 #include "partime.h"
 #include "maketime.h"
 
-static int isleap (int);
-static int month_days (struct tm const *);
-static time_t maketime (struct partime const *, time_t);
-
-/*
-* For maximum portability, use only localtime and gmtime.
-* Make no assumptions about the time_t epoch or the range of time_t values.
-* Avoid mktime because it's not universal and because there's no easy,
-* portable way for mktime to yield the inverse of gmtime.
-*/
+/* For maximum portability, use only `localtime' and `gmtime'.  Make no
+   assumptions about the `time_t' epoch or the range of `time_t' values.
+   Avoid `mktime' because it's not universal and because there's no easy,
+   portable way for `mktime' to return the inverse of `gmtime'.  */
 
 #define TM_YEAR_ORIGIN 1900
 
@@ -43,41 +37,41 @@ isleap (int y)
 }
 
 static int const month_yday[] = {
-  /* days in year before start of months 0-12 */
+  /* Days in year before start of months 0-12.  */
   0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
 };
 
-/* Yield the number of days in TM's month.  */
 static int
 month_days (struct tm const *tm)
+/* Return the number of days in `tm' month.  */
 {
   int m = tm->tm_mon;
+
   return month_yday[m + 1] - month_yday[m]
     + (m == 1 && isleap (tm->tm_year + TM_YEAR_ORIGIN));
 }
 
-/*
-* Convert UNIXTIME to struct tm form.
-* Use gmtime if available and if !LOCALZONE, localtime otherwise.
-*/
 struct tm *
 time2tm (time_t unixtime, int localzone)
+/* Convert `unixtime' to `struct tm' form.
+   Use `gmtime' if available and if `!localzone', `localtime' otherwise.  */
 {
   struct tm *tm;
-#	if TZ_must_be_set
+#if TZ_must_be_set
   static char const *TZ;
+
   if (!TZ && !(TZ = getenv ("TZ")))
     faterror
       ("The TZ environment variable is not set; please set it to your timezone");
-#	endif
+#endif
   if (localzone || !(tm = gmtime (&unixtime)))
     tm = localtime (&unixtime);
   return tm;
 }
 
-/* Yield A - B, measured in seconds.  */
 time_t
 difftm (struct tm const *a, struct tm const *b)
+/* Return `a - b', measured in seconds.  */
 {
   int ay = a->tm_year + (TM_YEAR_ORIGIN - 1);
   int by = b->tm_year + (TM_YEAR_ORIGIN - 1);
@@ -89,27 +83,26 @@ difftm (struct tm const *a, struct tm const *b)
   time_t difference_in_days = (difference_in_years * 365
                                + (intervening_leap_days +
                                   difference_in_day_of_year));
+
   return ((24 * difference_in_days + (a->tm_hour - b->tm_hour)) * 60 +
           (a->tm_min - b->tm_min)) * 60 + (a->tm_sec - b->tm_sec);
 }
 
-/*
-* Adjust time T by adding SECONDS.  SECONDS must be at most 24 hours' worth.
-* Adjust only T's year, mon, mday, hour, min and sec members;
-* plus adjust wday if it is defined.
-*/
 void
 adjzone (register struct tm *t, long seconds)
+/* Adjust time `t' by adding `seconds'.  `seconds' must be at most 24
+   hours' worth.  In `t', adjust only the `year', `mon', `mday', `hour',
+   `min' and `sec' members; plus adjust `wday' if it is defined.  */
 {
-  /*
-   * This code can be off by a second if SECONDS is not a multiple of 60,
-   * if T is local time, and if a leap second happens during this minute.
-   * But this bug has never occurred, and most likely will not ever occur.
-   * Liberia, the last country for which SECONDS % 60 was nonzero,
-   * switched to UTC in May 1972; the first leap second was in June 1972.
-   */
+  /* This code can be off by a second if `seconds' is not a multiple of
+     60, if `t' is local time, and if a leap second happens during this
+     minute.  But this bug has never occurred, and most likely will not
+     ever occur.  Liberia, the last country for which `seconds' % 60 was
+     nonzero, switched to UTC in May 1972; the first leap second was in
+     June 1972.  */
   int leap_second = t->tm_sec == 60;
   long sec = seconds + (t->tm_sec - leap_second);
+
   if (sec < 0)
     {
       if ((t->tm_min -= (59 - sec) / 60) < 0)
@@ -153,28 +146,25 @@ adjzone (register struct tm *t, long seconds)
   t->tm_sec = (int) (sec % 60) + leap_second;
 }
 
-/*
-* Convert TM to time_t, using localtime if LOCALZONE and gmtime otherwise.
-* Use only TM's year, mon, mday, hour, min, and sec members.
-* Ignore TM's old tm_yday and tm_wday, but fill in their correct values.
-* Yield -1 on failure (e.g. a member out of range).
-* Posix 1003.1-1990 doesn't allow leap seconds, but some implementations
-* have them anyway, so allow them if localtime/gmtime does.
-*/
 time_t
 tm2time (struct tm *tm, int localzone)
+/* Convert `tm' to `time_t', using `localtime' if `localzone' and `gmtime'
+   otherwise.  From `tm', use only `year', `mon', `mday', `hour', `min',
+   and `sec' members.  Ignore old members `tm_yday' and `tm_wday', but
+   fill in their correct values.  Return -1 on failure (e.g. a member out
+   of range).  POSIX 1003.1-1990 doesn't allow leap seconds, but some
+   implementations have them anyway, so allow them if `localtime'/`gmtime'
+   does.  */
 {
-  /* Cache the most recent t,tm pairs; 1 for gmtime, 1 for localtime.  */
+  /* Cache the most recent `t',`tm' pairs;
+     1 for `gmtime', 1 for `localtime'.  */
   static time_t t_cache[2];
   static struct tm tm_cache[2];
-
   time_t d, gt;
   struct tm const *gtm;
-  /*
-   * The maximum number of iterations should be enough to handle any
-   * combinations of leap seconds, time zone rule changes, and solar time.
-   * 4 is probably enough; we use a bigger number just to be safe.
-   */
+  /* The maximum number of iterations should be enough to handle any
+     combinations of leap seconds, time zone rule changes, and solar time.
+     4 is probably enough; we use a bigger number just to be safe.  */
   int remaining_tries = 8;
 
   /* Avoid subscript errors.  */
@@ -199,11 +189,9 @@ tm2time (struct tm *tm, int localzone)
   t_cache[localzone] = gt;
   tm_cache[localzone] = *gtm;
 
-  /*
-   * Check that the guess actually matches;
-   * overflow can cause difftm to yield 0 even on differing times,
-   * or tm may have members out of range (e.g. bad leap seconds).
-   */
+  /* Check that the guess actually matches; overflow can cause `difftm'
+     to return 0 even on differing times, or `tm' may have members out of
+     range (e.g. bad leap seconds).  */
   if ((tm->tm_year ^ gtm->tm_year)
       | (tm->tm_mon ^ gtm->tm_mon)
       | (tm->tm_mday ^ gtm->tm_mday)
@@ -215,15 +203,12 @@ tm2time (struct tm *tm, int localzone)
   return gt;
 }
 
-/*
-* Check *PT and convert it to time_t.
-* If it is incompletely specified, use DEFAULT_TIME to fill it out.
-* Use localtime if PT->zone is the special value TM_LOCAL_ZONE.
-* Yield -1 on failure.
-* ISO 8601 day-of-year and week numbers are not yet supported.
-*/
 static time_t
 maketime (struct partime const *pt, time_t default_time)
+/* Check `*pt' and convert it to `time_t'.  If it is incompletely specified,
+   use `default_time' to fill it out.  Use `localtime' if `pt->zone' is the
+   special value `TM_LOCAL_ZONE'.  Return -1 on failure.  ISO 8601 day-of-year
+   and week numbers are not yet supported.  */
 {
   int localzone, wday;
   struct tm tm;
@@ -258,7 +243,7 @@ maketime (struct partime const *pt, time_t default_time)
         }
     }
 
-  /* Convert from partime year (Gregorian) to Posix year.  */
+  /* Convert from `partime' year (Gregorian) to POSIX year.  */
   tm.tm_year -= TM_YEAR_ORIGIN;
 
   /* Set remaining default fields to be their minimum values.  */
@@ -277,7 +262,7 @@ maketime (struct partime const *pt, time_t default_time)
     adjzone (&tm, -pt->zone);
   wday = tm.tm_wday;
 
-  /* Convert and fill in the rest of the tm.  */
+  /* Convert and fill in the rest of the `tm'.  */
   r = tm2time (&tm, localzone);
 
   /* Check weekday.  */
@@ -287,9 +272,9 @@ maketime (struct partime const *pt, time_t default_time)
   return r;
 }
 
-/* Parse a free-format date in SOURCE, yielding a Unix format time.  */
 time_t
 str2time (char const *source, time_t default_time, long default_zone)
+/* Parse a free-format date in `source', returning a Unix format time.  */
 {
   struct partime pt;
 
@@ -308,6 +293,7 @@ main (int argc, char **argv)
   time_t default_time = time (NULL);
   long default_zone = argv[1] ? atol (argv[1]) : 0;
   char buf[1000];
+
   while (gets (buf))
     {
       time_t t = str2time (buf, default_time, default_zone);
@@ -316,3 +302,5 @@ main (int argc, char **argv)
   return 0;
 }
 #endif
+
+/* maketime.c ends here */

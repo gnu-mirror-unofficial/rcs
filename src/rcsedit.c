@@ -30,68 +30,72 @@
 #include "rcsbase.h"
 #include <stdbool.h>
 
-static void editEndsPrematurely (void) exiting;
-static void editLineNumberOverflow (void) exiting;
-static void escape_string (FILE *, char const *);
-static void keyreplace (enum markers, struct hshentry const *,
-                        int, RILE *, FILE *, int);
+/* Result file descriptor.  */
+FILE *fcopy;
+/* Result pathname.  */
+char const *resultname;
+/* Should the locker name be appended to Id val?  */
+int locker_expansion;
 
-FILE *fcopy;               /* result file descriptor                          */
-char const *resultname;    /* result pathname                                 */
-int locker_expansion;      /* should the locker name be appended to Id val?   */
 #if !large_memory
-static RILE *fedit;        /* edit file descriptor */
-static char const *editname;       /* edit pathname */
+/* Edit file descriptor.  */
+static RILE *fedit;
+/* Edit pathname.  */
+static char const *editname;
 #endif
-static long editline;      /* edit line counter; #lines before cursor   */
-static long linecorr;      /* #adds - #deletes in each edit run.                 */
-               /*used to correct editline in case file is not rewound after */
-               /* applying one delta                                        */
 
-/* indexes into dirtpname */
-#define lockdirtp_index 0
-#define newRCSdirtp_index BAD_CREAT0
-#define newworkdirtp_index (newRCSdirtp_index+1)
-#define DIRTEMPNAMES (newworkdirtp_index + 1)
+/* Edit line counter; #lines before cursor.  */
+static long editline;
+/* #adds - #deletes in each edit run, used to correct editline in case
+   file is not rewound after applying one delta.  */
+static long linecorr;
+
+/* Indexes into dirtpname.  */
+#define lockdirtp_index     0
+#define newRCSdirtp_index   BAD_CREAT0
+#define newworkdirtp_index  (newRCSdirtp_index + 1)
+#define DIRTEMPNAMES        (newworkdirtp_index + 1)
 
 enum maker { notmade, real, effective };
-static struct buf dirtpname[DIRTEMPNAMES]; /* unlink these when done */
-static enum maker volatile dirtpmaker[DIRTEMPNAMES];       /* if these are set */
-#define lockname (dirtpname[lockdirtp_index].string)
-#define newRCSname (dirtpname[newRCSdirtp_index].string)
+/* Unlink these when done.  */
+static struct buf dirtpname[DIRTEMPNAMES];
+/* (But only if these are set.)  */
+static enum maker volatile dirtpmaker[DIRTEMPNAMES];
+
+#define lockname    (dirtpname[lockdirtp_index].string)
+#define newRCSname  (dirtpname[newRCSdirtp_index].string)
 
 #if has_NFS || BAD_UNLINK
-int un_link (char const *s)
-/*
- * Remove S, even if it is unwritable.
- * Ignore unlink() ENOENT failures; NFS generates bogus ones.
- */
+int
+un_link (char const *s)
+/* Remove `s', even if it is unwritable.
+   Ignore `unlink' `ENOENT' failures; NFS generates bogus ones.  */
 {
-#	if BAD_UNLINK
+#if BAD_UNLINK
   if (unlink (s) == 0)
     return 0;
   else
     {
       int e = errno;
-      /*
-       * Forge ahead even if errno == ENOENT; some completely
-       * brain-damaged hosts (e.g. PCTCP 2.2) yield ENOENT
-       * even for existing unwritable files.
-       */
+
+      /* Forge ahead even if `errno == ENOENT'; some completely
+         brain-damaged hosts (e.g. PCTCP 2.2) return `ENOENT' even for
+         existing unwritable files.  */
       if (chmod (s, S_IWUSR) != 0)
         {
           errno = e;
           return -1;
         }
     }
-#	endif
-#	if has_NFS
+#endif  /* BAD_UNLINK */
+
+#if has_NFS
   return unlink (s) == 0 || errno == ENOENT ? 0 : -1;
-#	else
+#else
   return unlink (s);
-#	endif
-}
 #endif
+}
+#endif  /* has_NFS || BAD_UNLINK */
 
 static void
 editEndsPrematurely (void)
@@ -107,35 +111,27 @@ editLineNumberOverflow (void)
 
 #if large_memory
 
-#define movelines(s1, s2, n) memmove(s1, s2, (n)*sizeof(Iptr_type))
+#define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (Iptr_type))
 
-static void deletelines (unsigned long, unsigned long);
-static void finisheditline (RILE *, FILE *, Iptr_type, struct hshentry const *);
-static void insertline (unsigned long, Iptr_type);
-static void snapshotline (FILE *, Iptr_type);
+/* `line' contains pointers to the lines in the currently "edited" file.
+   It is a 0-origin array that represents `linelim - gapsize' lines.
+   `line[0 .. gap-1]' and `line[gap+gapsize .. linelim-1]' hold pointers to lines.
+   `line[gap .. gap+gapsize-1]' contains garbage.
 
-/*
- * `line' contains pointers to the lines in the currently `edited' file.
- * It is a 0-origin array that represents linelim-gapsize lines.
- * line[0 .. gap-1] and line[gap+gapsize .. linelim-1] hold pointers to lines.
- * line[gap .. gap+gapsize-1] contains garbage.
- *
- * Any @s in lines are duplicated.
- * Lines are terminated by \n, or (for a last partial line only) by single @.
- */
+   Any '@'s in lines are duplicated.  Lines are terminated by '\n', or
+   (for a last partial line only) by single '@'.  */
 static Iptr_type *line;
 static size_t gap, gapsize, linelim;
 
 static void
 insertline (unsigned long n, Iptr_type l)
-/* Before line N, insert line L.  N is 0-origin.  */
+/* Before line `n', insert line `l'.  */
 {
   if (linelim - gapsize < n)
     editLineNumberOverflow ();
   if (!gapsize)
-    line =
-      !linelim ?
-      tnalloc (Iptr_type, linelim = gapsize = 1024)
+    line = !linelim
+      ? tnalloc (Iptr_type, linelim = gapsize = 1024)
       : (gap = gapsize = linelim, trealloc (Iptr_type, line, linelim <<= 1));
   if (n < gap)
     movelines (line + n + gapsize, line + n, gap - n);
@@ -149,9 +145,10 @@ insertline (unsigned long n, Iptr_type l)
 
 static void
 deletelines (unsigned long n, unsigned long nlines)
-/* Delete lines N through N+NLINES-1.  N is 0-origin.  */
+/* Delete lines `n' through `n + nlines - 1'.  */
 {
   unsigned long l = n + nlines;
+
   if (linelim - gapsize < l || l < n)
     editLineNumberOverflow ();
   if (l < gap)
@@ -178,9 +175,10 @@ snapshotline (register FILE *f, register Iptr_type l)
 
 void
 snapshotedit (FILE *f)
-/* Copy the current state of the edits to F.  */
+/* Copy the current state of the edits to `f'.  */
 {
   register Iptr_type *p, *lim, *l = line;
+
   for (p = l, lim = l + gap; p < lim;)
     snapshotline (f, *p++);
   for (p += gapsize, lim = l + linelim; p < lim;)
@@ -188,7 +186,8 @@ snapshotedit (FILE *f)
 }
 
 static void
-finisheditline (RILE *fin, FILE *fout, Iptr_type l, struct hshentry const *delta)
+finisheditline (RILE *fin, FILE *fout, Iptr_type l,
+                struct hshentry const *delta)
 {
   fin->ptr = l;
   if (expandline (fin, fout, delta, true, NULL, true) < 0)
@@ -197,10 +196,9 @@ finisheditline (RILE *fin, FILE *fout, Iptr_type l, struct hshentry const *delta
 
 void
 finishedit (struct hshentry const *delta, FILE *outfile, int done)
-/*
- * Doing expansion if DELTA is set, output the state of the edits to OUTFILE.
- * But do nothing unless DONE is set (which means we are on the last pass).
- */
+/* Doing expansion if `delta' is set, output the state of the edits to
+   `outfile'.  But do nothing unless `done' is set (which means we are
+   on the last pass).  */
 {
   if (done)
     {
@@ -213,6 +211,7 @@ finishedit (struct hshentry const *delta, FILE *outfile, int done)
           register Iptr_type *p, *lim, *l = line;
           register RILE *fin = finptr;
           Iptr_type here = fin->ptr;
+
           for (p = l, lim = l + gap; p < lim;)
             finisheditline (fin, outfile, *p++, delta);
           for (p += gapsize, lim = l + linelim; p < lim;)
@@ -223,9 +222,10 @@ finishedit (struct hshentry const *delta, FILE *outfile, int done)
 }
 
 /* Open a temporary NAME for output, truncating any previous contents.  */
-#   define fopen_update_truncate(name) fopenSafer(name, FOPEN_W_WORK)
+#define fopen_update_truncate(name)  fopenSafer (name, FOPEN_W_WORK)
+
 #else /* !large_memory */
-static FILE *fopen_update_truncate (char const *);
+
 static FILE *
 fopen_update_truncate (char const *name)
 {
@@ -233,7 +233,8 @@ fopen_update_truncate (char const *name)
     efaterror (name);
   return fopenSafer (name, FOPEN_WPLUS_WORK);
 }
-#endif
+
+#endif  /* !large_memory */
 
 void
 openfcopy (FILE *f)
@@ -249,13 +250,12 @@ openfcopy (FILE *f)
 
 #if !large_memory
 
-static void swapeditfiles (FILE *);
 static void
 swapeditfiles (FILE *outfile)
-/* Function: swaps resultname and editname, assigns fedit=fcopy,
- * and rewinds fedit for reading.  Set fcopy to outfile if nonnull;
- * otherwise, set fcopy to be resultname opened for reading and writing.
- */
+/* Swap `resultname' and `editname', assign `fedit = fcopy', and rewind
+   `fedit' for reading.  Set `fcopy' to `outfile' if non-NULL;
+   otherwise, set `fcopy' to be `resultname' opened for reading and
+   writing.  */
 {
   char const *tmpptr;
 
@@ -271,7 +271,7 @@ swapeditfiles (FILE *outfile)
 
 void
 snapshotedit (FILE *f)
-/* Copy the current state of the edits to F.  */
+/* Copy the current state of the edits to `f'.  */
 {
   finishedit (NULL, NULL, false);
   fastcopy (fedit, f);
@@ -280,10 +280,9 @@ snapshotedit (FILE *f)
 
 void
 finishedit (struct hshentry const *delta, FILE *outfile, int done)
-/* copy the rest of the edit file and close it (if it exists).
- * if delta, perform keyword substitution at the same time.
- * If DONE is set, we are finishing the last pass.
- */
+/* Copy the rest of the edit file and close it (if it exists).
+   If `delta', perform keyword substitution at the same time.
+   If `done' is set, we are finishing the last pass.  */
 {
   register RILE *fe;
   register FILE *fc;
@@ -306,19 +305,16 @@ finishedit (struct hshentry const *delta, FILE *outfile, int done)
   if (!done)
     swapeditfiles (outfile);
 }
-#endif
+#endif  /* !large_memory */
 
 #if large_memory
-#	define copylines(upto,delta) (editline = (upto))
-#else
-static void copylines (long, struct hshentry const *);
+#define copylines(upto,delta)  (editline = (upto))
+#else  /* !large_memory */
 static void
 copylines (register long upto, struct hshentry const *delta)
-/*
- * Copy input lines editline+1..upto from fedit to fcopy.
- * If delta, keyword expansion is done simultaneously.
- * editline is updated. Rewinds a file only if necessary.
- */
+/* Copy input lines `editline+1..upto' from `fedit' to `fcopy'.
+   If `delta', keyword expansion is done simultaneously.
+   `editline' is updated.  Rewinds a file only if necessary.  */
 {
   register int c;
   declarecache;
@@ -327,9 +323,9 @@ copylines (register long upto, struct hshentry const *delta)
 
   if (upto < editline)
     {
-      /* swap files */
+      /* Swap files.  */
       finishedit (NULL, NULL, false);
-      /* assumes edit only during last pass, from the beginning */
+      /* Assumes edit only during last pass, from the beginning.  */
     }
   fe = fedit;
   fc = fcopy;
@@ -358,15 +354,14 @@ copylines (register long upto, struct hshentry const *delta)
         uncache (fe);
       }
 }
-#endif
+#endif  /* !large_memory */
 
 void
 xpandstring (struct hshentry const *delta)
-/* Function: Reads a string terminated by SDELIM from finptr and writes it
- * to fcopy. Double SDELIM is replaced with single SDELIM.
- * Keyword expansion is performed with data from delta.
- * If foutptr is nonnull, the string is also copied unchanged to foutptr.
- */
+/* Read a string terminated by `SDELIM' from `finptr' and write it to
+   `fcopy'.  Double `SDELIM' is replaced with single `SDELIM'.  Keyword
+   expansion is performed with data from `delta'.  If `foutptr' is
+   non-NULL, the string is also copied unchanged to `foutptr'.  */
 {
   while (1 < expandline (finptr, fcopy, delta, true, foutptr, true))
     continue;
@@ -374,12 +369,11 @@ xpandstring (struct hshentry const *delta)
 
 void
 copystring (void)
-/* Function: copies a string terminated with a single SDELIM from finptr to
- * fcopy, replacing all double SDELIM with a single SDELIM.
- * If foutptr is nonnull, the string also copied unchanged to foutptr.
- * editline is incremented by the number of lines copied.
- * Assumption: next character read is first string character.
- */
+/* Copy a string terminated with a single `SDELIM' from `finptr' to
+   `fcopy', replacing all double `SDELIM' with a single `SDELIM'.  If
+   `foutptr' is non-NULL, the string also copied unchanged to `foutptr'.
+   `editline' is incremented by the number of lines copied.  Assumption:
+   next character read is first string character.  */
 {
   register int c;
   declarecache;
@@ -407,7 +401,7 @@ copystring (void)
           GETC (frew, c);
           if (c != SDELIM)
             {
-              /* end of string */
+              /* End of string.  */
               nextc = c;
               editline += amidline;
               uncache (fin);
@@ -424,7 +418,8 @@ copystring (void)
 
 void
 enterstring (void)
-/* Like copystring, except the string is put into the edit data structure.  */
+/* Like `copystring', except the string is
+   put into the `edit' data structure.  */
 {
 #if !large_memory
   editname = NULL;
@@ -434,7 +429,7 @@ enterstring (void)
   if (!(fcopy = fopen_update_truncate (resultname)))
     efaterror (resultname);
   copystring ();
-#else
+#else  /* large_memory */
   register int c;
   declarecache;
   register FILE *frew;
@@ -469,7 +464,7 @@ enterstring (void)
           GETC (frew, c);
           if (c != SDELIM)
             {
-              /* end of string */
+              /* End of string.  */
               nextc = c;
               editline = e + amidline;
               linecorr = 0;
@@ -484,7 +479,7 @@ enterstring (void)
       if (!oamidline)
         insertline (oe, optr);
     }
-#endif
+#endif  /* large_memory */
 }
 
 void
@@ -493,39 +488,37 @@ edit_string (void)
 #else
 editstring (struct hshentry const *delta)
 #endif
-/*
- * Read an edit script from finptr and applies it to the edit file.
+/* Read an edit script from `finptr' and applies it to the edit file.
 #if !large_memory
- * The result is written to fcopy.
- * If delta, keyword expansion is performed simultaneously.
- * If running out of lines in fedit, fedit and fcopy are swapped.
- * editname is the name of the file that goes with fedit.
+   The result is written to `fcopy'.
+   If `delta', keyword expansion is performed simultaneously.
+   If running out of lines in `fedit', `fedit' and `fcopy' are swapped.
+   `editname' is the name of the file that goes with `fedit'.
 #endif
- * If foutptr is set, the edit script is also copied verbatim to foutptr.
- * Assumes that all these files are open.
- * resultname is the name of the file that goes with fcopy.
- * Assumes the next input character from finptr is the first character of
- * the edit script. Resets nextc on exit.
- */
+   If `foutptr' is set, the edit script is also copied verbatim to `foutptr'.
+   Assumes that all these files are open.
+   `resultname' is the name of the file that goes with `fcopy'.
+   Assumes the next input character from `finptr' is the first
+   character of the edit script.  Resets `nextc' on exit.  */
 {
-  int ed;                       /* editor command */
+  int ed;                               /* editor command */
   register int c;
   declarecache;
   register FILE *frew;
-#	if !large_memory
+#if !large_memory
   register FILE *f;
   long line_lim = LONG_MAX;
   register RILE *fe;
-#	endif
+#endif
   register long i;
   register RILE *fin;
-#	if large_memory
+#if large_memory
   register long j;
-#	endif
+#endif
   struct diffcmd dc;
 
   editline += linecorr;
-  linecorr = 0;                 /*correct line number */
+  linecorr = 0;                         /* correct line number */
   frew = foutptr;
   fin = finptr;
   setupcache (fin);
@@ -539,17 +532,17 @@ editstring (struct hshentry const *delta)
     if (!ed)
       {
         copylines (dc.line1 - 1, delta);
-        /* skip over unwanted lines */
+        /* Skip over unwanted lines.  */
         i = dc.nlines;
         linecorr -= i;
         editline += i;
-#			if large_memory
+#if large_memory
         deletelines (editline + linecorr, i);
-#			else
+#else  /* !large_memory */
         fe = fedit;
         do
           {
-            /*skip next line */
+            /* Skip next line.  */
             do Igeteof (fe, c,
                         {
                           if (i != 1)
@@ -562,16 +555,16 @@ editstring (struct hshentry const *delta)
             ;
           }
         while (--i);
-#			endif
+#endif  /* !large_memory */
       }
     else
       {
         /* Copy lines without deleting any.  */
         copylines (dc.line1, delta);
         i = dc.nlines;
-#			if large_memory
+#if large_memory
         j = editline + linecorr;
-#			endif
+#endif
         linecorr += i;
 #if !large_memory
         f = fcopy;
@@ -591,14 +584,14 @@ editstring (struct hshentry const *delta)
             }
           while (--i);
         else
-#endif
+#endif  /* !large_memory */
           {
             cache (fin);
             do
               {
-#				if large_memory
+#if large_memory
                 insertline (j++, cacheptr ());
-#				endif
+#endif
                 for (;;)
                   {
                     GETC (frew, c);
@@ -614,9 +607,9 @@ editstring (struct hshentry const *delta)
                             return;
                           }
                       }
-#				    if !large_memory
+#if !large_memory
                     aputc (c, f);
-#				    endif
+#endif
                     if (c == '\n')
                       break;
                   }
@@ -628,166 +621,15 @@ editstring (struct hshentry const *delta)
       }
 }
 
-/* The rest is for keyword expansion */
-
-int
-expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
-            int delimstuffed, FILE *frewfile, int dolog)
-/*
- * Read a line from INFILE and write it to OUTFILE.
- * Do keyword expansion with data from DELTA.
- * If DELIMSTUFFED is true, double SDELIM is replaced with single SDELIM.
- * If FREWFILE is set, copy the line unchanged to FREWFILE.
- * DELIMSTUFFED must be true if FREWFILE is set.
- * Append revision history to log only if DOLOG is set.
- * Yields -1 if no data is copied, 0 if an incomplete line is copied,
- * 2 if a complete line is copied; adds 1 to yield if expansion occurred.
- */
-{
-  register int c;
-  declarecache;
-  register FILE *out, *frew;
-  register char *tp;
-  register int e, ds, r;
-  char const *tlim;
-  static struct buf keyval;
-  enum markers matchresult;
-
-  setupcache (infile);
-  cache (infile);
-  out = outfile;
-  frew = frewfile;
-  ds = delimstuffed;
-  bufalloc (&keyval, keylength + 3);
-  e = 0;
-  r = -1;
-
-  for (;;)
-    {
-      if (ds)
-        GETC (frew, c);
-      else
-        cachegeteof (c, goto uncache_exit);
-      for (;;)
-        {
-          switch (c)
-            {
-            case SDELIM:
-              if (ds)
-                {
-                  GETC (frew, c);
-                  if (c != SDELIM)
-                    {
-                      /* end of string */
-                      nextc = c;
-                      goto uncache_exit;
-                    }
-                }
-              /* fall into */
-            default:
-              aputc (c, out);
-              r = 0;
-              break;
-
-            case '\n':
-              rcsline += ds;
-              aputc (c, out);
-              r = 2;
-              goto uncache_exit;
-
-            case KDELIM:
-              r = 0;
-              /* check for keyword */
-              /* first, copy a long enough string into keystring */
-              tp = keyval.string;
-              *tp++ = KDELIM;
-              for (;;)
-                {
-                  if (ds)
-                    GETC (frew, c);
-                  else
-                    cachegeteof (c, goto keystring_eof);
-                  if (tp <= &keyval.string[keylength])
-                    switch (ctab[c])
-                      {
-                      case LETTER:
-                      case Letter:
-                        *tp++ = c;
-                        continue;
-                      default:
-                        break;
-                      }
-                  break;
-                }
-              *tp++ = c;
-              *tp = '\0';
-              matchresult = trymatch (keyval.string + 1);
-              if (matchresult == Nomatch)
-                {
-                  tp[-1] = 0;
-                  aputs (keyval.string, out);
-                  continue;     /* last c handled properly */
-                }
-
-              /* Now we have a keyword terminated with a K/VDELIM */
-              if (c == VDELIM)
-                {
-                  /* try to find closing KDELIM, and replace value */
-                  tlim = keyval.string + keyval.size;
-                  for (;;)
-                    {
-                      if (ds)
-                        GETC (frew, c);
-                      else
-                        cachegeteof (c, goto keystring_eof);
-                      if (c == '\n' || c == KDELIM)
-                        break;
-                      *tp++ = c;
-                      if (tlim <= tp)
-                        tp = bufenlarge (&keyval, &tlim);
-                      if (c == SDELIM && ds)
-                        {       /*skip next SDELIM */
-                          GETC (frew, c);
-                          if (c != SDELIM)
-                            {
-                              /* end of string before closing KDELIM or newline */
-                              nextc = c;
-                              goto keystring_eof;
-                            }
-                        }
-                    }
-                  if (c != KDELIM)
-                    {
-                      /* couldn't find closing KDELIM -- give up */
-                      *tp = '\0';
-                      aputs (keyval.string, out);
-                      continue; /* last c handled properly */
-                    }
-                }
-              /* now put out the new keyword value */
-              uncache (infile);
-              keyreplace (matchresult, delta, ds, infile, out, dolog);
-              cache (infile);
-              e = 1;
-              break;
-            }
-          break;
-        }
-    }
-
-keystring_eof:
-  *tp = '\0';
-  aputs (keyval.string, out);
-uncache_exit:
-  uncache (infile);
-  return r + e;
-}
+/* The rest is for keyword expansion.  */
 
 static void
 escape_string (register FILE *out, register char const *s)
-/* Output to OUT the string S, escaping chars that would break `ci -k'.  */
+/* Output to `out' the string `s',
+   escaping chars that would break `ci -k'.  */
 {
   register char c;
+
   for (;;)
     switch ((c = *s++))
       {
@@ -823,9 +665,8 @@ char const ciklog[ciklogsize] = "checked in with -k by ";
 static void
 keyreplace (enum markers marker, register struct hshentry const *delta,
             int delimstuffed, RILE *infile, register FILE *out, int dolog)
-/* function: outputs the keyword value(s) corresponding to marker.
- * Attributes are derived from delta.
- */
+/* Output the keyword value(s) corresponding to `marker'.
+   Attributes are derived from `delta'.  */
 {
   register char const *sp, *cp, *date;
   register int c;
@@ -931,15 +772,14 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
           int kdelim_found = 0;
           Ioffset_type chars_read = Itell (infile);
           declarecache;
+
           setupcache (infile);
           cache (infile);
 
           c = 0;                /* Pacify `gcc -Wall'.  */
 
-          /*
-           * Back up to the start of the current input line,
-           * setting CS to the number of characters before `$Log'.
-           */
+          /* Back up to the start of the current input line,
+             setting `cs' to the number of characters before `$Log'.  */
           cs = 0;
           for (;;)
             {
@@ -966,7 +806,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
         done_backing_up:
           ;
 
-          /* Copy characters before `$Log' into LEADER.  */
+          /* Copy characters before `$Log' into `leader'.  */
           bufalloc (&leader, cs);
           cp = leader.string;
           for (cw = 0; cw < cs; cw++)
@@ -985,11 +825,11 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
               && cp[cw + 1] == '*' && (cp[cw] == '/' || cp[cw] == '('))
             {
               size_t i = cw + 1;
+
               for (;;)
                 if (++i == cs)
                   {
-                    warn
-                      ("`%c* $Log' is obsolescent; use ` * $Log'.", cp[cw]);
+                    warn ("`%c* $Log' is obsolescent; use ` * $Log'.", cp[cw]);
                     leader.string[cw] = ' ';
                     break;
                   }
@@ -1013,7 +853,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
         }
       else
         {
-          /* oddity: 2 spaces between date and time, not 1 as usual */
+          /* Oddity: 2 spaces between date and time, not 1 as usual.  */
           sp1 = strchr (sp1, ' ');
           aprintf (out, "Revision %s  %.*s %s  %s",
                    delta->num, (int) (sp1 - datebuf), datebuf,
@@ -1050,16 +890,166 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
     }
 }
 
+int
+expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
+            int delimstuffed, FILE *frewfile, int dolog)
+/* Read a line from `infile' and write it to `outfile'.  Do keyword
+   expansion with data from `delta'.  If `delimstuffed' is true, double
+   `SDELIM' is replaced with single `SDELIM'.  If `frewfile' is set,
+   copy the line unchanged to `frewfile'.  `delimstuffed' must be true
+   if `frewfile' is set.  Append revision history to log only if `dolog'
+   is set.  Return -1 if no data is copied, 0 if an incomplete line is
+   copied, 2 if a complete line is copied; add 1 to return value if
+   expansion occurred.  */
+{
+  register int c;
+  declarecache;
+  register FILE *out, *frew;
+  register char *tp;
+  register int e, ds, r;
+  char const *tlim;
+  static struct buf keyval;
+  enum markers matchresult;
+
+  setupcache (infile);
+  cache (infile);
+  out = outfile;
+  frew = frewfile;
+  ds = delimstuffed;
+  bufalloc (&keyval, keylength + 3);
+  e = 0;
+  r = -1;
+
+  for (;;)
+    {
+      if (ds)
+        GETC (frew, c);
+      else
+        cachegeteof (c, goto uncache_exit);
+      for (;;)
+        {
+          switch (c)
+            {
+            case SDELIM:
+              if (ds)
+                {
+                  GETC (frew, c);
+                  if (c != SDELIM)
+                    {
+                      /* End of string.  */
+                      nextc = c;
+                      goto uncache_exit;
+                    }
+                }
+              /* fall into */
+            default:
+              aputc (c, out);
+              r = 0;
+              break;
+
+            case '\n':
+              rcsline += ds;
+              aputc (c, out);
+              r = 2;
+              goto uncache_exit;
+
+            case KDELIM:
+              r = 0;
+              /* Check for keyword.  First, copy a long
+                 enough string into keystring.  */
+              tp = keyval.string;
+              *tp++ = KDELIM;
+              for (;;)
+                {
+                  if (ds)
+                    GETC (frew, c);
+                  else
+                    cachegeteof (c, goto keystring_eof);
+                  if (tp <= &keyval.string[keylength])
+                    switch (ctab[c])
+                      {
+                      case LETTER:
+                      case Letter:
+                        *tp++ = c;
+                        continue;
+                      default:
+                        break;
+                      }
+                  break;
+                }
+              *tp++ = c;
+              *tp = '\0';
+              matchresult = trymatch (keyval.string + 1);
+              if (matchresult == Nomatch)
+                {
+                  tp[-1] = 0;
+                  aputs (keyval.string, out);
+                  continue;     /* last c handled properly */
+                }
+
+              /* Now we have a keyword terminated with a K/VDELIM.  */
+              if (c == VDELIM)
+                {
+                  /* Try to find closing `KDELIM', and replace value.  */
+                  tlim = keyval.string + keyval.size;
+                  for (;;)
+                    {
+                      if (ds)
+                        GETC (frew, c);
+                      else
+                        cachegeteof (c, goto keystring_eof);
+                      if (c == '\n' || c == KDELIM)
+                        break;
+                      *tp++ = c;
+                      if (tlim <= tp)
+                        tp = bufenlarge (&keyval, &tlim);
+                      if (c == SDELIM && ds)
+                        {
+                          /* Skip next `SDELIM'.  */
+                          GETC (frew, c);
+                          if (c != SDELIM)
+                            {
+                              /* End of string before closing
+                                 `KDELIM' or newline.  */
+                              nextc = c;
+                              goto keystring_eof;
+                            }
+                        }
+                    }
+                  if (c != KDELIM)
+                    {
+                      /* Couldn't find closing `KDELIM' -- give up.  */
+                      *tp = '\0';
+                      aputs (keyval.string, out);
+                      continue; /* last c handled properly */
+                    }
+                }
+              /* Now put out the new keyword value.  */
+              uncache (infile);
+              keyreplace (matchresult, delta, ds, infile, out, dolog);
+              cache (infile);
+              e = 1;
+              break;
+            }
+          break;
+        }
+    }
+
+keystring_eof:
+  *tp = '\0';
+  aputs (keyval.string, out);
+uncache_exit:
+  uncache (infile);
+  return r + e;
+}
+
 #ifdef HAVE_READLINK
-static int resolve_symlink (struct buf *);
 static int
 resolve_symlink (struct buf *L)
-/*
- * If L is a symbolic link, resolve it to the name that it points to.
- * If unsuccessful, set errno and yield -1.
- * If it points to an existing file, yield 1.
- * Otherwise, set errno=ENOENT and yield 0.
- */
+/* If `L' is a symbolic link, resolve it to the name that it points to.
+   If unsuccessful, set errno and return -1.
+   If it points to an existing file, return 1.
+   Otherwise, set `errno' to `ENOENT' and return 0.  */
 {
   char *b, a[SIZEABLE_PATH];
   int e;
@@ -1079,22 +1069,20 @@ resolve_symlink (struct buf *L)
       }
     else if (!linkcount--)
       {
-#		ifndef ELOOP
-        /*
-         * Some pedantic Posix 1003.1-1990 hosts have readlink
-         * but not ELOOP.  Approximate ELOOP with EMLINK.
-         */
-#		    define ELOOP EMLINK
-#		endif
+#ifndef ELOOP
+        /* Some pedantic POSIX 1003.1-1990 hosts have `readlink'
+           but not `ELOOP'.  Approximate `ELOOP' with `EMLINK'.  */
+#define ELOOP EMLINK
+#endif
         errno = ELOOP;
         return -1;
       }
     else
       {
-        /* Splice symbolic link into L.  */
+        /* Splice symbolic link into `L'.  */
         b[r] = '\0';
-        L->string[ROOTPATH (b) ? 0 : basefilename (L->string) -
-                  L->string] = '\0';
+        L->string[ROOTPATH (b) ? 0 : basefilename (L->string) - L->string]
+          = '\0';
         bufscat (L, b);
       }
   e = errno;
@@ -1110,18 +1098,16 @@ resolve_symlink (struct buf *L)
       return -1;
     }
 }
-#endif
+#endif  /* defined HAVE_READLINK */
 
 RILE *
 rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
-/*
- * Create the lock file corresponding to RCSBUF.
- * Then try to open RCSBUF for reading and yield its RILE* descriptor.
- * Put its status into *STATUS too.
- * MUSTREAD is true if the file must already exist, too.
- * If all goes well, discard any previously acquired locks,
- * and set fdlock to the file descriptor of the RCS lockfile.
- */
+/* Create the lock file corresponding to `RCSbuf'.
+   Then try to open `RCSbuf' for reading and return its `RILE*' descriptor.
+   Put its status into `*status' too.
+   `mustread' is true if the file must already exist, too.
+   If all goes well, discard any previously acquired locks,
+   and set `fdlock' to the file descriptor of the RCS lockfile.  */
 {
   register char *tp;
   register char const *sp, *RCSpath, *x;
@@ -1133,17 +1119,15 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
 
   waslocked = 0 <= fdlock;
   exists =
-#		ifdef HAVE_READLINK
+#ifdef HAVE_READLINK
     resolve_symlink (RCSbuf);
-#		else
+#else
     stat (RCSbuf->string, &statbuf) == 0 ? 1 : errno == ENOENT ? 0 : -1;
-#		endif
+#endif
   if (exists < (mustread | waslocked))
-    /*
-     * There's an unusual problem with the RCS file;
-     * or the RCS file doesn't exist,
-     * and we must read or we already have a lock elsewhere.
-     */
+    /* There's an unusual problem with the RCS file; or the RCS file
+       doesn't exist, and we must read or we already have a lock
+       elsewhere.  */
     return NULL;
 
   RCSpath = RCSbuf->string;
@@ -1153,14 +1137,14 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
   bufscpy (dirt, RCSpath);
   tp = dirt->string + l;
   x = rcssuffix (RCSpath);
-#	ifdef HAVE_READLINK
+#ifdef HAVE_READLINK
   if (!x)
     {
       error ("symbolic link to non RCS file `%s'", RCSpath);
       errno = EINVAL;
       return NULL;
     }
-#	endif
+#endif
   if (*sp == *x)
     {
       error ("RCS pathname `%s' incompatible with suffix `%s'", sp, x);
@@ -1170,13 +1154,12 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
   /* Create a lock filename that is a function of the RCS filename.  */
   if (*x)
     {
-      /*
-       * The suffix is nonempty.
-       * The lock filename is the first char of of the suffix,
-       * followed by the RCS filename with last char removed.  E.g.:
-       *      foo,v   RCS filename with suffix ,v
-       *      ,foo,   lock filename
-       */
+      /* The suffix is nonempty.  The lock filename is the first char
+         of of the suffix, followed by the RCS filename with last char
+         removed.  E.g.:
+         | foo,v  -- RCS filename with suffix ,v
+         | ,foo,  -- lock filename
+      */
       *tp++ = *x;
       while (*sp)
         *tp++ = *sp++;
@@ -1184,11 +1167,8 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
     }
   else
     {
-      /*
-       * The suffix is empty.
-       * The lock filename is the RCS filename
-       * with last char replaced by '_'.
-       */
+      /* The suffix is empty.  The lock filename is the RCS filename
+         with last char replaced by '_'.  */
       while ((*tp++ = *sp++))
         continue;
       tp -= 2;
@@ -1205,65 +1185,70 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
 
   f = NULL;
 
-  /*
-   * good news:
-   *      open(f, O_CREAT|O_EXCL|O_TRUNC|..., OPEN_CREAT_READONLY)
-   *      is atomic according to Posix 1003.1-1990.
-   * bad news:
-   *      NFS ignores O_EXCL and doesn't comply with Posix 1003.1-1990.
-   * good news:
-   *      (O_TRUNC,OPEN_CREAT_READONLY) normally guarantees atomicity
-   *      even with NFS.
-   * bad news:
-   *      If you're root, (O_TRUNC,OPEN_CREAT_READONLY) doesn't
-   *      guarantee atomicity.
-   * good news:
-   *      Root-over-the-wire NFS access is rare for security reasons.
-   *      This bug has never been reported in practice with RCS.
-   * So we don't worry about this bug.
-   *
-   * An even rarer NFS bug can occur when clients retry requests.
-   * This can happen in the usual case of NFS over UDP.
-   * Suppose client A releases a lock by renaming ",f," to "f,v" at
-   * about the same time that client B obtains a lock by creating ",f,",
-   * and suppose A's first rename request is delayed, so A reissues it.
-   * The sequence of events might be:
-   *      A sends rename(",f,", "f,v")
-   *      B sends create(",f,")
-   *      A sends retry of rename(",f,", "f,v")
-   *      server receives, does, and acknowledges A's first rename()
-   *      A receives acknowledgment, and its RCS program exits
-   *      server receives, does, and acknowledges B's create()
-   *      server receives, does, and acknowledges A's retry of rename()
-   * This not only wrongly deletes B's lock, it removes the RCS file!
-   * Most NFS implementations have idempotency caches that usually prevent
-   * this scenario, but such caches are finite and can be overrun.
-   * This problem afflicts not only RCS, which uses open() and rename()
-   * to get and release locks; it also afflicts the traditional
-   * Unix method of using link() and unlink() to get and release locks,
-   * and the less traditional method of using mkdir() and rmdir().
-   * There is no easy workaround.
-   * Any new method based on lockf() seemingly would be incompatible with
-   * the old methods; besides, lockf() is notoriously buggy under NFS.
-   * Since this problem afflicts scads of Unix programs, but is so rare
-   * that nobody seems to be worried about it, we won't worry either.
-   */
-#	if !open_can_creat
-#		define create(f) creat(f, OPEN_CREAT_READONLY)
-#	else
-#		define create(f) open(f, OPEN_O_BINARY|OPEN_O_LOCK|OPEN_O_WRONLY|O_CREAT|O_EXCL|O_TRUNC, OPEN_CREAT_READONLY)
-#	endif
+  /* good news:
+     `open (f, O_CREAT|O_EXCL|O_TRUNC|..., OPEN_CREAT_READONLY)'
+     is atomic according to POSIX 1003.1-1990.
+
+     bad news:
+     NFS ignores O_EXCL and doesn't comply with POSIX 1003.1-1990.
+
+     good news:
+     `(O_TRUNC,OPEN_CREAT_READONLY)' normally guarantees atomicity
+     even with NFS.
+
+     bad news:
+     If you're root, `(O_TRUNC,OPEN_CREAT_READONLY)' doesn't guarantee atomicity.
+
+     good news:
+     Root-over-the-wire NFS access is rare for security reasons.
+     This bug has never been reported in practice with RCS.
+     So we don't worry about this bug.
+
+     An even rarer NFS bug can occur when clients retry requests.
+     This can happen in the usual case of NFS over UDP.
+     Suppose client A releases a lock by renaming ",f," to "f,v" at
+     about the same time that client B obtains a lock by creating ",f,",
+     and suppose A's first rename request is delayed, so A reissues it.
+     The sequence of events might be:
+     - A sends rename (",f,", "f,v").
+     - B sends create (",f,").
+     - A sends retry of rename (",f,", "f,v").
+     - server receives, does, and acknowledges A's first `rename'.
+     - A receives acknowledgment, and its RCS program exits.
+     - server receives, does, and acknowledges B's `create'.
+     - server receives, does, and acknowledges A's retry of `rename'.
+     This not only wrongly deletes B's lock, it removes the RCS file!
+     Most NFS implementations have idempotency caches that usually prevent
+     this scenario, but such caches are finite and can be overrun.
+
+     This problem afflicts not only RCS, which uses `open' and `rename'
+     to get and release locks; it also afflicts the traditional
+     Unix method of using `link' and `unlink' to get and release locks,
+     and the less traditional method of using `mkdir' and `rmdir'.
+     There is no easy workaround.
+
+     Any new method based on `lockf' seemingly would be incompatible with
+     the old methods; besides, `lockf' is notoriously buggy under NFS.
+     Since this problem afflicts scads of Unix programs, but is so rare
+     that nobody seems to be worried about it, we won't worry either.  */
+#if !open_can_creat
+#define create(f) creat (f, OPEN_CREAT_READONLY)
+#else
+#define create(f) open (f, OPEN_O_BINARY | OPEN_O_LOCK                \
+                        | OPEN_O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, \
+                        OPEN_CREAT_READONLY)
+#endif
 
   catchints ();
   ignoreints ();
 
-  /*
-   * Create a lock file for an RCS file.  This should be atomic, i.e.
-   * if two processes try it simultaneously, at most one should succeed.
-   */
+  /* Create a lock file for an RCS file.  This should be atomic,
+     i.e.  if two processes try it simultaneously, at most one
+     should succeed.  */
   seteid ();
   fdesc = create (sp);
-  fdescSafer = fdSafer (fdesc); /* Do it now; setrid might use stderr.  */
+  /* Do it now; `setrid' might use stderr.  */
+  fdescSafer = fdSafer (fdesc);
   e = errno;
   setrid ();
 
@@ -1307,11 +1292,11 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
 
 void
 keepdirtemp (char const *name)
-/* Do not unlink name, either because it's not there any more,
- * or because it has already been unlinked.
- */
+/* Do not unlink `name', either because it's not there any more,
+   or because it has already been unlinked.  */
 {
   register int i;
+
   for (i = DIRTEMPNAMES; 0 <= --i;)
     if (dirtpname[i].string == name)
       {
@@ -1323,13 +1308,11 @@ keepdirtemp (char const *name)
 
 char const *
 makedirtemp (int isworkfile)
-/*
- * Create a unique pathname and store it into dirtpname.
- * Because of storage in tpnames, dirtempunlink() can unlink the file later.
- * Return a pointer to the pathname created.
- * If ISWORKFILE is 1, put it into the working file's directory;
- * if 0, put the unique file in RCSfile's directory.
- */
+/* Create a unique pathname and store it into `dirtpname'.
+   Because of storage in `tpnames', `dirtempunlink' can unlink the file later.
+   Return a pointer to the pathname created.
+   If `isworkfile' is 1, put it into the working file's directory;
+   if 0, put the unique file in RCSfile's directory.  */
 {
   int slot = newRCSdirtp_index + isworkfile;
 
@@ -1340,7 +1323,8 @@ makedirtemp (int isworkfile)
 
 void
 dirtempunlink (void)
-/* Clean up makedirtemp() files.  May be invoked by signal handler. */
+/* Clean up `makedirtemp' files.
+   May be invoked by signal handler.  */
 {
   register int i;
   enum maker m;
@@ -1360,20 +1344,18 @@ dirtempunlink (void)
 int
 chnamemod (FILE ** fromp, char const *from, char const *to,
            int set_mode, mode_t mode, time_t mtime)
-/*
- * Rename a file (with stream pointer *FROMP) from FROM to TO.
- * FROM already exists.
- * If 0 < SET_MODE, change the mode to MODE, before renaming if possible.
- * If MTIME is not -1, change its mtime to MTIME before renaming.
- * Close and clear *FROMP before renaming it.
- * Unlink TO if it already exists.
- * Return -1 on error (setting errno), 0 otherwise.
- */
+/* Rename a file (with stream pointer `*fromp') from `from' to `to'.
+   `from' already exists.
+   If `0 < set_mode', change the mode to `mode', before renaming if possible.
+   If `mtime' is not -1, change its mtime to `mtime' before renaming.
+   Close and clear `*fromp' before renaming it.
+   Unlink `to' if it already exists.
+   Return -1 on error (setting `errno'), 0 otherwise.   */
 {
   mode_t mode_while_renaming = mode;
   int fchmod_set_mode = 0;
 
-#	if BAD_A_RENAME || bad_NFS_rename
+#if BAD_A_RENAME || bad_NFS_rename
   struct stat st;
   if (bad_NFS_rename || (BAD_A_RENAME && set_mode <= 0))
     {
@@ -1382,22 +1364,20 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
       if (BAD_A_RENAME && set_mode <= 0)
         mode = st.st_mode;
     }
-#	endif
+#endif  /* BAD_A_RENAME || bad_NFS_rename */
 
-#	if BAD_A_RENAME
-  /*
-   * There's a short window of inconsistency
-   * during which the lock file is writable.
-   */
+#if BAD_A_RENAME
+  /* There's a short window of inconsistency
+     during which the lock file is writable.  */
   mode_while_renaming = mode | S_IWUSR;
   if (mode != mode_while_renaming)
     set_mode = 1;
-#	endif
+#endif  /* BAD_A_RENAME */
 
-#	ifdef HAVE_FCHMOD
+#ifdef HAVE_FCHMOD
   if (0 < set_mode && fchmod (fileno (*fromp), mode_while_renaming) == 0)
     fchmod_set_mode = set_mode;
-#	endif
+#endif
   /* On some systems, we must close before chmod.  */
   Ozclose (fromp);
   if (fchmod_set_mode < set_mode && chmod (from, mode_while_renaming) != 0)
@@ -1406,25 +1386,22 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
   if (setmtime (from, mtime) != 0)
     return -1;
 
-#	if BAD_B_RENAME
-  /*
-   * There's a short window of inconsistency
-   * during which TO does not exist.
-   */
+#if BAD_B_RENAME
+  /* There's a short window of inconsistency
+     during which `to' does not exist.  */
   if (un_link (to) != 0 && errno != ENOENT)
     return -1;
-#	endif
+#endif  /* BAD_B_RENAME */
 
   if (rename (from, to) != 0 && !(has_NFS && errno == ENOENT))
     return -1;
 
-#	if bad_NFS_rename
+#if bad_NFS_rename
   {
-    /*
-     * Check whether the rename falsely reported success.
-     * A race condition can occur between the rename and the stat.
-     */
+    /* Check whether the rename falsely reported success.
+       A race condition can occur between the rename and the stat.  */
     struct stat tostat;
+
     if (stat (to, &tostat) != 0)
       return -1;
     if (!same_file (st, tostat, 0))
@@ -1433,21 +1410,23 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
         return -1;
       }
   }
-#	endif
+#endif  /* bad_NFS_rename */
 
-#	if BAD_A_RENAME
+#if BAD_A_RENAME
   if (0 < set_mode && chmod (to, mode) != 0)
     return -1;
-#	endif
+#endif
 
   return 0;
 }
 
 int
 setmtime (char const *file, time_t mtime)
-/* Set FILE's last modified time to MTIME, but do nothing if MTIME is -1.  */
+/* Set `file' last modified time to `mtime',
+   but do nothing if `mtime' is -1.  */
 {
   static struct utimbuf amtime; /* static so unused fields are zero */
+
   if (mtime == -1)
     return 0;
   amtime.actime = now ();
@@ -1457,12 +1436,10 @@ setmtime (char const *file, time_t mtime)
 
 int
 findlock (int delete, struct hshentry **target)
-/*
- * Find the first lock held by caller and return a pointer
- * to the locked delta; also removes the lock if DELETE.
- * If one lock, put it into *TARGET.
- * Return 0 for no locks, 1 for one, 2 for two or more.
- */
+/* Find the first lock held by caller and return a pointer
+   to the locked delta; also removes the lock if `delete'.
+   If one lock, put it into `*target'.
+   Return 0 for no locks, 1 for one, 2 for two or more.  */
 {
   register struct rcslock *next, **trail, **found;
 
@@ -1472,9 +1449,8 @@ findlock (int delete, struct hshentry **target)
       {
         if (found)
           {
-            rcserror
-              ("multiple revisions locked by %s; please specify one",
-               getcaller ());
+            rcserror ("multiple revisions locked by %s; please specify one",
+                      getcaller ());
             return 2;
           }
         found = trail;
@@ -1493,12 +1469,10 @@ findlock (int delete, struct hshentry **target)
 
 int
 addlock (struct hshentry *delta, int verbose)
-/*
- * Add a lock held by caller to DELTA and yield 1 if successful.
- * Print an error message if verbose and yield -1 if no lock is added because
- * DELTA is locked by somebody other than caller.
- * Return 0 if the caller already holds the lock.
- */
+/* Add a lock held by caller to `delta' and yield 1 if successful.
+   Print an error message if `verbose' and return -1 if no lock is
+   added because `delta' is locked by somebody other than caller.
+   Return 0 if the caller already holds the lock.   */
 {
   register struct rcslock *next;
 
@@ -1525,12 +1499,10 @@ addlock (struct hshentry *delta, int verbose)
 
 int
 addsymbol (char const *num, char const *name, int rebind)
-/*
- * Associate with revision NUM the new symbolic NAME.
- * If NAME already exists and REBIND is set, associate NAME with NUM;
- * otherwise, print an error message and return false;
- * Return -1 if unsuccessful, 0 if no change, 1 if change.
- */
+/* Associate with revision `num' the new symbolic `name'.
+   If `name' already exists and `rebind' is set, associate `name'
+   with `num'; otherwise, print an error message and return false;
+   Return -1 if unsuccessful, 0 if no change, 1 if change.  */
 {
   register struct assoc *next;
 
@@ -1562,20 +1534,18 @@ char const *
 getcaller (void)
 /* Get the caller's login name.  */
 {
-#	if defined HAVE_SETUID
+#if defined HAVE_SETUID
   return getusername (euid () != ruid ());
-#	else
+#else
   return getusername (false);
-#	endif
+#endif
 }
 
 int
 checkaccesslist (void)
-/*
- * Return true if caller is the superuser, the owner of the
- * file, the access list is empty, or caller is on the access list.
- * Otherwise, print an error message and return false.
- */
+/* Return true if caller is the superuser, the owner of the
+   file, the access list is empty, or caller is on the access list.
+   Otherwise, print an error message and return false.  */
 {
   register struct access const *next;
 
@@ -1597,13 +1567,11 @@ checkaccesslist (void)
 
 int
 dorewrite (int lockflag, int changed)
-/*
- * Do nothing if LOCKFLAG is zero.
- * Prepare to rewrite an RCS file if CHANGED is positive.
- * Stop rewriting if CHANGED is zero, because there won't be any changes.
- * Fail if CHANGED is negative.
- * Return 0 on success, -1 on failure.
- */
+/* Do nothing if `lockflag' is zero.
+   Prepare to rewrite an RCS file if `changed' is positive.
+   Stop rewriting if `changed' is zero, because there won't be any changes.
+   Fail if `changed' is negative.
+   Return 0 on success, -1 on failure.  */
 {
   int r = 0, e;
 
@@ -1620,20 +1588,20 @@ dorewrite (int lockflag, int changed)
         }
       else
         {
-#			if BAD_CREAT0
+#if BAD_CREAT0
           int nr = !!frewrite, ne = 0;
-#			endif
+#endif
           ORCSclose ();
           seteid ();
           ignoreints ();
-#			if BAD_CREAT0
+#if BAD_CREAT0
           if (nr)
             {
               nr = un_link (newRCSname);
               ne = errno;
               keepdirtemp (newRCSname);
             }
-#			endif
+#endif
           r = un_link (lockname);
           e = errno;
           keepdirtemp (lockname);
@@ -1641,13 +1609,13 @@ dorewrite (int lockflag, int changed)
           setrid ();
           if (r != 0)
             enerror (e, lockname);
-#			if BAD_CREAT0
+#if BAD_CREAT0
           if (nr != 0)
             {
               enerror (ne, newRCSname);
               r = -1;
             }
-#			endif
+#endif
         }
       }
   return r;
@@ -1655,17 +1623,15 @@ dorewrite (int lockflag, int changed)
 
 int
 donerewrite (int changed, time_t newRCStime)
-/*
- * Finish rewriting an RCS file if CHANGED is nonzero.
- * Set its mode if CHANGED is positive.
- * Set its modification time to NEWRCSTIME unless it is -1.
- * Return 0 on success, -1 on failure.
- */
+/* Finish rewriting an RCS file if `changed' is nonzero.
+   Set its mode if `changed' is positive.
+   Set its modification time to `newRCStime' unless it is -1.
+   Return 0 on success, -1 on failure.  */
 {
   int r = 0, e = 0;
-#	if BAD_CREAT0
+#if BAD_CREAT0
   int lr, le;
-#	endif
+#endif
 
   if (changed && !nerror)
     {
@@ -1680,16 +1646,15 @@ donerewrite (int changed, time_t newRCStime)
       seteid ();
       ignoreints ();
       r = chnamemod (&frewrite, newRCSname, RCSname, changed,
-                     RCSstat.
-                     st_mode & (mode_t) ~ (S_IWUSR | S_IWGRP |
-                                           S_IWOTH), newRCStime);
+                     RCSstat.st_mode & (mode_t) ~ (S_IWUSR | S_IWGRP | S_IWOTH),
+                     newRCStime);
       e = errno;
       keepdirtemp (newRCSname);
-#		if BAD_CREAT0
+#if BAD_CREAT0
       lr = un_link (lockname);
       le = errno;
       keepdirtemp (lockname);
-#		endif
+#endif
       restoreints ();
       setrid ();
       if (r != 0)
@@ -1697,13 +1662,13 @@ donerewrite (int changed, time_t newRCStime)
           enerror (e, RCSname);
           error ("saved in %s", newRCSname);
         }
-#		if BAD_CREAT0
+#if BAD_CREAT0
       if (lr != 0)
         {
           enerror (le, lockname);
           r = -1;
         }
-#		endif
+#endif
     }
   return r;
 }
@@ -1722,19 +1687,20 @@ ORCSclose (void)
 
 void
 ORCSerror (void)
-/*
-* Like ORCSclose, except we are cleaning up after an interrupt or fatal error.
-* Do not report errors, since this may loop.  This is needed only because
-* some brain-damaged hosts (e.g. OS/2) cannot unlink files that are open, and
-* some nearly-Posix hosts (e.g. NFS) work better if the files are closed first.
-* This isn't a completely reliable away to work around brain-damaged hosts,
-* because of the gap between actual file opening and setting frewrite etc.,
-* but it's better than nothing.
-*/
+/* Like `ORCSclose', except we are cleaning up after an interrupt or
+   fatal error.  Do not report errors, since this may loop.  This is
+   needed only because some brain-damaged hosts (e.g. OS/2) cannot
+   unlink files that are open, and some nearly-POSIX hosts (e.g. NFS)
+   work better if the files are closed first.  This isn't a completely
+   reliable away to work around brain-damaged hosts, because of the gap
+   between actual file opening and setting `frewrite' etc., but it's
+   better than nothing.  */
 {
   if (0 <= fdlock)
     close (fdlock);
   if (frewrite)
-    /* Avoid fclose, since stdio may not be reentrant.  */
+    /* Avoid `fclose', since stdio may not be reentrant.  */
     close (fileno (frewrite));
 }
+
+/* rcsedit.c ends here */

@@ -33,15 +33,6 @@ struct name_val
   int val;
 };
 
-static char const *parse_decimal (char const *, int, int, int, int, int *, int *);
-static char const *parse_fixed (char const *, int, int *);
-static char const *parse_pattern_letter (char const *, int, struct partime *);
-static char const *parse_prefix (char const *, struct partime *, int *);
-static char const *parse_ranged (char const *, int, int, int, int *);
-static int lookup (char const *, struct name_val const[]);
-static int merge_partime (struct partime *, struct partime const *);
-static void undefine (struct partime *);
-
 static struct name_val const month_names[] = {
   {"jan", 0}, {"feb", 1}, {"mar", 2}, {"apr", 3}, {"may", 4}, {"jun", 5},
   {"jul", 6}, {"aug", 7}, {"sep", 8}, {"oct", 9}, {"nov", 10}, {"dec", 11},
@@ -154,7 +145,8 @@ static struct name_val const zone_names[] = {
 
 static int
 lookup (char const *s, struct name_val const table[])
-/* Look for a prefix of S in TABLE, returning val for first matching entry.  */
+/* Look for a prefix of `s' in `table',
+   returning val for first matching entry.  */
 {
   int j;
   char buf[NAME_LENGTH_MAXIMUM];
@@ -162,6 +154,7 @@ lookup (char const *s, struct name_val const table[])
   for (j = 0; j < NAME_LENGTH_MAXIMUM; j++)
     {
       unsigned char c = *s++;
+
       buf[j] = isupper (c) ? tolower (c) : c;
       if (!isalpha (c))
         break;
@@ -176,7 +169,7 @@ done:
 
 static void
 undefine (struct partime *t)
-/* Set *T to ``undefined'' values.  */
+/* Set `*t' to "undefined" values.  */
 {
   t->tm.tm_sec = t->tm.tm_min = t->tm.tm_hour = t->tm.tm_mday = t->tm.tm_mon
     = t->tm.tm_year = t->tm.tm_wday = t->tm.tm_yday
@@ -184,20 +177,16 @@ undefine (struct partime *t)
   t->zone = TM_UNDEFINED_ZONE;
 }
 
-/*
-* Array of patterns to look for in a date string.
-* Order is important: we look for the first matching pattern
-* whose values do not contradict values that we already know about.
-* See `parse_pattern_letter' below for the meaning of the pattern codes.
-*/
+/* Array of patterns to look for in a date string.  Order is important: we
+   look for the first matching pattern whose values do not contradict values
+   that we already know about.  See `parse_pattern_letter' below for the
+   meaning of the pattern codes.  */
 static char const *const patterns[] = {
-  /*
-   * These traditional patterns must come first,
-   * to prevent an ISO 8601 format from misinterpreting their prefixes.
-   */
-  "E_n_y", "x",                 /* RFC 822 */
+  /* These traditional patterns must come first,
+     to prevent an ISO 8601 format from misinterpreting their prefixes.  */
+  "E_n_y", "x",                                 /* RFC 822 */
   "E_n", "n_E", "n", "t:m:s_A", "t:m_A", "t_A", /* traditional */
-  "y/N/D$",                     /* traditional RCS */
+  "y/N/D$",                                     /* traditional RCS */
 
   /* ISO 8601:1988 formats, generalized a bit.  */
   "y-N-D$", "4ND$", "Y-N$",
@@ -215,66 +204,18 @@ static char const *const patterns[] = {
 };
 
 static char const *
-parse_prefix (char const *str, struct partime *t, int *pi)
-/*
-* Parse an initial prefix of STR, setting *T accordingly.
-* Return the first character after the prefix, or 0 if it couldn't be parsed.
-* Start with pattern *PI; if success, set *PI to the next pattern to try.
-* Set *PI to -1 if we know there are no more patterns to try;
-* if *PI is initially negative, give up immediately.
-*/
-{
-  int i = *pi;
-  char const *pat;
-  unsigned char c;
-
-  if (i < 0)
-    return NULL;
-
-  /* Remove initial noise.  */
-  while (!isalnum (c = *str) && c != '-' && c != '+')
-    {
-      if (!c)
-        {
-          undefine (t);
-          *pi = -1;
-          return str;
-        }
-      str++;
-    }
-
-  /* Try a pattern until one succeeds.  */
-  while ((pat = patterns[i++]) != NULL)
-    {
-      char const *s = str;
-      undefine (t);
-      do
-        {
-          if (!(c = *pat++))
-            {
-              *pi = i;
-              return s;
-            }
-        }
-      while ((s = parse_pattern_letter (s, c, t)) != NULL);
-    }
-
-  return NULL;
-}
-
-static char const *
 parse_fixed (char const *s, int digits, int *res)
-/*
-* Parse an initial prefix of S of length DIGITS; it must be a number.
-* Store the parsed number into *RES.
-* Return the first character after the prefix, or 0 if it couldn't be parsed.
-*/
+/* Parse an initial prefix of `s' of length `digits'; it must be a
+   number.  Store the parsed number into `*res'.  Return the first
+   character after the prefix, or 0 if it couldn't be parsed.  */
 {
   int n = 0;
   char const *lim = s + digits;
+
   while (s < lim)
     {
       unsigned d = *s++ - '0';
+
       if (9 < d)
         return NULL;
       n = 10 * n + d;
@@ -285,12 +226,9 @@ parse_fixed (char const *s, int digits, int *res)
 
 static char const *
 parse_ranged (char const *s, int digits, int lo, int hi, int *res)
-/*
-* Parse an initial prefix of S of length DIGITS;
-* it must be a number in the range LO through HI.
-* Store the parsed number into *RES.
-* Return the first character after the prefix, or 0 if it couldn't be parsed.
-*/
+/* Parse an initial prefix of `s' of length `digits'; it must be a number in
+   the range `lo' through `hi'.  Store the parsed number into `*res'.  Return
+   the first character after the prefix, or 0 if it couldn't be parsed.  */
 {
   s = parse_fixed (s, digits, res);
   return s && lo <= *res && *res <= hi ? s : NULL;
@@ -299,24 +237,24 @@ parse_ranged (char const *s, int digits, int lo, int hi, int *res)
 static char const *
 parse_decimal (char const *s, int digits, int lo, int hi,
                int resolution, int *res, int *fres)
-/*
-* Parse an initial prefix of S of length DIGITS;
-* it must be a number in the range LO through HI
-* and it may be followed by a fraction that is to be computed using RESOLUTION.
-* Store the parsed number into *RES; store the fraction times RESOLUTION,
-* rounded to the nearest integer, into *FRES.
-* Return the first character after the prefix, or 0 if it couldn't be parsed.
-*/
+/* Parse an initial prefix of `s' of length `digits'; it must be a number in
+   the range `lo' through `hi' and it may be followed by a fraction that is to
+   be computed using `resolution'.  Store the parsed number into `*res'; store
+   the fraction times `resolution', rounded to the nearest integer, into
+   `*fres'.  Return the first character after the prefix, or 0 if it couldn't
+   be parsed.  */
 {
   s = parse_fixed (s, digits, res);
   *fres = 0;
   if (s && lo <= *res && *res <= hi)
     {
       int f = 0;
+
       if ((s[0] == ',' || s[0] == '.') && isdigit ((unsigned char) s[1]))
         {
           char const *s1 = ++s;
           int num10 = 0, denom10 = 10, product;
+
           while (isdigit ((unsigned char) *++s))
             denom10 *= 10;
           s = parse_fixed (s1, s - s1, &num10);
@@ -334,23 +272,19 @@ parse_decimal (char const *s, int digits, int lo, int hi,
 
 char const*
 parzone (char const *s, long *zone)
-/*
-* Parse an initial prefix of S; it must denote a time zone.
-* Set *ZONE to the number of seconds east of GMT,
-* or to TM_LOCAL_ZONE if it is the local time zone.
-* Return the first character after the prefix, or 0 if it couldn't be parsed.
-*/
+/* Parse an initial prefix of `s'; it must denote a time zone.  Set `*zone'
+   to the number of seconds east of GMT, or to `TM_LOCAL_ZONE' if it is the
+   local time zone.  Return the first character after the prefix, or 0 if it
+   couldn't be parsed.  */
 {
   char sign;
   int hh, mm, ss;
   int minutesEastOfUTC;
   long offset, z;
 
-  /*
-   * The formats are LT, n, n DST, nDST, no, o
-   * where n is a time zone name
-   * and o is a time zone offset of the form [-+]hh[:mm[:ss]].
-   */
+  /* The formats are LT, n, n DST, nDST, no, o
+     where n is a time zone name
+     and o is a time zone offset of the form [-+]hh[:mm[:ss]].  */
   switch (*s)
     {
     case '-':
@@ -377,13 +311,15 @@ parzone (char const *s, long *zone)
       z = minutesEastOfUTC * 60L;
 
       /* Look for trailing " DST".  */
-      if ((s[-1] == 'T' || s[-1] == 't') &&
-          (s[-2] == 'S' || s[-2] == 's') && (s[-3] == 'D' || s[-3] == 't'))
+      if ((s[-1] == 'T' || s[-1] == 't')
+          && (s[-2] == 'S' || s[-2] == 's')
+          && (s[-3] == 'D' || s[-3] == 't'))
         goto trailing_dst;
       while (isspace ((unsigned char) *s))
         s++;
-      if ((s[0] == 'D' || s[0] == 'd') &&
-          (s[1] == 'S' || s[1] == 's') && (s[2] == 'T' || s[2] == 't'))
+      if ((s[0] == 'D' || s[0] == 'd')
+          && (s[1] == 'S' || s[1] == 's')
+          && (s[2] == 'T' || s[2] == 't'))
         {
           s += 3;
         trailing_dst:
@@ -421,20 +357,16 @@ parzone (char const *s, long *zone)
     return NULL;
   offset = (hh * 60 + mm) * 60L + ss;
   *zone = z + (sign == '-' ? -offset : offset);
-  /*
-   * ?? Are fractions allowed here?
-   * If so, they're not implemented.
-   */
+  /* ?? Are fractions allowed here?
+     If so, they're not implemented.  */
   return s;
 }
 
 static char const *
 parse_pattern_letter (char const *s, int c, struct partime *t)
-/*
-* Parse an initial prefix of S, matching the pattern whose code is C.
-* Set *T accordingly.
-* Return the first character after the prefix, or 0 if it couldn't be parsed.
-*/
+/* Parse an initial prefix of `s', matching the pattern whose code is `c'.
+   Set `*t' accordingly.  Return the first character after the prefix, or 0
+   if it couldn't be parsed.  */
 {
   switch (c)
     {
@@ -460,11 +392,9 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
       break;
 
     case 'A':                  /* AM or PM */
-      /*
-       * This matches the regular expression [AaPp][Mm]?.
-       * It must not be followed by a letter or digit;
-       * otherwise it would match prefixes of strings like "PST".
-       */
+      /* This matches the regular expression [AaPp][Mm]?.
+         It must not be followed by a letter or digit;
+         otherwise it would match prefixes of strings like "PST".  */
       switch (*s++)
         {
         case 'A':
@@ -503,14 +433,15 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
       break;
 
     case 'E':                  /* extended day of month [1-9, 01-31] */
-      s = parse_ranged (s, (isdigit ((unsigned char) s[0]) &&
-                            isdigit ((unsigned char) s[1])) + 1, 1, 31,
-                        &t->tm.tm_mday);
+      s = parse_ranged (s, (isdigit ((unsigned char) s[0])
+                            && isdigit ((unsigned char) s[1])) + 1,
+                        1, 31, &t->tm.tm_mday);
       break;
 
     case 'h':                  /* hour [00-23 followed by optional fraction] */
       {
         int frac;
+
         s = parse_decimal (s, 2, 0, 23, 60 * 60, &t->tm.tm_hour, &frac);
         t->tm.tm_min = frac / 60;
         t->tm.tm_sec = frac % 60;
@@ -548,6 +479,7 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
     case 's':                  /* second [00-60 followed by optional fraction] */
       {
         int frac;
+
         s = parse_decimal (s, 2, 0, 60, 1, &t->tm.tm_sec, &frac);
         t->tm.tm_sec += frac;
       }
@@ -565,11 +497,9 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
       break;
 
     case 't':                  /* traditional hour [1-9 or 01-12] */
-      s =
-        parse_ranged (s,
-                      (isdigit ((unsigned char) s[0])
-                       && isdigit ((unsigned char) s[1])) + 1, 1, 12,
-                      &t->tm.tm_hour);
+      s = parse_ranged (s, (isdigit ((unsigned char) s[0])
+                            && isdigit ((unsigned char) s[1])) + 1,
+                        1, 12, &t->tm.tm_hour);
       break;
 
     case 'w':                  /* 'W' or 'w' only (stands for current week) */
@@ -609,13 +539,15 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
       break;
 
     case 'y':                  /* either R or Y */
-      if (isdigit ((unsigned char) s[0]) &&
-          isdigit ((unsigned char) s[1]) && !isdigit ((unsigned char) s[2]))
+      if (isdigit ((unsigned char) s[0])
+          && isdigit ((unsigned char) s[1])
+          && !isdigit ((unsigned char) s[2]))
         goto case_R;
       /* fall into */
     case 'Y':                  /* year in full [4 or more digits] */
       {
         int len = 0;
+
         while (isdigit ((unsigned char) s[len]))
           len++;
         if (len < 4)
@@ -639,50 +571,95 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
   return s;
 }
 
+static char const *
+parse_prefix (char const *str, struct partime *t, int *pi)
+/* Parse an initial prefix of `str', setting `*t' accordingly.  Return the
+   first character after the prefix, or 0 if it couldn't be parsed.  Start
+   with pattern `*pi'; if success, set `*pi' to the next pattern to try.  Set
+   `*pi' to -1 if we know there are no more patterns to try; if `*pi' is
+   initially negative, give up immediately.  */
+{
+  int i = *pi;
+  char const *pat;
+  unsigned char c;
+
+  if (i < 0)
+    return NULL;
+
+  /* Remove initial noise.  */
+  while (!isalnum (c = *str) && c != '-' && c != '+')
+    {
+      if (!c)
+        {
+          undefine (t);
+          *pi = -1;
+          return str;
+        }
+      str++;
+    }
+
+  /* Try a pattern until one succeeds.  */
+  while ((pat = patterns[i++]) != NULL)
+    {
+      char const *s = str;
+
+      undefine (t);
+      do
+        {
+          if (!(c = *pat++))
+            {
+              *pi = i;
+              return s;
+            }
+        }
+      while ((s = parse_pattern_letter (s, c, t)) != NULL);
+    }
+
+  return NULL;
+}
+
 static int
 merge_partime (struct partime *t, struct partime const *u)
-/*
-* If there is no conflict, merge into *T the additional information in *U
-* and return 0.  Otherwise do nothing and return -1.
-*/
+/* If there is no conflict, merge into `*t' the additional information in
+   `*u' and return 0.  Otherwise do nothing and return -1.  */
 {
-#	define conflict(a,b) ((a) != (b)  &&  TM_DEFINED (a)  &&  TM_DEFINED (b))
-  if (conflict (t->tm.tm_sec, u->tm.tm_sec) ||
-      conflict (t->tm.tm_min, u->tm.tm_min) ||
-      conflict (t->tm.tm_hour, u->tm.tm_hour) ||
-      conflict (t->tm.tm_mday, u->tm.tm_mday) ||
-      conflict (t->tm.tm_mon, u->tm.tm_mon) ||
-      conflict (t->tm.tm_year, u->tm.tm_year) ||
-      conflict (t->tm.tm_wday, u->tm.tm_yday) ||
-      conflict (t->ymodulus, u->ymodulus) ||
-      conflict (t->yweek, u->yweek) ||
-      (t->zone != u->zone &&
-       t->zone != TM_UNDEFINED_ZONE && u->zone != TM_UNDEFINED_ZONE))
+#define conflict(a,b)  ((a) != (b) && TM_DEFINED (a) && TM_DEFINED (b))
+  if (conflict (t->tm.tm_sec, u->tm.tm_sec)
+      || conflict (t->tm.tm_min, u->tm.tm_min)
+      || conflict (t->tm.tm_hour, u->tm.tm_hour)
+      || conflict (t->tm.tm_mday, u->tm.tm_mday)
+      || conflict (t->tm.tm_mon, u->tm.tm_mon)
+      || conflict (t->tm.tm_year, u->tm.tm_year)
+      || conflict (t->tm.tm_wday, u->tm.tm_yday)
+      || conflict (t->ymodulus, u->ymodulus)
+      || conflict (t->yweek, u->yweek)
+      || (t->zone != u->zone
+          && t->zone != TM_UNDEFINED_ZONE
+          && u->zone != TM_UNDEFINED_ZONE))
     return -1;
-#	undef conflict
-#	define merge_(a,b) if (TM_DEFINED (b)) (a) = (b);
-  merge_ (t->tm.tm_sec, u->tm.tm_sec)
-    merge_ (t->tm.tm_min, u->tm.tm_min)
-    merge_ (t->tm.tm_hour, u->tm.tm_hour)
-    merge_ (t->tm.tm_mday, u->tm.tm_mday)
-    merge_ (t->tm.tm_mon, u->tm.tm_mon)
-    merge_ (t->tm.tm_year, u->tm.tm_year)
-    merge_ (t->tm.tm_wday, u->tm.tm_yday)
-    merge_ (t->ymodulus, u->ymodulus) merge_ (t->yweek, u->yweek)
-#	undef merge_
-    if (u->zone != TM_UNDEFINED_ZONE)
+#undef conflict
+#define merge_(a,b)  if (TM_DEFINED (b)) (a) = (b)
+  merge_ (t->tm.tm_sec, u->tm.tm_sec);
+  merge_ (t->tm.tm_min, u->tm.tm_min);
+  merge_ (t->tm.tm_hour, u->tm.tm_hour);
+  merge_ (t->tm.tm_mday, u->tm.tm_mday);
+  merge_ (t->tm.tm_mon, u->tm.tm_mon);
+  merge_ (t->tm.tm_year, u->tm.tm_year);
+  merge_ (t->tm.tm_wday, u->tm.tm_yday);
+  merge_ (t->ymodulus, u->ymodulus);
+  merge_ (t->yweek, u->yweek);
+#undef merge_
+  if (u->zone != TM_UNDEFINED_ZONE)
     t->zone = u->zone;
   return 0;
 }
 
 char const*
 partime (char const *s, struct partime *t)
-/*
-* Parse a date/time prefix of S, putting the parsed result into *T.
-* Return the first character after the prefix.
-* The prefix may contain no useful information;
-* in that case, *T will contain only undefined values.
-*/
+/* Parse a date/time prefix of `s', putting the parsed result into `*t'.
+   Return the first character after the prefix.  The prefix may contain no
+   useful information; in that case, `*t' will contain only undefined
+   values.  */
 {
   struct partime p;
 
@@ -691,6 +668,7 @@ partime (char const *s, struct partime *t)
     {
       int i = 0;
       char const *s1;
+
       do
         {
           if (!(s1 = parse_prefix (s, &p, &i)))
@@ -701,3 +679,5 @@ partime (char const *s, struct partime *t)
     }
   return s;
 }
+
+/* partime.c ends here */

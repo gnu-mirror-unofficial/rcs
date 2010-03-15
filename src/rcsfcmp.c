@@ -20,23 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*****************************************************************************
- *                       rcsfcmp()
- *                       Testprogram: define FCMPTEST
- *****************************************************************************
- */
-
-/*
-#define FCMPTEST
-*/
-/* Testprogram; prints out whether two files are identical,
- * except for keywords
- */
-
 #include "rcsbase.h"
 #include <stdbool.h>
 
-static int discardkeyval (int, RILE *);
 static int
 discardkeyval (register int c, register RILE *f)
 {
@@ -55,18 +41,18 @@ discardkeyval (register int c, register RILE *f)
 int
 rcsfcmp (register RILE *xfp, struct stat const *xstatp,
          char const *uname, struct hshentry const *delta)
-/* Compare the files xfp and uname.  Return zero
- * if xfp has the same contents as uname and neither has keywords,
- * otherwise -1 if they are the same ignoring keyword values,
- * and 1 if they differ even ignoring
- * keyword values. For the LOG-keyword, rcsfcmp skips the log message
- * given by the parameter delta in xfp.  Thus, rcsfcmp returns nonpositive
- * if xfp contains the same as uname, with the keywords expanded.
- * Implementation: character-by-character comparison until $ is found.
- * If a $ is found, read in the marker keywords; if they are real keywords
- * and identical, read in keyword value. If value is terminated properly,
- * disregard it and optionally skip log message; otherwise, compare value.
- */
+/* Compare the files `xfp' and `uname'.  Return zero if `xfp' has the
+   same contents as `uname' and neither has keywords, otherwise -1 if
+   they are the same ignoring keyword values, and 1 if they differ even
+   ignoring keyword values.  For the `Log' keyword, skip the log message
+   given by the parameter `delta' in `xfp'.  Thus, return nonpositive if
+   `xfp' contains the same as `uname', with the keywords expanded.
+
+   Implementation: character-by-character comparison until $ is found.
+   If a $ is found, read in the marker keywords; if they are real
+   keywords and identical, read in keyword value. If value is terminated
+   properly, disregard it and optionally skip log message; otherwise,
+   compare value.  */
 {
   register int xc, uc;
   char xkeyword[keylength + 2];
@@ -89,12 +75,12 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
     {
       if (!(result = xstatp->st_size != ustat.st_size))
         {
-#	    if large_memory && maps_memory
+#if large_memory && maps_memory
           result = !!memcmp (xfp->base, ufp->base, (size_t) xstatp->st_size);
-#	    else
+#else  /* !(large_memory && maps_memory) */
           for (;;)
             {
-              /* get the next characters */
+              /* Get the next characters.  */
               Igeteof (xfp, xc, xeof = true);
               Igeteof (ufp, uc, ueof = true);
               if (xeof | ueof)
@@ -102,7 +88,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
               if (xc != uc)
                 goto return1;
             }
-#	    endif
+#endif  /* !(large_memory && maps_memory) */
         }
     }
   else
@@ -116,7 +102,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
         {
           if (xc != KDELIM)
             {
-              /* get the next characters */
+              /* Get the next characters.  */
               Igeteof (xfp, xc, xeof = true);
               Igeteof (ufp, uc, ueof = true);
               if (xeof | ueof)
@@ -124,7 +110,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
             }
           else
             {
-              /* try to get both keywords */
+              /* Try to get both keywords.  */
               tp = xkeyword;
               for (;;)
                 {
@@ -192,25 +178,27 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                       Igeteof (ufp, uc, ueof = true);
                       if (xeof | ueof)
                         goto eof;
-                      /* if the keyword is LOG, also skip the log message in xfp */
+                      /* If the keyword is `Log', also
+                         skip the log message in `xfp'.  */
                       if (match1 == Log)
                         {
-                          /* first, compute the number of line feeds in log msg */
+                          /* First, compute the number of LFs in log msg.  */
                           int lncnt;
                           size_t ls, ccnt;
+
                           sp = delta->log.string;
                           ls = delta->log.size;
                           if (ls < sizeof (ciklog) - 1
                               || memcmp (sp, ciklog, sizeof (ciklog) - 1))
                             {
-                              /*
-                               * This log message was inserted.  Skip its header.
-                               * The number of newlines to skip is
-                               * 1 + (C+1)*(1+L+1), where C is the number of newlines
-                               * in the comment leader, and L is the number of
-                               * newlines in the log string.
-                               */
+                              /* This log message was inserted.  Skip
+                                 its header.  The number of newlines to
+                                 skip is `1 + (C + 1) * (1 + L + 1)',
+                                 where C is the number of newlines in
+                                 the comment leader, and L is the number
+                                 of newlines in the log string.  */
                               int c1 = 1;
+
                               for (ccnt = Comment.size; ccnt--;)
                                 c1 += Comment.string[ccnt] == '\n';
                               lncnt = 2 * c1 + 1;
@@ -224,20 +212,20 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                       break;
                                   Igeteof (xfp, xc, goto returnresult);
                                 }
-                              /* skip last comment leader */
-                              /* Can't just skip another line here, because there may be */
-                              /* additional characters on the line (after the Log....$)  */
-                              ccnt =
-                                RCSversion <
-                                VERSION (5) ? Comment.size : leaderlen;
+                              /* Skip last comment leader.  Can't just
+                                 skip another line here, because there
+                                 may be additional characters on the
+                                 line (after the Log....$).  */
+                              ccnt = RCSversion < VERSION (5)
+                                ? Comment.size
+                                : leaderlen;
                               do
                                 {
                                   Igeteof (xfp, xc, goto returnresult);
-                                  /*
-                                   * Read to the end of the comment leader or '\n',
-                                   * whatever comes first, because the leader's
-                                   * trailing white space was probably stripped.
-                                   */
+                                  /* Read to the end of the comment leader
+                                     or '\n', whatever comes first, because
+                                     the leader's trailing white space was
+                                     probably stripped.  */
                                 }
                               while (ccnt-- && (xc != '\n' || --c1));
                             }
@@ -245,8 +233,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                     }
                   else
                     {
-                      /* both end in the same character, but not a KDELIM */
-                      /* must compare string values. */
+                      /* Both end in the same character, but not a `KDELIM'.
+                         Must compare string values.  */
 #ifdef FCMPTEST
                       printf
                         ("non-terminated keywords %s, potentially different values\n",
@@ -277,14 +265,18 @@ returnresult:
 }
 
 #ifdef FCMPTEST
+/* The test program prints out whether two files are identical,
+   except for keywords.  */
 
 char const cmdid[] = "rcsfcmp";
 
 int
 main (int argc, char *argv[])
-/* first argument: comment leader; 2nd: log message, 3rd: expanded file,
- * 4th: unexpanded file
- */
+/* Arguments:
+   1st: comment leader
+   2nd: log message
+   3rd: expanded file
+   4th: unexpanded file  */
 {
   struct hshentry delta;
 
@@ -292,10 +284,11 @@ main (int argc, char *argv[])
   Comment.size = strlen (argv[1]);
   delta.log.string = argv[2];
   delta.log.size = strlen (argv[2]);
-  if (rcsfcmp
-      (Iopen (argv[3], FOPEN_R_WORK, NULL), argv[4], &delta))
+  if (rcsfcmp (Iopen (argv[3], FOPEN_R_WORK, NULL), argv[4], &delta))
     printf ("files are the same\n");
   else
     printf ("files are different\n");
 }
-#endif
+#endif  /* defined FCMPTEST */
+
+/* rcsfcmp.c ends here */

@@ -24,29 +24,177 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-static int badly_terminated (void);
-static int checknum (char const *);
-static int get0val (int, RILE *, struct buf *, int);
-static int getval (RILE *, struct buf *, int);
-static int keepdate (RILE *);
-static int keepid (int, RILE *, struct buf *);
-static int keeprev (RILE *);
-
 int prevkeys;
 struct buf prevauthor, prevdate, prevname, prevrev, prevstate;
 
+static int
+badly_terminated (void)
+{
+  workerror ("badly terminated keyword value");
+  return false;
+}
+
+static int
+get0val (register int c, register RILE *fp, struct buf *target, int optional)
+/* Read a keyword value from `c + fp' into `target', perhaps `optional'ly.
+   Same as `getval', except `c'` is the lookahead character.  */
+{
+  register char *tp;
+  char const *tlim;
+  register int got1;
+
+  if (target)
+    {
+      bufalloc (target, 1);
+      tp = target->string;
+      tlim = tp + target->size;
+    }
+  else
+    tlim = tp = NULL;
+  got1 = false;
+  for (;;)
+    {
+      switch (c)
+        {
+        default:
+          got1 = true;
+          if (tp)
+            {
+              *tp++ = c;
+              if (tlim <= tp)
+                tp = bufenlarge (target, &tlim);
+            }
+          break;
+
+        case ' ':
+        case '\t':
+          if (tp)
+            {
+              *tp = '\0';
+#ifdef KEEPTEST
+              printf ("getval: %s\n", target);
+#endif
+            }
+          return got1;
+
+        case KDELIM:
+          if (!got1 && optional)
+            return false;
+          /* fall into */
+        case '\n':
+        case 0:
+          return badly_terminated ();
+        }
+      Igeteof (fp, c, return badly_terminated ());
+    }
+}
+
+static int
+keepid (int c, RILE *fp, struct buf *b)
+/* Get previous identifier from `c + fp' into `b'.  */
+{
+  if (!c)
+    Igeteof (fp, c, return false);
+  if (!get0val (c, fp, b, false))
+    return false;
+  checksid (b->string);
+  return !nerror;
+}
+
+static int
+getval (register RILE *fp, struct buf *target, int optional)
+/* Read a keyword value from `fp' into `target'.  Returns true if one is
+   found, false otherwise.  Does not modify target if it is 0.  Do not report
+   an error if `optional' is set and `kdelim' is found instead.  */
+{
+  int c;
+
+  Igeteof (fp, c, return badly_terminated ());
+  return get0val (c, fp, target, optional);
+}
+
+static int
+keepdate (RILE *fp)
+/* Read a date `prevdate'; check format.
+   Return 0 on error, lookahead character otherwise.  */
+{
+  struct buf prevday, prevtime;
+  register int c;
+
+  c = 0;
+  bufautobegin (&prevday);
+  if (getval (fp, &prevday, false))
+    {
+      bufautobegin (&prevtime);
+      if (getval (fp, &prevtime, false))
+        {
+          Igeteof (fp, c, c = 0);
+          if (c)
+            {
+              register char const *d = prevday.string, *t = prevtime.string;
+
+              bufalloc (&prevdate, strlen (d) + strlen (t) + 9);
+              sprintf (prevdate.string, "%s%s %s%s",
+                       /* Parse dates put out by old versions of RCS.  */
+                       (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2])
+                        ? "19" : ""),
+                       d, t, (strchr (t, '-') || strchr (t, '+')
+                              ? "" : "+0000"));
+            }
+        }
+      bufautoend (&prevtime);
+    }
+  bufautoend (&prevday);
+  return c;
+}
+
+static int
+checknum (char const *s)
+{
+  register char const *sp;
+  register int dotcount = 0;
+
+  for (sp = s;; sp++)
+    {
+      switch (*sp)
+        {
+        case 0:
+          if (dotcount & 1)
+            return true;
+          else
+            break;
+
+        case '.':
+          dotcount++;
+          continue;
+
+        default:
+          if (isdigit (*sp))
+            continue;
+          break;
+        }
+      break;
+    }
+  workerror ("%s is not a revision number", s);
+  return false;
+}
+
+static int
+keeprev (RILE *fp)
+/* Get previous revision from `fp' into `prevrev'.  */
+{
+  return getval (fp, &prevrev, false) && checknum (prevrev.string);
+}
+
 int
 getoldkeys (register RILE *fp)
-/* Function: Tries to read keyword values for author, date,
- * revision number, and state out of the file fp.
- * If fp is null, workname is opened and closed instead of using fp.
- * The results are placed into
- * prevauthor, prevdate, prevname, prevrev, prevstate.
- * Aborts immediately if it finds an error and returns false.
- * If it returns true, it doesn't mean that any of the
- * values were found; instead, check to see whether the corresponding arrays
- * contain the empty string.
- */
+/* Try to read keyword values for author, date, revision number, and
+   state out of the file `fp'.  If `fp' is NULL, `workname' is opened
+   and closed instead of using `fp'.  The results are placed into
+   `prevauthor', `prevdate', `prevname', `prevrev', `prevstate'.  On
+   error, stop searching and return false.  Returning true doesn't mean
+   that any of the values were found; instead, caller must check to see
+   whether the corresponding arrays contain the empty string.  */
 {
   register int c;
   char keyword[keylength + 1];
@@ -68,7 +216,7 @@ getoldkeys (register RILE *fp)
       needs_closing = true;
     }
 
-  /* initialize to empty */
+  /* Initializee to empty.  */
   bufscpy (&prevauthor, "");
   bufscpy (&prevdate, "");
   bufscpy (&prevname, "");
@@ -76,14 +224,15 @@ getoldkeys (register RILE *fp)
   bufscpy (&prevrev, "");
   bufscpy (&prevstate, "");
 
-  c = '\0';                     /* anything but KDELIM */
+  /* We can use anything but `KDELIM' here.  */
+  c = '\0';
   for (;;)
     {
       if (c == KDELIM)
         {
           do
             {
-              /* try to get keyword */
+              /* Try to get keyword.  */
               tp = keyword;
               for (;;)
                 {
@@ -131,15 +280,14 @@ getoldkeys (register RILE *fp)
               break;
             case Header:
             case Id:
-              if (!(getval (fp, NULL, false) &&
-                    keeprev (fp) &&
-                    (c = keepdate (fp)) &&
-                    keepid (c, fp, &prevauthor) &&
-                    keepid (0, fp, &prevstate)))
+              if (!(getval (fp, NULL, false)
+                    && keeprev (fp)
+                    && (c = keepdate (fp))
+                    && keepid (c, fp, &prevauthor)
+                    && keepid (0, fp, &prevstate)))
                 return false;
               /* Skip either ``who'' (new form) or ``Locker: who'' (old).  */
-              if (getval (fp, NULL, true) &&
-                  getval (fp, NULL, true))
+              if (getval (fp, NULL, true) && getval (fp, NULL, true))
                 c = 0;
               else if (nerror)
                 return false;
@@ -186,9 +334,9 @@ getoldkeys (register RILE *fp)
               workerror ("closing %c missing on keyword", KDELIM);
               return false;
             }
-          if (prevname_found &&
-              *prevauthor.string && *prevdate.string &&
-              *prevrev.string && *prevstate.string)
+          if (prevname_found
+              && *prevauthor.string && *prevdate.string
+              && *prevrev.string && *prevstate.string)
             break;
         }
       Igeteof (fp, c, goto ok);
@@ -203,168 +351,7 @@ getoldkeys (register RILE *fp)
   return true;
 }
 
-static int
-badly_terminated (void)
-{
-  workerror ("badly terminated keyword value");
-  return false;
-}
-
-static int
-getval (register RILE *fp, struct buf *target, int optional)
-/* Reads a keyword value from FP into TARGET.
- * Returns true if one is found, false otherwise.
- * Does not modify target if it is 0.
- * Do not report an error if OPTIONAL is set and KDELIM is found instead.
- */
-{
-  int c;
-  Igeteof (fp, c, return badly_terminated ());
-  return get0val (c, fp, target, optional);
-}
-
-static int
-get0val (register int c, register RILE *fp, struct buf *target, int optional)
-/* Reads a keyword value from C+FP into TARGET, perhaps OPTIONALly.
- * Same as getval, except C is the lookahead character.
- */
-{
-  register char *tp;
-  char const *tlim;
-  register int got1;
-
-  if (target)
-    {
-      bufalloc (target, 1);
-      tp = target->string;
-      tlim = tp + target->size;
-    }
-  else
-    tlim = tp = NULL;
-  got1 = false;
-  for (;;)
-    {
-      switch (c)
-        {
-        default:
-          got1 = true;
-          if (tp)
-            {
-              *tp++ = c;
-              if (tlim <= tp)
-                tp = bufenlarge (target, &tlim);
-            }
-          break;
-
-        case ' ':
-        case '\t':
-          if (tp)
-            {
-              *tp = '\0';
-#		    ifdef KEEPTEST
-              printf ("getval: %s\n", target);
-#		    endif
-            }
-          return got1;
-
-        case KDELIM:
-          if (!got1 && optional)
-            return false;
-          /* fall into */
-        case '\n':
-        case 0:
-          return badly_terminated ();
-        }
-      Igeteof (fp, c, return badly_terminated ());
-    }
-}
-
-static int
-keepdate (RILE *fp)
-/* Function: reads a date prevdate; checks format
- * Return 0 on error, lookahead character otherwise.
- */
-{
-  struct buf prevday, prevtime;
-  register int c;
-
-  c = 0;
-  bufautobegin (&prevday);
-  if (getval (fp, &prevday, false))
-    {
-      bufautobegin (&prevtime);
-      if (getval (fp, &prevtime, false))
-        {
-          Igeteof (fp, c, c = 0);
-          if (c)
-            {
-              register char const *d = prevday.string, *t = prevtime.string;
-              bufalloc (&prevdate, strlen (d) + strlen (t) + 9);
-              sprintf (prevdate.string, "%s%s %s%s",
-                       /* Parse dates put out by old versions of RCS.  */
-                       isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2])
-                       ? "19" : "",
-                       d, t,
-                       strchr (t, '-') || strchr (t, '+') ? "" : "+0000");
-            }
-        }
-      bufautoend (&prevtime);
-    }
-  bufautoend (&prevday);
-  return c;
-}
-
-static int
-keepid (int c, RILE *fp, struct buf *b)
-/* Get previous identifier from C+FP into B.  */
-{
-  if (!c)
-    Igeteof (fp, c, return false);
-  if (!get0val (c, fp, b, false))
-    return false;
-  checksid (b->string);
-  return !nerror;
-}
-
-static int
-keeprev (RILE *fp)
-/* Get previous revision from FP into prevrev.  */
-{
-  return getval (fp, &prevrev, false) && checknum (prevrev.string);
-}
-
-static int
-checknum (char const *s)
-{
-  register char const *sp;
-  register int dotcount = 0;
-  for (sp = s;; sp++)
-    {
-      switch (*sp)
-        {
-        case 0:
-          if (dotcount & 1)
-            return true;
-          else
-            break;
-
-        case '.':
-          dotcount++;
-          continue;
-
-        default:
-          if (isdigit (*sp))
-            continue;
-          break;
-        }
-      break;
-    }
-  workerror ("%s is not a revision number", s);
-  return false;
-}
-
 #ifdef KEEPTEST
-
 /* Print the keyword values found.  */
 
 char const cmdid[] = "keeptest";
@@ -376,11 +363,12 @@ main (int argc, char *argv[])
     {
       workname = *argv;
       getoldkeys (NULL);
-      printf
-        ("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
-         *argv, prevrev.string, prevdate.string, prevauthor.string,
-         prevname.string, prevstate.string);
+      printf ("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
+              *argv, prevrev.string, prevdate.string, prevauthor.string,
+              prevname.string, prevstate.string);
     }
   return EXIT_SUCCESS;
 }
-#endif
+#endif  /* KEEPTEST */
+
+/* rcskeep.c ends here */

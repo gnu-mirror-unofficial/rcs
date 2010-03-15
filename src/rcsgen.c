@@ -23,80 +23,22 @@
 #include "rcsbase.h"
 #include <stdbool.h>
 
-int interactiveflag;            /* Should we act as if stdin is a tty?  */
-struct buf curlogbuf;           /* buffer for current log message */
+/* Should we act as if stdin is a tty?  */
+int interactiveflag;
+/* Buffer for current log message.  */
+struct buf curlogbuf;
 
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
 
-static void putdelta (struct hshentry const *, FILE *);
-static void scandeltatext (struct hshentry *, enum stringwork, int);
-
-char const *
-buildrevision (struct hshentries const *deltas, struct hshentry *target,
-               FILE *outfile, int expandflag)
-/* Function: Generates the revision given by target
- * by retrieving all deltas given by parameter deltas and combining them.
- * If outfile is set, the revision is output to it,
- * otherwise written into a temporary file.
- * Temporary files are allocated by maketemp().
- * if expandflag is set, keyword expansion is performed.
- * Return 0 if outfile is set, the name of the temporary file otherwise.
- *
- * Algorithm: Copy initial revision unchanged.  Then edit all revisions but
- * the last one into it, alternating input and output files (resultname and
- * editname). The last revision is then edited in, performing simultaneous
- * keyword substitution (this saves one extra pass).
- * All this simplifies if only one revision needs to be generated,
- * or no keyword expansion is necessary, or if output goes to stdout.
- */
-{
-  if (deltas->first == target)
-    {
-      /* only latest revision to generate */
-      openfcopy (outfile);
-      scandeltatext (target, expandflag ? expand : copy, true);
-      if (outfile)
-        return NULL;
-      else
-        {
-          Ozclose (&fcopy);
-          return resultname;
-        }
-    }
-  else
-    {
-      /* several revisions to generate */
-      /* Get initial revision without keyword expansion.  */
-      scandeltatext (deltas->first, enter, false);
-      while ((deltas = deltas->rest)->rest)
-        {
-          /* do all deltas except last one */
-          scandeltatext (deltas->first, edit, false);
-        }
-      if (expandflag || outfile)
-        {
-          /* first, get to beginning of file */
-          finishedit (NULL, outfile, false);
-        }
-      scandeltatext (target, expandflag ? edit_expand : edit, true);
-      finishedit (expandflag ? target : NULL, outfile, true);
-      if (outfile)
-        return NULL;
-      Ozclose (&fcopy);
-      return resultname;
-    }
-}
-
 static void
 scandeltatext (struct hshentry *delta, enum stringwork func, int needlog)
-/* Function: Scans delta text nodes up to and including the one given
- * by delta. For the one given by delta, the log message is saved into
- * delta->log if needlog is set; func specifies how to handle the text.
- * Similarly, if needlog, delta->igtext is set to the ignored phrases.
- * Assumes the initial lexeme must be read in first.
- * Does not advance nexttok after it is finished.
- */
+/* Scan delta text nodes up to and including the one given by `delta'.
+   For the one given by `delta', the log message is saved into
+   `delta->log' if `needlog' is set; `func' specifies how to handle the
+   text.  Similarly, if `needlog', `delta->igtext' is set to the ignored
+   phrases.  Assume the initial lexeme must be read in first.  Does not
+   advance `nexttok' after it is finished.  */
 {
   struct hshentry const *nextdelta;
   struct cbuf cb;
@@ -127,8 +69,8 @@ scandeltatext (struct hshentry *delta, enum stringwork func, int needlog)
 
       if (delta == nextdelta)
         break;
-      readstring ();            /* skip over it */
-
+      /* Skip over it.  */
+      readstring ();
     }
   switch (func)
     {
@@ -150,12 +92,67 @@ scandeltatext (struct hshentry *delta, enum stringwork func, int needlog)
     }
 }
 
+char const *
+buildrevision (struct hshentries const *deltas, struct hshentry *target,
+               FILE *outfile, int expandflag)
+/* Generate the revision given by `target' by retrieving all deltas given
+   by parameter `deltas' and combining them.  If `outfile' is set, the
+   revision is output to it, otherwise write into a temporary file.
+   Temporary files are allocated by `maketemp'.  If `expandflag' is set,
+   keyword expansion is performed.  Return NULL if `outfile' is set, the
+   name of the temporary file otherwise.
+
+   Algorithm: Copy initial revision unchanged.  Then edit all revisions
+   but the last one into it, alternating input and output files
+   (`resultname' and `editname').  The last revision is then edited in,
+   performing simultaneous keyword substitution (this saves one extra
+   pass).  All this simplifies if only one revision needs to be generated,
+   or no keyword expansion is necessary, or if output goes to stdout.  */
+{
+  if (deltas->first == target)
+    {
+      /* Only latest revision to generate.  */
+      openfcopy (outfile);
+      scandeltatext (target, expandflag ? expand : copy, true);
+      if (outfile)
+        return NULL;
+      else
+        {
+          Ozclose (&fcopy);
+          return resultname;
+        }
+    }
+  else
+    {
+      /* Several revisions to generate.
+         Get initial revision without keyword expansion.  */
+      scandeltatext (deltas->first, enter, false);
+      while ((deltas = deltas->rest)->rest)
+        {
+          /* Do all deltas except last one.  */
+          scandeltatext (deltas->first, edit, false);
+        }
+      if (expandflag || outfile)
+        {
+          /* First, get to beginning of file.  */
+          finishedit (NULL, outfile, false);
+        }
+      scandeltatext (target, expandflag ? edit_expand : edit, true);
+      finishedit (expandflag ? target : NULL, outfile, true);
+      if (outfile)
+        return NULL;
+      Ozclose (&fcopy);
+      return resultname;
+    }
+}
+
 struct cbuf
 cleanlogmsg (char *m, size_t s)
 {
   register char *t = m;
   register char const *f = t;
   struct cbuf r;
+
   while (s)
     {
       --s;
@@ -178,6 +175,7 @@ int
 ttystdin (void)
 {
   static int initialized;
+
   if (!initialized)
     {
       if (!interactiveflag)
@@ -211,6 +209,7 @@ yesorno (int default_answer, char const *question, ...)
 {
   va_list args;
   register int c, r;
+
   if (!quietflag && ttystdin ())
     {
       oflush ();
@@ -231,14 +230,12 @@ yesorno (int default_answer, char const *question, ...)
 
 void
 putdesc (int textflag, char *textfile)
-/* Function: puts the descriptive text into file frewrite.
- * if finptr && !textflag, the text is copied from the old description.
- * Otherwise, if textfile, the text is read from that
- * file, or from stdin, if !textfile.
- * A textfile with a leading '-' is treated as a string, not a pathname.
- * If finptr, the old descriptive text is discarded.
- * Always clears foutptr.
- */
+/* Put the descriptive text into file `frewrite'.
+   If `finptr && !textflag', the text is copied from the old description.
+   Otherwise, if `textfile', the text is read from that file, or from
+   stdin, if `!textfile'.  A `textfile' with a leading '-' is treated as a
+   string, not a pathname.  If `finptr', the old descriptive text is
+   discarded.  Always clear `foutptr'.  */
 {
   static struct buf desc;
   static struct cbuf desclean;
@@ -253,7 +250,7 @@ putdesc (int textflag, char *textfile)
   frew = frewrite;
   if (finptr && !textflag)
     {
-      /* copy old description */
+      /* Copy old description.  */
       aprintf (frew, "\n\n%s%c", Kdesc, nextc);
       foutptr = frewrite;
       getdesc (false);
@@ -262,16 +259,17 @@ putdesc (int textflag, char *textfile)
   else
     {
       foutptr = NULL;
-      /* get new description */
+      /* Get new description.  */
       if (finptr)
         {
-          /*skip old description */
+          /* Skip old description.  */
           getdesc (false);
         }
       aprintf (frew, "\n\n%s\n%c", Kdesc, SDELIM);
       if (!textfile)
         desclean = getsstdin ("t-", "description",
-                              "NOTE: This is NOT the log message!\n", &desc);
+                              "NOTE: This is NOT the log message!\n",
+                              &desc);
       else if (!desclean.string)
         {
           if (*textfile == '-')
@@ -361,23 +359,22 @@ putadmin (void)
 
   if (!(fout = frewrite))
     {
-#		if BAD_CREAT0
+#if BAD_CREAT0
       ORCSclose ();
       fout = fopenSafer (makedirtemp (0), FOPEN_WB);
-#		else
+#else  /* !BAD_CREAT0 */
       int fo = fdlock;
+
       fdlock = -1;
       fout = fdopen (fo, FOPEN_WB);
-#		endif
+#endif  /* !BAD_CREAT0 */
 
       if (!(frewrite = fout))
         efaterror (RCSname);
     }
 
-  /*
-   * Output the first character with putc, not printf.
-   * Otherwise, an SVR4 stdio bug buffers output inefficiently.
-   */
+  /* Output the first character with `putc', not `printf'.
+     Otherwise, an SVR4 stdio bug buffers output inefficiently.  */
   aputc (*Khead, fout);
   aprintf (fout, "%s\t%s;\n", Khead + 1, Head ? Head->num : "");
   if (Dbranch && VERSION (4) <= RCSversion)
@@ -422,7 +419,7 @@ putadmin (void)
 
 static void
 putdelta (register struct hshentry const *node, register FILE *fout)
-/* Output the delta NODE to FOUT.  */
+/* Output the delta `node' to `fout'.  */
 {
   struct branchhead const *nextbranch;
 
@@ -430,9 +427,8 @@ putdelta (register struct hshentry const *node, register FILE *fout)
     return;
 
   aprintf (fout, "\n%s\n%s\t%s;\t%s %s;\t%s %s;\nbranches",
-           node->num,
-           Kdate, node->date,
-           Kauthor, node->author, Kstate, node->state ? node->state : "");
+           node->num, Kdate, node->date, Kauthor, node->author,
+           Kstate, node->state ? node->state : "");
   nextbranch = node->branches;
   while (nextbranch)
     {
@@ -446,7 +442,7 @@ putdelta (register struct hshentry const *node, register FILE *fout)
 
 void
 puttree (struct hshentry const *root, register FILE *fout)
-/* Output the delta tree with base ROOT in preorder to FOUT.  */
+/* Output the delta tree with base `root' in preorder to `fout'.  */
 {
   struct branchhead const *nextbranch;
 
@@ -469,16 +465,14 @@ puttree (struct hshentry const *root, register FILE *fout)
 int
 putdtext (struct hshentry const *delta, char const *srcname,
           FILE *fout, int diffmt)
-/*
- * Output a deltatext node with delta number DELTA->num, log message DELTA->log,
- * ignored phrases DELTA->igtext and text SRCNAME to FOUT.
- * Double up all SDELIMs in both the log and the text.
- * Make sure the log message ends in \n.
- * Return false on error.
- * If DIFFMT, also check that the text is valid diff -n output.
- */
+/* Output a deltatext node with delta number `delta->num', log message
+   `delta->log', ignored phrases `delta->igtext' and text `srcname' to
+   `fout'.  Double up all `SDELIM's in both the log and the text.  Make
+   sure the log message ends in '\n'.  Return false on error.  If
+   `diffmt', also check that the text is valid "diff -n" output.  */
 {
   RILE *fin;
+
   if (!(fin = Iopen (srcname, "r", NULL)))
     {
       eerror (srcname);
@@ -491,10 +485,9 @@ putdtext (struct hshentry const *delta, char const *srcname,
 
 void
 putstring (register FILE *out, int delim, struct cbuf s, int log)
-/*
- * Output to OUT one SDELIM if DELIM, then the string S with SDELIMs doubled.
- * If LOG is set then S is a log string; append a newline if S is nonempty.
- */
+/* Output to `out' one `SDELIM' if `delim', then the string `s' with
+   `SDELIM's doubled.  If `log' is set then `s' is a log string; append
+   a newline if `s' is nonempty.  */
 {
   register char const *sp;
   register size_t ss;
@@ -516,7 +509,7 @@ putstring (register FILE *out, int delim, struct cbuf s, int log)
 void
 putdftext (struct hshentry const *delta, RILE *finfile,
            FILE *foutfile, int diffmt)
-/* like putdtext(), except the source file is already open */
+/* Like `putdtext', except the source file is already open.  */
 {
   declarecache;
   register FILE *fout;
@@ -528,26 +521,27 @@ putdftext (struct hshentry const *delta, RILE *finfile,
   fout = foutfile;
   aprintf (fout, DELNUMFORM, delta->num, Klog);
 
-  /* put log */
+  /* Put log.  */
   putstring (fout, true, delta->log, true);
   aputc ('\n', fout);
-  /* put ignored phrases */
+  /* Put ignored phrases.  */
   awrite (delta->igtext.string, delta->igtext.size, fout);
 
-  /* put text */
+  /* Put text.  */
   aprintf (fout, "%s\n%c", Ktext, SDELIM);
 
   fin = finfile;
   setupcache (fin);
   if (!diffmt)
     {
-      /* Copy the file */
+      /* Copy the file.  */
       cache (fin);
       for (;;)
         {
           cachegeteof (c, goto done);
           if (c == SDELIM)
-            aputc (SDELIM, fout);       /*double up SDELIM */
+            /* Double up `SDELIM'.  */
+            aputc (SDELIM, fout);
           aputc (c, fout);
         }
     done:
@@ -580,3 +574,5 @@ putdftext (struct hshentry const *delta, RILE *finfile,
  OK_EOF:
   aprintf (fout, "%c\n", SDELIM);
 }
+
+/* rcsgen.c ends here */

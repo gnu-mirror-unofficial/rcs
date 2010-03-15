@@ -21,15 +21,13 @@
 
 #include "rcsbase.h"
 
-static char const *normalize_arg (char const *, char **);
 static char const *
 normalize_arg (char const *s, char **b)
-/*
- * If S looks like an option, prepend ./ to it.  Yield the result.
- * Set *B to the address of any storage that was allocated.
- */
+/* If `s' looks like an option, prepend ./ to it.  Return the result.
+   Set `*b' to the address of any storage that was allocated.  */
 {
   char *t;
+
   if (*s == '-')
     {
       *b = t = testalloc (strlen (s) + 3);
@@ -38,7 +36,7 @@ normalize_arg (char const *s, char **b)
     }
   else
     {
-      *b = '\0';
+      *b = NULL;
       return s;
     }
 }
@@ -46,13 +44,10 @@ normalize_arg (char const *s, char **b)
 int
 merge (int tostdout, char const *edarg, char const *const label[3],
        char const *const argv[3])
-/*
- * Do `merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2',
- * where TOSTDOUT specifies whether -p is present,
- * EDARG gives the editing type (e.g. "-A", or null for the default),
- * LABEL gives l0, l1 and l2, and ARGV gives a0, a1 and a2.
- * Yield `diff_success' or `diff_failure'.
- */
+/* Do `merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2', where `tostdout'
+   specifies whether `-p' is present, `edarg' gives the editing type
+   (e.g. "-A", or null for the default), `label' gives l0, l1 and l2, and
+   `argv' gives a0, a1 and a2.  Return `diff_success' or `diff_failure'.  */
 {
   register int i;
   FILE *f;
@@ -74,10 +69,9 @@ merge (int tostdout, char const *edarg, char const *const label[3],
   t = NULL;
   if (!tostdout)
     t = maketemp (0);
-  s = run (-1, t,
-           prog_diff3, edarg, "-am",
-           "-L", label[0],
-           "-L", label[1], "-L", label[2], a[0], a[1], a[2], NULL);
+  s = run (-1, t, prog_diff3, edarg, "-am",
+           "-L", label[0], "-L", label[1], "-L", label[2],
+           a[0], a[1], a[2], NULL);
   if (diff_trouble == s)
     exiterr ();
   if (diff_failure == s)
@@ -92,7 +86,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
       Ifclose (rt);
       Ofclose (f);
     }
-#else
+#else  /* !DIFF3_BIN */
   for (i = 0; i < 2; i++)
     if (diff_trouble == run (-1, d[i] = maketemp (i), prog_diff,
                              a[i], a[2], NULL))
@@ -114,7 +108,7 @@ merge (int tostdout, char const *edarg, char const *const label[3],
   if (run (fileno (f), NULL, ED, "-", a[0], NULL))
     exiterr ();
   Ofclose (f);
-#endif
+#endif  /* !DIFF3_BIN */
 
   tempunlink ();
   for (i = 3; 0 <= --i;)
@@ -122,3 +116,5 @@ merge (int tostdout, char const *edarg, char const *const label[3],
       tfree (b[i]);
   return s;
 }
+
+/* merger.c ends here */

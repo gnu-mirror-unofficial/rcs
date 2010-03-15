@@ -23,7 +23,7 @@
 #include "rcsbase.h"
 
 char const *const Keyword[] = {
-  /* This must be in the same order as rcsbase.h's enum markers type. */
+  /* This must be in the same order as rcsbase.h's enum markers type.  */
   NULL,
   AUTHOR, DATE, HEADER, IDH,
   LOCKER, LOG, NAME, RCSFILE, REVISION, SOURCE, STATE
@@ -31,16 +31,16 @@ char const *const Keyword[] = {
 
 enum markers
 trymatch (char const *string)
-/* function: Checks whether string starts with a keyword followed
- * by a KDELIM or a VDELIM.
- * If successful, returns the appropriate marker, otherwise Nomatch.
- */
+/* Check whether `string' starts with a keyword followed by a
+   `KDELIM' or a `VDELIM'.  If successful, return the appropriate
+   marker, otherwise `Nomatch'.  */
 {
   register int j;
   register char const *p, *s;
+
   for (j = sizeof (Keyword) / sizeof (*Keyword); (--j);)
     {
-      /* try next keyword */
+      /* Try next keyword.  */
       p = Keyword[j];
       s = string;
       while (*p++ == *s++)
@@ -58,3 +58,5 @@ trymatch (char const *string)
     }
   return (Nomatch);
 }
+
+/* rcskeys.c ends here */

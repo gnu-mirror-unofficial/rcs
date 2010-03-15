@@ -20,33 +20,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/******************************************************************************
- *                       Syntax Analysis.
- *                       Keyword table
- *                       Testprogram: define SYNTEST
- *                       Compatibility with Release 2: define COMPAT2=1
- ******************************************************************************
- */
-
-/* version COMPAT2 reads files of the format of release 2 and 3, but
- * generates files of release 3 format. Need not be defined if no
- * old RCS files generated with release 2 exist.
- */
-
 #include "rcsbase.h"
 #include <stdbool.h>
 #include <ctype.h>
 
-static char const *getkeyval (char const *, enum tokens, int);
-static int getdelta (void);
-static int strn2expmode (char const *, size_t);
-static struct hshentry *getdnum (void);
-static void badDiffOutput (char const *) exiting;
-static void diffLineNumberTooLarge (char const *) exiting;
-static void getsemi (char const *);
-
-/* keyword table */
-
+/* Keyword table.  */
 char const
   Kaccess[] = "access",
   Kauthor[] = "author",
@@ -60,7 +38,9 @@ char const
   Klog[] = "log",
   Knext[] = "next",
   Kstate[] = "state",
-  Kstrict[] = "strict", Ksymbols[] = "symbols", Ktext[] = "text";
+  Kstrict[] = "strict",
+  Ksymbols[] = "symbols",
+  Ktext[] = "text";
 
 static char const
 #if COMPAT2
@@ -82,7 +62,7 @@ int TotalDeltas;
 
 static void
 getsemi (char const *key)
-/* Get a semicolon to finish off a phrase started by KEY.  */
+/* Get a semicolon to finish off a phrase started by `key'.  */
 {
   if (!getlex (SEMI))
     fatserror ("missing ';' after '%s'", key);
@@ -93,9 +73,27 @@ getdnum (void)
 /* Get a delta number.  */
 {
   register struct hshentry *delta = getnum ();
+
   if (delta && countnumflds (delta->num) & 1)
     fatserror ("%s isn't a delta number", delta->num);
   return delta;
+}
+
+char const *const expand_names[] = {
+  /* These must agree with *_EXPAND in rcsbase.h.  */
+  "kv", "kvl", "k", "v", "o", "b",
+  NULL
+};
+
+static int
+strn2expmode (char const *s, size_t n)
+{
+  char const *const *p;
+
+  for (p = expand_names; *p; ++p)
+    if (memcmp (*p, s, n) == 0 && !(*p)[n])
+      return p - expand_names;
+  return -1;
 }
 
 void
@@ -128,13 +126,14 @@ getadmin (void)
     }
 
 #if COMPAT2
-  /* read suffix. Only in release 2 format */
+  /* Read suffix.  Only in release 2 format.  */
   if (getkeyopt (Ksuffix))
     {
       if (nexttok == STRING)
         {
           readstring ();
-          nextlex ();           /* Throw away the suffix.  */
+          /* Throw away the suffix.  */
+          nextlex ();
         }
       else if (nexttok == ID)
         {
@@ -142,7 +141,7 @@ getadmin (void)
         }
       getsemi (Ksuffix);
     }
-#endif
+#endif  /* COMPAT2 */
 
   getkey (Kaccess);
   LastAccess = &AccessList;
@@ -167,7 +166,8 @@ getadmin (void)
           fatserror ("missing number in symbolic name definition");
         }
       else
-        {                       /*add new pair to association list */
+        {
+          /* Add new pair to association list.  */
           newassoc = ftalloc (struct assoc);
           newassoc->symbol = id;
           newassoc->num = delta->num;
@@ -189,7 +189,8 @@ getadmin (void)
           fatserror ("missing number in lock");
         }
       else
-        {                       /*add new pair to lock list */
+        {
+          /* Add new pair to lock list.  */
           newlock = ftalloc (struct rcslock);
           newlock->login = id;
           newlock->delta = delta;
@@ -231,37 +232,17 @@ getadmin (void)
   Ignored = getphrases (Kdesc);
 }
 
-char const *const expand_names[] = {
-  /* These must agree with *_EXPAND in rcsbase.h.  */
-  "kv", "kvl", "k", "v", "o", "b",
-  NULL
-};
-
 int
 str2expmode (char const *s)
-/* Yield expand mode corresponding to S, or -1 if bad.  */
+/* Return expand mode corresponding to `s', or -1 if bad.  */
 {
   return strn2expmode (s, strlen (s));
 }
 
-static int
-strn2expmode (char const *s, size_t n)
-{
-  char const *const *p;
-
-  for (p = expand_names; *p; ++p)
-    if (memcmp (*p, s, n) == 0 && !(*p)[n])
-      return p - expand_names;
-  return -1;
-}
-
 void
 ignorephrases (const char *key)
-/*
-* Ignore a series of phrases that do not start with KEY.
-* Stop when the next phrase starts with a token that is not an identifier,
-* or is KEY.
-*/
+/* Ignore a series of phrases that do not start with `key'.  Stop when the
+   next phrase starts with a token that is not an identifier, or is `key'.  */
 {
   for (;;)
     {
@@ -292,11 +273,35 @@ ignorephrases (const char *key)
     }
 }
 
+static char const *
+getkeyval (char const *keyword, enum tokens token, int optional)
+/* Read a pair of the form:
+   <keyword> <token> ;
+   where `token' is one of `ID' or `NUM'.  `optional' indicates whether
+   <token> is optional.  Return a pointer to the actual character string
+   of <id> or <num>.  */
+{
+  register char const *val = NULL;
+
+  getkey (keyword);
+  if (nexttok == token)
+    {
+      val = NextString;
+      nextlex ();
+    }
+  else
+    {
+      if (!optional)
+        fatserror ("missing %s", keyword);
+    }
+  getsemi (keyword);
+  return (val);
+}
+
 static int
 getdelta (void)
-/* Function: reads a delta block.
- * returns false if the current block does not start with a number.
- */
+/* Read a delta block.  Return false if the
+   current block does not start with a number.  */
 {
   register struct hshentry *Delta, *num;
   struct branchhead **LastBranch, *NewBranch;
@@ -304,9 +309,11 @@ getdelta (void)
   if (!(Delta = getdnum ()))
     return false;
 
-  hshenter = false;             /*Don't enter dates into hashtable */
+  /* Don't enter dates into hashtable.  */
+  hshenter = false;
   Delta->date = getkeyval (Kdate, NUM, false);
-  hshenter = true;              /*reset hshenter for revision numbers. */
+  /* Reset hshenter for revision numbers.  */
+  hshenter = true;
 
   Delta->author = getkeyval (Kauthor, ID, false);
 
@@ -337,9 +344,8 @@ getdelta (void)
 
 void
 gettree (void)
-/* Function: Reads in the delta tree with getdelta(), then
- * updates the lockedby fields.
- */
+/* Read in the delta tree with `getdelta',
+   then update the `lockedby' fields.  */
 {
   struct rcslock const *currlock;
 
@@ -355,43 +361,14 @@ gettree (void)
 
 void
 getdesc (int prdesc)
-/* Function: read in descriptive text
- * nexttok is not advanced afterwards.
- * If prdesc is set, the text is printed to stdout.
- */
+/* Read in descriptive text.  `nexttok' is not advanced afterwards.
+   If `prdesc' is set, then print text to stdout.  */
 {
-
   getkeystring (Kdesc);
   if (prdesc)
-    printstring ();             /*echo string */
+    printstring ();                     /* echo string */
   else
-    readstring ();              /*skip string */
-}
-
-static char const *
-getkeyval (char const *keyword, enum tokens token, int optional)
-/* reads a pair of the form
- * <keyword> <token> ;
- * where token is one of <id> or <num>. optional indicates whether
- * <token> is optional. A pointer to
- * the actual character string of <id> or <num> is returned.
- */
-{
-  register char const *val = NULL;
-
-  getkey (keyword);
-  if (nexttok == token)
-    {
-      val = NextString;
-      nextlex ();
-    }
-  else
-    {
-      if (!optional)
-        fatserror ("missing %s", keyword);
-    }
-  getsemi (keyword);
-  return (val);
+    readstring ();                      /* skip string */
 }
 
 void
@@ -402,7 +379,7 @@ unexpected_EOF (void)
 
 void
 initdiffcmd (register struct diffcmd *dc)
-/* Initialize *dc suitably for getdiffcmd(). */
+/* Initialize `*dc' suitably for `getdiffcmd'.  */
 {
   dc->adprev = 0;
   dc->dafter = 0;
@@ -422,13 +399,12 @@ diffLineNumberTooLarge (char const *buf)
 
 int
 getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
-/* Get a editing command output by 'diff -n' from fin.
- * The input is delimited by SDELIM if delimiter is set, EOF otherwise.
- * Copy a clean version of the command to fout (if nonnull).
- * Yield 0 for 'd', 1 for 'a', and -1 for EOF.
- * Store the command's line number and length into dc->line1 and dc->nlines.
- * Keep dc->adprev and dc->dafter up to date.
- */
+/* Get an editing command output by "diff -n" from `finfile'.  The input
+   is delimited by `SDELIM' if `delimiter' is set, EOF otherwise.  Copy
+   a clean version of the command to `foutfile' (if non-NULL).  Return 0
+   for 'd', 1 for 'a', and -1 for EOF.  Store the command's line number
+   and length into `dc->line1' and `dc->nlines'.  Keep `dc->adprev' and
+   `dc->dafter' up to date.  */
 {
   register int c;
   declarecache;
@@ -486,8 +462,8 @@ getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
   line1 = 0;
   while (isdigit (c))
     {
-      if (LONG_MAX / 10 < line1 ||
-          (t = line1 * 10, (line1 = t + (c - '0')) < t))
+      if (LONG_MAX / 10 < line1
+          || (t = line1 * 10, (line1 = t + (c - '0')) < t))
         diffLineNumberTooLarge (buf);
       c = *p++;
     }
@@ -496,8 +472,8 @@ getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
   nlines = 0;
   while (isdigit (c))
     {
-      if (LONG_MAX / 10 < nlines ||
-          (t = nlines * 10, (nlines = t + (c - '0')) < t))
+      if (LONG_MAX / 10 < nlines
+          || (t = nlines * 10, (nlines = t + (c - '0')) < t))
         diffLineNumberTooLarge (buf);
       c = *p++;
     }
@@ -539,7 +515,6 @@ getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
 }
 
 #ifdef SYNTEST
-
 /* Input an RCS file and print its internal data structures.  */
 
 char const cmdid[] = "syntest";
@@ -547,7 +522,6 @@ char const cmdid[] = "syntest";
 int
 main (int argc, char *argv[])
 {
-
   if (argc < 2)
     {
       aputs ("No input file\n", stderr);
@@ -581,4 +555,6 @@ exiterr (void)
   _exit (EXIT_FAILURE);
 }
 
-#endif
+#endif  /* defined SYNTEST */
+
+/* rcssyn.c ends here */

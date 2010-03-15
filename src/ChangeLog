@@ -1,5 +1,26 @@
 2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Topo-sort top-level; eliminate redundant forward func decls.
+
+	* maketime.c: Delete forward func decls; reorder
+	top-level; do other whitespace and comment changes.
+	* merger.c: Likewise.
+	* partime.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcskeys.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmap.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcstime.c: Likewise.
+	* rcsutil.c: Likewise.
+
+2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Remove spurious debugging output.
 
 	* rcsfnms.c [!HAVE_MKSTEMP] (homegrown_mkstemp):
