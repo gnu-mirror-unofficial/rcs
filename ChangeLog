@@ -1,3 +1,30 @@
+2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Improve quantity/quality of manual.
+
+	* doc/rcs.texi (rcscommand): New alias.
+	(usage, noVN): New macros.
+	(Top): Add a detailed node listing (@detailmenu).
+	(Overview): Use @rcscommand.
+	Add "Quick tour" menu item.
+	(Credits): Add @cindex for WFT; use @option more;
+	link to RCS homepage for Tichy paper source/output.
+	(Concepts): Reorder subsections; add some new (but mostly empty).
+	(Still missing): Use @rcscommand, @option, @command.
+	(Usage): Move --help, --version first;
+	mention required option-before-filename ordering; add
+	"Description option" and Substitution mode option" menu items.
+	(Revision options): Mention default revision if not specified;
+	use @rcscommand, @option, @command.
+	(Date option): Rename from "Date options";
+	mention `LT' timezone; use @option.
+	(Description option): New node/subsection.
+	(Substitution mode option): New node/subsection.
+	(Misc common options): Add -I, -q; remove -t; expand -V, -VN.
+	(ci, co, ident, merge, rcs, rcsclean, rcsdiff, rcsmerge, rlog):
+	Convert provisionary text to texinfo; use @rcscommand in @section.
+	(GNU FDL): Rename from "GNU Free Documentation License".
+
 2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Revise output for --help option.
