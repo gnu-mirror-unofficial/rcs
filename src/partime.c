@@ -1,4 +1,4 @@
-/* Parse a string, yielding a struct partime that describes it.
+/* Parse a string, returning a `struct partime' that describes it.
 
    Copyright (C) 2010 Thien-Thi Nguyen
    Copyright (C) 1993, 1994, 1995 Paul Eggert

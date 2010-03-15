@@ -1469,7 +1469,7 @@ findlock (int delete, struct hshentry **target)
 
 int
 addlock (struct hshentry *delta, int verbose)
-/* Add a lock held by caller to `delta' and yield 1 if successful.
+/* Add a lock held by caller to `delta' and return 1 if successful.
    Print an error message if `verbose' and return -1 if no lock is
    added because `delta' is locked by somebody other than caller.
    Return 0 if the caller already holds the lock.   */

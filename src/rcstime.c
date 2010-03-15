@@ -1,4 +1,4 @@
-/* Convert between RCS time format and Posix and/or C formats.
+/* Convert between RCS time format and POSIX and/or C formats.
 
    Copyright (C) 2010 Thien-Thi Nguyen
    Copyright (C) 1992, 1993, 1994, 1995 Paul Eggert

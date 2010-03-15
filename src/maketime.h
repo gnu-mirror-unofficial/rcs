@@ -1,4 +1,4 @@
-/* Yield time_t from struct partime yielded by partime.
+/* Return `time_t' from `struct partime' returned by partime.
 
    Copyright (C) 2010 Thien-Thi Nguyen
    Copyright (C) 1993, 1994, 1995 Paul Eggert
@@ -24,3 +24,5 @@ time_t difftm (struct tm const *, struct tm const *);
 time_t str2time (char const *, time_t, long);
 time_t tm2time (struct tm *, int);
 void adjzone (struct tm *, long);
+
+/* maketime.h ends here */
