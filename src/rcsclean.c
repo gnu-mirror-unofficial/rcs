@@ -252,7 +252,7 @@ main (int argc, char **argv)
               && (workptr = Iopen (workname, FOPEN_R_WORK, &workstat))))
           continue;
 
-        if (same_file (RCSstat, workstat, 0))
+        if (same_file (RCSstat, workstat))
           {
             rcserror ("RCS file is the same as working file %s.", workname);
             continue;

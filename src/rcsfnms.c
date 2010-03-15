@@ -742,7 +742,7 @@ getfullRCSname (void)
                 && ROOTPATH (PWD)
                 && stat (PWD, &PWDstat) == 0
                 && stat (".", &dotstat) == 0
-                && same_file (PWDstat, dotstat, 1)))
+                && same_file (PWDstat, dotstat)))
             {
               bufalloc (&wdbuf, SIZEABLE_PATH + 1);
 #if defined HAVE_GETCWD || !defined HAVE_GETWD

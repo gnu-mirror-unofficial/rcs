@@ -599,7 +599,7 @@ main (int argc, char **argv)
         else
           {
             workstatstat = stat (workname, &workstat);
-            if (workstatstat == 0 && same_file (RCSstat, workstat, 0))
+            if (workstatstat == 0 && same_file (RCSstat, workstat))
               {
                 rcserror ("RCS file is the same as working file %s.",
                           workname);

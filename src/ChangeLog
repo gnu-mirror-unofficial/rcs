@@ -1,5 +1,16 @@
 2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Don't bother taking unused third arg for `same_file'.
+
+	* rcsbase.h (same_file): Don't take third arg.
+	* ci.c (main): Call `same_file' w/o third arg.
+	* co.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsedit.c (chnamemod): Likewise.
+	* rcsfnms.c (getfullRCSname): Likewise.
+
+2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Topo-sort top-level; eliminate redundant forward func decls.
 
 	* maketime.c: Delete forward func decls; reorder

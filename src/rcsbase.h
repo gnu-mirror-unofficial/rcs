@@ -153,10 +153,9 @@
 #define large_memory 0
 #endif
 
-/* Do `struct stat' `s' and `t' describe the same file?
-   Answer d if unknown.  (FIXME: `d' is unused! --ttn)  */
-#define same_file(s,t,d)  ((s).st_ino == (t).st_ino     \
-                           && (s).st_dev == (t).st_dev)
+/* Do `struct stat' `s' and `t' describe the same file?  */
+#define same_file(s,t)  ((s).st_ino == (t).st_ino       \
+                         && (s).st_dev == (t).st_dev)
 
 /* Filename component separation.
    TMPDIR       string           Default directory for temporary files.

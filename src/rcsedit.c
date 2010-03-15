@@ -1404,7 +1404,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 
     if (stat (to, &tostat) != 0)
       return -1;
-    if (!same_file (st, tostat, 0))
+    if (!same_file (st, tostat))
       {
         errno = EIO;
         return -1;

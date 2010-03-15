@@ -831,7 +831,7 @@ main (int argc, char **argv)
 
         if (finptr)
           {
-            if (same_file (RCSstat, workstat, 0))
+            if (same_file (RCSstat, workstat))
               {
                 rcserror ("RCS file is the same as working file %s.",
                           workname);
