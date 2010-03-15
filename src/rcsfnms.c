@@ -135,14 +135,12 @@ homegrown_mkstemp (char *template)
         return -1;
       /* Cast to ensure 64-bit shift.  */
       n = pid | (uint64_t)(tv.tv_sec ^ tv.tv_usec) << 32;
-      fprintf (stderr, "BEF: %s %llx [%lu.%lu]\n", end - 6, n, tv.tv_sec, tv.tv_usec);
       for (char *w = end - 6; n && w < end; w++)
         {
           *w = xrep[n % 61];
           n = n / 61;
         }
       fd = open (template, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-      fprintf (stderr, "AFT: %s %d\n", end - 6, 42 * 42 - patience);
     }
   if (0 > fd)
     errno = EEXIST;

@@ -1,3 +1,10 @@
+2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int C] Remove spurious debugging output.
+
+	* rcsfnms.c [!HAVE_MKSTEMP] (homegrown_mkstemp):
+	Remove debugging output.
+
 2010-03-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Revise output for --help option.
