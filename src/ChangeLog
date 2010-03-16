@@ -1,5 +1,13 @@
 2010-03-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `quietflag' more.
+
+	* ident.c (scanfile): Drop arg `quiet'; use `quietflag' instead.
+	(main): If given -q, set `quietflag' directly.
+	If given -V, return successfully after displaying version info.
+
+2010-03-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use enum for keyword substitution mode.
 
 	* rcsbase.h (kwsub): New enum.

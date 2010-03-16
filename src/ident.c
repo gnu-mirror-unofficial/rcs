@@ -100,7 +100,7 @@ match (register FILE *fp)
 }
 
 static int
-scanfile (register FILE *file, char const *name, int quiet)
+scanfile (register FILE *file, char const *name)
 /* Scan an open `file' (perhaps with `name') for keywords.  Return
    -1 if there's a write error; exit immediately on a read error.  */
 {
@@ -123,7 +123,7 @@ scanfile (register FILE *file, char const *name, int quiet)
             continue;
           if (ferror (stdout))
             return -1;
-          quiet = true;
+          quietflag = true;
         }
       c = getc (file);
     }
@@ -137,7 +137,7 @@ scanfile (register FILE *file, char const *name, int quiet)
       fflush (stdout);
       exiterr ();
     }
-  if (!quiet)
+  if (!quietflag)
     fprintf (stderr, "%s warning: no id keywords in %s\n", cmdid, name);
   return 0;
 }
@@ -155,7 +155,6 @@ int
 main (int argc, char **argv)
 {
   FILE *fp;
-  int quiet = 0;
   int status = EXIT_SUCCESS;
   char const *a;
 
@@ -166,13 +165,12 @@ main (int argc, char **argv)
       switch (*a)
         {
         case 'q':
-          quiet = 1;
+          quietflag = true;
           break;
 
         case 'V':
           display_version ();
-          quiet = -1;
-          break;
+          return EXIT_SUCCESS;
 
         default:
           fprintf (stderr, "ident: usage: ident -{qV} [file...]\n");
@@ -180,24 +178,21 @@ main (int argc, char **argv)
           break;
         }
 
-  if (0 <= quiet)
-    {
-      if (!a)
-        scanfile (stdin, NULL, quiet);
-      else
-        do
+  if (!a)
+    scanfile (stdin, NULL);
+  else
+    do
+      {
+        if (!(fp = fopen (a, FOPEN_RB)))
           {
-            if (!(fp = fopen (a, FOPEN_RB)))
-              {
-                reportError (a);
-                status = EXIT_FAILURE;
-              }
-            else if (scanfile (fp, a, quiet) != 0
-                     || (argv[1] && putchar ('\n') == EOF))
-              break;
+            reportError (a);
+            status = EXIT_FAILURE;
           }
-        while ((a = *++argv));
-    }
+        else if (scanfile (fp, a) != 0
+                 || (argv[1] && putchar ('\n') == EOF))
+          break;
+      }
+    while ((a = *++argv));
 
   if (ferror (stdout) || fclose (stdout) != 0)
     {
