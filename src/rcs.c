@@ -1016,7 +1016,7 @@ buildeltatext (struct hshentries const *deltas)
       *++diffp = prog_diff;
       *++diffp = diff_flags;
 #if OPEN_O_BINARY
-      if (Expand == BINARY_EXPAND)
+      if (Expand == kwsub_b)
         *++diffp == "--binary";
 #endif
       *++diffp = "-";

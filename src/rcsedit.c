@@ -681,12 +681,12 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
   date = delta->date;
   RCSv = RCSversion;
 
-  if (exp != VAL_EXPAND)
+  if (exp != kwsub_v)
     aprintf (out, "%c%s", KDELIM, sp);
-  if (exp != KEY_EXPAND)
+  if (exp != kwsub_k)
     {
 
-      if (exp != VAL_EXPAND)
+      if (exp != kwsub_v)
         aprintf (out, "%c%c", VDELIM,
                  marker == Log && RCSv < VERSION (5) ? '\t' : ' ');
 
@@ -713,7 +713,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
             {
               if (VERSION (5) <= RCSv)
                 {
-                  if (locker_expansion || exp == KEYVALLOCK_EXPAND)
+                  if (locker_expansion || exp == kwsub_kvl)
                     aprintf (out, " %s", delta->lockedby);
                 }
               else if (RCSv == VERSION (4))
@@ -723,7 +723,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
         case Locker:
           if (delta->lockedby)
             if (locker_expansion
-                || exp == KEYVALLOCK_EXPAND || RCSv <= VERSION (4))
+                || exp == kwsub_kvl || RCSv <= VERSION (4))
               aputs (delta->lockedby, out);
           break;
         case Log:
@@ -746,10 +746,10 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
         default:
           break;
         }
-      if (exp != VAL_EXPAND)
+      if (exp != kwsub_v)
         afputc (' ', out);
     }
-  if (exp != VAL_EXPAND)
+  if (exp != kwsub_v)
     afputc (KDELIM, out);
 
   if (marker == Log && dolog)

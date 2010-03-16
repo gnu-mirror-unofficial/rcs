@@ -410,7 +410,7 @@ putadmin (void)
       putstring (fout, true, Comment, false);
       aprintf (fout, ";\n");
     }
-  if (Expand != KEYVAL_EXPAND)
+  if (Expand != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
              Kexpand, SDELIM, expand_names[Expand], SDELIM);
   awrite (Ignored.string, Ignored.size, fout);

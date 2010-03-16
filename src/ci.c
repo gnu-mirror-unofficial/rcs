@@ -1061,7 +1061,7 @@ main (int argc, char **argv)
                 *++diffp = prog_diff;
                 *++diffp = diff_flags;
 #if OPEN_O_BINARY
-                if (Expand == BINARY_EXPAND)
+                if (Expand == kwsub_b)
                   *++diffp = "--binary";
 #endif
                 *++diffp = newhead ? "-" : expname;
@@ -1123,7 +1123,7 @@ main (int argc, char **argv)
         else
           {
             newworkmode = WORKMODE (RCSstat.st_mode,
-                                    !(Expand == VAL_EXPAND
+                                    !(Expand == kwsub_v
                                       || lockthis < StrictLocks));
             mtime = mtimeflag ? wtime : (time_t) - 1;
 

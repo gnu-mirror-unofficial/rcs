@@ -1123,7 +1123,7 @@ main (int argc, char **argv)
             awrite (Comment.string, Comment.size, out);
             afputc ('\"', out);
           }
-        if (!pre5 || Expand != KEYVAL_EXPAND)
+        if (!pre5 || Expand != kwsub_kv)
           aprintf (out, "\nkeyword substitution: %s", expand_names[Expand]);
 
         aprintf (out, "\ntotal revisions: %d", TotalDeltas);

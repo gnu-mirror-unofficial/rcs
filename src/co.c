@@ -585,7 +585,7 @@ main (int argc, char **argv)
         if (tostdout)
           {
 #if OPEN_O_BINARY
-            int newmode = Expand == BINARY_EXPAND ? OPEN_O_BINARY : 0;
+            int newmode = Expand == kwsub_b ? OPEN_O_BINARY : 0;
             if (stdout_mode != newmode)
               {
                 stdout_mode = newmode;
@@ -672,7 +672,7 @@ main (int argc, char **argv)
 
             if (0 <= expmode)
               Expand = expmode;
-            if (0 < lockflag && Expand == VAL_EXPAND)
+            if (0 < lockflag && Expand == kwsub_v)
               {
                 rcserror ("cannot combine -kv and -l");
                 continue;
@@ -727,7 +727,7 @@ main (int argc, char **argv)
                     aflush (neworkptr);
                     joinname = neworkname;
                   }
-                if (Expand == BINARY_EXPAND)
+                if (Expand == kwsub_b)
                   workerror ("merging binary files");
                 if (!buildjoin (joinname))
                   continue;
@@ -736,7 +736,7 @@ main (int argc, char **argv)
         if (!tostdout)
           {
             mode_t m = WORKMODE (RCSstat.st_mode,
-                                 !(Expand == VAL_EXPAND
+                                 !(Expand == kwsub_v
                                    || (lockflag <= 0 && StrictLocks)));
             time_t t = mtimeflag
               && newdate ? date2time (newdate) : (time_t) - 1;

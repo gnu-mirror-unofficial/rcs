@@ -300,9 +300,9 @@ main (int argc, char **argv)
         if (0 <= expmode)
           Expand = expmode;
         else if (waslocked
-                 && Expand == KEYVAL_EXPAND
+                 && Expand == kwsub_kv
                  && WORKMODE (RCSstat.st_mode, true) == workstat.st_mode)
-          Expand = KEYVALLOCK_EXPAND;
+          Expand = kwsub_kvl;
 
         getdesc (false);
 

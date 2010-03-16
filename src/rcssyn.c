@@ -80,7 +80,7 @@ getdnum (void)
 }
 
 char const *const expand_names[] = {
-  /* These must agree with *_EXPAND in rcsbase.h.  */
+  /* These must agree with kwsub_* in rcsbase.h.  */
   "kv", "kvl", "k", "v", "o", "b",
   NULL
 };
@@ -215,7 +215,7 @@ getadmin (void)
       getsemi (Kcomment);
     }
 
-  Expand = KEYVAL_EXPAND;
+  Expand = kwsub_kv;
   if (getkeyopt (Kexpand))
     {
       if (nexttok == STRING)

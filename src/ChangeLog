@@ -1,3 +1,27 @@
+2010-03-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int C] Use enum for keyword substitution mode.
+
+	* rcsbase.h (kwsub): New enum.
+	[O_BINARY] (FOPEN_R_WORK, FOPEN_W_WORK, FOPEN_WPLUS_WORK): Use enum.
+	(KEYVAL_EXPAND, KEYVALLOCK_EXPAND, KEY_EXPAND, VAL_EXPAND)
+	(OLD_EXPAND, BINARY_EXPAND): Delete #define:s.
+	(MIN_UNEXPAND, MIN_UNCHANGED_EXPAND): Use enum.
+	* ci.c (main) [OPEN_O_BINARY]: Use enum.
+	(main): Likewise.
+	* co.c (main) [OPEN_O_BINARY]: Likewise.
+	(main): Likewise.
+	* rcs.c (buildeltatext) [OPEN_O_BINARY]: Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	(main) [OPEN_O_BINARY]: Likewise.
+	* rcsedit.c (keyreplace): Likewise.
+	* rcsfnms.c (InitAdmin): Likewise.
+	* rcsgen.c (putadmin): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rcssyn.c (getadmin): Likewise.
+	* rlog.c (main): Likewise.
+
 2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Don't bother taking unused third arg for `same_file'.

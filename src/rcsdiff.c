@@ -390,7 +390,7 @@ main (int argc, char **argv)
           }
         else if (target->lockedby
                  && !lexpandarg
-                 && Expand == KEYVAL_EXPAND
+                 && Expand == kwsub_kv
                  && WORKMODE (RCSstat.st_mode, true) == workstat.st_mode)
           lexpandarg = "-kkvl";
         Izclose (&workptr);
@@ -428,7 +428,7 @@ main (int argc, char **argv)
 
         diffp = diffpend;
 #if OPEN_O_BINARY
-        if (Expand == BINARY_EXPAND)
+        if (Expand == kwsub_b)
           *diffp++ = "--binary";
 #endif
         diffp[0] = maketemp (0);

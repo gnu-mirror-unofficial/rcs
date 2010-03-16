@@ -154,7 +154,7 @@ main (int argc, char **argv)
 
           if (argc > 2 || (argc == 2 && argv[1]))
             warn ("excess arguments ignored");
-          if (Expand == BINARY_EXPAND)
+          if (Expand == kwsub_b)
             workerror ("merging binary files");
           diagnose ("RCS file: %s\n", RCSname);
           if (!(workptr = Iopen (workname, FOPEN_R_WORK, NULL)))

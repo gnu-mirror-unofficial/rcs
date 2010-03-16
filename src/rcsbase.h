@@ -99,14 +99,26 @@
 #define printf_string_exiting(m, n) printf_string (m, n) exiting
 #endif
 
+/* Keyword substitution modes.
+   These must agree with `Expand_names' in rcssyn.c.  */
+enum kwsub
+  {
+    kwsub_kv,                           /* $Keyword: value $ */
+    kwsub_kvl,                          /* $Keyword: value locker $ */
+    kwsub_k,                            /* $Keyword$ */
+    kwsub_v,                            /* value */
+    kwsub_o,                            /* (old string) */
+    kwsub_b                             /* (binary i/o old string) */
+  };
+
 #ifdef O_BINARY
 /* Text and binary i/o behave differently.
    This is incompatible with POSIX and Unix.  */
 #define FOPEN_RB "rb"
-#define FOPEN_R_WORK (Expand==BINARY_EXPAND ? "r" : "rb")
+#define FOPEN_R_WORK (Expand == kwsub_b ? "r" : "rb")
 #define FOPEN_WB "wb"
-#define FOPEN_W_WORK (Expand==BINARY_EXPAND ? "w" : "wb")
-#define FOPEN_WPLUS_WORK (Expand==BINARY_EXPAND ? "w+" : "w+b")
+#define FOPEN_W_WORK (Expand == kwsub_b ? "w" : "wb")
+#define FOPEN_WPLUS_WORK (Expand == kwsub_b ? "w+" : "w+b")
 #define OPEN_O_BINARY O_BINARY
 #else
 /* Text and binary i/o behave the same.
@@ -778,17 +790,10 @@ int countnumflds (char const *);
 void getbranchno (char const *, struct buf *);
 
 /* rcssyn */
-/* These expand modes must agree with Expand_names[] in rcssyn.c.
-   FIXME: Use enum. --ttn  */
-#define KEYVAL_EXPAND 0         /* -kkv `$Keyword: value $' */
-#define KEYVALLOCK_EXPAND 1     /* -kkvl `$Keyword: value locker $' */
-#define KEY_EXPAND 2            /* -kk `$Keyword$' */
-#define VAL_EXPAND 3            /* -kv `value' */
-#define OLD_EXPAND 4            /* -ko use old string, omitting expansion */
-#define BINARY_EXPAND 5         /* -kb like -ko, but use binary mode I/O */
-#define MIN_UNEXPAND OLD_EXPAND /* min value for no logical expansion */
+/* Minimum value for no logical expansion.  */
+#define MIN_UNEXPAND  kwsub_o
 /* The minimum value guaranteed to yield an identical file.  */
-#define MIN_UNCHANGED_EXPAND  (OPEN_O_BINARY ? BINARY_EXPAND : OLD_EXPAND)
+#define MIN_UNCHANGED_EXPAND  (OPEN_O_BINARY ? kwsub_b : kwsub_o)
 struct diffcmd
 {
   /* Number of first line.  */

@@ -303,7 +303,7 @@ InitAdmin (void)
     continue;
   Comment.string = comtable[i].comlead;
   Comment.size = strlen (comtable[i].comlead);
-  Expand = KEYVAL_EXPAND;
+  Expand = kwsub_kv;
   clear_buf (&Ignored);
   /* Note: If `!finptr', read nothing; only initialize.  */
   Lexinit ();
