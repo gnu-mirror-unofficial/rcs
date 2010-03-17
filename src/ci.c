@@ -94,7 +94,7 @@ incnum (char const *onum, struct buf *nnum)
   l = strlen (onum);
   bufalloc (nnum, l + 2);
   np = tp = nnum->string;
-  strcpy (np, onum);
+  strncpy (np, onum, 1 + l);    /* `1 +' to include '\0' */
   for (tp = np + l; np != tp;)
     if (isdigit (*--tp))
       {

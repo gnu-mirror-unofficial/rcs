@@ -215,7 +215,7 @@ maketemp (int n)
   bufautobegin (&rv);
   set_temporary_file_name (&rv, NULL);
   t = testalloc (rv.size);
-  strcpy (t, rv.string);
+  strncpy (t, rv.string, rv.size);
   bufautoend (&rv);
   tpnames[n] = t;
   return t;
@@ -386,17 +386,20 @@ bufscat (struct buf *b, char const *s)
 /* Concatenate `s' to the end of `b'.  */
 {
   size_t blen = b->string ? strlen (b->string) : 0;
+  size_t ssiz = strlen (s) + 1;
 
-  bufrealloc (b, blen + strlen (s) + 1);
-  strcpy (b->string + blen, s);
+  bufrealloc (b, blen + ssiz);
+  strncpy (b->string + blen, s, ssiz);
 }
 
 void
 bufscpy (struct buf *b, char const *s)
 /* Copy `s' into `b'.  */
 {
-  bufalloc (b, strlen (s) + 1);
-  strcpy (b->string, s);
+  size_t ssiz = strlen (s) + 1;
+
+  bufalloc (b, ssiz);
+  strncpy (b->string, s, ssiz);
 }
 
 char const *
@@ -724,7 +727,7 @@ getfullRCSname (void)
 #else  /* !needs_getabsname */
       static char const *wdptr;
       static struct buf wdbuf;
-      static size_t wdlen;
+      static size_t wdlen, rsiz;
 
       register char const *r;
       register size_t dlen;
@@ -771,12 +774,13 @@ getfullRCSname (void)
           r++;
       /* Build full pathname.  */
       dlen = wdlen;
-      bufalloc (&rcsbuf, dlen + strlen (r) + 2);
+      rsiz = strlen (r) + 1;
+      bufalloc (&rcsbuf, dlen + rsiz + 1);
       d = rcsbuf.string;
       memcpy (d, wd, dlen);
       d += dlen;
       *d++ = SLASH;
-      strcpy (d, r);
+      strncpy (d, r, rsiz);
 #endif  /* !needs_getabsname */
       return rcsbuf.string;
     }

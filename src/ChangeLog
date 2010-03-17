@@ -1,3 +1,16 @@
+2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int C] Avoid `strcpy'.
+
+	* ci.c (incnum): Use `strncpy'.
+	* rcsclean.c [HAVE_DIRENT_H] (get_directory): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsfnms.c (maketemp, bufscat, bufscpy, getfullRCSname): Likewise.
+	* rcsutil.c (str_save, fstr_save): Likewise.
+	* rlog.c (recentdate, getdatepair): Likewise.
+	(KSTRCPY): New macro.
+	(getnumericrev, main): Use `KSTRCPY'.
+
 2010-03-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Use `bool' (and `true' and `false') more.

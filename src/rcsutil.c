@@ -115,7 +115,9 @@ char *
 str_save (char const *s)
 /* Save `s' in permanently allocated storage.  */
 {
-  return strcpy (tnalloc (char, strlen (s) + 1), s);
+  size_t ssiz = strlen (s) + 1;
+
+  return strncpy (tnalloc (char, ssiz), s, ssiz);
 }
 
 char *
@@ -123,7 +125,9 @@ fstr_save (char const *s)
 /* Save `s' in storage that will be deallocated
    when we're done with this file.  */
 {
-  return strcpy (ftnalloc (char, strlen (s) + 1), s);
+  size_t ssiz = strlen (s) + 1;
+
+  return strncpy (ftnalloc (char, ssiz), s, ssiz);
 }
 
 char *

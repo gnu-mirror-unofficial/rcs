@@ -102,7 +102,7 @@ get_directory (char const *dirname, char ***aargv)
       if (entries == entries_max)
         offset = trealloc (size_t, offset, entries_max <<= 1);
       offset[entries++] = chars;
-      strcpy (a + chars, en);
+      strncpy (a + chars, en, s);
       chars += s;
     }
   if (errno || closedir (d) != 0)

@@ -503,7 +503,10 @@ recentdate (struct hshentry const *root, struct Datepairs *pd)
     {
       if (cmpdate (root->date, pd->strtdate) >= 0
           && cmpdate (root->date, pd->enddate) <= 0)
-        strcpy (pd->strtdate, root->date);
+        {
+          strncpy (pd->strtdate, root->date, datesize);
+          pd->strtdate[datesize - 1] = '\0';
+        }
     }
 
   recentdate (root->next, pd);
@@ -620,7 +623,7 @@ getdatepair (char *argv)
                     switchflag ? nextdate->enddate : nextdate->strtdate);
           if (c == ';' || c == '\0')    /* DATE */
             {
-              strcpy (nextdate->enddate, nextdate->strtdate);
+              strncpy (nextdate->enddate, nextdate->strtdate, datesize);
               nextdate->dnext = duelst;
               duelst = nextdate;
               goto end;
@@ -680,6 +683,8 @@ checkrevpair (char const *num1, char const *num2)
   return true;
 }
 
+#define KSTRCPY(to,kstr)  strncpy (to, kstr, sizeof kstr)
+
 static bool
 getnumericrev (void)
 /* Get the numeric name of revisions stored in `revlist'; store
@@ -732,7 +737,7 @@ getnumericrev (void)
           else
             {
               bufscpy (&s, e.string);
-              strcpy (strrchr (s.string, '.'), ".0");
+              KSTRCPY (strrchr (s.string, '.'), ".0");
             }
           break;
 
@@ -1138,7 +1143,7 @@ main (int argc, char **argv)
             currdate = duelst;
             while (currdate)
               {
-                strcpy (currdate->strtdate, "0.0.0.0.0.0");
+                KSTRCPY (currdate->strtdate, "0.0.0.0.0.0");
                 recentdate (Head, currdate);
                 currdate = currdate->dnext;
               }

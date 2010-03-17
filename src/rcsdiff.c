@@ -441,11 +441,13 @@ main (int argc, char **argv)
             diffp[1] = workname;
             if (*workname == '-')
               {
-                char *dp = ftnalloc (char, strlen (workname) + 3);
+                size_t wsiz = strlen (workname) + 1;
+                char *dp = ftnalloc (char, wsiz + 2);
+
                 diffp[1] = dp;
                 *dp++ = '.';
                 *dp++ = SLASH;
-                strcpy (dp, workname);
+                strncpy (dp, workname, wsiz);
               }
           }
         else
