@@ -1,3 +1,11 @@
+2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[admin] Don't distribute Tichy paper (now permanently online).
+
+	* Makefile.in (dist): Don't distribute "*.ms".
+	* rcs.ms: Delete file.
+	* README: Update; nfc.
+
 2010-03-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Improve quantity/quality of manual.

@@ -12,7 +12,6 @@ See the following files and directories for more information.
  INSTALL - generic installation instructions
  NEWS - recent changes
  man/ - sources for manual page entries
- rcs.ms - troff source for the paper `RCS--A System for Version Control'
  src/ - sources for programs
 
 If you lack troff, you can get GNU groff to format the documentation.

@@ -56,7 +56,7 @@ dist :: $(srcdir)/configure
 	d='$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)' && \
 	rm -fr $$d && \
 	mkdir $$d $$d/build-aux $$d/doc $$d/man $$d/src $$d/v && \
-	ln *.ms ChangeLog configure configure.ac AUTHORS COPYING \
+	ln ChangeLog configure configure.ac AUTHORS COPYING \
 		INSTALL \
 		Makefile.in NEWS README $$d && \
 	(cd build-aux && ln extract-help \
