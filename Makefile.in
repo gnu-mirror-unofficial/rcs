@@ -51,7 +51,7 @@ doc ::
 dist :: $(srcdir)/configure
 	cd man && $(MAKE) rcsfile.5
 	cd src && $(MAKE) TAGS
-	$(MAKE) doc distclean
+	cd doc && $(MAKE)
 	set -x && \
 	d='$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)' && \
 	rm -fr $$d && \
@@ -72,8 +72,7 @@ dist :: $(srcdir)/configure
 		  cat TMP $$f > ../$$d/man/$$f ; \
 		done ; \
 		rm -f TMP) && \
-	(cd src && ln *.[ch] *.sh ChangeLog \
-		*.in alive.test TAGS ../$$d/src) && \
+	(cd src && $(MAKE) dist distdir=../$$d/src) && \
 	(cd v && ln *.test *.in ChangeLog ../$$d/v) && \
 	sed -i 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/' \
 	  $$d/src/rcsfreeze.sh && \

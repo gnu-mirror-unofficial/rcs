@@ -1,5 +1,13 @@
 2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Don't do "make distclean" on "make dist"!
+
+	* Makefile.in (distdir, slow, headers)
+	(infrastructure, EXTRA_DIST): New vars.
+	(dist): New target.
+
+2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Consolidate some program globals into `struct program'.
 
 	Here, "USUAL" means "(cmdid): Delete var.

@@ -209,3 +209,18 @@ xorlf:
 	} > $@.c
 	$(CC) -o $@ $@.c
 	$(REMOVE) $@.c
+
+# Structure things kind of like how Automake would (will).
+# On transition, `EXTRA_DIST' should remain unchanged.
+
+distdir =
+
+slow = rcsfreeze.sh
+headers = gnu-h-v.h maketime.h partime.h rcsbase.h
+infrastructure = ChangeLog Makefile.in auto-sussed.h.in
+
+EXTRA_DIST = TAGS
+
+dist:
+	@ln -v $(SOURCE) $(headers) $(slow) $(infrastructure) \
+	  $(TESTS) $(EXTRA_DIST) $(distdir)
