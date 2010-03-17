@@ -1,5 +1,21 @@
 2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Consolidate parallel rcsedit.c arrays into `struct sff'.
+
+	* rcsedit.c (sff): New struct.
+	(SFFI_LOCKDIR, SFFI_NEWDIR, SFF_COUNT): New #define:s.
+	(sff): New static array of `struct sff'.
+	(lockname, newRCSname): Use `sff'.
+	(lockdirtp_index, newRCSdirtp_index, newworkdirtp_index)
+	(DIRTEMPNAMES): Delete #define:s.
+	(dirtpname, dirtpmaker): Delete data structures.
+	(rcswriteopen): Use `sff', `SFFI_LOCKDIR'.
+	(keepdirtemp): Use `sff', `SFF_COUNT'.
+	(makedirtemp): Use `SFFI_NEWDIR', `sff'.
+	(dirtempunlink): Use `SFF_COUNT', `sff'.
+
+2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `_Exit', which is C99.
 
 	* ci.c (exiterr): Use `_Exit'.

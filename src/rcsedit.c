@@ -49,20 +49,26 @@ static long editline;
    file is not rewound after applying one delta.  */
 static long linecorr;
 
-/* Indexes into dirtpname.  */
-#define lockdirtp_index     0
-#define newRCSdirtp_index   BAD_CREAT0
-#define newworkdirtp_index  (newRCSdirtp_index + 1)
-#define DIRTEMPNAMES        (newworkdirtp_index + 1)
-
+/* (Somewhat) fleeting files.  */
 enum maker { notmade, real, effective };
-/* Unlink these when done.  */
-static struct buf dirtpname[DIRTEMPNAMES];
-/* (But only if these are set.)  */
-static enum maker volatile dirtpmaker[DIRTEMPNAMES];
 
-#define lockname    (dirtpname[lockdirtp_index].string)
-#define newRCSname  (dirtpname[newRCSdirtp_index].string)
+struct sff
+{
+  /* Unlink these when done.  */
+  struct buf filename;
+  /* (But only if they are in the right mood.)  */
+  enum maker volatile disposition;
+};
+
+/* Indexes into `sff'.  */
+#define SFFI_LOCKDIR  0
+#define SFFI_NEWDIR   BAD_CREAT0
+
+#define SFF_COUNT  (SFFI_NEWDIR + 2)
+static struct sff sff[SFF_COUNT];
+
+#define lockname    (sff[SFFI_LOCKDIR].filename.string)
+#define newRCSname  (sff[SFFI_NEWDIR].filename.string)
 
 #if has_NFS || BAD_UNLINK
 int
@@ -1134,7 +1140,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   RCSpath = RCSbuf->string;
   sp = basefilename (RCSpath);
   l = sp - RCSpath;
-  dirt = &dirtpname[waslocked];
+  dirt = &sff[waslocked].filename;
   bufscpy (dirt, RCSpath);
   tp = dirt->string + l;
   x = rcssuffix (RCSpath);
@@ -1254,7 +1260,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   setrid ();
 
   if (0 <= fdesc)
-    dirtpmaker[0] = effective;
+    sff[SFFI_LOCKDIR].disposition = effective;
 
   if (fdescSafer < 0)
     {
@@ -1279,7 +1285,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
               setrid ();
               if (r != 0)
                 enfaterror (e, lockname);
-              bufscpy (&dirtpname[lockdirtp_index], sp);
+              bufscpy (&sff[SFFI_LOCKDIR].filename, sp);
             }
         }
       fdlock = fdescSafer;
@@ -1298,10 +1304,10 @@ keepdirtemp (char const *name)
 {
   register int i;
 
-  for (i = DIRTEMPNAMES; 0 <= --i;)
-    if (dirtpname[i].string == name)
+  for (i = SFF_COUNT; 0 <= --i;)
+    if (sff[i].filename.string == name)
       {
-        dirtpmaker[i] = notmade;
+        sff[i].disposition = notmade;
         return;
       }
   faterror ("keepdirtemp");
@@ -1309,17 +1315,17 @@ keepdirtemp (char const *name)
 
 char const *
 makedirtemp (bool isworkfile)
-/* Create a unique pathname and store it into `dirtpname'.
-   Because of storage in `tpnames', `dirtempunlink' can unlink the file later.
+/* Create a unique pathname and store it into `sff'.
+   Because of storage in `sff', `dirtempunlink' can unlink the file later.
    Return a pointer to the pathname created.
    If `isworkfile', put it into the working file's directory;
    otherwise, put the unique file in RCSfile's directory.  */
 {
-  int slot = newRCSdirtp_index + isworkfile;
+  int slot = SFFI_NEWDIR + isworkfile;
 
-  set_temporary_file_name (&dirtpname[slot], isworkfile ? workname : RCSname);
-  dirtpmaker[slot] = real;
-  return dirtpname[slot].string;
+  set_temporary_file_name (&sff[slot].filename, isworkfile ? workname : RCSname);
+  sff[slot].disposition = real;
+  return sff[slot].filename.string;
 }
 
 void
@@ -1330,15 +1336,15 @@ dirtempunlink (void)
   register int i;
   enum maker m;
 
-  for (i = DIRTEMPNAMES; 0 <= --i;)
-    if ((m = dirtpmaker[i]) != notmade)
+  for (i = SFF_COUNT; 0 <= --i;)
+    if ((m = sff[i].disposition) != notmade)
       {
         if (m == effective)
           seteid ();
-        un_link (dirtpname[i].string);
+        un_link (sff[i].filename.string);
         if (m == effective)
           setrid ();
-        dirtpmaker[i] = notmade;
+        sff[i].disposition = notmade;
       }
 }
 
