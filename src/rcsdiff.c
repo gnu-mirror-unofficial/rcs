@@ -87,7 +87,7 @@ static exiting void
 exiterr (void)
 {
   tempunlink ();
-  _exit (diff_trouble);
+  _Exit (diff_trouble);
 }
 
 #if DIFF_L

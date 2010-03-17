@@ -781,7 +781,7 @@ tiprev (void)
 static exiting void
 exiterr (void)
 {
-  _exit (EXIT_FAILURE);
+  _Exit (EXIT_FAILURE);
 }
 
 const struct program program =

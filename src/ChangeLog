@@ -1,5 +1,25 @@
 2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `_Exit', which is C99.
+
+	* ci.c (exiterr): Use `_Exit'.
+	* co.c (exiterr): Likewise.
+	* ident.c (exiterr): Likewise.
+	* merge.c (exiterr): Likewise.
+	* rcs.c (exiterr): Likewise.
+	* rcsclean.c (exiterr): Likewise.
+	* rcsdiff.c (exiterr): Likewise.
+	* rcsfnms.c [!HAVE_GETWD] (getcwd): Likewise.
+	(exiterr): Likewise.
+	* rcslex.c [LEXDB] (exiterr): Likewise.
+	* rcsmerge.c (exiterr): Likewise.
+	* rcsrev.c [REVTEST] (exiterr): Likewise.
+	* rcssyn.c [SYNTEST] (exiterr): Likewise.
+	* rcsutil.c (write_stderr, runv): Likewise.
+	* rlog.c (exiterr): Likewise.
+
+2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Don't do "make distclean" on "make dist"!
 
 	* Makefile.in (distdir, slow, headers)

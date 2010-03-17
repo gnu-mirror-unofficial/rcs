@@ -519,7 +519,7 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
 static exiting void
 exiterr (void)
 {
-  _exit (EXIT_FAILURE);
+  _Exit (EXIT_FAILURE);
 }
 
 const struct program program =

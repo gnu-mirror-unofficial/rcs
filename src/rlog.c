@@ -92,7 +92,7 @@ cleanup (void)
 static exiting void
 exiterr (void)
 {
-  _exit (EXIT_FAILURE);
+  _Exit (EXIT_FAILURE);
 }
 
 static void

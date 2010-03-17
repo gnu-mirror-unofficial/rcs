@@ -846,7 +846,7 @@ getcwd (char *path, size_t size)
           execl (binpwd, binpwd, NULL);
           execl (usrbinpwd, usrbinpwd, NULL);
         }
-      _exit (EXIT_FAILURE);
+      _Exit (EXIT_FAILURE);
     }
   e = errno;
   closeerror = close (fd[1]);
@@ -942,7 +942,7 @@ exiterr (void)
 {
   dirtempunlink ();
   tempunlink ();
-  _exit (EXIT_FAILURE);
+  _Exit (EXIT_FAILURE);
 }
 const struct program program =
   {

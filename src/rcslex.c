@@ -1360,7 +1360,7 @@ aprintf (FILE * iop, char const *fmt, ...)
 static void
 exiterr (void)
 {
-  _exit (EXIT_FAILURE);
+  _Exit (EXIT_FAILURE);
 }
 
 const struct program program =

@@ -767,7 +767,7 @@ write_stderr (char const *s)
 {
   int slen = strlen (s);
   if (write (STDERR_FILENO, s, slen) != slen)
-    _exit (diff_trouble);
+    _Exit (diff_trouble);
 }
 #endif  /* defined HAVE_WORKING_FORK */
 
@@ -818,7 +818,7 @@ runv (int infd, char const *outname, char const **args)
             /* Avoid `perror' since it may misuse buffers.  */
             write_stderr (args[1]);
             write_stderr (": I/O redirection failed\n");
-            _exit (diff_trouble);
+            _Exit (diff_trouble);
           }
 
         if (outname)
@@ -830,7 +830,7 @@ runv (int infd, char const *outname, char const **args)
               write_stderr (": ");
               write_stderr (outname);
               write_stderr (": cannot create\n");
-              _exit (diff_trouble);
+              _Exit (diff_trouble);
             }
         exec_RCS (args[1], (char **) (args + 1));
         notfound = args[1];
@@ -845,7 +845,7 @@ runv (int infd, char const *outname, char const **args)
         /* Avoid `perror' since it may misuse buffers.  */
         write_stderr (notfound);
         write_stderr (": not found\n");
-        _exit (diff_trouble);
+        _Exit (diff_trouble);
       }
     if (pid < 0)
       efaterror ("fork");
