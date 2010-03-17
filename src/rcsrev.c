@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include <ctype.h>
 
 int
@@ -583,7 +582,7 @@ lookupsym (char const *id)
   return NULL;
 }
 
-int
+bool
 expandsym (char const *source, struct buf *target)
 /* `source' points to a revision number.  Copy the number to `target',
    but replace all symbolic fields in the source number with their
@@ -604,7 +603,7 @@ branchtip (char const *branch)
   return h ? h->num : NULL;
 }
 
-int
+bool
 fexpandsym (char const *source, struct buf *target, RILE *fp)
 /* Same as `expandsym', except if `fp' is non-NULL,
    it is used to expand `KDELIM'.  */
@@ -642,7 +641,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
     {
       register char *p = tp;
       size_t s = tp - target->string;
-      int id = false;
+      bool id = false;
 
       for (;;)
         {

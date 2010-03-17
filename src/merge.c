@@ -20,7 +20,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "merge-help.c"
 
 char const cmdid[] = "merge";
@@ -59,12 +58,12 @@ main (int argc, char **argv)
 {
   register char const *a;
   char const *arg[3], *label[3], *edarg = NULL;
-  int labels, tostdout;
+  int labels;
+  bool tostdout = false;
 
   CHECK_HV ();
 
   labels = 0;
-  tostdout = false;
 
   for (; (a = *++argv) && *a++ == '-'; --argc)
     {

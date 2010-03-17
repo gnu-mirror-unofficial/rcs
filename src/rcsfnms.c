@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include <stdint.h>
 
 char const *RCSname;
@@ -256,7 +255,7 @@ bindex (register char const *sp, register int c)
   return r;
 }
 
-static int
+static bool
 suffix_matches (register char const *suffix, register char const *pattern)
 {
   register int c;
@@ -467,7 +466,7 @@ rcssuffix (char const *name)
 }
 
 RILE *
-rcsreadopen (struct buf *RCSpath, struct stat *status, int mustread RCS_UNUSED)
+rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
 /* Open `RCSpath' for reading and return its `FILE*' descriptor.
    If successful, set `*status' to its status.
    Pass this routine to `pairnames' for read-only access to the file.  */
@@ -475,15 +474,15 @@ rcsreadopen (struct buf *RCSpath, struct stat *status, int mustread RCS_UNUSED)
   return Iopen (RCSpath->string, FOPEN_RB, status);
 }
 
-static int
-finopen (RILE *(*rcsopen) (struct buf *, struct stat *, int), int mustread)
+static bool
+finopen (RILE *(*rcsopen) (struct buf *, struct stat *, bool), bool mustread)
 /* Use `rcsopen' to open an RCS file; `mustread' is set if the file must be
    read.  Set `finptr' to the result and return true if successful.  `RCSb'
    holds the file's name.  Set `RCSbuf' to the best RCS name found so far,
    and `RCSerrno' to its errno.  Return true if successful or if an unusual
    failure.  */
 {
-  int interesting, preferold;
+  bool interesting, preferold;
 
   /* We prefer an old name to that of a nonexisting new RCS file,
      unless we tried locking the old name and failed.  */
@@ -500,12 +499,12 @@ finopen (RILE *(*rcsopen) (struct buf *, struct stat *, int), int mustread)
   return interesting;
 }
 
-static int
+static bool
 fin2open (char const *d, size_t dlen,
           char const *base, size_t baselen,
           char const *x, size_t xlen,
-          RILE *(*rcsopen) (struct buf *, struct stat *, int),
-          int mustread)
+          RILE *(*rcsopen) (struct buf *, struct stat *, bool),
+          bool mustread)
 /* `d' is a directory name with length `dlen' (including trailing slash).
    `base' is a filename with length `baselen'.  `x' is an RCS pathname suffix
    with length `xlen'.  Use `rcsopen' to open an RCS file; `mustread' is set
@@ -544,8 +543,8 @@ fin2open (char const *d, size_t dlen,
 
 int
 pairnames (int argc, char **argv,
-           RILE *(*rcsopen) (struct buf *, struct stat *, int),
-           int mustread, int quiet)
+           RILE *(*rcsopen) (struct buf *, struct stat *, bool),
+           bool mustread, bool quiet)
 /* Pair the pathnames pointed to by `argv'; `argc' indicates how many there
    are.  Place a pointer to the RCS pathname into `RCSname', and a pointer to
    the pathname of the working file into `workname'.  If both are given, and
@@ -564,7 +563,7 @@ pairnames (int argc, char **argv,
 
   register char *p, *arg, *RCS1;
   char const *base, *RCSbase, *x;
-  int paired;
+  bool paired;
   size_t arglen, dlen, baselen, xlen;
 
   fdlock = -1;
@@ -783,7 +782,7 @@ getfullRCSname (void)
     }
 }
 
-int
+bool
 isSLASH (int c)
 {
 #if !WOE
@@ -810,7 +809,8 @@ getcwd (char *path, size_t size)
   register FILE *fp;
   register int c;
   register char *p, *lim;
-  int closeerrno, closeerror, e, fd[2], readerror, toolong, wstatus;
+  int closeerrno, closeerror, e, fd[2], wstatus;
+  bool readerror, toolong;
   pid_t child;
 
   if (!size)
@@ -848,7 +848,8 @@ getcwd (char *path, size_t size)
   closeerror = close (fd[1]);
   closeerrno = errno;
   fp = NULL;
-  readerror = toolong = wstatus = 0;
+  wstatus = 0;
+  readerror = toolong = false;
   p = path;
   if (0 <= child)
     {
@@ -865,14 +866,14 @@ getcwd (char *path, size_t size)
                     break;
                   if (ferror (fp))
                     {
-                      readerror = 1;
+                      readerror = true;
                       e = errno;
                       break;
                     }
                 }
               if (p == lim)
                 {
-                  toolong = 1;
+                  toolong = true;
                   break;
                 }
             }
@@ -938,7 +939,7 @@ int
 main (int argc, char *argv[])
 {
   int result;
-  int initflag;
+  bool initflag;
 
   quietflag = initflag = false;
 

@@ -42,7 +42,7 @@ normalize_arg (char const *s, char **b)
 }
 
 int
-merge (int tostdout, char const *edarg, char const *const label[3],
+merge (bool tostdout, char const *edarg, char const *const label[3],
        char const *const argv[3])
 /* Do `merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2', where `tostdout'
    specifies whether `-p' is present, `edarg' gives the editing type

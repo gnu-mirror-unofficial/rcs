@@ -28,14 +28,13 @@
  */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 
 /* Result file descriptor.  */
 FILE *fcopy;
 /* Result pathname.  */
 char const *resultname;
 /* Should the locker name be appended to Id val?  */
-int locker_expansion;
+bool locker_expansion;
 
 #if !large_memory
 /* Edit file descriptor.  */
@@ -195,7 +194,7 @@ finisheditline (RILE *fin, FILE *fout, Iptr_type l,
 }
 
 void
-finishedit (struct hshentry const *delta, FILE *outfile, int done)
+finishedit (struct hshentry const *delta, FILE *outfile, bool done)
 /* Doing expansion if `delta' is set, output the state of the edits to
    `outfile'.  But do nothing unless `done' is set (which means we are
    on the last pass).  */
@@ -279,7 +278,7 @@ snapshotedit (FILE *f)
 }
 
 void
-finishedit (struct hshentry const *delta, FILE *outfile, int done)
+finishedit (struct hshentry const *delta, FILE *outfile, bool done)
 /* Copy the rest of the edit file and close it (if it exists).
    If `delta', perform keyword substitution at the same time.
    If `done' is set, we are finishing the last pass.  */
@@ -378,7 +377,7 @@ copystring (void)
   register int c;
   declarecache;
   register FILE *frew, *fcop;
-  register int amidline;
+  register bool amidline;
   register RILE *fin;
 
   fin = finptr;
@@ -434,7 +433,7 @@ enterstring (void)
   declarecache;
   register FILE *frew;
   register long e, oe;
-  register int amidline, oamidline;
+  register bool amidline, oamidline;
   register Iptr_type optr;
   register RILE *fin;
 
@@ -664,7 +663,7 @@ char const ciklog[ciklogsize] = "checked in with -k by ";
 
 static void
 keyreplace (enum markers marker, register struct hshentry const *delta,
-            int delimstuffed, RILE *infile, register FILE *out, int dolog)
+            bool delimstuffed, RILE *infile, register FILE *out, bool dolog)
 /* Output the keyword value(s) corresponding to `marker'.
    Attributes are derived from `delta'.  */
 {
@@ -769,7 +768,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
         }
       else
         {
-          int kdelim_found = 0;
+          bool kdelim_found = false;
           Ioffset_type chars_read = Itell (infile);
           declarecache;
 
@@ -892,7 +891,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
 
 int
 expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
-            int delimstuffed, FILE *frewfile, int dolog)
+            bool delimstuffed, FILE *frewfile, bool dolog)
 /* Read a line from `infile' and write it to `outfile'.  Do keyword
    expansion with data from `delta'.  If `delimstuffed' is true, double
    `SDELIM' is replaced with single `SDELIM'.  If `frewfile' is set,
@@ -906,7 +905,8 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
   declarecache;
   register FILE *out, *frew;
   register char *tp;
-  register int e, ds, r;
+  register int r;
+  bool e;
   char const *tlim;
   static struct buf keyval;
   enum markers matchresult;
@@ -915,14 +915,13 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
   cache (infile);
   out = outfile;
   frew = frewfile;
-  ds = delimstuffed;
   bufalloc (&keyval, keylength + 3);
-  e = 0;
+  e = false;
   r = -1;
 
   for (;;)
     {
-      if (ds)
+      if (delimstuffed)
         GETC (frew, c);
       else
         cachegeteof (c, goto uncache_exit);
@@ -931,7 +930,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
           switch (c)
             {
             case SDELIM:
-              if (ds)
+              if (delimstuffed)
                 {
                   GETC (frew, c);
                   if (c != SDELIM)
@@ -948,7 +947,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
               break;
 
             case '\n':
-              rcsline += ds;
+              rcsline += delimstuffed;
               aputc (c, out);
               r = 2;
               goto uncache_exit;
@@ -961,7 +960,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
               *tp++ = KDELIM;
               for (;;)
                 {
-                  if (ds)
+                  if (delimstuffed)
                     GETC (frew, c);
                   else
                     cachegeteof (c, goto keystring_eof);
@@ -994,7 +993,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                   tlim = keyval.string + keyval.size;
                   for (;;)
                     {
-                      if (ds)
+                      if (delimstuffed)
                         GETC (frew, c);
                       else
                         cachegeteof (c, goto keystring_eof);
@@ -1003,7 +1002,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                       *tp++ = c;
                       if (tlim <= tp)
                         tp = bufenlarge (&keyval, &tlim);
-                      if (c == SDELIM && ds)
+                      if (c == SDELIM && delimstuffed)
                         {
                           /* Skip next `SDELIM'.  */
                           GETC (frew, c);
@@ -1026,9 +1025,10 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                 }
               /* Now put out the new keyword value.  */
               uncache (infile);
-              keyreplace (matchresult, delta, ds, infile, out, dolog);
+              keyreplace (matchresult, delta, delimstuffed,
+                          infile, out, dolog);
               cache (infile);
-              e = 1;
+              e = true;
               break;
             }
           break;
@@ -1101,7 +1101,7 @@ resolve_symlink (struct buf *L)
 #endif  /* defined HAVE_READLINK */
 
 RILE *
-rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
+rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 /* Create the lock file corresponding to `RCSbuf'.
    Then try to open `RCSbuf' for reading and return its `RILE*' descriptor.
    Put its status into `*status' too.
@@ -1113,7 +1113,8 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, int mustread)
   register char const *sp, *RCSpath, *x;
   RILE *f;
   size_t l;
-  int e, exists, fdesc, fdescSafer, r, waslocked;
+  int e, exists, fdesc, fdescSafer, r;
+  bool waslocked;
   struct buf *dirt;
   struct stat statbuf;
 
@@ -1307,12 +1308,12 @@ keepdirtemp (char const *name)
 }
 
 char const *
-makedirtemp (int isworkfile)
+makedirtemp (bool isworkfile)
 /* Create a unique pathname and store it into `dirtpname'.
    Because of storage in `tpnames', `dirtempunlink' can unlink the file later.
    Return a pointer to the pathname created.
-   If `isworkfile' is 1, put it into the working file's directory;
-   if 0, put the unique file in RCSfile's directory.  */
+   If `isworkfile', put it into the working file's directory;
+   otherwise, put the unique file in RCSfile's directory.  */
 {
   int slot = newRCSdirtp_index + isworkfile;
 
@@ -1435,7 +1436,7 @@ setmtime (char const *file, time_t mtime)
 }
 
 int
-findlock (int delete, struct hshentry **target)
+findlock (bool delete, struct hshentry **target)
 /* Find the first lock held by caller and return a pointer
    to the locked delta; also removes the lock if `delete'.
    If one lock, put it into `*target'.
@@ -1468,7 +1469,7 @@ findlock (int delete, struct hshentry **target)
 }
 
 int
-addlock (struct hshentry *delta, int verbose)
+addlock (struct hshentry *delta, bool verbose)
 /* Add a lock held by caller to `delta' and return 1 if successful.
    Print an error message if `verbose' and return -1 if no lock is
    added because `delta' is locked by somebody other than caller.
@@ -1498,7 +1499,7 @@ addlock (struct hshentry *delta, int verbose)
 }
 
 int
-addsymbol (char const *num, char const *name, int rebind)
+addsymbol (char const *num, char const *name, bool rebind)
 /* Associate with revision `num' the new symbolic `name'.
    If `name' already exists and `rebind' is set, associate `name'
    with `num'; otherwise, print an error message and return false;
@@ -1541,7 +1542,7 @@ getcaller (void)
 #endif
 }
 
-int
+bool
 checkaccesslist (void)
 /* Return true if caller is the superuser, the owner of the
    file, the access list is empty, or caller is on the access list.
@@ -1566,8 +1567,8 @@ checkaccesslist (void)
 }
 
 int
-dorewrite (int lockflag, int changed)
-/* Do nothing if `lockflag' is zero.
+dorewrite (bool lockflag, int changed)
+/* Do nothing if not `lockflag'.
    Prepare to rewrite an RCS file if `changed' is positive.
    Stop rewriting if `changed' is zero, because there won't be any changes.
    Fail if `changed' is negative.

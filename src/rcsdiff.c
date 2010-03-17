@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "rcsdiff-help.c"
 
 /* Normally, if the two revisions specified are the same, we avoid calling
@@ -158,7 +157,7 @@ main (int argc, char **argv)
   struct hshentries *gendeltas; /* deltas to be generated */
   struct hshentry *target;
   char *a, *dcp, **newargv;
-  int no_diff_means_no_output;
+  bool no_diff_means_no_output;
   register int c;
 
   CHECK_HV ();

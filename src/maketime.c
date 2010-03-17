@@ -30,7 +30,7 @@
 
 #define TM_YEAR_ORIGIN 1900
 
-static int
+static bool
 isleap (int y)
 {
   return (y & 3) == 0 && (y % 100 != 0 || y % 400 == 0);
@@ -52,7 +52,7 @@ month_days (struct tm const *tm)
 }
 
 struct tm *
-time2tm (time_t unixtime, int localzone)
+time2tm (time_t unixtime, bool localzone)
 /* Convert `unixtime' to `struct tm' form.
    Use `gmtime' if available and if `!localzone', `localtime' otherwise.  */
 {
@@ -147,7 +147,7 @@ adjzone (register struct tm *t, long seconds)
 }
 
 time_t
-tm2time (struct tm *tm, int localzone)
+tm2time (struct tm *tm, bool localzone)
 /* Convert `tm' to `time_t', using `localtime' if `localzone' and `gmtime'
    otherwise.  From `tm', use only `year', `mon', `mday', `hour', `min',
    and `sec' members.  Ignore old members `tm_yday' and `tm_wday', but
@@ -210,13 +210,13 @@ maketime (struct partime const *pt, time_t default_time)
    special value `TM_LOCAL_ZONE'.  Return -1 on failure.  ISO 8601 day-of-year
    and week numbers are not yet supported.  */
 {
-  int localzone, wday;
+  bool localzone = pt->zone == TM_LOCAL_ZONE;
+  int wday;
   struct tm tm;
   struct tm *tm0 = NULL;
   time_t r;
 
   tm0 = NULL;                           /* Keep gcc -Wall happy.  */
-  localzone = pt->zone == TM_LOCAL_ZONE;
 
   tm = pt->tm;
 

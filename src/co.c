@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "co-help.c"
 
 static char const quietarg[] = "-q";
@@ -32,12 +31,12 @@ static char const **joinlist;
 static int joinlength;
 static FILE *neworkptr;
 static int exitstatus;
-static int forceflag;
+static bool forceflag;
 /* Index of last element in `joinlist'.  */
 static int lastjoin;
 /* -1 -> unlock, 0 -> do nothing, 1 -> lock.  */
 static int lockflag;
-static int mtimeflag;
+static bool mtimeflag;
 /* Deltas to be generated.  */
 static struct hshentries *gendeltas;
 /* Final delta to be generated.  */
@@ -71,7 +70,7 @@ exiterr (void)
   _exit (EXIT_FAILURE);
 }
 
-static int
+static bool
 rmworkfile (void)
 /* Prepare to remove workname, if it exists, and if it is read-only.
    Otherwise (file writable), if !quietmode, ask the user whether to
@@ -223,7 +222,7 @@ getancestor (char const *r1, char const *r2)
   return NULL;
 }
 
-static int
+static bool
 preparejoin (register char *j)
 /* Parse join list `j' and place pointers to the
    revision numbers into `joinlist'.  */
@@ -282,7 +281,7 @@ preparejoin (register char *j)
   return true;
 }
 
-static int
+static bool
 buildjoin (char const *initialfile)
 /* Merge pairs of elements in `joinlist' into `initialfile'.  If
    workstdout is set, copy result to stdout.  All unlinking of
@@ -417,8 +416,8 @@ main (int argc, char **argv)
   char const *joinname, *newdate, *neworkname;
   /* 1 if a lock has been changed, -1 if error.  */
   int changelock;
-  int expmode, r, tostdout, workstatstat;
-  int Ttimeflag;
+  int expmode, r, workstatstat;
+  bool tostdout, Ttimeflag;
   struct buf numericrev;           /* expanded revision number */
   char finaldate[datesize];
 #if OPEN_O_BINARY

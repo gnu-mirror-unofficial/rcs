@@ -26,7 +26,7 @@
 /* Seconds east of UTC, or `TM_LOCAL_ZONE'.  */
 static long zone_offset;
 /* If zero, use UTC without zone indication.  */
-static int use_zone_offset;
+static bool use_zone_offset;
 
 #define proper_dot_2(a,b)  (PRINTF_DOT2_OK ? (a) : (b))
 
@@ -124,7 +124,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
       zone = zone_offset;
       if (zone == TM_LOCAL_ZONE)
         {
-          time_t u = tm2time (&t, 0), d;
+          time_t u = tm2time (&t, false), d;
 
           z = localtime (&u);
           d = difftm (z, &t);

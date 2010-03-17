@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "rlog-help.c"
 
 struct rcslockers
@@ -61,9 +60,9 @@ struct Datepairs
 /* A version-specific format string.  */
 static char const *insDelFormat;
 /* The `-b' option.  */
-static int branchflag;
+static bool branchflag;
 /* The `-l' option.  */
-static int lockflag;
+static bool lockflag;
 
 /* Date range in `-d' option.  */
 static struct Datepairs *datelist, *duelst;
@@ -136,7 +135,7 @@ getlocker (char *argv)
 static void
 putadelta (register struct hshentry const *node,
            register struct hshentry const *editscript,
-           int trunk)
+           bool trunk)
 /* Print delta `node' if `node->selector' is set.
    `editscript' indicates where the editscript is stored;
    `trunk' !false indicates this node is in trunk.  */
@@ -148,7 +147,7 @@ putadelta (register struct hshentry const *node,
   struct branchhead const *newbranch;
   struct buf branchnum;
   char datebuf[datesize + zonelenmax];
-  int pre5 = RCSversion < VERSION (5);
+  bool pre5 = RCSversion < VERSION (5);
 
   if (!node->selector)
     return;
@@ -578,7 +577,7 @@ getdatepair (char *argv)
   register char c;
   struct Datepairs *nextdate;
   char const *rawdate;
-  int switchflag;
+  bool switchflag;
 
   argv--;
   while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -628,7 +627,7 @@ getdatepair (char *argv)
             }
           else                   /* DATE< or DATE> (see `switchflag') */
             {
-              int eq = argv[1] == '=';
+              bool eq = argv[1] == '=';
 
               nextdate->ne_date = !eq;
               argv += eq;
@@ -664,7 +663,7 @@ getdatepair (char *argv)
     }
 }
 
-static int
+static bool
 checkrevpair (char const *num1, char const *num2)
 /* Check whether `num1', `num2' are a legal pair, i.e.
    only the last field differs and have same number of
@@ -681,7 +680,7 @@ checkrevpair (char const *num1, char const *num2)
   return true;
 }
 
-static int
+static bool
 getnumericrev (void)
 /* Get the numeric name of revisions stored in `revlist'; store
    them in `Revlst'.  If `branchflag', also add default branch.  */
@@ -922,11 +921,11 @@ main (int argc, char **argv)
   struct assoc const *curassoc;
   struct hshentry const *delta;
   struct rcslock const *currlock;
-  int descflag, selectflag;
-  int onlylockflag;                    /* print only files with locks */
-  int onlyRCSflag;                     /* print only RCS pathname */
-  int pre5;
-  int shownames;
+  bool descflag, selectflag;
+  bool onlylockflag;                   /* print only files with locks */
+  bool onlyRCSflag;                    /* print only RCS pathname */
+  bool pre5;
+  bool shownames;
   int revno;
 
   CHECK_HV ();

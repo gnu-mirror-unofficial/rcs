@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 
 static int
 discardkeyval (register int c, register RILE *f)
@@ -56,9 +55,9 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
 {
   register int xc, uc;
   char xkeyword[keylength + 2];
-  int eqkeyvals;
+  bool eqkeyvals;
   register RILE *ufp;
-  register int xeof, ueof;
+  register bool xeof, ueof;
   register char *tp;
   register char const *sp;
   register size_t leaderlen;

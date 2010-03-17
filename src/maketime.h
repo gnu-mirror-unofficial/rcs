@@ -19,10 +19,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-struct tm *time2tm (time_t, int);
+struct tm *time2tm (time_t, bool);
 time_t difftm (struct tm const *, struct tm const *);
 time_t str2time (char const *, time_t, long);
-time_t tm2time (struct tm *, int);
+time_t tm2time (struct tm *, bool);
 void adjzone (struct tm *, long);
 
 /* maketime.h ends here */

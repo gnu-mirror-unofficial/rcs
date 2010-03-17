@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include <ctype.h>
 #include "gnu-h-v.h"
 
@@ -137,7 +136,7 @@ cgetenv (char const *name)
 }
 
 char const *
-getusername (int suspicious)
+getusername (bool suspicious)
 /* Get the caller's login name.  Trust only `getwpuid' if `suspicious'.  */
 {
   static char *name;
@@ -189,7 +188,7 @@ getusername (int suspicious)
 
 static sig_atomic_t volatile heldsignal, holdlevel;
 #ifdef SA_SIGINFO
-static int unsupported_SA_SIGINFO;
+static bool unsupported_SA_SIGINFO;
 static siginfo_t bufsiginfo;
 static siginfo_t *volatile heldsiginfo;
 #endif
@@ -447,7 +446,7 @@ setup_catchsig (int const *sig, int sigs)
               if (errno == ENOTSUP && !unsupported_SA_SIGINFO)
                 {
                   /* Turn off use of SA_SIGINFO and try again.  */
-                  unsupported_SA_SIGINFO = 1;
+                  unsupported_SA_SIGINFO = true;
                   i++;
                   continue;
                 }
@@ -521,7 +520,7 @@ static int const regsigs[] = {
 void
 catchints (void)
 {
-  static int catching_ints;
+  static bool catching_ints;
 
   if (!catching_ints)
     {
@@ -547,7 +546,7 @@ static int const mmapsigs[] = { MMAP_SIGNAL };
 void
 catchmmapints (void)
 {
-  static int catching_mmap_ints;
+  static bool catching_mmap_ints;
 
   if (!catching_mmap_ints)
     {
@@ -780,7 +779,7 @@ runv (int infd, char const *outname, char const **args)
   int wstatus;
 
 #if BAD_WAIT_IF_SIGCHLD_IGNORED
-  static int fixed_SIGCHLD;
+  static bool fixed_SIGCHLD;
   if (!fixed_SIGCHLD)
     {
       fixed_SIGCHLD = true;
@@ -919,7 +918,7 @@ int RCSversion;
 void
 setRCSversion (char const *str)
 {
-  static int oldversion;
+  static bool oldversion;
 
   register char const *s = str + 2;
 
@@ -1075,7 +1074,7 @@ static void
 set_uid_to (uid_t u)
 /* Become user `u'.  */
 {
-  static int looping;
+  static bool looping;
 
   if (euid () == ruid ())
     return;
@@ -1097,7 +1096,7 @@ set_uid_to (uid_t u)
     }
 }
 
-static int stick_with_euid;
+static bool stick_with_euid;
 
 void
 nosetid (void)

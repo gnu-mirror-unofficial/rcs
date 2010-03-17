@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 
 /* Pointer to next hash entry, set by `lookup'.  */
 static struct hshentry *nexthsh;
@@ -31,7 +30,7 @@ enum tokens nexttok;
 
 /* If true, next suitable lexeme will be entered
    into the symbol table.  Handle with care.  */
-int hshenter;
+bool hshenter;
 
 /* Next input character, initialized by `Lexinit'.  */
 int nextc;
@@ -43,7 +42,7 @@ long rcsline;
 int nerror;
 
 /* Indicates quiet mode.  */
-int quietflag;
+bool quietflag;
 
 /* Input file descriptor.  */
 RILE *finptr;
@@ -73,7 +72,7 @@ char const *NextString;
 static struct hshentry *hshtab[hshsize];
 
 /* Have we ignored phrases in this RCS file?  */
-static int ignored_phrases;
+static bool ignored_phrases;
 
 void
 warnignore (void)
@@ -252,7 +251,7 @@ nextlex (void)
   uncache (fin);
 }
 
-int
+bool
 eoflex (void)
 /* Return true if we look ahead to the end of the input, false otherwise.
    `nextc' becomes undefined at end of file.  */
@@ -293,7 +292,7 @@ eoflex (void)
     }
 }
 
-int
+bool
 getlex (enum tokens token)
 /* Check if `nexttok' is the same as `token'.  If so, advance the input
    by calling `nextlex' and return true.  Otherwise return false.
@@ -309,7 +308,7 @@ getlex (enum tokens token)
     return (false);
 }
 
-int
+bool
 getkeyopt (char const *key)
 /* If the current token is a keyword identical to `key',
    advance the input by calling `nextlex' and return true;
@@ -320,9 +319,9 @@ getkeyopt (char const *key)
       /* Match found.  */
       ffree1 (NextString);
       nextlex ();
-      return (true);
+      return true;
     }
-  return (false);
+  return false;
 }
 
 void
@@ -673,7 +672,7 @@ savestring (struct buf *target)
 }
 
 static char *
-checkidentifier (register char *id, int delimiter, register int dotok)
+checkidentifier (register char *id, int delimiter, register bool dotok)
 /* Check whether the string starting at `id' is an identifier and return
    a pointer to the delimiter after the identifier.  White space,
    `delimiter' and 0 are legal delimiters.  Abort the program if not a
@@ -684,7 +683,7 @@ checkidentifier (register char *id, int delimiter, register int dotok)
   register char *temp;
   register char c;
   register char delim = delimiter;
-  int isid = false;
+  bool isid = false;
 
   temp = id;
   for (;; id++)
@@ -930,7 +929,7 @@ fd2RILE (int fd, char const *name, char const *type,
 }
 
 #if !maps_memory && large_memory
-int
+bool
 Igetmore (register RILE *f)
 {
   register size_t r;
@@ -943,10 +942,10 @@ Igetmore (register RILE *f)
       testIerror (f->stream);
       /* The file might have shrunk!  */
       f->lim = f->readlim;
-      return 0;
+      return false;
     }
   f->readlim += r;
-  return 1;
+  return true;
 }
 #endif  /* !maps_memory && large_memory */
 
@@ -984,7 +983,7 @@ Iopen (char const *name, char const *type, struct stat *status)
 #endif
 }
 
-static int Oerrloop;
+static bool Oerrloop;
 
 void
 Oerror (void)
@@ -1095,7 +1094,7 @@ oflush (void)
 }
 
 void
-fatcleanup (int already_newline)
+fatcleanup (bool already_newline)
 {
   fprintf (stderr, already_newline + "\n%s aborted\n", cmdid);
   exiterr ();

@@ -1,5 +1,162 @@
 2010-03-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `bool' (and `true' and `false') more.
+
+	Here, "B: foo" means "Change type of foo from `int' to `bool'".
+	* rcsbase.h: #include <stdbool.h>.
+	(STRICT_LOCKING): Use `true'.
+	[!maps_memory] (Igetmore): Update func decl.
+	(merge): Update func decl.
+	(locker_expansion): Update var decl.
+	(rcswriteopen, makedirtemp, addlock, addsymbol, checkaccesslist)
+	(dorewrite, expandline, findlock, finishedit, rcsreadopen, pairnames):
+	Update func decl.
+	(interactiveflag): Update var decl.
+	(buildrevision, putdtext, ttystdin, yesorno, putdesc, putdftext):
+	Update func decl.
+	(prevkeys): Update var decl.
+	(getoldkeys): Update func decl.
+	(hshenter, quietflag): Update var decl.
+	(fatcleanup, eoflex, getkeyopt, getlex, expandsym, fexpandsym):
+	Update func decl.
+	(StrictLocks): Update var decl.
+	(getdiffcmd, getdesc, putstring, getusername, isSLASH): Update func decl.
+	* ci.c: Don't #include <stdbool.h>.
+	(struct Symrev): B: .override.
+	(forceciflag, keepflag, keepworkingfile, rcsinitflag): B: var.
+	(addbranch): B: param `removedlock'.
+	(addsyms): B: rv.
+	(xpandfile): B: param `dolog'.
+	(addassoclst): B: param `flag'.
+	(main): B: local vars `initflag', `mustread', `lockflag',
+	`lockthis', `mtimeflag', `Ttimeflag', `dolog', `newhead',
+	`usestatdate', `bad_truncate'.  Also, update interpretation
+	of `ftruncate' rv to be `bool'-friendly.
+	* co.c: Don't #include <stdbool.h>.
+	(forceflag, mtimeflag): B: var.
+	(rmworkfile, preparejoin, buildjoin): B: rv.
+	(main): B: local vars `tostdout', `Ttimeflag'.
+	* ident.c: Don't #include <stdbool.h>.
+	* maketime.c (isleap): B: rv.
+	(time2tm, tm2time): B: param `localzone'.
+	(maketime): B: local var `localzone'.
+	* maketime.h (time2tm, tm2time): Update func decls.
+	* merge.c: Don't #include <stdbool.h>.
+	(main): B: local var `tostdout'.
+	* merger.c (merge): B: param `tostdout'.
+	* rcs.c: Don't #include <stdbool.h>.
+	(struct Symrev): B: .override.
+	(chgheadstate, lockhead, unlockcaller, suppress_mail): B: var.
+	(getassoclst): B: param `flag'.
+	(scanlogtext): B: param `edit'.
+	(doaccess): B: rv, local var `changed'.
+	(sendmail): B: rv; also, remove spurious parens for `return' "arg".
+	(breaklock, branchpoint): B: rv.
+	(removerevs): B: rv; use `true', `false'.
+	(doassoc): B: rv, local var `changed'.
+	(setlock): B: rv; use `false'.
+	(dolocks, domessage): B: rv, local var `changed'.
+	(rcs_setstate, buildeltatext): B: rv.
+	(main): B: local vars `branchflag', `initflag', `textflag',
+	`strictlock', `strict_selected', `Ttimeflag', `keepRCStime';
+	use `false'.
+	* rcsclean.c: Don't #include <stdbool.h>.
+	(unlock): B: rv.
+	(main): B: local vars `dounlock', `perform', `unlocked', `unlockflag',
+	`waslocked', `Ttimeflag'.
+	* rcsdiff.c: Don't #include <stdbool.h>.
+	(main): B: local var `no_diff_means_no_output'.
+	* rcsedit.c: Don't #include <stdbool.h>.
+	(locker_expansion): B: var.
+	(finishedit): B: param `done'.
+	(copystring): B: local var `amidline'.
+	(enterstring): B: local vars `amidline', `oamidline'.
+	(keyreplace): B: params `delimstuffed', `dolog';
+	B: local var `kdelim_found'; use `false'.
+	(expandline): B: params `delimstuffed', `dolog'; B: local var `e';
+	remove local var `ds'; use `delimstuffed' directly; use `false', `true'.
+	(rcswriteopen): B: param `mustread'; local var `waslocked'.
+	(makedirtemp): B: param `isworkfile'.
+	(findlock): B: param `delete'.
+	(addlock): B: param `verbose'.
+	(addsymbol): B: param `rebind'.
+	(checkaccesslist): B: rv.
+	(dorewrite): B: param `lockflag'.
+	* rcsfcmp.c: Don't #include <stdbool.h>.
+	(rcsfcmp): B: local vars `eqkeyvals', `xeof', `ueof'.
+	* rcsfnms.c: Don't #include <stdbool.h>.
+	(suffix_matches): B: rv.
+	(rcsreadopen): B: param `mustread'.
+	(finopen): B: params `rcsopen' 3rd arg, `mustread';
+	B: local vars `interesting', `preferold'.
+	(fin2open): B: params `rcsopen' 3rd arg, `mustread'.
+	(pairnames):  B: params `rcsopen' 3rd arg, `mustread', `quiet';
+	B: local var `paired'.
+	(isSLASH): B: rv.
+	[!HAVE_GETWD] (getcwd): B: local vars `readerror',
+	`toolong'; use `true'.
+	[PAIRTEST] (main): B: local var `initflag'.
+	* rcsgen.c: Don't #include <stdbool.h>.
+	(interactiveflag): B: var.
+	(scandeltatext): B: param `needlog'.
+	(buildrevision): B: param `expandflag'.
+	(ttystdin): B: rv, local var `initialized'.
+	(yesorno): B: rv.
+	(putdesc): B: param `textflag'.
+	(getsstdin): B: local var `tty'.
+	(putdtext): B: rv, param `diffmt'.
+	(putstring): B: params `delim', `log'.
+	(putdftext): B: param `diffmt'.
+	* rcskeep.c: Don't #include <stdbool.h>.
+	(prevkeys): B: var.
+	(badly_terminated): B: rv.
+	(get0val): B: param `optional', local var `got1'.
+	(keepid): B: rv.
+	(getval): B: rv, param `optional'.
+	(checknum, keeprev): B: rv.
+	(getoldkeys): B: rv, local vars
+	`needs_closing', `prevname_found'; use `true'.
+	* rcslex.c: Don't #include <stdbool.h>.
+	(hshenter, quietflag, ignored_phrases): B: vars.
+	(eoflex, getlex): B: rv.
+	(getkeyopt): B: rv; remove spurious parens around `return' "arg".
+	(checkidentifier): B: param `dotok', local var `isid'.
+	[!maps_memory && large_memory] (Igetmore): B: rv; use `true', `false'.
+	(Oerrloop): B: var.
+	(fatcleanup): B: param `already_newline'.
+	* rcsmerge.c: Don't #include <stdbool.h>.
+	(main): B: local var `tostdout'.
+	* rcsrev.c: Don't #include <stdbool.h>.
+	(expandsym): B: rv.
+	(fexpandsym): B: rv, local var `id'.
+	* rcssyn.c: Don't #include <stdbool.h>.
+	(StrictLocks): B: var.
+	(getkeyval): B: param `optional'.
+	(getdelta): B: rv; remove spurious parens around `return' "arg".
+	(getdesc): B: param `prdesc'.
+	(getdiffcmd): B: param `delimiter'.
+	* rcstime.c (use_zone_offset): B: var.
+	(date2str): Use `false'.
+	* rcsutil.c: Don't #include <stdbool.h>.
+	(getusername): B: param `suspicious'.
+	(unsupported_SA_SIGINFO): B: var.
+	(setup_catchsig): Use `true'.
+	(catchints): B: local var `catching_ints'.
+	(catchmmapints): B: local var `catching_mmap_ints'.
+	(runv) [BAD_WAIT_IF_SIGCHLD_IGNORED]: B: local var `fixed_SIGCHLD'.
+	(setRCSversion): B: local var `oldversion'.
+	(set_uid_to): B: local var `looping'
+	(stick_with_euid): B: var.
+	* rlog.c: Don't #include <stdbool.h>.
+	(branchflag, lockflag): B: vars.
+	(putadelta): B: param `trunk', local var `pre5'.
+	(getdatepair): B: local var `switchflag', `eq'.
+	(checkrevpair, getnumericrev): B: rv.
+	(main): B: local var `descflag', `selectflag', `onlylockflag',
+	`onlyRCSflag', `pre5', `shownames'.
+
+2010-03-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `quietflag' more.
 
 	* ident.c (scanfile): Drop arg `quiet'; use `quietflag' instead.

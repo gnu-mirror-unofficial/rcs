@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include <ctype.h>
 
 /* Keyword table.  */
@@ -55,7 +54,7 @@ struct access *AccessList;
 struct assoc *Symbols;
 struct rcslock *Locks;
 int Expand;
-int StrictLocks;
+bool StrictLocks;
 struct hshentry *Head;
 char const *Dbranch;
 int TotalDeltas;
@@ -274,7 +273,7 @@ ignorephrases (const char *key)
 }
 
 static char const *
-getkeyval (char const *keyword, enum tokens token, int optional)
+getkeyval (char const *keyword, enum tokens token, bool optional)
 /* Read a pair of the form:
    <keyword> <token> ;
    where `token' is one of `ID' or `NUM'.  `optional' indicates whether
@@ -298,7 +297,7 @@ getkeyval (char const *keyword, enum tokens token, int optional)
   return (val);
 }
 
-static int
+static bool
 getdelta (void)
 /* Read a delta block.  Return false if the
    current block does not start with a number.  */
@@ -339,7 +338,7 @@ getdelta (void)
   Delta->selector = true;
   Delta->ig = getphrases (Kdesc);
   TotalDeltas++;
-  return (true);
+  return true;
 }
 
 void
@@ -360,7 +359,7 @@ gettree (void)
 }
 
 void
-getdesc (int prdesc)
+getdesc (bool prdesc)
 /* Read in descriptive text.  `nexttok' is not advanced afterwards.
    If `prdesc' is set, then print text to stdout.  */
 {
@@ -398,7 +397,7 @@ diffLineNumberTooLarge (char const *buf)
 }
 
 int
-getdiffcmd (RILE *finfile, int delimiter, FILE *foutfile, struct diffcmd *dc)
+getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
 /* Get an editing command output by "diff -n" from `finfile'.  The input
    is delimited by `SDELIM' if `delimiter' is set, EOF otherwise.  Copy
    a clean version of the command to `foutfile' (if non-NULL).  Return 0

@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include <ctype.h>                      /* isdigit */
 #include "ci-help.c"
 
@@ -37,7 +36,7 @@
 struct Symrev
 {
   char const *ssymbol;
-  int override;
+  bool override;
   struct Symrev *nextsym;
 };
 
@@ -49,8 +48,8 @@ static struct buf newdelnum;
 static struct cbuf msg;
 static int exitstatus;
 /* Forces check-in.  */
-static int forceciflag;
-static int keepflag, keepworkingfile, rcsinitflag;
+static bool forceciflag;
+static bool keepflag, keepworkingfile, rcsinitflag;
 /* Deltas to be generated.  */
 static struct hshentries *gendeltas;
 /* Old delta to be generated.  */
@@ -154,14 +153,14 @@ removelock (struct hshentry *delta)
 }
 
 static int
-addbranch (struct hshentry *branchpoint, struct buf *num, int removedlock)
+addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
 /* Add a new branch and branch delta at `branchpoint'.
    If `num' is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
    the new delta and branchhead are in globals `newdelta' and `newbranch', resp.
    the new number is placed into `num'.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
-   If `removedlock' is 1, a lock was already removed.  */
+   If `removedlock', a lock was already removed.  */
 {
   struct branchhead *bhead, **btrail;
   struct buf branchnum;
@@ -325,7 +324,7 @@ addelta (void)
             {
               /* Middle revision; start a new branch.  */
               bufscpy (&newdelnum, "");
-              return addbranch (targetdelta, &newdelnum, 1);
+              return addbranch (targetdelta, &newdelnum, true);
             }
           incnum (targetdelta->num, &newdelnum);
           /* Successful use of existing lock.  */
@@ -395,11 +394,11 @@ addelta (void)
         }
       /* Restore final dot.  */
       *tp = '.';
-      return addbranch (targetdelta, &newdelnum, 0);
+      return addbranch (targetdelta, &newdelnum, false);
     }
 }
 
-static int
+static bool
 addsyms (char const *num)
 {
   register struct Symrev *p;
@@ -438,7 +437,7 @@ fixwork (mode_t newworkmode, time_t mtime)
 
 static int
 xpandfile (RILE *unexfile, struct hshentry const *delta,
-           char const **exname, int dolog)
+           char const **exname, bool dolog)
 /* Read `unexfile' and copy it to a file, performing keyword
    substitution with data from `delta'.
    Return -1 if unsuccessful, 1 if expansion occurred, 0 otherwise.
@@ -533,7 +532,7 @@ getlogmsg (void)
 }
 
 static void
-addassoclst (int flag, char const *sp)
+addassoclst (bool flag, char const *sp)
 /* Make a linked list of Symbolic names.  */
 {
   struct Symrev *pt;
@@ -602,11 +601,14 @@ main (int argc, char **argv)
   char const *author, *krev, *rev, *state;
   char const *diffname, *expname;
   char const *newworkname;
-  int initflag, mustread;
-  int lockflag, lockthis, mtimeflag, removedlock, Ttimeflag;
+  bool initflag, mustread;
+  bool lockflag, lockthis, mtimeflag;
+  int removedlock;
+  bool Ttimeflag;
   int r;
-  int changedRCS, changework, dolog, newhead;
-  int usestatdate;              /* Use mod time of file for -d.  */
+  int changedRCS, changework;
+  bool dolog, newhead;
+  bool usestatdate;             /* Use mod time of file for -d.  */
   mode_t newworkmode;           /* mode for working file */
   time_t mtime, wtime;
   struct hshentry *workdelta;
@@ -989,10 +991,10 @@ main (int argc, char **argv)
                      Start over from the beginning.  */
                   {
                     long hwm = ftell (frewrite);
-                    int bad_truncate;
+                    bool bad_truncate;
 
                     Orewind (frewrite);
-                    bad_truncate = ftruncate (fileno (frewrite), (off_t) 0);
+                    bad_truncate = 0 > ftruncate (fileno (frewrite), (off_t) 0);
 
                     Irewind (finptr);
                     Lexinit ();

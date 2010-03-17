@@ -21,27 +21,26 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include <ctype.h>
 
-int prevkeys;
+bool prevkeys;
 struct buf prevauthor, prevdate, prevname, prevrev, prevstate;
 
-static int
+static bool
 badly_terminated (void)
 {
   workerror ("badly terminated keyword value");
   return false;
 }
 
-static int
-get0val (register int c, register RILE *fp, struct buf *target, int optional)
+static bool
+get0val (register int c, register RILE *fp, struct buf *target, bool optional)
 /* Read a keyword value from `c + fp' into `target', perhaps `optional'ly.
    Same as `getval', except `c'` is the lookahead character.  */
 {
   register char *tp;
   char const *tlim;
-  register int got1;
+  register bool got1;
 
   if (target)
     {
@@ -89,7 +88,7 @@ get0val (register int c, register RILE *fp, struct buf *target, int optional)
     }
 }
 
-static int
+static bool
 keepid (int c, RILE *fp, struct buf *b)
 /* Get previous identifier from `c + fp' into `b'.  */
 {
@@ -101,8 +100,8 @@ keepid (int c, RILE *fp, struct buf *b)
   return !nerror;
 }
 
-static int
-getval (register RILE *fp, struct buf *target, int optional)
+static bool
+getval (register RILE *fp, struct buf *target, bool optional)
 /* Read a keyword value from `fp' into `target'.  Returns true if one is
    found, false otherwise.  Does not modify target if it is 0.  Do not report
    an error if `optional' is set and `kdelim' is found instead.  */
@@ -148,7 +147,7 @@ keepdate (RILE *fp)
   return c;
 }
 
-static int
+static bool
 checknum (char const *s)
 {
   register char const *sp;
@@ -179,14 +178,14 @@ checknum (char const *s)
   return false;
 }
 
-static int
+static bool
 keeprev (RILE *fp)
 /* Get previous revision from `fp' into `prevrev'.  */
 {
   return getval (fp, &prevrev, false) && checknum (prevrev.string);
 }
 
-int
+bool
 getoldkeys (register RILE *fp)
 /* Try to read keyword values for author, date, revision number, and
    state out of the file `fp'.  If `fp' is NULL, `workname' is opened
@@ -199,8 +198,7 @@ getoldkeys (register RILE *fp)
   register int c;
   char keyword[keylength + 1];
   register char *tp;
-  int needs_closing;
-  int prevname_found;
+  bool needs_closing, prevname_found;
 
   if (prevkeys)
     return true;
@@ -220,7 +218,7 @@ getoldkeys (register RILE *fp)
   bufscpy (&prevauthor, "");
   bufscpy (&prevdate, "");
   bufscpy (&prevname, "");
-  prevname_found = 0;
+  prevname_found = false;
   bufscpy (&prevrev, "");
   bufscpy (&prevstate, "");
 
@@ -310,7 +308,7 @@ getoldkeys (register RILE *fp)
                 {
                   if (*prevname.string)
                     checkssym (prevname.string);
-                  prevname_found = 1;
+                  prevname_found = true;
                 }
               c = 0;
               break;

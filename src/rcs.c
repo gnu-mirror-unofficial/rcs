@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "rcs-help.c"
 
 struct Lockrev
@@ -34,7 +33,7 @@ struct Symrev
 {
   char const *revno;
   char const *ssymbol;
-  int override;
+  bool override;
   struct Symrev *nextsym;
 };
 
@@ -70,8 +69,8 @@ struct delrevpair
 
 static struct buf numrev;
 static char const *headstate;
-static int chgheadstate, exitstatus, lockhead, unlockcaller;
-static int suppress_mail;
+static bool chgheadstate, lockhead, unlockcaller, suppress_mail;
+static int exitstatus;
 static struct Lockrev *newlocklst, *rmvlocklst;
 static struct Message *messagelst, **nextmessage;
 static struct Status *statelst, **nextstate;
@@ -102,7 +101,7 @@ exiterr (void)
 }
 
 static void
-getassoclst (int flag, char *sp)
+getassoclst (bool flag, char *sp)
 /* Associate a symbolic name to a revision or branch,
    and store in `assoclst'.  */
 {
@@ -327,7 +326,7 @@ getdelrev (char *sp)
 }
 
 static void
-scanlogtext (struct hshentry *delta, int edit)
+scanlogtext (struct hshentry *delta, bool edit)
 /* Scan delta text nodes up to and including the one given by `delta',
    or up to last one present, if `!delta'.  For the one given by
    `delta' (if `delta'), the log message is saved into `delta->log' if
@@ -410,12 +409,12 @@ rmnewlocklst (char const *which)
   return pre;
 }
 
-static int
+static bool
 doaccess (void)
 {
   register struct chaccess *ch;
   register struct access **p, *t;
-  register int changed = false;
+  register bool changed = false;
 
   for (ch = chaccess; ch; ch = ch->nextchaccess)
     {
@@ -457,7 +456,7 @@ doaccess (void)
   return changed;
 }
 
-static int
+static bool
 sendmail (char const *Delta, char const *who)
 /* Mail to `who', informing him that his lock on `Delta' was broken by
    caller.  Ask first whether to go ahead.  Return false on error or if
@@ -525,10 +524,10 @@ sendmail (char const *Delta, char const *who)
 #endif  /* defined SENDMAIL */
   warn ("Mail notification of broken locks is not available.");
   warn ("Please tell `%s' why you broke the lock.", who);
-  return (true);
+  return true;
 }
 
-static int
+static bool
 breaklock (struct hshentry const *delta)
 /* Find the lock held by caller on `delta', and remove it.
    Send mail if a lock different from the caller's is broken.
@@ -571,7 +570,7 @@ searchcutpt (char const *object, int length, struct hshentries *store)
   return store->first;
 }
 
-static int
+static bool
 branchpoint (struct hshentry *strt, struct hshentry *tail)
 /* Check whether the deltas between `strt' and `tail' are locked or
    branch point, return 1 if any is locked or branch point; otherwise,
@@ -600,7 +599,7 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
   return false;
 }
 
-static int
+static bool
 removerevs (void)
 /* Get the revision range to be removed, and place the first revision
    removed in `delstrt', the revision before `delstrt' in `cuthead'
@@ -612,10 +611,10 @@ removerevs (void)
   int cmp;
 
   if (!expandsym (delrev.strt, &numrev))
-    return 0;
+    return false;
   target = gr_revno (numrev.string, &gendeltas);
   if (!target)
-    return 0;
+    return false;
   cmp = cmpnum (target->num, numrev.string);
   length = countnumflds (numrev.string);
 
@@ -626,7 +625,7 @@ removerevs (void)
       else if (cmp)
         {
           rcserror ("Revision %s doesn't exist.", numrev.string);
-          return 0;
+          return false;
         }
       else
         temp = searchcutpt (numrev.string, length, gendeltas);
@@ -634,16 +633,16 @@ removerevs (void)
       if (branchpoint (temp, cuttail))
         {
           cuttail = NULL;
-          return 0;
+          return false;
         }
       delstrt = temp;           /* first revision to be removed */
-      return 1;
+      return true;
     }
 
   if (length & 1)
     {                           /* invalid branch after -o */
       rcserror ("invalid branch range %s after -o", numrev.string);
-      return 0;
+      return false;
     }
 
   if (delrev.code == 1)
@@ -663,10 +662,10 @@ removerevs (void)
       if (branchpoint (temp, cuttail))
         {
           cuttail = NULL;
-          return 0;
+          return false;
         }
       delstrt = temp;
-      return 1;
+      return true;
     }
 
   if (delrev.code == 2)
@@ -685,7 +684,7 @@ removerevs (void)
             {
               cuthead = target;
               if (!(temp = target->next))
-                return 0;
+                return false;
             }
           else
             temp = searchcutpt (target->num, length, gendeltas);
@@ -696,25 +695,25 @@ removerevs (void)
       if (branchpoint (temp, cuttail))
         {
           cuttail = NULL;
-          return 0;
+          return false;
         }
       delstrt = temp;
-      return 1;
+      return true;
     }
 
   /* -o rev1-rev2 */
   if (!expandsym (delrev.end, &numrev))
-    return 0;
+    return false;
   if (length != countnumflds (numrev.string)
       || (length > 2 && compartial (numrev.string, target->num, length - 1)))
     {
       rcserror ("invalid revision range %s-%s", target->num, numrev.string);
-      return 0;
+      return false;
     }
 
   target2 = gr_revno (numrev.string, &gendeltas);
   if (!target2)
-    return 0;
+    return false;
 
   if (length > 2)
     {                           /* delete revisions on branches */
@@ -731,7 +730,7 @@ removerevs (void)
             {
               rcserror ("Revisions %s-%s don't exist.",
                         delrev.strt, delrev.end);
-              return 0;
+              return false;
             }
           cuthead = target;
           temp = target->next;
@@ -756,7 +755,7 @@ removerevs (void)
             {
               rcserror ("Revisions %s-%s don't exist.",
                         delrev.strt, delrev.end);
-              return 0;
+              return false;
             }
           cuttail = target2;
         }
@@ -767,18 +766,18 @@ removerevs (void)
   if (branchpoint (temp, cuttail))
     {
       cuttail = NULL;
-      return 0;
+      return false;
     }
   delstrt = temp;
-  return 1;
+  return true;
 }
 
-static int
+static bool
 doassoc (void)
 /* Add or delete (if !revno) association that is stored in `assoclst'.  */
 {
   char const *p;
-  int changed = false;
+  bool changed = false;
   struct Symrev const *curassoc;
   struct assoc **pre, *pt;
 
@@ -821,7 +820,7 @@ doassoc (void)
   return changed;
 }
 
-static int
+static bool
 setlock (char const *rev)
 /* Given a revision or branch number, find the corresponding
    delta and locks it for caller.  */
@@ -850,10 +849,10 @@ setlock (char const *rev)
             }
         }
     }
-  return 0;
+  return false;
 }
 
-static int
+static bool
 dolocks (void)
 /* Remove lock for caller or first lock if `unlockcaller' is set;
    remove locks which are stored in `rmvlocklst',
@@ -862,7 +861,7 @@ dolocks (void)
 {
   struct Lockrev const *lockpt;
   struct hshentry *target;
-  int changed = false;
+  bool changed = false;
 
   if (unlockcaller)
     {
@@ -927,12 +926,12 @@ dolocks (void)
   return changed;
 }
 
-static int
+static bool
 domessages (void)
 {
   struct hshentry *target;
   struct Message *p;
-  int changed = false;
+  bool changed = false;
 
   for (p = messagelst; p; p = p->nextmessage)
     if (expandsym (p->revno, &numrev) &&
@@ -946,7 +945,7 @@ domessages (void)
   return changed;
 }
 
-static int
+static bool
 rcs_setstate (char const *rev, char const *status)
 /* Given a revision or branch number, find the corresponding delta
    and sets its state to `status'.  */
@@ -972,7 +971,7 @@ rcs_setstate (char const *rev, char const *status)
   return false;
 }
 
-static int
+static bool
 buildeltatext (struct hshentries const *deltas)
 /* Put the delta text on `frewrite' and make necessary
    change to delta text.  */
@@ -1130,9 +1129,10 @@ main (int argc, char **argv)
 {
   char *a, **newargv, *textfile;
   char const *branchsym, *commsyml;
-  int branchflag, changed, expmode, initflag;
-  int strictlock, strict_selected, textflag;
-  int keepRCStime, Ttimeflag;
+  bool branchflag, initflag, textflag;
+  int changed, expmode;
+  bool strictlock, strict_selected, Ttimeflag;
+  bool keepRCStime;
   size_t commsymlen;
   struct buf branchnum;
   struct Lockrev *lockpt;
@@ -1156,7 +1156,7 @@ main (int argc, char **argv)
   expmode = -1;
   suffixes = X_DEFAULT;
   initflag = textflag = false;
-  strict_selected = 0;
+  strict_selected = false;
   Ttimeflag = false;
 
   /* Preprocess command options.  */

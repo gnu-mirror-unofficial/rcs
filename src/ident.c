@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "ident-help.c"
 
 char const cmdid[] = "ident";

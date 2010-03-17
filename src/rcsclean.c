@@ -20,7 +20,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "rcsclean-help.c"
 
 #ifdef HAVE_DIRENT_H
@@ -54,7 +53,7 @@ exiterr (void)
   _exit (EXIT_FAILURE);
 }
 
-static int
+static bool
 unlock (struct hshentry *delta)
 {
   register struct rcslock **al, *l;
@@ -148,8 +147,8 @@ main (int argc, char **argv)
   static struct buf revision;
   char *a, **newargv;
   char const *rev, *p;
-  int dounlock, expmode, perform, unlocked, unlockflag, waslocked;
-  int Ttimeflag;
+  bool dounlock, perform, unlocked, unlockflag, waslocked, Ttimeflag;
+  int expmode;
   struct hshentries *deltas;
   struct hshentry *delta;
   struct stat workstat;

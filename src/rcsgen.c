@@ -21,10 +21,9 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 
 /* Should we act as if stdin is a tty?  */
-int interactiveflag;
+bool interactiveflag;
 /* Buffer for current log message.  */
 struct buf curlogbuf;
 
@@ -32,7 +31,7 @@ enum stringwork
 { enter, copy, edit, expand, edit_expand };
 
 static void
-scandeltatext (struct hshentry *delta, enum stringwork func, int needlog)
+scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
 /* Scan delta text nodes up to and including the one given by `delta'.
    For the one given by `delta', the log message is saved into
    `delta->log' if `needlog' is set; `func' specifies how to handle the
@@ -94,7 +93,7 @@ scandeltatext (struct hshentry *delta, enum stringwork func, int needlog)
 
 char const *
 buildrevision (struct hshentries const *deltas, struct hshentry *target,
-               FILE *outfile, int expandflag)
+               FILE *outfile, bool expandflag)
 /* Generate the revision given by `target' by retrieving all deltas given
    by parameter `deltas' and combining them.  If `outfile' is set, the
    revision is output to it, otherwise write into a temporary file.
@@ -171,10 +170,10 @@ cleanlogmsg (char *m, size_t s)
   return r;
 }
 
-int
+bool
 ttystdin (void)
 {
-  static int initialized;
+  static bool initialized;
 
   if (!initialized)
     {
@@ -204,8 +203,8 @@ getcstdin (void)
   return c;
 }
 
-int
-yesorno (int default_answer, char const *question, ...)
+bool
+yesorno (bool default_answer, char const *question, ...)
 {
   va_list args;
   register int c, r;
@@ -229,7 +228,7 @@ yesorno (int default_answer, char const *question, ...)
 }
 
 void
-putdesc (int textflag, char *textfile)
+putdesc (bool textflag, char *textfile)
 /* Put the descriptive text into file `frewrite'.
    If `finptr && !textflag', the text is copied from the old description.
    Otherwise, if `textfile', the text is read from that file, or from
@@ -315,7 +314,7 @@ getsstdin (char const *option, char const *name,
   register int c;
   register char *p;
   register size_t i;
-  register int tty = ttystdin ();
+  register bool tty = ttystdin ();
 
   if (tty)
     {
@@ -462,9 +461,9 @@ puttree (struct hshentry const *root, register FILE *fout)
     }
 }
 
-int
+bool
 putdtext (struct hshentry const *delta, char const *srcname,
-          FILE *fout, int diffmt)
+          FILE *fout, bool diffmt)
 /* Output a deltatext node with delta number `delta->num', log message
    `delta->log', ignored phrases `delta->igtext' and text `srcname' to
    `fout'.  Double up all `SDELIM's in both the log and the text.  Make
@@ -484,7 +483,7 @@ putdtext (struct hshentry const *delta, char const *srcname,
 }
 
 void
-putstring (register FILE *out, int delim, struct cbuf s, int log)
+putstring (register FILE *out, bool delim, struct cbuf s, bool log)
 /* Output to `out' one `SDELIM' if `delim', then the string `s' with
    `SDELIM's doubled.  If `log' is set then `s' is a log string; append
    a newline if `s' is nonempty.  */
@@ -508,7 +507,7 @@ putstring (register FILE *out, int delim, struct cbuf s, int log)
 
 void
 putdftext (struct hshentry const *delta, RILE *finfile,
-           FILE *foutfile, int diffmt)
+           FILE *foutfile, bool diffmt)
 /* Like `putdtext', except the source file is already open.  */
 {
   declarecache;

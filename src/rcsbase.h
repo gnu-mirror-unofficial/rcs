@@ -21,6 +21,7 @@
 */
 
 #include "auto-sussed.h"
+#include <stdbool.h>
 
 /* begin cruft formerly from from conf.h */
 
@@ -303,13 +304,13 @@ char *getlogin (void);
 #define VERSION(n)  ((n) - VERSION_DEFAULT)
 
 /* Locking strictness
-   0 sets the default locking to non-strict;
+   false sets the default locking to non-strict;
    used in experimental environments.
-   1 sets the default locking to strict;
+   true sets the default locking to strict;
    used in production environments.
 */
 #ifndef STRICT_LOCKING
-#define STRICT_LOCKING 1
+#define STRICT_LOCKING  true
 #endif
 
 /* This is good through AD 9,999,999,999,999,999.  */
@@ -381,7 +382,7 @@ typedef struct RILE
       (c) = *ptr++;                             \
   while (0)
 # else  /* !maps_memory */
-int Igetmore (RILE *);
+bool Igetmore (RILE *);
 # define declarecache  register Iptr_type ptr; register RILE *rRILE
 # define setupcache(f)  (rRILE = (f))
 # define Igeteof(f,c,s)  do                     \
@@ -593,32 +594,32 @@ extern char const cmdid[];
 void exiterr (void) exiting;
 
 /* merge */
-int merge (int, char const *, char const *const[3], char const *const[3]);
+int merge (bool, char const *, char const *const[3], char const *const[3]);
 
 /* rcsedit */
 #define ciklogsize 23           /* sizeof ("checked in with -k by ") */
 extern FILE *fcopy;
 extern char const *resultname;
 extern char const ciklog[ciklogsize];
-extern int locker_expansion;
-RILE *rcswriteopen (struct buf *, struct stat *, int);
-char const *makedirtemp (int);
+extern bool locker_expansion;
+RILE *rcswriteopen (struct buf *, struct stat *, bool);
+char const *makedirtemp (bool);
 char const *getcaller (void);
-int addlock (struct hshentry *, int);
-int addsymbol (char const *, char const *, int);
-int checkaccesslist (void);
+int addlock (struct hshentry *, bool);
+int addsymbol (char const *, char const *, bool);
+bool checkaccesslist (void);
 int chnamemod (FILE **, char const *, char const *, int, mode_t, time_t);
 int donerewrite (int, time_t);
-int dorewrite (int, int);
-int expandline (RILE *, FILE *, struct hshentry const *, int, FILE *, int);
-int findlock (int, struct hshentry **);
+int dorewrite (bool, int);
+int expandline (RILE *, FILE *, struct hshentry const *, bool, FILE *, bool);
+int findlock (bool, struct hshentry **);
 int setmtime (char const *, time_t);
 void ORCSclose (void);
 void ORCSerror (void);
 void copystring (void);
 void dirtempunlink (void);
 void enterstring (void);
-void finishedit (struct hshentry const *, FILE *, int);
+void finishedit (struct hshentry const *, FILE *, bool);
 void keepdirtemp (char const *);
 void openfcopy (FILE *);
 void snapshotedit (FILE *);
@@ -648,7 +649,7 @@ extern char const *RCSname;
 extern char const *suffixes;
 extern int fdlock;
 extern struct stat RCSstat;
-RILE *rcsreadopen (struct buf *, struct stat *, int);
+RILE *rcsreadopen (struct buf *, struct stat *, bool);
 char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
 char const *getfullRCSname (void);
@@ -656,8 +657,8 @@ void set_temporary_file_name (struct buf *filename, const char *prefix);
 char const *maketemp (int);
 char const *rcssuffix (char const *);
 int pairnames (int, char **,
-               RILE * (*) (struct buf *, struct stat *, int), /* TODO: typedef */
-               int, int);
+               RILE * (*) (struct buf *, struct stat *, bool), /* TODO: typedef */
+               bool, bool);
 struct cbuf bufremember (struct buf *, size_t);
 void bufalloc (struct buf *, size_t);
 void bufautoend (struct buf *);
@@ -667,24 +668,24 @@ void bufscpy (struct buf *, char const *);
 void tempunlink (void);
 
 /* rcsgen */
-extern int interactiveflag;
+extern bool interactiveflag;
 extern struct buf curlogbuf;
 char const *buildrevision (struct hshentries const *,
-                           struct hshentry *, FILE *, int);
+                           struct hshentry *, FILE *, bool);
 int getcstdin (void);
-int putdtext (struct hshentry const *, char const *, FILE *, int);
-int ttystdin (void);
-int yesorno (int, char const *, ...) printf_string (2, 3);
+bool putdtext (struct hshentry const *, char const *, FILE *, bool);
+bool ttystdin (void);
+bool yesorno (bool, char const *, ...) printf_string (2, 3);
 struct cbuf cleanlogmsg (char *, size_t);
 struct cbuf getsstdin (char const *, char const *,
                        char const *, struct buf *);
-void putdesc (int, char *);
-void putdftext (struct hshentry const *, RILE *, FILE *, int);
+void putdesc (bool, char *);
+void putdftext (struct hshentry const *, RILE *, FILE *, bool);
 
 /* rcskeep */
-extern int prevkeys;
+extern bool prevkeys;
 extern struct buf prevauthor, prevdate, prevname, prevrev, prevstate;
-int getoldkeys (RILE *);
+bool getoldkeys (RILE *);
 
 /* rcskeys */
 extern char const *const Keyword[];
@@ -696,15 +697,15 @@ extern FILE *frewrite;
 extern RILE *finptr;
 extern char const *NextString;
 extern enum tokens nexttok;
-extern int hshenter;
+extern bool hshenter;
 extern int nerror;
 extern int nextc;
-extern int quietflag;
+extern bool quietflag;
 extern long rcsline;
 char const *getid (void);
 void efaterror (char const *) exiting;
 void enfaterror (int, char const *) exiting;
-void fatcleanup (int) exiting;
+void fatcleanup (bool) exiting;
 void faterror (char const *, ...) printf_string_exiting (1, 2);
 void fatserror (char const *, ...) printf_string_exiting (1, 2);
 void rcsfaterror (char const *, ...) printf_string_exiting (1, 2);
@@ -713,9 +714,9 @@ void Ierror (void) exiting;
 void Oerror (void) exiting;
 char *checkid (char *, int);
 char *checksym (char *, int);
-int eoflex (void);
-int getkeyopt (char const *);
-int getlex (enum tokens);
+bool eoflex (void);
+bool getkeyopt (char const *);
+bool getlex (enum tokens);
 struct cbuf getphrases (char const *);
 struct cbuf savestring (struct buf *);
 struct hshentry *getnum (void);
@@ -781,8 +782,8 @@ int cmpdate (char const *, char const *);
 int cmpnum (char const *, char const *);
 int cmpnumfld (char const *, char const *, int);
 int compartial (char const *, char const *, int);
-int expandsym (char const *, struct buf *);
-int fexpandsym (char const *, struct buf *, RILE *);
+bool expandsym (char const *, struct buf *);
+bool fexpandsym (char const *, struct buf *, RILE *);
 struct hshentry *genrevs (char const *, char const *, char const *,
                           char const *, struct hshentries **);
 struct hshentry *gr_revno (char const *revno, struct hshentries **store);
@@ -813,22 +814,22 @@ extern struct cbuf Ignored;
 extern struct rcslock *Locks;
 extern struct hshentry *Head;
 extern int Expand;
-extern int StrictLocks;
+extern bool StrictLocks;
 extern int TotalDeltas;
 extern char const *const expand_names[];
 extern char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
   Kdate[], Kdesc[], Kexpand[], Khead[], Klocks[], Klog[],
   Knext[], Kstate[], Kstrict[], Ksymbols[], Ktext[];
 void unexpected_EOF (void) exiting;
-int getdiffcmd (RILE *, int, FILE *, struct diffcmd *);
+int getdiffcmd (RILE *, bool, FILE *, struct diffcmd *);
 int str2expmode (char const *);
 void getadmin (void);
-void getdesc (int);
+void getdesc (bool);
 void gettree (void);
 void ignorephrases (char const *);
 void initdiffcmd (struct diffcmd *);
 void putadmin (void);
-void putstring (FILE *, int, struct cbuf, int);
+void putstring (FILE *, bool, struct cbuf, bool);
 void puttree (struct hshentry const *, FILE *);
 
 /* rcstime */
@@ -846,7 +847,7 @@ FILE *fopenSafer (char const *, char const *);
 char *cgetenv (char const *);
 char *fstr_save (char const *);
 char *str_save (char const *);
-char const *getusername (int);
+char const *getusername (bool);
 int fdSafer (int);
 int getRCSINIT (int, char **, char ***);
 int run (int, char const *, ...);
@@ -903,7 +904,7 @@ void setrid (void);
 #define setrid()
 #endif
 
-extern int isSLASH (int c);
+extern bool isSLASH (int c);
 
 /* The locations of RCS programs, for internal use.  */
 extern const char const prog_co[];

@@ -21,7 +21,6 @@
 */
 
 #include "rcsbase.h"
-#include <stdbool.h>
 #include "rcsmerge-help.c"
 
 void
@@ -60,7 +59,7 @@ main (int argc, char **argv)
   char const *arg[3];
   char const *rev[3], *xrev[3];         /*revision numbers */
   char const *edarg, *expandarg, *suffixarg, *versionarg, *zonearg;
-  int tostdout;
+  bool tostdout;
   int status;
   RILE *workptr;
   struct buf commarg;
