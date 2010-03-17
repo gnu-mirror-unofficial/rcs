@@ -23,9 +23,7 @@
 #include "rcsbase.h"
 #include "ident-help.c"
 
-char const cmdid[] = "ident";
-
-void
+static exiting void
 exiterr (void)
 {
   _exit (EXIT_FAILURE);
@@ -36,7 +34,7 @@ reportError (char const *s)
 {
   int e = errno;
 
-  fprintf (stderr, "%s error: ", cmdid);
+  fprintf (stderr, "%s error: ", program.name);
   errno = e;
   perror (s);
 }
@@ -137,7 +135,7 @@ scanfile (register FILE *file, char const *name)
       exiterr ();
     }
   if (!quietflag)
-    fprintf (stderr, "%s warning: no id keywords in %s\n", cmdid, name);
+    fprintf (stderr, "%s warning: no id keywords in %s\n", program.name, name);
   return 0;
 }
 
@@ -149,6 +147,13 @@ Options:
 
 If no FILE is specified, scan standard input.
 */
+
+const struct program program =
+  {
+    .name = "ident",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

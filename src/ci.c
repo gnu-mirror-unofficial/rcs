@@ -59,8 +59,6 @@ static struct hshentry newdelta;
 static struct stat workstat;
 static struct Symrev *assoclst, **nextassoc;
 
-char const cmdid[] = "ci";
-
 static void
 cleanup (void)
 {
@@ -74,7 +72,7 @@ cleanup (void)
   dirtempunlink ();
 }
 
-void
+static exiting void
 exiterr (void)
 {
   ORCSerror ();
@@ -588,6 +586,13 @@ mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
 If REV is omitted, compute it from the last lock (co -l), perhaps
 starting a new branch.  If there is no lock, use DEFBR.(L+1).
 */
+
+const struct program program =
+  {
+    .name = "ci",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

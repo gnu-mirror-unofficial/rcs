@@ -989,7 +989,7 @@ void
 Oerror (void)
 {
   if (Oerrloop)
-    exiterr ();
+    program.exiterr ();
   Oerrloop = true;
   efaterror ("output error");
 }
@@ -1096,8 +1096,8 @@ oflush (void)
 void
 fatcleanup (bool already_newline)
 {
-  fprintf (stderr, already_newline + "\n%s aborted\n", cmdid);
-  exiterr ();
+  fprintf (stderr, already_newline + "\n%s aborted\n", program.name);
+  program.exiterr ();
 }
 
 static void
@@ -1105,9 +1105,9 @@ startsay (const char *s, const char *t)
 {
   oflush ();
   if (s)
-    aprintf (stderr, "%s: %s: %s", cmdid, s, t);
+    aprintf (stderr, "%s: %s: %s", program.name, s, t);
   else
-    aprintf (stderr, "%s: %s", cmdid, t);
+    aprintf (stderr, "%s: %s", program.name, t);
 }
 
 static void
@@ -1208,7 +1208,7 @@ fatserror (char const *format, ...)
   va_list args;
 
   oflush ();
-  fprintf (stderr, "%s: %s:%ld: ", cmdid, RCSname, rcsline);
+  fprintf (stderr, "%s: %s:%ld: ", program.name, RCSname, rcsline);
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1357,10 +1357,21 @@ aprintf (FILE * iop, char const *fmt, ...)
    into the hashtable, and prints the recognized tokens.  Keywords are
    recognized as identifiers.  */
 
+static void
+exiterr (void)
+{
+  _exit (EXIT_FAILURE);
+}
+
+const struct program program =
+  {
+    .name = "lextest",
+    .exiterr = exiterr
+  };
+
 int
 main (int argc, char *argv[])
 {
-  cmdid = "lextest";
   if (argc < 2)
     {
       aputs ("No input file\n", stderr);
@@ -1414,12 +1425,6 @@ main (int argc, char *argv[])
       nextlex ();
     }
   return EXIT_SUCCESS;
-}
-
-void
-exiterr (void)
-{
-  _exit (EXIT_FAILURE);
 }
 
 #endif  /* defined LEXDB */

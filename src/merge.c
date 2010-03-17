@@ -22,8 +22,6 @@
 #include "rcsbase.h"
 #include "merge-help.c"
 
-char const cmdid[] = "merge";
-
 static char const usage[] =
   "\nmerge: usage: merge [-AeEpqxX3] [-L lab [-L lab [-L lab]]] file1 file2 file3";
 
@@ -33,7 +31,7 @@ badoption (char const *a)
   error ("unknown option: %s%s", a, usage);
 }
 
-void
+static exiting void
 exiterr (void)
 {
   tempunlink ();
@@ -52,6 +50,13 @@ Options:
                 RECEIVING-SIBLING, PARENT and OTHER-SIBLING, respectively.
   -V            Like --version.
 */
+
+const struct program program =
+  {
+    .name = "merge",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

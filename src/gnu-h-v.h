@@ -19,21 +19,22 @@
 */
 
 /* Display the version blurb to stdout, starting with:
-   | CMDID (GNU RCS) PACKAGE_VERSION
+   | NAME (GNU RCS) PACKAGE_VERSION
    | ...
-   and ending with newline.  */
+   and ending with newline.  NAME is the value of `program.name'.  */
 extern void
 display_version (void);
 
 /* If ARGC is less than 2, do nothing.
    If ARGV[1] is "--version", use `display_version' and exit successfully.
    If ARGV[1] is "--help", display the help blurb, starting with:
-   | CMDID HELP
-   and exit successfully.  CMDID is the value of global var `cmdid'.  */
+   | NAME HELP
+   and exit successfully.  NAME is the value of `program.name',
+   whlie HELP is the value of `program.help'.  */
 extern void
-check_hv (int argc, char **argv, const char *help);
+check_hv (int argc, char **argv);
 
 /* Idiom.  */
-#define CHECK_HV()  check_hv (argc, argv, help)
+#define CHECK_HV()  check_hv (argc, argv)
 
 /* gnu-h-v.h ends here */

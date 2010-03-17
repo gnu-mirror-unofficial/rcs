@@ -79,7 +79,6 @@ static struct rcslockers *lockerlist;
 /* States in `-s' option.  */
 static struct stateattri *statelist;
 
-char const cmdid[] = "rlog";
 static int exitstatus;
 
 static void
@@ -90,7 +89,7 @@ cleanup (void)
   Izclose (&finptr);
 }
 
-void
+static exiting void
 exiterr (void)
 {
   _exit (EXIT_FAILURE);
@@ -913,6 +912,13 @@ Options:
   -zZONE        Specify date output format in keyword-substitution.
   -q            No effect, included for consistency with other commands.
 */
+
+const struct program program =
+  {
+    .name = "rlog",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

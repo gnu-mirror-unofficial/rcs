@@ -43,8 +43,6 @@ static struct hshentries *gendeltas;
 static struct hshentry *targetdelta;
 static struct stat workstat;
 
-char const cmdid[] = "co";
-
 static void
 cleanup (void)
 {
@@ -61,7 +59,7 @@ cleanup (void)
   dirtempunlink ();
 }
 
-void
+static exiting void
 exiterr (void)
 {
   ORCSerror ();
@@ -407,6 +405,13 @@ mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
   BR       -- latest revision on branch BR
 If REV is omitted, take it to be the latest on the default branch.
 */
+
+const struct program program =
+  {
+    .name = "co",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

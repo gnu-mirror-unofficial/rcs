@@ -778,7 +778,17 @@ tiprev (void)
 /* Test the routines that generate a sequence of delta numbers
   needed to regenerate a given delta.  */
 
-char const cmdid[] = "revtest";
+static exiting void
+exiterr (void)
+{
+  _exit (EXIT_FAILURE);
+}
+
+const struct program program =
+  {
+    .name = "revtest"
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char *argv[])
@@ -845,12 +855,6 @@ main (int argc, char *argv[])
   while (true);
   aprintf (stderr, "done\n");
   return EXIT_SUCCESS;
-}
-
-void
-exiterr (void)
-{
-  _exit (EXIT_FAILURE);
 }
 
 #endif  /* defined REVTEST */

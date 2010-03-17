@@ -1,5 +1,44 @@
 2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Consolidate some program globals into `struct program'.
+
+	Here, "USUAL" means "(cmdid): Delete var.
+	                     (exiterr): Make static, declare `exiting'.
+	                     (program): New struct instance.";
+	and "PARTIAL foo" means "Like USUAL, but with only foo".
+	* rcsbase.h (cmdid): Delete var decl.
+	(exiterr): Delete func decl.
+	(program): New struct.
+	(program): New var decl.
+	* ci.c: USUAL.
+	* co.c: USUAL.
+	* gnu-h-v.c (display_version): Use `program.name'.
+	(check_hv): Likewise; also don't
+	take `help'; use `program.help' instead.
+	* gnu-h-v.h (check_hv): Update func decl.
+	(CHECK_HV): Update call to `check_hv'.
+	* ident.c: USUAL.
+	(reportError, scanfile): Use `program.name'.
+	* merge.c: USUAL.
+	* merger.c (merge): Use `program.exiterr'.
+	* rcs.c: USUAL.
+	* rcsclean.c: USUAL.
+	* rcsdiff.c: USUAL.
+	* rcsfcmp.c [FCMPTEST]: PARTIAL cmdid, program.
+	* rcsfnms.c [PAIRTEST]: USUAL.
+	* rcskeep.c [KEEPTEST]: PARTIAL cmdid, program.
+	* rcslex.c (Oerror): Use `program.exiterr'.
+	(fatcleanup): Use `program.name', `program.exiterr'.
+	(startsay, fatserror): Use `program.name'.
+	[LEXDB]: USUAL.
+	* rcsmerge.c: USUAL.
+	* rcsrev.c [REVTEST]: USUAL.
+	* rcssyn.c [SYNTEST]: USUAL.
+	* rcsutil.c (catchsigaction): Use `program.exiterr'.
+	* rlog.c: USUAL.
+
+2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Avoid `strcpy'.
 
 	* ci.c (incnum): Use `strncpy'.

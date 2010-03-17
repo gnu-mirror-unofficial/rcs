@@ -516,7 +516,17 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
 #ifdef SYNTEST
 /* Input an RCS file and print its internal data structures.  */
 
-char const cmdid[] = "syntest";
+static exiting void
+exiterr (void)
+{
+  _exit (EXIT_FAILURE);
+}
+
+const struct program program =
+  {
+    .name = "syntest"
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char *argv[])
@@ -546,12 +556,6 @@ main (int argc, char *argv[])
       fatserror ("expecting EOF");
     }
   return EXIT_SUCCESS;
-}
-
-void
-exiterr (void)
-{
-  _exit (EXIT_FAILURE);
 }
 
 #endif  /* defined SYNTEST */

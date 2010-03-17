@@ -589,10 +589,6 @@ enum markers
 /* This is used by ci and rlog.  */
 #define EMPTYLOG "*** empty log message ***"
 
-/* Every main program supplies these.  */
-extern char const cmdid[];
-void exiterr (void) exiting;
-
 /* merge */
 int merge (bool, char const *, char const *const[3], char const *const[3]);
 
@@ -923,5 +919,17 @@ extern const int diff_trouble;
 
 /* A string of 77 '=' followed by '\n'.  */
 extern char const equal_line[];
+
+/* Every program defines this.  */
+struct program
+{
+  /* The name of the program, for --help, --version, etc.  */
+  const char const *name;
+  /* Text for --help.  */
+  const char const *help;
+  /* Exit errorfully.  */
+  void (*exiterr) (void) exiting;
+};
+extern const struct program program;
 
 /* rcsbase.h ends here */

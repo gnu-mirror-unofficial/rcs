@@ -30,8 +30,6 @@ static int get_directory (char const *, char ***);
 static RILE *workptr;
 static int exitstatus;
 
-char const cmdid[] = "rcsclean";
-
 static void
 cleanup (void)
 {
@@ -44,7 +42,7 @@ cleanup (void)
   dirtempunlink ();
 }
 
-void
+static exiting void
 exiterr (void)
 {
   ORCSerror ();
@@ -138,6 +136,13 @@ Options:
 
 REV defaults to the latest revision on the default branch.
 */
+
+const struct program program =
+  {
+    .name = "rcsclean",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

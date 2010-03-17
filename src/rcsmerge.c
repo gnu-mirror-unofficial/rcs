@@ -23,14 +23,12 @@
 #include "rcsbase.h"
 #include "rcsmerge-help.c"
 
-void
+static exiting void
 exiterr (void)
 {
   tempunlink ();
   _exit (diff_trouble);
 }
-
-char const cmdid[] = "rcsmerge";
 
 /*:help
 [options] file
@@ -49,6 +47,13 @@ One or two revisions must be specified (using -p, -q, or -r).
 If only one is specified, use the latest revision on the default
 branch to be the second revision.
 */
+
+const struct program program =
+  {
+    .name = "rcsmerge",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

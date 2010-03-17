@@ -56,7 +56,6 @@ static const s_unique const minus_D =
     .full = "--ifdef"
   };
 
-char const cmdid[] = "rcsdiff";
 static int exitstatus;
 static RILE *workptr;
 static struct stat workstat;
@@ -84,7 +83,7 @@ cleanup (void)
   Izclose (&workptr);
 }
 
-void
+static exiting void
 exiterr (void)
 {
   tempunlink ();
@@ -135,6 +134,13 @@ passed to the underlying diff(1) command:
   [long options (that start with "--")].
 (Not all of these options are meaningful.)
 */
+
+const struct program program =
+  {
+    .name = "rcsdiff",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

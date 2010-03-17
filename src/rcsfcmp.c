@@ -267,7 +267,7 @@ returnresult:
 /* The test program prints out whether two files are identical,
    except for keywords.  */
 
-char const cmdid[] = "rcsfcmp";
+const struct program program = { .name = "rcsfcmp" };
 
 int
 main (int argc, char *argv[])

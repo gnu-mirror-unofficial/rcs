@@ -91,7 +91,7 @@ cleanup (void)
   dirtempunlink ();
 }
 
-void
+static exiting void
 exiterr (void)
 {
   ORCSerror ();
@@ -1080,8 +1080,6 @@ buildtree (void)
   return;
 }
 
-char const cmdid[] = "rcs";
-
 /*:help
 [options] file ...
 Options:
@@ -1123,6 +1121,13 @@ Options:
 
 REV defaults to the latest revision on the default branch.
 */
+
+const struct program program =
+  {
+    .name = "rcs",
+    .help = help,
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char **argv)

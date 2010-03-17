@@ -42,19 +42,18 @@
 void
 display_version (void)
 {
-  printf ("%s%s", cmdid, COMMAND_VERSION);
+  printf ("%s%s", program.name, COMMAND_VERSION);
 }
 
 void
-check_hv (int argc, char **argv,
-          const char const help[])
+check_hv (int argc, char **argv)
 {
   if (1 >= argc)
     return;
 
   if (EXACTLY ("--help", argv[1]))
     {
-      printf ("Usage: %s %s%s", cmdid, help, BUGME);
+      printf ("Usage: %s %s%s", program.name, program.help, BUGME);
       exit (EXIT_SUCCESS);
     }
 

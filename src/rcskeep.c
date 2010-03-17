@@ -352,7 +352,7 @@ getoldkeys (register RILE *fp)
 #ifdef KEEPTEST
 /* Print the keyword values found.  */
 
-char const cmdid[] = "keeptest";
+const struct program program = { .name = "keeptest" };
 
 int
 main (int argc, char *argv[])

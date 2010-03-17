@@ -937,7 +937,18 @@ getcwd (char *path, size_t size)
 #ifdef PAIRTEST
 /* This is a test program for `pairnames' and `getfullRCSname'.  */
 
-char const cmdid[] = "pair";
+static exiting void
+exiterr (void)
+{
+  dirtempunlink ();
+  tempunlink ();
+  _exit (EXIT_FAILURE);
+}
+const struct program program =
+  {
+    .name = "pairtest",
+    .exiterr = exiterr
+  };
 
 int
 main (int argc, char *argv[])
@@ -1004,13 +1015,6 @@ main (int argc, char *argv[])
 
 }
 
-void
-exiterr (void)
-{
-  dirtempunlink ();
-  tempunlink ();
-  _exit (EXIT_FAILURE);
-}
 #endif  /* PAIRTEST */
 
 /* rcsfnms.c ends here */
