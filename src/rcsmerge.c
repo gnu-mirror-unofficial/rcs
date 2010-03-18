@@ -27,7 +27,7 @@ static exiting void
 exiterr (void)
 {
   tempunlink ();
-  _Exit (diff_trouble);
+  _Exit (DIFF_TROUBLE);
 }
 
 /*:help
@@ -224,7 +224,7 @@ main (int argc, char **argv)
         }
     }
   tempunlink ();
-  return nerror ? diff_trouble : status;
+  return nerror ? DIFF_TROUBLE : status;
 }
 
 /* rcsmerge.c ends here */

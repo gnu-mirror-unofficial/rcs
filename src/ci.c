@@ -1074,7 +1074,7 @@ main (int argc, char **argv)
                 *++diffp = newhead ? "-" : expname;
                 *++diffp = newhead ? expname : "-";
                 *++diffp = NULL;
-                if (diff_trouble == runv (wfd, diffname, diffv))
+                if (DIFF_TROUBLE == runv (wfd, diffname, diffv))
                   rcsfaterror ("diff failed");
 #if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 if (lseek (wfd, wfd_off, SEEK_CUR) == -1)

@@ -78,7 +78,7 @@ static void
 cleanup (void)
 {
   if (nerror)
-    exitstatus = diff_trouble;
+    exitstatus = DIFF_TROUBLE;
   Izclose (&finptr);
   Izclose (&workptr);
 }
@@ -87,7 +87,7 @@ static exiting void
 exiterr (void)
 {
   tempunlink ();
-  _Exit (diff_trouble);
+  _Exit (DIFF_TROUBLE);
 }
 
 #if DIFF_L
@@ -168,7 +168,7 @@ main (int argc, char **argv)
 
   CHECK_HV ();
 
-  exitstatus = diff_success;
+  exitstatus = DIFF_SUCCESS;
 
   bufautobegin (&commarg);
   bufautobegin (&numericrev);
@@ -479,10 +479,10 @@ main (int argc, char **argv)
         {
           int s = runv (-1, NULL, diffv);
 
-          if (diff_trouble == s)
+          if (DIFF_TROUBLE == s)
             workerror ("diff failed");
-          if (diff_failure == s
-              && diff_success == exitstatus)
+          if (DIFF_FAILURE == s
+              && DIFF_SUCCESS == exitstatus)
             exitstatus = s;
         }
       }

@@ -354,7 +354,7 @@ buildjoin (char const *initialfile)
       *p++ = rev2;
       *p++ = rev3;
       *p = '\0';
-      if (diff_trouble == runv (-1, NULL, mergev))
+      if (DIFF_TROUBLE == runv (-1, NULL, mergev))
           goto badmerge;
       i = i + 2;
     }

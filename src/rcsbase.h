@@ -912,11 +912,6 @@ extern const char const prog_diff3[];
    should be a single argument (no internal spaces).  */
 extern const char const diff_flags[];
 
-/* Return values for diff(1).  */
-extern const int diff_success;
-extern const int diff_failure;
-extern const int diff_trouble;
-
 /* A string of 77 '=' followed by '\n'.  */
 extern char const equal_line[];
 

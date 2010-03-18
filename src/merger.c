@@ -47,7 +47,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
 /* Do `merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2', where `tostdout'
    specifies whether `-p' is present, `edarg' gives the editing type
    (e.g. "-A", or null for the default), `label' gives l0, l1 and l2, and
-   `argv' gives a0, a1 and a2.  Return `diff_success' or `diff_failure'.  */
+   `argv' gives a0, a1 and a2.  Return `DIFF_SUCCESS' or `DIFF_FAILURE'.  */
 {
   register int i;
   FILE *f;
@@ -72,9 +72,9 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   s = run (-1, t, prog_diff3, edarg, "-am",
            "-L", label[0], "-L", label[1], "-L", label[2],
            a[0], a[1], a[2], NULL);
-  if (diff_trouble == s)
+  if (DIFF_TROUBLE == s)
     program.exiterr ();
-  if (diff_failure == s)
+  if (DIFF_FAILURE == s)
     warn ("conflicts during merge");
   if (t)
     {
@@ -88,16 +88,16 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
     }
 #else  /* !DIFF3_BIN */
   for (i = 0; i < 2; i++)
-    if (diff_trouble == run (-1, d[i] = maketemp (i), prog_diff,
+    if (DIFF_TROUBLE == run (-1, d[i] = maketemp (i), prog_diff,
                              a[i], a[2], NULL))
       faterror ("diff failed");
   t = maketemp (2);
   s = run (-1, t,
            prog_diff3, edarg, d[0], d[1], a[0], a[1], a[2],
            label[0], label[2], NULL);
-  if (s != diff_success)
+  if (s != DIFF_SUCCESS)
     {
-      s = diff_failure;
+      s = DIFF_FAILURE;
       warn ("overlaps or other problems during merge");
     }
   if (!(f = fopenSafer (t, "a+")))

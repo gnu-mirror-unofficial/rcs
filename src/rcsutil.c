@@ -27,9 +27,6 @@
 const char const prog_diff[] = DIFF;
 const char const prog_diff3[] = DIFF3;
 const char const diff_flags[] = DIFFFLAGS;
-const int diff_success = DIFF_SUCCESS;
-const int diff_failure = DIFF_FAILURE;
-const int diff_trouble = DIFF_TROUBLE;
 
 /* List of blocks allocated with `ftestalloc'.  These blocks can be
    freed by ffree when we're done with the current file.  We could put
@@ -767,7 +764,7 @@ write_stderr (char const *s)
 {
   int slen = strlen (s);
   if (write (STDERR_FILENO, s, slen) != slen)
-    _Exit (diff_trouble);
+    _Exit (DIFF_TROUBLE);
 }
 #endif  /* defined HAVE_WORKING_FORK */
 
@@ -818,7 +815,7 @@ runv (int infd, char const *outname, char const **args)
             /* Avoid `perror' since it may misuse buffers.  */
             write_stderr (args[1]);
             write_stderr (": I/O redirection failed\n");
-            _Exit (diff_trouble);
+            _Exit (DIFF_TROUBLE);
           }
 
         if (outname)
@@ -830,7 +827,7 @@ runv (int infd, char const *outname, char const **args)
               write_stderr (": ");
               write_stderr (outname);
               write_stderr (": cannot create\n");
-              _Exit (diff_trouble);
+              _Exit (DIFF_TROUBLE);
             }
         exec_RCS (args[1], (char **) (args + 1));
         notfound = args[1];
@@ -845,7 +842,7 @@ runv (int infd, char const *outname, char const **args)
         /* Avoid `perror' since it may misuse buffers.  */
         write_stderr (notfound);
         write_stderr (": not found\n");
-        _Exit (diff_trouble);
+        _Exit (DIFF_TROUBLE);
       }
     if (pid < 0)
       efaterror ("fork");

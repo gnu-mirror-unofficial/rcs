@@ -1,3 +1,23 @@
+2010-03-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int C] Use DIFF_{SUCCESS,FAILURE,TROUBLE} directly.
+
+	Using vars was a temporary measure while fleeing conf.h.
+
+	Here, "U" means "Throughout, use `DIFF_SUCCESS',
+	                 `DIFF_FAILURE', `DIFF_TROUBLE' directly".
+	* rcsutil.c: U.
+	(diff_success, diff_failure, diff_trouble): Delete vars.
+	* rcsbase.h (diff_success, diff_failure, diff_trouble):
+	Delete var decls.
+	* ci.c: U.
+	* co.c: U.
+	* merge.c: U.
+	* merger.c: U.
+	* rcs.c: U.
+	* rcsdiff.c: U.
+	* rcsmerge.c: U.
+
 2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Consolidate parallel rcsedit.c arrays into `struct sff'.

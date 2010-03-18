@@ -1021,7 +1021,7 @@ buildeltatext (struct hshentries const *deltas)
       *++diffp = "-";
       *++diffp = resultname;
       *++diffp = '\0';
-      if (diff_trouble == runv (fileno (fcut), diffname, diffv))
+      if (DIFF_TROUBLE == runv (fileno (fcut), diffname, diffv))
         rcsfaterror ("diff failed");
       Ofclose (fcut);
       return putdtext (cuttail, diffname, frewrite, true);
