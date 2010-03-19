@@ -9,7 +9,7 @@ It lives in the repo but is not included in the distribution.
 ******* DONE no-fuss "make check"
 ******* DONE precious env vars
 ******* general spiffing
-***** automake
+***** DONE automake
 *** bugfixes
 ***** DONE --help, --version
 ***** DONE avoid mktemp (debian #291542)
