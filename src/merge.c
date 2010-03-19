@@ -20,7 +20,7 @@
 */
 
 #include "rcsbase.h"
-#include "merge-help.c"
+#include "merge.help"
 
 static char const usage[] =
   "\nmerge: usage: merge [-AeEpqxX3] [-L lab [-L lab [-L lab]]] file1 file2 file3";

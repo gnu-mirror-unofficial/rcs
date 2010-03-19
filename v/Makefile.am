@@ -17,20 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-@SET_MAKE@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = @bindir@
-
-all ::
-
-test-prep:
-	@cd ../src ; $(MAKE) test-prep
-
 # This is for the benefit of "make installcheck".
 # Note that it should end in ":".
 PATHPREFIX =
@@ -39,7 +25,12 @@ TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$$(pwd)/../src/0pre/bin:$$PATH" sh
 TESTS = alive.test \
   t000.test
 
-check: test-prep
+EXTRA_DIST = $(TESTS)
+
+test-prep:
+	@cd ../src ; $(MAKE) test-prep
+
+check-TESTS: test-prep
 	@overall=true ;							\
 	ls='$(TESTS)' ; if [ "$$ls" ] ; then				\
 	  d='$(srcdir)/' ; test './' = $$d && d= ;			\
@@ -58,8 +49,10 @@ check: test-prep
 	  done ;							\
 	fi ; $$overall
 
-installcheck :: test-prep
-	$(MAKE) check PATHPREFIX='$(bindir):'
+installcheck: test-prep
+	$(MAKE) check PATHPREFIX='$(DESTDIR)$(bindir):'
 
-clean:
+clean-local:
 	rm -rf *.d
+
+# Makefile.am ends here

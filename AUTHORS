@@ -7,16 +7,9 @@ many porting fixes.  Paul Eggert of System Development Corporation
 contributed bug fixes and tuneups.  Jay Lepreau contributed 4.3BSD
 support.
 
-Paul Eggert of Twin Sun wrote the changes for RCS versions 5.5 and 5.6
-(1991).  Rich Braun of Kronos and Andy Glew of Intel contributed ideas
-for new options.  Bill Hahn of Stratus contributed ideas for setuid
-support.  Ideas for piece tables came from Joe Berkovitz of Stratus and
-Walter F. Tichy.  Matt Cross of Stratus contributed test case ideas.
-Adam Hammer of Purdue QAed.
+Paul Eggert wrote the changes for RCS versions 5.5 and 5.6 (1991).
 
-Paul Eggert wrote most of the changes for RCS 5.7.  K. Richard Pixley
-of Cygnus Support contributed several bug fixes.  Robert Lupton of
-Princeton and Daniel Trinkle contributed ideas for $Name expansion.
-Brendan Kehoe of Cygnus Support suggested rlog's -N option.  Paul
-D. Smith of Data General suggested improvements in option and error
-processing.  Adam Hammer of Purdue QAed.
+Paul Eggert wrote most of the changes for RCS 5.7 (1995).
+K. Richard Pixley of Cygnus Support contributed several bug fixes.
+
+Thien-Thi Nguyen wrote the changes for RCS version 5.8.

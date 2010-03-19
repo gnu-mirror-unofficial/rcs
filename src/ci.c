@@ -22,7 +22,7 @@
 
 #include "rcsbase.h"
 #include <ctype.h>                      /* isdigit */
-#include "ci-help.c"
+#include "ci.help"
 
 /* Work around a common `ftruncate' bug: NFS won't let you truncate a file
    that you currently lack permissions for, even if you had permissions when
@@ -577,12 +577,12 @@ Options:
 
 Multiple flags in {fiIjklMqru} may be used, except for -r, -l, -u, which are
 mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
-  symbolic -- must have been defined previously (see -n, -N)
-  $        -- determine revision number from keyword values in the working file
-  .N       -- prepend default branch => DEFBR.N
-  BR.N     -- use this, but N must be greater than any existing
-              on BR, or BR must be new
-  BR       -- latest rev on branch BR + 1 => BR.(L+1), or BR.1 if new branch
+  symbolic      Must have been defined previously (see -n, -N).
+  $             Determine from keyword values in the working file.
+  .N            Prepend default branch => DEFBR.N
+  BR.N          Use this, but N must be greater than any existing
+                on BR, or BR must be new.
+  BR            Latest rev on branch BR + 1 => BR.(L+1), or BR.1 if new branch.
 If REV is omitted, compute it from the last lock (co -l), perhaps
 starting a new branch.  If there is no lock, use DEFBR.(L+1).
 */

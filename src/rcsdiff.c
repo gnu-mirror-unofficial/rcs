@@ -21,7 +21,7 @@
 */
 
 #include "rcsbase.h"
-#include "rcsdiff-help.c"
+#include "rcsdiff.help"
 
 /* Normally, if the two revisions specified are the same, we avoid calling
    the underlying diff on the theory that it will produce no output.  This

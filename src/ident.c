@@ -21,7 +21,7 @@
 */
 
 #include "rcsbase.h"
-#include "ident-help.c"
+#include "ident.help"
 
 static exiting void
 exiterr (void)

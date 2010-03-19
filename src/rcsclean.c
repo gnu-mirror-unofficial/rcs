@@ -20,7 +20,7 @@
 */
 
 #include "rcsbase.h"
-#include "rcsclean-help.c"
+#include "rcsclean.help"
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>

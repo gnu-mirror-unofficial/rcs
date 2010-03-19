@@ -21,6 +21,7 @@
 AC_INIT([GNU RCS],[5.7.40],[bug-rcs@gnu.org])
 AC_CONFIG_HEADERS([src/auto-sussed.h])
 AC_CONFIG_AUX_DIR([build-aux])
+AM_INIT_AUTOMAKE([1.11.1 gnits readme-alpha no-define])
 AS_CASE([$PACKAGE_VERSION],[*.*.*],[pretest_p=yes],[pretest_p=no])
 
 # syntax terrors
@@ -223,6 +224,7 @@ RCS_CHECK_GCC_ATTRIBUTE([format],[
      __attribute__ ((format (printf, 1, 2)));
 ])
 
+AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 

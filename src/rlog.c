@@ -21,7 +21,7 @@
 */
 
 #include "rcsbase.h"
-#include "rlog-help.c"
+#include "rlog.help"
 
 struct rcslockers
 {

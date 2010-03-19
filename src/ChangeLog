@@ -1,3 +1,19 @@
+2010-03-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use GNU Automake.
+
+	* Makefile.am: New file.
+	* ci.c: Do s/-help.c/.help/ for #include file.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merge.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+	* Makefile.in: Delete file.
+
 2010-03-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Use DIFF_{SUCCESS,FAILURE,TROUBLE} directly.

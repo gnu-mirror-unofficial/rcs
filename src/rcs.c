@@ -21,7 +21,7 @@
 */
 
 #include "rcsbase.h"
-#include "rcs-help.c"
+#include "rcs.help"
 
 struct Lockrev
 {

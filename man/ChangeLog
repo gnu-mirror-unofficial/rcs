@@ -1,3 +1,21 @@
+2010-03-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use GNU Automake.
+
+	* Makefile.am: New file.
+	* ci.1in: Rename from ci.1.
+	* co.1in: Rename from co.1.
+	* ident.1in: Rename from ident.1.
+	* merge.1in: Rename from merge.1.
+	* rcs.1in: Rename from rcs.1.
+	* rcsclean.1in: Rename from rcsclean.1.
+	* rcsdiff.1in: Rename from rcsdiff.1.
+	* rcsfreeze.1in: Rename from rcsfreeze.1.
+	* rcsintro.1in: Rename from rcsintro.1.
+	* rcsmerge.1in: Rename from rcsmerge.1.
+	* rlog.1in: Rename from rlog.1.
+	* Makefile.in: Delete file.
+
 2010-03-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[man] Include branch names in RCS file diagram.

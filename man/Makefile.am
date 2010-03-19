@@ -1,8 +1,6 @@
-# Make RCS info pages (and other formats, too).
+# Make RCS man pages.
 
 # Copyright (C) 2010 Thien-Thi Nguyen
-# Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
-# Copyright (C) 1982, 1988, 1989 Walter Tichy
 #
 # This file is part of GNU RCS.
 #
@@ -19,34 +17,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-srcdir = @srcdir@
-VPATH = @srcdir@
+dist_man_MANS = ci.1 co.1 ident.1 merge.1 rcs.1 rcsclean.1 \
+  rcsdiff.1 rcsfile.5 rcsintro.1 rcsmerge.1 rlog.1
 
-prefix = @prefix@
-datarootdir = @datarootdir@
-infodir = @infodir@
+BUILT_SOURCES = REL
 
-PACKAGE_VERSION = @PACKAGE_VERSION@
+EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES)
 
-all :: info
+rcsfile.5: rcsfile.5in REL
+	{ cat REL ; $(PIC) $(PICFLAGS) $< ; } > $@
 
-info :: rcs.info
+.1in.1:
+	cat REL $< > $@
 
-pdf :: rcs.pdf
+REL: $(top_srcdir)/configure
+	@{ echo '.ds Rv $(PACKAGE_VERSION)' ;		\
+	   date -u +'.ds Dt %Y-%m-%d' -r $< ; } > $@t ;	\
+	if [ -f $@ ] && cmp -s $@t $@ ;			\
+	  then rm -f $@t ;				\
+	  else mv $@t $@ ; echo Created $@ ;		\
+	fi
 
-rcs.info :: version.texi
+MAINTAINERCLEANFILES = $(dist_man_MANS) REL
 
-version.texi :: $(srcdir)/../configure
-	@{ echo @set VERSION $(PACKAGE_VERSION) ;		\
-	   echo @set UPDATED $$(date -r $< +'%Y-%m-%d') ;	\
-	} > $@
-
-%.pdf : %.texi
-	texi2pdf -o $@ $<
-	rm -f rcs.{aux,cp,cps,fn,ky,log,pg,toc,tp,vr}
-
-clean ::
-	rm -f rcs.{aux,cp,cps,fn,ky,log,pg,toc,tp,vr}
-
-maintainer-clean :: clean
-	rm -f rcs.{info,html,pdf}
+# Makefile.am ends here

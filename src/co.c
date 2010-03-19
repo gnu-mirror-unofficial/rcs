@@ -21,7 +21,7 @@
 */
 
 #include "rcsbase.h"
-#include "co-help.c"
+#include "co.help"
 
 static char const quietarg[] = "-q";
 

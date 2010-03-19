@@ -21,7 +21,7 @@
 */
 
 #include "rcsbase.h"
-#include "rcsmerge-help.c"
+#include "rcsmerge.help"
 
 static exiting void
 exiterr (void)
