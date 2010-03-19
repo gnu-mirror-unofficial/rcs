@@ -564,9 +564,9 @@ Options:
   -sSTATE       Set state to STATE.
   -t-TEXT       Set description to TEXT.
   -tFILENAME    Set description from text read from FILENAME.
-  -T            Set the RCS file’s modification time to the new revision’s
+  -T            Set the RCS file's modification time to the new revision's
                 time if the former precedes the latter and there is a new
-                revision; preserve the RCS file’s modification time otherwise.
+                revision; preserve the RCS file's modification time otherwise.
   -V            Like --version.
   -VN           Emulate RCS version N.
   -wWHO         Use WHO as the author.
