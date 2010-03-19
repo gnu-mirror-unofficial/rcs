@@ -1,3 +1,18 @@
+2010-03-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[dist] Add support for doing a pretest release.
+
+	* README-alpha: New file.
+	* Makefile.in (dist): If pretest version, distribute README-alpha.
+	* configure.ac: Bump version down to 5.7.40.
+	(pretest_p): New var.
+	(RCS_YESP, RCS_ALL): New AC_DEFUNs.
+	(RCS_PRETEST): New AC_ARG_VAR; if not set appropriately for
+	a pretest version, display a warning and exit failurefully.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): New AC_DEFUN; for a pretest
+	version, if all the vars named do not have value `yes', issue a
+	warning about the platform possibly being desupported in the future.
+
 2010-03-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Don't do "make distclean" on "make dist"!

@@ -59,6 +59,7 @@ dist :: $(srcdir)/configure
 	ln ChangeLog configure configure.ac AUTHORS COPYING \
 		INSTALL \
 		Makefile.in NEWS README $$d && \
+	case $(PACKAGE_VERSION) in (*.*.*) ln README-alpha $$d ;; esac && \
 	(cd build-aux && ln extract-help \
 		install-sh mkinstalldirs \
 		../$$d/build-aux) && \

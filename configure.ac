@@ -18,11 +18,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([GNU RCS],[5.8-dev],[bug-rcs@gnu.org])
+AC_INIT([GNU RCS],[5.7.40],[bug-rcs@gnu.org])
 AC_CONFIG_HEADERS([src/auto-sussed.h])
 AC_CONFIG_AUX_DIR([build-aux])
+AS_CASE([$PACKAGE_VERSION],[*.*.*],[pretest_p=yes],[pretest_p=no])
 
 # syntax terrors
+
+AC_DEFUN([RCS_YESP],[test yes = "$[]$1"])dnl $1 -- shell variable name
+
+AC_DEFUN([RCS_ALL],[m4_map_sep([$1],[ &&
+     ],m4_split(m4_normalize($2)))])dnl
 
 AC_DEFUN([RCS_CBOOL],[dnl
 dnl $1 -- C variable (actually #define) name
@@ -56,6 +62,13 @@ AC_PATH_PROG([$1],[$[]$1],[no])
 RCS_MUSTHAVE([$1],[absolute name of $2 program: $save_$1])
 AC_DEFINE_UNQUOTED([$1],["$[]$1"],[$3])
 ])dnl
+
+# For pretest releases, discourage user ignorance.
+
+AC_ARG_VAR([RCS_PRETEST],[if incorrectly set, for pretest releases, the
+  configure script tells you to see README-alpha and then exits failurefully])
+AS_IF([RCS_YESP([pretest_p]) && test ! acknowledged = "$RCS_PRETEST"],
+  [AC_MSG_ERROR([user too eager, see README-alpha])])
 
 # --enable, --with
 
@@ -541,6 +554,51 @@ popdef([inode])dnl
 RCS_CBOOL([SLASHSLASH_IS_SLASH],[yes],[rcs_cv_slsl_is_sl],
   [Are // and / the same directory?])
 
+# For pretest releases, encourage user feedback for weird systems.
+
+AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
+
+dnl These can probably be handled by gnulib, no sweat.
+ac_cv_header_stdint_h           dnl C99
+ac_cv_header_stdlib_h           dnl C99
+ac_cv_header_string_h           dnl C99
+ac_cv_header_signal_h           dnl C99
+ac_cv_type_sig_atomic_t		dnl C99
+ac_cv_header_utime_h            dnl SVr4, POSIX.1-2001
+ac_cv_header_pwd_h              dnl 4.3BSD, SVr4, POSIX.1-2001
+rcs_cv_dot2_ok                  dnl C99 (printf)
+ac_cv_func_getcwd               dnl POSIX.1-2001
+ac_cv_func_fchmod               dnl 4.4BSD, SVr4, POSIX.1-2001
+ac_cv_func_ftruncate            dnl 4.4BSD, SVr4, POSIX.1-2001
+ac_cv_func_mkstemp              dnl 4.3BSD, POSIX.1-2001
+ac_cv_func_readlink             dnl 4.4BSD, POSIX.1-2001
+ac_cv_func_getuid               dnl 4.3BSD, POSIX.1-2001
+
+dnl These are things we would like to not worry about.
+dnl Removing checks for them (assuming yes) eases maintenance.
+dnl Because their removal is motivated primarily by laziness,
+dnl and only secondarily by standards compliance, we should not
+dnl be surprised if there is some resistence from pretest users.
+dnl In that case, fine, just keep them (remove them from this list).
+rcs_cv_flush_in_ok
+rcs_cv_fopen_truncates
+rcs_cv_sane_mmap
+rcs_cv_slsl_is_sl
+rcs_cv_unlink_mw_ok
+rcs_cv_wac_ok
+ac_cv_func_psignal              dnl TODO: check for strsignal; logior them
+ac_cv_func_sys_siglist
+
+dnl Some things to think about
+dnl mmap_signal_is_SIGBUS -- TODO: make rcs_cv_mmap_signal have symbolic
+dnl                          value, not just numeric (like old src/conf.h)
+])
+
+AS_IF([RCS_YESP([pretest_p])],[
+  AS_IF([RCS_ALL([RCS_YESP],[PRESUMABLY_STANDARD_ENOUGH_BY_NOW])],[:],
+   [AC_MSG_WARN([Your platform might be desupported in the future.])])
+])
+
 # write it out
 
 AC_CONFIG_FILES([
@@ -553,3 +611,5 @@ AC_CONFIG_FILES([
 ])
 
 AC_OUTPUT
+
+# configure.ac ends here
