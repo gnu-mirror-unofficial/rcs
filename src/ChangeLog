@@ -1,3 +1,35 @@
+2010-03-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Consolidate some global booleans into `struct behavior'.
+
+	Here, "BE" means "Use BE (foo) instead of separate var names".
+	* rcsbase.h (behavior): New struct.
+	(behavior): New `struct behavior' decl.
+	(BE): New macro.
+	(locker_expansion, interactiveflag, hshenter)
+	(quietflag, StrictLocks): Delete var decls.
+	* rcsutil.c (behavior): New `struct behavior'.
+	(catchsigaction): Use `BE (quiet)'.
+	* ci.c (removelock, addelta, main): BE.
+	* co.c (rmworkfile, buildjoin, main): BE.
+	* ident.c (scanfile, main): BE.
+	* merge.c (main): BE.
+	* rcs.c (buildtree, main): BE.
+	* rcsclean.c (main): BE.
+	* rcsdiff.c (main): BE.
+	* rcsedit.c (locker_expansion): Delete var.
+	(keyreplace): BE.
+	* rcsfnms.c (InitAdmin, main): BE.
+	* rcsgen.c (interactiveflag): Delete var.
+	(ttystdin, yesorno, putadmin): BE.
+	* rcslex.c (hshenter, quietflag): Delete vars.
+	(Lexinit, nextlex, warn, rcswarn, workwarn, diagnose): BE.
+	[LEXDB] (main): BE.
+	* rcsmerge.c (main): BE.
+	* rcssyn.c (StrictLocks): Delete var.
+	(getadmin, ignorephrases, getdelta): BE.
+	* rlog.c (main): BE.
+
 2010-03-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use GNU Automake.

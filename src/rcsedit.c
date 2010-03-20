@@ -33,8 +33,6 @@
 FILE *fcopy;
 /* Result pathname.  */
 char const *resultname;
-/* Should the locker name be appended to Id val?  */
-bool locker_expansion;
 
 #if !large_memory
 /* Edit file descriptor.  */
@@ -718,7 +716,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
             {
               if (VERSION (5) <= RCSv)
                 {
-                  if (locker_expansion || exp == kwsub_kvl)
+                  if (BE (inclusive_of_Locker_in_Id_val) || exp == kwsub_kvl)
                     aprintf (out, " %s", delta->lockedby);
                 }
               else if (RCSv == VERSION (4))
@@ -727,7 +725,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
           break;
         case Locker:
           if (delta->lockedby)
-            if (locker_expansion
+            if (BE (inclusive_of_Locker_in_Id_val)
                 || exp == kwsub_kvl || RCSv <= VERSION (4))
               aputs (delta->lockedby, out);
           break;

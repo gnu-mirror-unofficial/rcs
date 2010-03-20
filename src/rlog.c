@@ -1000,7 +1000,7 @@ main (int argc, char **argv)
 
         case 'q':
           /* This has no effect; it's here for consistency.  */
-          quietflag = true;
+          BE (quiet) = true;
           break;
 
         case 'x':
@@ -1100,7 +1100,7 @@ main (int argc, char **argv)
         aprintf (out, headFormat, RCSname, workname,
                  Head ? " " : "", Head ? Head->num : "",
                  Dbranch ? " " : "", Dbranch ? Dbranch : "",
-                 StrictLocks ? " strict" : "");
+                 BE (strictly_locking) ? " strict" : "");
         currlock = Locks;
         while (currlock)
           {
@@ -1108,7 +1108,7 @@ main (int argc, char **argv)
                      currlock->delta->num);
             currlock = currlock->nextlock;
           }
-        if (StrictLocks && pre5)
+        if (BE (strictly_locking) && pre5)
           aputs ("  ;  strict" + (Locks ? 3 : 0), out);
 
         /* Print access list.  */

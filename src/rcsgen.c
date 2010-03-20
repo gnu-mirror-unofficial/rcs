@@ -22,8 +22,6 @@
 
 #include "rcsbase.h"
 
-/* Should we act as if stdin is a tty?  */
-bool interactiveflag;
 /* Buffer for current log message.  */
 struct buf curlogbuf;
 
@@ -177,11 +175,11 @@ ttystdin (void)
 
   if (!initialized)
     {
-      if (!interactiveflag)
-        interactiveflag = isatty (STDIN_FILENO);
+      if (!BE (interactive))
+        BE (interactive) = isatty (STDIN_FILENO);
       initialized = true;
     }
-  return interactiveflag;
+  return BE (interactive);
 }
 
 int
@@ -209,7 +207,7 @@ yesorno (bool default_answer, char const *question, ...)
   va_list args;
   register int c, r;
 
-  if (!quietflag && ttystdin ())
+  if (!BE (quiet) && ttystdin ())
     {
       oflush ();
       va_start (args, question);
@@ -400,7 +398,7 @@ putadmin (void)
       aprintf (fout, "\n\t%s:%s", curlock->login, curlock->delta->num);
       curlock = curlock->nextlock;
     }
-  if (StrictLocks)
+  if (BE (strictly_locking))
     aprintf (fout, "; %s", Kstrict);
   aprintf (fout, ";\n");
   if (Comment.size)

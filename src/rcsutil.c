@@ -331,7 +331,7 @@ catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
 
   ignoreints ();
   setrid ();
-  if (!quietflag)
+  if (!BE (quiet))
     {
       /* Avoid calling `sprintf' etc., in case they're not reentrant.  */
       char const *p;
@@ -1135,5 +1135,8 @@ now (void)
 
 char const equal_line[] =
   "=============================================================================\n";
+
+/* Behavior control.  */
+struct behavior behavior;
 
 /* rcsutil.c ends here */

@@ -28,10 +28,6 @@ static struct hshentry *nexthsh;
 /* Next token, set by `nextlex'.  */
 enum tokens nexttok;
 
-/* If true, next suitable lexeme will be entered
-   into the symbol table.  Handle with care.  */
-bool hshenter;
-
 /* Next input character, initialized by `Lexinit'.  */
 int nextc;
 
@@ -40,9 +36,6 @@ long rcsline;
 
 /* Counter for errors.  */
 int nerror;
-
-/* Indicates quiet mode.  */
-bool quietflag;
 
 /* Input file descriptor.  */
 RILE *finptr;
@@ -137,7 +130,7 @@ Lexinit (void)
   if (finptr)
     {
       foutptr = NULL;
-      hshenter = true;
+      BE (receptive_to_next_hash_key) = true;
       ignored_phrases = false;
       rcsline = 1;
       bufrealloc (&tokbuf, 2);
@@ -150,8 +143,8 @@ Lexinit (void)
 void
 nextlex (void)
 /* Read the next token and set `nexttok' to the next token code.
-   Only if `hshenter' is set, a revision number is entered into the
-   hashtable and a pointer to it is placed into `nexthsh'.
+   Only if `receptive_to_next_hash_key', a revision number is entered
+   into the hashtable and a pointer to it is placed into `nexthsh'.
    This is useful for avoiding that dates are placed into the hashtable.
    For ID's and NUM's, NextString is set to the character string.
    Assumption: `nextc' contains the next character.  */
@@ -224,7 +217,7 @@ nextlex (void)
           if (d == DIGIT || d == PERIOD)
             {
               d = NUM;
-              if (hshenter)
+              if (BE (receptive_to_next_hash_key))
                 {
                   lookup (tokbuf.string);
                   break;
@@ -366,7 +359,7 @@ struct hshentry *
 getnum (void)
 /* Check if `nexttok' is a number.  If so, advance the input by calling
    `nextlex' and return a pointer to the hashtable entry.  Otherwise
-   returns NULL.  Doesn't work if `hshenter' is false.  */
+   returns NULL.  Doesn't work if not `receptive_to_next_hash_key'.  */
 {
   register struct hshentry *num;
 
@@ -1247,7 +1240,7 @@ warn (char const *format, ...)
 {
   va_list args;
 
-  if (!quietflag)
+  if (!BE (quiet))
     {
       warnsay (NULL);
       va_start (args, format);
@@ -1264,7 +1257,7 @@ rcswarn (char const *format, ...)
 {
   va_list args;
 
-  if (!quietflag)
+  if (!BE (quiet))
     {
       warnsay (RCSname);
       va_start (args, format);
@@ -1281,7 +1274,7 @@ workwarn (char const *format, ...)
 {
   va_list args;
 
-  if (!quietflag)
+  if (!BE (quiet))
     {
       warnsay (workname);
       va_start (args, format);
@@ -1307,7 +1300,7 @@ diagnose (char const *format, ...)
 {
   va_list args;
 
-  if (!quietflag)
+  if (!BE (quiet))
     {
       oflush ();
       va_start (args, format);
@@ -1392,12 +1385,13 @@ main (int argc, char *argv[])
           break;
 
         case NUM:
-          if (hshenter)
+          if (BE (receptive_to_next_hash_key))
             printf ("NUM: %s, index: %d", nexthsh->num,
                     nexthsh - hshtab);
           else
             printf ("NUM, unentered: %s", NextString);
-          hshenter = !hshenter;     /*alternate between dates and numbers */
+          /* Alternate between dates and numbers.  */
+          BE (receptive_to_next_hash_key) = !BE (receptive_to_next_hash_key);
           break;
 
         case COLON:

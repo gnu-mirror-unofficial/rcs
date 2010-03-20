@@ -597,7 +597,6 @@ int merge (bool, char const *, char const *const[3], char const *const[3]);
 extern FILE *fcopy;
 extern char const *resultname;
 extern char const ciklog[ciklogsize];
-extern bool locker_expansion;
 RILE *rcswriteopen (struct buf *, struct stat *, bool);
 char const *makedirtemp (bool);
 char const *getcaller (void);
@@ -664,7 +663,6 @@ void bufscpy (struct buf *, char const *);
 void tempunlink (void);
 
 /* rcsgen */
-extern bool interactiveflag;
 extern struct buf curlogbuf;
 char const *buildrevision (struct hshentries const *,
                            struct hshentry *, FILE *, bool);
@@ -693,10 +691,8 @@ extern FILE *frewrite;
 extern RILE *finptr;
 extern char const *NextString;
 extern enum tokens nexttok;
-extern bool hshenter;
 extern int nerror;
 extern int nextc;
-extern bool quietflag;
 extern long rcsline;
 char const *getid (void);
 void efaterror (char const *) exiting;
@@ -810,7 +806,6 @@ extern struct cbuf Ignored;
 extern struct rcslock *Locks;
 extern struct hshentry *Head;
 extern int Expand;
-extern bool StrictLocks;
 extern int TotalDeltas;
 extern char const *const expand_names[];
 extern char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
@@ -926,5 +921,50 @@ struct program
   void (*exiterr) (void) exiting;
 };
 extern const struct program program;
+
+/* A program controls the behavior of subsystems by setting these.
+   Subsystems also communicate via these settings.  */
+struct behavior
+{
+  bool quiet;
+  /* This is set from command-line option `-q'.  When set:
+     - disable all yn -- yesorno
+     - disable warnings -- warn rcswarn workwarn
+     - disable error messages -- diagnose catchsigaction
+     - don't ask about overwriting a writable workfile
+     - on missing RCS file, suppress error and init instead -- pairnames
+     - [ident] suppress no-keywords-found warning
+     - [rcs] suppress yn when outdating all revisions
+     - [rcsclean] suppress progress output  */
+
+  bool interactive;
+  /* Should we act as if stdin is a tty?  Set from `-I'.  When set:
+     - enables stdin flushing and newline output -- getcstdin
+     - enables yn (masked by `quiet', above) -- yesorno
+     - enables "enter FOO terminated by ." message -- getsstdin
+     - [co] when workfile writable, include name in error message  */
+
+  bool inclusive_of_Locker_in_Id_val;
+  /* If set, append locker val when expanding `Id' and locking.  */
+
+  bool receptive_to_next_hash_key;
+  /* If set, next suitable lexeme will be entered into the
+     symbol table -- nextlex.  Handle with care.  */
+
+  bool strictly_locking;
+  /* When set:
+     - don't inhibit error when removing self-lock -- removelock
+     - enable error if not self-lock -- addelta
+     - generate "; strict" in RCS file -- putadmin
+     - [ci] ???
+     - [co] conspires w/ kwsub_v to make workfile readonly
+     - [rlog] display "strict"  */
+};
+extern struct behavior behavior;
+
+/* In the future we plan to change `behavior' to be a part of
+   another structure, as part of a no-more-globals campaign.
+   This abstraction keeps the invasiveness to a minimum.  */
+#define BE(quality)  (behavior. quality)
 
 /* rcsbase.h ends here */

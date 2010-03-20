@@ -291,7 +291,7 @@ InitAdmin (void)
   AccessList = NULL;
   Symbols = NULL;
   Locks = NULL;
-  StrictLocks = STRICT_LOCKING;
+  BE (strictly_locking) = STRICT_LOCKING;
 
   /* Guess the comment leader from the suffix.  */
   Suffix = bindex (workname, '.');
@@ -956,7 +956,7 @@ main (int argc, char *argv[])
   int result;
   bool initflag;
 
-  quietflag = initflag = false;
+  BE (quiet) = initflag = false;
 
   while (--argc, ++argv, argc >= 1 && ((*argv)[0] == '-'))
     {
@@ -970,7 +970,7 @@ main (int argc, char *argv[])
           initflag = true;
           break;
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
           break;
         default:
           error ("unknown option: %s", *argv);
@@ -981,7 +981,7 @@ main (int argc, char *argv[])
   do
     {
       RCSname = workname = NULL;
-      result = pairnames (argc, argv, rcsreadopen, !initflag, quietflag);
+      result = pairnames (argc, argv, rcsreadopen, !initflag, BE (quiet));
       if (result != 0)
         {
           diagnose

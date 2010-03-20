@@ -200,7 +200,7 @@ main (int argc, char **argv)
           goto handle_revision;
 
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
           /* fall into */
         case 'r':
         handle_revision:
@@ -289,8 +289,8 @@ main (int argc, char **argv)
           continue;
 
         waslocked = delta && delta->lockedby;
-        locker_expansion = unlock (delta);
-        unlocked = locker_expansion & unlockflag;
+        BE (inclusive_of_Locker_in_Id_val) = unlock (delta);
+        unlocked = BE (inclusive_of_Locker_in_Id_val) & unlockflag;
         if (unlocked < waslocked
             && workstat.st_mode & (S_IWUSR | S_IWGRP | S_IWOTH))
           continue;
@@ -317,7 +317,7 @@ main (int argc, char **argv)
                            delta))
           continue;
 
-        if (quietflag < unlocked)
+        if (BE (quiet) < unlocked)
           aprintf (stdout, "rcs -u%s %s\n", delta->num, RCSname);
 
         if (perform & unlocked)
@@ -331,7 +331,7 @@ main (int argc, char **argv)
               continue;
           }
 
-        if (!quietflag)
+        if (!BE (quiet))
           aprintf (stdout, "rm -f %s\n", workname);
         Izclose (&workptr);
         if (perform && un_link (workname) != 0)
@@ -339,7 +339,7 @@ main (int argc, char **argv)
       }
 
   tempunlink ();
-  if (!quietflag)
+  if (!BE (quiet))
     Ofclose (stdout);
   return exitstatus;
 }

@@ -120,7 +120,7 @@ scanfile (register FILE *file, char const *name)
             continue;
           if (ferror (stdout))
             return -1;
-          quietflag = true;
+          BE (quiet) = true;
         }
       c = getc (file);
     }
@@ -134,7 +134,7 @@ scanfile (register FILE *file, char const *name)
       fflush (stdout);
       exiterr ();
     }
-  if (!quietflag)
+  if (!BE (quiet))
     fprintf (stderr, "%s warning: no id keywords in %s\n", program.name, name);
   return 0;
 }
@@ -169,7 +169,7 @@ main (int argc, char **argv)
       switch (*a)
         {
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
           break;
 
         case 'V':

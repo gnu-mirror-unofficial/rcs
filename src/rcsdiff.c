@@ -270,7 +270,7 @@ main (int argc, char **argv)
             *dcp++ = c;
             break;
           case 'q':
-            quietflag = true;
+            BE (quiet) = true;
             break;
           case 'x':
             suffixarg = *argv;

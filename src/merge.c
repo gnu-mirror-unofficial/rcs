@@ -86,7 +86,7 @@ main (int argc, char **argv)
           tostdout = true;
           break;
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
           break;
 
         case 'L':

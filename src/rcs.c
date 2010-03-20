@@ -1059,7 +1059,7 @@ buildtree (void)
       }
   else
     {
-      if (!cuttail && !quietflag)
+      if (!cuttail && !BE (quiet))
         {
           if (!yesorno
               (false,
@@ -1345,11 +1345,11 @@ main (int argc, char **argv)
           break;
 
         case 'I':
-          interactiveflag = true;
+          BE (interactive) = true;
           break;
 
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
           break;
 
         case 'x':
@@ -1435,8 +1435,8 @@ main (int argc, char **argv)
         /* Update admin. node.  */
         if (strict_selected)
           {
-            changed |= StrictLocks ^ strictlock;
-            StrictLocks = strictlock;
+            changed |= BE (strictly_locking) ^ strictlock;
+            BE (strictly_locking) = strictlock;
           }
         if (commsyml &&
             (commsymlen != Comment.size ||

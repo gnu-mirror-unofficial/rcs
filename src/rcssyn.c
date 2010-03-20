@@ -54,7 +54,6 @@ struct access *AccessList;
 struct assoc *Symbols;
 struct rcslock *Locks;
 int Expand;
-bool StrictLocks;
 struct hshentry *Head;
 char const *Dbranch;
 int TotalDeltas;
@@ -200,7 +199,7 @@ getadmin (void)
   *LastLock = NULL;
   getsemi (Klocks);
 
-  if ((StrictLocks = getkeyopt (Kstrict)))
+  if ((BE (strictly_locking) = getkeyopt (Kstrict)))
     getsemi (Kstrict);
 
   clear_buf (&Comment);
@@ -249,13 +248,13 @@ ignorephrases (const char *key)
       if (nexttok != ID || strcmp (NextString, key) == 0)
         break;
       warnignore ();
-      hshenter = false;
+      BE (receptive_to_next_hash_key) = false;
       for (;; nextlex ())
         {
           switch (nexttok)
             {
             case SEMI:
-              hshenter = true;
+              BE (receptive_to_next_hash_key) = true;
               break;
             case ID:
             case NUM:
@@ -309,10 +308,10 @@ getdelta (void)
     return false;
 
   /* Don't enter dates into hashtable.  */
-  hshenter = false;
+  BE (receptive_to_next_hash_key) = false;
   Delta->date = getkeyval (Kdate, NUM, false);
-  /* Reset hshenter for revision numbers.  */
-  hshenter = true;
+  /* Reset BE (receptive_to_next_hash_key) for revision numbers.  */
+  BE (receptive_to_next_hash_key) = true;
 
   Delta->author = getkeyval (Kauthor, ID, false);
 

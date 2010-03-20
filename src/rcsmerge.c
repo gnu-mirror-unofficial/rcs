@@ -93,7 +93,7 @@ main (int argc, char **argv)
           goto revno;
 
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
         revno:
           if (!*a)
             break;

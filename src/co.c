@@ -83,7 +83,7 @@ rmworkfile (void)
                                ? ""
                                : ", and you do not own it")))
         {
-          error (!quietflag && ttystdin ()
+          error (!BE (quiet) && ttystdin ()
                  ? "checkout aborted"
                  : "writable %s exists; checkout aborted", workname);
           return false;
@@ -346,7 +346,7 @@ buildjoin (char const *initialfile)
       mergev[3] = subs.string;
       mergev[5] = joinlist[i + 1];
       p = &mergev[6];
-      if (quietflag)
+      if (BE (quiet))
         *p++ = quietarg;
       if (lastjoin <= i + 2 && workstdout)
         *p++ = "-p";
@@ -482,11 +482,11 @@ main (int argc, char **argv)
           goto revno;
 
         case 'I':
-          interactiveflag = true;
+          BE (interactive) = true;
           goto revno;
 
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
           goto revno;
 
         case 'd':
@@ -697,7 +697,7 @@ main (int argc, char **argv)
             /* Skip description (don't echo).  */
             getdesc (false);
 
-            locker_expansion = 0 < lockflag;
+            BE (inclusive_of_Locker_in_Id_val) = 0 < lockflag;
             targetdelta->name = namedrev (rev, targetdelta);
             joinname = buildrevision (gendeltas, targetdelta,
                                       joinflag && tostdout ? NULL : neworkptr,
@@ -741,7 +741,7 @@ main (int argc, char **argv)
           {
             mode_t m = WORKMODE (RCSstat.st_mode,
                                  !(Expand == kwsub_v
-                                   || (lockflag <= 0 && StrictLocks)));
+                                   || (lockflag <= 0 && BE (strictly_locking))));
             time_t t = mtimeflag
               && newdate ? date2time (newdate) : (time_t) - 1;
             aflush (neworkptr);

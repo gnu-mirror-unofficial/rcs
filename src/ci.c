@@ -120,7 +120,7 @@ removelock (struct hshentry *delta)
 /* Find the lock held by caller on `delta',
    remove it, and return nonzero if successful.
    Print an error message and return -1 if there is no such lock.
-   An exception is if `!StrictLocks', and caller is the owner of
+   An exception is if `!strictly_locking', and caller is the owner of
    the RCS file.  If caller does not have a lock in this case,
    return 0; return 1 if a lock is actually removed.  */
 {
@@ -144,7 +144,7 @@ removelock (struct hshentry *delta)
             return -1;
           }
       }
-  if (!StrictLocks && myself (RCSstat.st_uid))
+  if (!BE (strictly_locking) && myself (RCSstat.st_uid))
     return 0;
   rcserror ("no lock set by %s for revision %s", getcaller (), num);
   return -1;
@@ -330,7 +330,7 @@ addelta (void)
 
         case 0:
           /* No existing lock; try `Dbranch'.  Update `newdelnum'.  */
-          if (StrictLocks || !myself (RCSstat.st_uid))
+          if (BE (strictly_locking) || !myself (RCSstat.st_uid))
             {
               rcserror ("no lock set by %s", getcaller ());
               return -1;
@@ -669,11 +669,11 @@ main (int argc, char **argv)
           goto revno;
 
         case 'I':
-          interactiveflag = true;
+          BE (interactive) = true;
           goto revno;
 
         case 'q':
-          quietflag = true;
+          BE (quiet) = true;
           goto revno;
 
         case 'f':
@@ -1131,7 +1131,7 @@ main (int argc, char **argv)
           {
             newworkmode = WORKMODE (RCSstat.st_mode,
                                     !(Expand == kwsub_v
-                                      || lockthis < StrictLocks));
+                                      || lockthis < BE (strictly_locking)));
             mtime = mtimeflag ? wtime : (time_t) - 1;
 
             /* Expand if it might change or if we can't fix mode, time.  */
@@ -1139,7 +1139,7 @@ main (int argc, char **argv)
               {
                 Irewind (workptr);
                 /* Expand keywords in file.  */
-                locker_expansion = lockthis;
+                BE (inclusive_of_Locker_in_Id_val) = lockthis;
                 workdelta->name =
                   namedrev (assoclst ? assoclst->ssymbol
                             : keepflag && *prevname.string ? prevname.string
