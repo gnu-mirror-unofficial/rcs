@@ -23,9 +23,6 @@
 #include "rcsbase.h"
 #include <ctype.h>
 
-bool prevkeys;
-struct buf prevauthor, prevdate, prevname, prevrev, prevstate;
-
 static bool
 badly_terminated (void)
 {
@@ -114,14 +111,15 @@ getval (register RILE *fp, struct buf *target, bool optional)
 
 static int
 keepdate (RILE *fp)
-/* Read a date `prevdate'; check format.
+/* Read a date; check format; if ok, set `PREV (date)'.
    Return 0 on error, lookahead character otherwise.  */
 {
-  struct buf prevday, prevtime;
+  struct buf prevday, prevtime, date;
   register int c;
 
   c = 0;
   bufautobegin (&prevday);
+  bufautobegin (&date);
   if (getval (fp, &prevday, false))
     {
       bufautobegin (&prevtime);
@@ -132,17 +130,19 @@ keepdate (RILE *fp)
             {
               register char const *d = prevday.string, *t = prevtime.string;
 
-              bufalloc (&prevdate, strlen (d) + strlen (t) + 9);
-              sprintf (prevdate.string, "%s%s %s%s",
+              bufalloc (&date, strlen (d) + strlen (t) + 9);
+              sprintf (date.string, "%s%s %s%s",
                        /* Parse dates put out by old versions of RCS.  */
                        (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2])
                         ? "19" : ""),
                        d, t, (strchr (t, '-') || strchr (t, '+')
                               ? "" : "+0000"));
+              PREV (date) = fbuf_save (&date);
             }
         }
       bufautoend (&prevtime);
     }
+  bufautoend (&date);
   bufautoend (&prevday);
   return c;
 }
@@ -180,9 +180,17 @@ checknum (char const *s)
 
 static bool
 keeprev (RILE *fp)
-/* Get previous revision from `fp' into `prevrev'.  */
+/* Get previous revision from `fp' into `b'.  */
 {
-  return getval (fp, &prevrev, false) && checknum (prevrev.string);
+  struct buf rev;
+  bool rv;
+
+  bufautobegin (&rev);
+  if ((rv = (getval (fp, &rev, false)
+             && checknum (rev.string))))
+    PREV (rev) = fbuf_save (&rev);
+  bufautoend (&rev);
+  return rv;
 }
 
 bool
@@ -190,7 +198,7 @@ getoldkeys (register RILE *fp)
 /* Try to read keyword values for author, date, revision number, and
    state out of the file `fp'.  If `fp' is NULL, `workname' is opened
    and closed instead of using `fp'.  The results are placed into
-   `prevauthor', `prevdate', `prevname', `prevrev', `prevstate'.  On
+   MANI (prev): .author, .date, .name, .rev and .state members.  On
    error, stop searching and return false.  Returning true doesn't mean
    that any of the values were found; instead, caller must check to see
    whether the corresponding arrays contain the empty string.  */
@@ -198,9 +206,10 @@ getoldkeys (register RILE *fp)
   register int c;
   char keyword[keylength + 1];
   register char *tp;
-  bool needs_closing, prevname_found;
+  bool needs_closing;
+  struct buf author, name, state;
 
-  if (prevkeys)
+  if (PREV (valid))
     return true;
 
   needs_closing = false;
@@ -214,13 +223,21 @@ getoldkeys (register RILE *fp)
       needs_closing = true;
     }
 
-  /* Initializee to empty.  */
-  bufscpy (&prevauthor, "");
-  bufscpy (&prevdate, "");
-  bufscpy (&prevname, "");
-  prevname_found = false;
-  bufscpy (&prevrev, "");
-  bufscpy (&prevstate, "");
+  /* Initialize to empty.  */
+#define CLEAR(which)  do                        \
+    {                                           \
+      bufautobegin (&which);                    \
+      PREV (which) = NULL;                      \
+    }                                           \
+  while (0);
+  CLEAR (author);
+  CLEAR (name);
+  CLEAR (state);
+#undef CLEAR
+
+#define KEEPID(c,which)                         \
+  (keepid (c, fp, &which)                       \
+   && (PREV (which) = fbuf_save (&which)))
 
   /* We can use anything but `KDELIM' here.  */
   c = '\0';
@@ -268,27 +285,27 @@ getoldkeys (register RILE *fp)
           switch (trymatch (keyword))
             {
             case Author:
-              if (!keepid (0, fp, &prevauthor))
-                return false;
+              if (!KEEPID ('\0', author))
+                goto badness;
               c = 0;
               break;
             case Date:
               if (!(c = keepdate (fp)))
-                return false;
+                goto badness;
               break;
             case Header:
             case Id:
               if (!(getval (fp, NULL, false)
                     && keeprev (fp)
                     && (c = keepdate (fp))
-                    && keepid (c, fp, &prevauthor)
-                    && keepid (0, fp, &prevstate)))
-                return false;
+                    && KEEPID (c, author)
+                    && KEEPID ('\0', state)))
+                goto badness;
               /* Skip either ``who'' (new form) or ``Locker: who'' (old).  */
               if (getval (fp, NULL, true) && getval (fp, NULL, true))
                 c = 0;
               else if (nerror)
-                return false;
+                goto badness;
               else
                 c = KDELIM;
               break;
@@ -300,26 +317,26 @@ getoldkeys (register RILE *fp)
             case RCSfile:
             case Source:
               if (!getval (fp, NULL, false))
-                return false;
+                goto badness;
               c = 0;
               break;
             case Name:
-              if (getval (fp, &prevname, false))
+              if (getval (fp, &name, false))
                 {
-                  if (*prevname.string)
-                    checkssym (prevname.string);
-                  prevname_found = true;
+                  if (*name.string)
+                    checkssym (name.string);
+                  PREV (name) = fbuf_save (&name);
                 }
               c = 0;
               break;
             case Revision:
               if (!keeprev (fp))
-                return false;
+                goto badness;
               c = 0;
               break;
             case State:
-              if (!keepid (0, fp, &prevstate))
-                return false;
+              if (!KEEPID ('\0', state))
+                goto badness;
               c = 0;
               break;
             default:
@@ -330,11 +347,11 @@ getoldkeys (register RILE *fp)
           if (c != KDELIM)
             {
               workerror ("closing %c missing on keyword", KDELIM);
-              return false;
+              goto badness;
             }
-          if (prevname_found
-              && *prevauthor.string && *prevdate.string
-              && *prevrev.string && *prevstate.string)
+          if (PREV (name)
+              && PREV (author) && PREV (date)
+              && PREV (rev) && PREV (state))
             break;
         }
       Igeteof (fp, c, goto ok);
@@ -345,8 +362,24 @@ getoldkeys (register RILE *fp)
     Ifclose (fp);
   else
     Irewind (fp);
-  prevkeys = true;
+  /* Prune empty strings.  */
+#define PRUNE(which)                            \
+  if (PREV (which) && ! *PREV (which))          \
+    PREV (which) = NULL
+  PRUNE (name);
+  PRUNE (author);
+  PRUNE (date);
+  PRUNE (rev);
+  PRUNE (state);
+#undef PRUNE
+  PREV (valid) = true;
   return true;
+
+ badness:
+  bufautoend (&author);
+  bufautoend (&name);
+  bufautoend (&state);
+  return false;
 }
 
 #ifdef KEEPTEST
@@ -362,8 +395,8 @@ main (int argc, char *argv[])
       workname = *argv;
       getoldkeys (NULL);
       printf ("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
-              *argv, prevrev.string, prevdate.string, prevauthor.string,
-              prevname.string, prevstate.string);
+              *argv, PREV (rev), PREV (date), PREV (author),
+              PREV (name), PREV (state));
     }
   return EXIT_SUCCESS;
 }

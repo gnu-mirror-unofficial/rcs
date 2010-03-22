@@ -851,19 +851,19 @@ main (int argc, char **argv)
         krev = rev;
         if (keepflag)
           {
-            /* get keyword values from working file */
+            /* Get keyword values from working file.  */
             if (!getoldkeys (workptr))
               continue;
-            if (!rev && !*(krev = prevrev.string))
+            if (!rev && !(krev = PREV (rev)))
               {
                 workerror ("can't find a revision number");
                 continue;
               }
-            if (!*prevdate.string && *altdate == '\0' && usestatdate == false)
+            if (!PREV (date) && *altdate == '\0' && usestatdate == false)
               workwarn ("can't find a date");
-            if (!*prevauthor.string && !author)
+            if (!PREV (author) && !author)
               workwarn ("can't find an author");
-            if (!*prevstate.string && !state)
+            if (!PREV (state) && !state)
               workwarn ("can't find a state");
           }
         /* (End processing keepflag.)  */
@@ -893,9 +893,9 @@ main (int argc, char **argv)
         if (author)
           /* Given by `-w'.  */
           newdelta.author = author;
-        else if (keepflag && *prevauthor.string)
+        else if (keepflag && PREV (author))
             /* Preserve old author if possible.  */
-          newdelta.author = prevauthor.string;
+          newdelta.author = PREV (author);
         else
           /* Otherwise use caller's id.  */
           newdelta.author = getcaller ();
@@ -905,9 +905,9 @@ main (int argc, char **argv)
         if (state)
           /* Given by `-s'.  */
           newdelta.state = state;
-        else if (keepflag && *prevstate.string)
+        else if (keepflag && PREV (state))
           /* Preserve old state if possible.  */
-          newdelta.state = prevstate.string;
+          newdelta.state = PREV (state);
 
         /* Compute date.  */
         if (usestatdate)
@@ -917,10 +917,10 @@ main (int argc, char **argv)
         if (*altdate != '\0')
           /* Given by `-d'.  */
           newdelta.date = altdate;
-        else if (keepflag && *prevdate.string)
+        else if (keepflag && PREV (date))
           {
             /* Preserve old date if possible.  */
-            str2date (prevdate.string, olddate);
+            str2date (PREV (date), olddate);
             newdelta.date = olddate;
           }
         else
@@ -939,8 +939,8 @@ main (int argc, char **argv)
         if (lockflag && addlock (&newdelta, true) < 0)
           continue;
 
-        if (keepflag && *prevname.string)
-          if (addsymbol (newdelta.num, prevname.string, false) < 0)
+        if (keepflag && PREV (name))
+          if (addsymbol (newdelta.num, PREV (name), false) < 0)
             continue;
         if (!addsyms (newdelta.num))
           continue;
@@ -1141,9 +1141,12 @@ main (int argc, char **argv)
                 /* Expand keywords in file.  */
                 BE (inclusive_of_Locker_in_Id_val) = lockthis;
                 workdelta->name =
-                  namedrev (assoclst ? assoclst->ssymbol
-                            : keepflag && *prevname.string ? prevname.string
-                            : rev, workdelta);
+                  namedrev (assoclst
+                            ? assoclst->ssymbol
+                            : (keepflag && PREV (name)
+                               ? PREV (name)
+                               : rev),
+                            workdelta);
                 switch (xpandfile (workptr, workdelta, &newworkname, dolog))
                   {
                   default:

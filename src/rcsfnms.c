@@ -24,9 +24,8 @@
 #include <stdint.h>
 
 char const *RCSname;
-char *workname;
+struct manifestation manifestation;
 int fdlock;
-FILE *workstdout;
 struct stat RCSstat;
 char const *suffixes;
 
@@ -681,7 +680,7 @@ pairnames (int argc, char **argv,
   if (paired && workstdout)
     workwarn ("Working file ignored due to -p option");
 
-  prevkeys = false;
+  PREV (valid) = false;
   return finptr ? 1 : -1;
 }
 

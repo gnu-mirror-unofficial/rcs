@@ -626,12 +626,12 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
     {
       if (!getoldkeys (fp))
         return false;
-      if (!*prevrev.string)
+      if (!PREV (rev))
         {
           workerror ("working file lacks revision number");
           return false;
         }
-      bufscpy (target, prevrev.string);
+      bufscpy (target, PREV (rev));
       return true;
     }
   tlim = tp + target->size;

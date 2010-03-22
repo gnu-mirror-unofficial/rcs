@@ -1,5 +1,29 @@
 2010-03-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Consolidate workfile state into `struct manifestation'.
+
+	* rcsbase.h (manifestation): New struct.
+	(manifestation): New `struct manifestation' decl.
+	(MANI, workname, workstdout, PREV): New macros.
+	(workname, workstdout, prevkeys, prevauthor, prevdate)
+	(prevname, prevrev, prevstate): Delete var decls.
+	* rcsfnms.c (workname, workstdout): Delete vars.
+	(manifestation): New `struct manifestation'.
+	(pairnames): Use `PREV (valid)'.
+	* rcskeep.c (prevkeys): Delete var.
+	(prevauthor, prevdate, prevname, prevrev, prevstate): Likewise.
+	(keepdate): Set `PREV (date)' directly.
+	(keeprev): Set `PREV (rev)' directly.
+	(getoldkeys): Set `PREV (foo)' state; use `PREV (foo)' directly;
+	add "consider empty string as not given" processing.
+	(main): Use `PREV (rev)', `PREV (date)',
+	`PREV (author)', `PREV (name)', `PREV (state)'.
+	* rcsrev.c (fexpandsym): Use `PREV (rev)'.
+	* ci.c (main): Use `PREV (rev)', `PREV (date)',
+	`PREV (author)', `PREV (state)', `PREV (name)'.
+
+2010-03-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: fbuf_save
 
 	* rcsbase.h (fbuf_save): New func decl.

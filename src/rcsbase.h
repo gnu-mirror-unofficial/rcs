@@ -638,8 +638,6 @@ int rcsfcmp (RILE *, struct stat const *, char const *,
 /* rcsfnms */
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
-extern FILE *workstdout;
-extern char *workname;
 extern char const *RCSname;
 extern char const *suffixes;
 extern int fdlock;
@@ -677,8 +675,6 @@ void putdesc (bool, char *);
 void putdftext (struct hshentry const *, RILE *, FILE *, bool);
 
 /* rcskeep */
-extern bool prevkeys;
-extern struct buf prevauthor, prevdate, prevname, prevrev, prevstate;
 bool getoldkeys (RILE *);
 
 /* rcskeys */
@@ -966,5 +962,35 @@ extern struct behavior behavior;
    another structure, as part of a no-more-globals campaign.
    This abstraction keeps the invasiveness to a minimum.  */
 #define BE(quality)  (behavior. quality)
+
+/* The working file is a manifestation of a particular revision.  */
+struct manifestation
+{
+  /* What it's called on disk; may be relative,
+     unused if writing to stdout.
+     -- rcsreadopen  */
+  char *filename;
+
+  /* [co] Use this if writing to stdout.  */
+  FILE *standard_output;
+
+  /* Previous keywords, to accomodate `ci -k'.
+     -- getoldkeys  */
+  struct {
+    bool valid;
+    char *author;
+    char *date;
+    char *name;
+    char *rev;
+    char *state;
+  } prev;
+};
+extern struct manifestation manifestation;
+
+#define MANI(member)  (manifestation. member)
+#define workname      (MANI (filename))
+#define workstdout    (MANI (standard_output))
+
+#define PREV(which)  (MANI (prev). which)
 
 /* rcsbase.h ends here */
