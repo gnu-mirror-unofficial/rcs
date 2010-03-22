@@ -86,6 +86,7 @@ test-prep:
         then : ; else							\
 	  rm -rf 0pre ; mkdir 0pre 0pre/bin 0pre/stash ;		\
 	  cp -p $(bin_PROGRAMS) *.o *.a bother.c 0pre/stash ;		\
+	  rm -f $(bin_PROGRAMS) ;					\
 	  $(MAKE) all bindir=$$(pwd)/0pre/bin >/dev/null ;		\
 	  $(MAKE) xorlf >/dev/null ;					\
 	  mv -v $(bin_PROGRAMS) xorlf 0pre/bin ;			\

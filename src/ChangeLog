@@ -1,3 +1,10 @@
+2010-03-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Make "make test-prep" more robust.
+
+	* Makefile.am (test-prep): Explicitly
+	delete $(bin_PROGRAMS) to force relink.
+
 2010-03-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Consolidate some global booleans into `struct behavior'.
