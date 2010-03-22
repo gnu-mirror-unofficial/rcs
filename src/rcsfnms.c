@@ -802,8 +802,7 @@ isSLASH (int c)
 #endif
 }
 
-#if !defined HAVE_GETWD && !defined HAVE_GETWD
-
+#if !defined HAVE_GETCWD && !defined HAVE_GETWD
 char *
 getcwd (char *path, size_t size)
 {
@@ -932,7 +931,7 @@ getcwd (char *path, size_t size)
   *p = '\0';
   return path;
 }
-#endif  /* !defined HAVE_GETWD && !defined HAVE_GETWD (FIXME?) */
+#endif  /* !defined HAVE_GETCWD && !defined HAVE_GETWD */
 
 #ifdef PAIRTEST
 /* This is a test program for `pairnames' and `getfullRCSname'.  */
