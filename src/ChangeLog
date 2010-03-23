@@ -1,3 +1,18 @@
+2010-03-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Add abstraction: fbuf_save
+
+	* rcsbase.h (fbuf_save): New func decl.
+	(fstr_save): Delete func decl.
+	* rcsutil.c (fbuf_save): New func.
+	(fstr_save): Delete func.
+	* rcs.c (doassoc): Use `fbuf_save'.
+	* rlog.c (getnumericrev): Likewise.
+	* rcslex.c (lookup): Don't take `char *'; instead, take
+	`struct buf *'; use `fbuf_save'; update callers.
+	(nextlex): Use `fbuf_save'.
+	(getphrases): Use `strncpy' for saving `key'.
+
 2010-03-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Fix cpp conditional regression introduced 2010-02-17.

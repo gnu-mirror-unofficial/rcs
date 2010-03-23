@@ -836,7 +836,7 @@ void zone_set (char const *);
 extern int RCSversion;
 FILE *fopenSafer (char const *, char const *);
 char *cgetenv (char const *);
-char *fstr_save (char const *);
+char *fbuf_save (const struct buf *);
 char *str_save (char const *);
 char const *getusername (bool);
 int fdSafer (int);

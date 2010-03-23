@@ -808,7 +808,7 @@ doassoc (void)
             {
               p = NULL;
               if (expandsym (curassoc->revno, &numrev))
-                p = fstr_save (numrev.string);
+                p = fbuf_save (&numrev);
             }
           else if (!(p = tiprev ()))
             rcserror ("no latest revision to associate with symbol %s",

@@ -759,8 +759,8 @@ getnumericrev (void)
         {
           pt = ftalloc (struct Revpairs);
           pt->numfld = n;
-          pt->strtrev = fstr_save (rstart->string);
-          pt->endrev = fstr_save (rend->string);
+          pt->strtrev = fbuf_save (rstart);
+          pt->endrev = fbuf_save (rend);
           pt->rnext = Revlst;
           Revlst = pt;
         }
@@ -770,8 +770,10 @@ getnumericrev (void)
   if (branchflag && (Dbranch || Head))
     {
       pt = ftalloc (struct Revpairs);
-      pt->strtrev = pt->endrev =
-        Dbranch ? Dbranch : fstr_save (partialno (&s, Head->num, 1));
+      pt->strtrev = pt->endrev = Dbranch ? Dbranch
+        : (partialno (&s, Head->num, 1),
+           fbuf_save (&s),
+           s.string);
       pt->rnext = Revlst;
       Revlst = pt;
       pt->numfld = countnumflds (pt->strtrev);

@@ -118,13 +118,11 @@ str_save (char const *s)
 }
 
 char *
-fstr_save (char const *s)
-/* Save `s' in storage that will be deallocated
+fbuf_save (const struct buf *b)
+/* Save `b->string' in storage that will be deallocated
    when we're done with this file.  */
 {
-  size_t ssiz = strlen (s) + 1;
-
-  return strncpy (ftnalloc (char, ssiz), s, ssiz);
+  return strncpy (ftestalloc (1 + b->size), b->string, b->size);
 }
 
 char *

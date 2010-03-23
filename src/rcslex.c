@@ -78,12 +78,13 @@ warnignore (void)
 }
 
 static void
-lookup (char const *str)
-/* Look up the character string pointed to by `str' in the hashtable.
+lookup (const struct buf *b)
+/* Look up the character string pointed to by `b->string' in the hashtable.
    If the string is not present, a new entry for it is created.  In any
    case, the address of the corresponding hashtable entry is placed into
    `nexthsh'.  */
 {
+  char const *str = b->string;
   register unsigned ihash;      /* index into hashtable */
   register char const *sp;
   register struct hshentry *n, **p;
@@ -100,7 +101,7 @@ lookup (char const *str)
       {
         /* Empty slot found.  */
         *p = n = ftalloc (struct hshentry);
-        n->num = fstr_save (str);
+        n->num = fbuf_save (b);
         n->nexthsh = NULL;
 #ifdef LEXDB
         printf ("\nEntered: %s at %u ", str, ihash);
@@ -219,11 +220,11 @@ nextlex (void)
               d = NUM;
               if (BE (receptive_to_next_hash_key))
                 {
-                  lookup (tokbuf.string);
+                  lookup (&tokbuf);
                   break;
                 }
             }
-          NextString = fstr_save (tokbuf.string);
+          NextString = fbuf_save (&tokbuf);
           break;
 
         case SBEGIN:           /* long string */
@@ -511,7 +512,13 @@ getphrases (char const *key)
                     break;
                   default:
                     nextc = c;
-                    NextString = fstr_save (key);
+                    {
+                      /* FIXME: {Re-}move redundant `strlen' call.
+                         All callers are key = Kfoo (constant strings).  */
+                      size_t ksiz = strlen (key) + 1;
+
+                      NextString = strncpy (ftestalloc (ksiz), key, ksiz);
+                    }
                     nexttok = ID;
                     uncache (fin);
                     goto returnit;
