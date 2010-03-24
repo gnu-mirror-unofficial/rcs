@@ -1,5 +1,12 @@
 2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Add braces to disambiguate `else' clause.
+
+	* rcsedit.c [!large_memory] (copylines):
+	Add braces to disambiguate `else' clause.
+
+2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Define type for `pairnames' "rcsopen" func.
 
 	* rcsbase.h (open_rcsfile_fn_t): New typedef.

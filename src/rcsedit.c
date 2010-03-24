@@ -333,29 +333,31 @@ copylines (register long upto, struct hshentry const *delta)
   fe = fedit;
   fc = fcopy;
   if (editline < upto)
-    if (delta)
-      do
-        {
-          if (expandline (fe, fc, delta, false, NULL, true) <= 1)
-            editLineNumberOverflow ();
-        }
-      while (++editline < upto);
-    else
-      {
-        setupcache (fe);
-        cache (fe);
+    {
+      if (delta)
         do
           {
-            do
-              {
-                cachegeteof (c, editLineNumberOverflow ());
-                aputc (c, fc);
-              }
-            while (c != '\n');
+            if (expandline (fe, fc, delta, false, NULL, true) <= 1)
+              editLineNumberOverflow ();
           }
         while (++editline < upto);
-        uncache (fe);
-      }
+      else
+        {
+          setupcache (fe);
+          cache (fe);
+          do
+            {
+              do
+                {
+                  cachegeteof (c, editLineNumberOverflow ());
+                  aputc (c, fc);
+                }
+              while (c != '\n');
+            }
+          while (++editline < upto);
+          uncache (fe);
+        }
+    }
 }
 #endif  /* !large_memory */
 
