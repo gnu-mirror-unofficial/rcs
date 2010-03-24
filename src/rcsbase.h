@@ -861,12 +861,8 @@ void readAccessFilenameBuffer (char const *, unsigned char const *);
 # define catchmmapints()
 # endif
 #endif
-#if defined HAVE_GETUID
 uid_t ruid (void);
-#define myself(u)  ((u) == ruid())
-#else
-#define myself(u)  true
-#endif
+bool myself (uid_t);
 #if defined HAVE_SETUID
 uid_t euid (void);
 void nosetid (void);

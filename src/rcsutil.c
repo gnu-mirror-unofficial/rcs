@@ -1043,14 +1043,27 @@ getRCSINIT (int argc, char **argv, char ***newargv)
 }
 
 #define cacheid(E)  static uid_t i; static int s; if (!s) { s = 1; i= (E); } return i
-
-#if defined HAVE_GETUID
 uid_t
 ruid (void)
 {
+#ifndef HAVE_GETUID
+  /* Programmer error: We used to conditionally define `ruid'
+     (only when `defined HAVE_GETUID'), so it makes no sense
+     to call it otherwise.  */
+  abort ();
+#endif
   cacheid (getuid ());
 }
+
+bool
+myself (uid_t u)
+{
+#ifndef HAVE_GETUID
+  return true;
+#else
+  return u == ruid ();
 #endif
+}
 
 #if defined HAVE_SETUID
 uid_t

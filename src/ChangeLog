@@ -1,5 +1,15 @@
 2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Define `ruid', `myself' unconditionally.
+
+	* rcsutil.c (ruid): Remove surrounding preproc conditional.
+	(ruid) [!HAVE_GETUID]: Abort; programmer error.
+	(myself): New func.
+	* rcsbase.h (ruid): Declare func unconditionally.
+	(myself): New func decl.
+
+2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Push `#if has_NFS || BAD_UNLINK' for `un_link' out of header.
 
 	* rcsedit.c (un_link): Restructure to use #define:s in code.
