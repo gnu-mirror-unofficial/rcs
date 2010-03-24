@@ -663,7 +663,7 @@ escape_string (register FILE *out, register char const *s)
       }
 }
 
-char const ciklog[ciklogsize] = "checked in with -k by ";
+const char const ciklog[ciklogsize] = "checked in with -k by ";
 
 static void
 keyreplace (enum markers marker, register struct hshentry const *delta,

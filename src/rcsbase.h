@@ -596,7 +596,7 @@ int merge (bool, char const *, char const *const[3], char const *const[3]);
 #define ciklogsize 23           /* sizeof ("checked in with -k by ") */
 extern FILE *fcopy;
 extern char const *resultname;
-extern char const ciklog[ciklogsize];
+extern const char const ciklog[ciklogsize];
 RILE *rcswriteopen (struct buf *, struct stat *, bool);
 char const *makedirtemp (bool);
 char const *getcaller (void);
@@ -678,7 +678,7 @@ void putdftext (struct hshentry const *, RILE *, FILE *, bool);
 bool getoldkeys (RILE *);
 
 /* rcskeys */
-extern char const *const Keyword[];
+extern const char const *const Keyword[];
 enum markers trymatch (char const *);
 
 /* rcslex */
@@ -755,7 +755,7 @@ void Irewind (RILE *);
 #endif
 
 /* rcsmap */
-extern enum tokens const ctab[];
+extern const enum tokens const ctab[];
 
 /* rcsrev */
 char *partialno (struct buf *, char const *, int);
@@ -798,8 +798,8 @@ extern struct rcslock *Locks;
 extern struct hshentry *Head;
 extern int Expand;
 extern int TotalDeltas;
-extern char const *const expand_names[];
-extern char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
+extern const char const *const expand_names[];
+extern const char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
   Kdate[], Kdesc[], Kexpand[], Khead[], Klocks[], Klog[],
   Knext[], Kstate[], Kstrict[], Ksymbols[], Ktext[];
 void unexpected_EOF (void) exiting;
@@ -899,7 +899,7 @@ extern const char const prog_diff3[];
 extern const char const diff_flags[];
 
 /* A string of 77 '=' followed by '\n'.  */
-extern char const equal_line[];
+extern const char const equal_line[];
 
 /* Every program defines this.  */
 struct program

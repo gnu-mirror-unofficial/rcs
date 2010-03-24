@@ -1,5 +1,21 @@
 2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Dose data structures with `const'.
+
+	* rcsbase.h (ciklog, Keyword, ctab, expand_names, Kaccess)
+	(Kauthor, Kbranch, Kcomment, Kdate, Kdesc, Kexpand, Khead)
+	(Klocks, Klog, Knext, Kstate, Kstrict, Ksymbols, Ktext)
+	(equal_line): Add `const' to var decls.
+	* rcsedit.c (ciklog): Add `const' to var definition.
+	* rcskeys.c (Keyword): Likewise.
+	* rcsmap.c (ctab): Likewise.
+	* rcssyn.c (Kaccess, Kauthor, Kbranch, Kcomment, Kdate)
+	(Kdesc, Kexpand, Khead, Klocks, Klog, Knext, Kstate)
+	(Kstrict, Ksymbols, Ktext, expand_names): Likewise.
+	* rcsutil.c (equal_line): Likewise.
+
+2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Consolidate parse state into `struct parse_state'.
 
 	Here, "U" means "Throughout, use `LEX (foo)' and `NEXT (foo)'

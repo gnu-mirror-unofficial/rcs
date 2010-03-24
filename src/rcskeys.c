@@ -22,7 +22,7 @@
 
 #include "rcsbase.h"
 
-char const *const Keyword[] = {
+const char const *const Keyword[] = {
   /* This must be in the same order as rcsbase.h's enum markers type.  */
   NULL,
   AUTHOR, DATE, HEADER, IDH,

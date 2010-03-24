@@ -1131,7 +1131,7 @@ now (void)
   return t;
 }
 
-char const equal_line[] =
+const char const equal_line[] =
   "=============================================================================\n";
 
 /* Behavior control.  */

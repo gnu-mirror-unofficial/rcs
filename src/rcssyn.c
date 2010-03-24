@@ -24,7 +24,7 @@
 #include <ctype.h>
 
 /* Keyword table.  */
-char const
+const char const
   Kaccess[] = "access",
   Kauthor[] = "author",
   Kbranch[] = "branch",
@@ -77,7 +77,7 @@ getdnum (void)
   return delta;
 }
 
-char const *const expand_names[] = {
+const char const *const expand_names[] = {
   /* These must agree with kwsub_* in rcsbase.h.  */
   "kv", "kvl", "k", "v", "o", "b",
   NULL
