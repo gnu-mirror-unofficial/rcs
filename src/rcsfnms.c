@@ -544,8 +544,7 @@ fin2open (char const *d, size_t dlen,
 }
 
 int
-pairnames (int argc, char **argv,
-           RILE *(*rcsopen) (struct buf *, struct stat *, bool),
+pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
            bool mustread, bool quiet)
 /* Pair the pathnames pointed to by `argv'; `argc' indicates how many there
    are.  Place a pointer to the RCS pathname into `RCSname', and a pointer to

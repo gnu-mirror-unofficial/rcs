@@ -1,5 +1,13 @@
 2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Define type for `pairnames' "rcsopen" func.
+
+	* rcsbase.h (open_rcsfile_fn_t): New typedef.
+	(pairnames): Use `open_rcsfile_fn_t' in func decl.
+	* rcsfnms.c (pairnames): Use `open_rcsfile_fn_t' in arglist.
+
+2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Dose data structures with `const'.
 
 	* rcsbase.h (ciklog, Keyword, ctab, expand_names, Kaccess)

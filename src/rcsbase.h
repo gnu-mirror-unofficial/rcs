@@ -589,6 +589,9 @@ enum markers
 /* This is used by ci and rlog.  */
 #define EMPTYLOG "*** empty log message ***"
 
+/* The function `pairnames' takes to open the RCS file.  */
+typedef RILE * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
+
 /* merge */
 int merge (bool, char const *, char const *const[3], char const *const[3]);
 
@@ -649,9 +652,7 @@ char const *getfullRCSname (void);
 void set_temporary_file_name (struct buf *filename, const char *prefix);
 char const *maketemp (int);
 char const *rcssuffix (char const *);
-int pairnames (int, char **,
-               RILE * (*) (struct buf *, struct stat *, bool), /* TODO: typedef */
-               bool, bool);
+int pairnames (int, char **, open_rcsfile_fn_t *, bool, bool);
 struct cbuf bufremember (struct buf *, size_t);
 void bufalloc (struct buf *, size_t);
 void bufautoend (struct buf *);
