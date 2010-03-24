@@ -1,5 +1,15 @@
 2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Push `#if large_memory' for `editstring' out of header.
+
+	* rcsedit.c (UNUSED_IF_LARGE_MEMORY): New #define.
+	(editstring): Use `UNUSED_IF_LARGE_MEMORY' for param `delta';
+	remove preproc conditional surrounding func header.
+	* rcsbase.h (editstring): Remove surrounding preproc
+	conditional, including sibling block `#if large_memory'.
+
+2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Add braces to disambiguate `else' clause.
 
 	* rcsedit.c [!large_memory] (copylines):

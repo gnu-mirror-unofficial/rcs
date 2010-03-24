@@ -627,12 +627,7 @@ int un_link (char const *);
 #else
 #define un_link(s)  unlink (s)
 #endif
-#if large_memory
-void edit_string (void);
-#define editstring(delta)  edit_string ()
-#else
 void editstring (struct hshentry const *);
-#endif
 
 /* rcsfcmp */
 int rcsfcmp (RILE *, struct stat const *, char const *,

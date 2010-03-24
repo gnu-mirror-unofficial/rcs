@@ -487,12 +487,14 @@ enterstring (void)
 #endif  /* large_memory */
 }
 
-void
 #if large_memory
-edit_string (void)
+#define UNUSED_IF_LARGE_MEMORY  RCS_UNUSED
 #else
-editstring (struct hshentry const *delta)
+#define UNUSED_IF_LARGE_MEMORY
 #endif
+
+void
+editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
 /* Read an edit script from `finptr' and applies it to the edit file.
 #if !large_memory
    The result is written to `fcopy'.
