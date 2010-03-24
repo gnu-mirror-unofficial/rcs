@@ -622,11 +622,7 @@ void keepdirtemp (char const *);
 void openfcopy (FILE *);
 void snapshotedit (FILE *);
 void xpandstring (struct hshentry const *);
-#if has_NFS || BAD_UNLINK
 int un_link (char const *);
-#else
-#define un_link(s)  unlink (s)
-#endif
 void editstring (struct hshentry const *);
 
 /* rcsfcmp */

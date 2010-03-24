@@ -1,5 +1,13 @@
 2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Push `#if has_NFS || BAD_UNLINK' for `un_link' out of header.
+
+	* rcsedit.c (un_link): Restructure to use #define:s in code.
+	* rcsbase.h (un_link): Remove surrounding preproc conditional,
+	including sibling `#if ! (has_NFS || BAD_UNLINK)' block.
+
+2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Push `#if large_memory' for `editstring' out of header.
 
 	* rcsedit.c (UNUSED_IF_LARGE_MEMORY): New #define.

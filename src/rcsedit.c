@@ -68,37 +68,36 @@ static struct sff sff[SFF_COUNT];
 #define lockname    (sff[SFFI_LOCKDIR].filename.string)
 #define newRCSname  (sff[SFFI_NEWDIR].filename.string)
 
-#if has_NFS || BAD_UNLINK
 int
 un_link (char const *s)
 /* Remove `s', even if it is unwritable.
    Ignore `unlink' `ENOENT' failures; NFS generates bogus ones.  */
 {
-#if BAD_UNLINK
-  if (unlink (s) == 0)
-    return 0;
+  int rv = unlink (s);
+
+  if (0 == rv)
+    /* Good news, don't do anything.  */
+    ;
   else
     {
-      int e = errno;
-
-      /* Forge ahead even if `errno == ENOENT'; some completely
-         brain-damaged hosts (e.g. PCTCP 2.2) return `ENOENT' even for
-         existing unwritable files.  */
-      if (chmod (s, S_IWUSR) != 0)
+      if (BAD_UNLINK)
         {
-          errno = e;
-          return -1;
-        }
-    }
-#endif  /* BAD_UNLINK */
+          int e = errno;
 
-#if has_NFS
-  return unlink (s) == 0 || errno == ENOENT ? 0 : -1;
-#else
-  return unlink (s);
-#endif
+          /* Forge ahead even if `errno == ENOENT';
+             some completely brain-damaged hosts (e.g. PCTCP 2.2)
+             return `ENOENT' even for existing unwritable files.  */
+          if (chmod (s, S_IWUSR) != 0)
+            {
+              errno = e;
+              rv = -1;
+            }
+        }
+      if (has_NFS && ENOENT == errno)
+        rv = 0;
+    }
+  return rv;
 }
-#endif  /* has_NFS || BAD_UNLINK */
 
 static void
 editEndsPrematurely (void)
