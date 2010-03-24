@@ -1,3 +1,29 @@
+2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Consolidate parse state into `struct parse_state'.
+
+	Here, "U" means "Throughout, use `LEX (foo)' and `NEXT (foo)'
+        instead of the old singular variable names".
+	* rcsbase.h (parse_state): New struct.
+	(parse_state): New `struct parse_state' decl.
+	(LEX, NEXT): New macros.
+	(NextString, nexttok, nerror, nextc, rcsline): Delete var decls.
+	* rcslex.c: U.
+	(parse_state): New `struct parse_state'.
+	(nexttok, nextc, rcsline, nerror, NextString): Delete vars.
+	* ci.c: U.
+	* co.c: U.
+	* merge.c: U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsedit.c: U.
+	* rcsgen.c: U.
+	* rcskeep.c: U.
+	* rcsmerge.c: U.
+	* rcssyn.c: U.
+	* rlog.c: U.
+
 2010-03-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Consolidate workfile state into `struct manifestation'.

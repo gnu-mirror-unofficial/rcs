@@ -120,7 +120,7 @@ main (int argc, char **argv)
   for (; labels < 3; labels++)
     label[labels] = arg[labels];
 
-  if (nerror)
+  if (LEX (nerr))
     exiterr ();
   return merge (tostdout, edarg, label, arg);
 }

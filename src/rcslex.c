@@ -22,20 +22,10 @@
 
 #include "rcsbase.h"
 
+struct parse_state parse_state;
+
 /* Pointer to next hash entry, set by `lookup'.  */
 static struct hshentry *nexthsh;
-
-/* Next token, set by `nextlex'.  */
-enum tokens nexttok;
-
-/* Next input character, initialized by `Lexinit'.  */
-int nextc;
-
-/* Current line-number of input.  */
-long rcsline;
-
-/* Counter for errors.  */
-int nerror;
 
 /* Input file descriptor.  */
 RILE *finptr;
@@ -48,9 +38,6 @@ FILE *foutptr;
 
 /* Token buffer.  */
 static struct buf tokbuf;
-
-/* Next token.  */
-char const *NextString;
 
 /* Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
    so hshsize should be odd.
@@ -73,7 +60,7 @@ warnignore (void)
   if (!ignored_phrases)
     {
       ignored_phrases = true;
-      rcswarn ("Unknown phrases like `%s ...;' are present.", NextString);
+      rcswarn ("Unknown phrases like `%s ...;' are present.", NEXT (str));
     }
 }
 
@@ -112,13 +99,13 @@ lookup (const struct buf *b)
       /* Match found.  */
       break;
   nexthsh = n;
-  NextString = n->num;
+  NEXT (str) = n->num;
 }
 
 void
 Lexinit (void)
 /* Initialize lexical analyzer: initialize the hashtable;
-   initialize nextc, nexttok if `finptr' != NULL.  */
+   initialize `NEXT (c)', `NEXT (tok)' if `finptr' != NULL.  */
 {
   register int c;
 
@@ -127,15 +114,15 @@ Lexinit (void)
       hshtab[c] = NULL;
     }
 
-  nerror = 0;
+  LEX (nerr) = 0;
   if (finptr)
     {
       foutptr = NULL;
       BE (receptive_to_next_hash_key) = true;
       ignored_phrases = false;
-      rcsline = 1;
+      LEX (lno) = 1;
       bufrealloc (&tokbuf, 2);
-      Iget (finptr, nextc);
+      Iget (finptr, NEXT (c));
       /* Initial token.  */
       nextlex ();
     }
@@ -143,12 +130,12 @@ Lexinit (void)
 
 void
 nextlex (void)
-/* Read the next token and set `nexttok' to the next token code.
+/* Read the next token and set `NEXT (tok)' to the next token code.
    Only if `receptive_to_next_hash_key', a revision number is entered
    into the hashtable and a pointer to it is placed into `nexthsh'.
    This is useful for avoiding that dates are placed into the hashtable.
-   For ID's and NUM's, NextString is set to the character string.
-   Assumption: `nextc' contains the next character.  */
+   For ID's and NUM's, `NEXT (str)' is set to the character string.
+   Assumption: `NEXT (c)' contains the next character.  */
 {
   register int c;
   declarecache;
@@ -162,7 +149,7 @@ nextlex (void)
   frew = foutptr;
   setupcache (fin);
   cache (fin);
-  c = nextc;
+  c = NEXT (c);
 
   for (;;)
     {
@@ -172,7 +159,7 @@ nextlex (void)
         default:
           fatserror ("unknown character `%c'", c);
         case NEWLN:
-          ++rcsline;
+          ++LEX (lno);
 #ifdef LEXDB
           afputc ('\n', stdout);
 #endif
@@ -224,13 +211,13 @@ nextlex (void)
                   break;
                 }
             }
-          NextString = fbuf_save (&tokbuf);
+          NEXT (str) = fbuf_save (&tokbuf);
           break;
 
         case SBEGIN:           /* long string */
           d = STRING;
           /* Note: Only the initial SBEGIN has been read.
-             Read the string, and reset `nextc' afterwards.  */
+             Read the string, and reset `NEXT (c)' afterwards.  */
           break;
 
         case COLON:
@@ -240,22 +227,22 @@ nextlex (void)
         }
       break;
     }
-  nextc = c;
-  nexttok = d;
+  NEXT (c) = c;
+  NEXT (tok) = d;
   uncache (fin);
 }
 
 bool
 eoflex (void)
 /* Return true if we look ahead to the end of the input, false otherwise.
-   `nextc' becomes undefined at end of file.  */
+   `NEXT (c)' becomes undefined at end of file.  */
 {
   register int c;
   declarecache;
   register FILE *fout;
   register RILE *fin;
 
-  c = nextc;
+  c = NEXT (c);
   fin = finptr;
   fout = foutptr;
   setupcache (fin);
@@ -266,12 +253,12 @@ eoflex (void)
       switch (ctab[c])
         {
         default:
-          nextc = c;
+          NEXT (c) = c;
           uncache (fin);
           return false;
 
         case NEWLN:
-          ++rcsline;
+          ++LEX (lno);
           /* fall into */
         case SPACE:
           cachegeteof (c,
@@ -288,12 +275,12 @@ eoflex (void)
 
 bool
 getlex (enum tokens token)
-/* Check if `nexttok' is the same as `token'.  If so, advance the input
+/* Check if `NEXT (tok)' is the same as `token'.  If so, advance the input
    by calling `nextlex' and return true.  Otherwise return false.
    Doesn't work for strings and keywords; loses the character string for
    ids.  */
 {
-  if (nexttok == token)
+  if (NEXT (tok) == token)
     {
       nextlex ();
       return (true);
@@ -308,10 +295,10 @@ getkeyopt (char const *key)
    advance the input by calling `nextlex' and return true;
    otherwise return false.  */
 {
-  if (nexttok == ID && strcmp (key, NextString) == 0)
+  if (NEXT (tok) == ID && strcmp (key, NEXT (str)) == 0)
     {
       /* Match found.  */
-      ffree1 (NextString);
+      ffree1 (NEXT (str));
       nextlex ();
       return true;
     }
@@ -334,21 +321,21 @@ getkeystring (char const *key)
    string.  */
 {
   getkey (key);
-  if (nexttok != STRING)
+  if (NEXT (tok) != STRING)
     fatserror ("missing string after '%s' keyword", key);
 }
 
 char const *
 getid (void)
-/* Check if `nexttok' is an identifier.  If so, advance the input by
+/* Check if `NEXT (tok)' is an identifier.  If so, advance the input by
    calling `nextlex' and return a pointer to the identifier; otherwise
    returns NULL.  Treat keywords as identifiers.  */
 {
   register char const *name;
 
-  if (nexttok == ID)
+  if (NEXT (tok) == ID)
     {
-      name = NextString;
+      name = NEXT (str);
       nextlex ();
       return name;
     }
@@ -358,13 +345,13 @@ getid (void)
 
 struct hshentry *
 getnum (void)
-/* Check if `nexttok' is a number.  If so, advance the input by calling
+/* Check if `NEXT (tok)' is a number.  If so, advance the input by calling
    `nextlex' and return a pointer to the hashtable entry.  Otherwise
    returns NULL.  Doesn't work if not `receptive_to_next_hash_key'.  */
 {
   register struct hshentry *num;
 
-  if (nexttok == NUM)
+  if (NEXT (tok) == NUM)
     {
       num = nexthsh;
       nextlex ();
@@ -397,7 +384,7 @@ getphrases (char const *key)
 #define savech_(c)  { if (limit <= p) p = bufenlarge (&b, &limit); *p++ = (c); }
 #endif  /* !large_memory */
 
-  if (nexttok != ID || strcmp (NextString, key) == 0)
+  if (NEXT (tok) != ID || strcmp (NEXT (str), key) == 0)
     clear_buf (&r);
   else
     {
@@ -407,15 +394,15 @@ getphrases (char const *key)
       setupcache (fin);
       cache (fin);
 #if large_memory
-      r.string = (char const *) cacheptr () - strlen (NextString) - 1;
+      r.string = (char const *) cacheptr () - strlen (NEXT (str)) - 1;
 #else  /* !large_memory */
       bufautobegin (&b);
-      bufscpy (&b, NextString);
+      bufscpy (&b, NEXT (str));
       p = b.string + strlen (b.string);
       limit = b.string + b.size;
 #endif  /* !large_memory */
-      ffree1 (NextString);
-      c = nextc;
+      ffree1 (NEXT (str));
+      c = NEXT (c);
       for (;;)
         {
           for (;;)
@@ -426,7 +413,7 @@ getphrases (char const *key)
                 default:
                   fatserror ("unknown character `%c'", c);
                 case NEWLN:
-                  ++rcsline;
+                  ++LEX (lno);
                   /* fall into */
                 case COLON:
                 case DIGIT:
@@ -446,7 +433,7 @@ getphrases (char const *key)
                           switch (c)
                             {
                             case '\n':
-                              ++rcsline;
+                              ++LEX (lno);
                               /* fall into */
                             default:
                               continue;
@@ -468,7 +455,7 @@ getphrases (char const *key)
                     {
                       if (frew)
                         aputc (c, frew);
-                      ++ rcsline;
+                      ++ LEX (lno);
                       savech_ (c)
                       cacheget (c);
                     }
@@ -480,7 +467,7 @@ getphrases (char const *key)
                       switch (ctab[c])
                         {
                         case NEWLN:
-                          ++rcsline;
+                          ++LEX (lno);
                           /* fall into */
                         case SPACE:
                           cacheget (c);
@@ -511,15 +498,15 @@ getphrases (char const *key)
                   case PERIOD:
                     break;
                   default:
-                    nextc = c;
+                    NEXT (c) = c;
                     {
                       /* FIXME: {Re-}move redundant `strlen' call.
                          All callers are key = Kfoo (constant strings).  */
                       size_t ksiz = strlen (key) + 1;
 
-                      NextString = strncpy (ftestalloc (ksiz), key, ksiz);
+                      NEXT (str) = strncpy (ftestalloc (ksiz), key, ksiz);
                     }
-                    nexttok = ID;
+                    NEXT (tok) = ID;
                     uncache (fin);
                     goto returnit;
                   }
@@ -534,7 +521,7 @@ getphrases (char const *key)
             }
           else
             {
-              nextc = c;
+              NEXT (c) = c;
               uncache (fin);
               nextlex ();
               break;
@@ -569,7 +556,7 @@ readstring (void)
       switch (c)
         {
         case '\n':
-          ++rcsline;
+          ++LEX (lno);
           break;
 
         case SDELIM:
@@ -577,7 +564,7 @@ readstring (void)
           if (c != SDELIM)
             {
               /* End of string.  */
-              nextc = c;
+              NEXT (c) = c;
               uncache (fin);
               return;
             }
@@ -606,13 +593,13 @@ printstring (void)
       switch (c)
         {
         case '\n':
-          ++rcsline;
+          ++LEX (lno);
           break;
         case SDELIM:
           cacheget (c);
           if (c != SDELIM)
             {
-              nextc = c;
+              NEXT (c) = c;
               uncache (fin);
               return;
             }
@@ -650,14 +637,14 @@ savestring (struct buf *target)
       switch (c)
         {
         case '\n':
-          ++rcsline;
+          ++LEX (lno);
           break;
         case SDELIM:
           GETC (frew, c);
           if (c != SDELIM)
             {
               /* End of string.  */
-              nextc = c;
+              NEXT (c) = c;
               r.string = target->string;
               r.size = tp - r.string;
               uncache (fin);
@@ -1120,7 +1107,7 @@ static void
 errsay (char const *s)
 {
   fatsay (s);
-  nerror++;
+  LEX (nerr)++;
 }
 
 static void
@@ -1208,7 +1195,7 @@ fatserror (char const *format, ...)
   va_list args;
 
   oflush ();
-  fprintf (stderr, "%s: %s:%ld: ", program.name, RCSname, rcsline);
+  fprintf (stderr, "%s: %s:%ld: ", program.name, RCSname, LEX (lno));
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1384,11 +1371,11 @@ main (int argc, char *argv[])
   Lexinit ();
   while (!eoflex ())
     {
-      switch (nexttok)
+      switch (NEXT (tok))
         {
 
         case ID:
-          printf ("ID: %s", NextString);
+          printf ("ID: %s", NEXT (str));
           break;
 
         case NUM:
@@ -1396,7 +1383,7 @@ main (int argc, char *argv[])
             printf ("NUM: %s, index: %d", nexthsh->num,
                     nexthsh - hshtab);
           else
-            printf ("NUM, unentered: %s", NextString);
+            printf ("NUM, unentered: %s", NEXT (str));
           /* Alternate between dates and numbers.  */
           BE (receptive_to_next_hash_key) = !BE (receptive_to_next_hash_key);
           break;

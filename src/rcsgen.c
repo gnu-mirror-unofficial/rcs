@@ -35,7 +35,7 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
    `delta->log' if `needlog' is set; `func' specifies how to handle the
    text.  Similarly, if `needlog', `delta->igtext' is set to the ignored
    phrases.  Assume the initial lexeme must be read in first.  Does not
-   advance `nexttok' after it is finished.  */
+   advance `NEXT (tok)' after it is finished.  */
 {
   struct hshentry const *nextdelta;
   struct cbuf cb;
@@ -248,7 +248,7 @@ putdesc (bool textflag, char *textfile)
   if (finptr && !textflag)
     {
       /* Copy old description.  */
-      aprintf (frew, "\n\n%s%c", Kdesc, nextc);
+      aprintf (frew, "\n\n%s%c", Kdesc, NEXT (c));
       foutptr = frewrite;
       getdesc (false);
       foutptr = NULL;

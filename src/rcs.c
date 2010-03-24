@@ -83,7 +83,7 @@ static struct hshentries *gendeltas;
 static void
 cleanup (void)
 {
-  if (nerror)
+  if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
   Izclose (&finptr);
   Ozclose (&fcopy);
@@ -332,7 +332,7 @@ scanlogtext (struct hshentry *delta, bool edit)
    `delta' (if `delta'), the log message is saved into `delta->log' if
    `delta == cuttail'; the text is edited if `edit' is set, else
    copied.  Assume the initial lexeme must be read in first.  Do not
-   advance `nexttok' after it is finished, except if `!delta'.  */
+   advance `NEXT (tok)' after it is finished, except if `!delta'.  */
 {
   struct hshentry const *nextdelta;
   struct cbuf cb;
@@ -371,7 +371,7 @@ scanlogtext (struct hshentry *delta, bool edit)
               readstring ();
               foutptr = frewrite;
               putstring (foutptr, false, nextdelta->log, true);
-              afputc (nextc, foutptr);
+              afputc (NEXT (c), foutptr);
             }
           else
             readstring ();
@@ -1379,7 +1379,7 @@ main (int argc, char **argv)
   /* (End processing of options.)  */
 
   /* Now handle all pathnames.  */
-  if (nerror)
+  if (LEX (nerr))
     cleanup ();
   else if (argc < 1)
     faterror ("no input file");
@@ -1513,7 +1513,7 @@ main (int argc, char **argv)
             keepRCStime = false;
           }
 
-        if (nerror)
+        if (LEX (nerr))
           continue;
 
         putadmin ();

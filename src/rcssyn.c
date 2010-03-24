@@ -127,13 +127,13 @@ getadmin (void)
   /* Read suffix.  Only in release 2 format.  */
   if (getkeyopt (Ksuffix))
     {
-      if (nexttok == STRING)
+      if (NEXT (tok) == STRING)
         {
           readstring ();
           /* Throw away the suffix.  */
           nextlex ();
         }
-      else if (nexttok == ID)
+      else if (NEXT (tok) == ID)
         {
           nextlex ();
         }
@@ -205,7 +205,7 @@ getadmin (void)
   clear_buf (&Comment);
   if (getkeyopt (Kcomment))
     {
-      if (nexttok == STRING)
+      if (NEXT (tok) == STRING)
         {
           Comment = savestring (&Commleader);
           nextlex ();
@@ -216,7 +216,7 @@ getadmin (void)
   Expand = kwsub_kv;
   if (getkeyopt (Kexpand))
     {
-      if (nexttok == STRING)
+      if (NEXT (tok) == STRING)
         {
           bufautobegin (&b);
           cb = savestring (&b);
@@ -245,20 +245,20 @@ ignorephrases (const char *key)
   for (;;)
     {
       nextlex ();
-      if (nexttok != ID || strcmp (NextString, key) == 0)
+      if (NEXT (tok) != ID || strcmp (NEXT (str), key) == 0)
         break;
       warnignore ();
       BE (receptive_to_next_hash_key) = false;
       for (;; nextlex ())
         {
-          switch (nexttok)
+          switch (NEXT (tok))
             {
             case SEMI:
               BE (receptive_to_next_hash_key) = true;
               break;
             case ID:
             case NUM:
-              ffree1 (NextString);
+              ffree1 (NEXT (str));
               continue;
             case STRING:
               readstring ();
@@ -282,9 +282,9 @@ getkeyval (char const *keyword, enum tokens token, bool optional)
   register char const *val = NULL;
 
   getkey (keyword);
-  if (nexttok == token)
+  if (NEXT (tok) == token)
     {
-      val = NextString;
+      val = NEXT (str);
       nextlex ();
     }
   else
@@ -359,7 +359,7 @@ gettree (void)
 
 void
 getdesc (bool prdesc)
-/* Read in descriptive text.  `nexttok' is not advanced afterwards.
+/* Read in descriptive text.  `NEXT (tok)' is not advanced afterwards.
    If `prdesc' is set, then print text to stdout.  */
 {
   getkeystring (Kdesc);
@@ -434,7 +434,7 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
               badDiffOutput (buf);
             }
           uncache (fin);
-          nextc = c;
+          NEXT (c) = c;
           if (fout)
             aprintf (fout, "%c%c", SDELIM, c);
           return -1;
@@ -453,7 +453,7 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
   while (c != '\n');
   uncache (fin);
   if (delimiter)
-    ++rcsline;
+    ++LEX (lno);
   *p = '\0';
   for (p = buf + 1; (c = *p++) == ' ';)
     continue;

@@ -149,7 +149,7 @@ main (int argc, char **argv)
     faterror ("no base revision number given");
 
   /* Now handle all pathnames.  */
-  if (!nerror)
+  if (!LEX (nerr))
     {
       if (argc < 1)
         faterror ("no input file");
@@ -224,7 +224,7 @@ main (int argc, char **argv)
         }
     }
   tempunlink ();
-  return nerror ? DIFF_TROUBLE : status;
+  return LEX (nerr) ? DIFF_TROUBLE : status;
 }
 
 /* rcsmerge.c ends here */

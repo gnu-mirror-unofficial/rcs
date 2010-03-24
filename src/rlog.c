@@ -84,7 +84,7 @@ static int exitstatus;
 static void
 cleanup (void)
 {
-  if (nerror)
+  if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
   Izclose (&finptr);
 }
@@ -279,7 +279,7 @@ getscript (struct hshentry *Delta)
                       continue;
                     if (--i)
                       unexpected_EOF ();
-                    nextc = c;
+                    NEXT (c) = c;
                     uncache (fin);
                     return;
                   case '\n':
@@ -287,7 +287,7 @@ getscript (struct hshentry *Delta)
                   }
                 break;
               }
-            ++rcsline;
+            ++LEX (lno);
           }
         while (--i);
         uncache (fin);
@@ -298,7 +298,7 @@ static struct hshentry const *
 readdeltalog (void)
 /* Get the log message and skip the text of a deltatext node.
    Return the delta found.  Assume the current lexeme is not
-   yet in nexttok; do not advance nexttok.  */
+   yet in `NEXT (tok)'; do not advance `NEXT (tok)'.  */
 {
   register struct hshentry *Delta;
   struct buf logbuf;
@@ -1058,7 +1058,7 @@ main (int argc, char **argv)
     }
 
   /* Now handle all pathnames.  */
-  if (nerror)
+  if (LEX (nerr))
     cleanup ();
   else if (argc < 1)
     faterror ("no input file");

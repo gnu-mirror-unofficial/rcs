@@ -46,7 +46,7 @@ static struct stat workstat;
 static void
 cleanup (void)
 {
-  if (nerror)
+  if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
   Izclose (&finptr);
   ORCSclose ();
@@ -363,7 +363,7 @@ buildjoin (char const *initialfile)
   return true;
 
 badmerge:
-  nerror++;
+  LEX (nerr)++;
   bufautoend (&commarg);
   bufautoend (&subs);
   return false;
@@ -565,7 +565,7 @@ main (int argc, char **argv)
   /* (End of option processing.)  */
 
   /* Now handle all pathnames.  */
-  if (nerror)
+  if (LEX (nerr))
     cleanup ();
   else if (argc < 1)
     faterror ("no input file");

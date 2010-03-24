@@ -397,7 +397,7 @@ copystring (void)
         {
         case '\n':
           ++editline;
-          ++rcsline;
+          ++LEX (lno);
           amidline = false;
           break;
         case SDELIM:
@@ -405,7 +405,7 @@ copystring (void)
           if (c != SDELIM)
             {
               /* End of string.  */
-              nextc = c;
+              NEXT (c) = c;
               editline += amidline;
               uncache (fin);
               return;
@@ -460,7 +460,7 @@ enterstring (void)
         {
         case '\n':
           ++e;
-          ++rcsline;
+          ++LEX (lno);
           amidline = false;
           break;
         case SDELIM:
@@ -468,7 +468,7 @@ enterstring (void)
           if (c != SDELIM)
             {
               /* End of string.  */
-              nextc = c;
+              NEXT (c) = c;
               editline = e + amidline;
               linecorr = 0;
               uncache (fin);
@@ -502,7 +502,7 @@ editstring (struct hshentry const *delta)
    Assumes that all these files are open.
    `resultname' is the name of the file that goes with `fcopy'.
    Assumes the next input character from `finptr' is the first
-   character of the edit script.  Resets `nextc' on exit.  */
+   character of the edit script.  Resets `NEXT (c)' on exit.  */
 {
   int ed;                               /* editor command */
   register int c;
@@ -605,7 +605,7 @@ editstring (struct hshentry const *delta)
                           {
                             if (--i)
                               editEndsPrematurely ();
-                            nextc = c;
+                            NEXT (c) = c;
                             uncache (fin);
                             return;
                           }
@@ -616,7 +616,7 @@ editstring (struct hshentry const *delta)
                     if (c == '\n')
                       break;
                   }
-                ++rcsline;
+                ++LEX (lno);
               }
             while (--i);
             uncache (fin);
@@ -940,7 +940,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                   if (c != SDELIM)
                     {
                       /* End of string.  */
-                      nextc = c;
+                      NEXT (c) = c;
                       goto uncache_exit;
                     }
                 }
@@ -951,7 +951,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
               break;
 
             case '\n':
-              rcsline += delimstuffed;
+              LEX (lno) += delimstuffed;
               aputc (c, out);
               r = 2;
               goto uncache_exit;
@@ -1014,7 +1014,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                             {
                               /* End of string before closing
                                  `KDELIM' or newline.  */
-                              nextc = c;
+                              NEXT (c) = c;
                               goto keystring_eof;
                             }
                         }
@@ -1588,7 +1588,7 @@ dorewrite (bool lockflag, int changed)
             return -1;
           putadmin ();
           puttree (Head, frewrite);
-          aprintf (frewrite, "\n\n%s%c", Kdesc, nextc);
+          aprintf (frewrite, "\n\n%s%c", Kdesc, NEXT (c));
           foutptr = frewrite;
         }
       else
@@ -1638,7 +1638,7 @@ donerewrite (int changed, time_t newRCStime)
   int lr, le;
 #endif
 
-  if (changed && !nerror)
+  if (changed && !LEX (nerr))
     {
       if (finptr)
         {

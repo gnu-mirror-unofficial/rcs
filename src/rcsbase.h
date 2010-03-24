@@ -685,11 +685,6 @@ enum markers trymatch (char const *);
 extern FILE *foutptr;
 extern FILE *frewrite;
 extern RILE *finptr;
-extern char const *NextString;
-extern enum tokens nexttok;
-extern int nerror;
-extern int nextc;
-extern long rcsline;
 char const *getid (void);
 void efaterror (char const *) exiting;
 void enfaterror (int, char const *) exiting;
@@ -992,5 +987,43 @@ extern struct manifestation manifestation;
 #define workstdout    (MANI (standard_output))
 
 #define PREV(which)  (MANI (prev). which)
+
+/* The parse state is used when reading the RCS file.  */
+struct parse_state
+{
+  int nerr;
+  /* Counter for errors.
+     -- buildjoin Lexinit errsay  */
+
+  struct next
+  {
+    enum tokens tok;
+    /* Character class and/or token code.
+       -- nextlex getphrases  */
+
+    int c;
+    /* Next input character, parallel with `tok'.
+       -- copystring enterstring editstring expandline
+       -- nextlex eoflex getphrases readstring printstring savestring
+       -- getdiffcmd
+       -- getscript
+       (all to restore stream at end-of-string).  */
+
+    char const *str;
+    /* Hold the next ID or NUM value.
+       -- lookup nextlex getphrases  */
+  } next;
+
+  long lno;
+  /* Current line-number of input.  FIXME: Make unsigned.
+     -- copystring enterstring editstring expandline
+     -- Lexinit nextlex eoflex getphrases readstring printstring savestring
+     -- getdiffcmd
+     -- getscript  */
+};
+extern struct parse_state parse_state;
+
+#define LEX(member)  (parse_state. member)
+#define NEXT(which)  (LEX (next). which)
 
 /* rcsbase.h ends here */
