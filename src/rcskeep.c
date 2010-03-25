@@ -310,7 +310,7 @@ getoldkeys (register RILE *fp)
                 c = KDELIM;
               break;
             case Locker:
-              (void) getval (fp, NULL, false);
+              getval (fp, NULL, false);
               c = 0;
               break;
             case Log:

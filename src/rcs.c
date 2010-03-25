@@ -1547,7 +1547,7 @@ main (int argc, char **argv)
               {
 #if BAD_CREAT0
                 mode_t m = umask (0);
-                (void) umask (m);
+                umask (m);
                 REPO (stat).st_mode = (S_IRUSR | S_IRGRP | S_IROTH) & ~m;
 #else
                 changed = -1;

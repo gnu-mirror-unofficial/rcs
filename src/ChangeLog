@@ -1,5 +1,12 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Remove spurious casts to void for function call.
+
+	* rcs.c (main): Remove cast to void for `umask' call.
+	* rcskeep.c (getoldkeys): Remove cast to void for `getval' call.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Dose data structures with `const'.
 
 	* maketime.c (month_yday): Add `const' to var definition.
