@@ -861,7 +861,7 @@ void setrid (void);
 #define setrid()
 #endif
 
-extern bool isSLASH (int c);
+bool isSLASH (int c);
 
 /* The locations of RCS programs, for internal use.  */
 extern const char const prog_co[];

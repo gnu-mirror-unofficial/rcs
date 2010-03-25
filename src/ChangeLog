@@ -1,5 +1,11 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Remove spurious `extern'.
+
+	* rcsbase.h (isSLASH): Remove `extern' on func decl.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move "keyword subtitution mode" into `struct behavior'.
 
 	Here, "U" means "Throughout, use `BE (kws)'".
