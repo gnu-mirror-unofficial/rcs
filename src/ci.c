@@ -628,7 +628,7 @@ main (int argc, char **argv)
   Ttimeflag = false;
   altdate[0] = '\0';            /* empty alternate date for -d */
   usestatdate = false;
-  suffixes = X_DEFAULT;
+  BE (pe) = X_DEFAULT;
   nextassoc = &assoclst;
 
   argc = getRCSINIT (argc, argv, &newargv);
@@ -758,7 +758,7 @@ main (int argc, char **argv)
           break;
 
         case 'x':
-          suffixes = a;
+          BE (pe) = a;
           break;
 
         case 'V':

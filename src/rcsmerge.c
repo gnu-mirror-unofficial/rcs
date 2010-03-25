@@ -80,7 +80,7 @@ main (int argc, char **argv)
   status = 0;                           /* Keep lint happy.  */
   tostdout = false;
   expandarg = suffixarg = versionarg = zonearg = quietarg;      /* no-op */
-  suffixes = X_DEFAULT;
+  BE (pe) = X_DEFAULT;
 
   argc = getRCSINIT (argc, argv, &newargv);
   argv = newargv;
@@ -117,7 +117,7 @@ main (int argc, char **argv)
 
         case 'x':
           suffixarg = *argv;
-          suffixes = a;
+          BE (pe) = a;
           break;
         case 'z':
           zonearg = *argv;

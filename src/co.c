@@ -436,7 +436,7 @@ main (int argc, char **argv)
   joinflag = NULL;
   bufautobegin (&numericrev);
   expmode = -1;
-  suffixes = X_DEFAULT;
+  BE (pe) = X_DEFAULT;
   tostdout = false;
   Ttimeflag = false;
 
@@ -535,7 +535,7 @@ main (int argc, char **argv)
 
         case 'x':
           suffixarg = *argv;
-          suffixes = a;
+          BE (pe) = a;
           break;
 
         case 'V':

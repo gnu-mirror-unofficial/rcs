@@ -164,7 +164,7 @@ main (int argc, char **argv)
 
   expmode = -1;
   rev = NULL;
-  suffixes = X_DEFAULT;
+  BE (pe) = X_DEFAULT;
   perform = true;
   unlockflag = false;
   Ttimeflag = false;
@@ -227,7 +227,7 @@ main (int argc, char **argv)
           break;
 
         case 'x':
-          suffixes = a;
+          BE (pe) = a;
           break;
 
         case 'z':

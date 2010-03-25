@@ -1159,7 +1159,7 @@ main (int argc, char **argv)
   curlock = &newlocklst;
   rmvlock = &rmvlocklst;
   expmode = -1;
-  suffixes = X_DEFAULT;
+  BE (pe) = X_DEFAULT;
   initflag = textflag = false;
   strict_selected = false;
   Ttimeflag = false;
@@ -1353,7 +1353,7 @@ main (int argc, char **argv)
           break;
 
         case 'x':
-          suffixes = a;
+          BE (pe) = a;
           break;
 
         case 'V':

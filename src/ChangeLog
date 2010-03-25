@@ -1,5 +1,22 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move "possible endings for RCS file" into `struct behavior'.
+
+	Here, "U" means "Throughout, use `BE (pe)'".
+	* rcsbase.h (suffixes): Delete var decl.
+	(behavior): Add `pe' to this struct.
+	* ci.c: U.
+	* co.c: U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsfnms.c: U.
+	(suffixes): Delete var.
+	* rcsmerge.c: U.
+	* rlog.c: U.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move "temporary log buffer" into `struct manifestation'.
 
 	Here, "U" means "Throughout, use `MANI (log)'".

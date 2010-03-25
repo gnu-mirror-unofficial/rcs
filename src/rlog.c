@@ -946,7 +946,7 @@ main (int argc, char **argv)
   descflag = selectflag = shownames = true;
   onlylockflag = onlyRCSflag = false;
   out = stdout;
-  suffixes = X_DEFAULT;
+  BE (pe) = X_DEFAULT;
 
   argc = getRCSINIT (argc, argv, &newargv);
   argv = newargv;
@@ -1006,7 +1006,7 @@ main (int argc, char **argv)
           break;
 
         case 'x':
-          suffixes = a;
+          BE (pe) = a;
           break;
 
         case 'z':

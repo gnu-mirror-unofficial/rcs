@@ -632,7 +632,6 @@ int rcsfcmp (RILE *, struct stat const *, char const *,
 /* rcsfnms */
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
-extern char const *suffixes;
 RILE *rcsreadopen (struct buf *, struct stat *, bool);
 char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
@@ -934,6 +933,14 @@ struct behavior
   /* The keyword substitution (aka "expansion") mode, or -1 (mu).
      FIXME: Unify with `enum kwsub'.
      -- [co]main [rcs]main [rcsclean]main InitAdmin getadmin  */
+
+  char const *pe;
+  /* Possible endings, a slash-separated list of filename-end
+     fragments to consider for recognizing the name of the RCS file.
+     FIXME: Push defaulting into library.
+     -- [ci]main [co]main [rcs]main [rcsclean]main [rcsdiff]main
+     -- rcssuffix
+     -- [rcsmerge]main [rlog]main  */
 };
 extern struct behavior behavior;
 

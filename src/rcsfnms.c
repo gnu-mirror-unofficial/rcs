@@ -25,7 +25,6 @@
 
 struct manifestation manifestation;
 struct repository repository;
-char const *suffixes;
 
 static char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
@@ -445,7 +444,7 @@ rcssuffix (char const *name)
 
   nl = strlen (name);
   nz = name + nl;
-  x = suffixes;
+  x = BE (pe);
   do
     {
       if ((xl = suffixlen (x)))
@@ -640,7 +639,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
           /* No RCS pathname was given.
              Try each suffix in turn.  */
           dlen = base - arg;
-          x = suffixes;
+          x = BE (pe);
           while (!fin2open (arg, dlen, base, baselen,
                             x, xlen = suffixlen (x), rcsopen, mustread))
             {

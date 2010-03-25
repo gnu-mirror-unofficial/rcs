@@ -178,7 +178,7 @@ main (int argc, char **argv)
 #endif
   expandarg = suffixarg = versionarg = zonearg = NULL;
   no_diff_means_no_output = true;
-  suffixes = X_DEFAULT;
+  BE (pe) = X_DEFAULT;
 
   /* Room for runv extra + args [+ --binary] [+ 2 labels]
      + 1 file + 1 trailing null.  */
@@ -273,7 +273,7 @@ main (int argc, char **argv)
             break;
           case 'x':
             suffixarg = *argv;
-            suffixes = *argv + 2;
+            BE (pe) = *argv + 2;
             goto option_handled;
           case 'z':
             zonearg = *argv;
