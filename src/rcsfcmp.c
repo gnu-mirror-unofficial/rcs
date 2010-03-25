@@ -70,7 +70,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
       efaterror (uname);
     }
   xeof = ueof = false;
-  if (MIN_UNEXPAND <= Expand)
+  if (MIN_UNEXPAND <= BE (kws))
     {
       if (!(result = xstatp->st_size != ustat.st_size))
         {

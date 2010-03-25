@@ -1,5 +1,26 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move "keyword subtitution mode" into `struct behavior'.
+
+	Here, "U" means "Throughout, use `BE (kws)'".
+	* rcsbase.h (Expand): Delete var decl.
+	(behavior): Add `kws' to this struct.
+	* ci.c: U.
+	* co.c: U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsedit.c: U.
+	* rcsfcmp.c: U.
+	* rcsfnms.c: U.
+	* rcsgen.c: U.
+	* rcsmerge.c: U.
+	* rcssyn.c: U.
+	(Expand): Delete var.
+	* rlog.c: U.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move "effective RCS version" into `struct behavior'.
 
 	Here, "U" means "Throughout, use `BE (version)'".

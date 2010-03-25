@@ -116,10 +116,10 @@ enum kwsub
 /* Text and binary i/o behave differently.
    This is incompatible with POSIX and Unix.  */
 #define FOPEN_RB "rb"
-#define FOPEN_R_WORK (Expand == kwsub_b ? "r" : "rb")
+#define FOPEN_R_WORK (BE (kws) == kwsub_b ? "r" : "rb")
 #define FOPEN_WB "wb"
-#define FOPEN_W_WORK (Expand == kwsub_b ? "w" : "wb")
-#define FOPEN_WPLUS_WORK (Expand == kwsub_b ? "w+" : "w+b")
+#define FOPEN_W_WORK (BE (kws) == kwsub_b ? "w" : "wb")
+#define FOPEN_WPLUS_WORK (BE (kws) == kwsub_b ? "w+" : "w+b")
 #define OPEN_O_BINARY O_BINARY
 #else
 /* Text and binary i/o behave the same.
@@ -778,7 +778,6 @@ struct diffcmd
   /* Sum of previous 'd' line1 and previous 'd' nlines.  */
   long dafter;
 };
-extern int Expand;
 extern const char const *const expand_names[];
 extern const char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
   Kdate[], Kdesc[], Kexpand[], Khead[], Klocks[], Klog[],
@@ -931,6 +930,11 @@ struct behavior
   /* The "effective RCS version", for backward compatability,
      normalized via `VERSION' (i.e., current 0, previous -1, etc).
      -- setRCSversion  */
+
+  int kws;
+  /* The keyword substitution (aka "expansion") mode, or -1 (mu).
+     FIXME: Unify with `enum kwsub'.
+     -- [co]main [rcs]main [rcsclean]main InitAdmin getadmin  */
 };
 extern struct behavior behavior;
 

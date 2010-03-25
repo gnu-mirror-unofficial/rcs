@@ -452,7 +452,7 @@ xpandfile (RILE *unexfile, struct hshentry const *delta,
       return -1;
     }
   r = 0;
-  if (MIN_UNEXPAND <= Expand)
+  if (MIN_UNEXPAND <= BE (kws))
     fastcopy (unexfile, exfile);
   else
     {
@@ -950,7 +950,7 @@ main (int argc, char **argv)
         puttree (ADMIN (head), frewrite);
         putdesc (false, textfile);
 
-        changework = Expand < MIN_UNCHANGED_EXPAND;
+        changework = BE (kws) < MIN_UNCHANGED_EXPAND;
         dolog = true;
         lockthis = lockflag;
         workdelta = &newdelta;
@@ -1069,7 +1069,7 @@ main (int argc, char **argv)
                 *++diffp = prog_diff;
                 *++diffp = diff_flags;
 #if OPEN_O_BINARY
-                if (Expand == kwsub_b)
+                if (BE (kws) == kwsub_b)
                   *++diffp = "--binary";
 #endif
                 *++diffp = newhead ? "-" : expname;
@@ -1131,7 +1131,7 @@ main (int argc, char **argv)
         else
           {
             newworkmode = WORKMODE (REPO (stat).st_mode,
-                                    !(Expand == kwsub_v
+                                    !(BE (kws) == kwsub_v
                                       || lockthis < BE (strictly_locking)));
             mtime = mtimeflag ? wtime : (time_t) - 1;
 

@@ -48,7 +48,6 @@ static char const
   K_branches[] = "branches";
 
 static struct buf Commleader;
-int Expand;
 
 static void
 getsemi (char const *key)
@@ -205,14 +204,14 @@ getadmin (void)
       getsemi (Kcomment);
     }
 
-  Expand = kwsub_kv;
+  BE (kws) = kwsub_kv;
   if (getkeyopt (Kexpand))
     {
       if (NEXT (tok) == STRING)
         {
           bufautobegin (&b);
           cb = savestring (&b);
-          if ((Expand = strn2expmode (cb.string, cb.size)) < 0)
+          if ((BE (kws) = strn2expmode (cb.string, cb.size)) < 0)
             fatserror ("unknown expand mode %.*s", (int) cb.size, cb.string);
           bufautoend (&b);
           nextlex ();

@@ -589,7 +589,7 @@ main (int argc, char **argv)
         if (tostdout)
           {
 #if OPEN_O_BINARY
-            int newmode = Expand == kwsub_b ? OPEN_O_BINARY : 0;
+            int newmode = BE (kws) == kwsub_b ? OPEN_O_BINARY : 0;
             if (stdout_mode != newmode)
               {
                 stdout_mode = newmode;
@@ -675,8 +675,8 @@ main (int argc, char **argv)
               continue;
 
             if (0 <= expmode)
-              Expand = expmode;
-            if (0 < lockflag && Expand == kwsub_v)
+              BE (kws) = expmode;
+            if (0 < lockflag && BE (kws) == kwsub_v)
               {
                 rcserror ("cannot combine -kv and -l");
                 continue;
@@ -701,7 +701,7 @@ main (int argc, char **argv)
             targetdelta->name = namedrev (rev, targetdelta);
             joinname = buildrevision (gendeltas, targetdelta,
                                       joinflag && tostdout ? NULL : neworkptr,
-                                      Expand < MIN_UNEXPAND);
+                                      BE (kws) < MIN_UNEXPAND);
 #if !large_memory
             if (fcopy == neworkptr)
               fcopy = NULL;             /* Don't close it twice.  */
@@ -731,7 +731,7 @@ main (int argc, char **argv)
                     aflush (neworkptr);
                     joinname = neworkname;
                   }
-                if (Expand == kwsub_b)
+                if (BE (kws) == kwsub_b)
                   workerror ("merging binary files");
                 if (!buildjoin (joinname))
                   continue;
@@ -740,7 +740,7 @@ main (int argc, char **argv)
         if (!tostdout)
           {
             mode_t m = WORKMODE (REPO (stat).st_mode,
-                                 !(Expand == kwsub_v
+                                 !(BE (kws) == kwsub_v
                                    || (lockflag <= 0 && BE (strictly_locking))));
             time_t t = mtimeflag
               && newdate ? date2time (newdate) : (time_t) - 1;

@@ -1138,8 +1138,8 @@ main (int argc, char **argv)
             awrite (ADMIN (log_lead).string, ADMIN (log_lead).size, out);
             afputc ('\"', out);
           }
-        if (!pre5 || Expand != kwsub_kv)
-          aprintf (out, "\nkeyword substitution: %s", expand_names[Expand]);
+        if (!pre5 || BE (kws) != kwsub_kv)
+          aprintf (out, "\nkeyword substitution: %s", expand_names[BE (kws)]);
 
         aprintf (out, "\ntotal revisions: %d", REPO (ndelt));
 

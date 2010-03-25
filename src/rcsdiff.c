@@ -396,7 +396,7 @@ main (int argc, char **argv)
           }
         else if (target->lockedby
                  && !lexpandarg
-                 && Expand == kwsub_kv
+                 && BE (kws) == kwsub_kv
                  && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
           lexpandarg = "-kkvl";
         Izclose (&workptr);
@@ -434,7 +434,7 @@ main (int argc, char **argv)
 
         diffp = diffpend;
 #if OPEN_O_BINARY
-        if (Expand == kwsub_b)
+        if (BE (kws) == kwsub_b)
           *diffp++ = "--binary";
 #endif
         diffp[0] = maketemp (0);

@@ -683,7 +683,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
   int exp;
 
   sp = Keyword[(int) marker];
-  exp = Expand;
+  exp = BE (kws);
   date = delta->date;
   RCSv = BE (version);
 

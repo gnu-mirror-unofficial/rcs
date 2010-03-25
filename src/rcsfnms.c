@@ -299,7 +299,7 @@ InitAdmin (void)
     continue;
   ADMIN (log_lead).string = comtable[i].comlead;
   ADMIN (log_lead).size = strlen (comtable[i].comlead);
-  Expand = kwsub_kv;
+  BE (kws) = kwsub_kv;
   clear_buf (&ADMIN (description));
   /* Note: If `!finptr', read nothing; only initialize.  */
   Lexinit ();

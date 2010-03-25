@@ -303,11 +303,11 @@ main (int argc, char **argv)
           continue;
 
         if (0 <= expmode)
-          Expand = expmode;
+          BE (kws) = expmode;
         else if (waslocked
-                 && Expand == kwsub_kv
+                 && BE (kws) == kwsub_kv
                  && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
-          Expand = kwsub_kvl;
+          BE (kws) = kwsub_kvl;
 
         getdesc (false);
 

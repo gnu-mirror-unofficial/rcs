@@ -408,9 +408,9 @@ putadmin (void)
       putstring (fout, true, ADMIN (log_lead), false);
       aprintf (fout, ";\n");
     }
-  if (Expand != kwsub_kv)
+  if (BE (kws) != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
-             Kexpand, SDELIM, expand_names[Expand], SDELIM);
+             Kexpand, SDELIM, expand_names[BE (kws)], SDELIM);
   awrite (ADMIN (description).string, ADMIN (description).size, fout);
   aputc ('\n', fout);
 }

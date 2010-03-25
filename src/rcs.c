@@ -1015,7 +1015,7 @@ buildeltatext (struct hshentries const *deltas)
       *++diffp = prog_diff;
       *++diffp = diff_flags;
 #if OPEN_O_BINARY
-      if (Expand == kwsub_b)
+      if (BE (kws) == kwsub_b)
         *++diffp == "--binary";
 #endif
       *++diffp = "-";
@@ -1446,9 +1446,9 @@ main (int argc, char **argv)
             ADMIN (log_lead).size = strlen (commsyml);
             changed = true;
           }
-        if (0 <= expmode && Expand != expmode)
+        if (0 <= expmode && BE (kws) != expmode)
           {
-            Expand = expmode;
+            BE (kws) = expmode;
             changed = true;
           }
 

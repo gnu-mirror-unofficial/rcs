@@ -158,7 +158,7 @@ main (int argc, char **argv)
 
           if (argc > 2 || (argc == 2 && argv[1]))
             warn ("excess arguments ignored");
-          if (Expand == kwsub_b)
+          if (BE (kws) == kwsub_b)
             workerror ("merging binary files");
           diagnose ("RCS file: %s\n", REPO (filename));
           if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, NULL)))
