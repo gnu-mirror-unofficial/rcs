@@ -650,7 +650,6 @@ void bufscpy (struct buf *, char const *);
 void tempunlink (void);
 
 /* rcsgen */
-extern struct buf curlogbuf;
 char const *buildrevision (struct hshentries const *,
                            struct hshentry *, FILE *, bool);
 int getcstdin (void);
@@ -964,6 +963,10 @@ struct manifestation
     char *rev;
     char *state;
   } prev;
+
+  /* A buffer to accumulate text for `Log' substitution.
+     -- scanlogtext scandeltatext  */
+  struct buf log;
 };
 extern struct manifestation manifestation;
 

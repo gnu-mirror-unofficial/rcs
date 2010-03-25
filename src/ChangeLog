@@ -1,5 +1,16 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move "temporary log buffer" into `struct manifestation'.
+
+	Here, "U" means "Throughout, use `MANI (log)'".
+	* rcsbase.h (curlogbuf): Delete var decl.
+	(manifestation): Add `log' to this struct.
+	* rcs.c: U.
+	* rcsgen.c: U.
+	(curlogbuf): Delete var.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Remove spurious `extern'.
 
 	* rcsbase.h (isSLASH): Remove `extern' on func decl.

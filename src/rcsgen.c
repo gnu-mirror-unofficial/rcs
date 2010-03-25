@@ -22,9 +22,6 @@
 
 #include "rcsbase.h"
 
-/* Buffer for current log message.  */
-struct buf curlogbuf;
-
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
 
@@ -52,8 +49,8 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
       getkeystring (Klog);
       if (needlog && delta == nextdelta)
         {
-          cb = savestring (&curlogbuf);
-          delta->log = cleanlogmsg (curlogbuf.string, cb.size);
+          cb = savestring (&MANI (log));
+          delta->log = cleanlogmsg (MANI (log).string, cb.size);
           nextlex ();
           delta->igtext = getphrases (Ktext);
         }
