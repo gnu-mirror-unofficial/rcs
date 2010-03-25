@@ -1072,7 +1072,7 @@ main (int argc, char **argv)
 
         /* `REPO (filename)' contains the name of the RCS file,
            and `finptr' the file descriptor;
-           `workname' contains the name of the working file.  */
+           `MANI (filename)' contains the name of the working file.  */
 
         /* Keep only those locks given by `-l'.  */
         if (lockflag)
@@ -1099,7 +1099,7 @@ main (int argc, char **argv)
         /* Print RCS pathname, working pathname and optional
            administrative information.  Could use `getfullRCSname'
            here, but that is very slow.  */
-        aprintf (out, headFormat, REPO (filename), workname,
+        aprintf (out, headFormat, REPO (filename), MANI (filename),
                  ADMIN (head) ? " " : "",
                  ADMIN (head) ? ADMIN (head)->num : "",
                  ADMIN (defbr) ? " " : "", ADMIN (defbr) ? ADMIN (defbr) : "",

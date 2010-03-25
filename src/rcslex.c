@@ -1076,7 +1076,10 @@ eflush (void)
 void
 oflush (void)
 {
-  if (fflush (workstdout ? workstdout : stdout) != 0 && !Oerrloop)
+  if (fflush (MANI (standard_output)
+              ? MANI (standard_output)
+              : stdout)
+      != 0 && !Oerrloop)
     Oerror ();
 }
 
@@ -1180,7 +1183,7 @@ workerror (char const *format, ...)
 {
   va_list args;
 
-  errsay (workname);
+  errsay (MANI (filename));
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1270,7 +1273,7 @@ workwarn (char const *format, ...)
 
   if (!BE (quiet))
     {
-      warnsay (workname);
+      warnsay (MANI (filename));
       va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);

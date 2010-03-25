@@ -291,8 +291,8 @@ InitAdmin (void)
   BE (strictly_locking) = STRICT_LOCKING;
 
   /* Guess the comment leader from the suffix.  */
-  Suffix = bindex (workname, '.');
-  if (Suffix == workname)
+  Suffix = bindex (MANI (filename), '.');
+  if (Suffix == MANI (filename))
     /* Empty suffix; will get default.  */
     Suffix = "";
   for (i = 0; !suffix_matches (Suffix, comtable[i].suffix); i++)
@@ -546,8 +546,8 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
            bool mustread, bool quiet)
 /* Pair the pathnames pointed to by `argv'; `argc' indicates how many there
    are.  Place a pointer to the RCS pathname into `REPO (filename)', and a
-   pointer to the pathname of the working file into `workname'.  If both are
-   given, and `workstdout' is set, a print a warning.
+   pointer to the pathname of the working file into `MANI (filename)'.  If
+   both are given, and `MANI (standard_output)' is set, a print a warning.
 
    If the RCS file exists, place its status into `REPO (stat)'.
 
@@ -586,9 +586,9 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       RCSbase = base;
       baselen = x - base;
       if (1 < argc
-          && !rcssuffix (workname = p = argv[1])
+          && !rcssuffix (MANI (filename) = p = argv[1])
           && baselen <= (arglen = (size_t) strlen (p))
-          && ((p += arglen - baselen) == workname || isSLASH (p[-1]))
+          && ((p += arglen - baselen) == MANI (filename) || isSLASH (p[-1]))
           && memcmp (base, p, baselen) == 0)
         {
           argv[1] = NULL;
@@ -597,14 +597,14 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       else
         {
           bufscpy (&tempbuf, base);
-          workname = p = tempbuf.string;
+          MANI (filename) = p = tempbuf.string;
           p[baselen] = 0;
         }
     }
   else
     {
       /* Working file given; now try to find RCS file.  */
-      workname = arg;
+      MANI (filename) = arg;
       baselen = strlen (base);
       /* Derive RCS pathname.  */
       if (1 < argc
@@ -619,7 +619,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       else
         RCSbase = RCS1 = NULL;
     }
-  /* Now we have a (tentative) RCS pathname in RCS1 and workname.
+  /* Now we have a (tentative) RCS pathname in RCS1 and `MANI (filename)'.
      Second, try to find the right RCS file.  */
   if (RCSbase != RCS1)
     {
@@ -674,7 +674,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       InitAdmin ();
     };
 
-  if (paired && workstdout)
+  if (paired && MANI (standard_output))
     workwarn ("Working file ignored due to -p option");
 
   PREV (valid) = false;
@@ -959,7 +959,7 @@ main (int argc, char *argv[])
         {
 
         case 'p':
-          workstdout = stdout;
+          MANI (standard_output) = stdout;
           break;
         case 'i':
           initflag = true;
@@ -975,13 +975,13 @@ main (int argc, char *argv[])
 
   do
     {
-      REPO (filename) = workname = NULL;
+      REPO (filename) = MANI (filename) = NULL;
       result = pairnames (argc, argv, rcsreadopen, !initflag, BE (quiet));
       if (result != 0)
         {
           diagnose
             ("RCS pathname: %s; working pathname: %s\nFull RCS pathname: %s\n",
-             REPO (filename), workname, getfullRCSname ());
+             REPO (filename), MANI (filename), getfullRCSname ());
         }
       switch (result)
         {

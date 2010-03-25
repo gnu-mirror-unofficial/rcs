@@ -51,10 +51,10 @@ cleanup (void)
   Izclose (&finptr);
   ORCSclose ();
 #if !large_memory
-  if (fcopy != workstdout)
+  if (fcopy != MANI (standard_output))
     Ozclose (&fcopy);
 #endif
-  if (neworkptr != workstdout)
+  if (neworkptr != MANI (standard_output))
     Ozclose (&neworkptr);
   dirtempunlink ();
 }
@@ -70,7 +70,7 @@ exiterr (void)
 
 static bool
 rmworkfile (void)
-/* Prepare to remove workname, if it exists, and if it is read-only.
+/* Prepare to remove `MANI (filename)', if it exists, and if it is read-only.
    Otherwise (file writable), if !quietmode, ask the user whether to
    really delete it (default: fail); otherwise fail.
    Return true if permission is gotten.  */
@@ -79,13 +79,13 @@ rmworkfile (void)
     {
       /* File is writable.  */
       if (!yesorno (false, "writable %s exists%s; remove it? [ny](n): ",
-                    workname, (myself (workstat.st_uid)
-                               ? ""
-                               : ", and you do not own it")))
+                    MANI (filename), (myself (workstat.st_uid)
+                                      ? ""
+                                      : ", and you do not own it")))
         {
           error (!BE (quiet) && ttystdin ()
                  ? "checkout aborted"
-                 : "writable %s exists; checkout aborted", workname);
+                 : "writable %s exists; checkout aborted", MANI (filename));
           return false;
         }
     }
@@ -281,10 +281,10 @@ preparejoin (register char *j)
 
 static bool
 buildjoin (char const *initialfile)
-/* Merge pairs of elements in `joinlist' into `initialfile'.  If
-   workstdout is set, copy result to stdout.  All unlinking of
-   `initialfile', `rev2', and `rev3' should be done by
-   `tempunlink'.  */
+/* Merge pairs of elements in `joinlist' into `initialfile'.
+   If `MANI (standard_output)' is set, copy result to stdout.
+   All unlinking of `initialfile', `rev2', and `rev3'
+   should be done by `tempunlink'.  */
 {
   struct buf commarg;
   struct buf subs;
@@ -348,7 +348,7 @@ buildjoin (char const *initialfile)
       p = &mergev[6];
       if (BE (quiet))
         *p++ = quietarg;
-      if (lastjoin <= i + 2 && workstdout)
+      if (lastjoin <= i + 2 && MANI (standard_output))
         *p++ = "-p";
       *p++ = initialfile;
       *p++ = rev2;
@@ -580,10 +580,10 @@ main (int argc, char **argv)
           continue;
 
         /* `REPO (filename)' contains the name of the RCS file, and `finptr'
-           points at it.  `workname' contains the name of the working file.
+           points at it.  `MANI (filename)' contains the name of the working file.
            Also, `REPO (stat)' has been set.  */
         diagnose ("%s  -->  %s\n", REPO (filename),
-                  tostdout ? "standard output" : workname);
+                  tostdout ? "standard output" : MANI (filename));
 
         workstatstat = -1;
         if (tostdout)
@@ -598,15 +598,15 @@ main (int argc, char **argv)
               }
 #endif
             neworkname = NULL;
-            neworkptr = workstdout = stdout;
+            neworkptr = MANI (standard_output) = stdout;
           }
         else
           {
-            workstatstat = stat (workname, &workstat);
+            workstatstat = stat (MANI (filename), &workstat);
             if (workstatstat == 0 && same_file (REPO (stat), workstat))
               {
                 rcserror ("RCS file is the same as working file %s.",
-                          workname);
+                          MANI (filename));
                 continue;
               }
             neworkname = makedirtemp (1);
@@ -746,12 +746,12 @@ main (int argc, char **argv)
               && newdate ? date2time (newdate) : (time_t) - 1;
             aflush (neworkptr);
             ignoreints ();
-            r = chnamemod (&neworkptr, neworkname, workname, 1, m, t);
+            r = chnamemod (&neworkptr, neworkname, MANI (filename), 1, m, t);
             keepdirtemp (neworkname);
             restoreints ();
             if (r != 0)
               {
-                eerror (workname);
+                eerror (MANI (filename));
                 error ("see %s", neworkname);
                 continue;
               }
@@ -760,7 +760,7 @@ main (int argc, char **argv)
       }
 
   tempunlink ();
-  Ofclose (workstdout);
+  Ofclose (MANI (standard_output));
   return exitstatus;
 }
 

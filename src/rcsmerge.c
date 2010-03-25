@@ -161,8 +161,8 @@ main (int argc, char **argv)
           if (Expand == kwsub_b)
             workerror ("merging binary files");
           diagnose ("RCS file: %s\n", REPO (filename));
-          if (!(workptr = Iopen (workname, FOPEN_R_WORK, NULL)))
-            efaterror (workname);
+          if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, NULL)))
+            efaterror (MANI (filename));
 
           /* Read in the delta tree.  */
           gettree ();
@@ -211,10 +211,10 @@ main (int argc, char **argv)
                         }
                       diagnose
                         ("Merging differences between %s and %s into %s%s\n",
-                         xrev[1], xrev[2], workname,
+                         xrev[1], xrev[2], MANI (filename),
                          tostdout ? "; result to stdout" : "");
 
-                      arg[0] = xrev[0] = workname;
+                      arg[0] = xrev[0] = MANI (filename);
                       status = merge (tostdout, edarg, xrev, arg);
                     }
                 }

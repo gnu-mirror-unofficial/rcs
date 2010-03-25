@@ -1416,7 +1416,7 @@ main (int argc, char **argv)
           }
 
         /* `REPO (filename)' contains the name of the RCS file, and
-           `workname' contains the name of the working file.
+           `MANI (filename)' contains the name of the working file.
            If `!initflag', `finptr' contains the file descriptor
            for the RCS file.  The admin node is initialized.  */
 
@@ -1543,7 +1543,7 @@ main (int argc, char **argv)
         if (initflag)
           {
             /* Adjust things for donerewrite's sake.  */
-            if (stat (workname, &REPO (stat)) != 0)
+            if (stat (MANI (filename), &REPO (stat)) != 0)
               {
 #if BAD_CREAT0
                 mode_t m = umask (0);

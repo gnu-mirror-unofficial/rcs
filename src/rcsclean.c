@@ -253,12 +253,13 @@ main (int argc, char **argv)
         if (!(0 < pairnames (argc, argv,
                              dounlock ? rcswriteopen : rcsreadopen,
                              true, true)
-              && (workptr = Iopen (workname, FOPEN_R_WORK, &workstat))))
+              && (workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat))))
           continue;
 
         if (same_file (REPO (stat), workstat))
           {
-            rcserror ("RCS file is the same as working file %s.", workname);
+            rcserror ("RCS file is the same as working file %s.",
+                      MANI (filename));
             continue;
           }
 
@@ -332,10 +333,10 @@ main (int argc, char **argv)
           }
 
         if (!BE (quiet))
-          aprintf (stdout, "rm -f %s\n", workname);
+          aprintf (stdout, "rm -f %s\n", MANI (filename));
         Izclose (&workptr);
-        if (perform && un_link (workname) != 0)
-          eerror (workname);
+        if (perform && un_link (MANI (filename)) != 0)
+          eerror (MANI (filename));
       }
 
   tempunlink ();

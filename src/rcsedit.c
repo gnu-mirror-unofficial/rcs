@@ -1325,7 +1325,7 @@ makedirtemp (bool isworkfile)
   int slot = SFFI_NEWDIR + isworkfile;
 
   set_temporary_file_name (&sff[slot].filename, isworkfile
-                           ? workname
+                           ? MANI (filename)
                            : REPO (filename));
   sff[slot].disposition = real;
   return sff[slot].filename.string;

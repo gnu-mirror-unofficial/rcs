@@ -196,8 +196,8 @@ keeprev (RILE *fp)
 bool
 getoldkeys (register RILE *fp)
 /* Try to read keyword values for author, date, revision number, and
-   state out of the file `fp'.  If `fp' is NULL, `workname' is opened
-   and closed instead of using `fp'.  The results are placed into
+   state out of the file `fp'.  If `fp' is NULL, `MANI (filename)' is
+   opened and closed instead of using `fp'.  The results are placed into
    MANI (prev): .author, .date, .name, .rev and .state members.  On
    error, stop searching and return false.  Returning true doesn't mean
    that any of the values were found; instead, caller must check to see
@@ -215,9 +215,9 @@ getoldkeys (register RILE *fp)
   needs_closing = false;
   if (!fp)
     {
-      if (!(fp = Iopen (workname, FOPEN_R_WORK, NULL)))
+      if (!(fp = Iopen (MANI (filename), FOPEN_R_WORK, NULL)))
         {
-          eerror (workname);
+          eerror (MANI (filename));
           return false;
         }
       needs_closing = true;
@@ -392,7 +392,7 @@ main (int argc, char *argv[])
 {
   while (*(++argv))
     {
-      workname = *argv;
+      MANI (filename) = *argv;
       getoldkeys (NULL);
       printf ("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
               *argv, PREV (rev), PREV (date), PREV (author),

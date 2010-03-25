@@ -960,10 +960,7 @@ struct manifestation
 extern struct manifestation manifestation;
 
 #define MANI(member)  (manifestation. member)
-#define workname      (MANI (filename))
-#define workstdout    (MANI (standard_output))
-
-#define PREV(which)  (MANI (prev). which)
+#define PREV(which)   (MANI (prev). which)
 
 /* The parse state is used when reading the RCS file.  */
 struct parse_state

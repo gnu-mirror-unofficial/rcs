@@ -98,14 +98,13 @@ setup_label (struct buf *b, char const *num, char const date[datesize])
   char datestr[datesize + zonelenmax];
 
   date2str (date, datestr);
-  bufalloc (b,
-            strlen (workname)
-            + sizeof datestr + 4 + (num ? strlen (num) : 0));
+  bufalloc (b, (strlen (MANI (filename)) + sizeof datestr
+                + 4 + (num ? strlen (num) : 0)));
   p = b->string;
   if (num)
-    sprintf (p, "-L%s\t%s\t%s", workname, datestr, num);
+    sprintf (p, "-L%s\t%s\t%s", MANI (filename), datestr, num);
   else
-    sprintf (p, "-L%s\t%s", workname, datestr);
+    sprintf (p, "-L%s\t%s", MANI (filename), datestr);
   return p;
 }
 #endif
@@ -352,9 +351,9 @@ main (int argc, char **argv)
         if (!rev2)
           {
             /* Make sure work file is readable, and get its status.  */
-            if (!(workptr = Iopen (workname, FOPEN_R_WORK, &workstat)))
+            if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat)))
               {
-                eerror (workname);
+                eerror (MANI (filename));
                 continue;
               }
           }
@@ -446,16 +445,16 @@ main (int argc, char **argv)
           }
         if (!rev2)
           {
-            diffp[1] = workname;
-            if (*workname == '-')
+            diffp[1] = MANI (filename);
+            if (*MANI (filename) == '-')
               {
-                size_t wsiz = strlen (workname) + 1;
+                size_t wsiz = strlen (MANI (filename)) + 1;
                 char *dp = ftnalloc (char, wsiz + 2);
 
                 diffp[1] = dp;
                 *dp++ = '.';
                 *dp++ = SLASH;
-                strncpy (dp, workname, wsiz);
+                strncpy (dp, MANI (filename), wsiz);
               }
           }
         else
@@ -473,7 +472,7 @@ main (int argc, char **argv)
               }
           }
         if (!rev2)
-          diagnose ("diff%s -r%s %s\n", diffvstr, xrev1, workname);
+          diagnose ("diff%s -r%s %s\n", diffvstr, xrev1, MANI (filename));
         else
           diagnose ("diff%s -r%s -r%s\n", diffvstr, xrev1, xrev2);
 

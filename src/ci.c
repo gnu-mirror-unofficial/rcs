@@ -424,12 +424,12 @@ fixwork (mode_t newworkmode, time_t mtime)
   return
     1 < workstat.st_nlink
     || (newworkmode & S_IWUSR && !myself (workstat.st_uid))
-    || setmtime (workname, mtime) != 0
+    || setmtime (MANI (filename), mtime) != 0
     ? -1 : workstat.st_mode == newworkmode ? 0
 #ifdef HAVE_FCHMOD
     : fchmod (Ifileno (workptr), newworkmode) == 0 ? 0
 #endif
-    : chmod (workname, newworkmode)
+    : chmod (MANI (filename), newworkmode)
     ;
 }
 
@@ -824,16 +824,16 @@ main (int argc, char **argv)
           }
 
         /* `REPO (filename)' contains the name of the RCS file,
-           and `workname' contains the name of the working file.
+           and `MANI (filename)' contains the name of the working file.
            If the RCS file exists, `finptr' contains the file
            descriptor for the RCS file, and `REPO (stat)' is set.
            The admin node is initialized.  */
 
-        diagnose ("%s  <--  %s\n", REPO (filename), workname);
+        diagnose ("%s  <--  %s\n", REPO (filename), MANI (filename));
 
-        if (!(workptr = Iopen (workname, FOPEN_R_WORK, &workstat)))
+        if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat)))
           {
-            eerror (workname);
+            eerror (MANI (filename));
             continue;
           }
 
@@ -842,7 +842,7 @@ main (int argc, char **argv)
             if (same_file (REPO (stat), workstat))
               {
                 rcserror ("RCS file is the same as working file %s.",
-                          workname);
+                          MANI (filename));
                 continue;
               }
             if (!checkaccesslist ())
@@ -1126,7 +1126,7 @@ main (int argc, char **argv)
           {
             Izclose (&workptr);
             /* Get rid of old file.  */
-            r = un_link (workname);
+            r = un_link (MANI (filename));
           }
         else
           {
@@ -1164,8 +1164,8 @@ main (int argc, char **argv)
                     Izclose (&workptr);
                     aflush (exfile);
                     ignoreints ();
-                    r = chnamemod (&exfile, newworkname,
-                                   workname, 1, newworkmode, mtime);
+                    r = chnamemod (&exfile, newworkname, MANI (filename),
+                                   1, newworkmode, mtime);
                     keepdirtemp (newworkname);
                     restoreints ();
                   }
@@ -1173,7 +1173,7 @@ main (int argc, char **argv)
           }
         if (r != 0)
           {
-            eerror (workname);
+            eerror (MANI (filename));
             continue;
           }
         diagnose ("done\n");

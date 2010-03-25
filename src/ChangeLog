@@ -1,5 +1,24 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `MANI (filename)' and `MANI (standard_output)'.
+
+	Here, "U" means "Throughout, use `MANI (filename)'
+	and `MANI (standard_output)' instead of singular variable names.
+	* rcsbase.h (workname, workstdout): Delete #define:s.
+	* ci.c: U.
+	* co.c: U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsedit.c: U.
+	* rcsfnms.c: U.
+	* rcskeep.c: U.
+	* rcslex.c: U.
+	* rcsmerge.c: U.
+	* rlog.c: U.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Consolidate RCS file state into `struct repository'.
 
 	Here, "U" means "Throughout, use `REPO (foo)' and
