@@ -360,39 +360,40 @@ putadmin (void)
       ORCSclose ();
       fout = fopenSafer (makedirtemp (0), FOPEN_WB);
 #else  /* !BAD_CREAT0 */
-      int fo = fdlock;
+      int fo = REPO (fd_lock);
 
-      fdlock = -1;
+      REPO (fd_lock) = -1;
       fout = fdopen (fo, FOPEN_WB);
 #endif  /* !BAD_CREAT0 */
 
       if (!(frewrite = fout))
-        efaterror (RCSname);
+        efaterror (REPO (filename));
     }
 
   /* Output the first character with `putc', not `printf'.
      Otherwise, an SVR4 stdio bug buffers output inefficiently.  */
   aputc (*Khead, fout);
-  aprintf (fout, "%s\t%s;\n", Khead + 1, Head ? Head->num : "");
-  if (Dbranch && VERSION (4) <= RCSversion)
-    aprintf (fout, "%s\t%s;\n", Kbranch, Dbranch);
+  aprintf (fout, "%s\t%s;\n", Khead + 1,
+           ADMIN (head) ? ADMIN (head)->num : "");
+  if (ADMIN (defbr) && VERSION (4) <= RCSversion)
+    aprintf (fout, "%s\t%s;\n", Kbranch, ADMIN (defbr));
 
   aputs (Kaccess, fout);
-  curaccess = AccessList;
+  curaccess = ADMIN (allowed);
   while (curaccess)
     {
       aprintf (fout, "\n\t%s", curaccess->login);
       curaccess = curaccess->nextaccess;
     }
   aprintf (fout, ";\n%s", Ksymbols);
-  curassoc = Symbols;
+  curassoc = ADMIN (assocs);
   while (curassoc)
     {
       aprintf (fout, "\n\t%s:%s", curassoc->symbol, curassoc->num);
       curassoc = curassoc->nextassoc;
     }
   aprintf (fout, ";\n%s", Klocks);
-  curlock = Locks;
+  curlock = ADMIN (locks);
   while (curlock)
     {
       aprintf (fout, "\n\t%s:%s", curlock->login, curlock->delta->num);
@@ -401,16 +402,16 @@ putadmin (void)
   if (BE (strictly_locking))
     aprintf (fout, "; %s", Kstrict);
   aprintf (fout, ";\n");
-  if (Comment.size)
+  if (ADMIN (log_lead).size)
     {
       aprintf (fout, "%s\t", Kcomment);
-      putstring (fout, true, Comment, false);
+      putstring (fout, true, ADMIN (log_lead), false);
       aprintf (fout, ";\n");
     }
   if (Expand != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
              Kexpand, SDELIM, expand_names[Expand], SDELIM);
-  awrite (Ignored.string, Ignored.size, fout);
+  awrite (ADMIN (description).string, ADMIN (description).size, fout);
   aputc ('\n', fout);
 }
 

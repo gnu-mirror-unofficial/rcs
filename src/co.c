@@ -105,7 +105,7 @@ rmlock (struct hshentry const *delta)
   int whomatch, nummatch;
 
   num = delta->num;
-  dummy.nextlock = next = Locks;
+  dummy.nextlock = next = ADMIN (locks);
   trail = &dummy;
   while (next)
     {
@@ -127,7 +127,7 @@ rmlock (struct hshentry const *delta)
     {
       /* Found one; delete it.  */
       trail->nextlock = next->nextlock;
-      Locks = dummy.nextlock;
+      ADMIN (locks) = dummy.nextlock;
       next->delta->lockedby = NULL;
       /* Success.  */
       return 1;
@@ -310,7 +310,7 @@ buildjoin (char const *initialfile)
   if (zonearg)
     *p++ = zonearg;
   *p++ = quietarg;
-  *p++ = RCSname;
+  *p++ = REPO (filename);
   *p = '\0';
 
   mergev[1] = prog_merge;
@@ -579,10 +579,10 @@ main (int argc, char **argv)
              false) <= 0)
           continue;
 
-        /* `RCSname' contains the name of the RCS file, and `finptr'
+        /* `REPO (filename)' contains the name of the RCS file, and `finptr'
            points at it.  `workname' contains the name of the working file.
-           Also, `RCSstat' has been set.  */
-        diagnose ("%s  -->  %s\n", RCSname,
+           Also, `REPO (stat)' has been set.  */
+        diagnose ("%s  -->  %s\n", REPO (filename),
                   tostdout ? "standard output" : workname);
 
         workstatstat = -1;
@@ -603,7 +603,7 @@ main (int argc, char **argv)
         else
           {
             workstatstat = stat (workname, &workstat);
-            if (workstatstat == 0 && same_file (RCSstat, workstat))
+            if (workstatstat == 0 && same_file (REPO (stat), workstat))
               {
                 rcserror ("RCS file is the same as working file %s.",
                           workname);
@@ -623,7 +623,7 @@ main (int argc, char **argv)
         /* Read in the delta tree.  */
         gettree ();
 
-        if (!Head)
+        if (!ADMIN (head))
           {
             /* No revisions; create empty file.  */
             diagnose ("no revisions present; generating empty revision 0.0\n");
@@ -653,7 +653,7 @@ main (int argc, char **argv)
                   default:
                     continue;
                   case 0:
-                    bufscpy (&numericrev, Dbranch ? Dbranch : "");
+                    bufscpy (&numericrev, ADMIN (defbr) ? ADMIN (defbr) : "");
                     break;
                   case 1:
                     bufscpy (&numericrev, targetdelta->num);
@@ -710,7 +710,7 @@ main (int argc, char **argv)
                               finptr, MADV_SEQUENTIAL);
 
             if (donerewrite (changelock, Ttimeflag
-                             ? RCSstat.st_mtime
+                             ? REPO (stat).st_mtime
                              : (time_t) - 1)
                 != 0)
               continue;
@@ -739,7 +739,7 @@ main (int argc, char **argv)
           }
         if (!tostdout)
           {
-            mode_t m = WORKMODE (RCSstat.st_mode,
+            mode_t m = WORKMODE (REPO (stat).st_mode,
                                  !(Expand == kwsub_v
                                    || (lockflag <= 0 && BE (strictly_locking))));
             time_t t = mtimeflag

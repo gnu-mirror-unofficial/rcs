@@ -451,7 +451,7 @@ genrevs (char const *revno, char const *date, char const *author,
 
   bufautobegin (&t);
 
-  if (!(next = Head))
+  if (!(next = ADMIN (head)))
     {
       rcserror ("RCS file empty");
       goto norev;
@@ -571,12 +571,12 @@ gr_revno (char const *revno, struct hshentries **store)
 static char const *
 lookupsym (char const *id)
 /* Look up `id' in the list of symbolic names starting with pointer
-   `Symbols', and return a pointer to the corresponding revision number.
-   Return NULL if not present.  */
+   `ADMIN (assocs)', and return a pointer to the corresponding
+   revision number.  Return NULL if not present.  */
 {
   register struct assoc const *next;
 
-  for (next = Symbols; next; next = next->nextassoc)
+  for (next = ADMIN (assocs); next; next = next->nextassoc)
     if (strcmp (id, next->symbol) == 0)
       return next->num;
   return NULL;
@@ -692,10 +692,10 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
                   /* Insert default branch before initial `.'.  */
                   char const *b;
 
-                  if (Dbranch)
-                    b = Dbranch;
-                  else if (Head)
-                    b = Head->num;
+                  if (ADMIN (defbr))
+                    b = ADMIN (defbr);
+                  else if (ADMIN (head))
+                    b = ADMIN (head)->num;
                   else
                     break;
                   getbranchno (b, target);
@@ -771,7 +771,9 @@ namedrev (char const *name, struct hshentry *delta)
 char const *
 tiprev (void)
 {
-  return Dbranch ? branchtip (Dbranch) : Head ? Head->num : NULL;
+  return ADMIN (defbr)
+    ? branchtip (ADMIN (defbr))
+    : ADMIN (head) ? ADMIN (head)->num : NULL;
 }
 
 #ifdef REVTEST

@@ -632,10 +632,7 @@ int rcsfcmp (RILE *, struct stat const *, char const *,
 /* rcsfnms */
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
-extern char const *RCSname;
 extern char const *suffixes;
-extern int fdlock;
-extern struct stat RCSstat;
 RILE *rcsreadopen (struct buf *, struct stat *, bool);
 char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
@@ -781,15 +778,7 @@ struct diffcmd
   /* Sum of previous 'd' line1 and previous 'd' nlines.  */
   long dafter;
 };
-extern char const *Dbranch;
-extern struct access *AccessList;
-extern struct assoc *Symbols;
-extern struct cbuf Comment;
-extern struct cbuf Ignored;
-extern struct rcslock *Locks;
-extern struct hshentry *Head;
 extern int Expand;
-extern int TotalDeltas;
 extern const char const *const expand_names[];
 extern const char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
   Kdate[], Kdesc[], Kexpand[], Khead[], Klocks[], Klog[],
@@ -1013,5 +1002,60 @@ extern struct parse_state parse_state;
 
 #define LEX(member)  (parse_state. member)
 #define NEXT(which)  (LEX (next). which)
+
+/* The RCS file is the repository of revisions, plus metadata.  */
+struct repository
+{
+  char const *filename;
+  /* What it's called on disk.
+     -- pairnames (PAIRTEST)main  */
+
+  int fd_lock;
+  /* The file descriptor of the RCS file lockfile.
+     -- rcswriteopen ORCSclose pairnames putadmin (SYNTEST)main  */
+
+  struct stat stat;
+  /* Stat info, possibly munged.
+     -- [ci]main [rcs]main fd2{_}RILE (via Iopen, rcs{read,write}open)  */
+
+  struct admin
+  {
+    struct access *allowed;
+    /* List of usernames who may modify the repo.
+       -- InitAdmin doaccess [rcs]main  */
+
+    struct assoc *assocs;
+    /* List of symbolic names.
+       -- addsymbol InitAdmin  */
+
+    struct cbuf log_lead;
+    /* The string to use to start lines expanded for `Log'.  FIXME:ZONK.
+       -- [rcs]main (FCMPTEST)main InitAdmin getadmin  */
+
+    struct cbuf description;
+    /* The description string, if any.  Not functionally relevant.
+       -- InitAdmin getadmin  */
+
+    struct rcslock *locks;
+    /* List of locks.
+       -- rmlock addlock InitAdmin  */
+
+    char const *defbr;
+    /* The default branch, or NULL.
+       -- [rcs]main InitAdmin getadmin  */
+
+    struct hshentry *head;
+    /* The revision on the tip of the default branch.
+       -- addelta buildtree [rcs]main InitAdmin getadmin  */
+  } admin;
+
+  int ndelt;
+  /* Counter for deltas.
+     -- getadmin  */
+};
+extern struct repository repository;
+
+#define REPO(member)  (repository. member)
+#define ADMIN(part)   (REPO (admin). part)
 
 /* rcsbase.h ends here */

@@ -23,10 +23,8 @@
 #include "rcsbase.h"
 #include <stdint.h>
 
-char const *RCSname;
 struct manifestation manifestation;
-int fdlock;
-struct stat RCSstat;
+struct repository repository;
 char const *suffixes;
 
 static char const rcsdir[] = "RCS";
@@ -285,11 +283,11 @@ InitAdmin (void)
   register char const *Suffix;
   register int i;
 
-  Head = NULL;
-  Dbranch = NULL;
-  AccessList = NULL;
-  Symbols = NULL;
-  Locks = NULL;
+  ADMIN (head) = NULL;
+  ADMIN (defbr) = NULL;
+  ADMIN (allowed) = NULL;
+  ADMIN (assocs) = NULL;
+  ADMIN (locks) = NULL;
   BE (strictly_locking) = STRICT_LOCKING;
 
   /* Guess the comment leader from the suffix.  */
@@ -299,10 +297,10 @@ InitAdmin (void)
     Suffix = "";
   for (i = 0; !suffix_matches (Suffix, comtable[i].suffix); i++)
     continue;
-  Comment.string = comtable[i].comlead;
-  Comment.size = strlen (comtable[i].comlead);
+  ADMIN (log_lead).string = comtable[i].comlead;
+  ADMIN (log_lead).size = strlen (comtable[i].comlead);
   Expand = kwsub_kv;
-  clear_buf (&Ignored);
+  clear_buf (&ADMIN (description));
   /* Note: If `!finptr', read nothing; only initialize.  */
   Lexinit ();
 }
@@ -488,9 +486,9 @@ finopen (RILE *(*rcsopen) (struct buf *, struct stat *, bool), bool mustread)
 
   /* We prefer an old name to that of a nonexisting new RCS file,
      unless we tried locking the old name and failed.  */
-  preferold = RCSbuf.string[0] && (mustread || 0 <= fdlock);
+  preferold = RCSbuf.string[0] && (mustread || 0 <= REPO (fd_lock));
 
-  finptr = (*rcsopen) (&RCSb, &RCSstat, mustread);
+  finptr = (*rcsopen) (&RCSb, &REPO (stat), mustread);
   interesting = finptr || errno != ENOENT;
   if (interesting || !preferold)
     {
@@ -547,11 +545,11 @@ int
 pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
            bool mustread, bool quiet)
 /* Pair the pathnames pointed to by `argv'; `argc' indicates how many there
-   are.  Place a pointer to the RCS pathname into `RCSname', and a pointer to
-   the pathname of the working file into `workname'.  If both are given, and
-   `workstdout' is set, a print a warning.
+   are.  Place a pointer to the RCS pathname into `REPO (filename)', and a
+   pointer to the pathname of the working file into `workname'.  If both are
+   given, and `workstdout' is set, a print a warning.
 
-   If the RCS file exists, place its status into `RCSstat'.
+   If the RCS file exists, place its status into `REPO (stat)'.
 
    If the RCS file exists, open (using `rcsopen') it for reading, place the
    file pointer into `finptr', read in the admin-node, and return 1.  If the
@@ -567,7 +565,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
   bool paired;
   size_t arglen, dlen, baselen, xlen;
 
-  fdlock = -1;
+  REPO (fd_lock) = -1;
 
   if (!(arg = *argv))
     return 0;                   /* already paired pathname */
@@ -627,7 +625,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     {
       /* A path for RCSfile is given; single RCS file to look for.  */
       bufscpy (&RCSbuf, RCS1);
-      finptr = (*rcsopen) (&RCSbuf, &RCSstat, mustread);
+      finptr = (*rcsopen) (&RCSbuf, &REPO (stat), mustread);
       RCSerrno = errno;
     }
   else
@@ -652,10 +650,10 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
             }
         }
     }
-  RCSname = p = RCSbuf.string;
+  REPO (filename) = p = RCSbuf.string;
   if (finptr)
     {
-      if (!S_ISREG (RCSstat.st_mode))
+      if (!S_ISREG (REPO (stat).st_mode))
         {
           error ("%s isn't a regular file -- ignored", p);
           return 0;
@@ -665,7 +663,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     }
   else
     {
-      if (RCSerrno != ENOENT || mustread || fdlock < 0)
+      if (RCSerrno != ENOENT || mustread || REPO (fd_lock) < 0)
         {
           if (RCSerrno == EEXIST)
             error ("RCS file %s is in use", p);
@@ -707,9 +705,9 @@ getfullRCSname (void)
 /* Return a pointer to the full pathname of the RCS file.
    Remove leading `./'.  */
 {
-  if (ROOTPATH (RCSname))
+  if (ROOTPATH (REPO (filename)))
     {
-      return RCSname;
+      return REPO (filename);
     }
   else
     {
@@ -717,7 +715,7 @@ getfullRCSname (void)
 #if needs_getabsname
 
       bufalloc (&rcsbuf, SIZEABLE_PATH + 1);
-      while (getabsname (RCSname, rcsbuf.string, rcsbuf.size) != 0)
+      while (getabsname (REPO (filename), rcsbuf.string, rcsbuf.size) != 0)
         if (errno == ERANGE)
           bufalloc (&rcsbuf, rcsbuf.size << 1);
         else
@@ -763,10 +761,10 @@ getfullRCSname (void)
           d[wdlen] = 0;
           wdptr = wd = d;
         }
-      /* Remove leading `./'s from `RCSname'.
+      /* Remove leading `./'s from `REPO (filename)'.
          Do not try to handle `../', since removing it may result
          in the wrong answer in the presence of symbolic links.  */
-      for (r = RCSname; r[0] == '.' && isSLASH (r[1]); r += 2)
+      for (r = REPO (filename); r[0] == '.' && isSLASH (r[1]); r += 2)
         /* `.////' is equivalent to `./'.  */
         while (isSLASH (r[2]))
           r++;
@@ -977,13 +975,13 @@ main (int argc, char *argv[])
 
   do
     {
-      RCSname = workname = NULL;
+      REPO (filename) = workname = NULL;
       result = pairnames (argc, argv, rcsreadopen, !initflag, BE (quiet));
       if (result != 0)
         {
           diagnose
             ("RCS pathname: %s; working pathname: %s\nFull RCS pathname: %s\n",
-             RCSname, workname, getfullRCSname ());
+             REPO (filename), workname, getfullRCSname ());
         }
       switch (result)
         {
@@ -997,7 +995,7 @@ main (int argc, char *argv[])
             }
           else
             {
-              diagnose ("RCS file %s exists\n", RCSname);
+              diagnose ("RCS file %s exists\n", REPO (filename));
             }
           Ifclose (finptr);
           break;

@@ -160,24 +160,24 @@ main (int argc, char **argv)
             warn ("excess arguments ignored");
           if (Expand == kwsub_b)
             workerror ("merging binary files");
-          diagnose ("RCS file: %s\n", RCSname);
+          diagnose ("RCS file: %s\n", REPO (filename));
           if (!(workptr = Iopen (workname, FOPEN_R_WORK, NULL)))
             efaterror (workname);
 
           /* Read in the delta tree.  */
           gettree ();
 
-          if (!Head)
+          if (!ADMIN (head))
             rcsfaterror ("no revisions present");
 
           if (!*rev[1])
-            rev[1] = Dbranch ? Dbranch : Head->num;
+            rev[1] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
           if (fexpandsym (rev[1], &numericrev, workptr)
               && (target = gr_revno (numericrev.string, &gendeltas)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
-                rev[2] = Dbranch ? Dbranch : Head->num;
+                rev[2] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
               if (fexpandsym (rev[2], &numericrev, workptr)
                   && (target = gr_revno (numericrev.string, &gendeltas)))
                 {
@@ -206,7 +206,7 @@ main (int argc, char **argv)
                                    arg[i] = maketemp (i + 2),
                                    prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
-                                   RCSname, NULL))
+                                   REPO (filename), NULL))
                             rcsfaterror ("co failed");
                         }
                       diagnose

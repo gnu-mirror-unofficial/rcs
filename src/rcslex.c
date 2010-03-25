@@ -1166,7 +1166,7 @@ rcserror (char const *format, ...)
 {
   va_list args;
 
-  errsay (RCSname);
+  errsay (REPO (filename));
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1195,7 +1195,7 @@ fatserror (char const *format, ...)
   va_list args;
 
   oflush ();
-  fprintf (stderr, "%s: %s:%ld: ", program.name, RCSname, LEX (lno));
+  fprintf (stderr, "%s: %s:%ld: ", program.name, REPO (filename), LEX (lno));
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1221,7 +1221,7 @@ rcsfaterror (char const *format, ...)
 {
   va_list args;
 
-  fatsay (RCSname);
+  fatsay (REPO (filename));
   va_start (args, format);
   fvfprintf (stderr, format, args);
   va_end (args);
@@ -1253,7 +1253,7 @@ rcswarn (char const *format, ...)
 
   if (!BE (quiet))
     {
-      warnsay (RCSname);
+      warnsay (REPO (filename));
       va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);

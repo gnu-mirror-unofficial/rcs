@@ -58,7 +58,7 @@ unlock (struct hshentry *delta)
 
   if (delta && delta->lockedby
       && strcmp (getcaller (), delta->lockedby) == 0)
-    for (al = &Locks; (l = *al); al = &l->nextlock)
+    for (al = &ADMIN (locks); (l = *al); al = &l->nextlock)
       if (l->delta == delta)
         {
           *al = l->nextlock;
@@ -256,7 +256,7 @@ main (int argc, char **argv)
               && (workptr = Iopen (workname, FOPEN_R_WORK, &workstat))))
           continue;
 
-        if (same_file (RCSstat, workstat))
+        if (same_file (REPO (stat), workstat))
           {
             rcserror ("RCS file is the same as working file %s.", workname);
             continue;
@@ -271,13 +271,13 @@ main (int argc, char **argv)
               continue;
             p = revision.string;
           }
-        else if (Head)
+        else if (ADMIN (head))
           switch (unlockflag ? findlock (false, &delta) : 0)
             {
             default:
               continue;
             case 0:
-              p = Dbranch ? Dbranch : "";
+              p = ADMIN (defbr) ? ADMIN (defbr) : "";
               break;
             case 1:
               p = delta->num;
@@ -305,7 +305,7 @@ main (int argc, char **argv)
           Expand = expmode;
         else if (waslocked
                  && Expand == kwsub_kv
-                 && WORKMODE (RCSstat.st_mode, true) == workstat.st_mode)
+                 && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
           Expand = kwsub_kvl;
 
         getdesc (false);
@@ -318,14 +318,14 @@ main (int argc, char **argv)
           continue;
 
         if (BE (quiet) < unlocked)
-          aprintf (stdout, "rcs -u%s %s\n", delta->num, RCSname);
+          aprintf (stdout, "rcs -u%s %s\n", delta->num, REPO (filename));
 
         if (perform & unlocked)
           {
             if_advise_access (deltas->first != delta, finptr,
                               MADV_SEQUENTIAL);
             if (donerewrite (true, Ttimeflag
-                             ? RCSstat.st_mtime
+                             ? REPO (stat).st_mtime
                              : (time_t) - 1)
                 != 0)
               continue;

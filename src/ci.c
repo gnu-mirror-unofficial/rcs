@@ -128,7 +128,7 @@ removelock (struct hshentry *delta)
   char const *num;
 
   num = delta->num;
-  for (trail = &Locks; (next = *trail); trail = &next->nextlock)
+  for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
     if (next->delta == delta)
       {
         if (strcmp (getcaller (), next->login) == 0)
@@ -144,7 +144,7 @@ removelock (struct hshentry *delta)
             return -1;
           }
       }
-  if (!BE (strictly_locking) && myself (RCSstat.st_uid))
+  if (!BE (strictly_locking) && myself (REPO (stat).st_uid))
     return 0;
   rcserror ("no lock set by %s for revision %s", getcaller (), num);
   return -1;
@@ -257,7 +257,7 @@ addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
 static int
 addelta (void)
 /* Append a delta to the delta tree, whose number is given by
-   `newdelnum'.  Update `Head', `newdelnum', `newdelnumlength',
+   `newdelnum'.  Update `ADMIN (head)', `newdelnum', `newdelnumlength',
    and the links in newdelta.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.  */
 {
@@ -272,10 +272,10 @@ addelta (void)
     {
       /* This covers non-existing RCS file,
          and a file initialized with `rcs -i'.  */
-      if (newdnumlength == 0 && Dbranch)
+      if (newdnumlength == 0 && ADMIN (defbr))
         {
-          bufscpy (&newdelnum, Dbranch);
-          newdnumlength = countnumflds (Dbranch);
+          bufscpy (&newdelnum, ADMIN (defbr));
+          newdnumlength = countnumflds (ADMIN (defbr));
         }
       if (newdnumlength == 0)
         bufscpy (&newdelnum, "1.1");
@@ -288,7 +288,7 @@ addelta (void)
           return -1;
         }
       /* (`newdnumlength' == 2 is OK.)  */
-      Head = &newdelta;
+      ADMIN (head) = &newdelta;
       newdelta.next = NULL;
       return 0;
     }
@@ -306,11 +306,11 @@ addelta (void)
           /* Found an old lock.  Check whether locked revision exists.  */
           if (!gr_revno (targetdelta->num, &gendeltas))
             return -1;
-          if (targetdelta == Head)
+          if (targetdelta == ADMIN (head))
             {
               /* Make new head.  */
-              newdelta.next = Head;
-              Head = &newdelta;
+              newdelta.next = ADMIN (head);
+              ADMIN (head) = &newdelta;
             }
           else if (!targetdelta->next && countnumflds (targetdelta->num) > 2)
             {
@@ -329,19 +329,19 @@ addelta (void)
           return 1;
 
         case 0:
-          /* No existing lock; try `Dbranch'.  Update `newdelnum'.  */
-          if (BE (strictly_locking) || !myself (RCSstat.st_uid))
+          /* No existing lock; try `ADMIN (defbr)'.  Update `newdelnum'.  */
+          if (BE (strictly_locking) || !myself (REPO (stat).st_uid))
             {
               rcserror ("no lock set by %s", getcaller ());
               return -1;
             }
-          if (Dbranch)
+          if (ADMIN (defbr))
             {
-              bufscpy (&newdelnum, Dbranch);
+              bufscpy (&newdelnum, ADMIN (defbr));
             }
           else
             {
-              incnum (Head->num, &newdelnum);
+              incnum (ADMIN (head)->num, &newdelnum);
             }
           newdnumlength = countnumflds (newdelnum.string);
           /* Now fall into next statement.  */
@@ -353,24 +353,24 @@ addelta (void)
       if (newdnumlength == 1)
         {
           /* Make a two-field number out of it.  */
-          if (cmpnumfld (newdelnum.string, Head->num, 1) == 0)
-            incnum (Head->num, &newdelnum);
+          if (cmpnumfld (newdelnum.string, ADMIN (head)->num, 1) == 0)
+            incnum (ADMIN (head)->num, &newdelnum);
           else
             bufscat (&newdelnum, ".1");
         }
-      if (cmpnum (newdelnum.string, Head->num) <= 0)
+      if (cmpnum (newdelnum.string, ADMIN (head)->num) <= 0)
         {
           rcserror ("revision %s too low; must be higher than %s",
-                    newdelnum.string, Head->num);
+                    newdelnum.string, ADMIN (head)->num);
           return -1;
         }
-      targetdelta = Head;
-      if (0 <= (removedlock = removelock (Head)))
+      targetdelta = ADMIN (head);
+      if (0 <= (removedlock = removelock (ADMIN (head))))
         {
-          if (!gr_revno (Head->num, &gendeltas))
+          if (!gr_revno (ADMIN (head)->num, &gendeltas))
             return -1;
-          newdelta.next = Head;
-          Head = &newdelta;
+          newdelta.next = ADMIN (head);
+          ADMIN (head) = &newdelta;
         }
       return removedlock;
     }
@@ -820,15 +820,16 @@ main (int argc, char **argv)
                 rcserror ("already exists");
                 continue;
               }
-            rcsinitflag = !Head;
+            rcsinitflag = !ADMIN (head);
           }
 
-        /* `RCSname' contains the name of the RCS file, and `workname'
-          contains the name of the working file.  If the RCS file exists,
-          `finptr' contains the file descriptor for the RCS file, and
-          `RCSstat' is set.  The admin node is initialized.  */
+        /* `REPO (filename)' contains the name of the RCS file,
+           and `workname' contains the name of the working file.
+           If the RCS file exists, `finptr' contains the file
+           descriptor for the RCS file, and `REPO (stat)' is set.
+           The admin node is initialized.  */
 
-        diagnose ("%s  <--  %s\n", RCSname, workname);
+        diagnose ("%s  <--  %s\n", REPO (filename), workname);
 
         if (!(workptr = Iopen (workname, FOPEN_R_WORK, &workstat)))
           {
@@ -838,7 +839,7 @@ main (int argc, char **argv)
 
         if (finptr)
           {
-            if (same_file (RCSstat, workstat))
+            if (same_file (REPO (stat), workstat))
               {
                 rcserror ("RCS file is the same as working file %s.",
                           workname);
@@ -946,7 +947,7 @@ main (int argc, char **argv)
           continue;
 
         putadmin ();
-        puttree (Head, frewrite);
+        puttree (ADMIN (head), frewrite);
         putdesc (false, textfile);
 
         changework = Expand < MIN_UNCHANGED_EXPAND;
@@ -961,14 +962,14 @@ main (int argc, char **argv)
             /* Get logmessage.  */
             newdelta.log = getlogmsg ();
             putdftext (&newdelta, workptr, frewrite, false);
-            RCSstat.st_mode = workstat.st_mode;
-            RCSstat.st_nlink = 0;
+            REPO (stat).st_mode = workstat.st_mode;
+            REPO (stat).st_nlink = 0;
             changedRCS = true;
           }
         else
           {
             diffname = maketemp (0);
-            newhead = Head == &newdelta;
+            newhead = ADMIN (head) == &newdelta;
             if (!newhead)
               foutptr = frewrite;
             expname =
@@ -1115,8 +1116,8 @@ main (int argc, char **argv)
 
         if (donerewrite (changedRCS, !Ttimeflag
                          ? (time_t) - 1
-                         : finptr && wtime < (RCSstat.st_mtime
-                                              ? RCSstat.st_mtime
+                         : finptr && wtime < (REPO (stat).st_mtime
+                                              ? REPO (stat).st_mtime
                                               : wtime))
             != 0)
           continue;
@@ -1129,7 +1130,7 @@ main (int argc, char **argv)
           }
         else
           {
-            newworkmode = WORKMODE (RCSstat.st_mode,
+            newworkmode = WORKMODE (REPO (stat).st_mode,
                                     !(Expand == kwsub_v
                                       || lockthis < BE (strictly_locking)));
             mtime = mtimeflag ? wtime : (time_t) - 1;

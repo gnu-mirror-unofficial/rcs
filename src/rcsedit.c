@@ -708,7 +708,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
         case Header:
           escape_string (out,
                          marker == Id || RCSv < VERSION (4)
-                         ? basefilename (RCSname) : getfullRCSname ());
+                         ? basefilename (REPO (filename)) : getfullRCSname ());
           aprintf (out, " %s %s %s %s",
                    delta->num,
                    date2str (date, datebuf),
@@ -734,7 +734,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
           break;
         case Log:
         case RCSfile:
-          escape_string (out, basefilename (RCSname));
+          escape_string (out, basefilename (REPO (filename)));
           break;
         case Name:
           if (delta->name)
@@ -770,8 +770,8 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
       bufautobegin (&leader);
       if (RCSversion < VERSION (5))
         {
-          cp = Comment.string;
-          cs = Comment.size;
+          cp = ADMIN (log_lead).string;
+          cs = ADMIN (log_lead).size;
         }
       else
         {
@@ -1114,7 +1114,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
    Put its status into `*status' too.
    `mustread' is true if the file must already exist, too.
    If all goes well, discard any previously acquired locks,
-   and set `fdlock' to the file descriptor of the RCS lockfile.  */
+   and set `REPO (fd_lock)' to the file descriptor of the RCS lockfile.  */
 {
   register char *tp;
   register char const *sp, *RCSpath, *x;
@@ -1125,7 +1125,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   struct buf *dirt;
   struct stat statbuf;
 
-  waslocked = 0 <= fdlock;
+  waslocked = 0 <= REPO (fd_lock);
   exists =
 #ifdef HAVE_READLINK
     resolve_symlink (RCSbuf);
@@ -1289,7 +1289,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
               bufscpy (&sff[SFFI_LOCKDIR].filename, sp);
             }
         }
-      fdlock = fdescSafer;
+      REPO (fd_lock) = fdescSafer;
     }
 
   restoreints ();
@@ -1324,7 +1324,9 @@ makedirtemp (bool isworkfile)
 {
   int slot = SFFI_NEWDIR + isworkfile;
 
-  set_temporary_file_name (&sff[slot].filename, isworkfile ? workname : RCSname);
+  set_temporary_file_name (&sff[slot].filename, isworkfile
+                           ? workname
+                           : REPO (filename));
   sff[slot].disposition = real;
   return sff[slot].filename.string;
 }
@@ -1452,7 +1454,7 @@ findlock (bool delete, struct hshentry **target)
   register struct rcslock *next, **trail, **found;
 
   found = 0;
-  for (trail = &Locks; (next = *trail); trail = &next->nextlock)
+  for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
     if (strcmp (getcaller (), next->login) == 0)
       {
         if (found)
@@ -1484,7 +1486,7 @@ addlock (struct hshentry *delta, bool verbose)
 {
   register struct rcslock *next;
 
-  for (next = Locks; next; next = next->nextlock)
+  for (next = ADMIN (locks); next; next = next->nextlock)
     if (cmpnum (delta->num, next->delta->num) == 0)
       {
         if (strcmp (getcaller (), next->login) == 0)
@@ -1500,8 +1502,8 @@ addlock (struct hshentry *delta, bool verbose)
   next = ftalloc (struct rcslock);
   delta->lockedby = next->login = getcaller ();
   next->delta = delta;
-  next->nextlock = Locks;
-  Locks = next;
+  next->nextlock = ADMIN (locks);
+  ADMIN (locks) = next;
   return 1;
 }
 
@@ -1514,7 +1516,7 @@ addsymbol (char const *num, char const *name, bool rebind)
 {
   register struct assoc *next;
 
-  for (next = Symbols; next; next = next->nextassoc)
+  for (next = ADMIN (assocs); next; next = next->nextassoc)
     if (strcmp (name, next->symbol) == 0)
       {
         if (strcmp (next->num, num) == 0)
@@ -1533,8 +1535,8 @@ addsymbol (char const *num, char const *name, bool rebind)
   next = ftalloc (struct assoc);
   next->symbol = name;
   next->num = num;
-  next->nextassoc = Symbols;
-  Symbols = next;
+  next->nextassoc = ADMIN (assocs);
+  ADMIN (assocs) = next;
   return 1;
 }
 
@@ -1557,11 +1559,11 @@ checkaccesslist (void)
 {
   register struct access const *next;
 
-  if (!AccessList || myself (RCSstat.st_uid)
+  if (!ADMIN (allowed) || myself (REPO (stat).st_uid)
       || strcmp (getcaller (), "root") == 0)
     return true;
 
-  next = AccessList;
+  next = ADMIN (allowed);
   do
     {
       if (strcmp (getcaller (), next->login) == 0)
@@ -1590,7 +1592,7 @@ dorewrite (bool lockflag, int changed)
           if (changed < 0)
             return -1;
           putadmin ();
-          puttree (Head, frewrite);
+          puttree (ADMIN (head), frewrite);
           aprintf (frewrite, "\n\n%s%c", Kdesc, NEXT (c));
           foutptr = frewrite;
         }
@@ -1648,13 +1650,13 @@ donerewrite (int changed, time_t newRCStime)
           fastcopy (finptr, frewrite);
           Izclose (&finptr);
         }
-      if (1 < RCSstat.st_nlink)
+      if (1 < REPO (stat).st_nlink)
         rcswarn ("breaking hard link");
       aflush (frewrite);
       seteid ();
       ignoreints ();
-      r = chnamemod (&frewrite, newRCSname, RCSname, changed,
-                     RCSstat.st_mode & (mode_t) ~ (S_IWUSR | S_IWGRP | S_IWOTH),
+      r = chnamemod (&frewrite, newRCSname, REPO (filename), changed,
+                     REPO (stat).st_mode & (mode_t) ~(S_IWUSR | S_IWGRP | S_IWOTH),
                      newRCStime);
       e = errno;
       keepdirtemp (newRCSname);
@@ -1667,7 +1669,7 @@ donerewrite (int changed, time_t newRCStime)
       setrid ();
       if (r != 0)
         {
-          enerror (e, RCSname);
+          enerror (e, REPO (filename));
           error ("saved in %s", newRCSname);
         }
 #if BAD_CREAT0
@@ -1684,11 +1686,11 @@ donerewrite (int changed, time_t newRCStime)
 void
 ORCSclose (void)
 {
-  if (0 <= fdlock)
+  if (0 <= REPO (fd_lock))
     {
-      if (close (fdlock) != 0)
+      if (close (REPO (fd_lock)) != 0)
         efaterror (lockname);
-      fdlock = -1;
+      REPO (fd_lock) = -1;
     }
   Ozclose (&frewrite);
 }
@@ -1704,8 +1706,8 @@ ORCSerror (void)
    between actual file opening and setting `frewrite' etc., but it's
    better than nothing.  */
 {
-  if (0 <= fdlock)
-    close (fdlock);
+  if (0 <= REPO (fd_lock))
+    close (REPO (fd_lock));
   if (frewrite)
     /* Avoid `fclose', since stdio may not be reentrant.  */
     close (fileno (frewrite));

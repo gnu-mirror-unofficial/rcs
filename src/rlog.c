@@ -202,7 +202,7 @@ putrunk (void)
 {
   register struct hshentry const *ptr;
 
-  for (ptr = Head; ptr; ptr = ptr->next)
+  for (ptr = ADMIN (head); ptr; ptr = ptr->next)
     putadelta (ptr, ptr->next, true);
 }
 
@@ -319,7 +319,7 @@ readdeltalog (void)
   ignorephrases (Ktext);
   getkeystring (Ktext);
   Delta->insertlns = Delta->deletelns = 0;
-  if (Delta != Head)
+  if (Delta != ADMIN (head))
     getscript (Delta);
   else
     readstring ();
@@ -348,7 +348,7 @@ extractdelta (struct hshentry const *pdelta)
         return false;
   /* Only locked revisions wanted.  */
   if (lockflag)
-    for (plock = Locks;; plock = plock->nextlock)
+    for (plock = ADMIN (locks);; plock = plock->nextlock)
       if (!plock)
         return false;
       else if (plock->delta == pdelta)
@@ -473,7 +473,7 @@ trunclocks (void)
     return;
 
   /* Shorten locks to those contained in `lockerlist'.  */
-  for (pp = &Locks; (p = *pp);)
+  for (pp = &ADMIN (locks); (p = *pp);)
     for (plocker = lockerlist;;)
       if (strcmp (plocker->login, p->login) == 0)
         {
@@ -767,11 +767,11 @@ getnumericrev (void)
       ptr = ptr->rnext;
     }
   /* Now take care of `branchflag'.  */
-  if (branchflag && (Dbranch || Head))
+  if (branchflag && (ADMIN (defbr) || ADMIN (head)))
     {
       pt = ftalloc (struct Revpairs);
-      pt->strtrev = pt->endrev = Dbranch ? Dbranch
-        : (partialno (&s, Head->num, 1),
+      pt->strtrev = pt->endrev = ADMIN (defbr) ? ADMIN (defbr)
+        : (partialno (&s, ADMIN (head)->num, 1),
            fbuf_save (&s),
            s.string);
       pt->rnext = Revlst;
@@ -1070,7 +1070,7 @@ main (int argc, char **argv)
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
           continue;
 
-        /* `RCSname' contains the name of the RCS file,
+        /* `REPO (filename)' contains the name of the RCS file,
            and `finptr' the file descriptor;
            `workname' contains the name of the working file.  */
 
@@ -1079,12 +1079,12 @@ main (int argc, char **argv)
           trunclocks ();
 
         /* Do nothing if `-L' is given and there are no locks.  */
-        if (onlylockflag && !Locks)
+        if (onlylockflag && !ADMIN (locks))
           continue;
 
         if (onlyRCSflag)
           {
-            aprintf (out, "%s\n", RCSname);
+            aprintf (out, "%s\n", REPO (filename));
             continue;
           }
 
@@ -1099,11 +1099,12 @@ main (int argc, char **argv)
         /* Print RCS pathname, working pathname and optional
            administrative information.  Could use `getfullRCSname'
            here, but that is very slow.  */
-        aprintf (out, headFormat, RCSname, workname,
-                 Head ? " " : "", Head ? Head->num : "",
-                 Dbranch ? " " : "", Dbranch ? Dbranch : "",
+        aprintf (out, headFormat, REPO (filename), workname,
+                 ADMIN (head) ? " " : "",
+                 ADMIN (head) ? ADMIN (head)->num : "",
+                 ADMIN (defbr) ? " " : "", ADMIN (defbr) ? ADMIN (defbr) : "",
                  BE (strictly_locking) ? " strict" : "");
-        currlock = Locks;
+        currlock = ADMIN (locks);
         while (currlock)
           {
             aprintf (out, symbolFormat, currlock->login,
@@ -1111,11 +1112,11 @@ main (int argc, char **argv)
             currlock = currlock->nextlock;
           }
         if (BE (strictly_locking) && pre5)
-          aputs ("  ;  strict" + (Locks ? 3 : 0), out);
+          aputs ("  ;  strict" + (ADMIN (locks) ? 3 : 0), out);
 
         /* Print access list.  */
         aputs (accessListString, out);
-        curaccess = AccessList;
+        curaccess = ADMIN (allowed);
         while (curaccess)
           {
             aprintf (out, accessFormat, curaccess->login);
@@ -1126,37 +1127,39 @@ main (int argc, char **argv)
           {
             /* Print symbolic names.  */
             aputs ("\nsymbolic names:", out);
-            for (curassoc = Symbols; curassoc; curassoc = curassoc->nextassoc)
+            for (curassoc = ADMIN (assocs);
+                 curassoc;
+                 curassoc = curassoc->nextassoc)
               aprintf (out, symbolFormat, curassoc->symbol, curassoc->num);
           }
         if (pre5)
           {
             aputs ("\ncomment leader:  \"", out);
-            awrite (Comment.string, Comment.size, out);
+            awrite (ADMIN (log_lead).string, ADMIN (log_lead).size, out);
             afputc ('\"', out);
           }
         if (!pre5 || Expand != kwsub_kv)
           aprintf (out, "\nkeyword substitution: %s", expand_names[Expand]);
 
-        aprintf (out, "\ntotal revisions: %d", TotalDeltas);
+        aprintf (out, "\ntotal revisions: %d", REPO (ndelt));
 
         revno = 0;
 
-        if (Head && selectflag & descflag)
+        if (ADMIN (head) && selectflag & descflag)
           {
 
-            exttree (Head);
+            exttree (ADMIN (head));
 
             /* Get most recently date of the dates pointed by `duelst'.  */
             currdate = duelst;
             while (currdate)
               {
                 KSTRCPY (currdate->strtdate, "0.0.0.0.0.0");
-                recentdate (Head, currdate);
+                recentdate (ADMIN (head), currdate);
                 currdate = currdate->dnext;
               }
 
-            revno = extdate (Head);
+            revno = extdate (ADMIN (head));
 
             aprintf (out, ";\tselected revisions: %d", revno);
           }
@@ -1176,7 +1179,7 @@ main (int argc, char **argv)
               while (readdeltalog () != delta->next)
                 continue;
             putrunk ();
-            putree (Head);
+            putree (ADMIN (head));
           }
         aputs (equal_line, out);
       }

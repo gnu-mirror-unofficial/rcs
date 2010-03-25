@@ -1,3 +1,33 @@
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Consolidate RCS file state into `struct repository'.
+
+	Here, "U" means "Throughout, use `REPO (foo)' and
+	`ADMIN (foo)' instead of the old singular variable names".
+	* rcsbase.h (repository): New struct.
+	(repository): New `struct repository' decl.
+	(REPO, ADMIN): New macros.
+	(RCSname, fdlock, RCSstat, Dbranch, AccessList, Symbols, Comment)
+	(Ignored, Locks, Head, TotalDeltas): Delete var decls.
+	* ci.c: U.
+	* co.c: U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsedit.c: U.
+	* rcsfcmp.c: U.
+	* rcsfnms.c: U.
+	(RCSname, fdlock, RCSstat): Delete vars.
+	(repository): New `struct repository'.
+	* rcsgen.c: U.
+	* rcslex.c: U.
+	* rcsmerge.c: U.
+	* rcsrev.c: U.
+	* rcssyn.c: U.
+	(Comment, Ignored, AccessList, Symbols, Locks, Head)
+	(Dbranch, TotalDeltas): Delete vars.
+	* rlog.c: U.
+
 2010-03-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Define `ruid', `myself' unconditionally.

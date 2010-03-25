@@ -234,7 +234,7 @@ getstates (char *sp)
 
   if (c == '\0')
     {
-      /* Change state of default branch or `Head'.  */
+      /* Change state of default branch or `ADMIN (head)'.  */
       chgheadstate = true;
       headstate = temp;
       return;
@@ -423,14 +423,14 @@ doaccess (void)
         case erase:
           if (!ch->login)
             {
-              if (AccessList)
+              if (ADMIN (allowed))
                 {
-                  AccessList = NULL;
+                  ADMIN (allowed) = NULL;
                   changed = true;
                 }
             }
           else
-            for (p = &AccessList; (t = *p); p = &t->nextaccess)
+            for (p = &ADMIN (allowed); (t = *p); p = &t->nextaccess)
               if (strcmp (ch->login, t->login) == 0)
                 {
                   *p = t->nextaccess;
@@ -439,7 +439,7 @@ doaccess (void)
                 }
           break;
         case append:
-          for (p = &AccessList;; p = &t->nextaccess)
+          for (p = &ADMIN (allowed);; p = &t->nextaccess)
             if (!(t = *p))
               {
                 *p = t = ftalloc (struct access);
@@ -484,7 +484,7 @@ sendmail (char const *Delta, char const *who)
 
   aprintf (mailmess,
            "Subject: Broken lock on %s\n\nYour lock on revision %s of file %s\nhas been broken by %s for the following reason:\n",
-           basefilename (RCSname), Delta, getfullRCSname (), getcaller ());
+           basefilename (REPO (filename)), Delta, getfullRCSname (), getcaller ());
   aputs
     ("State the reason for breaking the lock:\n(terminate with single '.' or end of file)\n>> ",
      stderr);
@@ -537,7 +537,7 @@ breaklock (struct hshentry const *delta)
   char const *num;
 
   num = delta->num;
-  for (trail = &Locks; (next = *trail); trail = &next->nextlock)
+  for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
     if (strcmp (num, next->delta->num) == 0)
       {
         if (strcmp (getcaller (), next->login) != 0
@@ -558,7 +558,7 @@ breaklock (struct hshentry const *delta)
 static struct hshentry *
 searchcutpt (char const *object, int length, struct hshentries *store)
 /* Search store and return entry with number being `object'.
-   `cuttail' is 0, if the entry is Head; otherwise, `cuttail'
+   `cuttail' is 0, if the entry is `ADMIN (head)'; otherwise, it
    is the entry point to the one with number being `object'.  */
 {
   cuthead = NULL;
@@ -587,7 +587,7 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
           rcserror ("can't remove branch point %s", pt->num);
           return true;
         }
-      for (lockpt = Locks; lockpt; lockpt = lockpt->nextlock)
+      for (lockpt = ADMIN (locks); lockpt; lockpt = lockpt->nextlock)
         if (lockpt->delta == pt)
           {
             rcserror ("can't remove locked revision %s", pt->num);
@@ -789,7 +789,7 @@ doassoc (void)
       if (!curassoc->revno)
         {
           /* Delete symbol.  */
-          for (pre = &Symbols;; pre = &pt->nextassoc)
+          for (pre = &ADMIN (assocs);; pre = &pt->nextassoc)
             if (!(pt = *pre))
               {
                 rcswarn ("can't delete nonexisting symbol %s", ssymbol);
@@ -857,7 +857,7 @@ dolocks (void)
 /* Remove lock for caller or first lock if `unlockcaller' is set;
    remove locks which are stored in `rmvlocklst',
    add new locks which are stored in `newlocklst',
-   add lock for `Dbranch' or `Head' if `lockhead' is set.  */
+   add lock for `ADMIN (defbr)' or `ADMIN (head)' if `lockhead' is set.  */
 {
   struct Lockrev const *lockpt;
   struct hshentry *target;
@@ -866,15 +866,15 @@ dolocks (void)
   if (unlockcaller)
     {
       /* Find lock for caller.  */
-      if (Head)
+      if (ADMIN (head))
         {
-          if (Locks)
+          if (ADMIN (locks))
             {
               switch (findlock (true, &target))
                 {
                 case 0:
                   /* Remove most recent lock.  */
-                  changed |= breaklock (Locks->delta);
+                  changed |= breaklock (ADMIN (locks)->delta);
                   break;
                 case 1:
                   diagnose ("%s unlocked\n", target->num);
@@ -916,10 +916,10 @@ dolocks (void)
   if (lockhead)
     {
       /* Lock default branch or head.  */
-      if (Dbranch)
-        changed |= setlock (Dbranch);
-      else if (Head)
-        changed |= setlock (Head->num);
+      if (ADMIN (defbr))
+        changed |= setlock (ADMIN (defbr));
+      else if (ADMIN (head))
+        changed |= setlock (ADMIN (head)->num);
       else
         rcswarn ("can't lock an empty tree");
     }
@@ -1075,7 +1075,7 @@ buildtree (void)
               return;
             }
         }
-      Head = cuttail;
+      ADMIN (head) = cuttail;
     }
   return;
 }
@@ -1211,10 +1211,10 @@ main (int argc, char **argv)
           *argv = a;
           if (0 < pairnames (1, argv, rcsreadopen, true, false))
             {
-              while (AccessList)
+              while (ADMIN (allowed))
                 {
-                  getchaccess (str_save (AccessList->login), append);
-                  AccessList = AccessList->nextaccess;
+                  getchaccess (str_save (ADMIN (allowed)->login), append);
+                  ADMIN (allowed) = ADMIN (allowed)->nextaccess;
                 }
               Izclose (&finptr);
             }
@@ -1415,12 +1415,12 @@ main (int argc, char **argv)
               }
           }
 
-        /* `RCSname' contains the name of the RCS file, and
+        /* `REPO (filename)' contains the name of the RCS file, and
            `workname' contains the name of the working file.
            If `!initflag', `finptr' contains the file descriptor
            for the RCS file.  The admin node is initialized.  */
 
-        diagnose ("RCS file: %s\n", RCSname);
+        diagnose ("RCS file: %s\n", REPO (filename));
 
         changed = initflag | textflag;
         keepRCStime = Ttimeflag;
@@ -1439,11 +1439,11 @@ main (int argc, char **argv)
             BE (strictly_locking) = strictlock;
           }
         if (commsyml &&
-            (commsymlen != Comment.size ||
-             memcmp (commsyml, Comment.string, commsymlen) != 0))
+            (commsymlen != ADMIN (log_lead).size ||
+             memcmp (commsyml, ADMIN (log_lead).string, commsymlen) != 0))
           {
-            Comment.string = commsyml;
-            Comment.size = strlen (commsyml);
+            ADMIN (log_lead).string = commsyml;
+            ADMIN (log_lead).size = strlen (commsyml);
             changed = true;
           }
         if (0 <= expmode && Expand != expmode)
@@ -1457,15 +1457,15 @@ main (int argc, char **argv)
           {
             if (countnumflds (branchnum.string))
               {
-                if (cmpnum (Dbranch, branchnum.string) != 0)
+                if (cmpnum (ADMIN (defbr), branchnum.string) != 0)
                   {
-                    Dbranch = branchnum.string;
+                    ADMIN (defbr) = branchnum.string;
                     changed = true;
                   }
               }
-            else if (Dbranch)
+            else if (ADMIN (defbr))
               {
-                Dbranch = NULL;
+                ADMIN (defbr) = NULL;
                 changed = true;
               }
           }
@@ -1486,18 +1486,18 @@ main (int argc, char **argv)
         if (chgheadstate)
           {
             /* Change state of default branch or head.  */
-            if (!Dbranch)
+            if (!ADMIN (defbr))
               {
-                if (!Head)
+                if (!ADMIN (head))
                   rcswarn ("can't change states in an empty tree");
-                else if (strcmp (Head->state, headstate) != 0)
+                else if (strcmp (ADMIN (head)->state, headstate) != 0)
                   {
-                    Head->state = headstate;
+                    ADMIN (head)->state = headstate;
                     changed = true;
                   }
               }
             else
-              changed |= rcs_setstate (Dbranch, headstate);
+              changed |= rcs_setstate (ADMIN (defbr), headstate);
           }
         for (curstate = statelst; curstate; curstate = curstate->nextstatus)
           changed |= rcs_setstate (curstate->revno, curstate->status);
@@ -1517,11 +1517,11 @@ main (int argc, char **argv)
           continue;
 
         putadmin ();
-        if (Head)
-          puttree (Head, frewrite);
+        if (ADMIN (head))
+          puttree (ADMIN (head), frewrite);
         putdesc (textflag, textfile);
 
-        /* Don't conditionalize on non-NULL `Head'; that prevents
+        /* Don't conditionalize on non-NULL `ADMIN (head)'; that prevents
            `scanlogtext' from advancing the input pointer to EOF, in
            the process "marking" the intervening log messages to be
            discarded later.  The result is bogus log messages.  See
@@ -1543,21 +1543,22 @@ main (int argc, char **argv)
         if (initflag)
           {
             /* Adjust things for donerewrite's sake.  */
-            if (stat (workname, &RCSstat) != 0)
+            if (stat (workname, &REPO (stat)) != 0)
               {
 #if BAD_CREAT0
                 mode_t m = umask (0);
                 (void) umask (m);
-                RCSstat.st_mode = (S_IRUSR | S_IRGRP | S_IROTH) & ~m;
+                REPO (stat).st_mode = (S_IRUSR | S_IRGRP | S_IROTH) & ~m;
 #else
                 changed = -1;
 #endif
               }
-            RCSstat.st_nlink = 0;
+            REPO (stat).st_nlink = 0;
             keepRCStime = false;
           }
-        if (donerewrite (changed,
-                         keepRCStime ? RCSstat.st_mtime : (time_t) - 1) != 0)
+        if (donerewrite (changed, keepRCStime
+                         ? REPO (stat).st_mtime
+                         : (time_t) - 1) != 0)
           break;
 
         diagnose ("done\n");

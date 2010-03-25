@@ -198,8 +198,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                  of newlines in the log string.  */
                               int c1 = 1;
 
-                              for (ccnt = Comment.size; ccnt--;)
-                                c1 += Comment.string[ccnt] == '\n';
+                              for (ccnt = ADMIN (log_lead).size; ccnt--;)
+                                c1 += ADMIN (log_lead).string[ccnt] == '\n';
                               lncnt = 2 * c1 + 1;
                               while (ls--)
                                 if (*sp++ == '\n')
@@ -216,7 +216,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                  may be additional characters on the
                                  line (after the Log....$).  */
                               ccnt = RCSversion < VERSION (5)
-                                ? Comment.size
+                                ? ADMIN (log_lead).size
                                 : leaderlen;
                               do
                                 {
@@ -279,8 +279,8 @@ main (int argc, char *argv[])
 {
   struct hshentry delta;
 
-  Comment.string = argv[1];
-  Comment.size = strlen (argv[1]);
+  ADMIN (log_lead).string = argv[1];
+  ADMIN (log_lead).size = strlen (argv[1]);
   delta.log.string = argv[2];
   delta.log.size = strlen (argv[2]);
   if (rcsfcmp (Iopen (argv[3], FOPEN_R_WORK, NULL), argv[4], &delta))

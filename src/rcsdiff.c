@@ -348,7 +348,7 @@ main (int argc, char **argv)
 
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
           continue;
-        diagnose ("%sRCS file: %s\n", equal_line + 10, RCSname);
+        diagnose ("%sRCS file: %s\n", equal_line + 10, REPO (filename));
         if (!rev2)
           {
             /* Make sure work file is readable, and get its status.  */
@@ -362,13 +362,13 @@ main (int argc, char **argv)
         /* Read in the delta tree.  */
         gettree ();
 
-        if (!Head)
+        if (!ADMIN (head))
           {
             rcserror ("no revisions present");
             continue;
           }
         if (revnums == 0 || !*rev1)
-          rev1 = Dbranch ? Dbranch : Head->num;
+          rev1 = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
 
         if (!fexpandsym (rev1, &numericrev, workptr))
           continue;
@@ -384,7 +384,9 @@ main (int argc, char **argv)
         lexpandarg = expandarg;
         if (revnums == 2)
           {
-            if (!fexpandsym (*rev2 ? rev2 : Dbranch ? Dbranch : Head->num,
+            if (!fexpandsym (*rev2 ? rev2 : (ADMIN (defbr)
+                                             ? ADMIN (defbr)
+                                             : ADMIN (head)->num),
                              &numericrev, workptr))
               continue;
             if (! (target = gr_revno (numericrev.string, &gendeltas)))
@@ -396,7 +398,7 @@ main (int argc, char **argv)
         else if (target->lockedby
                  && !lexpandarg
                  && Expand == kwsub_kv
-                 && WORKMODE (RCSstat.st_mode, true) == workstat.st_mode)
+                 && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
           lexpandarg = "-kkvl";
         Izclose (&workptr);
 #if DIFF_L
@@ -428,7 +430,7 @@ main (int argc, char **argv)
           *pp++ = versionarg;
         if (zonearg)
           *pp++ = zonearg;
-        *pp++ = RCSname;
+        *pp++ = REPO (filename);
         *pp = '\0';
 
         diffp = diffpend;

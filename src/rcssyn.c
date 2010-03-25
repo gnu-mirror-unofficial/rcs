@@ -48,15 +48,7 @@ static char const
   K_branches[] = "branches";
 
 static struct buf Commleader;
-struct cbuf Comment;
-struct cbuf Ignored;
-struct access *AccessList;
-struct assoc *Symbols;
-struct rcslock *Locks;
 int Expand;
-struct hshentry *Head;
-char const *Dbranch;
-int TotalDeltas;
 
 static void
 getsemi (char const *key)
@@ -109,17 +101,17 @@ getadmin (void)
   struct buf b;
   struct cbuf cb;
 
-  TotalDeltas = 0;
+  REPO (ndelt) = 0;
 
   getkey (Khead);
-  Head = getdnum ();
+  ADMIN (head) = getdnum ();
   getsemi (Khead);
 
-  Dbranch = NULL;
+  ADMIN (defbr) = NULL;
   if (getkeyopt (Kbranch))
     {
       if ((delta = getnum ()))
-        Dbranch = delta->num;
+        ADMIN (defbr) = delta->num;
       getsemi (Kbranch);
     }
 
@@ -142,7 +134,7 @@ getadmin (void)
 #endif  /* COMPAT2 */
 
   getkey (Kaccess);
-  LastAccess = &AccessList;
+  LastAccess = &ADMIN (allowed);
   while ((id = getid ()))
     {
       newaccess = ftalloc (struct access);
@@ -154,7 +146,7 @@ getadmin (void)
   getsemi (Kaccess);
 
   getkey (Ksymbols);
-  LastSymbol = &Symbols;
+  LastSymbol = &ADMIN (assocs);
   while ((id = getid ()))
     {
       if (!getlex (COLON))
@@ -177,7 +169,7 @@ getadmin (void)
   getsemi (Ksymbols);
 
   getkey (Klocks);
-  LastLock = &Locks;
+  LastLock = &ADMIN (locks);
   while ((id = getid ()))
     {
       if (!getlex (COLON))
@@ -202,12 +194,12 @@ getadmin (void)
   if ((BE (strictly_locking) = getkeyopt (Kstrict)))
     getsemi (Kstrict);
 
-  clear_buf (&Comment);
+  clear_buf (&ADMIN (log_lead));
   if (getkeyopt (Kcomment))
     {
       if (NEXT (tok) == STRING)
         {
-          Comment = savestring (&Commleader);
+          ADMIN (log_lead) = savestring (&Commleader);
           nextlex ();
         }
       getsemi (Kcomment);
@@ -227,7 +219,7 @@ getadmin (void)
         }
       getsemi (Kexpand);
     }
-  Ignored = getphrases (Kdesc);
+  ADMIN (description) = getphrases (Kdesc);
 }
 
 int
@@ -336,7 +328,7 @@ getdelta (void)
   Delta->log.string = NULL;
   Delta->selector = true;
   Delta->ig = getphrases (Kdesc);
-  TotalDeltas++;
+  REPO (ndelt)++;
   return true;
 }
 
@@ -349,7 +341,7 @@ gettree (void)
 
   while (getdelta ())
     continue;
-  currlock = Locks;
+  currlock = ADMIN (locks);
   while (currlock)
     {
       currlock->delta->lockedby = currlock->login;
@@ -541,7 +533,7 @@ main (int argc, char *argv[])
     }
   Lexinit ();
   getadmin ();
-  fdlock = STDOUT_FILENO;
+  REPO (fd_lock) = STDOUT_FILENO;
   putadmin ();
 
   gettree ();
