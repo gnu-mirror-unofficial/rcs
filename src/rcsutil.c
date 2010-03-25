@@ -492,7 +492,7 @@ setup_catchsig (int const *sig, int sigs)
 #endif  /* !defined HAVE_SIGBLOCK */
 #endif  /* !defined HAVE_SIGACTION */
 
-static int const regsigs[] = {
+static const int const regsigs[] = {
 #ifdef SIGHUP
   SIGHUP,
 #endif
@@ -540,7 +540,7 @@ catchints (void)
 
    This can also occur if someone truncates the file, even without NFS.  */
 
-static int const mmapsigs[] = { MMAP_SIGNAL };
+static const int const mmapsigs[] = { MMAP_SIGNAL };
 
 void
 catchmmapints (void)

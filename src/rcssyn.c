@@ -41,7 +41,7 @@ const char const
   Ksymbols[] = "symbols",
   Ktext[] = "text";
 
-static char const
+static const char const
 #if COMPAT2
   Ksuffix[] = "suffix",
 #endif

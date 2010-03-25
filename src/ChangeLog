@@ -1,5 +1,17 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Dose data structures with `const'.
+
+	* maketime.c (month_yday): Add `const' to var definition.
+	* partime.c (month_names): Likewise.
+	(weekday_names, zone_names, patterns): Likewise.
+	* rcsfnms.c (rcsdir, comtable): Likewise.
+	* rcssyn.c [COMPAT2] (Ksuffix): Likewise.
+	(K_branches): Likewise.
+	* rcsutil.c (regsigs, mmapsigs): Likewise.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Consolidate i/o streams into `struct flow'.
 
 	Here, "U" means "Throughout, use `FLOW (foo)'

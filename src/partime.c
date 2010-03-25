@@ -33,13 +33,13 @@ struct name_val
   int val;
 };
 
-static struct name_val const month_names[] = {
+static const struct name_val const month_names[] = {
   {"jan", 0}, {"feb", 1}, {"mar", 2}, {"apr", 3}, {"may", 4}, {"jun", 5},
   {"jul", 6}, {"aug", 7}, {"sep", 8}, {"oct", 9}, {"nov", 10}, {"dec", 11},
   {"", TM_UNDEFINED}
 };
 
-static struct name_val const weekday_names[] = {
+static const struct name_val const weekday_names[] = {
   {"sun", 0}, {"mon", 1}, {"tue", 2}, {"wed", 3}, {"thu", 4}, {"fri", 5},
   {"sat", 6}, {"", TM_UNDEFINED}
 };
@@ -49,7 +49,7 @@ static struct name_val const weekday_names[] = {
 #define zs(t,s)  {s, hr60(t)}
 #define zd(t,s,d)  zs(t, s),  zs((t)+100, d)
 
-static struct name_val const zone_names[] = {
+static const struct name_val const zone_names[] = {
   zs (-1000, "hst"),            /* Hawaii */
   zd (-1000, "hast", "hadt"),   /* Hawaii-Aleutian */
   zd (-900, "akst", "akdt"),    /* Alaska */
@@ -181,7 +181,7 @@ undefine (struct partime *t)
    look for the first matching pattern whose values do not contradict values
    that we already know about.  See `parse_pattern_letter' below for the
    meaning of the pattern codes.  */
-static char const *const patterns[] = {
+static const char const *const patterns[] = {
   /* These traditional patterns must come first,
      to prevent an ISO 8601 format from misinterpreting their prefixes.  */
   "E_n_y", "x",                                 /* RFC 822 */

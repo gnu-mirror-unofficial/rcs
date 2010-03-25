@@ -26,7 +26,7 @@
 struct manifestation manifestation;
 struct repository repository;
 
-static char const rcsdir[] = "RCS";
+static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
 
 static struct buf RCSbuf, RCSb;
@@ -44,7 +44,7 @@ struct compair
 
 /* This table is present only for backwards compatibility.  Normally we
    ignore this table, and use the prefix of the `$Log' line instead.  */
-static struct compair const comtable[] = {
+static const struct compair const comtable[] = {
   {"a",    "-- "},              /* Ada */
   {"ada",  "-- "},
   {"adb",  "-- "},
