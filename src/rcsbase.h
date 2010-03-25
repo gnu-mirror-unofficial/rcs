@@ -805,7 +805,6 @@ void time2date (time_t, char[datesize]);
 void zone_set (char const *);
 
 /* rcsutil */
-extern int RCSversion;
 FILE *fopenSafer (char const *, char const *);
 char *cgetenv (char const *);
 char *fbuf_save (const struct buf *);
@@ -927,6 +926,11 @@ struct behavior
      - [ci] ???
      - [co] conspires w/ kwsub_v to make workfile readonly
      - [rlog] display "strict"  */
+
+  int version;
+  /* The "effective RCS version", for backward compatability,
+     normalized via `VERSION' (i.e., current 0, previous -1, etc).
+     -- setRCSversion  */
 };
 extern struct behavior behavior;
 

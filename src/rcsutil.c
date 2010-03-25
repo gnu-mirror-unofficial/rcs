@@ -912,8 +912,6 @@ run (int infd, char const *outname, ...)
   return runv (infd, outname, rgargs);
 }
 
-int RCSversion;
-
 void
 setRCSversion (char const *str)
 {
@@ -936,7 +934,7 @@ setRCSversion (char const *str)
       else if (v < VERSION_min || VERSION_max < v)
         error ("%s out of range %d..%d", str, VERSION_min, VERSION_max);
 
-      RCSversion = VERSION (v);
+      BE (version) = VERSION (v);
     }
   else
     {

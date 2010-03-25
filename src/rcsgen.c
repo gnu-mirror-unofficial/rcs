@@ -375,7 +375,7 @@ putadmin (void)
   aputc (*Khead, fout);
   aprintf (fout, "%s\t%s;\n", Khead + 1,
            ADMIN (head) ? ADMIN (head)->num : "");
-  if (ADMIN (defbr) && VERSION (4) <= RCSversion)
+  if (ADMIN (defbr) && VERSION (4) <= BE (version))
     aprintf (fout, "%s\t%s;\n", Kbranch, ADMIN (defbr));
 
   aputs (Kaccess, fout);

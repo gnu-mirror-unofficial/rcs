@@ -35,7 +35,7 @@ time2date (time_t unixtime, char date[datesize])
 /* Convert Unix time to RCS format.  For compatibility with older versions of
    RCS, dates from 1900 through 1999 are stored without the leading "19".  */
 {
-  register struct tm const *tm = time2tm (unixtime, RCSversion < VERSION (5));
+  register struct tm const *tm = time2tm (unixtime, BE (version) < VERSION (5));
   sprintf (date, proper_dot_2 ("%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",
                                "%02d.%02d.%02d.%02d.%02d.%02d"),
            tm->tm_year + ((unsigned) tm->tm_year < 100 ? 0 : 1900),
@@ -61,7 +61,7 @@ str2date (char const *source, char target[datesize])
   time2date (str2time_checked (source, now (),
                                use_zone_offset
                                ? zone_offset
-                               : (RCSversion < VERSION (5)
+                               : (BE (version) < VERSION (5)
                                   ? TM_LOCAL_ZONE
                                   : 0)),
              target);
@@ -104,7 +104,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
   if (!use_zone_offset)
     sprintf (datebuf,
              ("19%.*s/%.2s/%.2s %.2s:%.2s:%s"
-              + (date[2] == '.' && VERSION (5) <= RCSversion ? 0 : 2)),
+              + (date[2] == '.' && VERSION (5) <= BE (version) ? 0 : 2)),
              (int) (p - date - 1), date, p, p + 3, p + 6, p + 9, p + 12);
   else
     {

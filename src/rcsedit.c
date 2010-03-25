@@ -654,7 +654,7 @@ escape_string (register FILE *out, register char const *s)
         aputs ("\\044", out);
         break;
       case '\\':
-        if (VERSION (5) <= RCSversion)
+        if (VERSION (5) <= BE (version))
           {
             aputs ("\\\\", out);
             break;
@@ -685,7 +685,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
   sp = Keyword[(int) marker];
   exp = Expand;
   date = delta->date;
-  RCSv = RCSversion;
+  RCSv = BE (version);
 
   if (exp != kwsub_v)
     aprintf (out, "%c%s", KDELIM, sp);
@@ -768,7 +768,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
           && !memcmp (sp, ciklog, sizeof (ciklog) - 1))
         return;
       bufautobegin (&leader);
-      if (RCSversion < VERSION (5))
+      if (BE (version) < VERSION (5))
         {
           cp = ADMIN (log_lead).string;
           cs = ADMIN (log_lead).size;

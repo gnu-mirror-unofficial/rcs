@@ -215,7 +215,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                  skip another line here, because there
                                  may be additional characters on the
                                  line (after the Log....$).  */
-                              ccnt = RCSversion < VERSION (5)
+                              ccnt = BE (version) < VERSION (5)
                                 ? ADMIN (log_lead).size
                                 : leaderlen;
                               do

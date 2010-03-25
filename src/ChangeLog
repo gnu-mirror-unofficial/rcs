@@ -1,5 +1,21 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move "effective RCS version" into `struct behavior'.
+
+	Here, "U" means "Throughout, use `BE (version)'".
+	* rcsbase.h (RCSversion): Delete var decl.
+	(behavior): Add `version' to this struct.
+	* rcs.c: U.
+	* rcsedit.c: U.
+	* rcsfcmp.c: U.
+	* rcsgen.c: U.
+	* rcstime.c: U.
+	* rcsutil.c: U.
+	(RCSversion): Delete var.
+	* rlog.c: U.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `MANI (filename)' and `MANI (standard_output)'.
 
 	Here, "U" means "Throughout, use `MANI (filename)'

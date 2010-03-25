@@ -146,7 +146,7 @@ putadelta (register struct hshentry const *node,
   struct branchhead const *newbranch;
   struct buf branchnum;
   char datebuf[datesize + zonelenmax];
-  bool pre5 = RCSversion < VERSION (5);
+  bool pre5 = BE (version) < VERSION (5);
 
   if (!node->selector)
     return;
@@ -656,7 +656,7 @@ getdatepair (char *argv)
       nextdate->dnext = datelist;
       datelist = nextdate;
     end:
-      if (RCSversion < VERSION (5))
+      if (BE (version) < VERSION (5))
         nextdate->ne_date = 0;
       if (c == '\0')
         return;
@@ -800,7 +800,7 @@ getrevpairs (register char *argv)
     separator = ':';
   else
     {
-      if (strchr (argv, '-') && VERSION (5) <= RCSversion)
+      if (strchr (argv, '-') && VERSION (5) <= BE (version))
         warn ("`-' is obsolete in `-r%s'; use `:' instead", argv);
       separator = '-';
     }
@@ -1037,7 +1037,7 @@ main (int argc, char **argv)
       descflag = true;
     }
 
-  pre5 = RCSversion < VERSION (5);
+  pre5 = BE (version) < VERSION (5);
   if (pre5)
     {
       accessListString = "\naccess list:   ";

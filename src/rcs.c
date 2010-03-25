@@ -272,7 +272,7 @@ getdelrev (char *sp)
     separator = ':';
   else
     {
-      if (strchr (sp, '-') && VERSION (5) <= RCSversion)
+      if (strchr (sp, '-') && VERSION (5) <= BE (version))
         warn ("`-' is obsolete in `-o%s'; use `:' instead", sp);
       separator = '-';
     }
