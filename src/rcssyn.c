@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 #include <ctype.h>
 
 /* Keyword table.  */
@@ -69,7 +69,7 @@ getdnum (void)
 }
 
 const char const *const expand_names[] = {
-  /* These must agree with kwsub_* in rcsbase.h.  */
+  /* These must agree with kwsub_* in base.h.  */
   "kv", "kvl", "k", "v", "o", "b",
   NULL
 };

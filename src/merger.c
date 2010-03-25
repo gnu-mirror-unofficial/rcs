@@ -19,7 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 
 static char const *
 normalize_arg (char const *s, char **b)

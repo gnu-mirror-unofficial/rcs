@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 
 /* Map of character types: ISO 8859/1 (Latin-1).  */
 const enum tokens const ctab[] =

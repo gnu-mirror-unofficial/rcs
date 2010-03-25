@@ -1096,4 +1096,4 @@ extern struct flow flow;
 
 #define FLOW(member)  (flow. member)
 
-/* rcsbase.h ends here */
+/* base.h ends here */

@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 #include <stdint.h>
 
 struct manifestation manifestation;

@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 
 enum stringwork
 { enter, copy, edit, expand, edit_expand };

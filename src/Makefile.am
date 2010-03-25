@@ -19,7 +19,7 @@
 
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
-  gnu-h-v.h maketime.h partime.h rcsbase.h \
+  base.h gnu-h-v.h maketime.h partime.h \
   bother.c gnu-h-v.c \
   maketime.c merger.c partime.c rcsedit.c rcsfcmp.c rcsfnms.c \
   rcsgen.c rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsrev.c rcssyn.c \

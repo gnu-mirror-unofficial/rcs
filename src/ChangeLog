@@ -1,5 +1,37 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Rename rcsbase.h to base.h.
+
+	* base.h: Rename from rcsbase.h.
+	* Makefile.am (libparts_a_SOURCES): Update.
+	* ci.c: Update #include.
+	* co.c: Likewise.
+	* gnu-h-v.c: Likewise.
+	* ident.c: Likewise.
+	* maketime.c: Likewise.
+	* merge.c: Likewise.
+	* merger.c: Likewise.
+	* partime.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcskeys.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmap.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rcstime.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Remove spurious casts to void for function call.
 
 	* rcs.c (main): Remove cast to void for `umask' call.

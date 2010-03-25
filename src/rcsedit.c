@@ -27,7 +27,7 @@
  ******************************************************************************
  */
 
-#include "rcsbase.h"
+#include "base.h"
 
 #if !large_memory
 /* Edit file descriptor.  */

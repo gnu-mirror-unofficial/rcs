@@ -19,7 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 #include "rcsclean.help"
 
 #ifdef HAVE_DIRENT_H

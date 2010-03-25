@@ -20,10 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 
 const char const *const Keyword[] = {
-  /* This must be in the same order as rcsbase.h's enum markers type.  */
+  /* This must be in the same order as base.h's enum markers type.  */
   NULL,
   AUTHOR, DATE, HEADER, IDH,
   LOCKER, LOG, NAME, RCSFILE, REVISION, SOURCE, STATE

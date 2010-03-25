@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rcsbase.h"
+#include "base.h"
 #include "rcsdiff.help"
 
 /* Normally, if the two revisions specified are the same, we avoid calling
