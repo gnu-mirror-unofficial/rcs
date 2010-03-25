@@ -85,8 +85,8 @@ cleanup (void)
 {
   if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
-  Izclose (&finptr);
-  Ozclose (&fcopy);
+  Izclose (&FLOW (from));
+  Ozclose (&FLOW (res));
   ORCSclose ();
   dirtempunlink ();
 }
@@ -339,7 +339,7 @@ scanlogtext (struct hshentry *delta, bool edit)
 
   for (;;)
     {
-      foutptr = NULL;
+      FLOW (to) = NULL;
       if (eoflex ())
         {
           if (delta)
@@ -351,8 +351,8 @@ scanlogtext (struct hshentry *delta, bool edit)
         fatserror ("delta number corrupted");
       if (nextdelta->selector)
         {
-          foutptr = frewrite;
-          aprintf (frewrite, DELNUMFORM, nextdelta->num, Klog);
+          FLOW (to) = FLOW (rewr);
+          aprintf (FLOW (rewr), DELNUMFORM, nextdelta->num, Klog);
         }
       getkeystring (Klog);
       if (nextdelta == cuttail)
@@ -367,11 +367,11 @@ scanlogtext (struct hshentry *delta, bool edit)
         {
           if (nextdelta->log.string && nextdelta->selector)
             {
-              foutptr = NULL;
+              FLOW (to) = NULL;
               readstring ();
-              foutptr = frewrite;
-              putstring (foutptr, false, nextdelta->log, true);
-              afputc (NEXT (c), foutptr);
+              FLOW (to) = FLOW (rewr);
+              putstring (FLOW (to), false, nextdelta->log, true);
+              afputc (NEXT (c), FLOW (to));
             }
           else
             readstring ();
@@ -973,7 +973,7 @@ rcs_setstate (char const *rev, char const *status)
 
 static bool
 buildeltatext (struct hshentries const *deltas)
-/* Put the delta text on `frewrite' and make necessary
+/* Put the delta text on `FLOW (rewr)' and make necessary
    change to delta text.  */
 {
   register FILE *fcut;          /* temporary file to rebuild delta tree */
@@ -1004,7 +1004,7 @@ buildeltatext (struct hshentries const *deltas)
   while (deltas->first != cuttail)
     scanlogtext ((deltas = deltas->rest)->first, true);
   finishedit (NULL, NULL, true);
-  Ozclose (&fcopy);
+  Ozclose (&FLOW (res));
 
   if (fcut)
     {
@@ -1019,15 +1019,15 @@ buildeltatext (struct hshentries const *deltas)
         *++diffp == "--binary";
 #endif
       *++diffp = "-";
-      *++diffp = resultname;
+      *++diffp = FLOW (result);
       *++diffp = '\0';
       if (DIFF_TROUBLE == runv (fileno (fcut), diffname, diffv))
         rcsfaterror ("diff failed");
       Ofclose (fcut);
-      return putdtext (cuttail, diffname, frewrite, true);
+      return putdtext (cuttail, diffname, FLOW (rewr), true);
     }
   else
-    return putdtext (cuttail, resultname, frewrite, false);
+    return putdtext (cuttail, FLOW (result), FLOW (rewr), false);
 }
 
 static void
@@ -1216,7 +1216,7 @@ main (int argc, char **argv)
                   getchaccess (str_save (ADMIN (allowed)->login), append);
                   ADMIN (allowed) = ADMIN (allowed)->nextaccess;
                 }
-              Izclose (&finptr);
+              Izclose (&FLOW (from));
             }
           break;
 
@@ -1417,7 +1417,7 @@ main (int argc, char **argv)
 
         /* `REPO (filename)' contains the name of the RCS file, and
            `MANI (filename)' contains the name of the working file.
-           If `!initflag', `finptr' contains the file descriptor
+           If `!initflag', `FLOW (from)' contains the file descriptor
            for the RCS file.  The admin node is initialized.  */
 
         diagnose ("RCS file: %s\n", REPO (filename));
@@ -1518,7 +1518,7 @@ main (int argc, char **argv)
 
         putadmin ();
         if (ADMIN (head))
-          puttree (ADMIN (head), frewrite);
+          puttree (ADMIN (head), FLOW (rewr));
         putdesc (textflag, textfile);
 
         /* Don't conditionalize on non-NULL `ADMIN (head)'; that prevents
@@ -1532,7 +1532,7 @@ main (int argc, char **argv)
               {
                 if (!cuttail || buildeltatext (gendeltas))
                   {
-                    advise_access (finptr, MADV_SEQUENTIAL);
+                    advise_access (FLOW (from), MADV_SEQUENTIAL);
                     scanlogtext (NULL, false);
                     /* Copy rest of delta text nodes that are not deleted.  */
                     changed = true;

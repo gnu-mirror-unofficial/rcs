@@ -64,10 +64,10 @@ cleanup (void)
 {
   if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
-  Izclose (&finptr);
+  Izclose (&FLOW (from));
   Izclose (&workptr);
   Ozclose (&exfile);
-  Ozclose (&fcopy);
+  Ozclose (&FLOW (res));
   ORCSclose ();
   dirtempunlink ();
 }
@@ -825,7 +825,7 @@ main (int argc, char **argv)
 
         /* `REPO (filename)' contains the name of the RCS file,
            and `MANI (filename)' contains the name of the working file.
-           If the RCS file exists, `finptr' contains the file
+           If the RCS file exists, `FLOW (from)' contains the file
            descriptor for the RCS file, and `REPO (stat)' is set.
            The admin node is initialized.  */
 
@@ -837,7 +837,7 @@ main (int argc, char **argv)
             continue;
           }
 
-        if (finptr)
+        if (FLOW (from))
           {
             if (same_file (REPO (stat), workstat))
               {
@@ -870,7 +870,7 @@ main (int argc, char **argv)
         /* (End processing keepflag.)  */
 
         /* Read the delta tree.  */
-        if (finptr)
+        if (FLOW (from))
           gettree ();
 
         /* Expand symbolic revision number.  */
@@ -947,7 +947,7 @@ main (int argc, char **argv)
           continue;
 
         putadmin ();
-        puttree (ADMIN (head), frewrite);
+        puttree (ADMIN (head), FLOW (rewr));
         putdesc (false, textfile);
 
         changework = BE (kws) < MIN_UNCHANGED_EXPAND;
@@ -961,7 +961,7 @@ main (int argc, char **argv)
             diagnose ("initial revision: %s\n", newdelta.num);
             /* Get logmessage.  */
             newdelta.log = getlogmsg ();
-            putdftext (&newdelta, workptr, frewrite, false);
+            putdftext (&newdelta, workptr, FLOW (rewr), false);
             REPO (stat).st_mode = workstat.st_mode;
             REPO (stat).st_nlink = 0;
             changedRCS = true;
@@ -971,7 +971,7 @@ main (int argc, char **argv)
             diffname = maketemp (0);
             newhead = ADMIN (head) == &newdelta;
             if (!newhead)
-              foutptr = frewrite;
+              FLOW (to) = FLOW (rewr);
             expname =
               buildrevision (gendeltas, targetdelta, NULL, false);
             if (!forceciflag
@@ -996,13 +996,13 @@ main (int argc, char **argv)
                   /* We have started to build the wrong new RCS file.
                      Start over from the beginning.  */
                   {
-                    long hwm = ftell (frewrite);
+                    long hwm = ftell (FLOW (rewr));
                     bool bad_truncate;
 
-                    Orewind (frewrite);
-                    bad_truncate = 0 > ftruncate (fileno (frewrite), (off_t) 0);
+                    Orewind (FLOW (rewr));
+                    bad_truncate = 0 > ftruncate (fileno (FLOW (rewr)), (off_t) 0);
 
-                    Irewind (finptr);
+                    Irewind (FLOW (from));
                     Lexinit ();
                     getadmin ();
                     gettree ();
@@ -1017,12 +1017,12 @@ main (int argc, char **argv)
                       continue;
                     if (dorewrite (true, true) != 0)
                       continue;
-                    fastcopy (finptr, frewrite);
+                    fastcopy (FLOW (from), FLOW (rewr));
                     if (bad_truncate)
-                      while (ftell (frewrite) < hwm)
+                      while (ftell (FLOW (rewr)) < hwm)
                         /* White out any earlier mistake with '\n's.
                            This is unlikely.  */
-                        afputc ('\n', frewrite);
+                        afputc ('\n', FLOW (rewr));
                   }
               }
             else
@@ -1088,11 +1088,11 @@ main (int argc, char **argv)
                 if (newhead)
                   {
                     Irewind (workptr);
-                    putdftext (&newdelta, workptr, frewrite, false);
-                    if (!putdtext (targetdelta, diffname, frewrite, true))
+                    putdftext (&newdelta, workptr, FLOW (rewr), false);
+                    if (!putdtext (targetdelta, diffname, FLOW (rewr), true))
                       continue;
                   }
-                else if (!putdtext (&newdelta, diffname, frewrite, true))
+                else if (!putdtext (&newdelta, diffname, FLOW (rewr), true))
                   continue;
 
                 /* Check whether the working file changed during checkin,
@@ -1116,9 +1116,9 @@ main (int argc, char **argv)
 
         if (donerewrite (changedRCS, !Ttimeflag
                          ? (time_t) - 1
-                         : finptr && wtime < (REPO (stat).st_mtime
-                                              ? REPO (stat).st_mtime
-                                              : wtime))
+                         : FLOW (from) && wtime < (REPO (stat).st_mtime
+                                                   ? REPO (stat).st_mtime
+                                                   : wtime))
             != 0)
           continue;
 

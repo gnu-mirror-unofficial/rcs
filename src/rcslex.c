@@ -27,15 +27,6 @@ struct parse_state parse_state;
 /* Pointer to next hash entry, set by `lookup'.  */
 static struct hshentry *nexthsh;
 
-/* Input file descriptor.  */
-RILE *finptr;
-
-/* File descriptor for echoing input.  */
-FILE *frewrite;
-
-/* Copy of `frewrite', but NULL to suppress echo.  */
-FILE *foutptr;
-
 /* Token buffer.  */
 static struct buf tokbuf;
 
@@ -105,7 +96,7 @@ lookup (const struct buf *b)
 void
 Lexinit (void)
 /* Initialize lexical analyzer: initialize the hashtable;
-   initialize `NEXT (c)', `NEXT (tok)' if `finptr' != NULL.  */
+   initialize `NEXT (c)', `NEXT (tok)' if `FLOW (from)' != NULL.  */
 {
   register int c;
 
@@ -115,14 +106,14 @@ Lexinit (void)
     }
 
   LEX (nerr) = 0;
-  if (finptr)
+  if (FLOW (from))
     {
-      foutptr = NULL;
+      FLOW (to) = NULL;
       BE (receptive_to_next_hash_key) = true;
       ignored_phrases = false;
       LEX (lno) = 1;
       bufrealloc (&tokbuf, 2);
-      Iget (finptr, NEXT (c));
+      Iget (FLOW (from), NEXT (c));
       /* Initial token.  */
       nextlex ();
     }
@@ -145,8 +136,8 @@ nextlex (void)
   register enum tokens d;
   register RILE *fin;
 
-  fin = finptr;
-  frew = foutptr;
+  fin = FLOW (from);
+  frew = FLOW (to);
   setupcache (fin);
   cache (fin);
   c = NEXT (c);
@@ -243,8 +234,8 @@ eoflex (void)
   register RILE *fin;
 
   c = NEXT (c);
-  fin = finptr;
-  fout = foutptr;
+  fin = FLOW (from);
+  fout = FLOW (to);
   setupcache (fin);
   cache (fin);
 
@@ -365,7 +356,7 @@ struct cbuf
 getphrases (char const *key)
 /* Get a series of phrases that do not start with `key'.  Return
    resulting buffer.  Stop when the next phrase starts with a token that
-   is not an identifier, or is `key'.  Copy input to `foutptr' if it is
+   is not an identifier, or is `key'.  Copy input to `FLOW (to)' if it is
    set.  Unlike `ignorephrases', this routine assumes `nextlex' has
    already been invoked before we start.  */
 {
@@ -389,8 +380,8 @@ getphrases (char const *key)
   else
     {
       warnignore ();
-      fin = finptr;
-      frew = foutptr;
+      fin = FLOW (from);
+      frew = FLOW (to);
       setupcache (fin);
       cache (fin);
 #if large_memory
@@ -538,7 +529,7 @@ getphrases (char const *key)
 void
 readstring (void)
 /* Skip over characters until terminating single `SDELIM'.
-   If `foutptr' is set, copy every character read to `foutptr'.
+   If `FLOW (to)' is set, copy every character read to `FLOW (to)'.
    Do not advance `nextlex' at the end.  */
 {
   register int c;
@@ -546,8 +537,8 @@ readstring (void)
   register FILE *frew;
   register RILE *fin;
 
-  fin = finptr;
-  frew = foutptr;
+  fin = FLOW (from);
+  frew = FLOW (to);
   setupcache (fin);
   cache (fin);
   for (;;)
@@ -583,7 +574,7 @@ printstring (void)
   register FILE *fout;
   register RILE *fin;
 
-  fin = finptr;
+  fin = FLOW (from);
   fout = stdout;
   setupcache (fin);
   cache (fin);
@@ -611,9 +602,9 @@ printstring (void)
 
 struct cbuf
 savestring (struct buf *target)
-/* Copy a string terminated with `SDELIM' from file `finptr' to buffer
-   `target'.  Double `SDELIM' is replaced with `SDELIM'.  If `foutptr'
-   is set, the string is also copied unchanged to `foutptr'.  Do not
+/* Copy a string terminated with `SDELIM' from file `FLOW (from)' to buffer
+   `target'.  Double `SDELIM' is replaced with `SDELIM'.  If `FLOW (to)'
+   is set, the string is also copied unchanged to `FLOW (to)'.  Do not
    advance `nextlex' at the end.  Return a copy of `*target', except
    with exact length.  */
 {
@@ -625,8 +616,8 @@ savestring (struct buf *target)
   char const *limit;
   struct cbuf r;
 
-  fin = finptr;
-  frew = foutptr;
+  fin = FLOW (from);
+  frew = FLOW (to);
   setupcache (fin);
   cache (fin);
   tp = target->string;
@@ -1367,7 +1358,7 @@ main (int argc, char *argv[])
       aputs ("No input file\n", stderr);
       return EXIT_FAILURE;
     }
-  if (!(finptr = Iopen (argv[1], FOPEN_R, NULL)))
+  if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
     {
       faterror ("can't open input file %s", argv[1]);
     }

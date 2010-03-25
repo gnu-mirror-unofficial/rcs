@@ -300,7 +300,7 @@ InitAdmin (void)
   ADMIN (log_lead).size = strlen (comtable[i].comlead);
   BE (kws) = kwsub_kv;
   clear_buf (&ADMIN (description));
-  /* Note: If `!finptr', read nothing; only initialize.  */
+  /* Note: If `!FLOW (from)', read nothing; only initialize.  */
   Lexinit ();
 }
 
@@ -476,10 +476,10 @@ rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
 static bool
 finopen (RILE *(*rcsopen) (struct buf *, struct stat *, bool), bool mustread)
 /* Use `rcsopen' to open an RCS file; `mustread' is set if the file must be
-   read.  Set `finptr' to the result and return true if successful.  `RCSb'
-   holds the file's name.  Set `RCSbuf' to the best RCS name found so far,
-   and `RCSerrno' to its errno.  Return true if successful or if an unusual
-   failure.  */
+   read.  Set `FLOW (from)' to the result and return true if successful.
+   `RCSb' holds the file's name.  Set `RCSbuf' to the best RCS name found
+   so far, and `RCSerrno' to its errno.  Return true if successful or if
+   an unusual failure.  */
 {
   bool interesting, preferold;
 
@@ -487,8 +487,8 @@ finopen (RILE *(*rcsopen) (struct buf *, struct stat *, bool), bool mustread)
      unless we tried locking the old name and failed.  */
   preferold = RCSbuf.string[0] && (mustread || 0 <= REPO (fd_lock));
 
-  finptr = (*rcsopen) (&RCSb, &REPO (stat), mustread);
-  interesting = finptr || errno != ENOENT;
+  FLOW (from) = (*rcsopen) (&RCSb, &REPO (stat), mustread);
+  interesting = FLOW (from) || errno != ENOENT;
   if (interesting || !preferold)
     {
       /* Use the new name.  */
@@ -551,9 +551,9 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
    If the RCS file exists, place its status into `REPO (stat)'.
 
    If the RCS file exists, open (using `rcsopen') it for reading, place the
-   file pointer into `finptr', read in the admin-node, and return 1.  If the
-   RCS file does not exist and `mustread', print an error unless `quiet' and
-   return 0.  Otherwise, initialize the admin node and return -1.
+   file pointer into `FLOW (from)', read in the admin-node, and return 1.
+   If the RCS file does not exist and `mustread', print an error unless
+   `quiet' and return 0.  Otherwise, initialize the admin node and return -1.
 
    Return 0 on all errors, e.g. files that are not regular files.  */
 {
@@ -624,7 +624,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     {
       /* A path for RCSfile is given; single RCS file to look for.  */
       bufscpy (&RCSbuf, RCS1);
-      finptr = (*rcsopen) (&RCSbuf, &REPO (stat), mustread);
+      FLOW (from) = (*rcsopen) (&RCSbuf, &REPO (stat), mustread);
       RCSerrno = errno;
     }
   else
@@ -650,7 +650,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
         }
     }
   REPO (filename) = p = RCSbuf.string;
-  if (finptr)
+  if (FLOW (from))
     {
       if (!S_ISREG (REPO (stat).st_mode))
         {
@@ -677,7 +677,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     workwarn ("Working file ignored due to -p option");
 
   PREV (valid) = false;
-  return finptr ? 1 : -1;
+  return FLOW (from) ? 1 : -1;
 }
 
 static size_t
@@ -996,7 +996,7 @@ main (int argc, char *argv[])
             {
               diagnose ("RCS file %s exists\n", REPO (filename));
             }
-          Ifclose (finptr);
+          Ifclose (FLOW (from));
           break;
 
         case -1:

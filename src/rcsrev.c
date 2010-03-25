@@ -809,7 +809,7 @@ main (int argc, char *argv[])
       aputs ("No input file\n", stderr);
       return EXIT_FAILURE;
     }
-  if (!(finptr = Iopen (argv[1], FOPEN_R, NULL)))
+  if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
     {
       faterror ("can't open input file %s", argv[1]);
     }

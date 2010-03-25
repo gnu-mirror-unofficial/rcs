@@ -35,9 +35,9 @@ cleanup (void)
 {
   if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
-  Izclose (&finptr);
+  Izclose (&FLOW (from));
   Izclose (&workptr);
-  Ozclose (&fcopy);
+  Ozclose (&FLOW (res));
   ORCSclose ();
   dirtempunlink ();
 }
@@ -323,7 +323,7 @@ main (int argc, char **argv)
 
         if (perform & unlocked)
           {
-            if_advise_access (deltas->first != delta, finptr,
+            if_advise_access (deltas->first != delta, FLOW (from),
                               MADV_SEQUENTIAL);
             if (donerewrite (true, Ttimeflag
                              ? REPO (stat).st_mtime

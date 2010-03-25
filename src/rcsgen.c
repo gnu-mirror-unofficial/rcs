@@ -98,7 +98,7 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
 
    Algorithm: Copy initial revision unchanged.  Then edit all revisions
    but the last one into it, alternating input and output files
-   (`resultname' and `editname').  The last revision is then edited in,
+   (`FLOW (result)' and `editname').  The last revision is then edited in,
    performing simultaneous keyword substitution (this saves one extra
    pass).  All this simplifies if only one revision needs to be generated,
    or no keyword expansion is necessary, or if output goes to stdout.  */
@@ -112,8 +112,8 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
         return NULL;
       else
         {
-          Ozclose (&fcopy);
-          return resultname;
+          Ozclose (&FLOW (res));
+          return FLOW (result);
         }
     }
   else
@@ -135,8 +135,8 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
       finishedit (expandflag ? target : NULL, outfile, true);
       if (outfile)
         return NULL;
-      Ozclose (&fcopy);
-      return resultname;
+      Ozclose (&FLOW (res));
+      return FLOW (result);
     }
 }
 
@@ -224,12 +224,12 @@ yesorno (bool default_answer, char const *question, ...)
 
 void
 putdesc (bool textflag, char *textfile)
-/* Put the descriptive text into file `frewrite'.
-   If `finptr && !textflag', the text is copied from the old description.
+/* Put the descriptive text into file `FLOW (rewr)'.
+   If `FLOW (from) && !textflag', the text is copied from the old description.
    Otherwise, if `textfile', the text is read from that file, or from
    stdin, if `!textfile'.  A `textfile' with a leading '-' is treated as a
-   string, not a pathname.  If `finptr', the old descriptive text is
-   discarded.  Always clear `foutptr'.  */
+   string, not a pathname.  If `FLOW (from)', the old descriptive text is
+   discarded.  Always clear `FLOW (to)'.  */
 {
   static struct buf desc;
   static struct cbuf desclean;
@@ -241,20 +241,20 @@ putdesc (bool textflag, char *textfile)
   register size_t s;
   char const *plim;
 
-  frew = frewrite;
-  if (finptr && !textflag)
+  frew = FLOW (rewr);
+  if (FLOW (from) && !textflag)
     {
       /* Copy old description.  */
       aprintf (frew, "\n\n%s%c", Kdesc, NEXT (c));
-      foutptr = frewrite;
+      FLOW (to) = FLOW (rewr);
       getdesc (false);
-      foutptr = NULL;
+      FLOW (to) = NULL;
     }
   else
     {
-      foutptr = NULL;
+      FLOW (to) = NULL;
       /* Get new description.  */
-      if (finptr)
+      if (FLOW (from))
         {
           /* Skip old description.  */
           getdesc (false);
@@ -351,7 +351,7 @@ putadmin (void)
   struct rcslock const *curlock;
   struct access const *curaccess;
 
-  if (!(fout = frewrite))
+  if (!(fout = FLOW (rewr)))
     {
 #if BAD_CREAT0
       ORCSclose ();
@@ -363,7 +363,7 @@ putadmin (void)
       fout = fdopen (fo, FOPEN_WB);
 #endif  /* !BAD_CREAT0 */
 
-      if (!(frewrite = fout))
+      if (!(FLOW (rewr) = fout))
         efaterror (REPO (filename));
     }
 

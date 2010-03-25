@@ -1148,4 +1148,7 @@ const char const equal_line[] =
 /* Behavior control.  */
 struct behavior behavior;
 
+/* Flow.  */
+struct flow flow;
+
 /* rcsutil.c ends here */

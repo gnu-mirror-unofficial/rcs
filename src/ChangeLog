@@ -1,5 +1,31 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Consolidate i/o streams into `struct flow'.
+
+	Here, "U" means "Throughout, use `FLOW (foo)'
+	instead of the old singular variable names".
+	* rcsbase.h (flow): New struct.
+	(flow): New `struct flow' decl.
+	(FLOW): New macro.
+	(fcopy, resultname, finptr, frewrite, foutptr): Delete var decls.
+	* ci.c: U.
+	* co.c: U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsedit.c: U.
+	(fcopy, resultname): Delete var.
+	* rcsfnms.c: U.
+	* rcsgen.c: U.
+	* rcslex.c: U.
+	(finptr, frewrite, foutptr): Delete vars.
+	* rcsrev.c: U.
+	* rcssyn.c: U.
+	* rcsutil.c (flow): New `struct flow'.
+	* rlog.c: U.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move "possible endings for RCS file" into `struct behavior'.
 
 	Here, "U" means "Throughout, use `BE (pe)'".

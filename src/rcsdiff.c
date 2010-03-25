@@ -79,7 +79,7 @@ cleanup (void)
 {
   if (LEX (nerr))
     exitstatus = DIFF_TROUBLE;
-  Izclose (&finptr);
+  Izclose (&FLOW (from));
   Izclose (&workptr);
 }
 

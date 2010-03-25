@@ -597,8 +597,6 @@ int merge (bool, char const *, char const *const[3], char const *const[3]);
 
 /* rcsedit */
 #define ciklogsize 23           /* sizeof ("checked in with -k by ") */
-extern FILE *fcopy;
-extern char const *resultname;
 extern const char const ciklog[ciklogsize];
 RILE *rcswriteopen (struct buf *, struct stat *, bool);
 char const *makedirtemp (bool);
@@ -669,9 +667,6 @@ extern const char const *const Keyword[];
 enum markers trymatch (char const *);
 
 /* rcslex */
-extern FILE *foutptr;
-extern FILE *frewrite;
-extern RILE *finptr;
 char const *getid (void);
 void efaterror (char const *) exiting;
 void enfaterror (int, char const *) exiting;
@@ -1072,5 +1067,33 @@ extern struct repository repository;
 
 #define REPO(member)  (repository. member)
 #define ADMIN(part)   (REPO (admin). part)
+
+/* Various data streams flow in and out of RCS programs.  */
+struct flow
+{
+  RILE *from;
+  /* Input stream for the RCS file.
+     -- rcsreadopen pairnames (LEXDB)main (REVTEST)main (SYNTEST)main  */
+
+  FILE *rewr;
+  /* Output stream for echoing input stream.
+     -- putadmin  */
+
+  FILE *to;
+  /* Output stream for the RCS file.
+     ``Copy of `rewr', but NULL to suppress echo.''
+     -- [ci]main scanlogtext dorewrite putdesc  */
+
+  FILE *res;
+  /* Output stream for the result file.  ???
+     -- enterstring  */
+
+  char const *result;
+  /* The result file name.
+     -- openfcopy swapeditfiles  */
+};
+extern struct flow flow;
+
+#define FLOW(member)  (flow. member)
 
 /* rcsbase.h ends here */

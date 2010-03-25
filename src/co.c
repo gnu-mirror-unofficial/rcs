@@ -48,11 +48,11 @@ cleanup (void)
 {
   if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
-  Izclose (&finptr);
+  Izclose (&FLOW (from));
   ORCSclose ();
 #if !large_memory
-  if (fcopy != MANI (standard_output))
-    Ozclose (&fcopy);
+  if (FLOW (res) != MANI (standard_output))
+    Ozclose (&FLOW (res));
 #endif
   if (neworkptr != MANI (standard_output))
     Ozclose (&neworkptr);
@@ -579,9 +579,9 @@ main (int argc, char **argv)
              false) <= 0)
           continue;
 
-        /* `REPO (filename)' contains the name of the RCS file, and `finptr'
-           points at it.  `MANI (filename)' contains the name of the working file.
-           Also, `REPO (stat)' has been set.  */
+        /* `REPO (filename)' contains the name of the RCS file, and
+           `FLOW (from)' points at it.  `MANI (filename)' contains the
+           name of the working file.  Also, `REPO (stat)' has been set.  */
         diagnose ("%s  -->  %s\n", REPO (filename),
                   tostdout ? "standard output" : MANI (filename));
 
@@ -630,7 +630,7 @@ main (int argc, char **argv)
             if (lockflag)
               warn ("no revisions, so nothing can be %slocked",
                     lockflag < 0 ? "un" : "");
-            Ozclose (&fcopy);
+            Ozclose (&FLOW (res));
             if (workstatstat == 0)
               if (!rmworkfile ())
                 continue;
@@ -703,11 +703,11 @@ main (int argc, char **argv)
                                       joinflag && tostdout ? NULL : neworkptr,
                                       BE (kws) < MIN_UNEXPAND);
 #if !large_memory
-            if (fcopy == neworkptr)
-              fcopy = NULL;             /* Don't close it twice.  */
+            if (FLOW (res) == neworkptr)
+              FLOW (res) = NULL;             /* Don't close it twice.  */
 #endif
             if_advise_access (changelock && gendeltas->first != targetdelta,
-                              finptr, MADV_SEQUENTIAL);
+                              FLOW (from), MADV_SEQUENTIAL);
 
             if (donerewrite (changelock, Ttimeflag
                              ? REPO (stat).st_mtime

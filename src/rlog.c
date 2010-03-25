@@ -86,7 +86,7 @@ cleanup (void)
 {
   if (LEX (nerr))
     exitstatus = EXIT_FAILURE;
-  Izclose (&finptr);
+  Izclose (&FLOW (from));
 }
 
 static exiting void
@@ -252,7 +252,7 @@ getscript (struct hshentry *Delta)
   register long i;
   struct diffcmd dc;
 
-  fin = finptr;
+  fin = FLOW (from);
   setupcache (fin);
   initdiffcmd (&dc);
   while (0 <= (ed = getdiffcmd (fin, true, NULL, &dc)))
@@ -1071,7 +1071,7 @@ main (int argc, char **argv)
           continue;
 
         /* `REPO (filename)' contains the name of the RCS file,
-           and `finptr' the file descriptor;
+           and `FLOW (from)' the file descriptor;
            `MANI (filename)' contains the name of the working file.  */
 
         /* Keep only those locks given by `-l'.  */

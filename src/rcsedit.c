@@ -29,11 +29,6 @@
 
 #include "rcsbase.h"
 
-/* Result file descriptor.  */
-FILE *fcopy;
-/* Result pathname.  */
-char const *resultname;
-
 #if !large_memory
 /* Edit file descriptor.  */
 static RILE *fedit;
@@ -205,13 +200,13 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
   if (done)
     {
       openfcopy (outfile);
-      outfile = fcopy;
+      outfile = FLOW (res);
       if (!delta)
         snapshotedit (outfile);
       else
         {
           register Iptr_type *p, *lim, *l = line;
-          register RILE *fin = finptr;
+          register RILE *fin = FLOW (from);
           Iptr_type here = fin->ptr;
 
           for (p = l, lim = l + gap; p < lim;)
@@ -241,12 +236,12 @@ fopen_update_truncate (char const *name)
 void
 openfcopy (FILE *f)
 {
-  if (!(fcopy = f))
+  if (!(FLOW (res) = f))
     {
-      if (!resultname)
-        resultname = maketemp (2);
-      if (!(fcopy = fopen_update_truncate (resultname)))
-        efaterror (resultname);
+      if (!FLOW (result))
+        FLOW (result) = maketemp (2);
+      if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
+        efaterror (FLOW (result));
     }
 }
 
@@ -254,20 +249,20 @@ openfcopy (FILE *f)
 
 static void
 swapeditfiles (FILE *outfile)
-/* Swap `resultname' and `editname', assign `fedit = fcopy', and rewind
-   `fedit' for reading.  Set `fcopy' to `outfile' if non-NULL;
-   otherwise, set `fcopy' to be `resultname' opened for reading and
+/* Swap `FLOW (result)' and `editname', assign `fedit = FLOW (res)', and
+   rewind `fedit' for reading.  Set `FLOW (res)' to `outfile' if non-NULL;
+   otherwise, set `FLOW (res)' to be `FLOW (result)' opened for reading and
    writing.  */
 {
   char const *tmpptr;
 
   editline = 0;
   linecorr = 0;
-  Orewind (fcopy);
-  fedit = fcopy;
+  Orewind (FLOW (res));
+  fedit = FLOW (res);
   tmpptr = editname;
-  editname = resultname;
-  resultname = tmpptr;
+  editname = FLOW (result);
+  FLOW (result) = tmpptr;
   openfcopy (outfile);
 }
 
@@ -292,7 +287,7 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
   fe = fedit;
   if (fe)
     {
-      fc = fcopy;
+      fc = FLOW (res);
       if (delta)
         {
           while (1 < expandline (fe, fc, delta, false, NULL, true))
@@ -314,7 +309,7 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
 #else  /* !large_memory */
 static void
 copylines (register long upto, struct hshentry const *delta)
-/* Copy input lines `editline+1..upto' from `fedit' to `fcopy'.
+/* Copy input lines `editline+1..upto' from `fedit' to `FLOW (res)'.
    If `delta', keyword expansion is done simultaneously.
    `editline' is updated.  Rewinds a file only if necessary.  */
 {
@@ -330,7 +325,7 @@ copylines (register long upto, struct hshentry const *delta)
       /* Assumes edit only during last pass, from the beginning.  */
     }
   fe = fedit;
-  fc = fcopy;
+  fc = FLOW (res);
   if (editline < upto)
     {
       if (delta)
@@ -362,20 +357,20 @@ copylines (register long upto, struct hshentry const *delta)
 
 void
 xpandstring (struct hshentry const *delta)
-/* Read a string terminated by `SDELIM' from `finptr' and write it to
-   `fcopy'.  Double `SDELIM' is replaced with single `SDELIM'.  Keyword
-   expansion is performed with data from `delta'.  If `foutptr' is
-   non-NULL, the string is also copied unchanged to `foutptr'.  */
+/* Read a string terminated by `SDELIM' from `FLOW (from)' and write it to
+   `FLOW (res)'.  Double `SDELIM' is replaced with single `SDELIM'.  Keyword
+   expansion is performed with data from `delta'.  If `FLOW (to)' is
+   non-NULL, the string is also copied unchanged to `FLOW (to)'.  */
 {
-  while (1 < expandline (finptr, fcopy, delta, true, foutptr, true))
+  while (1 < expandline (FLOW (from), FLOW (res), delta, true, FLOW (to), true))
     continue;
 }
 
 void
 copystring (void)
-/* Copy a string terminated with a single `SDELIM' from `finptr' to
-   `fcopy', replacing all double `SDELIM' with a single `SDELIM'.  If
-   `foutptr' is non-NULL, the string also copied unchanged to `foutptr'.
+/* Copy a string terminated with a single `SDELIM' from `FLOW (from)' to
+   `FLOW (res)', replacing all double `SDELIM' with a single `SDELIM'.  If
+   `FLOW (to)' is non-NULL, the string also copied unchanged to `FLOW (to)'.
    `editline' is incremented by the number of lines copied.  Assumption:
    next character read is first string character.  */
 {
@@ -385,11 +380,11 @@ copystring (void)
   register bool amidline;
   register RILE *fin;
 
-  fin = finptr;
+  fin = FLOW (from);
   setupcache (fin);
   cache (fin);
-  frew = foutptr;
-  fcop = fcopy;
+  frew = FLOW (to);
+  fcop = FLOW (res);
   amidline = false;
   for (;;)
     {
@@ -429,9 +424,9 @@ enterstring (void)
   editname = NULL;
   fedit = NULL;
   editline = linecorr = 0;
-  resultname = maketemp (1);
-  if (!(fcopy = fopen_update_truncate (resultname)))
-    efaterror (resultname);
+  FLOW (result) = maketemp (1);
+  if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
+    efaterror (FLOW (result));
   copystring ();
 #else  /* large_memory */
   register int c;
@@ -445,11 +440,11 @@ enterstring (void)
   e = 0;
   gap = 0;
   gapsize = linelim;
-  fin = finptr;
+  fin = FLOW (from);
   setupcache (fin);
   cache (fin);
   advise_access (fin, MADV_NORMAL);
-  frew = foutptr;
+  frew = FLOW (to);
   amidline = false;
   for (;;)
     {
@@ -494,17 +489,17 @@ enterstring (void)
 
 void
 editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
-/* Read an edit script from `finptr' and applies it to the edit file.
+/* Read an edit script from `FLOW (from)' and applies it to the edit file.
 #if !large_memory
-   The result is written to `fcopy'.
+   The result is written to `FLOW (res)'.
    If `delta', keyword expansion is performed simultaneously.
-   If running out of lines in `fedit', `fedit' and `fcopy' are swapped.
+   If running out of lines in `fedit', `fedit' and `FLOW (res)' are swapped.
    `editname' is the name of the file that goes with `fedit'.
 #endif
-   If `foutptr' is set, the edit script is also copied verbatim to `foutptr'.
-   Assumes that all these files are open.
-   `resultname' is the name of the file that goes with `fcopy'.
-   Assumes the next input character from `finptr' is the first
+   If `FLOW (to)' is set, the edit script is also copied verbatim
+   to `FLOW (to)'.  Assumes that all these files are open.
+   `FLOW (result)' is the name of the file that goes with `FLOW (res)'.
+   Assumes the next input character from `FLOW (from)' is the first
    character of the edit script.  Resets `NEXT (c)' on exit.  */
 {
   int ed;                               /* editor command */
@@ -525,8 +520,8 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
 
   editline += linecorr;
   linecorr = 0;                         /* correct line number */
-  frew = foutptr;
-  fin = finptr;
+  frew = FLOW (to);
+  fin = FLOW (from);
   setupcache (fin);
   initdiffcmd (&dc);
   while (0 <= (ed = getdiffcmd (fin, true, frew, &dc)))
@@ -573,7 +568,7 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
 #endif
         linecorr += i;
 #if !large_memory
-        f = fcopy;
+        f = FLOW (res);
         if (delta)
           do
             {
@@ -1592,14 +1587,14 @@ dorewrite (bool lockflag, int changed)
           if (changed < 0)
             return -1;
           putadmin ();
-          puttree (ADMIN (head), frewrite);
-          aprintf (frewrite, "\n\n%s%c", Kdesc, NEXT (c));
-          foutptr = frewrite;
+          puttree (ADMIN (head), FLOW (rewr));
+          aprintf (FLOW (rewr), "\n\n%s%c", Kdesc, NEXT (c));
+          FLOW (to) = FLOW (rewr);
         }
       else
         {
 #if BAD_CREAT0
-          int nr = !!frewrite, ne = 0;
+          int nr = !!FLOW (rewr), ne = 0;
 #endif
           ORCSclose ();
           seteid ();
@@ -1645,17 +1640,17 @@ donerewrite (int changed, time_t newRCStime)
 
   if (changed && !LEX (nerr))
     {
-      if (finptr)
+      if (FLOW (from))
         {
-          fastcopy (finptr, frewrite);
-          Izclose (&finptr);
+          fastcopy (FLOW (from), FLOW (rewr));
+          Izclose (&FLOW (from));
         }
       if (1 < REPO (stat).st_nlink)
         rcswarn ("breaking hard link");
-      aflush (frewrite);
+      aflush (FLOW (rewr));
       seteid ();
       ignoreints ();
-      r = chnamemod (&frewrite, newRCSname, REPO (filename), changed,
+      r = chnamemod (&FLOW (rewr), newRCSname, REPO (filename), changed,
                      REPO (stat).st_mode & (mode_t) ~(S_IWUSR | S_IWGRP | S_IWOTH),
                      newRCStime);
       e = errno;
@@ -1692,7 +1687,7 @@ ORCSclose (void)
         efaterror (lockname);
       REPO (fd_lock) = -1;
     }
-  Ozclose (&frewrite);
+  Ozclose (&FLOW (rewr));
 }
 
 void
@@ -1703,14 +1698,14 @@ ORCSerror (void)
    unlink files that are open, and some nearly-POSIX hosts (e.g. NFS)
    work better if the files are closed first.  This isn't a completely
    reliable away to work around brain-damaged hosts, because of the gap
-   between actual file opening and setting `frewrite' etc., but it's
+   between actual file opening and setting `FLOW (rewr)' etc., but it's
    better than nothing.  */
 {
   if (0 <= REPO (fd_lock))
     close (REPO (fd_lock));
-  if (frewrite)
+  if (FLOW (rewr))
     /* Avoid `fclose', since stdio may not be reentrant.  */
-    close (fileno (frewrite));
+    close (fileno (FLOW (rewr)));
 }
 
 /* rcsedit.c ends here */
