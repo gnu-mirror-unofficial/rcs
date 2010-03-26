@@ -664,7 +664,7 @@ escape_string (register FILE *out, register char const *s)
 const char const ciklog[ciklogsize] = "checked in with -k by ";
 
 static void
-keyreplace (enum markers marker, register struct hshentry const *delta,
+keyreplace (struct pool_found *marker, register struct hshentry const *delta,
             bool delimstuffed, RILE *infile, register FILE *out, bool dolog)
 /* Output the keyword value(s) corresponding to `marker'.
    Attributes are derived from `delta'.  */
@@ -677,21 +677,20 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
   int RCSv;
   int exp;
 
-  sp = Keyword[(int) marker];
   exp = BE (kws);
   date = delta->date;
   RCSv = BE (version);
 
   if (exp != kwsub_v)
-    aprintf (out, "%c%s", KDELIM, sp);
+    aprintf (out, "%c%s", KDELIM, marker->sym->bytes);
   if (exp != kwsub_k)
     {
 
       if (exp != kwsub_v)
         aprintf (out, "%c%c", VDELIM,
-                 marker == Log && RCSv < VERSION (5) ? '\t' : ' ');
+                 marker->i == Log && RCSv < VERSION (5) ? '\t' : ' ');
 
-      switch (marker)
+      switch (marker->i)
         {
         case Author:
           aputs (delta->author, out);
@@ -702,7 +701,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
         case Id:
         case Header:
           escape_string (out,
-                         marker == Id || RCSv < VERSION (4)
+                         marker->i == Id || RCSv < VERSION (4)
                          ? basefilename (REPO (filename)) : getfullRCSname ());
           aprintf (out, " %s %s %s %s",
                    delta->num,
@@ -753,7 +752,7 @@ keyreplace (enum markers marker, register struct hshentry const *delta,
   if (exp != kwsub_v)
     afputc (KDELIM, out);
 
-  if (marker == Log && dolog)
+  if (marker->i == Log && dolog)
     {
       struct buf leader;
 
@@ -911,7 +910,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
   bool e;
   char const *tlim;
   static struct buf keyval;
-  enum markers matchresult;
+  struct pool_found matchresult;
 
   setupcache (infile);
   cache (infile);
@@ -980,8 +979,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                 }
               *tp++ = c;
               *tp = '\0';
-              matchresult = trymatch (keyval.string + 1);
-              if (matchresult == Nomatch)
+              if (! recognize_keyword (keyval.string + 1, &matchresult))
                 {
                   tp[-1] = 0;
                   aputs (keyval.string, out);
@@ -1027,7 +1025,7 @@ expandline (RILE *infile, FILE *outfile, struct hshentry const *delta,
                 }
               /* Now put out the new keyword value.  */
               uncache (infile);
-              keyreplace (matchresult, delta, delimstuffed,
+              keyreplace (&matchresult, delta, delimstuffed,
                           infile, out, dolog);
               cache (infile);
               e = true;

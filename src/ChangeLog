@@ -1,5 +1,27 @@
 2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Overhaul (working file) keyword recognition.
+
+	* b-anchor.c: New file.
+	* Makefile.am (libparts_a_SOURCES):
+	Add b-anchor.c; remove rcskeys.c.
+	* base.h: #include <stdint.h>.
+	(AUTHOR, DATE, HEADER, IDH, LOCKER, LOG, NAME, RCSFILE, REVISION)
+	(SOURCE, STATE): Delete #define:s.
+	(tinysym, pool_found): New structs.
+	(markers): From this enum, remove `Nomatch'.
+	(recognize_keyword): New func decl.
+	(Keyword): Delete var decl.
+	(trymatch): Delete func decl.
+	* rcsedit.c (keyreplace): Take `struct pool_found *'
+	for first arg instead of `enum markers'; use `marker->i'.
+	(expandline): Use `recognize_keyword'.
+	* rcsfcmp.c (rcsfcmp): Use `recognize_keyword', `match1.i'.
+	* rcskeep.c (getoldkeys): Use `recognize_keyword'.
+	* rcskeys.c: Delete file.
+
+2010-03-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Rename rcsbase.h to base.h.
 
 	* base.h: Rename from rcsbase.h.

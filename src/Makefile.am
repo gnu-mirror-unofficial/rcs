@@ -20,9 +20,10 @@
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
   base.h gnu-h-v.h maketime.h partime.h \
+  b-anchor.c \
   bother.c gnu-h-v.c \
   maketime.c merger.c partime.c rcsedit.c rcsfcmp.c rcsfnms.c \
-  rcsgen.c rcskeep.c rcskeys.c rcslex.c rcsmap.c rcsrev.c rcssyn.c \
+  rcsgen.c rcskeep.c rcslex.c rcsmap.c rcsrev.c rcssyn.c \
   rcstime.c rcsutil.c
 
 bin_PROGRAMS = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog

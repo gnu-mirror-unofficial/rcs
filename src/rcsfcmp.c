@@ -62,7 +62,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
   register char const *sp;
   register size_t leaderlen;
   int result;
-  enum markers match1;
+  struct pool_found match1;
   struct stat ustat;
 
   if (!(ufp = Iopen (uname, FOPEN_R_WORK, &ustat)))
@@ -135,7 +135,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                 }
               if ((xc == KDELIM || xc == VDELIM)
                   && (uc == KDELIM || uc == VDELIM)
-                  && (*tp = xc, (match1 = trymatch (xkeyword)) != Nomatch))
+                  && (*tp = xc, recognize_keyword (xkeyword, &match1)))
                 {
 #ifdef FCMPTEST
                   printf ("found common keyword %s\n", xkeyword);
@@ -179,7 +179,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                         goto eof;
                       /* If the keyword is `Log', also
                          skip the log message in `xfp'.  */
-                      if (match1 == Log)
+                      if (match1.i == Log)
                         {
                           /* First, compute the number of LFs in log msg.  */
                           int lncnt;

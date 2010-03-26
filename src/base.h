@@ -22,6 +22,7 @@
 
 #include "auto-sussed.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* begin cruft formerly from from conf.h */
 
@@ -562,24 +563,25 @@ struct assoc
   struct assoc *nextassoc;
 };
 
-/* Markers for keyword expansion (used in co and ident)
-   Every byte must have class LETTER or Letter.  */
-#define AUTHOR          "Author"
-#define DATE            "Date"
-#define HEADER          "Header"
-#define IDH             "Id"
-#define LOCKER          "Locker"
-#define LOG             "Log"
-#define NAME            "Name"
-#define RCSFILE         "RCSfile"
-#define REVISION        "Revision"
-#define SOURCE          "Source"
-#define STATE           "State"
-#define keylength 8              /* max length of any of the above keywords */
+/* Symbol-pool particulars.  */
+struct tinysym
+{
+  uint8_t len;
+  uint8_t bytes[];
+};
+struct pool_found
+{
+  int i;
+  struct tinysym *sym;
+};
 
-/* This must be in the same order as rcskeys.c's `Keyword'.  */
+/* Max length of the (working file) keywords.  */
+#define keylength 8
+
+/* This must be in the same order as in `keyword_pool'.  */
 enum markers
-{ Nomatch, Author, Date, Header, Id,
+{
+  Author, Date, Header, Id,
   Locker, Log, Name, RCSfile, Revision, Source, State
 };
 
@@ -591,6 +593,9 @@ enum markers
 
 /* The function `pairnames' takes to open the RCS file.  */
 typedef RILE * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
+
+/* b-anchor */
+bool recognize_keyword (char const *, struct pool_found *);
 
 /* merge */
 int merge (bool, char const *, char const *const[3], char const *const[3]);
@@ -661,10 +666,6 @@ void putdftext (struct hshentry const *, RILE *, FILE *, bool);
 
 /* rcskeep */
 bool getoldkeys (RILE *);
-
-/* rcskeys */
-extern const char const *const Keyword[];
-enum markers trymatch (char const *);
 
 /* rcslex */
 char const *getid (void);

@@ -208,6 +208,7 @@ getoldkeys (register RILE *fp)
   register char *tp;
   bool needs_closing;
   struct buf author, name, state;
+  struct pool_found match;
 
   if (PREV (valid))
     return true;
@@ -282,7 +283,8 @@ getoldkeys (register RILE *fp)
               continue;
             }
 
-          switch (trymatch (keyword))
+          recognize_keyword (keyword, &match);
+          switch (match.i)
             {
             case Author:
               if (!KEEPID ('\0', author))
