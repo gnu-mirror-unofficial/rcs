@@ -1,5 +1,14 @@
 2010-03-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move some constant data from rcsutil.c to b-anchor.c.
+
+	* b-anchor.c (prog_diff, prog_diff3, diff_flags, equal_line):
+	New, moved without change from...
+	* rcsutil.c (prog_diff, prog_diff3, diff_flags, equal_line):
+	...here.
+
+2010-03-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Overhaul "keyword-substitution mode name" recognition.
 
 	* b-anchor.c (kwsub_pool): New static `uint8_t' array.

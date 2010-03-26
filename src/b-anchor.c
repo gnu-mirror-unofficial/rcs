@@ -20,6 +20,13 @@
 
 #include "base.h"
 
+const char const prog_diff[] = DIFF;
+const char const prog_diff3[] = DIFF3;
+const char const diff_flags[] = DIFFFLAGS;
+
+const char const equal_line[] =
+  "=============================================================================\n";
+
 static const uint8_t kwsub_pool[22] =
 {
   6 /* count */,

@@ -24,10 +24,6 @@
 #include <ctype.h>
 #include "gnu-h-v.h"
 
-const char const prog_diff[] = DIFF;
-const char const prog_diff3[] = DIFF3;
-const char const diff_flags[] = DIFFFLAGS;
-
 /* List of blocks allocated with `ftestalloc'.  These blocks can be
    freed by ffree when we're done with the current file.  We could put
    the free block inside `struct alloclist', rather than a pointer to
@@ -1141,9 +1137,6 @@ now (void)
     efaterror ("time");
   return t;
 }
-
-const char const equal_line[] =
-  "=============================================================================\n";
 
 /* Behavior control.  */
 struct behavior behavior;
