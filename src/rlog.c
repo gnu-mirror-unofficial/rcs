@@ -1139,7 +1139,7 @@ main (int argc, char **argv)
             afputc ('\"', out);
           }
         if (!pre5 || BE (kws) != kwsub_kv)
-          aprintf (out, "\nkeyword substitution: %s", expand_names[BE (kws)]);
+          aprintf (out, "\nkeyword substitution: %s", kwsub_string (BE (kws)));
 
         aprintf (out, "\ntotal revisions: %d", REPO (ndelt));
 

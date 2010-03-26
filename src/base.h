@@ -101,8 +101,7 @@
 #define printf_string_exiting(m, n) printf_string (m, n) exiting
 #endif
 
-/* Keyword substitution modes.
-   These must agree with `Expand_names' in rcssyn.c.  */
+/* Keyword substitution modes.  The order must agree with `kwsub_pool'.  */
 enum kwsub
   {
     kwsub_kv,                           /* $Keyword: value $ */
@@ -595,6 +594,9 @@ enum markers
 typedef RILE * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
 
 /* b-anchor */
+int recognize_kwsub (const char *, size_t);
+#define str2expmode(s)  (recognize_kwsub ((s), strlen (s)))
+const char const *kwsub_string (enum kwsub);
 bool recognize_keyword (char const *, struct pool_found *);
 
 /* merge */
@@ -778,7 +780,6 @@ extern const char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
   Knext[], Kstate[], Kstrict[], Ksymbols[], Ktext[];
 void unexpected_EOF (void) exiting;
 int getdiffcmd (RILE *, bool, FILE *, struct diffcmd *);
-int str2expmode (char const *);
 void getadmin (void);
 void getdesc (bool);
 void gettree (void);

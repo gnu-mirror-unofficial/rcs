@@ -20,6 +20,17 @@
 
 #include "base.h"
 
+static const uint8_t kwsub_pool[22] =
+{
+  6 /* count */,
+  2,'k','v','\0',
+  3,'k','v','l','\0',
+  1,'k','\0',
+  1,'v','\0',
+  1,'o','\0',
+  1,'b','\0'
+};
+
 static const uint8_t keyword_pool[80] =
 {
   11 /* count */,
@@ -55,6 +66,35 @@ pool_lookup (const uint8_t pool[], const char *start, size_t len,
       p += 1 + symlen + 1;
     }
   return false;
+}
+
+int
+recognize_kwsub (const char *start, size_t len)
+/* Search for match in `kwsub_pool' for byte range `start' length `len'.
+   Return its `enum kwsub' if successful, otherwise -1.  */
+{
+  struct pool_found found;
+
+  return pool_lookup (kwsub_pool, start, len, &found)
+    ? found.i
+    : -1;
+}
+
+const char const *
+kwsub_string (enum kwsub i)
+{
+  size_t count = kwsub_pool[0], symlen;
+  const uint8_t *p = kwsub_pool + 1;
+
+  while (i && --count)
+    {
+      symlen = *p;
+      p += 1 + symlen + 1;
+      i--;
+    }
+  return i
+    ? NULL
+    : (const char const *) (p + 1);
 }
 
 bool

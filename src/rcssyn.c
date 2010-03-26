@@ -68,23 +68,6 @@ getdnum (void)
   return delta;
 }
 
-const char const *const expand_names[] = {
-  /* These must agree with kwsub_* in base.h.  */
-  "kv", "kvl", "k", "v", "o", "b",
-  NULL
-};
-
-static int
-strn2expmode (char const *s, size_t n)
-{
-  char const *const *p;
-
-  for (p = expand_names; *p; ++p)
-    if (memcmp (*p, s, n) == 0 && !(*p)[n])
-      return p - expand_names;
-  return -1;
-}
-
 void
 getadmin (void)
 /* Read an <admin> and initialize the appropriate global variables.  */
@@ -211,7 +194,7 @@ getadmin (void)
         {
           bufautobegin (&b);
           cb = savestring (&b);
-          if ((BE (kws) = strn2expmode (cb.string, cb.size)) < 0)
+          if ((BE (kws) = recognize_kwsub (cb.string, cb.size)) < 0)
             fatserror ("unknown expand mode %.*s", (int) cb.size, cb.string);
           bufautoend (&b);
           nextlex ();
@@ -219,13 +202,6 @@ getadmin (void)
       getsemi (Kexpand);
     }
   ADMIN (description) = getphrases (Kdesc);
-}
-
-int
-str2expmode (char const *s)
-/* Return expand mode corresponding to `s', or -1 if bad.  */
-{
-  return strn2expmode (s, strlen (s));
 }
 
 void

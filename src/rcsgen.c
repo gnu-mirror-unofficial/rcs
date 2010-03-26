@@ -407,7 +407,7 @@ putadmin (void)
     }
   if (BE (kws) != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
-             Kexpand, SDELIM, expand_names[BE (kws)], SDELIM);
+             Kexpand, SDELIM, kwsub_string (BE (kws)), SDELIM);
   awrite (ADMIN (description).string, ADMIN (description).size, fout);
   aputc ('\n', fout);
 }
