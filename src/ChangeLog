@@ -1,5 +1,20 @@
 2010-03-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use #define for RCS file keywords.
+
+	* base.h (KS): New macro.
+	(Kaccess): Convert from var decl to #define; use `KS'.
+	(Kauthor, Kbranch, Kcomment, Kdate, Kdesc, Kexpand, Khead, Klocks)
+	(Klog, Knext, Kstate, Kstrict, Ksymbols, Ktext): Likewise.
+	* rcssyn.c (Kaccess): Delete var.
+	(Kauthor, Kbranch, Kcomment, Kdate, Kdesc, Kexpand, Khead, Klocks)
+	(Klog, Knext, Kstate, Kstrict, Ksymbols, Ktext): Likewise.
+	(Kbranches): Rename from `K_branches'; convert from var to #define.
+	[COMPAT2] (Ksuffix): Convert from var to #define.
+	(getdelta): Use `Kbranches'.
+
+2010-03-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move some constant data from rcsutil.c to b-anchor.c.
 
 	* b-anchor.c (prog_diff, prog_diff3, diff_flags, equal_line):

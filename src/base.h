@@ -101,6 +101,25 @@
 #define printf_string_exiting(m, n) printf_string (m, n) exiting
 #endif
 
+#define KS(x)  (#x)
+
+/* The set of RCS file keywords.  */
+#define Kaccess    KS (access)
+#define Kauthor    KS (author)
+#define Kbranch    KS (branch)
+#define Kcomment   KS (comment)
+#define Kdate      KS (date)
+#define Kdesc      KS (desc)
+#define Kexpand    KS (expand)
+#define Khead      KS (head)
+#define Klocks     KS (locks)
+#define Klog       KS (log)
+#define Knext      KS (next)
+#define Kstate     KS (state)
+#define Kstrict    KS (strict)
+#define Ksymbols   KS (symbols)
+#define Ktext      KS (text)
+
 /* Keyword substitution modes.  The order must agree with `kwsub_pool'.  */
 enum kwsub
   {
@@ -775,9 +794,6 @@ struct diffcmd
   long dafter;
 };
 extern const char const *const expand_names[];
-extern const char const Kaccess[], Kauthor[], Kbranch[], Kcomment[],
-  Kdate[], Kdesc[], Kexpand[], Khead[], Klocks[], Klog[],
-  Knext[], Kstate[], Kstrict[], Ksymbols[], Ktext[];
 void unexpected_EOF (void) exiting;
 int getdiffcmd (RILE *, bool, FILE *, struct diffcmd *);
 void getadmin (void);

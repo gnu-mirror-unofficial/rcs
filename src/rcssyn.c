@@ -23,29 +23,10 @@
 #include "base.h"
 #include <ctype.h>
 
-/* Keyword table.  */
-const char const
-  Kaccess[] = "access",
-  Kauthor[] = "author",
-  Kbranch[] = "branch",
-  Kcomment[] = "comment",
-  Kdate[] = "date",
-  Kdesc[] = "desc",
-  Kexpand[] = "expand",
-  Khead[] = "head",
-  Klocks[] = "locks",
-  Klog[] = "log",
-  Knext[] = "next",
-  Kstate[] = "state",
-  Kstrict[] = "strict",
-  Ksymbols[] = "symbols",
-  Ktext[] = "text";
-
-static const char const
+#define Kbranches  KS (branches)
 #if COMPAT2
-  Ksuffix[] = "suffix",
+#define Ksuffix    KS (suffix)
 #endif
-  K_branches[] = "branches";
 
 static struct buf Commleader;
 
@@ -284,7 +265,7 @@ getdelta (void)
 
   Delta->state = getkeyval (Kstate, ID, true);
 
-  getkey (K_branches);
+  getkey (Kbranches);
   LastBranch = &Delta->branches;
   while ((num = getdnum ()))
     {
@@ -294,7 +275,7 @@ getdelta (void)
       LastBranch = &NewBranch->nextbranch;
     }
   *LastBranch = NULL;
-  getsemi (K_branches);
+  getsemi (Kbranches);
 
   getkey (Knext);
   Delta->next = num = getdnum ();
