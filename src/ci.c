@@ -23,6 +23,7 @@
 #include "base.h"
 #include <ctype.h>                      /* isdigit */
 #include "ci.help"
+#include "b-kwxout.h"
 
 /* Work around a common `ftruncate' bug: NFS won't let you truncate a file
    that you currently lack permissions for, even if you had permissions when
@@ -456,9 +457,11 @@ xpandfile (RILE *unexfile, struct hshentry const *delta,
     fastcopy (unexfile, exfile);
   else
     {
+      struct expctx ctx = EXPCTX_1OUT (exfile, unexfile, false, dolog);
+
       for (;;)
         {
-          e = expandline (unexfile, exfile, delta, false, NULL, dolog);
+          e = expandline (&ctx);
           if (e < 0)
             break;
           r |= e;

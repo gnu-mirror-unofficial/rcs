@@ -1,5 +1,19 @@
 2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move "expansion + output" to b-kwxout.[hc]; use exp context.
+
+	* b-kwxout.h: New file.
+	* b-kwxout.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-kwxout.h, b-kwxout.c.
+	* base.h (expandline): Delete func decl.
+	* ci.c: #include "b-kwxout.h".
+	(xpandfile): Update call to `expandline'.
+	* rcsedit.c: #include "b-kwxout.h".
+	(finisheditline, finishedit, copylines)
+	(xpandstring, editstring): Update call to `expandline'.
+
+2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use #define for `ciklog' et al.
 
 	* base.h (ciklog): Convert from var decl to #define.

@@ -634,7 +634,6 @@ bool checkaccesslist (void);
 int chnamemod (FILE **, char const *, char const *, int, mode_t, time_t);
 int donerewrite (int, time_t);
 int dorewrite (bool, int);
-int expandline (RILE *, FILE *, struct hshentry const *, bool, FILE *, bool);
 int findlock (bool, struct hshentry **);
 int setmtime (char const *, time_t);
 void ORCSclose (void);
