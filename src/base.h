@@ -120,6 +120,9 @@
 #define Ksymbols   KS (symbols)
 #define Ktext      KS (text)
 
+#define ciklog      "checked in with -k by "
+#define ciklog_len  ((sizeof ciklog) - 1)
+
 /* Keyword substitution modes.  The order must agree with `kwsub_pool'.  */
 enum kwsub
   {
@@ -622,8 +625,6 @@ bool recognize_keyword (char const *, struct pool_found *);
 int merge (bool, char const *, char const *const[3], char const *const[3]);
 
 /* rcsedit */
-#define ciklogsize 23           /* sizeof ("checked in with -k by ") */
-extern const char const ciklog[ciklogsize];
 RILE *rcswriteopen (struct buf *, struct stat *, bool);
 char const *makedirtemp (bool);
 char const *getcaller (void);

@@ -661,8 +661,6 @@ escape_string (register FILE *out, register char const *s)
       }
 }
 
-const char const ciklog[ciklogsize] = "checked in with -k by ";
-
 static void
 keyreplace (struct pool_found *marker, register struct hshentry const *delta,
             bool delimstuffed, RILE *infile, register FILE *out, bool dolog)
@@ -758,8 +756,8 @@ keyreplace (struct pool_found *marker, register struct hshentry const *delta,
 
       sp = delta->log.string;
       ls = delta->log.size;
-      if (sizeof (ciklog) - 1 <= ls
-          && !memcmp (sp, ciklog, sizeof (ciklog) - 1))
+      if (ciklog_len <= ls
+          && !memcmp (sp, ciklog, ciklog_len))
         return;
       bufautobegin (&leader);
       if (BE (version) < VERSION (5))

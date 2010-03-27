@@ -187,8 +187,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
 
                           sp = delta->log.string;
                           ls = delta->log.size;
-                          if (ls < sizeof (ciklog) - 1
-                              || memcmp (sp, ciklog, sizeof (ciklog) - 1))
+                          if (ls < ciklog_len
+                              || memcmp (sp, ciklog, ciklog_len))
                             {
                               /* This log message was inserted.  Skip
                                  its header.  The number of newlines to

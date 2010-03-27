@@ -1,3 +1,15 @@
+2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use #define for `ciklog' et al.
+
+	* base.h (ciklog): Convert from var decl to #define.
+	(ciklog_len): New #define.
+	(ciklogsize): Delete #define.
+	* ci.c (getlogmsg): Use `ciklog_len'.
+	* rcsedit.c (ciklog): Delete var.
+	(keyreplace): Use `ciklog_len'.
+	* rcsfcmp.c (rcsfcmp): Use `ciklog_len'.
+
 2010-03-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use #define for RCS file keywords.

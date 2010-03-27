@@ -499,7 +499,7 @@ getlogmsg (void)
     {
       /* Generate standard log message.  */
       caller = getcaller ();
-      i = sizeof (ciklog) + strlen (caller) + 3;
+      i = ciklog_len + 1 + strlen (caller) + 3;
       bufalloc (&logbuf, i + datesize + zonelenmax);
       tp = logbuf.string;
       sprintf (tp, "%s%s at ", ciklog, caller);
