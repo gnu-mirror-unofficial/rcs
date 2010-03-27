@@ -1,5 +1,13 @@
 2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Drop workaround for SVR4 stdio bug.
+
+	* rcsgen.c (putadmin): Don't bother using `putc'
+	for first output operation; just use `printf' normally.
+	* rlog.c (main): Likewise.
+
+2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Tighten `homegrown_mkstemp'.
 
 	* rcsfnms.c: #include <sys/time.h>.

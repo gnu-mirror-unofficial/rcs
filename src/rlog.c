@@ -1043,7 +1043,7 @@ main (int argc, char **argv)
       accessListString = "\naccess list:   ";
       accessFormat = "  %s";
       headFormat =
-        "RCS file:        %s;   Working file:    %s\nhead:           %s%s\nbranch:         %s%s\nlocks:         ";
+        "\nRCS file:        %s;   Working file:    %s\nhead:           %s%s\nbranch:         %s%s\nlocks:         ";
       insDelFormat = "  lines added/del: %ld/%ld";
       symbolFormat = "  %s: %s;";
     }
@@ -1052,7 +1052,7 @@ main (int argc, char **argv)
       accessListString = "\naccess list:";
       accessFormat = "\n\t%s";
       headFormat =
-        "RCS file: %s\nWorking file: %s\nhead:%s%s\nbranch:%s%s\nlocks:%s";
+        "\nRCS file: %s\nWorking file: %s\nhead:%s%s\nbranch:%s%s\nlocks:%s";
       insDelFormat = "  lines: +%ld -%ld";
       symbolFormat = "\n\t%s: %s";
     }
@@ -1093,9 +1093,6 @@ main (int argc, char **argv)
         if (!getnumericrev ())
           continue;
 
-        /* Output the first character with `putc', not `printf'.
-           Otherwise, an SVR4 stdio bug buffers output inefficiently.  */
-        aputc ('\n', out);
         /* Print RCS pathname, working pathname and optional
            administrative information.  Could use `getfullRCSname'
            here, but that is very slow.  */
