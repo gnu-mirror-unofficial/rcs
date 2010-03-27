@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include <stdint.h>
+#include <sys/time.h>                   /* gettimeofday */
 
 struct manifestation manifestation;
 struct repository repository;
@@ -87,17 +88,17 @@ static const struct compair const comtable[] = {
 };
 
 #ifndef HAVE_MKSTEMP
-int
+static int
 homegrown_mkstemp (char *template)
 /* Like mkstemp(2), but never return EINVAL.  That is, never check for
    missing "XXXXXX" since we know the unique caller DTRT.  */
 {
   int pid = getpid ();
   char *end = template + strlen (template);
-  static char const xrep[] = ("abcdefghijklmnopqrstuvwxyz"
+  static char const xrep[] = {"abcdefghijklmnopqrstuvwxyz"
                               "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                               /* Omit '0' => `strlen (xrep)' is prime.  */
-                              "123456789");
+                              "123456789"};
   struct timeval tv;
   uint64_t n;
   int fd = -1;

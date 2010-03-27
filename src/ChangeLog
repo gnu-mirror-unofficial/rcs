@@ -1,5 +1,13 @@
 2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Tighten `homegrown_mkstemp'.
+
+	* rcsfnms.c: #include <sys/time.h>.
+	[!HAVE_MKSTEMP] (homegrown_mkstemp): Make static;
+	use curly braces for string constant instead of parens.
+
+2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move "expansion + output" to b-kwxout.[hc]; use exp context.
 
 	* b-kwxout.h: New file.
