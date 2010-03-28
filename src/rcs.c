@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "rcs.help"
+#include "b-complain.h"
 
 struct Lockrev
 {
@@ -488,7 +489,6 @@ sendmail (char const *Delta, char const *who)
   aputs
     ("State the reason for breaking the lock:\n(terminate with single '.' or end of file)\n>> ",
      stderr);
-  eflush ();
 
   old1 = '\n';
   old2 = ' ';
@@ -508,10 +508,7 @@ sendmail (char const *Delta, char const *who)
           old2 = old1;
           old1 = c;
           if (c == '\n')
-            {
-              aputs (">> ", stderr);
-              eflush ();
-            }
+            aputs (">> ", stderr);
         }
     }
   Orewind (mailmess);
@@ -1145,6 +1142,7 @@ main (int argc, char **argv)
   struct Status *curstate;
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   nosetid ();
 

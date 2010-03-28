@@ -721,7 +721,6 @@ void checksid (char *);
 void checkssym (char *);
 void diagnose (char const *, ...) printf_string (1, 2);
 void eerror (char const *);
-void eflush (void);
 void enerror (int, char const *);
 void error (char const *, ...) printf_string (1, 2);
 void fvfprintf (FILE *, char const *, va_list);

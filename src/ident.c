@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "ident.help"
+#include "b-complain.h"
 
 static exiting void
 exiterr (void)
@@ -163,6 +164,7 @@ main (int argc, char **argv)
   char const *a;
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   while ((a = *++argv) && *a == '-')
     while (*++a)

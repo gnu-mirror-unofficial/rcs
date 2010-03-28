@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "rcsmerge.help"
+#include "b-complain.h"
 
 static exiting void
 exiterr (void)
@@ -73,6 +74,7 @@ main (int argc, char **argv)
   struct hshentry *target;
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   bufautobegin (&commarg);
   bufautobegin (&numericrev);

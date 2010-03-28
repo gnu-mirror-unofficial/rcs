@@ -1,3 +1,29 @@
+2010-03-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Unbuffer stderr at program start; don't fflush it, later.
+
+	Here, "I" means "#include "b-complain.h"";
+	and "U" means "(main) Use `unbuffer_standard_error'".
+	* b-complain.h: New file.
+	* b-complain.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-complain.h, b-complain.c.
+	* base.h (eflush): Delete func decl.
+	* rcsgen.c (yesorno, getsstdin): Don't call `eflush'.
+	* rcslex.c (eflush): Delete func.
+	(enerror, error, rcserror, workerror, warn, rcswarn, workwarn)
+	(diagnose): Don't call `eflush'.
+	* rcsutil.c (runv): Likewise.
+	* ci.c: I; U.
+	* co.c: I; U.
+	* ident.c: I; U.
+	* merge.c: I; U.
+	* rcs.c: I; U.
+	(sendmail): Don't call `eflush'.
+	* rcsclean.c: I; U.
+	* rcsdiff.c: I; U.
+	* rcsmerge.c: I; U.
+	* rlog.c: I; U.
+
 2010-03-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Drop workaround for SVR4 stdio bug.

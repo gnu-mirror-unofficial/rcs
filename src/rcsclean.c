@@ -21,6 +21,7 @@
 
 #include "base.h"
 #include "rcsclean.help"
+#include "b-complain.h"
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -159,6 +160,7 @@ main (int argc, char **argv)
   struct stat workstat;
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   setrid ();
 

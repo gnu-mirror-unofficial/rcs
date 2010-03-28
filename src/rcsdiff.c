@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "rcsdiff.help"
+#include "b-complain.h"
 
 /* Normally, if the two revisions specified are the same, we avoid calling
    the underlying diff on the theory that it will produce no output.  This
@@ -166,6 +167,7 @@ main (int argc, char **argv)
   register int c;
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   exitstatus = DIFF_SUCCESS;
 

@@ -210,7 +210,6 @@ yesorno (bool default_answer, char const *question, ...)
       va_start (args, question);
       fvfprintf (stderr, question, args);
       va_end (args);
-      eflush ();
       r = c = getcstdin ();
       while (c != '\n' && !feof (stdin))
         c = getcstdin ();
@@ -312,12 +311,9 @@ getsstdin (char const *option, char const *name,
   register bool tty = ttystdin ();
 
   if (tty)
-    {
-      aprintf (stderr,
-               "enter %s, terminated with single '.' or end of file:\n%s>> ",
-               name, note);
-      eflush ();
-    }
+    aprintf (stderr,
+             "enter %s, terminated with single '.' or end of file:\n%s>> ",
+             name, note);
   else if (feof (stdin))
     rcsfaterror ("can't reread redirected stdin for %s; use -%s<%s>",
                  name, option, name);
@@ -334,10 +330,7 @@ getsstdin (char const *option, char const *name,
             break;
           }
         else if (tty)
-          {
-            aputs (">> ", stderr);
-            eflush ();
-          }
+          aputs (">> ", stderr);
       }
   return cleanlogmsg (p, i);
 }

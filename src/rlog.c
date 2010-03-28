@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "rlog.help"
+#include "b-complain.h"
 
 struct rcslockers
 {
@@ -942,6 +943,7 @@ main (int argc, char **argv)
   int revno;
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   descflag = selectflag = shownames = true;
   onlylockflag = onlyRCSflag = false;

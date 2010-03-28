@@ -1058,13 +1058,6 @@ aflush (FILE *f)
 }
 
 void
-eflush (void)
-{
-  if (fflush (stderr) != 0 && !Oerrloop)
-    Oerror ();
-}
-
-void
 oflush (void)
 {
   if (fflush (MANI (standard_output)
@@ -1122,7 +1115,6 @@ enerror (int e, char const *s)
   errsay (NULL);
   errno = e;
   perror (s);
-  eflush ();
 }
 
 void
@@ -1151,7 +1143,6 @@ error (char const *format, ...)
   fvfprintf (stderr, format, args);
   va_end (args);
   afputc ('\n', stderr);
-  eflush ();
 }
 
 void
@@ -1165,7 +1156,6 @@ rcserror (char const *format, ...)
   fvfprintf (stderr, format, args);
   va_end (args);
   afputc ('\n', stderr);
-  eflush ();
 }
 
 void
@@ -1179,7 +1169,6 @@ workerror (char const *format, ...)
   fvfprintf (stderr, format, args);
   va_end (args);
   afputc ('\n', stderr);
-  eflush ();
 }
 
 void
@@ -1235,7 +1224,6 @@ warn (char const *format, ...)
       fvfprintf (stderr, format, args);
       va_end (args);
       afputc ('\n', stderr);
-      eflush ();
     }
 }
 
@@ -1252,7 +1240,6 @@ rcswarn (char const *format, ...)
       fvfprintf (stderr, format, args);
       va_end (args);
       afputc ('\n', stderr);
-      eflush ();
     }
 }
 
@@ -1269,7 +1256,6 @@ workwarn (char const *format, ...)
       fvfprintf (stderr, format, args);
       va_end (args);
       afputc ('\n', stderr);
-      eflush ();
     }
 }
 
@@ -1294,7 +1280,6 @@ diagnose (char const *format, ...)
       va_start (args, format);
       fvfprintf (stderr, format, args);
       va_end (args);
-      eflush ();
     }
 }
 

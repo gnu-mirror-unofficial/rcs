@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "co.help"
+#include "b-complain.h"
 
 static char const quietarg[] = "-q";
 
@@ -430,6 +431,7 @@ main (int argc, char **argv)
 #endif
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   setrid ();
   author = date = rev = state = NULL;

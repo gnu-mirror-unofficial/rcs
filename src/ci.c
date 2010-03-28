@@ -23,6 +23,7 @@
 #include "base.h"
 #include <ctype.h>                      /* isdigit */
 #include "ci.help"
+#include "b-complain.h"
 #include "b-kwxout.h"
 
 /* Work around a common `ftruncate' bug: NFS won't let you truncate a file
@@ -622,6 +623,7 @@ main (int argc, char **argv)
   struct hshentry *workdelta;
 
   CHECK_HV ();
+  unbuffer_standard_error ();
 
   setrid ();
 

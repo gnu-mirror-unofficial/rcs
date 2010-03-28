@@ -786,7 +786,6 @@ runv (int infd, char const *outname, char const **args)
 #endif  /* BAD_WAIT_IF_SIGCHLD_IGNORED */
 
   oflush ();
-  eflush ();
   {
 #if defined HAVE_WORKING_FORK
     pid_t pid;
