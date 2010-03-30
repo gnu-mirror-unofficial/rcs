@@ -938,6 +938,18 @@ struct behavior
      -- [ci]main [co]main [rcs]main [rcsclean]main [rcsdiff]main
      -- rcssuffix
      -- [rcsmerge]main [rlog]main  */
+
+  struct zone_offset
+  {
+    bool valid;
+    /* When set, use `BE (zone_offset.seconds)' in `date2str'.
+       Otherwise, use UTC without timezone indication.
+       -- zone_set  */
+
+    long seconds;
+    /* Seconds east of UTC, or `TM_LOCAL_ZONE'.
+       -- zone_set  */
+  } zone_offset;
 };
 extern struct behavior behavior;
 

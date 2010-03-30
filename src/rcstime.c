@@ -24,11 +24,6 @@
 #include "partime.h"
 #include "maketime.h"
 
-/* Seconds east of UTC, or `TM_LOCAL_ZONE'.  */
-static long zone_offset;
-/* If zero, use UTC without zone indication.  */
-static bool use_zone_offset;
-
 #define proper_dot_2(a,b)  (PRINTF_DOT2_OK ? (a) : (b))
 
 void
@@ -60,8 +55,8 @@ str2date (char const *source, char target[datesize])
    RCS internal format, and store the result into `target'.  */
 {
   time2date (str2time_checked (source, now (),
-                               use_zone_offset
-                               ? zone_offset
+                               BE (zone_offset.valid)
+                               ? BE (zone_offset.seconds)
                                : (BE (version) < VERSION (5)
                                   ? TM_LOCAL_ZONE
                                   : 0)),
@@ -81,7 +76,7 @@ void
 zone_set (char const *s)
 /* Set the time zone for `date2str' output.  */
 {
-  if ((use_zone_offset = *s))
+  if ((BE (zone_offset.valid) = !!(*s)))
     {
       long zone;
       char const *zonetail = parzone (s, &zone);
@@ -89,7 +84,7 @@ zone_set (char const *s)
       if (!zonetail || *zonetail)
         PERR ("%s: not a known time zone", s);
       else
-        zone_offset = zone;
+        BE (zone_offset.seconds) = zone;
     }
 }
 
@@ -102,7 +97,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
 
   while (*p++ != '.')
     continue;
-  if (!use_zone_offset)
+  if (!BE (zone_offset.valid))
     sprintf (datebuf,
              ("19%.*s/%.2s/%.2s %.2s:%.2s:%s"
               + (date[2] == '.' && VERSION (5) <= BE (version) ? 0 : 2)),
@@ -122,7 +117,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
       t.tm_min = atoi (p + 9);
       t.tm_sec = atoi (p + 12);
       t.tm_wday = -1;
-      zone = zone_offset;
+      zone = BE (zone_offset.seconds);
       if (zone == TM_LOCAL_ZONE)
         {
           time_t u = tm2time (&t, false), d;

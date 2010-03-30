@@ -1,5 +1,14 @@
 2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move "-z handling state" into `struct behavior'.
+
+	* base.h (behavior): Add member `zone_offset'.
+	* rcstime.c (zone_offset, use_zone_offset): Delete vars.
+	(str2date, zone_set, date2str): Use
+	`BE (zone_offset.valid)', `BE (zone_offset.seconds)'.
+
+2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use boolean to keep track of lexical error occurance.
 
 	Here, "U" means "Throughout, use `LEX (erroneousp)'".
