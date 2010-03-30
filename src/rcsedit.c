@@ -1230,7 +1230,7 @@ donerewrite (int changed, time_t newRCStime)
   int lr, le;
 #endif
 
-  if (changed && !LEX (nerr))
+  if (changed && !LEX (erroneousp))
     {
       if (FLOW (from))
         {

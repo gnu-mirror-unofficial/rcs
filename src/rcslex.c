@@ -106,7 +106,7 @@ Lexinit (void)
       hshtab[c] = NULL;
     }
 
-  LEX (nerr) = 0;
+  LEX (erroneousp) = false;
   if (FLOW (from))
     {
       FLOW (to) = NULL;

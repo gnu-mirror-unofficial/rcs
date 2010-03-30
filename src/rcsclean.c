@@ -34,7 +34,7 @@ static int exitstatus;
 static void
 cleanup (void)
 {
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
   Izclose (&FLOW (from));
   Izclose (&workptr);
@@ -244,7 +244,7 @@ main (int argc, char **argv)
 
   dounlock = perform & unlockflag;
 
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     cleanup ();
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)

@@ -85,7 +85,7 @@ static int exitstatus;
 static void
 cleanup (void)
 {
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
   Izclose (&FLOW (from));
 }
@@ -1060,7 +1060,7 @@ main (int argc, char **argv)
     }
 
   /* Now handle all pathnames.  */
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     cleanup ();
   else if (argc < 1)
     PFATAL ("no input file");

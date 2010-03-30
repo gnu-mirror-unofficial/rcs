@@ -78,7 +78,7 @@ longopt_maybe_p (const char *arg, const s_unique const *u)
 static void
 cleanup (void)
 {
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     exitstatus = DIFF_TROUBLE;
   Izclose (&FLOW (from));
   Izclose (&workptr);
@@ -338,7 +338,7 @@ main (int argc, char **argv)
 #endif
 
   /* Now handle all pathnames.  */
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     cleanup ();
   else if (argc < 1)
     PFATAL ("no input file");

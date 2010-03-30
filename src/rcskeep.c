@@ -95,7 +95,7 @@ keepid (int c, RILE *fp, struct buf *b)
   if (!get0val (c, fp, b, false))
     return false;
   checksid (b->string);
-  return !LEX (nerr);
+  return !LEX (erroneousp);
 }
 
 static bool
@@ -307,7 +307,7 @@ getoldkeys (register RILE *fp)
               /* Skip either ``who'' (new form) or ``Locker: who'' (old).  */
               if (getval (fp, NULL, true) && getval (fp, NULL, true))
                 c = 0;
-              else if (LEX (nerr))
+              else if (LEX (erroneousp))
                 goto badness;
               else
                 c = KDELIM;

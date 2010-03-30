@@ -1,5 +1,25 @@
 2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use boolean to keep track of lexical error occurance.
+
+	Here, "U" means "Throughout, use `LEX (erroneousp)'".
+	* base.h (struct parse_state): Replace `nerr' with `erroneousp'.
+	* b-complain.c (ERRONEOUS_X): New macro.
+	(syserror, generic_error, generic_fatal): Use `ERRONEOUS_X'.
+	* ci.c: U.
+	* co.c: U.
+	* merge.c: U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsedit.c: U.
+	* rcskeep.c: U.
+	* rcslex.c: U.
+	* rcsmerge.c: U.
+	* rlog.c: U.
+
+2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Abstract writes to stderr.
 
 	Here, "I" means "#include "b-complain.h",

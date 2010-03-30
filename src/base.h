@@ -980,9 +980,9 @@ extern struct manifestation manifestation;
 /* The parse state is used when reading the RCS file.  */
 struct parse_state
 {
-  int nerr;
-  /* Counter for errors.
-     -- buildjoin Lexinit errsay  */
+  bool erroneousp;
+  /* True means lexing encountered an error.
+     -- buildjoin Lexinit syserror generic_error generic_fatal  */
 
   struct next
   {

@@ -77,11 +77,13 @@ whoami (char const *who)
     complain ("%s: ", who);
 }
 
+#define ERRONEOUS_X()  LEX (erroneousp) = true
+
 void
 syserror (int e, char const *who)
 {
   whoami (NULL);
-  LEX (nerr)++;
+  ERRONEOUS_X ();
   errno = e;
   perror (who);
 }
@@ -100,7 +102,7 @@ generic_warn (char const *who, char const *fmt, ...)
 void
 generic_error (char const *who, char const *fmt, ...)
 {
-  LEX (nerr)++;
+  ERRONEOUS_X ();
   whoami (who);
   COMPLAIN_PLUS_NEWLINE ();
 }
@@ -115,7 +117,7 @@ die (void)
 void
 generic_fatal (char const *who, char const *fmt, ...)
 {
-  LEX (nerr)++;
+  ERRONEOUS_X ();
   whoami (who);
   COMPLAIN_PLUS_NEWLINE ();
   die ();

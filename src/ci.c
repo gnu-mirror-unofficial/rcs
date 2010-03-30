@@ -64,7 +64,7 @@ static struct Symrev *assoclst, **nextassoc;
 static void
 cleanup (void)
 {
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
   Izclose (&FLOW (from));
   Izclose (&workptr);
@@ -788,7 +788,7 @@ main (int argc, char **argv)
   /* (End processing of options.)  */
 
   /* Handle all pathnames.  */
-  if (LEX (nerr))
+  if (LEX (erroneousp))
     cleanup ();
   else if (argc < 1)
     PFATAL ("no input file");
