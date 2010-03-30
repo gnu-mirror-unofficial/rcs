@@ -1,5 +1,11 @@
 2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `bool' more.
+
+	* rcsutil.c (cacheid): Use boolean for valid bit.
+
+2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move "-z handling state" into `struct behavior'.
 
 	* base.h (behavior): Add member `zone_offset'.

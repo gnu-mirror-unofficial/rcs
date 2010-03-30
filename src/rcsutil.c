@@ -1018,7 +1018,17 @@ getRCSINIT (int argc, char **argv, char ***newargv)
   return argc;
 }
 
-#define cacheid(E)  static uid_t i; static int s; if (!s) { s = 1; i= (E); } return i
+#define cacheid(E)                              \
+  static uid_t id;                              \
+  static bool valid;                            \
+                                                \
+  if (!valid)                                   \
+    {                                           \
+      valid = true;                             \
+      id = E;                                   \
+    }                                           \
+  return id
+
 uid_t
 ruid (void)
 {
