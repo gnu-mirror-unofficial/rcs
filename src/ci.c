@@ -142,13 +142,13 @@ removelock (struct hshentry *delta)
           }
         else
           {
-            rcserror ("revision %s locked by %s", num, next->login);
+            RERR ("revision %s locked by %s", num, next->login);
             return -1;
           }
       }
   if (!BE (strictly_locking) && myself (REPO (stat).st_uid))
     return 0;
-  rcserror ("no lock set by %s for revision %s", getcaller (), num);
+  RERR ("no lock set by %s for revision %s", getcaller (), num);
   return -1;
 }
 
@@ -233,8 +233,8 @@ addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
             return -1;
           if (cmpnum (num->string, targetdelta->num) <= 0)
             {
-              rcserror ("revision %s too low; must be higher than %s",
-                        num->string, targetdelta->num);
+              RERR ("revision %s too low; must be higher than %s",
+                    num->string, targetdelta->num);
               return -1;
             }
           if (!removedlock && 0 <= (removedlock = removelock (targetdelta)))
@@ -285,8 +285,8 @@ addelta (void)
         bufscat (&newdelnum, ".1");
       else if (newdnumlength > 2)
         {
-          rcserror ("Branch point doesn't exist for revision %s.",
-                    newdelnum.string);
+          RERR ("Branch point doesn't exist for revision %s.",
+                newdelnum.string);
           return -1;
         }
       /* (`newdnumlength' == 2 is OK.)  */
@@ -334,7 +334,7 @@ addelta (void)
           /* No existing lock; try `ADMIN (defbr)'.  Update `newdelnum'.  */
           if (BE (strictly_locking) || !myself (REPO (stat).st_uid))
             {
-              rcserror ("no lock set by %s", getcaller ());
+              RERR ("no lock set by %s", getcaller ());
               return -1;
             }
           if (ADMIN (defbr))
@@ -362,8 +362,8 @@ addelta (void)
         }
       if (cmpnum (newdelnum.string, ADMIN (head)->num) <= 0)
         {
-          rcserror ("revision %s too low; must be higher than %s",
-                    newdelnum.string, ADMIN (head)->num);
+          RERR ("revision %s too low; must be higher than %s",
+                newdelnum.string, ADMIN (head)->num);
           return -1;
         }
       targetdelta = ADMIN (head);
@@ -389,7 +389,7 @@ addelta (void)
         return -1;
       if (cmpnum (targetdelta->num, newdelnum.string) != 0)
         {
-          rcserror ("can't find branch point %s", newdelnum.string);
+          RERR ("can't find branch point %s", newdelnum.string);
           return -1;
         }
       /* Restore final dot.  */
@@ -449,8 +449,8 @@ xpandfile (RILE *unexfile, struct hshentry const *delta,
   targetname = makedirtemp (1);
   if (!(exfile = fopenSafer (targetname, FOPEN_W_WORK)))
     {
-      eerror (targetname);
-      workerror ("can't build working file");
+      syserror_errno (targetname);
+      MERR ("can't build working file");
       return -1;
     }
   r = 0;
@@ -655,7 +655,7 @@ main (int argc, char **argv)
           if (*a)
             {
               if (rev)
-                warn ("redefinition of revision number");
+                PWARN ("redefinition of revision number");
               rev = a;
             }
           break;
@@ -694,13 +694,13 @@ main (int argc, char **argv)
             redefined ('m');
           msg = cleanlogmsg (a, strlen (a));
           if (!msg.size)
-            error ("missing message for -m option");
+            PERR ("missing message for -m option");
           break;
 
         case 'n':
           if (!*a)
             {
-              error ("missing symbolic name after -n");
+              PERR ("missing symbolic name after -n");
               break;
             }
           checkssym (a);
@@ -710,7 +710,7 @@ main (int argc, char **argv)
         case 'N':
           if (!*a)
             {
-              error ("missing symbolic name after -N");
+              PERR ("missing symbolic name after -N");
               break;
             }
           checkssym (a);
@@ -726,7 +726,7 @@ main (int argc, char **argv)
               state = a;
             }
           else
-            error ("missing state for -s option");
+            PERR ("missing state for -s option");
           break;
 
         case 't':
@@ -759,7 +759,7 @@ main (int argc, char **argv)
               author = a;
             }
           else
-            error ("missing author for -w option");
+            PERR ("missing author for -w option");
           break;
 
         case 'x':
@@ -782,7 +782,7 @@ main (int argc, char **argv)
             }
           /* fall into */
         default:
-          error ("unknown option: %s", *argv);
+          PERR ("unknown option: %s", *argv);
         };
     }
   /* (End processing of options.)  */
@@ -791,7 +791,7 @@ main (int argc, char **argv)
   if (LEX (nerr))
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file");
+    PFATAL ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
@@ -806,7 +806,7 @@ main (int argc, char **argv)
 #if defined HAVE_SETUID && defined HAVE_GETUID
             if (euid () != ruid ())
               {
-                workerror
+                MERR
                   ("setuid initial checkin prohibited; use `rcs -i -a' first");
                 continue;
               }
@@ -822,7 +822,7 @@ main (int argc, char **argv)
             /* Normal checkin with previous RCS file.  */
             if (initflag)
               {
-                rcserror ("already exists");
+                RERR ("already exists");
                 continue;
               }
             rcsinitflag = !ADMIN (head);
@@ -834,11 +834,11 @@ main (int argc, char **argv)
            descriptor for the RCS file, and `REPO (stat)' is set.
            The admin node is initialized.  */
 
-        diagnose ("%s  <--  %s\n", REPO (filename), MANI (filename));
+        diagnose ("%s  <--  %s", REPO (filename), MANI (filename));
 
         if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat)))
           {
-            eerror (MANI (filename));
+            syserror_errno (MANI (filename));
             continue;
           }
 
@@ -846,8 +846,8 @@ main (int argc, char **argv)
           {
             if (same_file (REPO (stat), workstat))
               {
-                rcserror ("RCS file is the same as working file %s.",
-                          MANI (filename));
+                RERR ("RCS file is the same as working file %s.",
+                      MANI (filename));
                 continue;
               }
             if (!checkaccesslist ())
@@ -862,15 +862,15 @@ main (int argc, char **argv)
               continue;
             if (!rev && !(krev = PREV (rev)))
               {
-                workerror ("can't find a revision number");
+                MERR ("can't find a revision number");
                 continue;
               }
             if (!PREV (date) && *altdate == '\0' && usestatdate == false)
-              workwarn ("can't find a date");
+              MWARN ("can't find a date");
             if (!PREV (author) && !author)
-              workwarn ("can't find an author");
+              MWARN ("can't find an author");
             if (!PREV (state) && !state)
-              workwarn ("can't find a state");
+              MWARN ("can't find a state");
           }
         /* (End processing keepflag.)  */
 
@@ -935,10 +935,10 @@ main (int argc, char **argv)
         /* Now check validity of date -- needed because of `-d' and `-k'.  */
         if (targetdelta && cmpdate (newdelta.date, targetdelta->date) < 0)
           {
-            rcserror ("Date %s precedes %s in revision %s.",
-                      date2str (newdelta.date, newdatebuf),
-                      date2str (targetdelta->date, targetdatebuf),
-                      targetdelta->num);
+            RERR ("Date %s precedes %s in revision %s.",
+                  date2str (newdelta.date, newdatebuf),
+                  date2str (targetdelta->date, targetdatebuf),
+                  targetdelta->num);
             continue;
           }
 
@@ -963,7 +963,7 @@ main (int argc, char **argv)
         /* Build rest of file.  */
         if (rcsinitflag)
           {
-            diagnose ("initial revision: %s\n", newdelta.num);
+            diagnose ("initial revision: %s", newdelta.num);
             /* Get logmessage.  */
             newdelta.log = getlogmsg ();
             putdftext (&newdelta, workptr, FLOW (rewr), false);
@@ -986,12 +986,12 @@ main (int argc, char **argv)
                     <= 0))
               {
                 diagnose
-                  ("file is unchanged; reverting to previous revision %s\n",
+                  ("file is unchanged; reverting to previous revision %s",
                    targetdelta->num);
                 if (removedlock < lockflag)
                   {
                     diagnose
-                      ("previous revision was not locked; ignoring -l option\n");
+                      ("previous revision was not locked; ignoring -l option");
                     lockthis = 0;
                   }
                 dolog = false;
@@ -1043,7 +1043,7 @@ main (int argc, char **argv)
                 off_t wfd_off;
 #endif
 
-                diagnose ("new revision: %s; previous revision: %s\n",
+                diagnose ("new revision: %s; previous revision: %s",
                           newdelta.num, targetdelta->num);
                 newdelta.log = getlogmsg ();
 #if !large_memory
@@ -1081,7 +1081,7 @@ main (int argc, char **argv)
                 *++diffp = newhead ? expname : "-";
                 *++diffp = NULL;
                 if (DIFF_TROUBLE == runv (wfd, diffname, diffv))
-                  rcsfaterror ("diff failed");
+                  RFATAL ("diff failed");
 #if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
                 if (lseek (wfd, wfd_off, SEEK_CUR) == -1)
                   Ierror ();
@@ -1106,7 +1106,7 @@ main (int argc, char **argv)
                     || workstat.st_mtime != checkworkstat.st_mtime
                     || workstat.st_size != checkworkstat.st_size)
                   {
-                    workerror ("file changed during checkin");
+                    MERR ("file changed during checkin");
                     continue;
                   }
 
@@ -1178,10 +1178,10 @@ main (int argc, char **argv)
           }
         if (r != 0)
           {
-            eerror (MANI (filename));
+            syserror_errno (MANI (filename));
             continue;
           }
-        diagnose ("done\n");
+        diagnose ("done");
 
       }
 

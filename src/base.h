@@ -690,12 +690,6 @@ bool getoldkeys (RILE *);
 
 /* rcslex */
 char const *getid (void);
-void efaterror (char const *) exiting;
-void enfaterror (int, char const *) exiting;
-void fatcleanup (bool) exiting;
-void faterror (char const *, ...) printf_string_exiting (1, 2);
-void fatserror (char const *, ...) printf_string_exiting (1, 2);
-void rcsfaterror (char const *, ...) printf_string_exiting (1, 2);
 void Ieof (void) exiting;
 void Ierror (void) exiting;
 void Oerror (void) exiting;
@@ -719,10 +713,6 @@ void aprintf (FILE *, char const *, ...) printf_string (2, 3);
 void aputs (char const *, FILE *);
 void checksid (char *);
 void checkssym (char *);
-void diagnose (char const *, ...) printf_string (1, 2);
-void eerror (char const *);
-void enerror (int, char const *);
-void error (char const *, ...) printf_string (1, 2);
 void fvfprintf (FILE *, char const *, va_list);
 void getkey (char const *);
 void getkeystring (char const *);
@@ -731,14 +721,9 @@ void oflush (void);
 void printstring (void);
 void readstring (void);
 void redefined (int);
-void rcserror (char const *, ...) printf_string (1, 2);
-void rcswarn (char const *, ...) printf_string (1, 2);
 void testIerror (FILE *);
 void testOerror (FILE *);
-void warn (char const *, ...) printf_string (1, 2);
 void warnignore (void);
-void workerror (char const *, ...) printf_string (1, 2);
-void workwarn (char const *, ...) printf_string (1, 2);
 #if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
 void advise_access (RILE *, int);
 #define if_advise_access(p,f,advice)  if (p) advise_access (f, advice)
@@ -905,7 +890,7 @@ struct behavior
   bool quiet;
   /* This is set from command-line option `-q'.  When set:
      - disable all yn -- yesorno
-     - disable warnings -- warn rcswarn workwarn
+     - disable warnings -- generic_warn
      - disable error messages -- diagnose catchsigaction
      - don't ask about overwriting a writable workfile
      - on missing RCS file, suppress error and init instead -- pairnames

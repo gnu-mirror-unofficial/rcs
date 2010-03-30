@@ -1,3 +1,54 @@
+2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Abstract writes to stderr.
+
+	Here, "I" means "#include "b-complain.h",
+	"U" means "Throughout, use the funcs and macros from there".
+	* b-complain.c (vcomplain, complain): New funcs.
+	(COMPLAIN_PLUS_NEWLINE): New macro.
+	(diagnose): New func.
+	(whoami): New static func.
+	(syserror, generic_warn, generic_error): New funcs.
+	(die): New static func.
+	(generic_fatal, fatal_syntax, fatal_sys): New funcs.
+	* b-complain.h (vcomplain, complain, diagnose, syserror)
+	(generic_warn, generic_error, generic_fatal, fatal_syntax)
+	(fatal_sys): New func decls.
+	(syserror_errno, PWARN, MWARN, RWARN)
+	(PERR, MERR, RERR, PFATAL, RFATAL): New macros.
+	* b-kwxout.c: I; U.
+	* ci.c: U.
+	* co.c: U.
+	* ident.c: U.
+	* maketime.c: U.
+	* merge.c: U.
+	* merger.c: I; U.
+	* rcs.c: U.
+	* rcsclean.c: U.
+	* rcsdiff.c: U.
+	* rcsedit.c: I; U.
+	* rcsfcmp.c: I; U.
+	* rcsfnms.c: I; U.
+	* rcsgen.c: I; U.
+	* rcskeep.c: I; U.
+	* rcslex.c: I; U.
+	(fatcleanup, startsay, fatsay, errsay, warnsay, eerror)
+	(enerror, efaterror, enfaterror, error, rcserror)
+	(workerror, fatserror, faterror, rcsfaterror, warn)
+	(rcswarn, workwarn, diagnose): Delete funcs.
+	* rcsmerge.c: U.
+	* rcsrev.c: I; U.
+	* rcssyn.c: I; U.
+	* rcstime.c: I; U.
+	* rcsutil.c: I; U.
+	[HAVE_WORKING_FORK] (write_stderr): Delete func.
+	(runv): If the child proc exited due to a signal,
+	mention that it "got a fatal signal" before dying.
+	* rlog.c: U.
+	* base.h (efaterror, enfaterror, fatcleanup, faterror)
+	(fatserror, rcsfaterror, diagnose, eerror, enerror, error)
+	(rcserror, rcswarn, warn, workerror, workwarn): Delete func decls.
+
 2010-03-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Unbuffer stderr at program start; don't fflush it, later.

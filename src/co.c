@@ -84,9 +84,9 @@ rmworkfile (void)
                                       ? ""
                                       : ", and you do not own it")))
         {
-          error (!BE (quiet) && ttystdin ()
-                 ? "checkout aborted"
-                 : "writable %s exists; checkout aborted", MANI (filename));
+          PERR (!BE (quiet) && ttystdin ()
+                ? "checkout aborted"
+                : "writable %s exists; checkout aborted", MANI (filename));
           return false;
         }
     }
@@ -117,8 +117,8 @@ rmlock (struct hshentry const *delta)
       /* Found a lock on delta by caller.  */
       if ((whomatch != 0) && (nummatch == 0))
         {
-          rcserror ("revision %s locked by %s; use co -r or rcs -u",
-                    num, next->login);
+          RERR ("revision %s locked by %s; use co -r or rcs -u",
+                num, next->login);
           return -1;
         }
       trail = next;
@@ -217,7 +217,7 @@ getancestor (char const *r1, char const *r2)
       else if (cmpnumfld (r1, r2, l3 + 1) != 0)
         return partialno (&t1, r1, l3);
     }
-  rcserror ("common ancestor of %s and %s undefined", r1, r2);
+  RERR ("common ancestor of %s and %s undefined", r1, r2);
   return NULL;
 }
 
@@ -255,7 +255,7 @@ preparejoin (register char *j)
             }
           else
             {
-              rcsfaterror ("join pair incomplete");
+              RFATAL ("join pair incomplete");
             }
         }
       else
@@ -271,12 +271,12 @@ preparejoin (register char *j)
             }
           else
             {
-              rcsfaterror ("join pair incomplete");
+              RFATAL ("join pair incomplete");
             }
         }
     }
   if (lastjoin < 1)
-    rcsfaterror ("empty join");
+    RFATAL ("empty join");
   return true;
 }
 
@@ -331,19 +331,19 @@ buildjoin (char const *initialfile)
           bufscat (&subs, ":");
           bufscat (&subs, joinlist[i - 1]);
         }
-      diagnose ("revision %s\n", joinlist[i]);
+      diagnose ("revision %s", joinlist[i]);
       bufscpy (&commarg, "-p");
       bufscat (&commarg, joinlist[i]);
       cov[2] = commarg.string;
       if (runv (-1, rev2, cov))
         goto badmerge;
-      diagnose ("revision %s\n", joinlist[i + 1]);
+      diagnose ("revision %s", joinlist[i + 1]);
       bufscpy (&commarg, "-p");
       bufscat (&commarg, joinlist[i + 1]);
       cov[2] = commarg.string;
       if (runv (-1, rev3, cov))
         goto badmerge;
-      diagnose ("merging...\n");
+      diagnose ("merging...");
       mergev[3] = subs.string;
       mergev[5] = joinlist[i + 1];
       p = &mergev[6];
@@ -454,7 +454,7 @@ main (int argc, char **argv)
           if (*a)
             {
               if (rev)
-                warn ("redefinition of revision number");
+                PWARN ("redefinition of revision number");
               rev = a;
             }
           break;
@@ -466,7 +466,7 @@ main (int argc, char **argv)
         case 'l':
           if (lockflag < 0)
             {
-              warn ("-u overridden by -l.");
+              PWARN ("-u overridden by -l.");
             }
           lockflag = 1;
           goto revno;
@@ -474,7 +474,7 @@ main (int argc, char **argv)
         case 'u':
           if (0 < lockflag)
             {
-              warn ("-l overridden by -u.");
+              PWARN ("-l overridden by -u.");
             }
           lockflag = -1;
           goto revno;
@@ -560,7 +560,7 @@ main (int argc, char **argv)
           /* fall into */
         default:
         unknown:
-          error ("unknown option: %s", *argv);
+          PERR ("unknown option: %s", *argv);
 
         };
     }
@@ -570,7 +570,7 @@ main (int argc, char **argv)
   if (LEX (nerr))
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file");
+    PFATAL ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
@@ -584,7 +584,7 @@ main (int argc, char **argv)
         /* `REPO (filename)' contains the name of the RCS file, and
            `FLOW (from)' points at it.  `MANI (filename)' contains the
            name of the working file.  Also, `REPO (stat)' has been set.  */
-        diagnose ("%s  -->  %s\n", REPO (filename),
+        diagnose ("%s  -->  %s", REPO (filename),
                   tostdout ? "standard output" : MANI (filename));
 
         workstatstat = -1;
@@ -607,17 +607,17 @@ main (int argc, char **argv)
             workstatstat = stat (MANI (filename), &workstat);
             if (workstatstat == 0 && same_file (REPO (stat), workstat))
               {
-                rcserror ("RCS file is the same as working file %s.",
-                          MANI (filename));
+                RERR ("RCS file is the same as working file %s.",
+                      MANI (filename));
                 continue;
               }
             neworkname = makedirtemp (1);
             if (!(neworkptr = fopenSafer (neworkname, FOPEN_W_WORK)))
               {
                 if (errno == EACCES)
-                  workerror ("permission denied on parent directory");
+                  MERR ("permission denied on parent directory");
                 else
-                  eerror (neworkname);
+                  syserror_errno (neworkname);
                 continue;
               }
           }
@@ -628,10 +628,10 @@ main (int argc, char **argv)
         if (!ADMIN (head))
           {
             /* No revisions; create empty file.  */
-            diagnose ("no revisions present; generating empty revision 0.0\n");
+            diagnose ("no revisions present; generating empty revision 0.0");
             if (lockflag)
-              warn ("no revisions, so nothing can be %slocked",
-                    lockflag < 0 ? "un" : "");
+              PWARN ("no revisions, so nothing can be %slocked",
+                     lockflag < 0 ? "un" : "");
             Ozclose (&FLOW (res));
             if (workstatstat == 0)
               if (!rmworkfile ())
@@ -680,14 +680,14 @@ main (int argc, char **argv)
               BE (kws) = expmode;
             if (0 < lockflag && BE (kws) == kwsub_v)
               {
-                rcserror ("cannot combine -kv and -l");
+                RERR ("cannot combine -kv and -l");
                 continue;
               }
 
             if (joinflag && !preparejoin (joinflag))
               continue;
 
-            diagnose ("revision %s%s\n", targetdelta->num,
+            diagnose ("revision %s%s", targetdelta->num,
                       0 < lockflag ? " (locked)" :
                       lockflag < 0 ? " (unlocked)" : "");
 
@@ -721,7 +721,7 @@ main (int argc, char **argv)
               {
                 locks += lockflag;
                 if (1 < locks)
-                  rcswarn ("You now have %d locks.", locks);
+                  RWARN ("You now have %d locks.", locks);
               }
 
             newdate = targetdelta->date;
@@ -734,7 +734,7 @@ main (int argc, char **argv)
                     joinname = neworkname;
                   }
                 if (BE (kws) == kwsub_b)
-                  workerror ("merging binary files");
+                  MERR ("merging binary files");
                 if (!buildjoin (joinname))
                   continue;
               }
@@ -753,11 +753,11 @@ main (int argc, char **argv)
             restoreints ();
             if (r != 0)
               {
-                eerror (MANI (filename));
-                error ("see %s", neworkname);
+                syserror_errno (MANI (filename));
+                PERR ("see %s", neworkname);
                 continue;
               }
-            diagnose ("done\n");
+            diagnose ("done");
           }
       }
 

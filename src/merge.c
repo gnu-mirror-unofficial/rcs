@@ -29,7 +29,7 @@ static char const usage[] =
 static void
 badoption (char const *a)
 {
-  error ("unknown option: %s%s", a, usage);
+  PERR ("unknown option: %s%s", a, usage);
 }
 
 static exiting void
@@ -80,7 +80,7 @@ main (int argc, char **argv)
         case 'E':
         case 'e':
           if (edarg && edarg[1] != (*argv)[1])
-            error ("%s and %s are incompatible", edarg, *argv);
+            PERR ("%s and %s are incompatible", edarg, *argv);
           edarg = *argv;
           break;
 
@@ -93,9 +93,9 @@ main (int argc, char **argv)
 
         case 'L':
           if (3 <= labels)
-            faterror ("too many -L options");
+            PFATAL ("too many -L options");
           if (!(label[labels++] = *++argv))
-            faterror ("-L needs following argument");
+            PFATAL ("-L needs following argument");
           --argc;
           break;
 
@@ -112,7 +112,7 @@ main (int argc, char **argv)
     }
 
   if (argc != 4)
-    faterror ("%s arguments%s", argc < 4 ? "not enough" : "too many", usage);
+    PFATAL ("%s arguments%s", argc < 4 ? "not enough" : "too many", usage);
 
   /* This copy keeps us `const'-clean.  */
   arg[0] = argv[0];

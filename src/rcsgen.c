@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include "b-complain.h"
 
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
@@ -40,11 +41,11 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
   for (;;)
     {
       if (eoflex ())
-        fatserror ("can't find delta for revision %s", delta->num);
+        fatal_syntax ("can't find delta for revision %s", delta->num);
       nextlex ();
       if (!(nextdelta = getnum ()))
         {
-          fatserror ("delta number corrupted");
+          fatal_syntax ("delta number corrupted");
         }
       getkeystring (Klog);
       if (needlog && delta == nextdelta)
@@ -193,7 +194,7 @@ getcstdin (void)
     {
       testIerror (in);
       if (feof (in) && ttystdin ())
-        afputc ('\n', stderr);
+        complain ("\n");
     }
   return c;
 }
@@ -208,7 +209,7 @@ yesorno (bool default_answer, char const *question, ...)
     {
       oflush ();
       va_start (args, question);
-      fvfprintf (stderr, question, args);
+      vcomplain (question, args);
       va_end (args);
       r = c = getcstdin ();
       while (c != '\n' && !feof (stdin))
@@ -273,7 +274,7 @@ putdesc (bool textflag, char *textfile)
           else
             {
               if (!(txt = fopenSafer (textfile, "r")))
-                efaterror (textfile);
+                fatal_sys (textfile);
               bufalloc (&desc, 1);
               p = desc.string;
               plim = p + desc.size;
@@ -310,13 +311,13 @@ getsstdin (char const *option, char const *name,
   register size_t i;
   register bool tty = ttystdin ();
 
+#define prompt  complain
   if (tty)
-    aprintf (stderr,
-             "enter %s, terminated with single '.' or end of file:\n%s>> ",
-             name, note);
+    prompt ("enter %s, terminated with single '.' or end of file:\n%s>> ",
+            name, note);
   else if (feof (stdin))
-    rcsfaterror ("can't reread redirected stdin for %s; use -%s<%s>",
-                 name, option, name);
+    RFATAL ("can't reread redirected stdin for %s; use -%s<%s>",
+            name, option, name);
 
   for (i = 0, p = 0;
        c = getcstdin (), !feof (stdin);
@@ -330,8 +331,9 @@ getsstdin (char const *option, char const *name,
             break;
           }
         else if (tty)
-          aputs (">> ", stderr);
+          prompt (">> ");
       }
+#undef prompt
   return cleanlogmsg (p, i);
 }
 
@@ -357,7 +359,7 @@ putadmin (void)
 #endif  /* !BAD_CREAT0 */
 
       if (!(FLOW (rewr) = fout))
-        efaterror (REPO (filename));
+        fatal_sys (REPO (filename));
     }
 
   aprintf (fout, "%s\t%s;\n", Khead,
@@ -460,7 +462,7 @@ putdtext (struct hshentry const *delta, char const *srcname,
 
   if (!(fin = Iopen (srcname, "r", NULL)))
     {
-      eerror (srcname);
+      syserror_errno (srcname);
       return false;
     }
   putdftext (delta, fin, fout, diffmt);

@@ -206,7 +206,7 @@ main (int argc, char **argv)
                 rev2 = a;
                 break;
               default:
-                error ("too many revision numbers");
+                PERR ("too many revision numbers");
               }
             goto option_handled;
           case '-':
@@ -226,7 +226,7 @@ main (int argc, char **argv)
           case 'W':
 #if DIFF_L
             if (c == 'L' && ++file_labels == 2)
-              faterror ("too many -L options");
+              PFATAL ("too many -L options");
 #endif
             *dcp++ = c;
             if (*a)
@@ -236,7 +236,7 @@ main (int argc, char **argv)
             else
               {
                 if (!--argc)
-                  faterror ("-%c needs following argument", c);
+                  PFATAL ("-%c needs following argument", c);
                 *diffp++ = *argv++;
               }
             break;
@@ -297,7 +297,7 @@ main (int argc, char **argv)
             /* fall into */
           default:
           unknown:
-            error ("unknown option: %s", *argv);
+            PERR ("unknown option: %s", *argv);
           };
     option_handled:
       if (dcp != *argv + 1)
@@ -341,7 +341,7 @@ main (int argc, char **argv)
   if (LEX (nerr))
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file");
+    PFATAL ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
@@ -349,13 +349,13 @@ main (int argc, char **argv)
 
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
           continue;
-        diagnose ("%sRCS file: %s\n", equal_line + 10, REPO (filename));
+        diagnose ("%sRCS file: %s", equal_line + 10, REPO (filename));
         if (!rev2)
           {
             /* Make sure work file is readable, and get its status.  */
             if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat)))
               {
-                eerror (MANI (filename));
+                syserror_errno (MANI (filename));
                 continue;
               }
           }
@@ -365,7 +365,7 @@ main (int argc, char **argv)
 
         if (!ADMIN (head))
           {
-            rcserror ("no revisions present");
+            RERR ("no revisions present");
             continue;
           }
         if (revnums == 0 || !*rev1)
@@ -416,7 +416,7 @@ main (int argc, char **argv)
           }
 #endif
 
-        diagnose ("retrieving revision %s\n", xrev1);
+        diagnose ("retrieving revision %s", xrev1);
         bufscpy (&commarg, "-p");
         /* Not `xrev1', for $Name's sake.  */
         bufscat (&commarg, rev1);
@@ -442,7 +442,7 @@ main (int argc, char **argv)
         diffp[0] = maketemp (0);
         if (runv (-1, diffp[0], cov))
           {
-            rcserror ("co failed");
+            RERR ("co failed");
             continue;
           }
         if (!rev2)
@@ -461,7 +461,7 @@ main (int argc, char **argv)
           }
         else
           {
-            diagnose ("retrieving revision %s\n", xrev2);
+            diagnose ("retrieving revision %s", xrev2);
             bufscpy (&commarg, "-p");
             /* Not `xrev2', for $Name's sake.  */
             bufscat (&commarg, rev2);
@@ -469,21 +469,21 @@ main (int argc, char **argv)
             diffp[1] = maketemp (1);
             if (runv (-1, diffp[1], cov))
               {
-                rcserror ("co failed");
+                RERR ("co failed");
                 continue;
               }
           }
         if (!rev2)
-          diagnose ("diff%s -r%s %s\n", diffvstr, xrev1, MANI (filename));
+          diagnose ("diff%s -r%s %s", diffvstr, xrev1, MANI (filename));
         else
-          diagnose ("diff%s -r%s -r%s\n", diffvstr, xrev1, xrev2);
+          diagnose ("diff%s -r%s -r%s", diffvstr, xrev1, xrev2);
 
         diffp[2] = 0;
         {
           int s = runv (-1, NULL, diffv);
 
           if (DIFF_TROUBLE == s)
-            workerror ("diff failed");
+            MERR ("diff failed");
           if (DIFF_FAILURE == s
               && DIFF_SUCCESS == exitstatus)
             exitstatus = s;

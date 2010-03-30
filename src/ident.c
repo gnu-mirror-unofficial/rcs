@@ -35,7 +35,7 @@ reportError (char const *s)
 {
   int e = errno;
 
-  fprintf (stderr, "%s error: ", program.name);
+  complain ("%s error: ", program.name);
   errno = e;
   perror (s);
 }
@@ -131,12 +131,11 @@ scanfile (register FILE *file, char const *name)
       /* The following is equivalent to `exit (EXIT_FAILURE)', but we
          invoke `exiterr' to keep lint happy.  The DOS and OS/2 ports
          need `exiterr'.  */
-      fflush (stderr);
       fflush (stdout);
       exiterr ();
     }
   if (!BE (quiet))
-    fprintf (stderr, "%s warning: no id keywords in %s\n", program.name, name);
+    complain ("%s warning: no id keywords in %s\n", program.name, name);
   return 0;
 }
 
@@ -179,7 +178,7 @@ main (int argc, char **argv)
           return EXIT_SUCCESS;
 
         default:
-          fprintf (stderr, "ident: usage: ident -{qV} [file...]\n");
+          complain ("ident: usage: ident -{qV} [file...]\n");
           return EXIT_FAILURE;
           break;
         }

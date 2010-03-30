@@ -86,7 +86,7 @@ get_directory (char const *dirname, char ***aargv)
   struct dirent *e;
 
   if (!(d = opendir (dirname)))
-    efaterror (dirname);
+    fatal_sys (dirname);
   while ((errno = 0, e = readdir (d)))
     {
       char const *en = e->d_name;
@@ -105,7 +105,7 @@ get_directory (char const *dirname, char ***aargv)
       chars += s;
     }
   if (errno || closedir (d) != 0)
-    efaterror (dirname);
+    fatal_sys (dirname);
   if (chars)
     a = trealloc (char, a, chars);
   else
@@ -182,7 +182,7 @@ main (int argc, char **argv)
           argv = newargv;
           break;
 #else
-          faterror ("no pathnames specified");
+          PFATAL ("no pathnames specified");
 #endif
         }
       a = *++argv;
@@ -209,7 +209,7 @@ main (int argc, char **argv)
           if (*a)
             {
               if (rev)
-                warn ("redefinition of revision number");
+                PWARN ("redefinition of revision number");
               rev = a;
             }
           break;
@@ -238,7 +238,7 @@ main (int argc, char **argv)
 
         default:
         unknown:
-          error ("unknown option: %s%s", *argv, usage);
+          PERR ("unknown option: %s%s", *argv, usage);
         }
     }
 
@@ -260,8 +260,7 @@ main (int argc, char **argv)
 
         if (same_file (REPO (stat), workstat))
           {
-            rcserror ("RCS file is the same as working file %s.",
-                      MANI (filename));
+            RERR ("RCS file is the same as working file %s.", MANI (filename));
             continue;
           }
 
@@ -338,7 +337,7 @@ main (int argc, char **argv)
           aprintf (stdout, "rm -f %s\n", MANI (filename));
         Izclose (&workptr);
         if (perform && un_link (MANI (filename)) != 0)
-          eerror (MANI (filename));
+          syserror_errno (MANI (filename));
       }
 
   tempunlink ();

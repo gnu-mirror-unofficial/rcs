@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include "b-complain.h"
 
 static int
 discardkeyval (register int c, register RILE *f)
@@ -67,7 +68,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
 
   if (!(ufp = Iopen (uname, FOPEN_R_WORK, &ustat)))
     {
-      efaterror (uname);
+      fatal_sys (uname);
     }
   xeof = ueof = false;
   if (MIN_UNEXPAND <= BE (kws))

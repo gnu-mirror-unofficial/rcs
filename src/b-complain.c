@@ -30,4 +30,110 @@ unbuffer_standard_error (void)
   unbufferedp = !setvbuf (stderr, NULL, _IONBF, 0);
 }
 
+void
+vcomplain (char const *fmt, va_list args)
+{
+  fflush (MANI (standard_output)
+          ? MANI (standard_output)
+          : stdout);
+  vfprintf (stderr, fmt, args);
+  if (!unbufferedp)
+    fflush (stderr);
+}
+
+void
+complain (char const *fmt, ...)
+{
+  va_list args;
+
+  va_start (args, fmt);
+  vcomplain (fmt, args);
+  va_end (args);
+}
+
+#define COMPLAIN_PLUS_NEWLINE()  do             \
+    {                                           \
+      va_list args;                             \
+                                                \
+      va_start (args, fmt);                     \
+      vcomplain (fmt, args);                    \
+      va_end (args);                            \
+      complain ("\n");                          \
+    }                                           \
+  while (0)
+
+void
+diagnose (char const *fmt, ...)
+{
+  if (! BE (quiet))
+    COMPLAIN_PLUS_NEWLINE ();
+}
+
+static void
+whoami (char const *who)
+{
+  complain ("%s: ", program.name);
+  if (who)
+    complain ("%s: ", who);
+}
+
+void
+syserror (int e, char const *who)
+{
+  whoami (NULL);
+  LEX (nerr)++;
+  errno = e;
+  perror (who);
+}
+
+void
+generic_warn (char const *who, char const *fmt, ...)
+{
+  if (!BE (quiet))
+    {
+      whoami (who);
+      complain ("warning: ");
+      COMPLAIN_PLUS_NEWLINE ();
+    }
+}
+
+void
+generic_error (char const *who, char const *fmt, ...)
+{
+  LEX (nerr)++;
+  whoami (who);
+  COMPLAIN_PLUS_NEWLINE ();
+}
+
+static void
+die (void)
+{
+  complain ("%s aborted\n", program.name);
+  program.exiterr ();
+}
+
+void
+generic_fatal (char const *who, char const *fmt, ...)
+{
+  LEX (nerr)++;
+  whoami (who);
+  COMPLAIN_PLUS_NEWLINE ();
+  die ();
+}
+
+void
+fatal_syntax (char const *fmt, ...)
+{
+  complain ("%s: %s:%ld: ", program.name, REPO (filename), LEX (lno));
+  COMPLAIN_PLUS_NEWLINE ();
+  die ();
+}
+
+void
+fatal_sys (char const *who)
+{
+  syserror (errno, who);
+  die ();
+}
+
 /* b-complain.c ends here */

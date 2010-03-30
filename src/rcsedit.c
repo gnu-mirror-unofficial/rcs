@@ -27,6 +27,7 @@
  */
 
 #include "base.h"
+#include "b-complain.h"
 #include "b-kwxout.h"
 
 #if !large_memory
@@ -97,13 +98,13 @@ un_link (char const *s)
 static void
 editEndsPrematurely (void)
 {
-  fatserror ("edit script ends prematurely");
+  fatal_syntax ("edit script ends prematurely");
 }
 
 static void
 editLineNumberOverflow (void)
 {
-  fatserror ("edit script refers to line past end of file");
+  fatal_syntax ("edit script refers to line past end of file");
 }
 
 #if large_memory
@@ -190,7 +191,7 @@ finisheditline (RILE *fin, FILE *fout, Iptr_type l,
 
   fin->ptr = l;
   if (expandline (&ctx) < 0)
-    faterror ("finisheditline internal error");
+    PFATAL ("finisheditline internal error");
 }
 
 void
@@ -229,7 +230,7 @@ static FILE *
 fopen_update_truncate (char const *name)
 {
   if (BAD_FOPEN_WPLUS && un_link (name) != 0)
-    efaterror (name);
+    fatal_sys (name);
   return fopenSafer (name, FOPEN_WPLUS_WORK);
 }
 
@@ -243,7 +244,7 @@ openfcopy (FILE *f)
       if (!FLOW (result))
         FLOW (result) = maketemp (2);
       if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
-        efaterror (FLOW (result));
+        fatal_sys (FLOW (result));
     }
 }
 
@@ -435,7 +436,7 @@ enterstring (void)
   editline = linecorr = 0;
   FLOW (result) = maketemp (1);
   if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
-    efaterror (FLOW (result));
+    fatal_sys (FLOW (result));
   copystring ();
 #else  /* large_memory */
   register int c;
@@ -733,14 +734,14 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 #ifdef HAVE_READLINK
   if (!x)
     {
-      error ("symbolic link to non RCS file `%s'", RCSpath);
+      PERR ("symbolic link to non RCS file `%s'", RCSpath);
       errno = EINVAL;
       return NULL;
     }
 #endif
   if (*sp == *x)
     {
-      error ("RCS pathname `%s' incompatible with suffix `%s'", sp, x);
+      PERR ("RCS pathname `%s' incompatible with suffix `%s'", sp, x);
       errno = EINVAL;
       return NULL;
     }
@@ -767,7 +768,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       tp -= 2;
       if (*tp == '_')
         {
-          error ("RCS pathname `%s' ends with `%c'", RCSpath, *tp);
+          PERR ("RCS pathname `%s' ends with `%c'", RCSpath, *tp);
           errno = EINVAL;
           return NULL;
         }
@@ -869,8 +870,9 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
               r = un_link (lockname);
               e = errno;
               setrid ();
+              errno = e;
               if (r != 0)
-                enfaterror (e, lockname);
+                fatal_sys (lockname);
               bufscpy (&sff[SFFI_LOCKDIR].filename, sp);
             }
         }
@@ -896,7 +898,7 @@ keepdirtemp (char const *name)
         sff[i].disposition = notmade;
         return;
       }
-  faterror ("keepdirtemp");
+  PFATAL ("keepdirtemp");
 }
 
 char const *
@@ -1044,8 +1046,8 @@ findlock (bool delete, struct hshentry **target)
       {
         if (found)
           {
-            rcserror ("multiple revisions locked by %s; please specify one",
-                      getcaller ());
+            RERR ("multiple revisions locked by %s; please specify one",
+                  getcaller ());
             return 2;
           }
         found = trail;
@@ -1079,8 +1081,8 @@ addlock (struct hshentry *delta, bool verbose)
         else
           {
             if (verbose)
-              rcserror ("Revision %s is already locked by %s.",
-                        delta->num, next->login);
+              RERR ("Revision %s is already locked by %s.",
+                    delta->num, next->login);
             return -1;
           }
       }
@@ -1113,7 +1115,7 @@ addsymbol (char const *num, char const *name, bool rebind)
           }
         else
           {
-            rcserror ("symbolic name %s already bound to %s", name, next->num);
+            RERR ("symbolic name %s already bound to %s", name, next->num);
             return -1;
           }
       }
@@ -1156,7 +1158,7 @@ checkaccesslist (void)
     }
   while ((next = next->nextaccess));
 
-  rcserror ("user %s not on the access list", getcaller ());
+  RERR ("user %s not on the access list", getcaller ());
   return false;
 }
 
@@ -1203,11 +1205,11 @@ dorewrite (bool lockflag, int changed)
           restoreints ();
           setrid ();
           if (r != 0)
-            enerror (e, lockname);
+            syserror (e, lockname);
 #if BAD_CREAT0
           if (nr != 0)
             {
-              enerror (ne, newRCSname);
+              syserror (ne, newRCSname);
               r = -1;
             }
 #endif
@@ -1236,7 +1238,7 @@ donerewrite (int changed, time_t newRCStime)
           Izclose (&FLOW (from));
         }
       if (1 < REPO (stat).st_nlink)
-        rcswarn ("breaking hard link");
+        RWARN ("breaking hard link");
       aflush (FLOW (rewr));
       seteid ();
       ignoreints ();
@@ -1254,13 +1256,13 @@ donerewrite (int changed, time_t newRCStime)
       setrid ();
       if (r != 0)
         {
-          enerror (e, REPO (filename));
-          error ("saved in %s", newRCSname);
+          syserror (e, REPO (filename));
+          PERR ("saved in %s", newRCSname);
         }
 #if BAD_CREAT0
       if (lr != 0)
         {
-          enerror (le, lockname);
+          syserror (le, lockname);
           r = -1;
         }
 #endif
@@ -1274,7 +1276,7 @@ ORCSclose (void)
   if (0 <= REPO (fd_lock))
     {
       if (close (REPO (fd_lock)) != 0)
-        efaterror (lockname);
+        fatal_sys (lockname);
       REPO (fd_lock) = -1;
     }
   Ozclose (&FLOW (rewr));

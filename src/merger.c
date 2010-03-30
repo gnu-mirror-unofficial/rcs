@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include "b-complain.h"
 
 static char const *
 normalize_arg (char const *s, char **b)
@@ -75,13 +76,13 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   if (DIFF_TROUBLE == s)
     program.exiterr ();
   if (DIFF_FAILURE == s)
-    warn ("conflicts during merge");
+    PWARN ("conflicts during merge");
   if (t)
     {
       if (!(f = fopenSafer (argv[0], "w")))
-        efaterror (argv[0]);
+        fatal_sys (argv[0]);
       if (!(rt = Iopen (t, "r", NULL)))
-        efaterror (t);
+        fatal_sys (t);
       fastcopy (rt, f);
       Ifclose (rt);
       Ofclose (f);
@@ -90,7 +91,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   for (i = 0; i < 2; i++)
     if (DIFF_TROUBLE == run (-1, d[i] = maketemp (i), prog_diff,
                              a[i], a[2], NULL))
-      faterror ("diff failed");
+      PFATAL ("diff failed");
   t = maketemp (2);
   s = run (-1, t,
            prog_diff3, edarg, d[0], d[1], a[0], a[1], a[2],
@@ -98,10 +99,10 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   if (s != DIFF_SUCCESS)
     {
       s = DIFF_FAILURE;
-      warn ("overlaps or other problems during merge");
+      PWARN ("overlaps or other problems during merge");
     }
   if (!(f = fopenSafer (t, "a+")))
-    efaterror (t);
+    fatal_sys (t);
   aputs (tostdout ? "1,$p\n" : "w\n", f);
   Orewind (f);
   aflush (f);

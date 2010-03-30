@@ -61,7 +61,7 @@ time2tm (time_t unixtime, bool localzone)
   static char const *TZ;
 
   if (!TZ && !(TZ = getenv ("TZ")))
-    faterror
+    PFATAL
       ("The TZ environment variable is not set; please set it to your timezone");
 #endif
   if (localzone || !(tm = gmtime (&unixtime)))

@@ -306,13 +306,13 @@ readdeltalog (void)
   struct cbuf cb;
 
   if (eoflex ())
-    fatserror ("missing delta log");
+    fatal_syntax ("missing delta log");
   nextlex ();
   if (!(Delta = getnum ()))
-    fatserror ("delta number corrupted");
+    fatal_syntax ("delta number corrupted");
   getkeystring (Klog);
   if (Delta->log.string)
-    fatserror ("duplicate delta log");
+    fatal_syntax ("duplicate delta log");
   bufautobegin (&logbuf);
   cb = savestring (&logbuf);
   Delta->log = bufremember (&logbuf, cb.size);
@@ -440,7 +440,7 @@ getstate (char *argv)
     continue;
   if (c == '\0')
     {
-      error ("missing state attributes after -s options");
+      PERR ("missing state attributes after -s options");
       return;
     }
 
@@ -588,7 +588,7 @@ getdatepair (char *argv)
     continue;
   if (c == '\0')
     {
-      error ("missing date/time after -d");
+      PERR ("missing date/time after -d");
       return;
     }
 
@@ -677,7 +677,7 @@ checkrevpair (char const *num1, char const *num2)
   if (countnumflds (num2) != length
       || (2 < length && compartial (num1, num2, length - 1) != 0))
     {
-      rcserror ("invalid branch or revision pair %s : %s", num1, num2);
+      RERR ("invalid branch or revision pair %s : %s", num1, num2);
       return false;
     }
   return true;
@@ -802,7 +802,7 @@ getrevpairs (register char *argv)
   else
     {
       if (strchr (argv, '-') && VERSION (5) <= BE (version))
-        warn ("`-' is obsolete in `-r%s'; use `:' instead", argv);
+        PWARN ("`-' is obsolete in `-r%s'; use `:' instead", argv);
       separator = '-';
     }
 
@@ -880,7 +880,7 @@ getrevpairs (register char *argv)
       else if (c == ',' || c == ';')
         c = *++argv;
       else
-        error ("missing `,' near `%c%s'", c, argv + 1);
+        PERR ("missing `,' near `%c%s'", c, argv + 1);
     }
 }
 
@@ -1027,7 +1027,7 @@ main (int argc, char **argv)
 
         default:
         unknown:
-          error ("unknown option: %s", *argv);
+          PERR ("unknown option: %s", *argv);
 
         };
     }
@@ -1035,7 +1035,7 @@ main (int argc, char **argv)
 
   if (!(descflag | selectflag))
     {
-      warn ("-t overrides -h.");
+      PWARN ("-t overrides -h.");
       descflag = true;
     }
 
@@ -1063,7 +1063,7 @@ main (int argc, char **argv)
   if (LEX (nerr))
     cleanup ();
   else if (argc < 1)
-    faterror ("no input file");
+    PFATAL ("no input file");
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {

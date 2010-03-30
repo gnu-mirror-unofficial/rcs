@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include <ctype.h>
+#include "b-complain.h"
 
 int
 countnumflds (char const *s)
@@ -190,14 +191,14 @@ cantfindbranch (char const *revno, char const date[datesize],
 {
   char datebuf[datesize + zonelenmax];
 
-  rcserror ("No revision on branch %s has%s%s%s%s%s%s.",
-            revno,
-            date ? " a date before " : "",
-            date ? date2str (date, datebuf) : "",
-            author ? " and author " + (date ? 0 : 4) : "",
-            author ? author : "",
-            state ? " and state " + (date || author ? 0 : 4) : "",
-            state ? state : "");
+  RERR ("No revision on branch %s has%s%s%s%s%s%s.",
+        revno,
+        date ? " a date before " : "",
+        date ? date2str (date, datebuf) : "",
+        author ? " and author " + (date ? 0 : 4) : "",
+        author ? author : "",
+        state ? " and state " + (date || author ? 0 : 4) : "",
+        state ? state : "");
 }
 
 static void
@@ -206,8 +207,8 @@ absent (char const *revno, int field)
   struct buf t;
 
   bufautobegin (&t);
-  rcserror ("%s %s absent", field & 1 ? "revision" : "branch",
-            partialno (&t, revno, field));
+  RERR ("%s %s absent", field & 1 ? "revision" : "branch",
+        partialno (&t, revno, field));
   bufautoend (&t);
 }
 
@@ -320,8 +321,8 @@ genbranch (struct hshentry const *bpoint, char const *revno,
       if (!bhead)
         {
           bufautobegin (&t);
-          rcserror ("no side branches present for %s",
-                    partialno (&t, revno, field - 1));
+          RERR ("no side branches present for %s",
+                partialno (&t, revno, field - 1));
           bufautoend (&t);
           return NULL;
         }
@@ -333,8 +334,8 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           if (!bhead)
             {
               bufautobegin (&t);
-              rcserror ("branch number %s too high",
-                        partialno (&t, revno, field));
+              RERR ("branch number %s too high",
+                    partialno (&t, revno, field));
               bufautoend (&t);
               return NULL;
             }
@@ -385,8 +386,8 @@ genbranch (struct hshentry const *bpoint, char const *revno,
       if (cmpnumfld (revno, next->num, field + 1) < 0)
         {
           bufautobegin (&t);
-          rcserror ("revision number %s too low",
-                    partialno (&t, revno, field + 1));
+          RERR ("revision number %s too low",
+                partialno (&t, revno, field + 1));
           bufautoend (&t);
           return NULL;
         }
@@ -409,20 +410,19 @@ genbranch (struct hshentry const *bpoint, char const *revno,
         {
           if (date && cmpdate (date, trail->date) < 0)
             {
-              rcserror ("Revision %s has date %s.",
-                        trail->num, date2str (trail->date, datebuf));
+              RERR ("Revision %s has date %s.",
+                    trail->num, date2str (trail->date, datebuf));
               return NULL;
             }
           if (author && strcmp (author, trail->author) != 0)
             {
-              rcserror ("Revision %s has author %s.",
-                        trail->num, trail->author);
+              RERR ("Revision %s has author %s.", trail->num, trail->author);
               return NULL;
             }
           if (state && strcmp (state, trail->state) != 0)
             {
-              rcserror ("Revision %s has state %s.",
-                        trail->num, trail->state ? trail->state : "<empty>");
+              RERR ("Revision %s has state %s.",
+                    trail->num, trail->state ? trail->state : "<empty>");
               return NULL;
             }
         }
@@ -453,7 +453,7 @@ genrevs (char const *revno, char const *date, char const *author,
 
   if (!(next = ADMIN (head)))
     {
-      rcserror ("RCS file empty");
+      RERR ("RCS file empty");
       goto norev;
     }
 
@@ -468,7 +468,7 @@ genrevs (char const *revno, char const *date, char const *author,
           next = next->next;
           if (!next)
             {
-              rcserror ("branch number %s too low", partialno (&t, revno, 1));
+              RERR ("branch number %s too low", partialno (&t, revno, 1));
               goto norev;
             }
         }
@@ -518,7 +518,7 @@ genrevs (char const *revno, char const *date, char const *author,
 
   if (!next || cmpnumfld (revno, next->num, 1) != 0)
     {
-      rcserror ("revision number %s too low", partialno (&t, revno, 2));
+      RERR ("revision number %s too low", partialno (&t, revno, 2));
       goto norev;
     }
   if ((length > 2) && (result != 0))
@@ -536,19 +536,19 @@ genrevs (char const *revno, char const *date, char const *author,
     {                                   /* length == 2 */
       if (date && cmpdate (date, next->date) < 0)
         {
-          rcserror ("Revision %s has date %s.",
-                    next->num, date2str (next->date, datebuf));
+          RERR ("Revision %s has date %s.",
+                next->num, date2str (next->date, datebuf));
           return NULL;
         }
       if (author && strcmp (author, next->author) != 0)
         {
-          rcserror ("Revision %s has author %s.", next->num, next->author);
+          RERR ("Revision %s has author %s.", next->num, next->author);
           return NULL;
         }
       if (state && strcmp (state, next->state) != 0)
         {
-          rcserror ("Revision %s has state %s.",
-                    next->num, next->state ? next->state : "<empty>");
+          RERR ("Revision %s has state %s.",
+                next->num, next->state ? next->state : "<empty>");
           return NULL;
         }
       *store = NULL;
@@ -628,7 +628,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
         return false;
       if (!PREV (rev))
         {
-          workerror ("working file lacks revision number");
+          MERR ("working file lacks revision number");
           return false;
         }
       bufscpy (target, PREV (rev));
@@ -673,7 +673,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
           bp = lookupsym (tp);
           if (!bp)
             {
-              rcserror ("Symbolic name `%s' is undefined.", tp);
+              RERR ("Symbolic name `%s' is undefined.", tp);
               return false;
             }
         }
@@ -731,7 +731,7 @@ fexpandsym (char const *source, struct buf *target, RILE *fp)
       break;
     }
 
-  rcserror ("improper revision number: %s", source);
+  RERR ("improper revision number: %s", source);
   return false;
 }
 
@@ -806,12 +806,12 @@ main (int argc, char *argv[])
 
   if (argc < 2)
     {
-      aputs ("No input file\n", stderr);
+      complain ("No input file\n");
       return EXIT_FAILURE;
     }
   if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
     {
-      faterror ("can't open input file %s", argv[1]);
+      PFATAL ("can't open input file %s", argv[1]);
     }
   Lexinit ();
   getadmin ();
@@ -824,23 +824,24 @@ main (int argc, char *argv[])
     {
       /* All output goes to stderr, to have diagnostics and
          errors in sequence.  */
-      aputs ("\nEnter revision number or <return> or '.': ", stderr);
+#define prompt complain
+      prompt ("\nEnter revision number or <return> or '.': ");
       if (!gets (symrevno))
         break;
       if (*symrevno == '.')
         break;
-      aprintf (stderr, "%s;\n", symrevno);
+      prompt ("%s;\n", symrevno);
       expandsym (symrevno, &numricrevno);
-      aprintf (stderr, "expanded number: %s; ", numricrevno.string);
-      aprintf (stderr, "Date: ");
+      prompt ("expanded number: %s; ", numricrevno.string);
+      prompt ("Date: ");
       gets (date);
-      aprintf (stderr, "%s; ", date);
-      aprintf (stderr, "Author: ");
+      prompt ("%s; ", date);
+      prompt ("Author: ");
       gets (author);
-      aprintf (stderr, "%s; ", author);
-      aprintf (stderr, "State: ");
+      prompt ("%s; ", author);
+      prompt ("State: ");
       gets (state);
-      aprintf (stderr, "%s;\n", state);
+      prompt ("%s;\n", state);
       target =
         genrevs (numricrevno.string, *date ? date : NULL,
                  *author ? author : NULL, *state ? state : NULL,
@@ -849,13 +850,14 @@ main (int argc, char *argv[])
         {
           while (gendeltas)
             {
-              aprintf (stderr, "%s\n", gendeltas->first->num);
+              complain ("%s\n", gendeltas->first->num);
               gendeltas = gendeltas->next;
             }
         }
+#undef prompt
     }
   while (true);
-  aprintf (stderr, "done\n");
+  complain ("done\n");
   return EXIT_SUCCESS;
 }
 

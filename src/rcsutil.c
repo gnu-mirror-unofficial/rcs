@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include <ctype.h>
+#include "b-complain.h"
 #include "gnu-h-v.h"
 
 /* List of blocks allocated with `ftestalloc'.  These blocks can be
@@ -39,7 +40,7 @@ static void *
 okalloc (void * p)
 {
   if (!p)
-    faterror ("out of memory");
+    PFATAL ("out of memory");
   return p;
 }
 
@@ -157,14 +158,14 @@ getusername (bool suspicious)
           struct passwd const *pw = getpwuid (ruid ());
 
           if (!pw)
-            faterror ("no password entry for userid %lu",
-                      (unsigned long) ruid ());
+            PFATAL ("no password entry for userid %lu",
+                    (unsigned long) ruid ());
           name = pw->pw_name;
 #else  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
 #if defined HAVE_SETUID
-          faterror ("setuid not supported");
+          PFATAL ("setuid not supported");
 #else
-          faterror ("Who are you?  Please setenv LOGNAME.");
+          PFATAL ("Who are you?  Please setenv LOGNAME.");
 #endif
 #endif  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
         }
@@ -411,7 +412,7 @@ static void
 check_sig (int r)
 {
   if (r != 0)
-    efaterror ("signal handling");
+    fatal_sys ("signal handling");
 }
 
 static void
@@ -468,7 +469,7 @@ setup_catchsig (int const *sig, int sigs)
   for (i = sigs; 0 <= --i;)
     if (signal (sig[i], catchsig) == SIG_IGN
         && signal (sig[i], SIG_IGN) != catchsig)
-      faterror ("signal catcher failure");
+      PFATAL ("signal catcher failure");
   sigsetmask (mask);
 }
 
@@ -482,7 +483,7 @@ setup_catchsig (int const *sig, int sigs)
   for (i = sigs; 0 <= --i;)
     if (signal (sig[i], SIG_IGN) != SIG_IGN
         && signal (sig[i], catchsig) != SIG_IGN)
-      faterror ("signal catcher failure");
+      PFATAL ("signal catcher failure");
 }
 
 #endif  /* !defined HAVE_SIGBLOCK */
@@ -749,19 +750,6 @@ bufargcat (register struct buf *b, int c, register char const *s)
 
 #endif  /* !defined HAVE_WORKING_FORK */
 
-#if defined HAVE_WORKING_FORK
-static void
-write_stderr (char const *s)
-/* Output the string `s' to stderr, without touching any I/O buffers.
-   This is useful if you are a child process, whose buffers are usually
-   wrong.  Exit immediately if the write does not completely succeed.  */
-{
-  int slen = strlen (s);
-  if (write (STDERR_FILENO, s, slen) != slen)
-    _Exit (DIFF_TROUBLE);
-}
-#endif  /* defined HAVE_WORKING_FORK */
-
 #define exec_RCS execv
 
 int
@@ -806,8 +794,7 @@ runv (int infd, char const *outname, char const **args)
             ))
           {
             /* Avoid `perror' since it may misuse buffers.  */
-            write_stderr (args[1]);
-            write_stderr (": I/O redirection failed\n");
+            complain ("%s: I/O redirection failed\n", args[1]);
             _Exit (DIFF_TROUBLE);
           }
 
@@ -816,10 +803,7 @@ runv (int infd, char const *outname, char const **args)
                         O_CREAT | O_TRUNC | O_WRONLY) < 0)
             {
               /* Avoid `perror' since it may misuse buffers.  */
-              write_stderr (args[1]);
-              write_stderr (": ");
-              write_stderr (outname);
-              write_stderr (": cannot create\n");
+              complain ("%s: %s: cannot create\n", args[1], outname);
               _Exit (DIFF_TROUBLE);
             }
         exec_RCS (args[1], (char **) (args + 1));
@@ -833,15 +817,14 @@ runv (int infd, char const *outname, char const **args)
 #endif
 
         /* Avoid `perror' since it may misuse buffers.  */
-        write_stderr (notfound);
-        write_stderr (": not found\n");
+        complain ("%s: not found\n", notfound);
         _Exit (DIFF_TROUBLE);
       }
     if (pid < 0)
-      efaterror ("fork");
+      fatal_sys ("fork");
 #if defined HAVE_WAITPID
     if (waitpid (pid, &wstatus, 0) < 0)
-      efaterror ("waitpid");
+      fatal_sys ("waitpid");
 #else  /* !defined HAVE_WAITPID */
     {
       pid_t w;
@@ -849,7 +832,7 @@ runv (int infd, char const *outname, char const **args)
       do
         {
           if ((w = wait (&wstatus)) < 0)
-            efaterror ("wait");
+            fatal_sys ("wait");
         }
       while (w != pid);
     }
@@ -880,9 +863,9 @@ runv (int infd, char const *outname, char const **args)
       if (WIFSIGNALED (wstatus))
         {
           psignal (WTERMSIG (wstatus), args[1]);
-          fatcleanup (1);
+          PFATAL ("%s got a fatal signal", args[1]);
         }
-      faterror ("%s failed for unknown reason", args[1]);
+      PFATAL ("%s failed for unknown reason", args[1]);
     }
   return WEXITSTATUS (wstatus);
 }
@@ -902,7 +885,7 @@ run (int infd, char const *outname, ...)
   va_start (ap, outname);
   for (i = 1; (rgargs[i++] = va_arg (ap, char const *));)
     if (CARGSMAX <= i)
-      faterror ("too many command arguments");
+      PFATAL ("too many command arguments");
   va_end (ap);
   return runv (infd, outname, rgargs);
 }
@@ -925,9 +908,9 @@ setRCSversion (char const *str)
       while (isdigit (*s))
         v = 10 * v + *s++ - '0';
       if (*s)
-        error ("%s isn't a number", str);
+        PERR ("%s isn't a number", str);
       else if (v < VERSION_min || VERSION_max < v)
-        error ("%s out of range %d..%d", str, VERSION_min, VERSION_max);
+        PERR ("%s out of range %d..%d", str, VERSION_min, VERSION_max);
 
       BE (version) = VERSION (v);
     }
@@ -1086,10 +1069,10 @@ set_uid_to (uid_t u)
 #if defined HAVE_WORKING_FORK
 #if has_setreuid
   if (setreuid (u == euid ()? ruid () : euid (), u) != 0)
-    efaterror ("setuid");
+    fatal_sys ("setuid");
 #else  /* !has_setreuid */
   if (seteuid (u) != 0)
-    efaterror ("setuid");
+    fatal_sys ("setuid");
 #endif  /* !has_setreuid */
 #endif  /* defined HAVE_WORKING_FORK */
   if (geteuid () != u)
@@ -1097,7 +1080,7 @@ set_uid_to (uid_t u)
       if (looping)
         return;
       looping = true;
-      faterror ("root setuid not supported" + (u ? 5 : 0));
+      PFATAL ("root setuid not supported" + (u ? 5 : 0));
     }
 }
 
@@ -1133,7 +1116,7 @@ now (void)
   static time_t t;
 
   if (!t && time (&t) == -1)
-    efaterror ("time");
+    fatal_sys ("time");
   return t;
 }
 

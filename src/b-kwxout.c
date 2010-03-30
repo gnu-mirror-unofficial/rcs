@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include "b-complain.h"
 #include "b-kwxout.h"
 
 static void
@@ -229,7 +230,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
               for (;;)
                 if (++i == cs)
                   {
-                    warn ("`%c* $Log' is obsolescent; use ` * $Log'.", cp[cw]);
+                    PWARN ("`%c* $Log' is obsolescent; use ` * $Log'.", cp[cw]);
                     leader.string[cw] = ' ';
                     break;
                   }

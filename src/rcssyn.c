@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include <ctype.h>
+#include "b-complain.h"
 
 #define Kbranches  KS (branches)
 #if COMPAT2
@@ -35,7 +36,7 @@ getsemi (char const *key)
 /* Get a semicolon to finish off a phrase started by `key'.  */
 {
   if (!getlex (SEMI))
-    fatserror ("missing ';' after '%s'", key);
+    fatal_syntax ("missing ';' after '%s'", key);
 }
 
 static struct hshentry *
@@ -45,7 +46,7 @@ getdnum (void)
   register struct hshentry *delta = getnum ();
 
   if (delta && countnumflds (delta->num) & 1)
-    fatserror ("%s isn't a delta number", delta->num);
+    fatal_syntax ("%s isn't a delta number", delta->num);
   return delta;
 }
 
@@ -113,10 +114,10 @@ getadmin (void)
   while ((id = getid ()))
     {
       if (!getlex (COLON))
-        fatserror ("missing ':' in symbolic name definition");
+        fatal_syntax ("missing ':' in symbolic name definition");
       if (!(delta = getnum ()))
         {
-          fatserror ("missing number in symbolic name definition");
+          fatal_syntax ("missing number in symbolic name definition");
         }
       else
         {
@@ -136,10 +137,10 @@ getadmin (void)
   while ((id = getid ()))
     {
       if (!getlex (COLON))
-        fatserror ("missing ':' in lock");
+        fatal_syntax ("missing ':' in lock");
       if (!(delta = getdnum ()))
         {
-          fatserror ("missing number in lock");
+          fatal_syntax ("missing number in lock");
         }
       else
         {
@@ -176,7 +177,7 @@ getadmin (void)
           bufautobegin (&b);
           cb = savestring (&b);
           if ((BE (kws) = recognize_kwsub (cb.string, cb.size)) < 0)
-            fatserror ("unknown expand mode %.*s", (int) cb.size, cb.string);
+            fatal_syntax ("unknown expand mode %.*s", (int) cb.size, cb.string);
           bufautoend (&b);
           nextlex ();
         }
@@ -238,7 +239,7 @@ getkeyval (char const *keyword, enum tokens token, bool optional)
   else
     {
       if (!optional)
-        fatserror ("missing %s", keyword);
+        fatal_syntax ("missing %s", keyword);
     }
   getsemi (keyword);
   return (val);
@@ -320,7 +321,7 @@ getdesc (bool prdesc)
 void
 unexpected_EOF (void)
 {
-  rcsfaterror ("unexpected EOF in diff output");
+  RFATAL ("unexpected EOF in diff output");
 }
 
 void
@@ -334,13 +335,13 @@ initdiffcmd (register struct diffcmd *dc)
 static void
 badDiffOutput (char const *buf)
 {
-  rcsfaterror ("bad diff output line: %s", buf);
+  RFATAL ("bad diff output line: %s", buf);
 }
 
 static void
 diffLineNumberTooLarge (char const *buf)
 {
-  rcsfaterror ("diff line number too large: %s", buf);
+  RFATAL ("diff line number too large: %s", buf);
 }
 
 int
@@ -393,7 +394,7 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
     {
       if (buf + BUFSIZ - 2 <= p)
         {
-          rcsfaterror ("diff output command line too long");
+          RFATAL ("diff output command line too long");
         }
       *p++ = c;
       cachegeteof (c, unexpected_EOF ());
@@ -436,14 +437,14 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
     case 'a':
       if (line1 < dc->adprev)
         {
-          rcsfaterror ("backward insertion in diff output: %s", buf);
+          RFATAL ("backward insertion in diff output: %s", buf);
         }
       dc->adprev = line1 + 1;
       break;
     case 'd':
       if (line1 < dc->adprev || line1 < dc->dafter)
         {
-          rcsfaterror ("backward deletion in diff output: %s", buf);
+          RFATAL ("backward deletion in diff output: %s", buf);
         }
       dc->adprev = line1;
       dc->dafter = line1 + nlines;
@@ -480,12 +481,12 @@ main (int argc, char *argv[])
 {
   if (argc < 2)
     {
-      aputs ("No input file\n", stderr);
+      complain ("No input file\n");
       return EXIT_FAILURE;
     }
   if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
     {
-      faterror ("can't open input file %s", argv[1]);
+      PFATAL ("can't open input file %s", argv[1]);
     }
   Lexinit ();
   getadmin ();
@@ -500,7 +501,7 @@ main (int argc, char *argv[])
 
   if (!eoflex ())
     {
-      fatserror ("expecting EOF");
+      fatal_syntax ("expecting EOF");
     }
   return EXIT_SUCCESS;
 }

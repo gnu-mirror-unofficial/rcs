@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include "b-complain.h"
 #include "partime.h"
 #include "maketime.h"
 
@@ -49,7 +50,7 @@ str2time_checked (char const *source, time_t default_time, long default_zone)
   time_t t = str2time (source, default_time, default_zone);
 
   if (t == -1)
-    faterror ("unknown date/time: %s", source);
+    PFATAL ("unknown date/time: %s", source);
   return t;
 }
 
@@ -86,7 +87,7 @@ zone_set (char const *s)
       char const *zonetail = parzone (s, &zone);
 
       if (!zonetail || *zonetail)
-        error ("%s: not a known time zone", s);
+        PERR ("%s: not a known time zone", s);
       else
         zone_offset = zone;
     }

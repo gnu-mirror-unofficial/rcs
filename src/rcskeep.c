@@ -21,12 +21,13 @@
 */
 
 #include "base.h"
+#include "b-complain.h"
 #include <ctype.h>
 
 static bool
 badly_terminated (void)
 {
-  workerror ("badly terminated keyword value");
+  MERR ("badly terminated keyword value");
   return false;
 }
 
@@ -174,7 +175,7 @@ checknum (char const *s)
         }
       break;
     }
-  workerror ("%s is not a revision number", s);
+  MERR ("%s is not a revision number", s);
   return false;
 }
 
@@ -218,7 +219,7 @@ getoldkeys (register RILE *fp)
     {
       if (!(fp = Iopen (MANI (filename), FOPEN_R_WORK, NULL)))
         {
-          eerror (MANI (filename));
+          syserror_errno (MANI (filename));
           return false;
         }
       needs_closing = true;
@@ -348,7 +349,7 @@ getoldkeys (register RILE *fp)
             Igeteof (fp, c, c = 0);
           if (c != KDELIM)
             {
-              workerror ("closing %c missing on keyword", KDELIM);
+              MERR ("closing %c missing on keyword", KDELIM);
               goto badness;
             }
           if (PREV (name)

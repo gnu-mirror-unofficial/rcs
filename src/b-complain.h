@@ -19,5 +19,37 @@
 */
 
 extern void unbuffer_standard_error (void);
+extern void vcomplain (char const *fmt, va_list args);
+extern void complain (char const *fmt, ...)
+  printf_string (1, 2);
+extern void diagnose (char const *fmt, ...)
+  printf_string (1, 2);
+extern void syserror (int e, char const *who);
+extern void generic_warn (char const *who, char const *fmt, ...)
+  printf_string (2, 3);
+extern void generic_error (char const *who, char const *fmt, ...)
+  printf_string (2, 3);
+extern void generic_fatal (char const *who, char const *fmt, ...)
+  printf_string_exiting (2, 3);
+extern void fatal_syntax (char const *fmt, ...)
+  printf_string_exiting (1, 2);
+extern void fatal_sys (char const *who)
+  exiting;
+
+/* Idioms.  Here, prefix P stands for "program" (general operation);
+   M for "manifestation"; R for "repository".  */
+
+#define syserror_errno(who)  syserror (errno, who)
+
+#define PWARN(...)     generic_warn (NULL, __VA_ARGS__)
+#define MWARN(...)     generic_warn (MANI (filename), __VA_ARGS__)
+#define RWARN(...)     generic_warn (REPO (filename), __VA_ARGS__)
+
+#define PERR(...)      generic_error (NULL, __VA_ARGS__)
+#define MERR(...)      generic_error (MANI (filename), __VA_ARGS__)
+#define RERR(...)      generic_error (REPO (filename), __VA_ARGS__)
+
+#define PFATAL(...)    generic_fatal (NULL, __VA_ARGS__)
+#define RFATAL(...)    generic_fatal (REPO (filename), __VA_ARGS__)
 
 /* b-complain.h ends here */

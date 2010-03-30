@@ -106,7 +106,7 @@ main (int argc, char **argv)
           else if (!rev[2])
             rev[2] = a;
           else
-            error ("too many revision numbers");
+            PERR ("too many revision numbers");
           break;
 
         case 'A':
@@ -142,35 +142,35 @@ main (int argc, char **argv)
           /* fall into */
         default:
         unknown:
-          error ("unknown option: %s", *argv);
+          PERR ("unknown option: %s", *argv);
         };
     }
   /* (End of option processing.)  */
 
   if (!rev[1])
-    faterror ("no base revision number given");
+    PFATAL ("no base revision number given");
 
   /* Now handle all pathnames.  */
   if (!LEX (nerr))
     {
       if (argc < 1)
-        faterror ("no input file");
+        PFATAL ("no input file");
       if (0 < pairnames (argc, argv, rcsreadopen, true, false))
         {
 
           if (argc > 2 || (argc == 2 && argv[1]))
-            warn ("excess arguments ignored");
+            PWARN ("excess arguments ignored");
           if (BE (kws) == kwsub_b)
-            workerror ("merging binary files");
-          diagnose ("RCS file: %s\n", REPO (filename));
+            MERR ("merging binary files");
+          diagnose ("RCS file: %s", REPO (filename));
           if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, NULL)))
-            efaterror (MANI (filename));
+            fatal_sys (MANI (filename));
 
           /* Read in the delta tree.  */
           gettree ();
 
           if (!ADMIN (head))
-            rcsfaterror ("no revisions present");
+            RFATAL ("no revisions present");
 
           if (!*rev[1])
             rev[1] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
@@ -199,7 +199,7 @@ main (int argc, char **argv)
 
                       for (i = 1; i <= 2; i++)
                         {
-                          diagnose ("retrieving revision %s\n", xrev[i]);
+                          diagnose ("retrieving revision %s", xrev[i]);
                           bufscpy (&commarg, "-p");
                           /* Not `xrev[i]', for $Name's sake.  */
                           bufscat (&commarg, rev[i]);
@@ -209,10 +209,10 @@ main (int argc, char **argv)
                                    prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
                                    REPO (filename), NULL))
-                            rcsfaterror ("co failed");
+                            RFATAL ("co failed");
                         }
                       diagnose
-                        ("Merging differences between %s and %s into %s%s\n",
+                        ("Merging differences between %s and %s into %s%s",
                          xrev[1], xrev[2], MANI (filename),
                          tostdout ? "; result to stdout" : "");
 

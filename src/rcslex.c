@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include "b-complain.h"
 
 struct parse_state parse_state;
 
@@ -51,7 +52,7 @@ warnignore (void)
   if (!ignored_phrases)
     {
       ignored_phrases = true;
-      rcswarn ("Unknown phrases like `%s ...;' are present.", NEXT (str));
+      RWARN ("Unknown phrases like `%s ...;' are present.", NEXT (str));
     }
 }
 
@@ -148,7 +149,7 @@ nextlex (void)
         {
 
         default:
-          fatserror ("unknown character `%c'", c);
+          fatal_syntax ("unknown character `%c'", c);
         case NEWLN:
           ++LEX (lno);
 #ifdef LEXDB
@@ -302,7 +303,7 @@ getkey (char const *key)
    and advance the input by calling `nextlex'.  */
 {
   if (!getkeyopt (key))
-    fatserror ("missing '%s' keyword", key);
+    fatal_syntax ("missing '%s' keyword", key);
 }
 
 void
@@ -313,7 +314,7 @@ getkeystring (char const *key)
 {
   getkey (key);
   if (NEXT (tok) != STRING)
-    fatserror ("missing string after '%s' keyword", key);
+    fatal_syntax ("missing string after '%s' keyword", key);
 }
 
 char const *
@@ -402,7 +403,7 @@ getphrases (char const *key)
               switch (ctab[c])
                 {
                 default:
-                  fatserror ("unknown character `%c'", c);
+                  fatal_syntax ("unknown character `%c'", c);
                 case NEWLN:
                   ++LEX (lno);
                   /* fall into */
@@ -697,7 +698,7 @@ checkidentifier (register char *id, int delimiter, register bool dotok)
              && c != delim)
         id++;
       *id = '\0';
-      faterror ("invalid %s `%s'", dotok ? "identifier" : "symbol", temp);
+      PFATAL ("invalid %s `%s'", dotok ? "identifier" : "symbol", temp);
     }
   return id;
 }
@@ -752,7 +753,7 @@ static void
 mmap_deallocate (register RILE *f)
 {
   if (munmap ((char *) f->base, (size_t) (f->lim - f->base)) != 0)
-    efaterror ("munmap");
+    fatal_sys ("munmap");
 }
 #endif  /* defined HAVE_MMAP */
 
@@ -783,10 +784,10 @@ fd2RILE (int fd, char const *name, char const *type,
   if (!status)
     status = &st;
   if (fstat (fd, status) != 0)
-    efaterror (name);
+    fatal_sys (name);
   if (!S_ISREG (status->st_mode))
     {
-      error ("`%s' is not a regular file", name);
+      PERR ("`%s' is not a regular file", name);
       close (fd);
       errno = EINVAL;
       return NULL;
@@ -797,7 +798,7 @@ fd2RILE (int fd, char const *name, char const *type,
       FILE *stream;
 
       if (!(stream = fdopen (fd, type)))
-        efaterror (name);
+        fatal_sys (name);
 #endif  /* !(large_memory && maps_memory) */
 
 #if !large_memory
@@ -811,10 +812,10 @@ fd2RILE (int fd, char const *name, char const *type,
         off_t s = status->st_size;
 
         if (s != status->st_size)
-          faterror ("%s: too large", name);
+          PFATAL ("%s: too large", name);
         for (f = rilebuf; f->base; f++)
           if (f == rilebuf + RILES)
-            faterror ("too many RILEs");
+            PFATAL ("too many RILEs");
 #if maps_memory
         f->deallocate = nothing_to_deallocate;
 #endif
@@ -870,7 +871,7 @@ fd2RILE (int fd, char const *name, char const *type,
                       switch (r)
                         {
                         case -1:
-                          efaterror (name);
+                          fatal_sys (name);
 
                         case 0:
                           /* The file must have shrunk!  */
@@ -886,7 +887,7 @@ fd2RILE (int fd, char const *name, char const *type,
                     }
                   while (bufsiz);
                   if (lseek (fd, (off_t) 0, SEEK_SET) == -1)
-                    efaterror (name);
+                    fatal_sys (name);
                   f->deallocate = read_deallocate;
                 }
 #endif  /* maps_memory */
@@ -969,19 +970,19 @@ Oerror (void)
   if (Oerrloop)
     program.exiterr ();
   Oerrloop = true;
-  efaterror ("output error");
+  fatal_sys ("output error");
 }
 
 void
 Ieof (void)
 {
-  fatserror ("unexpected end of file");
+  fatal_syntax ("unexpected end of file");
 }
 
 void
 Ierror (void)
 {
-  efaterror ("input error");
+  fatal_sys ("input error");
 }
 
 void
@@ -1068,219 +1069,9 @@ oflush (void)
 }
 
 void
-fatcleanup (bool already_newline)
-{
-  fprintf (stderr, already_newline + "\n%s aborted\n", program.name);
-  program.exiterr ();
-}
-
-static void
-startsay (const char *s, const char *t)
-{
-  oflush ();
-  if (s)
-    aprintf (stderr, "%s: %s: %s", program.name, s, t);
-  else
-    aprintf (stderr, "%s: %s", program.name, t);
-}
-
-static void
-fatsay (char const *s)
-{
-  startsay (s, "");
-}
-
-static void
-errsay (char const *s)
-{
-  fatsay (s);
-  LEX (nerr)++;
-}
-
-static void
-warnsay (char const *s)
-{
-  startsay (s, "warning: ");
-}
-
-void
-eerror (char const *s)
-{
-  enerror (errno, s);
-}
-
-void
-enerror (int e, char const *s)
-{
-  errsay (NULL);
-  errno = e;
-  perror (s);
-}
-
-void
-efaterror (char const *s)
-{
-  enfaterror (errno, s);
-}
-
-void
-enfaterror (int e, char const *s)
-{
-  fatsay (NULL);
-  errno = e;
-  perror (s);
-  fatcleanup (true);
-}
-
-void
-error (char const *format, ...)
-/* Non-fatal error.  */
-{
-  va_list args;
-
-  errsay (NULL);
-  va_start (args, format);
-  fvfprintf (stderr, format, args);
-  va_end (args);
-  afputc ('\n', stderr);
-}
-
-void
-rcserror (char const *format, ...)
-/* Non-fatal RCS file error.  */
-{
-  va_list args;
-
-  errsay (REPO (filename));
-  va_start (args, format);
-  fvfprintf (stderr, format, args);
-  va_end (args);
-  afputc ('\n', stderr);
-}
-
-void
-workerror (char const *format, ...)
-/* Non-fatal working file error.  */
-{
-  va_list args;
-
-  errsay (MANI (filename));
-  va_start (args, format);
-  fvfprintf (stderr, format, args);
-  va_end (args);
-  afputc ('\n', stderr);
-}
-
-void
-fatserror (char const *format, ...)
-/* Fatal RCS file syntax error.  */
-{
-  va_list args;
-
-  oflush ();
-  fprintf (stderr, "%s: %s:%ld: ", program.name, REPO (filename), LEX (lno));
-  va_start (args, format);
-  fvfprintf (stderr, format, args);
-  va_end (args);
-  fatcleanup (false);
-}
-
-void
-faterror (char const *format, ...)
-/* Fatal error.  Terminate program after cleanup.  */
-{
-  va_list args;
-
-  fatsay (NULL);
-  va_start (args, format);
-  fvfprintf (stderr, format, args);
-  va_end (args);
-  fatcleanup (false);
-}
-
-void
-rcsfaterror (char const *format, ...)
-/* Fatal RCS file error.  Terminate program after cleanup.  */
-{
-  va_list args;
-
-  fatsay (REPO (filename));
-  va_start (args, format);
-  fvfprintf (stderr, format, args);
-  va_end (args);
-  fatcleanup (false);
-}
-
-void
-warn (char const *format, ...)
-/* Warning.  */
-{
-  va_list args;
-
-  if (!BE (quiet))
-    {
-      warnsay (NULL);
-      va_start (args, format);
-      fvfprintf (stderr, format, args);
-      va_end (args);
-      afputc ('\n', stderr);
-    }
-}
-
-void
-rcswarn (char const *format, ...)
-/* RCS file warning.  */
-{
-  va_list args;
-
-  if (!BE (quiet))
-    {
-      warnsay (REPO (filename));
-      va_start (args, format);
-      fvfprintf (stderr, format, args);
-      va_end (args);
-      afputc ('\n', stderr);
-    }
-}
-
-void
-workwarn (char const *format, ...)
-/* Working file warning.  */
-{
-  va_list args;
-
-  if (!BE (quiet))
-    {
-      warnsay (MANI (filename));
-      va_start (args, format);
-      fvfprintf (stderr, format, args);
-      va_end (args);
-      afputc ('\n', stderr);
-    }
-}
-
-void
 redefined (int c)
 {
-  warn ("redefinition of -%c option", c);
-}
-
-void
-diagnose (char const *format, ...)
-/* Print a diagnostic message, but unlike the other routines, do not
-   append a newline.  This lets some callers suppress the newline, and
-   is faster implementations that flush stderr just at the end of each
-   `printf'.  */
-{
-  va_list args;
-
-  if (!BE (quiet))
-    {
-      oflush ();
-      va_start (args, format);
-      fvfprintf (stderr, format, args);
-      va_end (args);
-    }
+  PWARN ("redefinition of -%c option", c);
 }
 
 void
@@ -1340,12 +1131,12 @@ main (int argc, char *argv[])
 {
   if (argc < 2)
     {
-      aputs ("No input file\n", stderr);
+      complain ("No input file\n");
       return EXIT_FAILURE;
     }
   if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
     {
-      faterror ("can't open input file %s", argv[1]);
+      PFATAL ("can't open input file %s", argv[1]);
     }
   Lexinit ();
   while (!eoflex ())

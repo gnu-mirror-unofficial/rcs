@@ -23,6 +23,7 @@
 #include "base.h"
 #include <stdint.h>
 #include <sys/time.h>                   /* gettimeofday */
+#include "b-complain.h"
 
 struct manifestation manifestation;
 struct repository repository;
@@ -188,8 +189,8 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
   bufscat (&template, "XXXXXX");
 
   if (0 > (fd = mkstemp (template.string)))
-    faterror ("could not make temporary file name (template \"%s\")",
-              template.string);
+    PFATAL ("could not make temporary file name (template \"%s\")",
+            template.string);
 
   bufscpy (filename, template.string);
   bufautoend (&template);
@@ -571,7 +572,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     return 0;                   /* already paired pathname */
   if (*arg == '-')
     {
-      error ("%s option is ignored after pathnames", arg);
+      PERR ("%s option is ignored after pathnames", arg);
       return 0;
     }
 
@@ -655,7 +656,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     {
       if (!S_ISREG (REPO (stat).st_mode))
         {
-          error ("%s isn't a regular file -- ignored", p);
+          PERR ("%s isn't a regular file -- ignored", p);
           return 0;
         }
       Lexinit ();
@@ -666,16 +667,16 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       if (RCSerrno != ENOENT || mustread || REPO (fd_lock) < 0)
         {
           if (RCSerrno == EEXIST)
-            error ("RCS file %s is in use", p);
+            PERR ("RCS file %s is in use", p);
           else if (!quiet || RCSerrno != ENOENT)
-            enerror (RCSerrno, p);
+            syserror (RCSerrno, p);
           return 0;
         }
       InitAdmin ();
     };
 
   if (paired && MANI (standard_output))
-    workwarn ("Working file ignored due to -p option");
+    MWARN ("Working file ignored due to -p option");
 
   PREV (valid) = false;
   return FLOW (from) ? 1 : -1;
@@ -719,7 +720,7 @@ getfullRCSname (void)
         if (errno == ERANGE)
           bufalloc (&rcsbuf, rcsbuf.size << 1);
         else
-          efaterror ("getabsname");
+          fatal_sys ("getabsname");
 #else  /* !needs_getabsname */
       static char const *wdptr;
       static struct buf wdbuf;
@@ -750,11 +751,11 @@ getfullRCSname (void)
                 else if ((d = PWD))
                   break;
                 else
-                  efaterror ("getcwd");
+                  fatal_sys ("getcwd");
 #else  /* !(defined HAVE_GETCWD || !defined HAVE_GETWD) */
               d = getwd (wdbuf.string);
               if (!d && !(d = PWD))
-                efaterror ("getwd");
+                fatal_sys ("getwd");
 #endif  /* !(defined HAVE_GETCWD || !defined HAVE_GETWD) */
             }
           wdlen = dir_useful_len (d);
@@ -968,7 +969,7 @@ main (int argc, char *argv[])
           BE (quiet) = true;
           break;
         default:
-          error ("unknown option: %s", *argv);
+          PERR ("unknown option: %s", *argv);
           break;
         }
     }
@@ -980,7 +981,7 @@ main (int argc, char *argv[])
       if (result != 0)
         {
           diagnose
-            ("RCS pathname: %s; working pathname: %s\nFull RCS pathname: %s\n",
+            ("RCS pathname: %s; working pathname: %s\nFull RCS pathname: %s",
              REPO (filename), MANI (filename), getfullRCSname ());
         }
       switch (result)
@@ -991,17 +992,17 @@ main (int argc, char *argv[])
         case 1:
           if (initflag)
             {
-              rcserror ("already exists");
+              RERR ("already exists");
             }
           else
             {
-              diagnose ("RCS file %s exists\n", REPO (filename));
+              diagnose ("RCS file %s exists", REPO (filename));
             }
           Ifclose (FLOW (from));
           break;
 
         case -1:
-          diagnose ("RCS file doesn't exist\n");
+          diagnose ("RCS file doesn't exist");
           break;
         }
 
