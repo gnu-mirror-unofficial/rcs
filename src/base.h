@@ -898,6 +898,7 @@ struct behavior
      - [rcs] suppress yn when outdating all revisions
      - [rcsclean] suppress progress output  */
 
+  bool interactive_valid;               /* -- ttystdin */
   bool interactive;
   /* Should we act as if stdin is a tty?  Set from `-I'.  When set:
      - enables stdin flushing and newline output -- getcstdin

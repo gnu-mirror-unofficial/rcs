@@ -169,13 +169,11 @@ cleanlogmsg (char *m, size_t s)
 bool
 ttystdin (void)
 {
-  static bool initialized;
-
-  if (!initialized)
+  if (!BE (interactive_valid))
     {
       if (!BE (interactive))
         BE (interactive) = isatty (STDIN_FILENO);
-      initialized = true;
+      BE (interactive_valid) = true;
     }
   return BE (interactive);
 }

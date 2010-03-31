@@ -1,3 +1,10 @@
+2010-03-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Move "`BE (interactive)' valid" into `struct behavior'.
+
+	* base.h (behavior): Add member `interactive_valid'.
+	* rcsgen.c (ttystdin): Use `BE (interactive_valid)'.
+
 2010-03-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Use `bool' more.
