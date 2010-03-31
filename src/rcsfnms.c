@@ -96,10 +96,10 @@ homegrown_mkstemp (char *template)
 {
   int pid = getpid ();
   char *end = template + strlen (template);
-  static char const xrep[] = {"abcdefghijklmnopqrstuvwxyz"
-                              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                              /* Omit '0' => `strlen (xrep)' is prime.  */
-                              "123456789"};
+  char const xrep[] = {"abcdefghijklmnopqrstuvwxyz"
+                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                       /* Omit '0' => `strlen (xrep)' is prime.  */
+                       "123456789"};
   struct timeval tv;
   uint64_t n;
   int fd = -1;

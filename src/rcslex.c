@@ -820,11 +820,7 @@ fd2RILE (int fd, char const *name, char const *type,
         f->deallocate = nothing_to_deallocate;
 #endif
         if (!s)
-          {
-            static unsigned char nothing;
-
-            f->base = &nothing;     /* Any nonzero address will do.  */
-          }
+          f->base = (void *) &FLOW (to); /* Any nonzero address will do.  */
         else
           {
             f->base = NULL;

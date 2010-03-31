@@ -795,7 +795,7 @@ const struct program program =
 int
 main (int argc, char *argv[])
 {
-  static struct buf numricrevno;
+  struct buf numricrevno;
   char symrevno[100];           /* used for input of revision numbers */
   char author[20];
   char state[20];
@@ -820,6 +820,7 @@ main (int argc, char *argv[])
 
   getdesc (false);
 
+  bufautobegin (&numricrevno);
   do
     {
       /* All output goes to stderr, to have diagnostics and
@@ -857,6 +858,7 @@ main (int argc, char *argv[])
 #undef prompt
     }
   while (true);
+  bufautoend (&numricrevno);
   complain ("done\n");
   return EXIT_SUCCESS;
 }

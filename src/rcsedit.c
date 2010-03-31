@@ -1022,7 +1022,7 @@ setmtime (char const *file, time_t mtime)
 /* Set `file' last modified time to `mtime',
    but do nothing if `mtime' is -1.  */
 {
-  static struct utimbuf amtime; /* static so unused fields are zero */
+  struct utimbuf amtime;
 
   if (mtime == -1)
     return 0;
