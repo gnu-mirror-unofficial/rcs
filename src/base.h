@@ -984,6 +984,10 @@ struct manifestation
   /* A buffer to accumulate text for `Log' substitution.
      -- scanlogtext scandeltatext  */
   struct buf log;
+
+  /* A buffer to (temporarily) hold key values.
+     -- expandline  */
+  struct buf keyval;
 };
 extern struct manifestation manifestation;
 

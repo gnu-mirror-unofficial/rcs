@@ -311,14 +311,13 @@ expandline (struct expctx *ctx)
   register int r;
   bool e;
   char const *tlim;
-  static struct buf keyval;
   struct pool_found matchresult;
 
   setupcache (infile);
   cache (infile);
   out = ctx->to;
   frew = ctx->rewr;
-  bufalloc (&keyval, keylength + 3);
+  bufalloc (&MANI (keyval), keylength + 3);
   e = false;
   r = -1;
 
@@ -359,7 +358,7 @@ expandline (struct expctx *ctx)
               r = 0;
               /* Check for keyword.  First, copy a long
                  enough string into keystring.  */
-              tp = keyval.string;
+              tp = MANI (keyval).string;
               *tp++ = KDELIM;
               for (;;)
                 {
@@ -367,7 +366,7 @@ expandline (struct expctx *ctx)
                     GETC (frew, c);
                   else
                     cachegeteof (c, goto keystring_eof);
-                  if (tp <= &keyval.string[keylength])
+                  if (tp <= &MANI (keyval).string[keylength])
                     switch (ctab[c])
                       {
                       case LETTER:
@@ -381,10 +380,10 @@ expandline (struct expctx *ctx)
                 }
               *tp++ = c;
               *tp = '\0';
-              if (! recognize_keyword (keyval.string + 1, &matchresult))
+              if (! recognize_keyword (MANI (keyval).string + 1, &matchresult))
                 {
                   tp[-1] = 0;
-                  aputs (keyval.string, out);
+                  aputs (MANI (keyval).string, out);
                   continue;     /* last c handled properly */
                 }
 
@@ -392,7 +391,7 @@ expandline (struct expctx *ctx)
               if (c == VDELIM)
                 {
                   /* Try to find closing `KDELIM', and replace value.  */
-                  tlim = keyval.string + keyval.size;
+                  tlim = MANI (keyval).string + MANI (keyval).size;
                   for (;;)
                     {
                       if (delimstuffed)
@@ -403,7 +402,7 @@ expandline (struct expctx *ctx)
                         break;
                       *tp++ = c;
                       if (tlim <= tp)
-                        tp = bufenlarge (&keyval, &tlim);
+                        tp = bufenlarge (&MANI (keyval), &tlim);
                       if (c == SDELIM && delimstuffed)
                         {
                           /* Skip next `SDELIM'.  */
@@ -421,7 +420,7 @@ expandline (struct expctx *ctx)
                     {
                       /* Couldn't find closing `KDELIM' -- give up.  */
                       *tp = '\0';
-                      aputs (keyval.string, out);
+                      aputs (MANI (keyval).string, out);
                       continue; /* last c handled properly */
                     }
                 }
@@ -438,7 +437,7 @@ expandline (struct expctx *ctx)
 
 keystring_eof:
   *tp = '\0';
-  aputs (keyval.string, out);
+  aputs (MANI (keyval).string, out);
 uncache_exit:
   uncache (infile);
   return r + e;

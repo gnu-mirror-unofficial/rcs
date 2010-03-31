@@ -1,5 +1,12 @@
 2010-03-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move "temporary buf for key value" to `struct manifestation'.
+
+	* base.h (manifestation): Add member `keyval'.
+	* b-kwxout.c (expandline): Use `MANI (keyval)'.
+
+2010-03-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move "`BE (interactive)' valid" into `struct behavior'.
 
 	* base.h (behavior): Add member `interactive_valid'.
