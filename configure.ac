@@ -200,6 +200,9 @@ AC_CHECK_PROGS(PIC, "pic -n" "gpic -n" "pic -D" "pic", pic)
 AC_PROG_CC_C99
 RCS_MUSTHAVE([ac_cv_prog_cc_c99],[a C99-capable compiler])
 
+# gnulib
+gl_EARLY
+
 AC_DEFUN([RCS_CHECK_GCC_ATTRIBUTE],[
 AS_VAR_PUSHDEF([GAV],[rcs_cv_gcc_$1])dnl
   if test yes = "$GCC" ; then
@@ -224,9 +227,11 @@ RCS_CHECK_GCC_ATTRIBUTE([format],[
      __attribute__ ((format (printf, 1, 2)));
 ])
 
-AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
+
+# gnulib
+gl_INIT
 
 # headers
 AC_CHECK_HEADERS_ONCE([
@@ -604,6 +609,7 @@ AS_IF([RCS_YESP([pretest_p])],[
 # write it out
 
 AC_CONFIG_FILES([
+  lib/Makefile
   Makefile
   doc/Makefile
   man/Makefile

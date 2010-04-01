@@ -17,12 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SUBDIRS = doc man src v
+SUBDIRS = lib doc man src v
 
-EXTRA_DIST = build-aux/extract-help
+EXTRA_DIST = build-aux/extract-help m4/gnulib-cache.m4
 
 dist-hook:
 	case $(PACKAGE_VERSION) in (*.*.*) \
 	  cp -p $(srcdir)/HACKING $(distdir) ;; esac || true
+
+ACLOCAL_AMFLAGS = -I m4
 
 # Makefile.am ends here

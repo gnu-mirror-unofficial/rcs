@@ -1,3 +1,16 @@
+2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Add gnulib infrastructure (but don't use it yet).
+
+	* m4/gnulib-cache.m4: New file, from "gnulib-tool --import".
+	* autogen.sh: Use gnulib-tool.
+	* configure.ac (gl_EARLY, gl_INIT): New.
+	(AC_PROG_RANLIB): Delete.
+	(AC_CONFIG_FILES): Add lib/Makefile.
+	* Makefile.am (SUBDIRS): Add lib.
+	(EXTRA_DIST): Add m4/gnulib-cache.m4.
+	(ACLOCAL_AM_FLAGS): New var.
+
 2010-03-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use GNU Automake.
