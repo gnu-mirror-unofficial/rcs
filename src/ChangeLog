@@ -1,5 +1,11 @@
 2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `stdbool'.
+
+	* Makefile.am (AM_CPPFLAGS): New var.
+
+2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib to define `RCS_UNUSED'.
 
 	* base.h (RCS_UNUSED): Update.
