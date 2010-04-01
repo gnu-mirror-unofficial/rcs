@@ -1,5 +1,15 @@
 2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `stdint'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `stdint'.
+	(gl_AVOID): Add `wchar'.
+	* configure.ac (PRESUMABLY_STANDARD_ENOUGH_BY_NOW):
+	Remove `ac_cv_header_stdlib_h'.
+	* autogen.sh: Add `--avoid wchar' to gnulib-tool invocation.
+
+2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `stdbool'.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add `stdbool'.

@@ -563,7 +563,6 @@ RCS_CBOOL([SLASHSLASH_IS_SLASH],[yes],[rcs_cv_slsl_is_sl],
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 
 dnl These can probably be handled by gnulib, no sweat.
-ac_cv_header_stdint_h           dnl C99
 ac_cv_header_stdlib_h           dnl C99
 ac_cv_header_string_h           dnl C99
 ac_cv_header_signal_h           dnl C99

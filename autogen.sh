@@ -14,7 +14,9 @@
 # - ltmain.sh (GNU libtool) 2.2.6b
 
 set -ex
-gnulib-tool --no-vc-files --import
+gnulib-tool --no-vc-files \
+  --avoid wchar \
+  --import
 autoreconf --install --symlink "$@"
 
 # autogen.sh ends here
