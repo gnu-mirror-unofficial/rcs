@@ -1,5 +1,12 @@
 2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib to define `RCS_UNUSED'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `unused-parameter'.
+	* configure.ac (unused): Delete RCS_CHECK_GCC_ATTRIBUTE.
+
+2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Add gnulib infrastructure (but don't use it yet).
 
 	* m4/gnulib-cache.m4: New file, from "gnulib-tool --import".

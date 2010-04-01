@@ -1,3 +1,9 @@
+2010-04-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib to define `RCS_UNUSED'.
+
+	* base.h (RCS_UNUSED): Update.
+
 2010-03-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Avoid some function-static vars.
