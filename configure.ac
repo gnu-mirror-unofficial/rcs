@@ -202,11 +202,6 @@ RCS_MUSTHAVE([ac_cv_prog_cc_c99],[a C99-capable compiler])
 
 # gnulib
 gl_EARLY
-
-AC_PROG_INSTALL
-AC_PROG_MAKE_SET
-
-# gnulib
 gl_INIT
 
 # headers

@@ -1,5 +1,11 @@
 2010-04-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Remove some now-redundant configure.ac macro calls.
+
+	* configure.ac (AC_PROG_INSTALL, AC_PROG_MAKE_SET): Delete.
+
+2010-04-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move GCC attribute configuration into base.h.
 
 	* configure.ac (RCS_CHECK_GCC_ATTRIBUTE): Delete AC_DEFUN.
