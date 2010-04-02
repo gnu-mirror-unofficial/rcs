@@ -1,5 +1,12 @@
 2010-04-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move GCC attribute configuration into base.h.
+
+	* configure.ac (RCS_CHECK_GCC_ATTRIBUTE): Delete AC_DEFUN.
+	(noreturn, format): Delete these RCS_CHECK_GCC_ATTRIBUTE calls.
+
+2010-04-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `extensions'.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add `extensions'.

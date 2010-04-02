@@ -78,24 +78,15 @@
 
 #define RCS_UNUSED  _GL_UNUSED
 
-#ifdef GCC_HAS_ATTRIBUTE_NORETURN
-#define exiting __attribute__ ((noreturn))
+#if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+#define exiting              __attribute__ ((__noreturn__))
+#define printf_string(m, n)  __attribute__ ((__format__ (printf, m, n)))
 #else
 #define exiting
-#endif
-
-#ifdef GCC_HAS_ATTRIBUTE_FORMAT
-#define printf_string(m, n) __attribute__ ((format(printf, m, n)))
-#else
 #define printf_string(m, n)
 #endif
 
-#if defined GCC_HAS_ATTRIBUTE_FORMAT && defined GCC_HAS_ATTRIBUTE_NORETURN
-/* Work around a bug in GCC 2.5.x.  */
-#define printf_string_exiting(m, n) __attribute__ ((format(printf, m, n), noreturn))
-#else
-#define printf_string_exiting(m, n) printf_string (m, n) exiting
-#endif
+#define printf_string_exiting(m, n)  printf_string (m, n) exiting
 
 #define KS(x)  (#x)
 
