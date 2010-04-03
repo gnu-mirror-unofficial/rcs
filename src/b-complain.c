@@ -19,6 +19,7 @@
 */
 
 #include "base.h"
+#include <stdarg.h>
 #include <errno.h>
 
 /* Although standard error should be unbuffered by default,
