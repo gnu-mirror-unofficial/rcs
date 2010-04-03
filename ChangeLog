@@ -1,5 +1,15 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Tidy up configure.ac a bit.
+
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove unistd.h.
+	(rcs_cv_wac_ok, rcs_cv_tolerant_wait): Untabify C fragments.
+	(rcs_slsl_is_sl): Rename shell var from `rcs_cv_slsl_is_sl'.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): Remove now-obsolete
+	`ac_cv_header_stdlib_h', `ac_cv_header_string_h'.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `dirent'.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add `dirent'.

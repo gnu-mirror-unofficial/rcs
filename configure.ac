@@ -208,7 +208,7 @@ gl_INIT
 AC_CHECK_HEADERS_ONCE([
   fcntl.h limits.h mach/mach.h net/errno.h
   pwd.h siginfo.h
-  sys/mman.h sys/wait.h ucontext.h unistd.h utime.h
+  sys/mman.h sys/wait.h ucontext.h utime.h
 ])
 
 # types -- see also: (info "(autoconf) Particular Types")
@@ -299,9 +299,9 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/stat.h>
 #include <fcntl.h>
 #if defined(O_CREAT) && defined(O_WRONLY)
-#	define creat0(f) open(f, O_CREAT|O_WRONLY, 0)
+# define creat0(f) open(f, O_CREAT|O_WRONLY, 0)
 #else
-#	define creat0(f) creat(f, 0)
+# define creat0(f) creat(f, 0)
 #endif
 char buf[17000];
 ]],[[
@@ -466,20 +466,20 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
     pid_t p = fork ();
     if (p < 0)
       {
-	perror ("fork");
-	return 2;
+        perror ("fork");
+        return 2;
       }
     if (!p)
       _exit (0);
     while (wait (&status) != p)
       {
-	if (ECHILD == errno)
+        if (ECHILD == errno)
           return 1;
         if (EINTR != errno)
           {
-	    perror ("wait");
-	    return 2;
-	  }
+            perror ("wait");
+            return 2;
+          }
       }
   }
 #else
@@ -506,7 +506,7 @@ AC_SUBST([ABSFILENAMEGLOB])
 # For pretest releases, encourage user feedback for weird systems.
 
 AS_IF([RCS_YESP([gl_cv_double_slash_root])],[rcs_cv_slsl_is_sl=no],
-  [rcs_cv_slsl_is_sl=yes])
+  [rcs_slsl_is_sl=yes])
 
 AS_IF([RCS_YESP([ac_cv_func_psignal]) || RCS_YESP([ac_cv_func_strsignal])],
   [rcs_have_psignal_or_strsignal=yes],[rcs_have_psignal_or_strsignal=no])
@@ -514,8 +514,6 @@ AS_IF([RCS_YESP([ac_cv_func_psignal]) || RCS_YESP([ac_cv_func_strsignal])],
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 
 dnl These can probably be handled by gnulib, no sweat.
-ac_cv_header_stdlib_h           dnl C99
-ac_cv_header_string_h           dnl C99
 ac_cv_header_utime_h            dnl SVr4, POSIX.1-2001
 ac_cv_header_pwd_h              dnl 4.3BSD, SVr4, POSIX.1-2001
 rcs_cv_dot2_ok                  dnl C99 (printf)
@@ -535,7 +533,7 @@ dnl In that case, fine, just keep them (remove them from this list).
 rcs_cv_flush_in_ok
 rcs_cv_fopen_truncates
 rcs_cv_sane_mmap
-rcs_cv_slsl_is_sl
+rcs_slsl_is_sl
 rcs_cv_unlink_mw_ok
 rcs_cv_wac_ok
 rcs_have_psignal_or_strsignal
