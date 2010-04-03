@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <string.h>
 #include <ctype.h>
 #include "b-complain.h"
 

@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <string.h>
 #include <errno.h>
 #include <ctype.h>                      /* isdigit */
 #include <stdlib.h>

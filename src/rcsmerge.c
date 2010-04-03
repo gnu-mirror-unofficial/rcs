@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <string.h>
 #include "rcsmerge.help"
 #include "b-complain.h"
 

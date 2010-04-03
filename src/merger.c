@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include <string.h>
 #include <stdlib.h>
 #include "b-complain.h"
 

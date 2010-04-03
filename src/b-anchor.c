@@ -19,6 +19,7 @@
 */
 
 #include "base.h"
+#include <string.h>
 
 const char const prog_diff[] = DIFF;
 const char const prog_diff3[] = DIFF3;

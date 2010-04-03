@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <string.h>
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>

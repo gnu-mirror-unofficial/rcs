@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <string.h>
 #include <stdlib.h>
 #include "rlog.help"
 #include "b-complain.h"
