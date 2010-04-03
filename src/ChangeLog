@@ -1,5 +1,12 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume <unistd.h> provides STD{IN,OUT,ERR}_FILENO.
+
+	* base.h (STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO): Delete
+	#define:s, and surrouding #ifndef STDIN_FILENO cpp cond block.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume <unistd.h> provides `getlogin' decl.
 
 	* base.h (getlogin): Delete func decl.

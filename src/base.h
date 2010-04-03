@@ -265,13 +265,6 @@ enum kwsub
 #define WIFSIGNALED(stat_val) ((unsigned)(stat_val) - 1  <  0377)
 #endif
 
-/* <unistd.h> */
-#ifndef STDIN_FILENO
-#define STDIN_FILENO 0
-#define STDOUT_FILENO 1
-#define STDERR_FILENO 2
-#endif
-
 #if defined HAVE_WORKING_FORK && !defined HAVE_WORKING_VFORK
 #undef vfork
 #define vfork fork
