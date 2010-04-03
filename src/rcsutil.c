@@ -296,7 +296,7 @@ catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
         {
           char const *nRCS = "\nRCS";
 
-#if defined SA_SIGINFO && defined HAVE_SI_ERRNO && defined HAVE_MMAP && large_memory && MMAP_SIGNAL
+#if defined SA_SIGINFO && defined HAVE_MMAP && large_memory && MMAP_SIGNAL
           if (s == MMAP_SIGNAL && i && i->si_errno)
             {
               errno = i->si_errno;

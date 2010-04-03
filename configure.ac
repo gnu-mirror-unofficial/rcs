@@ -242,15 +242,6 @@ AC_CHECK_FUNCS_ONCE([
   waitpid
 ])
 
-if test yes = $ac_cv_func_psiginfo ; then
-AC_CHECK_MEMBER([struct siginfo_t.si_errno],[
-  AC_DEFINE([HAVE_SI_ERRNO],1,
-    [Define if `struct siginfo_t' has member `si_errno'.])
-],,[[
-#include <signal.h>
-]])
-fi
-
 # specific behaviors (that unfortunately require running a program to check)
 
 AC_CACHE_CHECK([if printf "%.2d" produces a leading "0"],[rcs_cv_dot2_ok],[
