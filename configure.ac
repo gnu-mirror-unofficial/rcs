@@ -573,8 +573,10 @@ dnl                          value, not just numeric (like old src/conf.h)
 
 AS_IF([RCS_YESP([pretest_p])],[
   AS_IF([RCS_ALL([RCS_YESP],[PRESUMABLY_STANDARD_ENOUGH_BY_NOW])],[:],
-   [AC_MSG_WARN([Your platform might be desupported in the future.])])
-])
+   [AC_MSG_WARN([Your platform might be desupported in the future:
+m4_foreach([V],m4_split(m4_normalize(PRESUMABLY_STANDARD_ENOUGH_BY_NOW)),[dnl
+	${V-(unset)}	V
+])])])])
 
 # write it out
 

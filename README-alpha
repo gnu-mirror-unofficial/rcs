@@ -46,8 +46,9 @@ README-alpha for RCS
   continued support for your platform, thereby quietening your fears and
   increasing the connectedness of the RCS-using community.
 
-  You do this by mailing the config.log file to bug-rcs@gnu.org, with a
-  suitably detailed (i.e., optional) explanation of your platform.
+  You do this by mailing the warning text output by the configure script
+  to bug-rcs@gnu.org, with a suitably detailed (i.e., optional) explanation
+  of your platform, including why it should (or shouldn't) be supported.
 
 
 * The configure script told me to see this file, and stopped.  Why?
