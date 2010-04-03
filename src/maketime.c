@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include <time.h>
 #include "partime.h"
 #include "maketime.h"
 

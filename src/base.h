@@ -27,7 +27,6 @@
 /* begin cruft formerly from from conf.h */
 
 #include <stdio.h>
-#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifdef HAVE_FCNTL_H

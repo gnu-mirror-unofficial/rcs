@@ -21,6 +21,7 @@
 
 #include "base.h"
 #include <string.h>
+#include <time.h>
 #include <stdlib.h>
 #include "b-complain.h"
 #include "partime.h"
