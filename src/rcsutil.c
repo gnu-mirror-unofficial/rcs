@@ -426,27 +426,13 @@ setup_catchsig (int const *sig, int sigs)
 #endif  /* !defined HAVE_SIGACTION */
 
 static const int const regsigs[] = {
-#ifdef SIGHUP
   SIGHUP,
-#endif
-#ifdef SIGINT
   SIGINT,
-#endif
-#ifdef SIGPIPE
   SIGPIPE,
-#endif
-#ifdef SIGQUIT
   SIGQUIT,
-#endif
-#ifdef SIGTERM
   SIGTERM,
-#endif
-#ifdef SIGXCPU
   SIGXCPU,
-#endif
-#ifdef SIGXFSZ
   SIGXFSZ,
-#endif
 };
 
 void
