@@ -1,5 +1,11 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume <signal.h> provides `SA_SIGINFO'.
+
+	* rcsutil.c: Throughout, take `defined SA_SIGINFO' to be 1.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume `siginfo_t' has member `si_errno'.
 
 	* rcsutil.c (catchsigaction): Take `defined HAVE_SI_ERRNO' to be 1.

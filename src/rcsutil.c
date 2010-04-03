@@ -189,11 +189,10 @@ getusername (bool suspicious)
    are POSIX-compatible here.  */
 
 static sig_atomic_t volatile heldsignal, holdlevel;
-#ifdef SA_SIGINFO
+
 static bool unsupported_SA_SIGINFO;
 static siginfo_t bufsiginfo;
 static siginfo_t *volatile heldsiginfo;
-#endif
 
 #if has_NFS && defined HAVE_MMAP && large_memory && MMAP_SIGNAL
 static char const *accessName;
@@ -239,41 +238,33 @@ complain_signal (char const *s, int sig)
 #endif  /* HAVE_PSIGNAL */
 }
 
-#ifdef SA_SIGINFO
 static void catchsigaction (int, siginfo_t *, void *);
-#endif
 
 static void
 catchsig (int s)
-#ifdef SA_SIGINFO
 {
   catchsigaction (s, NULL, NULL);
 }
 
 static void
 catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
-#endif
 {
 #if SIG_ZAPS_HANDLER
   /* If a signal arrives before we reset the handler, we lose.  */
   signal (s, SIG_IGN);
 #endif
 
-#ifdef SA_SIGINFO
   if (!unsupported_SA_SIGINFO)
     i = NULL;
-#endif
 
   if (holdlevel)
     {
       heldsignal = s;
-#ifdef SA_SIGINFO
       if (i)
         {
           bufsiginfo = *i;
           heldsiginfo = &bufsiginfo;
         }
-#endif
       return;
     }
 
@@ -296,14 +287,14 @@ catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
         {
           char const *nRCS = "\nRCS";
 
-#if defined SA_SIGINFO && defined HAVE_MMAP && large_memory && MMAP_SIGNAL
+#if defined HAVE_MMAP && large_memory && MMAP_SIGNAL
           if (s == MMAP_SIGNAL && i && i->si_errno)
             {
               errno = i->si_errno;
               perror (nRCS++);
             }
 #endif
-#if defined SA_SIGINFO && defined HAVE_PSIGINFO
+#if defined HAVE_PSIGINFO
           if (i)
             psiginfo (i, nRCS);
           else
@@ -353,11 +344,7 @@ void
 restoreints (void)
 {
   if (!--holdlevel && heldsignal)
-#ifdef SA_SIGINFO
     catchsigaction (heldsignal, heldsiginfo, NULL);
-#else
-    catchsig (heldsignal);
-#endif
 }
 
 #if defined HAVE_SIGACTION
@@ -380,18 +367,15 @@ setup_catchsig (int const *sig, int sigs)
       if (act.sa_handler != SIG_IGN)
         {
           act.sa_handler = catchsig;
-#ifdef SA_SIGINFO
           if (!unsupported_SA_SIGINFO)
             {
               act.sa_sigaction = catchsigaction;
               act.sa_flags |= SA_SIGINFO;
             }
-#endif
           for (j = sigs; 0 <= --j;)
             check_sig (sigaddset (&act.sa_mask, sig[j]));
           if (sigaction (sig[i], &act, NULL) != 0)
             {
-#if defined SA_SIGINFO
               if (errno == ENOTSUP && !unsupported_SA_SIGINFO)
                 {
                   /* Turn off use of SA_SIGINFO and try again.  */
@@ -399,7 +383,6 @@ setup_catchsig (int const *sig, int sigs)
                   i++;
                   continue;
                 }
-#endif
               check_sig (-1);
             }
         }
