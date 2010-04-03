@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include <stdlib.h>
 #include "b-complain.h"
 #include "partime.h"
 #include "maketime.h"

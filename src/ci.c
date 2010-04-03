@@ -23,6 +23,7 @@
 #include "base.h"
 #include <errno.h>
 #include <ctype.h>                      /* isdigit */
+#include <stdlib.h>
 #include "ci.help"
 #include "b-complain.h"
 #include "b-kwxout.h"

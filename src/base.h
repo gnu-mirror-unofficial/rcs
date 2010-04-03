@@ -30,7 +30,6 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #ifdef HAVE_FCNTL_H

@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include <errno.h>
+#include <stdlib.h>
 #include "co.help"
 #include "b-complain.h"
 

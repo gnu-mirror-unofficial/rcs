@@ -23,6 +23,7 @@
 #include "base.h"
 #include <errno.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/time.h>                   /* gettimeofday */
 #include "b-complain.h"
 

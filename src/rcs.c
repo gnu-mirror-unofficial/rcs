@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <stdlib.h>
 #include "rcs.help"
 #include "b-complain.h"
 

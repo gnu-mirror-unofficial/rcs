@@ -1,5 +1,22 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Move #include <stdlib.h> to .c files.
+
+	* base.h: Don't #include <stdlib.h>.
+	* ci.c: #include <stdlib.h>.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merger.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcstime.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Move #include <errno.h> to .c files.
 
 	* base.h: Don't #include <errno.h>.

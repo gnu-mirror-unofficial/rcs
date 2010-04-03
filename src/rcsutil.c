@@ -23,6 +23,7 @@
 #include "base.h"
 #include <errno.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "b-complain.h"
 #include "gnu-h-v.h"
 

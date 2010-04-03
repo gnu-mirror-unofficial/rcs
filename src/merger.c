@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include <stdlib.h>
 #include "b-complain.h"
 
 static char const *
