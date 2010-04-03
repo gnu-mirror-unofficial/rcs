@@ -1,5 +1,14 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `double-slash-root'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `double-slash-root'.
+	* configure.ac (rcs_cv_slsl_is_sl): Convert from
+	AC_CACHE_CHECK to simple comparison conditional assignment.
+	(SLASHSLASH_IS_SLASH): Delete RCS_CBOOL.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move the config header (and template) from src/ to lib/.
 
 	* configure.ac (AC_CONFIG_HEADERS): Rename to lib/config.h.

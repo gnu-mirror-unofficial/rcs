@@ -512,19 +512,10 @@ AC_DEFUN([WOEMUX],[AS_IF([test yes = $woe],[$2],[$1])])
 WOEMUX([ABSFILENAMEGLOB='/*'],[ABSFILENAMEGLOB='?:*'])
 AC_SUBST([ABSFILENAMEGLOB])
 
-AC_CACHE_CHECK([if // and / are the same],[rcs_cv_slsl_is_sl],[
-m4_pushdef([inode],[ls -d -i $1 | sed 's/^ *//;s/ .*//'])dnl
-  WOEMUX([fsrootdir=/],[fsrootdir=\\])
-  if test `inode([$fsrootdir])` = `inode([${fsrootdir}${fsrootdir}])`
-  then rcs_cv_slsl_is_sl=yes
-  else rcs_cv_slsl_is_sl=no
-  fi
-popdef([inode])dnl
-])
-RCS_CBOOL([SLASHSLASH_IS_SLASH],[yes],[rcs_cv_slsl_is_sl],
-  [Are // and / the same directory?])
-
 # For pretest releases, encourage user feedback for weird systems.
+
+AS_IF([RCS_YESP([gl_cv_double_slash_root])],[rcs_cv_slsl_is_sl=no],
+  [rcs_cv_slsl_is_sl=yes])
 
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 

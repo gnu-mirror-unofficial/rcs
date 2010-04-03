@@ -686,6 +686,10 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
   return FLOW (from) ? 1 : -1;
 }
 
+#ifndef DOUBLE_SLASH_IS_DISTINCT_ROOT
+#define DOUBLE_SLASH_IS_DISTINCT_ROOT 0
+#endif
+
 static size_t
 dir_useful_len (char const *d)
 /* `d' names a directory; return the number of bytes of its useful part.  To
@@ -695,7 +699,7 @@ dir_useful_len (char const *d)
 {
   size_t dlen = strlen (d);
 
-  if (!SLASHSLASH_IS_SLASH && dlen == 2
+  if (DOUBLE_SLASH_IS_DISTINCT_ROOT && dlen == 2
       && isSLASH (d[0])
       && isSLASH (d[1]))
     --dlen;
