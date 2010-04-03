@@ -1,5 +1,15 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use gnulib module `sig2str'; push `psignal' cppcond down.
+
+	* rcsutil.c: #include "sig2str.h".
+	(complain_signal): New static func.
+	[!HAVE_PSIGNAL] (psignal): Delete #define.
+	[!HAVE_PSIGNAL] (my_psignal): Delete func.
+	(catchsigaction, runv): Use `complain_signal'.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Also link against lib/libgnu.a.
 
 	* Makefile.am (LDADD): Add options to link against ../lib/libgnu.a.

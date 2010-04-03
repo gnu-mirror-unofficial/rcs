@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "sig2str.h"
 #include "b-complain.h"
 #include "gnu-h-v.h"
 
@@ -210,86 +211,33 @@ readAccessFilenameBuffer (char const *filename, unsigned char const *p)
 #define accessName (NULL)
 #endif  /* !(has_NFS && defined HAVE_MMAP && large_memory && MMAP_SIGNAL) */
 
-#if !defined HAVE_PSIGNAL
-
-#define psignal my_psignal
 static void
-my_psignal (int sig, char const *s)
+complain_signal (char const *s, int sig)
 {
-  char const *sname = "Unknown signal";
+#ifndef HAVE_PSIGNAL
+  char const *sname;
 
-#if defined HAVE_SYS_SIGLIST && defined NSIG
-  if ((unsigned) sig < NSIG)
-    sname = sys_siglist[sig];
-#else  /* !(defined HAVE_SYS_SIGLIST && defined NSIG) */
-  switch (sig)
-    {
-#ifdef SIGHUP
-    case SIGHUP:
-      sname = "Hangup";
-      break;
-#endif
-#ifdef SIGINT
-    case SIGINT:
-      sname = "Interrupt";
-      break;
-#endif
-#ifdef SIGPIPE
-    case SIGPIPE:
-      sname = "Broken pipe";
-      break;
-#endif
-#ifdef SIGQUIT
-    case SIGQUIT:
-      sname = "Quit";
-      break;
-#endif
-#ifdef SIGTERM
-    case SIGTERM:
-      sname = "Terminated";
-      break;
-#endif
-#ifdef SIGXCPU
-    case SIGXCPU:
-      sname = "Cputime limit exceeded";
-      break;
-#endif
-#ifdef SIGXFSZ
-    case SIGXFSZ:
-      sname = "Filesize limit exceeded";
-      break;
-#endif
-#if defined HAVE_MMAP && large_memory
-#if defined SIGBUS && MMAP_SIGNAL == SIGBUS
-    case SIGBUS:
-      sname = "Bus error";
-      break;
-#endif  /* defined SIGBUS && MMAP_SIGNAL == SIGBUS */
-#if defined SIGSEGV && MMAP_SIGNAL == SIGSEGV
-    case SIGSEGV:
-      sname = "Segmentation fault";
-      break;
-#endif  /* defined SIGSEGV && MMAP_SIGNAL == SIGSEGV */
-#endif  /* defined HAVE_MMAP && large_memory */
-    }
-#endif  /* !(defined HAVE_SYS_SIGLIST && defined NSIG) */
+#define UNKNOWN  "Unknown signal"
+#ifndef HAVE_STRSIGNAL
+#define SZ  (sizeof UNKNOWN + INT_STRLEN_BOUND (int))
+  char buf[SZ];
 
-  /* Avoid calling `sprintf' etc., in case they're not reentrant.  */
-  {
-    char const *p;
-    char buf[BUFSIZ], *b = buf;
+  if (0 > sig2str (sig, 3 + buf))
+    snprintf (buf, SZ, "%s %d", UNKNOWN, sig);
+  else
+    strncpy (buf, "SIG", 3);
+  sname = buf;
+#undef SZ
+#else  /* HAVE_STRSIGNAL */
+  sname = strsignal (sig);
+#endif  /* HAVE_STRSIGNAL */
+  complain ("%s: %s\n", s, (sname && *sname) ? sname : UNKNOWN);
 
-    for (p = s; *p; *b++ = *p++)
-      continue;
-    *b++ = ':';
-    *b++ = ' ';
-    for (p = sname; *p; *b++ = *p++)
-      continue;
-    *b++ = '\n';
-    write (STDERR_FILENO, buf, b - buf);
-  }
+#undef UNKNOWN
+#else  /* HAVE_PSIGNAL */
+  psignal (sig, s);
+#endif  /* HAVE_PSIGNAL */
 }
-#endif  /* !defined HAVE_PSIGNAL */
 
 #ifdef SA_SIGINFO
 static void catchsigaction (int, siginfo_t *, void *);
@@ -359,9 +307,9 @@ catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
           if (i)
             psiginfo (i, nRCS);
           else
-            psignal (s, nRCS);
+            complain_signal (nRCS, s);
 #else
-          psignal (s, nRCS);
+          complain_signal (nRCS, s);
 #endif
         }
 
@@ -865,7 +813,7 @@ runv (int infd, char const *outname, char const **args)
     {
       if (WIFSIGNALED (wstatus))
         {
-          psignal (WTERMSIG (wstatus), args[1]);
+          complain_signal (args[1], WTERMSIG (wstatus));
           PFATAL ("%s got a fatal signal", args[1]);
         }
       PFATAL ("%s failed for unknown reason", args[1]);

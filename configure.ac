@@ -238,7 +238,7 @@ AC_CHECK_FUNCS_ONCE([
   setuid
   sigaction
   sigblock
-  sys_siglist
+  strsignal
   waitpid
 ])
 
@@ -517,6 +517,9 @@ AC_SUBST([ABSFILENAMEGLOB])
 AS_IF([RCS_YESP([gl_cv_double_slash_root])],[rcs_cv_slsl_is_sl=no],
   [rcs_cv_slsl_is_sl=yes])
 
+AS_IF([RCS_YESP([ac_cv_func_psignal]) || RCS_YESP([ac_cv_func_strsignal])],
+  [rcs_have_psignal_or_strsignal=yes],[rcs_have_psignal_or_strsignal=no])
+
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 
 dnl These can probably be handled by gnulib, no sweat.
@@ -544,8 +547,7 @@ rcs_cv_sane_mmap
 rcs_cv_slsl_is_sl
 rcs_cv_unlink_mw_ok
 rcs_cv_wac_ok
-ac_cv_func_psignal              dnl TODO: check for strsignal; logior them
-ac_cv_func_sys_siglist
+rcs_have_psignal_or_strsignal
 
 dnl Some things to think about
 dnl mmap_signal_is_SIGBUS -- TODO: make rcs_cv_mmap_signal have symbolic
