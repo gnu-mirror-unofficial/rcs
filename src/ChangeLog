@@ -1,5 +1,13 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Move #include <utime.h> to .c files.
+
+	* base.h: Don't #include <utime.h>; remove surrounding
+	cpp cond #ifdef HAVE_UTIME_H ... #endif block.
+	* rcsedit.c [HAVE_UTIME_H]: #include <utime.h>.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Move #include <time.h> to .c files.
 
 	* base.h: Don't #include <time.h>.

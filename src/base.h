@@ -59,9 +59,6 @@
 #ifdef HAVE_UCONTEXT_H
 #include <ucontext.h>
 #endif
-#ifdef HAVE_UTIME_H
-#include <utime.h>
-#endif
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
 #endif

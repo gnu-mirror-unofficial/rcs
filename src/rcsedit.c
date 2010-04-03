@@ -30,6 +30,9 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#ifdef HAVE_UTIME_H
+#include <utime.h>
+#endif
 #include "b-complain.h"
 #include "b-kwxout.h"
 
