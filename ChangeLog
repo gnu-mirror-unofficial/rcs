@@ -1,5 +1,11 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `signal'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `signal'.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Include more info in "maybe desupported" warning.
 
 	* configure.ac: For "maybe desupported" warning, also output the
