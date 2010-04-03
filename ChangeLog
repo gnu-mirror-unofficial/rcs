@@ -1,5 +1,11 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Ignore unused <ucontext.h>.
+
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove ucontext.h.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Tidy up configure.ac a bit.
 
 	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove unistd.h.
