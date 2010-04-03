@@ -38,9 +38,6 @@
 #ifdef HAVE_NET_ERRNO_H
 #include <net/errno.h>
 #endif
-#ifdef HAVE_SIGINFO_H
-#include <siginfo.h>
-#endif
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif

@@ -207,7 +207,7 @@ gl_INIT
 # headers
 AC_CHECK_HEADERS_ONCE([
   fcntl.h limits.h mach/mach.h net/errno.h
-  pwd.h siginfo.h
+  pwd.h
   sys/mman.h sys/wait.h utime.h
 ])
 
