@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --avoid=wchar --no-libtool --macro-prefix=gl --no-vc-files errno extensions inline signal stdarg stdbool stdint stdlib string unistd unused-parameter
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --avoid=wchar --no-libtool --macro-prefix=gl --no-vc-files errno extensions inline signal stdarg stdbool stdint stdio stdlib string unistd unused-parameter
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -27,6 +27,7 @@ gl_MODULES([
   stdarg
   stdbool
   stdint
+  stdio
   stdlib
   string
   unistd
