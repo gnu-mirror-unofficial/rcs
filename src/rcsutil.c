@@ -29,6 +29,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #include "sig2str.h"
 #include "b-complain.h"
 #include "gnu-h-v.h"

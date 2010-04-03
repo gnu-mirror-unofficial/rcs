@@ -33,6 +33,9 @@
 #ifdef HAVE_UTIME_H
 #include <utime.h>
 #endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #include "b-complain.h"
 #include "b-kwxout.h"
 

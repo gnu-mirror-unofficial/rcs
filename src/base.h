@@ -29,9 +29,6 @@
 
 /* begin cruft formerly from from conf.h */
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
