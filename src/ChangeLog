@@ -1,5 +1,12 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume <errno.h> provides `ELOOP', `ENOTSUP'.
+
+	* rcsedit.c (resolve_symlink) [!ELOOP]: Remove cpp cond block.
+	* rcsutil.c (setup_catchsig): Assume `defined ENOTSUP' == 1.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Move #include <stdarg.h> to .c files.
 
 	* base.h: Don't #include <stdarg.h>.

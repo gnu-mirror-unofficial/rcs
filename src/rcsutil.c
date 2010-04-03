@@ -441,7 +441,7 @@ setup_catchsig (int const *sig, int sigs)
             check_sig (sigaddset (&act.sa_mask, sig[j]));
           if (sigaction (sig[i], &act, NULL) != 0)
             {
-#if defined SA_SIGINFO && defined ENOTSUP
+#if defined SA_SIGINFO
               if (errno == ENOTSUP && !unsupported_SA_SIGINFO)
                 {
                   /* Turn off use of SA_SIGINFO and try again.  */

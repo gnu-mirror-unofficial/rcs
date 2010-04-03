@@ -663,11 +663,6 @@ resolve_symlink (struct buf *L)
       }
     else if (!linkcount--)
       {
-#ifndef ELOOP
-        /* Some pedantic POSIX 1003.1-1990 hosts have `readlink'
-           but not `ELOOP'.  Approximate `ELOOP' with `EMLINK'.  */
-#define ELOOP EMLINK
-#endif
         errno = ELOOP;
         return -1;
       }
