@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = -I$(top_builddir)/lib
-
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
   b-complain.h b-kwxout.h base.h gnu-h-v.h maketime.h partime.h \

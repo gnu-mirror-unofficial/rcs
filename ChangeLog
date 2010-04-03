@@ -1,5 +1,11 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Move the config header (and template) from src/ to lib/.
+
+	* configure.ac (AC_CONFIG_HEADERS): Rename to lib/config.h.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Remove now-obsolete support for !HAVE_SIGNAL_H.
 
 	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove signal.h.

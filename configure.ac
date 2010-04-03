@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_INIT([GNU RCS],[5.7.40],[bug-rcs@gnu.org])
-AC_CONFIG_HEADERS([src/auto-sussed.h])
+AC_CONFIG_HEADERS([lib/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([1.11.1 gnits readme-alpha no-define])
 AS_CASE([$PACKAGE_VERSION],[*.*.*],[pretest_p=yes],[pretest_p=no])

@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "auto-sussed.h"
+#include "config.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
