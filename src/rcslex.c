@@ -1088,14 +1088,6 @@ aputs (char const *s, FILE *iop)
 }
 
 void
-fvfprintf (FILE * stream, char const *format, va_list args)
-/* Like `vfprintf', except abort program on error.  */
-{
-  if (vfprintf (stream, format, args) < 0)
-    Oerror ();
-}
-
-void
 aprintf (FILE * iop, char const *fmt, ...)
 /* Formatted output.  Same as `fprintf' in <stdio.h>,
    but abort program on error.  */
@@ -1103,7 +1095,8 @@ aprintf (FILE * iop, char const *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
-  fvfprintf (iop, fmt, ap);
+  if (0 > vfprintf (iop, fmt, ap))
+    Oerror ();
   va_end (ap);
 }
 

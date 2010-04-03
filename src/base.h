@@ -698,7 +698,6 @@ void aprintf (FILE *, char const *, ...) printf_string (2, 3);
 void aputs (char const *, FILE *);
 void checksid (char *);
 void checkssym (char *);
-void fvfprintf (FILE *, char const *, va_list);
 void getkey (char const *);
 void getkeystring (char const *);
 void nextlex (void);
