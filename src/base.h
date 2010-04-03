@@ -60,9 +60,6 @@
 #ifdef HAVE_UCONTEXT_H
 #include <ucontext.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #ifdef HAVE_UTIME_H
 #include <utime.h>
 #endif

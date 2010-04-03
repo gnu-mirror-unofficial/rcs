@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <ctype.h>                      /* isdigit */
 #include <stdlib.h>
+#include <unistd.h>
 #include "ci.help"
 #include "b-complain.h"
 #include "b-kwxout.h"

@@ -29,6 +29,7 @@
 #include "base.h"
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include "b-complain.h"
 #include "b-kwxout.h"
 
