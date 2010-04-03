@@ -32,6 +32,9 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
 #include "sig2str.h"
 #include "b-complain.h"
 #include "gnu-h-v.h"

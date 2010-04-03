@@ -38,9 +38,6 @@
 #ifdef HAVE_NET_ERRNO_H
 #include <net/errno.h>
 #endif
-#ifdef HAVE_PWD_H
-#include <pwd.h>
-#endif
 #ifdef HAVE_SIGINFO_H
 #include <siginfo.h>
 #endif
