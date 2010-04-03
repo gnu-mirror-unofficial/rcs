@@ -23,12 +23,12 @@
 #include "auto-sussed.h"
 #include <stdbool.h>
 #include <stdint.h>
-
-/* begin cruft formerly from from conf.h */
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+/* begin cruft formerly from from conf.h */
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
