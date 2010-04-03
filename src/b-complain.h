@@ -30,9 +30,9 @@ extern void generic_warn (char const *who, char const *fmt, ...)
 extern void generic_error (char const *who, char const *fmt, ...)
   printf_string (2, 3);
 extern void generic_fatal (char const *who, char const *fmt, ...)
-  printf_string_exiting (2, 3);
+  printf_string (2, 3) exiting;
 extern void fatal_syntax (char const *fmt, ...)
-  printf_string_exiting (1, 2);
+  printf_string (1, 2) exiting;
 extern void fatal_sys (char const *who)
   exiting;
 

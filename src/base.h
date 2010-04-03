@@ -75,8 +75,6 @@
 #define printf_string(m, n)
 #endif
 
-#define printf_string_exiting(m, n)  printf_string (m, n) exiting
-
 #define KS(x)  (#x)
 
 /* The set of RCS file keywords.  */
