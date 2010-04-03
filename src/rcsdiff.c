@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <errno.h>
 #include "rcsdiff.help"
 #include "b-complain.h"
 

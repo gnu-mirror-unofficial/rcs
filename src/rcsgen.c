@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <errno.h>
 #include "b-complain.h"
 
 enum stringwork

@@ -26,7 +26,6 @@
 
 /* begin cruft formerly from from conf.h */
 
-#include <errno.h>
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>

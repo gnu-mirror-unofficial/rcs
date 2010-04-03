@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include <errno.h>
 #include "rcsclean.help"
 #include "b-complain.h"
 

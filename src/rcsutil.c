@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <errno.h>
 #include <ctype.h>
 #include "b-complain.h"
 #include "gnu-h-v.h"

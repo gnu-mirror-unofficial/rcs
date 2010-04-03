@@ -1,3 +1,21 @@
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int C] Move #include <errno.h> to .c files.
+
+	* base.h: Don't #include <errno.h>.
+	* b-complain.c: #include <errno.h>.
+	* ci.c: Likewise.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsutil.c: Likewise.
+
 2010-04-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move GCC attribute configuration into base.h.

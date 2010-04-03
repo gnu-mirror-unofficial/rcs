@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <errno.h>
 #include "co.help"
 #include "b-complain.h"
 

@@ -21,6 +21,7 @@
 */
 
 #include "base.h"
+#include <errno.h>
 #include <ctype.h>                      /* isdigit */
 #include "ci.help"
 #include "b-complain.h"
