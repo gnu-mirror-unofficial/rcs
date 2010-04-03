@@ -1,5 +1,12 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `dirent'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `dirent'.
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove dirent.h.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume `siginfo_t' has member `si_errno'.
 
 	* configure.ac (HAVE_SI_ERRNO): Delete AC_DEFINE,

@@ -23,13 +23,9 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include "rcsclean.help"
 #include "b-complain.h"
-
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-static int get_directory (char const *, char ***);
-#endif
 
 static RILE *workptr;
 static int exitstatus;
@@ -72,7 +68,6 @@ unlock (struct hshentry *delta)
   return false;
 }
 
-#ifdef HAVE_DIRENT_H
 static int
 get_directory (char const *dirname, char ***aargv)
 /* Put a vector of all DIRNAME's directory entries names into *AARGV.
@@ -120,7 +115,6 @@ get_directory (char const *dirname, char ***aargv)
   tfree (offset);
   return entries;
 }
-#endif
 
 /*:help
 [options] file ...
@@ -180,13 +174,9 @@ main (int argc, char **argv)
     {
       if (--argc < 1)
         {
-#ifdef HAVE_DIRENT_H
           argc = get_directory (".", &newargv);
           argv = newargv;
           break;
-#else
-          PFATAL ("no pathnames specified");
-#endif
         }
       a = *++argv;
       if (!*a || *a++ != '-')
