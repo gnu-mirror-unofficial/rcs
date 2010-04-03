@@ -788,15 +788,9 @@ void fastcopy (RILE *, FILE *);
 void ffree (void);
 void ffree1 (char const *);
 void setRCSversion (char const *);
-#if defined HAVE_SIGNAL_H
 void catchints (void);
 void ignoreints (void);
 void restoreints (void);
-#else
-#define catchints()
-#define ignoreints()
-#define restoreints()
-#endif
 #if defined HAVE_MMAP && large_memory
 # if has_NFS && MMAP_SIGNAL
 void catchmmapints (void);

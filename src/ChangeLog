@@ -1,5 +1,13 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Remove now-obsolete support for !HAVE_SIGNAL_H.
+
+	* base.h [!HAVE_SIGNAL_H] (catchints, ignoreints, restoreints):
+	Delete macros, with surrounding cpp #if block.
+	* rcsutil.c: Remove #if defined HAVE_SIGNAL_H, matching #endif.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Move #include <signal.h> to .c files.
 
 	* base.h: Don't #include <signal.h>; remove surrounding

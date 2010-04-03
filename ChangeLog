@@ -1,5 +1,14 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Remove now-obsolete support for !HAVE_SIGNAL_H.
+
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove signal.h.
+	(sig_atomic_t): Remove AC_CHECK_TYPE.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): Remove
+	`ac_cv_header_signal_h', `ac_cv_type_sig_atomic_t'.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `sys_stat'.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add `sys_stat'.

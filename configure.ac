@@ -207,7 +207,7 @@ gl_INIT
 # headers
 AC_CHECK_HEADERS_ONCE([
   dirent.h fcntl.h limits.h mach/mach.h net/errno.h
-  pwd.h siginfo.h signal.h
+  pwd.h siginfo.h
   sys/mman.h sys/wait.h ucontext.h unistd.h utime.h
 ])
 
@@ -217,14 +217,6 @@ AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UID_T
-AC_CHECK_TYPE([sig_atomic_t],,[dnl
-  AC_DEFINE([sig_atomic_t], int,
-    [Define to `int' if <signal.h> does not define.])
-],[dnl
-#ifdef HAVE_SIGNAL_H
-# include <signal.h>
-#endif
-])
 
 # funcs
 
@@ -539,8 +531,6 @@ AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 dnl These can probably be handled by gnulib, no sweat.
 ac_cv_header_stdlib_h           dnl C99
 ac_cv_header_string_h           dnl C99
-ac_cv_header_signal_h           dnl C99
-ac_cv_type_sig_atomic_t		dnl C99
 ac_cv_header_utime_h            dnl SVr4, POSIX.1-2001
 ac_cv_header_pwd_h              dnl 4.3BSD, SVr4, POSIX.1-2001
 rcs_cv_dot2_ok                  dnl C99 (printf)

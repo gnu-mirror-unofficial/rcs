@@ -181,8 +181,6 @@ getusername (bool suspicious)
   return name;
 }
 
-#if defined HAVE_SIGNAL_H
-
 /* Signal handling
 
    Standard C places too many restrictions on signal handlers.  We obey
@@ -558,8 +556,6 @@ catchmmapints (void)
     }
 }
 #endif  /* defined HAVE_MMAP && large_memory && MMAP_SIGNAL */
-
-#endif  /* defined HAVE_SIGNAL_H */
 
 void
 fastcopy (register RILE *inf, FILE *outf)
