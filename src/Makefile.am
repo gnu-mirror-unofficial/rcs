@@ -30,7 +30,7 @@ bin_PROGRAMS = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog
 
 BUILT_SOURCES = bother.c $(bin_PROGRAMS:%=%.help)
 
-LDADD = libparts.a
+LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
 CLEANFILES = $(BUILT_SOURCES)
 

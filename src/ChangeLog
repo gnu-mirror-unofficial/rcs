@@ -1,5 +1,11 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Also link against lib/libgnu.a.
+
+	* Makefile.am (LDADD): Add options to link against ../lib/libgnu.a.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `double-slash-root'.
 
 	* rcsfnms.c (DOUBLE_SLASH_IS_DISTINCT_ROOT): If not #define:d,
