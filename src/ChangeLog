@@ -1,5 +1,13 @@
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Move #include <signal.h> to .c files.
+
+	* base.h: Don't #include <signal.h>; remove surrounding
+	cpp cond #ifdef HAVE_SIGNAL_H ... #endif block.
+	* rcsutil.c: #include <signal.h>.
+
+2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use GCC attributes individually.
 
 	* b-complain.h (generic_fatal, fatl_syntax): Use attribute
