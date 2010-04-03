@@ -266,7 +266,6 @@ enum kwsub
 #endif
 
 /* <unistd.h> */
-char *getlogin (void);
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
