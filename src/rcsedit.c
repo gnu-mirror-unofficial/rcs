@@ -460,7 +460,7 @@ enterstring (void)
   fin = FLOW (from);
   setupcache (fin);
   cache (fin);
-  advise_access (fin, MADV_NORMAL);
+  hey_trundling (false, fin);
   frew = FLOW (to);
   amidline = false;
   for (;;)

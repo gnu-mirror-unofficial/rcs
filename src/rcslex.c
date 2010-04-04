@@ -776,6 +776,18 @@ nothing_to_deallocate (RILE *f RCS_UNUSED)
 #endif  /* maps_memory */
 #endif  /* large_memory */
 
+void
+hey_trundling (bool sequentialp, RILE *f)
+/* Advise the mmap machinery (if applicable) that access to `f'
+   is sequential if `sequentialp', otherwise normal.  */
+{
+#if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
+  if (f->deallocate == mmap_deallocate)
+    madvise ((char *) f->base, (size_t) (f->lim - f->base),
+             sequentialp ? MADV_SEQUENTIAL : MADV_NORMAL);
+#endif
+}
+
 #if large_memory && maps_memory
 static RILE *
 fd2_RILE (int fd, char const *name, register struct stat *status)
@@ -902,7 +914,8 @@ fd2RILE (int fd, char const *name, char const *type,
         f->readlim = f->base;
         f->stream = stream;
 #endif  /* !maps_memory */
-        if_advise_access (s, f, MADV_SEQUENTIAL);
+        if (s)
+          hey_trundling (true, f);
         return f;
       }
 #endif  /* large_memory */
@@ -929,16 +942,6 @@ Igetmore (register RILE *f)
   return true;
 }
 #endif  /* !maps_memory && large_memory */
-
-#if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
-void
-advise_access (register RILE *f, int advice)
-{
-  if (f->deallocate == mmap_deallocate)
-    madvise ((char *) f->base, (size_t) (f->lim - f->base), advice);
-  /* Don't worry if madvise fails; it's only advisory.  */
-}
-#endif
 
 RILE *
 #if large_memory && maps_memory

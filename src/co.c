@@ -711,8 +711,8 @@ main (int argc, char **argv)
             if (FLOW (res) == neworkptr)
               FLOW (res) = NULL;             /* Don't close it twice.  */
 #endif
-            if_advise_access (changelock && gendeltas->first != targetdelta,
-                              FLOW (from), MADV_SEQUENTIAL);
+            if (changelock && gendeltas->first != targetdelta)
+              hey_trundling (true, FLOW (from));
 
             if (donerewrite (changelock, Ttimeflag
                              ? REPO (stat).st_mtime

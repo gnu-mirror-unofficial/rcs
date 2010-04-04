@@ -1528,7 +1528,7 @@ main (int argc, char **argv)
               {
                 if (!cuttail || buildeltatext (gendeltas))
                   {
-                    advise_access (FLOW (from), MADV_SEQUENTIAL);
+                    hey_trundling (true, FLOW (from));
                     scanlogtext (NULL, false);
                     /* Copy rest of delta text nodes that are not deleted.  */
                     changed = true;

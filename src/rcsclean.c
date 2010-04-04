@@ -317,8 +317,8 @@ main (int argc, char **argv)
 
         if (perform & unlocked)
           {
-            if_advise_access (deltas->first != delta, FLOW (from),
-                              MADV_SEQUENTIAL);
+            if (deltas->first != delta)
+              hey_trundling (true, FLOW (from));
             if (donerewrite (true, Ttimeflag
                              ? REPO (stat).st_mtime
                              : (time_t) - 1)

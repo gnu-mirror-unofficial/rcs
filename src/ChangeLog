@@ -1,5 +1,20 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: hey_trundling
+
+	* base.h (hey_trundling): New func decl.
+	(advise_access): Delete func decl / macro (two cppcond branches).
+	(if_advise_access): Delete macro.
+	* rcslex.c (hey_trundling): New func.
+	(advise_access): Delete func and surrounding #if ... #endif.
+	(fd2RILE): Use `hey_trundling'.
+	* co.c (main): Likewise.
+	* rcs.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsedit.c (enterstring): Likewise.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `sys_wait'.
 
 	* base.h: Don't #include <sys/wait.h>.

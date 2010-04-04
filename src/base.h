@@ -602,13 +602,7 @@ void redefined (int);
 void testIerror (FILE *);
 void testOerror (FILE *);
 void warnignore (void);
-#if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
-void advise_access (RILE *, int);
-#define if_advise_access(p,f,advice)  if (p) advise_access (f, advice)
-#else
-#define advise_access(f,advice)
-#define if_advise_access(p,f,advice)
-#endif
+void hey_trundling (bool, RILE *);
 #if large_memory && maps_memory
 RILE *I_open (char const *, struct stat *);
 #define Iopen(f,m,s)  I_open (f, s)
