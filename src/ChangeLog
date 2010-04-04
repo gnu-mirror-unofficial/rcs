@@ -1,5 +1,19 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: PROGRAM
+
+	* base.h (PROGRAM): New macro.
+	* b-complain.c: Throughout, use `PROGRAM (foo)' instead of program.foo.
+	* base.h: Likewise.
+	* gnu-h-v.c: Likewise.
+	* gnu-h-v.h: Likewise.
+	* ident.c: Likewise.
+	* merger.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsutil.c: Likewise.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `strlen' less.
 
 	* gnu-h-v.c (EXACTLY): Look for NUL at end

@@ -37,7 +37,7 @@ reportError (char const *s)
 {
   int e = errno;
 
-  complain ("%s error: ", program.name);
+  complain ("%s error: ", PROGRAM (name));
   errno = e;
   perror (s);
 }
@@ -137,7 +137,7 @@ scanfile (register FILE *file, char const *name)
       exiterr ();
     }
   if (!BE (quiet))
-    complain ("%s warning: no id keywords in %s\n", program.name, name);
+    complain ("%s warning: no id keywords in %s\n", PROGRAM (name), name);
   return 0;
 }
 

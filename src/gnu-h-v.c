@@ -42,7 +42,7 @@
 void
 display_version (void)
 {
-  printf ("%s%s", program.name, COMMAND_VERSION);
+  printf ("%s%s", PROGRAM (name), COMMAND_VERSION);
 }
 
 void
@@ -53,7 +53,7 @@ check_hv (int argc, char **argv)
 
   if (EXACTLY ("--help", argv[1]))
     {
-      printf ("Usage: %s %s%s", program.name, program.help, BUGME);
+      printf ("Usage: %s %s%s", PROGRAM (name), PROGRAM (help), BUGME);
       exit (EXIT_SUCCESS);
     }
 

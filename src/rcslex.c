@@ -973,7 +973,7 @@ void
 Oerror (void)
 {
   if (Oerrloop)
-    program.exiterr ();
+    PROGRAM (exiterr) ();
   Oerrloop = true;
   fatal_sys ("output error");
 }

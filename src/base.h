@@ -736,6 +736,7 @@ extern struct flow flow;
 /* In the future we plan to change the above structures to be a part of
    another (dynamically allocated) structure, a step towards libgnurcs.
    These abstractions keep the invasiveness to a minimum.  */
+#define PROGRAM(x)    (program. x)
 #define BE(quality)   (behavior. quality)
 #define MANI(member)  (manifestation. member)
 #define PREV(which)   (MANI (prev). which)

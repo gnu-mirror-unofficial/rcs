@@ -74,7 +74,7 @@ diagnose (char const *fmt, ...)
 static void
 whoami (char const *who)
 {
-  complain ("%s: ", program.name);
+  complain ("%s: ", PROGRAM (name));
   if (who)
     complain ("%s: ", who);
 }
@@ -112,8 +112,8 @@ generic_error (char const *who, char const *fmt, ...)
 static void
 die (void)
 {
-  complain ("%s aborted\n", program.name);
-  program.exiterr ();
+  complain ("%s aborted\n", PROGRAM (name));
+  PROGRAM (exiterr) ();
 }
 
 void
@@ -128,7 +128,7 @@ generic_fatal (char const *who, char const *fmt, ...)
 void
 fatal_syntax (char const *fmt, ...)
 {
-  complain ("%s: %s:%ld: ", program.name, REPO (filename), LEX (lno));
+  complain ("%s: %s:%ld: ", PROGRAM (name), REPO (filename), LEX (lno));
   COMPLAIN_PLUS_NEWLINE ();
   die ();
 }

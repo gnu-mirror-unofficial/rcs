@@ -336,7 +336,7 @@ catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
         continue;
       write (STDERR_FILENO, buf, b - buf);
     }
-  program.exiterr ();
+  PROGRAM (exiterr) ();
 }
 
 void
