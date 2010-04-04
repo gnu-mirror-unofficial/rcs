@@ -27,8 +27,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* begin cruft formerly from from conf.h */
-
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -89,6 +87,8 @@ enum kwsub
     kwsub_o,                            /* (old string) */
     kwsub_b                             /* (binary i/o old string) */
   };
+
+/* begin cruft formerly from from conf.h */
 
 #ifdef O_BINARY
 /* Text and binary i/o behave differently.
