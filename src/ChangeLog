@@ -1,5 +1,12 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `strlen' less.
+
+	* gnu-h-v.c (EXACTLY): Look for NUL at end
+	of string instead of comparing its length.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Remove unused #define.
 
 	* base.h (RCSTMPPREFIX): Delete #define.

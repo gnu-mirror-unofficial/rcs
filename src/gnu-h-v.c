@@ -36,7 +36,7 @@
 
 #define BUGME  ("\nReport bugs to <" PACKAGE_BUGREPORT ">\n")
 
-#define EXACTLY(k, s)  (sizeof (k) - 1 == strlen (s) \
+#define EXACTLY(k, s)  ('\0' == s[sizeof (k) - 1]               \
                         && !strncmp (k, s, sizeof (k) - 1))
 
 void
