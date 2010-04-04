@@ -218,8 +218,6 @@ enum kwsub
 #define yearlength                           16
 /* Size of output of `time2date'.  */
 #define datesize                             (yearlength + 16)
-/* Prefix for temp files in working dir.  */
-#define RCSTMPPREFIX                         '_'
 /* Delimiter for keywords.  */
 #define KDELIM                               '$'
 /* Separates keywords from values.  */

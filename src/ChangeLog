@@ -1,5 +1,11 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Remove unused #define.
+
+	* base.h (RCSTMPPREFIX): Delete #define.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: hey_trundling
 
 	* base.h (hey_trundling): New func decl.
