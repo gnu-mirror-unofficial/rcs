@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #ifdef HAVE_PWD_H
 #include <pwd.h>

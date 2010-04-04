@@ -28,6 +28,7 @@
 #include <sys/time.h>                   /* gettimeofday */
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include "b-complain.h"
 
 struct manifestation manifestation;

@@ -1,5 +1,12 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `sys_wait'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `sys_wait'.
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove sys/wait.h.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `fcntl'.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add `fcntl'.

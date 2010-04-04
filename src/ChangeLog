@@ -1,9 +1,19 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `sys_wait'.
+
+	* base.h: Don't #include <sys/wait.h>.
+	(WEXITSTATUS, WIFEXITED, WTERMSIG, WIFSIGNALED):
+	Delete conditional #define:s.
+	* rcsfnms.c: #include <sys/wait.h>.
+	* rcsutil.c: Likewise.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Remove some now-obsolete conditional #define:s.
 
 	* base.h (P_tmpdir, S_IRUSR, S_IWUSR, S_IRGRP, S_IWGRP)
-	(S_IROTH, S_IWOTH, S_ISREG) Delete conditional #define.
+	(S_IROTH, S_IWOTH, S_ISREG): Delete conditional #define:s.
 
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 

@@ -41,9 +41,6 @@
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
 #endif
@@ -174,22 +171,6 @@ enum kwsub
 
 /* Must TZ be set for gmtime() to work?  */
 #define TZ_must_be_set 0
-
-/* <sys/wait.h> */
-#ifndef WEXITSTATUS
-#define WEXITSTATUS(stat_val) ((unsigned)(stat_val) >> 8)
-#undef WIFEXITED /* Avoid 4.3BSD incompatibility with POSIX.  */
-#endif
-#ifndef WIFEXITED
-#define WIFEXITED(stat_val) (((stat_val)  &  0377) == 0)
-#endif
-#ifndef WTERMSIG
-#define WTERMSIG(stat_val) ((stat_val) & 0177)
-#undef WIFSIGNALED /* Avoid 4.3BSD incompatibility with POSIX.  */
-#endif
-#ifndef WIFSIGNALED
-#define WIFSIGNALED(stat_val) ((unsigned)(stat_val) - 1  <  0377)
-#endif
 
 #if defined HAVE_WORKING_FORK && !defined HAVE_WORKING_VFORK
 #undef vfork
