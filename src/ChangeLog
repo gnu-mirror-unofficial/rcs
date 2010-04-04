@@ -1,5 +1,12 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Remove some now-obsolete conditional #define:s.
+
+	* base.h (P_tmpdir, S_IRUSR, S_IWUSR, S_IRGRP, S_IWGRP)
+	(S_IROTH, S_IWOTH, S_ISREG) Delete conditional #define.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `fcntl'.
 
 	Here, "U" means "Convert #ifdef F_DUPFD

@@ -172,45 +172,8 @@ enum kwsub
 #define X_DEFAULT "\\,v"
 #endif
 
-#ifndef P_tmpdir
-#define P_tmpdir  TMPDIR
-#endif
-
 /* Must TZ be set for gmtime() to work?  */
 #define TZ_must_be_set 0
-
-/* <sys/stat.h> */
-#ifndef S_IRUSR
-# ifdef S_IREAD
-# define S_IRUSR S_IREAD
-# else
-# define S_IRUSR 0400
-# endif
-# ifdef S_IWRITE
-# define S_IWUSR S_IWRITE
-# else
-# define S_IWUSR (S_IRUSR/2)
-# endif
-#endif
-
-#ifndef S_IRGRP
-# if defined HAVE_GETUID
-# define S_IRGRP (S_IRUSR / 0010)
-# define S_IWGRP (S_IWUSR / 0010)
-# define S_IROTH (S_IRUSR / 0100)
-# define S_IWOTH (S_IWUSR / 0100)
-# else
-/* Single user OS -- not POSIX or Unix.  */
-# define S_IRGRP 0
-# define S_IWGRP 0
-# define S_IROTH 0
-# define S_IWOTH 0
-# endif
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(n) (((n) & S_IFMT) == S_IFREG)
-#endif
 
 /* <sys/wait.h> */
 #ifndef WEXITSTATUS
