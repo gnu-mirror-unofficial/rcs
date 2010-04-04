@@ -492,6 +492,259 @@ enum markers
 /* The function `pairnames' takes to open the RCS file.  */
 typedef RILE * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
 
+/* The locations of RCS programs, for internal use.  */
+extern const char const prog_co[];
+extern const char const prog_merge[];
+extern const char const prog_diff[];
+extern const char const prog_diff3[];
+
+/* Flags to make diff(1) work with RCS.  These
+   should be a single argument (no internal spaces).  */
+extern const char const diff_flags[];
+
+/* A string of 77 '=' followed by '\n'.  */
+extern const char const equal_line[];
+
+/* Every program defines this.  */
+struct program
+{
+  /* The name of the program, for --help, --version, etc.  */
+  const char const *name;
+  /* Text for --help.  */
+  const char const *help;
+  /* Exit errorfully.  */
+  void (*exiterr) (void) exiting;
+};
+extern const struct program program;
+
+/* A program controls the behavior of subsystems by setting these.
+   Subsystems also communicate via these settings.  */
+struct behavior
+{
+  bool quiet;
+  /* This is set from command-line option `-q'.  When set:
+     - disable all yn -- yesorno
+     - disable warnings -- generic_warn
+     - disable error messages -- diagnose catchsigaction
+     - don't ask about overwriting a writable workfile
+     - on missing RCS file, suppress error and init instead -- pairnames
+     - [ident] suppress no-keywords-found warning
+     - [rcs] suppress yn when outdating all revisions
+     - [rcsclean] suppress progress output  */
+
+  bool interactive_valid;               /* -- ttystdin */
+  bool interactive;
+  /* Should we act as if stdin is a tty?  Set from `-I'.  When set:
+     - enables stdin flushing and newline output -- getcstdin
+     - enables yn (masked by `quiet', above) -- yesorno
+     - enables "enter FOO terminated by ." message -- getsstdin
+     - [co] when workfile writable, include name in error message  */
+
+  bool inclusive_of_Locker_in_Id_val;
+  /* If set, append locker val when expanding `Id' and locking.  */
+
+  bool receptive_to_next_hash_key;
+  /* If set, next suitable lexeme will be entered into the
+     symbol table -- nextlex.  Handle with care.  */
+
+  bool strictly_locking;
+  /* When set:
+     - don't inhibit error when removing self-lock -- removelock
+     - enable error if not self-lock -- addelta
+     - generate "; strict" in RCS file -- putadmin
+     - [ci] ???
+     - [co] conspires w/ kwsub_v to make workfile readonly
+     - [rlog] display "strict"  */
+
+  int version;
+  /* The "effective RCS version", for backward compatability,
+     normalized via `VERSION' (i.e., current 0, previous -1, etc).
+     -- setRCSversion  */
+
+  int kws;
+  /* The keyword substitution (aka "expansion") mode, or -1 (mu).
+     FIXME: Unify with `enum kwsub'.
+     -- [co]main [rcs]main [rcsclean]main InitAdmin getadmin  */
+
+  char const *pe;
+  /* Possible endings, a slash-separated list of filename-end
+     fragments to consider for recognizing the name of the RCS file.
+     FIXME: Push defaulting into library.
+     -- [ci]main [co]main [rcs]main [rcsclean]main [rcsdiff]main
+     -- rcssuffix
+     -- [rcsmerge]main [rlog]main  */
+
+  struct zone_offset
+  {
+    bool valid;
+    /* When set, use `BE (zone_offset.seconds)' in `date2str'.
+       Otherwise, use UTC without timezone indication.
+       -- zone_set  */
+
+    long seconds;
+    /* Seconds east of UTC, or `TM_LOCAL_ZONE'.
+       -- zone_set  */
+  } zone_offset;
+};
+extern struct behavior behavior;
+
+/* The working file is a manifestation of a particular revision.  */
+struct manifestation
+{
+  /* What it's called on disk; may be relative,
+     unused if writing to stdout.
+     -- rcsreadopen  */
+  char *filename;
+
+  /* [co] Use this if writing to stdout.  */
+  FILE *standard_output;
+
+  /* Previous keywords, to accomodate `ci -k'.
+     -- getoldkeys  */
+  struct {
+    bool valid;
+    char *author;
+    char *date;
+    char *name;
+    char *rev;
+    char *state;
+  } prev;
+
+  /* A buffer to accumulate text for `Log' substitution.
+     -- scanlogtext scandeltatext  */
+  struct buf log;
+
+  /* A buffer to (temporarily) hold key values.
+     -- expandline  */
+  struct buf keyval;
+};
+extern struct manifestation manifestation;
+
+/* The parse state is used when reading the RCS file.  */
+struct parse_state
+{
+  bool erroneousp;
+  /* True means lexing encountered an error.
+     -- buildjoin Lexinit syserror generic_error generic_fatal  */
+
+  struct next
+  {
+    enum tokens tok;
+    /* Character class and/or token code.
+       -- nextlex getphrases  */
+
+    int c;
+    /* Next input character, parallel with `tok'.
+       -- copystring enterstring editstring expandline
+       -- nextlex eoflex getphrases readstring printstring savestring
+       -- getdiffcmd
+       -- getscript
+       (all to restore stream at end-of-string).  */
+
+    char const *str;
+    /* Hold the next ID or NUM value.
+       -- lookup nextlex getphrases  */
+  } next;
+
+  long lno;
+  /* Current line-number of input.  FIXME: Make unsigned.
+     -- copystring enterstring editstring expandline
+     -- Lexinit nextlex eoflex getphrases readstring printstring savestring
+     -- getdiffcmd
+     -- getscript  */
+};
+extern struct parse_state parse_state;
+
+/* The RCS file is the repository of revisions, plus metadata.  */
+struct repository
+{
+  char const *filename;
+  /* What it's called on disk.
+     -- pairnames (PAIRTEST)main  */
+
+  int fd_lock;
+  /* The file descriptor of the RCS file lockfile.
+     -- rcswriteopen ORCSclose pairnames putadmin (SYNTEST)main  */
+
+  struct stat stat;
+  /* Stat info, possibly munged.
+     -- [ci]main [rcs]main fd2{_}RILE (via Iopen, rcs{read,write}open)  */
+
+  struct admin
+  {
+    struct access *allowed;
+    /* List of usernames who may modify the repo.
+       -- InitAdmin doaccess [rcs]main  */
+
+    struct assoc *assocs;
+    /* List of symbolic names.
+       -- addsymbol InitAdmin  */
+
+    struct cbuf log_lead;
+    /* The string to use to start lines expanded for `Log'.  FIXME:ZONK.
+       -- [rcs]main (FCMPTEST)main InitAdmin getadmin  */
+
+    struct cbuf description;
+    /* The description string, if any.  Not functionally relevant.
+       -- InitAdmin getadmin  */
+
+    struct rcslock *locks;
+    /* List of locks.
+       -- rmlock addlock InitAdmin  */
+
+    char const *defbr;
+    /* The default branch, or NULL.
+       -- [rcs]main InitAdmin getadmin  */
+
+    struct hshentry *head;
+    /* The revision on the tip of the default branch.
+       -- addelta buildtree [rcs]main InitAdmin getadmin  */
+  } admin;
+
+  int ndelt;
+  /* Counter for deltas.
+     -- getadmin  */
+};
+extern struct repository repository;
+
+/* Various data streams flow in and out of RCS programs.  */
+struct flow
+{
+  RILE *from;
+  /* Input stream for the RCS file.
+     -- rcsreadopen pairnames (LEXDB)main (REVTEST)main (SYNTEST)main  */
+
+  FILE *rewr;
+  /* Output stream for echoing input stream.
+     -- putadmin  */
+
+  FILE *to;
+  /* Output stream for the RCS file.
+     ``Copy of `rewr', but NULL to suppress echo.''
+     -- [ci]main scanlogtext dorewrite putdesc  */
+
+  FILE *res;
+  /* Output stream for the result file.  ???
+     -- enterstring  */
+
+  char const *result;
+  /* The result file name.
+     -- openfcopy swapeditfiles  */
+};
+extern struct flow flow;
+
+/* In the future we plan to change the above structures to be a part of
+   another (dynamically allocated) structure, a step towards libgnurcs.
+   These abstractions keep the invasiveness to a minimum.  */
+#define BE(quality)   (behavior. quality)
+#define MANI(member)  (manifestation. member)
+#define PREV(which)   (MANI (prev). which)
+#define LEX(member)   (parse_state. member)
+#define NEXT(which)   (LEX (next). which)
+#define REPO(member)  (repository. member)
+#define ADMIN(part)   (REPO (admin). part)
+#define FLOW(member)  (flow. member)
+
 /* b-anchor */
 int recognize_kwsub (const char *, size_t);
 #define str2expmode(s)  (recognize_kwsub ((s), strlen (s)))
@@ -721,262 +974,5 @@ void setrid (void);
 #endif
 
 bool isSLASH (int c);
-
-/* The locations of RCS programs, for internal use.  */
-extern const char const prog_co[];
-extern const char const prog_merge[];
-extern const char const prog_diff[];
-extern const char const prog_diff3[];
-
-/* Flags to make diff(1) work with RCS.  These
-   should be a single argument (no internal spaces).  */
-extern const char const diff_flags[];
-
-/* A string of 77 '=' followed by '\n'.  */
-extern const char const equal_line[];
-
-/* Every program defines this.  */
-struct program
-{
-  /* The name of the program, for --help, --version, etc.  */
-  const char const *name;
-  /* Text for --help.  */
-  const char const *help;
-  /* Exit errorfully.  */
-  void (*exiterr) (void) exiting;
-};
-extern const struct program program;
-
-/* A program controls the behavior of subsystems by setting these.
-   Subsystems also communicate via these settings.  */
-struct behavior
-{
-  bool quiet;
-  /* This is set from command-line option `-q'.  When set:
-     - disable all yn -- yesorno
-     - disable warnings -- generic_warn
-     - disable error messages -- diagnose catchsigaction
-     - don't ask about overwriting a writable workfile
-     - on missing RCS file, suppress error and init instead -- pairnames
-     - [ident] suppress no-keywords-found warning
-     - [rcs] suppress yn when outdating all revisions
-     - [rcsclean] suppress progress output  */
-
-  bool interactive_valid;               /* -- ttystdin */
-  bool interactive;
-  /* Should we act as if stdin is a tty?  Set from `-I'.  When set:
-     - enables stdin flushing and newline output -- getcstdin
-     - enables yn (masked by `quiet', above) -- yesorno
-     - enables "enter FOO terminated by ." message -- getsstdin
-     - [co] when workfile writable, include name in error message  */
-
-  bool inclusive_of_Locker_in_Id_val;
-  /* If set, append locker val when expanding `Id' and locking.  */
-
-  bool receptive_to_next_hash_key;
-  /* If set, next suitable lexeme will be entered into the
-     symbol table -- nextlex.  Handle with care.  */
-
-  bool strictly_locking;
-  /* When set:
-     - don't inhibit error when removing self-lock -- removelock
-     - enable error if not self-lock -- addelta
-     - generate "; strict" in RCS file -- putadmin
-     - [ci] ???
-     - [co] conspires w/ kwsub_v to make workfile readonly
-     - [rlog] display "strict"  */
-
-  int version;
-  /* The "effective RCS version", for backward compatability,
-     normalized via `VERSION' (i.e., current 0, previous -1, etc).
-     -- setRCSversion  */
-
-  int kws;
-  /* The keyword substitution (aka "expansion") mode, or -1 (mu).
-     FIXME: Unify with `enum kwsub'.
-     -- [co]main [rcs]main [rcsclean]main InitAdmin getadmin  */
-
-  char const *pe;
-  /* Possible endings, a slash-separated list of filename-end
-     fragments to consider for recognizing the name of the RCS file.
-     FIXME: Push defaulting into library.
-     -- [ci]main [co]main [rcs]main [rcsclean]main [rcsdiff]main
-     -- rcssuffix
-     -- [rcsmerge]main [rlog]main  */
-
-  struct zone_offset
-  {
-    bool valid;
-    /* When set, use `BE (zone_offset.seconds)' in `date2str'.
-       Otherwise, use UTC without timezone indication.
-       -- zone_set  */
-
-    long seconds;
-    /* Seconds east of UTC, or `TM_LOCAL_ZONE'.
-       -- zone_set  */
-  } zone_offset;
-};
-extern struct behavior behavior;
-
-/* In the future we plan to change `behavior' to be a part of
-   another structure, as part of a no-more-globals campaign.
-   This abstraction keeps the invasiveness to a minimum.  */
-#define BE(quality)  (behavior. quality)
-
-/* The working file is a manifestation of a particular revision.  */
-struct manifestation
-{
-  /* What it's called on disk; may be relative,
-     unused if writing to stdout.
-     -- rcsreadopen  */
-  char *filename;
-
-  /* [co] Use this if writing to stdout.  */
-  FILE *standard_output;
-
-  /* Previous keywords, to accomodate `ci -k'.
-     -- getoldkeys  */
-  struct {
-    bool valid;
-    char *author;
-    char *date;
-    char *name;
-    char *rev;
-    char *state;
-  } prev;
-
-  /* A buffer to accumulate text for `Log' substitution.
-     -- scanlogtext scandeltatext  */
-  struct buf log;
-
-  /* A buffer to (temporarily) hold key values.
-     -- expandline  */
-  struct buf keyval;
-};
-extern struct manifestation manifestation;
-
-#define MANI(member)  (manifestation. member)
-#define PREV(which)   (MANI (prev). which)
-
-/* The parse state is used when reading the RCS file.  */
-struct parse_state
-{
-  bool erroneousp;
-  /* True means lexing encountered an error.
-     -- buildjoin Lexinit syserror generic_error generic_fatal  */
-
-  struct next
-  {
-    enum tokens tok;
-    /* Character class and/or token code.
-       -- nextlex getphrases  */
-
-    int c;
-    /* Next input character, parallel with `tok'.
-       -- copystring enterstring editstring expandline
-       -- nextlex eoflex getphrases readstring printstring savestring
-       -- getdiffcmd
-       -- getscript
-       (all to restore stream at end-of-string).  */
-
-    char const *str;
-    /* Hold the next ID or NUM value.
-       -- lookup nextlex getphrases  */
-  } next;
-
-  long lno;
-  /* Current line-number of input.  FIXME: Make unsigned.
-     -- copystring enterstring editstring expandline
-     -- Lexinit nextlex eoflex getphrases readstring printstring savestring
-     -- getdiffcmd
-     -- getscript  */
-};
-extern struct parse_state parse_state;
-
-#define LEX(member)  (parse_state. member)
-#define NEXT(which)  (LEX (next). which)
-
-/* The RCS file is the repository of revisions, plus metadata.  */
-struct repository
-{
-  char const *filename;
-  /* What it's called on disk.
-     -- pairnames (PAIRTEST)main  */
-
-  int fd_lock;
-  /* The file descriptor of the RCS file lockfile.
-     -- rcswriteopen ORCSclose pairnames putadmin (SYNTEST)main  */
-
-  struct stat stat;
-  /* Stat info, possibly munged.
-     -- [ci]main [rcs]main fd2{_}RILE (via Iopen, rcs{read,write}open)  */
-
-  struct admin
-  {
-    struct access *allowed;
-    /* List of usernames who may modify the repo.
-       -- InitAdmin doaccess [rcs]main  */
-
-    struct assoc *assocs;
-    /* List of symbolic names.
-       -- addsymbol InitAdmin  */
-
-    struct cbuf log_lead;
-    /* The string to use to start lines expanded for `Log'.  FIXME:ZONK.
-       -- [rcs]main (FCMPTEST)main InitAdmin getadmin  */
-
-    struct cbuf description;
-    /* The description string, if any.  Not functionally relevant.
-       -- InitAdmin getadmin  */
-
-    struct rcslock *locks;
-    /* List of locks.
-       -- rmlock addlock InitAdmin  */
-
-    char const *defbr;
-    /* The default branch, or NULL.
-       -- [rcs]main InitAdmin getadmin  */
-
-    struct hshentry *head;
-    /* The revision on the tip of the default branch.
-       -- addelta buildtree [rcs]main InitAdmin getadmin  */
-  } admin;
-
-  int ndelt;
-  /* Counter for deltas.
-     -- getadmin  */
-};
-extern struct repository repository;
-
-#define REPO(member)  (repository. member)
-#define ADMIN(part)   (REPO (admin). part)
-
-/* Various data streams flow in and out of RCS programs.  */
-struct flow
-{
-  RILE *from;
-  /* Input stream for the RCS file.
-     -- rcsreadopen pairnames (LEXDB)main (REVTEST)main (SYNTEST)main  */
-
-  FILE *rewr;
-  /* Output stream for echoing input stream.
-     -- putadmin  */
-
-  FILE *to;
-  /* Output stream for the RCS file.
-     ``Copy of `rewr', but NULL to suppress echo.''
-     -- [ci]main scanlogtext dorewrite putdesc  */
-
-  FILE *res;
-  /* Output stream for the result file.  ???
-     -- enterstring  */
-
-  char const *result;
-  /* The result file name.
-     -- openfcopy swapeditfiles  */
-};
-extern struct flow flow;
-
-#define FLOW(member)  (flow. member)
 
 /* base.h ends here */
