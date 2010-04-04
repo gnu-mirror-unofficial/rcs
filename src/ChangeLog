@@ -1,5 +1,23 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move some file/function-static state into `struct behavior'.
+
+	* base.h (behavior): Add to this struct members
+	`unbufferedp', `version_set', `stick_with_euid', `ruid',
+	`euid', `ruid_cached', `euid_cached', `already_setuid'.
+	* b-complain.c (unbufferedp): Delete var.
+	(unbuffer_standard_error, vcomplain): Use `BE (unbufferedp)'.
+	* rcsutil.c (setRCSversion): Delete func-static
+	var `oldversion'; use `BE (version_set)' instead.
+	(cacheid): Rewrite macro.
+	(ruid, euid): Update call to `cacheid'.
+	(set_uid_to): Delete func-static var `looping';
+	use `BE (already_setuid)', instead.
+	(stick_with_euid): Delete var.
+	(nosetid, seteid, setrid): Use `BE (stick_with_euid)'.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Fix bug: Notice if the system does not support SA_SIGINFO correctly.
 
 	* rcsutil.c (catchsigaction): Arrange to ignore siginfo_t info

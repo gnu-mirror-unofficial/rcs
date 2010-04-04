@@ -521,6 +521,11 @@ extern const struct program program;
    Subsystems also communicate via these settings.  */
 struct behavior
 {
+  bool unbufferedp;
+  /* Although standard error should be unbuffered by default,
+     don't rely on it.
+     -- unbuffer_standard_error  */
+
   bool quiet;
   /* This is set from command-line option `-q'.  When set:
      - disable all yn -- yesorno
@@ -556,10 +561,27 @@ struct behavior
      - [co] conspires w/ kwsub_v to make workfile readonly
      - [rlog] display "strict"  */
 
+  bool version_set;
   int version;
   /* The "effective RCS version", for backward compatability,
      normalized via `VERSION' (i.e., current 0, previous -1, etc).
+     `version_set' true means the effective version was set from the
+     command-line option `-V'.  Additional `-V' results in a warning.
      -- setRCSversion  */
+
+  bool stick_with_euid;
+  /* Ignore all calls to `seteid' and `setrid'.
+     -- nosetid  */
+
+  int ruid, euid;
+  bool ruid_cached, euid_cached;
+  /* The real and effective user-ids, and their respective
+     "already-cached" state (to implement one-shot).
+     -- ruid euid  */
+
+  bool already_setuid;
+  /* It's not entirely clear what this bit does.
+     -- set_uid_to  */
 
   int kws;
   /* The keyword substitution (aka "expansion") mode, or -1 (mu).

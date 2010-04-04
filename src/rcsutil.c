@@ -786,17 +786,15 @@ run (int infd, char const *outname, ...)
 void
 setRCSversion (char const *str)
 {
-  static bool oldversion;
-
   register char const *s = str + 2;
 
   if (*s)
     {
       int v = VERSION_DEFAULT;
 
-      if (oldversion)
+      if (BE (version_set))
         redefined ('V');
-      oldversion = true;
+      BE (version_set) = true;
       v = 0;
       while (isdigit (*s))
         v = 10 * v + *s++ - '0';
@@ -911,16 +909,13 @@ getRCSINIT (int argc, char **argv, char ***newargv)
   return argc;
 }
 
-#define cacheid(E)                              \
-  static uid_t id;                              \
-  static bool valid;                            \
-                                                \
-  if (!valid)                                   \
+#define cacheid(V,E)                            \
+  if (!BE (V ## _cached))                       \
     {                                           \
-      valid = true;                             \
-      id = E;                                   \
+      BE (V) = E;                               \
+      BE (V ## _cached) = true;                 \
     }                                           \
-  return id
+  return BE (V)
 
 uid_t
 ruid (void)
@@ -931,7 +926,7 @@ ruid (void)
      to call it otherwise.  */
   abort ();
 #endif
-  cacheid (getuid ());
+  cacheid (ruid, getuid ());
 }
 
 bool
@@ -948,7 +943,7 @@ myself (uid_t u)
 uid_t
 euid (void)
 {
-  cacheid (geteuid ());
+  cacheid (euid, geteuid ());
 }
 #endif
 
@@ -965,8 +960,6 @@ static void
 set_uid_to (uid_t u)
 /* Become user `u'.  */
 {
-  static bool looping;
-
   if (euid () == ruid ())
     return;
 #if defined HAVE_WORKING_FORK
@@ -980,27 +973,26 @@ set_uid_to (uid_t u)
 #endif  /* defined HAVE_WORKING_FORK */
   if (geteuid () != u)
     {
-      if (looping)
+      /* FIXME: This sequence of code seems to be a no-op! --ttn  */
+      if (BE (already_setuid))
         return;
-      looping = true;
+      BE (already_setuid) = true;
       PFATAL ("root setuid not supported" + (u ? 5 : 0));
     }
 }
-
-static bool stick_with_euid;
 
 void
 nosetid (void)
 /* Ignore all calls to `seteid' and `setrid'.  */
 {
-  stick_with_euid = true;
+  BE (stick_with_euid) = true;
 }
 
 void
 seteid (void)
 /* Become effective user.  */
 {
-  if (!stick_with_euid)
+  if (!BE (stick_with_euid))
     set_uid_to (euid ());
 }
 
@@ -1008,7 +1000,7 @@ void
 setrid (void)
 /* Become real user.  */
 {
-  if (!stick_with_euid)
+  if (!BE (stick_with_euid))
     set_uid_to (ruid ());
 }
 #endif  /* defined HAVE_SETUID */

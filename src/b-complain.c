@@ -22,14 +22,10 @@
 #include <stdarg.h>
 #include <errno.h>
 
-/* Although standard error should be unbuffered by default,
-   don't rely on it.  */
-static bool unbufferedp;
-
 void
 unbuffer_standard_error (void)
 {
-  unbufferedp = !setvbuf (stderr, NULL, _IONBF, 0);
+  BE (unbufferedp) = !setvbuf (stderr, NULL, _IONBF, 0);
 }
 
 void
@@ -39,7 +35,7 @@ vcomplain (char const *fmt, va_list args)
           ? MANI (standard_output)
           : stdout);
   vfprintf (stderr, fmt, args);
-  if (!unbufferedp)
+  if (!BE (unbufferedp))
     fflush (stderr);
 }
 
