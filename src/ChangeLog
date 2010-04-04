@@ -1,5 +1,12 @@
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Fix bug: Notice if the system does not support SA_SIGINFO correctly.
+
+	* rcsutil.c (catchsigaction): Arrange to ignore siginfo_t info
+	if `unsupported_SA_SIGINFO', not if `!unsupported_SA_SIGINFO'.
+
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: PROGRAM
 
 	* base.h (PROGRAM): New macro.

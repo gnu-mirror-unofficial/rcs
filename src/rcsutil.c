@@ -259,7 +259,7 @@ catchsigaction (int s, siginfo_t *i, void *c RCS_UNUSED)
   signal (s, SIG_IGN);
 #endif
 
-  if (!unsupported_SA_SIGINFO)
+  if (unsupported_SA_SIGINFO)
     i = NULL;
 
   if (holdlevel)
