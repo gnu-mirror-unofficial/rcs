@@ -1,3 +1,10 @@
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module `fcntl'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `fcntl'.
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove fcntl.h.
+
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Ignore <siginfo.h>.

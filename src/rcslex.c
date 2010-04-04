@@ -26,9 +26,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #include "b-complain.h"
 
 struct parse_state parse_state;

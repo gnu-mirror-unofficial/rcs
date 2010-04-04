@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <sys/time.h>                   /* gettimeofday */
 #include <unistd.h>
+#include <fcntl.h>
 #include "b-complain.h"
 
 struct manifestation manifestation;
@@ -836,15 +837,11 @@ getcwd (char *path, size_t size)
 #endif  /* BAD_WAIT_IF_SIGCHLD_IGNORED */
   if (!(child = vfork ()))
     {
-      if (close (fd[0]) == 0 && (fd[1] == STDOUT_FILENO
-                                 ||
-#ifdef F_DUPFD
-                                 (close (STDOUT_FILENO),
-                                  fcntl (fd[1], F_DUPFD, STDOUT_FILENO))
-#else
-                                 dup2 (fd[1], STDOUT_FILENO)
-#endif
-                                 == STDOUT_FILENO && close (fd[1]) == 0))
+      if (close (fd[0]) == 0
+          && (STDOUT_FILENO == fd[1]
+              || (STDOUT_FILENO == (close (STDOUT_FILENO),
+                                    fcntl (fd[1], F_DUPFD, STDOUT_FILENO))
+                  && close (fd[1]) == 0)))
         {
           close (STDERR_FILENO);
           execl (binpwd, binpwd, NULL);

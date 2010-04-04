@@ -179,22 +179,6 @@ enum kwsub
 /* Must TZ be set for gmtime() to work?  */
 #define TZ_must_be_set 0
 
-/* <fcntl.h> */
-#ifdef O_CREAT
-#define open_can_creat 1
-#else
-#define open_can_creat 0
-#define O_RDONLY 0
-#define O_WRONLY 1
-#define O_RDWR 2
-#define O_CREAT 01000
-#define O_TRUNC 02000
-#endif
-
-#ifndef O_EXCL
-#define O_EXCL 0
-#endif
-
 /* <sys/stat.h> */
 #ifndef S_IRUSR
 # ifdef S_IREAD

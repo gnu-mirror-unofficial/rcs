@@ -29,9 +29,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
@@ -542,19 +540,7 @@ static int
 dupSafer (int fd)
 /* Dup a file descriptor; the result must not be stdin, stdout, or stderr.  */
 {
-#ifdef F_DUPFD
   return fcntl (fd, F_DUPFD, STDERR_FILENO + 1);
-#else  /* !defined F_DUPFD */
-  int e, f, i, used = 0;
-  while (STDIN_FILENO <= (f = dup (fd)) && f <= STDERR_FILENO)
-    used |= 1 << f;
-  e = errno;
-  for (i = STDIN_FILENO; i <= STDERR_FILENO; i++)
-    if (used & (1 << i))
-      close (i);
-  errno = e;
-  return f;
-#endif  /* !defined F_DUPFD */
 }
 
 int
@@ -609,11 +595,6 @@ fopenSafer (char const *filename, char const *type)
   return stream;
 }
 
-#ifdef F_DUPFD
-#undef dup
-#define dup(fd)  fcntl (fd, F_DUPFD, 0)
-#endif
-
 #if defined HAVE_WORKING_FORK
 
 static int
@@ -621,11 +602,7 @@ movefd (int old, int new)
 {
   if (old < 0 || old == new)
     return old;
-#ifdef F_DUPFD
   new = fcntl (old, F_DUPFD, new);
-#else
-  new = dup2 (old, new);
-#endif
   return close (old) == 0 ? new : -1;
 }
 
@@ -635,11 +612,7 @@ fdreopen (int fd, char const *file, int flags)
   int newfd;
 
   close (fd);
-  newfd =
-#if !open_can_creat
-    flags & O_CREAT ? creat (file, S_IRUSR | S_IWUSR) :
-#endif
-    open (file, flags, S_IRUSR | S_IWUSR);
+  newfd = open (file, flags, S_IRUSR | S_IWUSR);
   return movefd (newfd, fd);
 }
 
@@ -706,18 +679,11 @@ runv (int infd, char const *outname, char const **args)
     if (!(pid = vfork ()))
       {
         char const *notfound;
-        if (infd != -1 && infd != STDIN_FILENO && (
-#ifdef F_DUPFD
-                                                    (close (STDIN_FILENO),
-                                                     fcntl (infd, F_DUPFD,
-                                                            STDIN_FILENO) !=
-                                                     STDIN_FILENO)
-#else  /* !defined F_DUPFD */
-                                                    dup2 (infd,
-                                                          STDIN_FILENO) !=
-                                                    STDIN_FILENO
-#endif  /* !defined F_DUPFD */
-            ))
+
+        if (infd != -1
+            && STDIN_FILENO != infd
+            && STDIN_FILENO != (close (STDIN_FILENO),
+                                fcntl (infd, F_DUPFD, STDIN_FILENO)))
           {
             /* Avoid `perror' since it may misuse buffers.  */
             complain ("%s: I/O redirection failed\n", args[1]);

@@ -1,3 +1,23 @@
+2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module `fcntl'.
+
+	Here, "U" means "Convert #ifdef F_DUPFD
+	foo #else bar #endif block to expression foo".
+	* base.h (open_can_creat): Delete #define.
+	[!O_CREAT] (O_RDONLY, O_WRONLY, O_RDWR, O_CREAT, O_TRUNC): Likewise.
+	[!O_EXCL] (O_EXCL): Likewise.
+	* rcsedit.c (create): Define macro unconditionally.
+	* rcsfnms.c: #include <fcntl.h> unconditionally.
+	[!HAVE_GETCWD && !HAVE_GETWD] (getcwd): U.
+	* rcslex.c: #include <fcntl.h> unconditionally.
+	* rcsutil.c: Likewise.
+	(dupSafer): U.
+	[F_DUPFD] (dup): Delete macro redefinition.
+	(movefd): U.
+	(fdreopen): Take `open_can_creat' to be 1.
+	(runv): U.
+
 2010-04-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Ignore <siginfo.h>.

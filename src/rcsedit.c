@@ -33,9 +33,7 @@
 #ifdef HAVE_UTIME_H
 #include <utime.h>
 #endif
-#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #include "b-complain.h"
 #include "b-kwxout.h"
 
@@ -829,13 +827,10 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
      the old methods; besides, `lockf' is notoriously buggy under NFS.
      Since this problem afflicts scads of Unix programs, but is so rare
      that nobody seems to be worried about it, we won't worry either.  */
-#if !open_can_creat
-#define create(f) creat (f, OPEN_CREAT_READONLY)
-#else
+
 #define create(f) open (f, OPEN_O_BINARY | OPEN_O_LOCK                \
                         | OPEN_O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, \
                         OPEN_CREAT_READONLY)
-#endif
 
   catchints ();
   ignoreints ();
