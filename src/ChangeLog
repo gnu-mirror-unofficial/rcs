@@ -1,3 +1,11 @@
+2010-04-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Fix bug: Don't #undef MMAP_SIGNAL.
+
+	Regression introduced 2010-03-02,
+	"Move mmap-related checks to configure.in".
+	* base.h [!MMAP_SIGNAL]: Don't #undef MMAP_SIGNAL.
+
 2010-04-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Move some file/function-static state into `struct behavior'.

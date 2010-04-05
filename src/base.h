@@ -241,11 +241,11 @@ enum kwsub
    Following such macros with `; else' results in a syntax error.
 */
 
-/* If there is no signal, better to disable mmap entirely.  */
+/* If there is no signal, better to disable mmap entirely.
+   We leave MMAP_SIGNAL as 0 to indicate this.  */
 #if !MMAP_SIGNAL
 #undef HAVE_MMAP
 #undef HAVE_MADVISE
-#undef MMAP_SIGNAL
 #endif
 
 #define maps_memory  (0 || defined HAVE_MMAP)
