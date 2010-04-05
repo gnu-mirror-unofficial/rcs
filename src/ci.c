@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include "ci.help"
 #include "b-complain.h"
+#include "b-isr.h"
 #include "b-kwxout.h"
 
 /* Work around a common `ftruncate' bug: NFS won't let you truncate a file
@@ -1172,11 +1173,11 @@ main (int argc, char **argv)
                   case 1:
                     Izclose (&workptr);
                     aflush (exfile);
-                    ignoreints ();
+                    IGNOREINTS ();
                     r = chnamemod (&exfile, newworkname, MANI (filename),
                                    1, newworkmode, mtime);
                     keepdirtemp (newworkname);
-                    restoreints ();
+                    RESTOREINTS ();
                   }
               }
           }

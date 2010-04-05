@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "b-complain.h"
+#include "b-isr.h"
 
 struct parse_state parse_state;
 
@@ -845,7 +846,8 @@ fd2RILE (int fd, char const *name, char const *type,
 #if defined HAVE_MMAP
             if (!f->base)
               {
-                catchmmapints ();
+                ISR_ENABLE ();
+                ISR_DO (CATCHMMAPINTS);
                 f->base = (unsigned char *) mmap (NULL, s,
                                                   PROT_READ,
                                                   MAP_SHARED, fd,
@@ -861,7 +863,7 @@ fd2RILE (int fd, char const *name, char const *type,
                     /* On many hosts, the superuser can mmap an NFS file
                        it can't read.  So access the first page now, and
                        print a nice message if a bus error occurs.  */
-                    readAccessFilenameBuffer (name, f->base);
+                    access_page (ISR_SCRATCH, name, f->base);
 #endif  /* has_NFS && MMAP_SIGNAL */
                   }
                 f->deallocate = mmap_deallocate;

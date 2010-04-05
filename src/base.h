@@ -607,6 +607,11 @@ struct behavior
     /* Seconds east of UTC, or `TM_LOCAL_ZONE'.
        -- zone_set  */
   } zone_offset;
+
+  /* The rest of the members in `struct behavior' are scratch spaces
+     managed by various subsystems.  */
+
+  struct isr_scratch *isr;
 };
 extern struct behavior behavior;
 
@@ -972,17 +977,6 @@ void fastcopy (RILE *, FILE *);
 void ffree (void);
 void ffree1 (char const *);
 void setRCSversion (char const *);
-void catchints (void);
-void ignoreints (void);
-void restoreints (void);
-#if defined HAVE_MMAP && large_memory
-# if has_NFS && MMAP_SIGNAL
-void catchmmapints (void);
-void readAccessFilenameBuffer (char const *, unsigned char const *);
-# else
-# define catchmmapints()
-# endif
-#endif
 uid_t ruid (void);
 bool myself (uid_t);
 #if defined HAVE_SETUID

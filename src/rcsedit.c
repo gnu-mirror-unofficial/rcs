@@ -35,6 +35,7 @@
 #endif
 #include <fcntl.h>
 #include "b-complain.h"
+#include "b-isr.h"
 #include "b-kwxout.h"
 
 #if !large_memory
@@ -832,8 +833,9 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
                         | OPEN_O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, \
                         OPEN_CREAT_READONLY)
 
-  catchints ();
-  ignoreints ();
+  ISR_ENABLE ();
+  ISR_DO (CATCHINTS);
+  IGNOREINTS ();
 
   /* Create a lock file for an RCS file.  This should be atomic,
      i.e.  if two processes try it simultaneously, at most one
@@ -878,7 +880,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       REPO (fd_lock) = fdescSafer;
     }
 
-  restoreints ();
+  RESTOREINTS ();
 
   errno = e;
   return f;
@@ -1189,7 +1191,7 @@ dorewrite (bool lockflag, int changed)
 #endif
           ORCSclose ();
           seteid ();
-          ignoreints ();
+          IGNOREINTS ();
 #if BAD_CREAT0
           if (nr)
             {
@@ -1201,7 +1203,7 @@ dorewrite (bool lockflag, int changed)
           r = un_link (lockname);
           e = errno;
           keepdirtemp (lockname);
-          restoreints ();
+          RESTOREINTS ();
           setrid ();
           if (r != 0)
             syserror (e, lockname);
@@ -1240,7 +1242,7 @@ donerewrite (int changed, time_t newRCStime)
         RWARN ("breaking hard link");
       aflush (FLOW (rewr));
       seteid ();
-      ignoreints ();
+      IGNOREINTS ();
       r = chnamemod (&FLOW (rewr), newRCSname, REPO (filename), changed,
                      REPO (stat).st_mode & (mode_t) ~(S_IWUSR | S_IWGRP | S_IWOTH),
                      newRCStime);
@@ -1251,7 +1253,7 @@ donerewrite (int changed, time_t newRCStime)
       le = errno;
       keepdirtemp (lockname);
 #endif
-      restoreints ();
+      RESTOREINTS ();
       setrid ();
       if (r != 0)
         {

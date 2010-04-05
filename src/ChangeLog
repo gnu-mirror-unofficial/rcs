@@ -1,3 +1,36 @@
+2010-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Overhaul interrupt handling.
+
+	Here, "I" means "#include "b-isr.h"";
+	and "U" means "Use `IGNOREINTS', `RESTOREINTS'";
+	and "E (foo)" means "Use `ISR_ENABLE', `ISR_DO (foo)'".
+	* b-isr.h: New file.
+	* b-isr.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-isr.h, b-isr.c.
+	* base.h (behavior): Add to this struct member `isr'.
+	(catchints, ignoreints, restoreints): Delete func decls.
+	[HAVE_MMAP && large_memory && has_NFS && MMAP_SIGNAL]
+	(catchmmapints, readAccessFilenameBuffer): Likewise.
+	[HAVE_MMAP && large_memory && !(has_NFS && MMAP_SIGNAL)]
+	(catchmmapints): Delete macro.
+	* ci.c: I.
+	(main): U.
+	* co.c: I.
+	(main): U.
+	* rcsedit.c: I.
+	(rcswriteopen): U; E (CATCHINTS).
+	(dorewrite, donerewrite): U.
+	* rcsfnms.c (maketemp): Remove spurious isr-enabling.
+	* rcslex.c: I.
+	(fd2_RILE): E (CATCHMMAPINTS); use `access_page'.
+	* rcsutil.c: I; don't #include <signal.h>, "sig2str.h".
+	(heldsignal, holdlevel, unsupported_SA_SIGINFO, bufsiginfo)
+	(heldsiginfo, accessName, regsigs, mmapsigs): Delete vars.
+	(readAccessFilenameBuffer, complain_signal, catchsig, catchsigaction)
+	(ignoreints, restoreints, check_sig, setup_catchsig, catchints)
+	(catchmmapints): Delete funcs.
+
 2010-04-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Fix bug: Don't #undef MMAP_SIGNAL.

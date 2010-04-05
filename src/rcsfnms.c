@@ -215,7 +215,6 @@ maketemp (int n)
   if (t)
     return t;
 
-  catchints ();
   bufautobegin (&rv);
   set_temporary_file_name (&rv, NULL);
   t = testalloc (rv.size);

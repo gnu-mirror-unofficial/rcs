@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "co.help"
 #include "b-complain.h"
+#include "b-isr.h"
 
 static char const quietarg[] = "-q";
 
@@ -750,10 +751,10 @@ main (int argc, char **argv)
             time_t t = mtimeflag
               && newdate ? date2time (newdate) : (time_t) - 1;
             aflush (neworkptr);
-            ignoreints ();
+            IGNOREINTS ();
             r = chnamemod (&neworkptr, neworkname, MANI (filename), 1, m, t);
             keepdirtemp (neworkname);
-            restoreints ();
+            RESTOREINTS ();
             if (r != 0)
               {
                 syserror_errno (MANI (filename));
