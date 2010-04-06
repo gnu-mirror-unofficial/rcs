@@ -723,15 +723,6 @@ getfullRCSname (void)
   else
     {
       static struct buf rcsbuf;
-#if needs_getabsname
-
-      bufalloc (&rcsbuf, SIZEABLE_PATH + 1);
-      while (getabsname (REPO (filename), rcsbuf.string, rcsbuf.size) != 0)
-        if (errno == ERANGE)
-          bufalloc (&rcsbuf, rcsbuf.size << 1);
-        else
-          fatal_sys ("getabsname");
-#else  /* !needs_getabsname */
       static char const *wdptr;
       static struct buf wdbuf;
       static size_t wdlen, rsiz;
@@ -754,7 +745,6 @@ getfullRCSname (void)
                 && SAME_INODE (PWDstat, dotstat)))
             {
               bufalloc (&wdbuf, SIZEABLE_PATH + 1);
-#if defined HAVE_GETCWD || !defined HAVE_GETWD
               while (!(d = getcwd (wdbuf.string, wdbuf.size)))
                 if (errno == ERANGE)
                   bufalloc (&wdbuf, wdbuf.size << 1);
@@ -762,11 +752,6 @@ getfullRCSname (void)
                   break;
                 else
                   fatal_sys ("getcwd");
-#else  /* !(defined HAVE_GETCWD || !defined HAVE_GETWD) */
-              d = getwd (wdbuf.string);
-              if (!d && !(d = PWD))
-                fatal_sys ("getwd");
-#endif  /* !(defined HAVE_GETCWD || !defined HAVE_GETWD) */
             }
           wdlen = dir_useful_len (d);
           d[wdlen] = 0;
@@ -788,7 +773,6 @@ getfullRCSname (void)
       d += dlen;
       *d++ = SLASH;
       strncpy (d, r, rsiz);
-#endif  /* !needs_getabsname */
       return rcsbuf.string;
     }
 }
@@ -809,7 +793,7 @@ isSLASH (int c)
 #endif
 }
 
-#if !defined HAVE_GETCWD && !defined HAVE_GETWD
+#if !defined HAVE_GETCWD
 char *
 getcwd (char *path, size_t size)
 {
@@ -934,7 +918,7 @@ getcwd (char *path, size_t size)
   *p = '\0';
   return path;
 }
-#endif  /* !defined HAVE_GETCWD && !defined HAVE_GETWD */
+#endif  /* !defined HAVE_GETCWD */
 
 #ifdef PAIRTEST
 /* This is a test program for `pairnames' and `getfullRCSname'.  */

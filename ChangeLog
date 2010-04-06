@@ -1,5 +1,11 @@
 2010-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Ignore `getwd', `getabsname'.
+
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Remove `getwd'.
+
+2010-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `same-inode'.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add `same-inode'.

@@ -227,7 +227,6 @@ AC_CHECK_FUNCS_ONCE([
   getcwd
   getpwuid
   getuid
-  getwd
   madvise
   mkstemp
   mmap

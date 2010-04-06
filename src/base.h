@@ -128,9 +128,6 @@ enum kwsub
 /* Does `setreuid' work?  See top-level README.  */
 #define has_setreuid 0
 
-/* Must we define getabsname?  */
-#define needs_getabsname 0
-
 /* Might NFS be used?  */
 #define has_NFS 1
 

@@ -1,5 +1,14 @@
 2010-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Ignore `getwd', `getabsname'.
+
+	* base.h (needs_getabsname): Delete #define.
+	* rcsfnms.c (getfullRCSname): Remove #if needs_getabsname block.
+	Remove preproc cond block that falls back to `getwd'.
+	[!HAVE_GETCWD] (getcwd): Simplify surrounding preproc cond.
+
+2010-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `same-inode'.
 
 	Here, all .c files have implicit "#include "same-inode.h"".
