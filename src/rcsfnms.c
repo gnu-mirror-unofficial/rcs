@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include "same-inode.h"
 #include "b-complain.h"
 
 struct manifestation manifestation;
@@ -750,7 +751,7 @@ getfullRCSname (void)
                 && ROOTPATH (PWD)
                 && stat (PWD, &PWDstat) == 0
                 && stat (".", &dotstat) == 0
-                && same_file (PWDstat, dotstat)))
+                && SAME_INODE (PWDstat, dotstat)))
             {
               bufalloc (&wdbuf, SIZEABLE_PATH + 1);
 #if defined HAVE_GETCWD || !defined HAVE_GETWD

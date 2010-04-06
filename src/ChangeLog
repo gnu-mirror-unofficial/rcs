@@ -1,5 +1,17 @@
 2010-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `same-inode'.
+
+	Here, all .c files have implicit "#include "same-inode.h"".
+	* base.h (same_file): Delete macro.
+	* ci.c (main): Use `SAME_INODE'.
+	* co.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsedit.c (chnamemod): Likewise.
+	* rcsfnms.c (getfullRCSname): Likewise.
+
+2010-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Overhaul interrupt handling.
 
 	Here, "I" means "#include "b-isr.h"";

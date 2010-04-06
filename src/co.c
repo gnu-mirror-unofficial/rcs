@@ -24,6 +24,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include "same-inode.h"
 #include "co.help"
 #include "b-complain.h"
 #include "b-isr.h"
@@ -609,7 +610,7 @@ main (int argc, char **argv)
         else
           {
             workstatstat = stat (MANI (filename), &workstat);
-            if (workstatstat == 0 && same_file (REPO (stat), workstat))
+            if (workstatstat == 0 && SAME_INODE (REPO (stat), workstat))
               {
                 RERR ("RCS file is the same as working file %s.",
                       MANI (filename));

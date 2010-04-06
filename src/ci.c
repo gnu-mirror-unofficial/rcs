@@ -26,6 +26,7 @@
 #include <ctype.h>                      /* isdigit */
 #include <stdlib.h>
 #include <unistd.h>
+#include "same-inode.h"
 #include "ci.help"
 #include "b-complain.h"
 #include "b-isr.h"
@@ -849,7 +850,7 @@ main (int argc, char **argv)
 
         if (FLOW (from))
           {
-            if (same_file (REPO (stat), workstat))
+            if (SAME_INODE (REPO (stat), workstat))
               {
                 RERR ("RCS file is the same as working file %s.",
                       MANI (filename));

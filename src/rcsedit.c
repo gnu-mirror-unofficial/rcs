@@ -34,6 +34,7 @@
 #include <utime.h>
 #endif
 #include <fcntl.h>
+#include "same-inode.h"
 #include "b-complain.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
@@ -1002,7 +1003,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 
     if (stat (to, &tostat) != 0)
       return -1;
-    if (!same_file (st, tostat))
+    if (!SAME_INODE (st, tostat))
       {
         errno = EIO;
         return -1;

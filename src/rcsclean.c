@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include "same-inode.h"
 #include "rcsclean.help"
 #include "b-complain.h"
 
@@ -251,7 +252,7 @@ main (int argc, char **argv)
               && (workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat))))
           continue;
 
-        if (same_file (REPO (stat), workstat))
+        if (SAME_INODE (REPO (stat), workstat))
           {
             RERR ("RCS file is the same as working file %s.", MANI (filename));
             continue;
