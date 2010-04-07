@@ -1,5 +1,11 @@
 2010-04-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[test] Test rlog with two (working) filenames.
+
+	* alive.test: Add a simple test with two filenames.
+
+2010-04-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `fbuf_save' more.
 
 	* rcsfnms.c (bufremember): Use `fbuf_save'.
