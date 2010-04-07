@@ -78,8 +78,21 @@ test -r $RCSfile || {
 rlog a.c >/dev/null || { echo "#rlog failed on empty RCS file"; exit 1; }
 rm -f $RCSfile || exit 2
 
+mm1='This is a log message that
+spans multiple lines but does NOT
+end in newline.'
+mm2="
+
+$mm1
+
+Actually, for THIS log message, that is not entirely true;
+we prefix and postfix several spurious newlines.
+
+
+"
+
 cp a.11 a.c &&
-ci -ta.11 -mm $q a.c &&
+ci -ta.11 -m"$mm1" $q a.c &&
 test -r $RCSfile &&
 rcs -L $q a.c || { echo "#ci+rcs -L failed"; exit 1; }
 test ! -f a.c || { echo "#ci did not remove working file"; exit 1; }
@@ -91,7 +104,7 @@ do
 done
 
 cp a.12 a.c &&
-ci -mm $q a.c &&
+ci -m"$mm2" $q a.c &&
 co $q a.c &&
 $diff a.12 a.c || { echo "#ci+co failed"; exit 1; }
 
