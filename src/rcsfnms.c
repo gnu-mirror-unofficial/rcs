@@ -363,7 +363,18 @@ bufremember (struct buf *b, size_t s)
   struct cbuf cb;
 
   if ((cb.size = s))
-    cb.string = fremember (trealloc (char, b->string, s));
+    {
+      size_t orig = b->size;
+      char *saved;
+
+      /* Temporarily jam the size so that `fbuf_save' can DTRT.  */
+      b->size = s;
+      saved = fbuf_save (b);
+      b->size = orig;
+      /* Also, explicitly terminate the string.  */
+      saved[s] = '\0';
+      cb.string = saved;
+    }
   else
     {
       /* Abstraction violation; not really auto.  */

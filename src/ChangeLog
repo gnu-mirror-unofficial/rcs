@@ -1,5 +1,11 @@
 2010-04-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `fbuf_save' more.
+
+	* rcsfnms.c (bufremember): Use `fbuf_save'.
+
+2010-04-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[test] Test multi-line log messages.
 
 	* alive.test: Make some log messages multi-line.
