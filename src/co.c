@@ -29,6 +29,8 @@
 #include "b-complain.h"
 #include "b-isr.h"
 
+struct top *top;
+
 static char const quietarg[] = "-q";
 
 static char const *expandarg, *suffixarg, *versionarg, *zonearg;
@@ -436,7 +438,7 @@ main (int argc, char **argv)
 #endif
 
   CHECK_HV ();
-  unbuffer_standard_error ();
+  gnurcs_init ();
 
   setrid ();
   author = date = rev = state = NULL;

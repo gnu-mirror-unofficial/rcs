@@ -26,6 +26,8 @@
 #include "rcs.help"
 #include "b-complain.h"
 
+struct top *top;
+
 struct Lockrev
 {
   char const *revno;
@@ -1140,7 +1142,7 @@ main (int argc, char **argv)
   struct Status *curstate;
 
   CHECK_HV ();
-  unbuffer_standard_error ();
+  gnurcs_init ();
 
   nosetid ();
 

@@ -28,6 +28,8 @@
 #include "rcsclean.help"
 #include "b-complain.h"
 
+struct top *top;
+
 static RILE *workptr;
 static int exitstatus;
 
@@ -158,7 +160,7 @@ main (int argc, char **argv)
   struct stat workstat;
 
   CHECK_HV ();
-  unbuffer_standard_error ();
+  gnurcs_init ();
 
   setrid ();
 

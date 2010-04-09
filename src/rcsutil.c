@@ -34,8 +34,18 @@
 #include <pwd.h>
 #endif
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-isr.h"
 #include "gnu-h-v.h"
+
+void
+gnurcs_init (void)
+{
+  shared = make_space ("shared");
+  single = make_space ("single");
+  top = memset (alloc (shared, "top", sizeof (*top)), 0, sizeof (*top));
+  unbuffer_standard_error ();
+}
 
 /* List of blocks allocated with `ftestalloc'.  These blocks can be
    freed by ffree when we're done with the current file.  We could put
@@ -721,11 +731,5 @@ now (void)
     fatal_sys ("time");
   return t;
 }
-
-/* Behavior control.  */
-struct behavior behavior;
-
-/* Flow.  */
-struct flow flow;
 
 /* rcsutil.c ends here */

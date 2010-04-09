@@ -32,9 +32,6 @@
 #include "same-inode.h"
 #include "b-complain.h"
 
-struct manifestation manifestation;
-struct repository repository;
-
 static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
 

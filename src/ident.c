@@ -26,6 +26,8 @@
 #include "ident.help"
 #include "b-complain.h"
 
+struct top *top;
+
 static exiting void
 exiterr (void)
 {
@@ -165,7 +167,7 @@ main (int argc, char **argv)
   char const *a;
 
   CHECK_HV ();
-  unbuffer_standard_error ();
+  gnurcs_init ();
 
   while ((a = *++argv) && *a == '-')
     while (*++a)

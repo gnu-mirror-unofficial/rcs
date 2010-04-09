@@ -1,5 +1,35 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Consolidate top-level structs; dynamically allocate in `main'.
+
+	* base.h (behavior): Delete var decl.
+	(manifestation, parse_state, repository, flow): Likewise.
+	(top): New struct.
+	(top): New pointer to `struct top'.
+	(BE, MANI, LEX, REPO, FLOW): Update.
+	(gnurcs_init): New func decl.
+	* b-complain.c (vcomplain): Don't flush if `top' is NULL.
+	* rcsutil.c: #include "b-divvy.h".
+	(gnurcs_init): New func.
+	(behavior): Delete `struct behavior'.
+	(flow): Delete `struct flow'.
+	* rcsfnms.c (manifestation): Delete `struct manifestation'.
+	(repository): Delete `struct repository'.
+	* rcslex.c (parse_state): Delete `struct parse_state'.
+	* ci.c (top): New pointer to `struct top'.
+	(main): Don't call `unbuffer_standard_error';
+	instead call `gnurcs_init'.
+	* co.c: Likewise.
+	* ident.c: Likewise.
+	* merge.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: make_space (et al)
 
 	* b-divvy.h: New file.

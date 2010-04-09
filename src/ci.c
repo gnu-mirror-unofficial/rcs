@@ -41,6 +41,8 @@
 #define ftruncate(fd,length) (-1)
 #endif
 
+struct top *top;
+
 struct Symrev
 {
   char const *ssymbol;
@@ -629,7 +631,7 @@ main (int argc, char **argv)
   struct hshentry *workdelta;
 
   CHECK_HV ();
-  unbuffer_standard_error ();
+  gnurcs_init ();
 
   setrid ();
 

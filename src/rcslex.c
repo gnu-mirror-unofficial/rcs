@@ -30,8 +30,6 @@
 #include "b-complain.h"
 #include "b-isr.h"
 
-struct parse_state parse_state;
-
 /* Pointer to next hash entry, set by `lookup'.  */
 static struct hshentry *nexthsh;
 

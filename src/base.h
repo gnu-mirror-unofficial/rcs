@@ -606,7 +606,6 @@ struct behavior
 
   struct isr_scratch *isr;
 };
-extern struct behavior behavior;
 
 /* The working file is a manifestation of a particular revision.  */
 struct manifestation
@@ -638,7 +637,6 @@ struct manifestation
      -- expandline  */
   struct buf keyval;
 };
-extern struct manifestation manifestation;
 
 /* The parse state is used when reading the RCS file.  */
 struct parse_state
@@ -673,7 +671,6 @@ struct parse_state
      -- getdiffcmd
      -- getscript  */
 };
-extern struct parse_state parse_state;
 
 /* The RCS file is the repository of revisions, plus metadata.  */
 struct repository
@@ -725,7 +722,6 @@ struct repository
   /* Counter for deltas.
      -- getadmin  */
 };
-extern struct repository repository;
 
 /* Various data streams flow in and out of RCS programs.  */
 struct flow
@@ -751,20 +747,30 @@ struct flow
   /* The result file name.
      -- openfcopy swapeditfiles  */
 };
-extern struct flow flow;
 
-/* In the future we plan to change the above structures to be a part of
-   another (dynamically allocated) structure, a step towards libgnurcs.
+/* The top of the structure tree (NB: does not include `program').  */
+struct top
+{
+  struct behavior behavior;
+  struct manifestation manifestation;
+  struct parse_state parse_state;
+  struct repository repository;
+  struct flow flow;
+};
+
+extern struct top *top;
+
+/* In the future we might move `top' into another structure.
    These abstractions keep the invasiveness to a minimum.  */
 #define PROGRAM(x)    (program. x)
-#define BE(quality)   (behavior. quality)
-#define MANI(member)  (manifestation. member)
+#define BE(quality)   (top->behavior. quality)
+#define MANI(member)  (top->manifestation. member)
 #define PREV(which)   (MANI (prev). which)
-#define LEX(member)   (parse_state. member)
+#define LEX(member)   (top->parse_state. member)
 #define NEXT(which)   (LEX (next). which)
-#define REPO(member)  (repository. member)
+#define REPO(member)  (top->repository. member)
 #define ADMIN(part)   (REPO (admin). part)
-#define FLOW(member)  (flow. member)
+#define FLOW(member)  (top->flow. member)
 
 /* b-anchor */
 int recognize_kwsub (const char *, size_t);
@@ -943,6 +949,7 @@ void time2date (time_t, char[datesize]);
 void zone_set (char const *);
 
 /* rcsutil */
+void gnurcs_init (void);
 FILE *fopenSafer (char const *, char const *);
 char *cgetenv (char const *);
 char *fbuf_save (const struct buf *);

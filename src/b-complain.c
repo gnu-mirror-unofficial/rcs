@@ -31,12 +31,14 @@ unbuffer_standard_error (void)
 void
 vcomplain (char const *fmt, va_list args)
 {
-  fflush (MANI (standard_output)
-          ? MANI (standard_output)
-          : stdout);
+  if (top)
+    fflush (MANI (standard_output)
+            ? MANI (standard_output)
+            : stdout);
   vfprintf (stderr, fmt, args);
-  if (!BE (unbufferedp))
-    fflush (stderr);
+  if (top)
+    if (!BE (unbufferedp))
+      fflush (stderr);
 }
 
 void

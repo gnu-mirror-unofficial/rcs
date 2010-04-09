@@ -26,6 +26,8 @@
 #include "rlog.help"
 #include "b-complain.h"
 
+struct top *top;
+
 struct rcslockers
 {
   char const *login;
@@ -945,7 +947,7 @@ main (int argc, char **argv)
   int revno;
 
   CHECK_HV ();
-  unbuffer_standard_error ();
+  gnurcs_init ();
 
   descflag = selectflag = shownames = true;
   onlylockflag = onlyRCSflag = false;

@@ -23,6 +23,8 @@
 #include "merge.help"
 #include "b-complain.h"
 
+struct top *top;
+
 static char const usage[] =
   "\nmerge: usage: merge [-AeEpqxX3] [-L lab [-L lab [-L lab]]] file1 file2 file3";
 
@@ -68,7 +70,7 @@ main (int argc, char **argv)
   bool tostdout = false;
 
   CHECK_HV ();
-  unbuffer_standard_error ();
+  gnurcs_init ();
 
   labels = 0;
 
