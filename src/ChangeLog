@@ -1,5 +1,12 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Allocate `tempname' in `shared'.
+
+	* rcsfnms.c: #include "b-divvy.h".
+	(maketemp): Rewrite.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Allocate ISR scratch in `shared'.
 
 	* b-isr.c: #include "b-divvy.h".

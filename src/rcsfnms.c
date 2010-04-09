@@ -31,6 +31,7 @@
 #include <sys/wait.h>
 #include "same-inode.h"
 #include "b-complain.h"
+#include "b-divvy.h"
 
 static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
@@ -203,23 +204,20 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
 
 char const *
 maketemp (int n)
-/* Create a unique pathname using n and the process id and store it into the
-   `n'th slot in `tpnames'.  Because of storage in `tpnames', `tempunlink'
-   can unlink the file later.  Return a pointer to the pathname created.  */
+/* Create a unique filename and store it into the `n'th slot
+   in `tpnames' (so that `tempunlink' can unlink the file later).
+   Return a pointer to the filename created.  */
 {
-  struct buf rv;
-  char *t = tpnames[n];
+  if (!tpnames[n])
+    {
+      struct buf rv;
 
-  if (t)
-    return t;
-
-  bufautobegin (&rv);
-  set_temporary_file_name (&rv, NULL);
-  t = testalloc (rv.size);
-  strncpy (t, rv.string, rv.size);
-  bufautoend (&rv);
-  tpnames[n] = t;
-  return t;
+      bufautobegin (&rv);
+      set_temporary_file_name (&rv, NULL);
+      tpnames[n] = intern (shared, rv.string, rv.size);
+      bufautoend (&rv);
+    }
+  return tpnames[n];
 }
 
 void
