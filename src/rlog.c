@@ -306,8 +306,6 @@ readdeltalog (void)
    yet in `NEXT (tok)'; do not advance `NEXT (tok)'.  */
 {
   register struct hshentry *Delta;
-  struct buf logbuf;
-  struct cbuf cb;
 
   if (eoflex ())
     fatal_syntax ("missing delta log");
@@ -317,9 +315,7 @@ readdeltalog (void)
   getkeystring (Klog);
   if (Delta->log.string)
     fatal_syntax ("duplicate delta log");
-  bufautobegin (&logbuf);
-  cb = savestring (&logbuf);
-  Delta->log = bufremember (&logbuf, cb.size);
+  Delta->log = savestring ();
 
   ignorephrases (Ktext);
   getkeystring (Ktext);

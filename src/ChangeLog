@@ -1,5 +1,20 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use `single' space for log message handling.
+
+	* rcslex.c (savestring): Don't write to `target';
+	use `single' space instead.
+	* rcsgen.c (cleanlogmsg): Take first arg as `const'.
+	(scandeltatext): Update calls to `savestring', `cleanlogmsg'.
+	* rcs.c (scanlogtext): Likewise.
+	* rcssyn.c (Commleader): Delete now-unused `struct buf'.
+	(getadmin): Update calls to `savestring'.
+	* rlog.c (readdeltalog): Likewise.
+	* base.h (cleanlogmsg, savestring): Update func decls.
+	(manifestation): Delete now-unused member `log'.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use `pointer_array' more.
 
 	* rcsutil.c (getRCSINIT): Use `pointer_array'.

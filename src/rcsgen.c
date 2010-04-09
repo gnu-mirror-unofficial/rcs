@@ -54,8 +54,8 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
       getkeystring (Klog);
       if (needlog && delta == nextdelta)
         {
-          cb = savestring (&MANI (log));
-          delta->log = cleanlogmsg (MANI (log).string, cb.size);
+          cb = savestring ();
+          delta->log = cleanlogmsg (cb.string, cb.size);
           nextlex ();
           delta->igtext = getphrases (Ktext);
         }
@@ -146,27 +146,19 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
 }
 
 struct cbuf
-cleanlogmsg (char *m, size_t s)
+cleanlogmsg (char const *m, size_t s)
 {
-  register char *t = m;
-  register char const *f = t;
   struct cbuf r;
 
-  while (s)
-    {
-      --s;
-      if ((*t++ = *f++) == '\n')
-        while (m < --t)
-          if (t[-1] != ' ' && t[-1] != '\t')
-            {
-              *t++ = '\n';
-              break;
-            }
-    }
-  while (m < t && (t[-1] == ' ' || t[-1] == '\t' || t[-1] == '\n'))
-    --t;
+#define WHITESPACEP(c)  (' ' == c || '\t' == c || '\n' == c)
+  while (s && WHITESPACEP (*m))
+    s--, m++;
+  while (s && WHITESPACEP (m[s - 1]))
+    s--;
+#undef WHITESPACEP
+
   r.string = m;
-  r.size = t - m;
+  r.size = s;
   return r;
 }
 

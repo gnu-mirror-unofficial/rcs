@@ -362,9 +362,9 @@ scanlogtext (struct hshentry *delta, bool edit)
       getkeystring (Klog);
       if (nextdelta == cuttail)
         {
-          cb = savestring (&MANI (log));
+          cb = savestring ();
           if (!delta->log.string)
-            delta->log = cleanlogmsg (MANI (log).string, cb.size);
+            delta->log = cleanlogmsg (cb.string, cb.size);
           nextlex ();
           delta->igtext = getphrases (Ktext);
         }

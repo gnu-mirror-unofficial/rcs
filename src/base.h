@@ -629,10 +629,6 @@ struct manifestation
     char *state;
   } prev;
 
-  /* A buffer to accumulate text for `Log' substitution.
-     -- scanlogtext scandeltatext  */
-  struct buf log;
-
   /* A buffer to (temporarily) hold key values.
      -- expandline  */
   struct buf keyval;
@@ -836,7 +832,7 @@ int getcstdin (void);
 bool putdtext (struct hshentry const *, char const *, FILE *, bool);
 bool ttystdin (void);
 bool yesorno (bool, char const *, ...) printf_string (2, 3);
-struct cbuf cleanlogmsg (char *, size_t);
+struct cbuf cleanlogmsg (char const *, size_t);
 struct cbuf getsstdin (char const *, char const *,
                        char const *, struct buf *);
 void putdesc (bool, char *);
@@ -856,7 +852,7 @@ bool eoflex (void);
 bool getkeyopt (char const *);
 bool getlex (enum tokens);
 struct cbuf getphrases (char const *);
-struct cbuf savestring (struct buf *);
+struct cbuf savestring (void);
 struct hshentry *getnum (void);
 void Ifclose (RILE *);
 void Izclose (RILE **);

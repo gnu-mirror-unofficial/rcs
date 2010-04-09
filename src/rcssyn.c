@@ -30,8 +30,6 @@
 #define Ksuffix    KS (suffix)
 #endif
 
-static struct buf Commleader;
-
 static void
 getsemi (char const *key)
 /* Get a semicolon to finish off a phrase started by `key'.  */
@@ -63,7 +61,6 @@ getadmin (void)
   struct access **LastAccess;
   struct assoc **LastSymbol;
   struct rcslock **LastLock;
-  struct buf b;
   struct cbuf cb;
 
   REPO (ndelt) = 0;
@@ -164,7 +161,7 @@ getadmin (void)
     {
       if (NEXT (tok) == STRING)
         {
-          ADMIN (log_lead) = savestring (&Commleader);
+          ADMIN (log_lead) = savestring ();
           nextlex ();
         }
       getsemi (Kcomment);
@@ -175,11 +172,9 @@ getadmin (void)
     {
       if (NEXT (tok) == STRING)
         {
-          bufautobegin (&b);
-          cb = savestring (&b);
+          cb = savestring ();
           if ((BE (kws) = recognize_kwsub (cb.string, cb.size)) < 0)
             fatal_syntax ("unknown expand mode %.*s", (int) cb.size, cb.string);
-          bufautoend (&b);
           nextlex ();
         }
       getsemi (Kexpand);

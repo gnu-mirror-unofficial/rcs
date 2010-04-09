@@ -604,27 +604,22 @@ printstring (void)
 }
 
 struct cbuf
-savestring (struct buf *target)
-/* Copy a string terminated with `SDELIM' from file `FLOW (from)' to buffer
-   `target'.  Double `SDELIM' is replaced with `SDELIM'.  If `FLOW (to)'
-   is set, the string is also copied unchanged to `FLOW (to)'.  Do not
-   advance `nextlex' at the end.  Return a copy of `*target', except
-   with exact length.  */
+savestring (void)
+/* Return a `SDELIM'-terminated cbuf read from file `FLOW (from)',
+   replacing double `SDELIM' is with `SDELIM'.  If `FLOW (to)' is set,
+   also copy (unsubstituted) to `FLOW (to)'.  Do not advance `nextlex'
+   at the end.  The returned cbuf has exact length.  */
 {
   register int c;
   declarecache;
   register FILE *frew;
-  register char *tp;
   register RILE *fin;
-  char const *limit;
   struct cbuf r;
 
   fin = FLOW (from);
   frew = FLOW (to);
   setupcache (fin);
   cache (fin);
-  tp = target->string;
-  limit = tp + target->size;
   for (;;)
     {
       GETC (frew, c);
@@ -639,16 +634,13 @@ savestring (struct buf *target)
             {
               /* End of string.  */
               NEXT (c) = c;
-              r.string = target->string;
-              r.size = tp - r.string;
+              r.string = finish_string (single, &r.size);
               uncache (fin);
               return r;
             }
           break;
         }
-      if (tp == limit)
-        tp = bufenlarge (target, &limit);
-      *tp++ = c;
+      accumulate_byte (single, c);
     }
 }
 
