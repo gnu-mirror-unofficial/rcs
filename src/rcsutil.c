@@ -524,7 +524,7 @@ getRCSINIT (int argc, char **argv, char ***newargv)
             }
           break;
         }
-      *newargv = pp = tnalloc (char *, n);
+      *newargv = pp = pointer_array (shared, n);
       /* Copy program name.  */
       *pp++ = *argv++;
       for (p = q;;)

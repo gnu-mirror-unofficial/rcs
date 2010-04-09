@@ -1,5 +1,11 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use `pointer_array' more.
+
+	* rcsutil.c (getRCSINIT): Use `pointer_array'.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use spaces for `co -j' parsing.
 
 	* co.c: #include "b-divvy.h".
