@@ -1,5 +1,12 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use `shared' space for rcsdiff `diffvstr' construction.
+
+	* rcsdiff.c: #include "b-divvy.h".
+	(main): Use `shared' space for `diffvstr' construction.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use `single' space for log message handling.
 
 	* rcslex.c (savestring): Don't write to `target';

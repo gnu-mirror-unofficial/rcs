@@ -25,6 +25,7 @@
 #include <errno.h>
 #include "rcsdiff.help"
 #include "b-complain.h"
+#include "b-divvy.h"
 
 struct top *top;
 
@@ -161,7 +162,7 @@ main (int argc, char **argv)
 #endif
   char const *cov[10 + !DIFF_L];
   char const **diffv, **diffp, **diffpend;      /* argv for subsidiary diff */
-  char const **pp, *p, *diffvstr;
+  char const **pp, *diffvstr = NULL;
   struct buf commarg;
   struct buf numericrev;        /* expanded revision number */
   struct hshentries *gendeltas; /* deltas to be generated */
@@ -188,7 +189,9 @@ main (int argc, char **argv)
 
   /* Room for runv extra + args [+ --binary] [+ 2 labels]
      + 1 file + 1 trailing null.  */
-  diffv = tnalloc (char const *, 1 + argc + !!OPEN_O_BINARY + 2 * DIFF_L + 2);
+  diffv = pointer_array (shared, (1 + argc
+                                  + !!OPEN_O_BINARY
+                                  + 2 * DIFF_L + 2));
   diffp = diffv + 1;
   *diffp++ = prog_diff;
 
@@ -312,17 +315,20 @@ main (int argc, char **argv)
     }
   /* (End of option processing.)  */
 
-  for (pp = diffv + 2, c = 0; pp < diffp;)
-    c += strlen (*pp++) + 1;
-  diffvstr = a = tnalloc (char, c + 1);
-  for (pp = diffv + 2; pp < diffp;)
+  if (! BE (quiet))
     {
-      p = *pp++;
-      *a++ = ' ';
-      while ((*a = *p++))
-        a++;
+      size_t len;
+      char const *p;
+
+      for (pp = diffv + 2; pp < diffp;)
+        {
+          p = *pp++;
+          accumulate_byte (shared, ' ');
+          while (*p)
+            accumulate_byte (shared, *p++);
+        }
+      diffvstr = finish_string (shared, &len);
     }
-  *a = '\0';
 
 #if DIFF_L
   diff_label1 = diff_label2 = NULL;
