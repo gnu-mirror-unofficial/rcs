@@ -1,5 +1,11 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `shared' space for filename arg normalization.
+
+	* rcsdiff.c (main): Use `shared' space for prepending "./".
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Get rid of `trealloc'.
 
 	* rcsedit.c (insertline): Use `testrealloc' directly.

@@ -460,13 +460,9 @@ main (int argc, char **argv)
             diffp[1] = MANI (filename);
             if (*MANI (filename) == '-')
               {
-                size_t wsiz = strlen (MANI (filename)) + 1;
-                char *dp = ftestalloc (wsiz + 2);
-
-                diffp[1] = dp;
-                *dp++ = '.';
-                *dp++ = SLASH;
-                strncpy (dp, MANI (filename), wsiz);
+                accumulate_byte (shared, '.');
+                accumulate_byte (shared, SLASH);
+                diffp[1] = intern0 (shared, MANI (filename));
               }
           }
         else
