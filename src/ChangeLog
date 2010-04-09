@@ -1,5 +1,29 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use `single' space for file(pair)-related allocation.
+
+	* base.h (fremember): Delete func decl.
+	(ftalloc): Update.
+	(ftnalloc): Delete macro.
+	(ffree1): Delete func decl.
+	(free_NEXT_str): New func decl.
+	* rcsdiff.c (main): Use `ftestalloc'.
+	* rcslex.c: #include "b-divvy.h".
+	(getkeyopt): Use `free_NEXT_str'.
+	(getphrases): Likewise.  Also, use `intern0'.
+	* rcssyn.c: Use `free_NEXT_str'.
+	* rcsutil.c (alloclist): Delete struct.
+	(alloced): Delete pointer to `struct alloclist'.
+	(fremember): Delete func.
+	(ftestalloc): Use `alloc'.
+	(ffree): Use `forget'.
+	(ffree1): Delete func.
+	(free_NEXT_str): New func.
+	(str_save): Use `intern0', into `shared'.
+	(fbuf_save): Use `intern0', into `single'.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Allocate `tempname' in `shared'.
 
 	* rcsfnms.c: #include "b-divvy.h".

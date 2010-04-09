@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-isr.h"
 
 /* Pointer to next hash entry, set by `lookup'.  */
@@ -295,7 +296,7 @@ getkeyopt (char const *key)
   if (NEXT (tok) == ID && strcmp (key, NEXT (str)) == 0)
     {
       /* Match found.  */
-      ffree1 (NEXT (str));
+      free_NEXT_str ();
       nextlex ();
       return true;
     }
@@ -398,7 +399,7 @@ getphrases (char const *key)
       p = b.string + strlen (b.string);
       limit = b.string + b.size;
 #endif  /* !large_memory */
-      ffree1 (NEXT (str));
+      free_NEXT_str ();
       c = NEXT (c);
       for (;;)
         {
@@ -496,13 +497,9 @@ getphrases (char const *key)
                     break;
                   default:
                     NEXT (c) = c;
-                    {
-                      /* FIXME: {Re-}move redundant `strlen' call.
-                         All callers are key = Kfoo (constant strings).  */
-                      size_t ksiz = strlen (key) + 1;
-
-                      NEXT (str) = strncpy (ftestalloc (ksiz), key, ksiz);
-                    }
+                    /* FIXME: {Re-}move redundant `strlen' call.
+                       All callers are key = Kfoo (constant strings).  */
+                    NEXT (str) = intern0 (single, key);
                     NEXT (tok) = ID;
                     uncache (fin);
                     goto returnit;

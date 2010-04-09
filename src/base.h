@@ -959,14 +959,12 @@ int fdSafer (int);
 int getRCSINIT (int, char **, char ***);
 int run (int, char const *, ...);
 int runv (int, char const *, char const **);
-void *fremember (void *);
 void *ftestalloc (size_t);
 void *testalloc (size_t);
 void *testrealloc (void *, size_t);
-#define ftalloc(T)  ftnalloc (T, 1)
+#define ftalloc(T)  ((T*) ftestalloc (sizeof (T)))
 #define talloc(T)  tnalloc (T, 1)
 
-#define ftnalloc(T,n)  ((T*) ftestalloc (sizeof (T) * (n)))
 #define tnalloc(T,n)  ((T*) testalloc (sizeof (T) * (n)))
 #define trealloc(T,p,n)  ((T*) testrealloc ((void *)(p), sizeof (T) * (n)))
 #define tfree(p)  free ((void *)(p))
@@ -975,7 +973,7 @@ time_t now (void);
 void awrite (char const *, size_t, FILE *);
 void fastcopy (RILE *, FILE *);
 void ffree (void);
-void ffree1 (char const *);
+void free_NEXT_str (void);
 void setRCSversion (char const *);
 uid_t ruid (void);
 bool myself (uid_t);

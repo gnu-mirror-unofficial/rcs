@@ -47,17 +47,6 @@ gnurcs_init (void)
   unbuffer_standard_error ();
 }
 
-/* List of blocks allocated with `ftestalloc'.  These blocks can be
-   freed by ffree when we're done with the current file.  We could put
-   the free block inside `struct alloclist', rather than a pointer to
-   the free block, but that would be less portable.  */
-struct alloclist
-{
-  void *alloc;
-  struct alloclist *nextalloc;
-};
-static struct alloclist *alloced;
-
 static void *
 okalloc (void * p)
 {
@@ -81,59 +70,30 @@ testrealloc (void *ptr, size_t size)
 }
 
 void *
-fremember (void *ptr)
-/* Remember `ptr' in `alloced' so that it can be freed later.
-   Return `ptr'.  */
-{
-  register struct alloclist *q = talloc (struct alloclist);
-
-  q->nextalloc = alloced;
-  alloced = q;
-  return q->alloc = ptr;
-}
-
-void *
 ftestalloc (size_t size)
-/* Allocate a block, putting it in `alloced' so it can be freed later.  */
+/* Allocate a block from the `single' space.  */
 {
-  return fremember (testalloc (size));
+  return alloc (single, __func__, size);
 }
 
 void
 ffree (void)
-/* Free all blocks allocated with `ftestalloc'.  */
+/* Free all blocks in the `single' space.  */
 {
-  register struct alloclist *p, *q;
-
-  for (p = alloced; p; p = q)
-    {
-      q = p->nextalloc;
-      tfree (p->alloc);
-      tfree (p);
-    }
-  alloced = NULL;
+  forget (single);
 }
 
 void
-ffree1 (register char const *f)
-/* Free the block `f', which was allocated by `ftestalloc'.  */
+free_NEXT_str (void)
 {
-  register struct alloclist *p, **a = &alloced;
-
-  while ((p = *a)->alloc != f)
-    a = &p->nextalloc;
-  *a = p->nextalloc;
-  tfree (p->alloc);
-  tfree (p);
+  brush_off (single, (void *) NEXT (str));
 }
 
 char *
 str_save (char const *s)
 /* Save `s' in permanently allocated storage.  */
 {
-  size_t ssiz = strlen (s) + 1;
-
-  return strncpy (tnalloc (char, ssiz), s, ssiz);
+  return intern0 (shared, s);
 }
 
 char *
@@ -141,7 +101,7 @@ fbuf_save (const struct buf *b)
 /* Save `b->string' in storage that will be deallocated
    when we're done with this file.  */
 {
-  return strncpy (ftestalloc (1 + b->size), b->string, b->size);
+  return intern0 (single, b->string);
 }
 
 char *

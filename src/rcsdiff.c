@@ -455,7 +455,7 @@ main (int argc, char **argv)
             if (*MANI (filename) == '-')
               {
                 size_t wsiz = strlen (MANI (filename)) + 1;
-                char *dp = ftnalloc (char, wsiz + 2);
+                char *dp = ftestalloc (wsiz + 2);
 
                 diffp[1] = dp;
                 *dp++ = '.';

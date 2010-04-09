@@ -208,7 +208,7 @@ ignorephrases (const char *key)
               break;
             case ID:
             case NUM:
-              ffree1 (NEXT (str));
+              free_NEXT_str ();
               continue;
             case STRING:
               readstring ();
