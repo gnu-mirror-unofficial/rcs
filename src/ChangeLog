@@ -1,5 +1,17 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use spaces for `co -j' parsing.
+
+	* co.c: #include "b-divvy.h".
+	(joinlength): Delete var.
+	(link, jstuff): New structs.
+	(jstuff): New static `struct jstuff'.
+	(jpush): New func.
+	(addjoin): Use `jpush'.
+	(preparejoin): Likewise.  Rework `joinlist' init.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use `shared' space for `merge' arg normalization.
 
 	* merger.c: #include "b-divvy.h".

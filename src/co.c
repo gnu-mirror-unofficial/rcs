@@ -27,6 +27,7 @@
 #include "same-inode.h"
 #include "co.help"
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-isr.h"
 
 struct top *top;
@@ -36,12 +37,25 @@ static char const quietarg[] = "-q";
 static char const *expandarg, *suffixarg, *versionarg, *zonearg;
 /* Revisions to be joined.  */
 static char const **joinlist;
-static int joinlength;
 static FILE *neworkptr;
 static int exitstatus;
 static bool forceflag;
 /* Index of last element in `joinlist'.  */
 static int lastjoin;
+
+/* Other data structures and state for -j.  (TODO: Consolidate all.)   */
+struct link
+{
+  char const  *entry;
+  struct link *next;
+};
+struct jstuff
+{
+  struct divvy *jstuff;
+  struct link *prev, *cur;
+};
+static struct jstuff jstuff;
+
 /* -1 -> unlock, 0 -> do nothing, 1 -> lock.  */
 static int lockflag;
 static bool mtimeflag;
@@ -145,6 +159,16 @@ rmlock (struct hshentry const *delta)
     return 0;
 }
 
+static void
+jpush (char const *rev)
+{
+  jstuff.cur = pointer_array (jstuff.jstuff, 2);
+  jstuff.cur->entry = rev;
+  jstuff.cur->next = jstuff.prev;
+  jstuff.prev = jstuff.cur;
+  lastjoin++;
+}
+
 static char *
 addjoin (char *joinrev)
 /* Add the number of `joinrev' to `joinlist'; return address
@@ -184,7 +208,7 @@ addjoin (char *joinrev)
   *j = terminator;
   if (d)
     {
-      joinlist[++lastjoin] = d->num;
+      jpush (d->num);
       return j;
     }
   return NULL;
@@ -231,8 +255,14 @@ getancestor (char const *r1, char const *r2)
 static bool
 preparejoin (register char *j)
 /* Parse join list `j' and place pointers to the
-   revision numbers into `joinlist'.  */
+   revision numbers into `joinlist'.
+   Set `lastjoin' to the last index of the list.  */
 {
+  bool rv = true;
+
+  jstuff.jstuff = make_space ("jstuff");
+  jstuff.prev = jstuff.cur = NULL;
+
   lastjoin = -1;
   for (;;)
     {
@@ -240,12 +270,6 @@ preparejoin (register char *j)
         j++;
       if (*j == '\0')
         break;
-      if (lastjoin >= joinlength - 2)
-        {
-          joinlist = (joinlength *= 2) == 0
-            ? tnalloc (char const *, joinlength = 16)
-            : trealloc (char const *, joinlist, joinlength);
-        }
       if (!(j = addjoin (j)))
         return false;
       while ((*j == ' ') || (*j == '\t'))
@@ -269,12 +293,16 @@ preparejoin (register char *j)
         {
           if (lastjoin == 0)            /* first pair */
             {
+              char const **atone = &jstuff.cur->entry;
+
               /* Common ancestor missing.  */
-              joinlist[1] = joinlist[0];
-              lastjoin = 1;
+              jpush (*atone);
               /* Derive common ancestor.  */
-              if (! (joinlist[0] = getancestor (targetdelta->num, joinlist[1])))
-                return false;
+              if (! (*atone = getancestor (targetdelta->num, *atone)))
+                {
+                  rv = false;
+                  goto done;
+                }
             }
           else
             {
@@ -284,7 +312,18 @@ preparejoin (register char *j)
     }
   if (lastjoin < 1)
     RFATAL ("empty join");
-  return true;
+ done:
+
+  joinlist = pointer_array (shared, 1 + lastjoin);
+  for (int i = 0; i <= lastjoin; i++)
+    {
+      joinlist[lastjoin - i] = jstuff.cur->entry;
+      jstuff.cur = jstuff.cur->next;
+    }
+  close_space (jstuff.jstuff);
+  jstuff.jstuff = NULL;
+  jstuff.prev = jstuff.cur = NULL;
+  return rv;
 }
 
 static bool
