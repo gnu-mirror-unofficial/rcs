@@ -42,7 +42,7 @@ extern void isr_do (struct isr_scratch *scratch,
 /* Idioms.  */
 
 #define ISR_ENABLE()    if (! ISR_SCRATCH) ISR_SCRATCH = isr_init (&BE (quiet))
-#define ISR_DISABLE()   tfree (ISR_SCRATCH), ISR_SCRATCH = NULL
+#define ISR_DISABLE()   ISR_SCRATCH = NULL
 #define ISR_DO(action)  isr_do (ISR_SCRATCH, ISR_ ## action)
 
 #define IGNOREINTS()   ISR_DO (IGNOREINTS)

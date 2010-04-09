@@ -1,5 +1,13 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Allocate ISR scratch in `shared'.
+
+	* b-isr.c: #include "b-divvy.h".
+	(isr_init): Allocate "isr scratch" in `shared'.
+	* b-isr.h (ISR_DISABLE): Don't `tfree' isr scratch.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use spaces for rcsclean `get_directory'.
 
 	* rscclean.c: #include "b-divvy.h".

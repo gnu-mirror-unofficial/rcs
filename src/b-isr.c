@@ -31,6 +31,7 @@
 #include <string.h>
 #include "sig2str.h"
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-isr.h"
 
 /* Avoid calling `sprintf' etc., in case they're not reentrant.  */
@@ -289,7 +290,8 @@ isr_init (bool *be_quiet)
 {
   /* Allocate a contiguous range for the scratch space,
      plus (possibly) space for the alternate sig stack.  */
-  struct isr_scratch *scratch = testalloc (SCRATCH_SIZE + ISR_STACK_SIZE);
+  struct isr_scratch *scratch = alloc (shared, "isr scratch",
+                                       SCRATCH_SIZE + ISR_STACK_SIZE);
 
 #if ISR_STACK_SIZE
   stack_t ss =
