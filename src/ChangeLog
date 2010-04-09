@@ -1,5 +1,12 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use spaces for rcsclean `get_directory'.
+
+	* rscclean.c: #include "b-divvy.h".
+	(get_directory): Rewrite.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Consolidate top-level structs; dynamically allocate in `main'.
 
 	* base.h (behavior): Delete var decl.

@@ -27,6 +27,7 @@
 #include "same-inode.h"
 #include "rcsclean.help"
 #include "b-complain.h"
+#include "b-divvy.h"
 
 struct top *top;
 
@@ -71,6 +72,12 @@ unlock (struct hshentry *delta)
   return false;
 }
 
+struct link
+{
+  char        *entry;
+  struct link *next;
+};
+
 static int
 get_directory (char const *dirname, char ***aargv)
 /* Put a vector of all DIRNAME's directory entries names into *AARGV.
@@ -79,43 +86,37 @@ get_directory (char const *dirname, char ***aargv)
    Allocate the storage for the vector and entry names.
    Do not sort the names.  Do not include '.' and '..'.  */
 {
-  int i, entries = 0, entries_max = 64;
-  size_t chars = 0, chars_max = 1024;
-  size_t *offset = tnalloc (size_t, entries_max);
-  char *a = tnalloc (char, chars_max), **p;
   DIR *d;
   struct dirent *e;
+  struct divvy *justme = make_space ("justme");
+  struct link *prev = NULL, *cur = NULL;
+  size_t entries = 0;
 
   if (!(d = opendir (dirname)))
     fatal_sys (dirname);
   while ((errno = 0, e = readdir (d)))
     {
       char const *en = e->d_name;
-      size_t s = strlen (en) + 1;
 
       if (en[0] == '.' && (!en[1] || (en[1] == '.' && !en[2])))
         continue;
       if (rcssuffix (en))
         continue;
-      while (chars_max < s + chars)
-        a = trealloc (char, a, chars_max <<= 1);
-      if (entries == entries_max)
-        offset = trealloc (size_t, offset, entries_max <<= 1);
-      offset[entries++] = chars;
-      strncpy (a + chars, en, s);
-      chars += s;
+      cur = pointer_array (justme, 2);
+      cur->entry = intern0 (shared, en);
+      cur->next = prev;
+      prev = cur;
+      entries++;
     }
   if (errno || closedir (d) != 0)
     fatal_sys (dirname);
-  if (chars)
-    a = trealloc (char, a, chars);
-  else
-    tfree (a);
-  *aargv = p = tnalloc (char *, entries + 1);
-  for (i = 0; i < entries; i++)
-    *p++ = a + offset[i];
-  *p = '\0';
-  tfree (offset);
+  *aargv = pointer_array (shared, entries);
+  for (size_t i = 0; i < entries; i++)
+    {
+      (*aargv)[i] = cur->entry;
+      cur = cur->next;
+    }
+  close_space (justme);
   return entries;
 }
 
