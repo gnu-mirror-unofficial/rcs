@@ -1,3 +1,11 @@
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Add abstraction: make_space (et al)
+
+	* b-divvy.h: New file.
+	* b-divvy.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-divvy.h, b-divvy.c.
+
 2010-04-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[test] Test rlog with two (working) filenames.
