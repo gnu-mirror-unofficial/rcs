@@ -23,25 +23,20 @@
 #include <string.h>
 #include <stdlib.h>
 #include "b-complain.h"
+#include "b-divvy.h"
 
 static char const *
-normalize_arg (char const *s, char **b)
-/* If `s' looks like an option, prepend ./ to it.  Return the result.
-   Set `*b' to the address of any storage that was allocated.  */
+normalize_arg (char const *s)
+/* If `s' looks like an option, prepend ./ to it.  Return the result.  */
 {
-  char *t;
-
   if (*s == '-')
     {
-      *b = t = testalloc (strlen (s) + 3);
-      sprintf (t, ".%c%s", SLASH, s);
-      return t;
+      accumulate_byte (shared, '.');
+      accumulate_byte (shared, SLASH);
+      return intern0 (shared, s);
     }
   else
-    {
-      *b = NULL;
-      return s;
-    }
+    return s;
 }
 
 int
@@ -56,14 +51,13 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   FILE *f;
   RILE *rt;
   char const *a[3], *t;
-  char *b[3];
   int s;
 #if !DIFF3_BIN
   char const *d[2];
 #endif
 
   for (i = 3; 0 <= --i;)
-    a[i] = normalize_arg (argv[i], &b[i]);
+    a[i] = normalize_arg (argv[i]);
 
   if (!edarg)
     edarg = "-E";
@@ -114,9 +108,6 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
 #endif  /* !DIFF3_BIN */
 
   tempunlink ();
-  for (i = 3; 0 <= --i;)
-    if (b[i])
-      tfree (b[i]);
   return s;
 }
 

@@ -1,5 +1,13 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use `shared' space for `merge' arg normalization.
+
+	* merger.c: #include "b-divvy.h".
+	(normalize_arg): Rewrite.
+	(merge): Update call to `normalize_arg'; don't `tfree'.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use `single' space for file(pair)-related allocation.
 
 	* base.h (fremember): Delete func decl.
