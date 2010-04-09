@@ -336,7 +336,7 @@ bufrealloc (register struct buf *b, size_t size)
         {
           while ((b->size <<= 1) < size)
             continue;
-          b->string = trealloc (char, b->string, b->size);
+          b->string = testrealloc (b->string, b->size);
         }
     }
 }

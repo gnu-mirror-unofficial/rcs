@@ -1,5 +1,13 @@
 2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Get rid of `trealloc'.
+
+	* rcsedit.c (insertline): Use `testrealloc' directly.
+	* rcsfnms.c (bufrealloc): Likewise.
+	* base.h (trealloc): Delete macro.
+
+2010-04-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Get rid of `tnalloc'.
 
 	* rcsedit.c (insertline): Use `testalloc' directly.

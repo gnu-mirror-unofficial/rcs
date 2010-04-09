@@ -960,7 +960,6 @@ void *testalloc (size_t);
 void *testrealloc (void *, size_t);
 #define ftalloc(T)  ((T*) ftestalloc (sizeof (T)))
 #define talloc(T)  ((T*) testalloc (sizeof (T)))
-#define trealloc(T,p,n)  ((T*) testrealloc ((void *)(p), sizeof (T) * (n)))
 #define tfree(p)  free ((void *)(p))
 
 time_t now (void);
