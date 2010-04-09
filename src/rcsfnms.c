@@ -320,7 +320,7 @@ bufalloc (register struct buf *b, size_t size)
         b->size = sizeof (void *);
       while (b->size < size)
         b->size <<= 1;
-      b->string = tnalloc (char, b->size);
+      b->string = testalloc (b->size);
     }
 }
 

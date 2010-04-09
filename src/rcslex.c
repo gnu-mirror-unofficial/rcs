@@ -858,7 +858,7 @@ fd2RILE (int fd, char const *name, char const *type,
 #endif  /* defined HAVE_MMAP */
             if (!f->base)
               {
-                f->base = tnalloc (unsigned char, s);
+                f->base = testalloc (s);
 #if maps_memory
                 {
                   /* We can't map the file into memory for some reason.

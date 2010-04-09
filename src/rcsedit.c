@@ -138,7 +138,7 @@ insertline (unsigned long n, Iptr_type l)
     editLineNumberOverflow ();
   if (!gapsize)
     line = !linelim
-      ? tnalloc (Iptr_type, linelim = gapsize = 1024)
+      ? testalloc (sizeof (Iptr_type) * (linelim = gapsize = 1024))
       : (gap = gapsize = linelim, trealloc (Iptr_type, line, linelim <<= 1));
   if (n < gap)
     movelines (line + n + gapsize, line + n, gap - n);
