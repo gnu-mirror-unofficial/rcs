@@ -157,10 +157,7 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
 #undef TRY
           if (! tmpdir)
             {
-              char *v = P_tmpdir;
-
-              while (*v)
-                accumulate_byte (shared, *v++);
+              accumulate_nonzero_bytes (shared, P_tmpdir);
               /* An extra byte in case we need to suffix a slash.
                  (If there is no need, no problem.)  */
               accumulate_byte (shared, '\0');
@@ -171,11 +168,8 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
         }
       prefix = tmpdir;
     }
-  while (*prefix)
-    accumulate_byte (shared, *prefix++);
-  len = 6;
-  while (len--)
-    accumulate_byte (shared, 'X');
+  accumulate_nonzero_bytes (shared, prefix);
+  accumulate_nonzero_bytes (shared, "XXXXXX");
   fn = finish_string (shared, &len);
   /* Support the 8.3 MS-DOG restriction, blech.  Truncate the non-directory
      filename component to two bytes so that the maximum non-extension name

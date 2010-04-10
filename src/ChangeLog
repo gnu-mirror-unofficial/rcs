@@ -1,5 +1,15 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: accumulate_nonzero_bytes
+
+	* b-divvy.h (accumulate_nonzero_bytes): New func decl.
+	* b-divvy.c (accumulate_nonzero_bytes): New func.
+	* merger.c (normalize_arg): Use `accumulate_nonzero_bytes'.
+	* rcsdiff.c (main): Likewise.
+	* rcsfnms.c (set_temporary_file_name): Likewise.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `shared' space for temporary filename templating.
 
 	* rcsfnms.c (set_temporary_file_name): Save `tmpdir' in `shared'.

@@ -318,14 +318,11 @@ main (int argc, char **argv)
   if (! BE (quiet))
     {
       size_t len;
-      char const *p;
 
       for (pp = diffv + 2; pp < diffp;)
         {
-          p = *pp++;
           accumulate_byte (shared, ' ');
-          while (*p)
-            accumulate_byte (shared, *p++);
+          accumulate_nonzero_bytes (shared, *pp++);
         }
       diffvstr = finish_string (shared, &len);
     }
@@ -460,8 +457,9 @@ main (int argc, char **argv)
             diffp[1] = MANI (filename);
             if (*MANI (filename) == '-')
               {
-                accumulate_byte (shared, '.');
-                accumulate_byte (shared, SLASH);
+                const char dotslash[3] = { '.', SLASH, '\0' };
+
+                accumulate_nonzero_bytes (shared, dotslash);
                 diffp[1] = intern0 (shared, MANI (filename));
               }
           }

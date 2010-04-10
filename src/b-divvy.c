@@ -129,6 +129,15 @@ accumulate_byte (struct divvy *divvy, int c)
   obstack_1grow (divvy->space, c);
 }
 
+void
+accumulate_nonzero_bytes (struct divvy *divvy, char const *s)
+{
+  struct obstack *o = divvy->space;
+
+  while (*s)
+    obstack_1grow (o, *s++);
+}
+
 char *
 finish_string (struct divvy *divvy, size_t *result_len)
 {
