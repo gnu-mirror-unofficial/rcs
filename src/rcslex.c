@@ -523,7 +523,10 @@ getphrases (char const *key)
         }
     returnit:;
 #if !large_memory
-      return bufremember (&b, (size_t) (p - b.string));
+      r.string = (r.size = p - b.string)
+        ? intern (single, b.string, r.size)
+        : "";
+      bufautoend (&b);
 #endif
     }
   return r;

@@ -817,7 +817,6 @@ void set_temporary_file_name (struct buf *filename, const char *prefix);
 char const *maketemp (int);
 char const *rcssuffix (char const *);
 int pairnames (int, char **, open_rcsfile_fn_t *, bool, bool);
-struct cbuf bufremember (struct buf *, size_t);
 void bufalloc (struct buf *, size_t);
 void bufautoend (struct buf *);
 void bufrealloc (struct buf *, size_t);

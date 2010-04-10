@@ -1,5 +1,13 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Get rid of `bufremember'.
+
+	* base.h (bufremember): Delete func decl.
+	* rcsfnms.c (bufremember): Delete func.
+	* rcslex.c (getphrases) [!large_memory]: Use `intern' directly.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Add to `single' space directly when keeping a date.
 
 	* rcskeep.c: #include "b-divvy.h".

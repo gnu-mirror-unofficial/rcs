@@ -346,36 +346,6 @@ bufautoend (struct buf *b)
     tfree (b->string);
 }
 
-struct cbuf
-bufremember (struct buf *b, size_t s)
-/* Free the buffer `b' with used size `s'.
-   Return a cbuf with identical contents.
-   The cbuf will be reclaimed when this input file is finished.  */
-{
-  struct cbuf cb;
-
-  if ((cb.size = s))
-    {
-      size_t orig = b->size;
-      char *saved;
-
-      /* Temporarily jam the size so that `fbuf_save' can DTRT.  */
-      b->size = s;
-      saved = fbuf_save (b);
-      b->size = orig;
-      /* Also, explicitly terminate the string.  */
-      saved[s] = '\0';
-      cb.string = saved;
-    }
-  else
-    {
-      /* Abstraction violation; not really auto.  */
-      bufautoend (b);
-      cb.string = "";
-    }
-  return cb;
-}
-
 char *
 bufenlarge (register struct buf *b, char const **alim)
 /* Make `*b' larger.  Set `*alim' to its new limit,
