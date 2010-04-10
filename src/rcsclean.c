@@ -103,14 +103,14 @@ get_directory (char const *dirname, char ***aargv)
       if (rcssuffix (en))
         continue;
       cur = pointer_array (justme, 2);
-      cur->entry = intern0 (shared, en);
+      cur->entry = intern0 (SHARED, en);
       cur->next = prev;
       prev = cur;
       entries++;
     }
   if (errno || closedir (d) != 0)
     fatal_sys (dirname);
-  *aargv = pointer_array (shared, entries);
+  *aargv = pointer_array (SHARED, entries);
   for (size_t i = 0; i < entries; i++)
     {
       (*aargv)[i] = cur->entry;

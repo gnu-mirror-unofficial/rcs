@@ -1,5 +1,21 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: SHARED, SINGLE
+
+	* b-divvy.h (SHARED, SINGLE): New #define:s.
+	* b-isr.c: Do s/shared/SHARED/g; do s/single/SINGLE/g.
+	* co.c: Likewise.
+	* merger.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsutil.c: Likewise.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Make `putdesc' reentrant.
 
 	* rcsgen.c: #include "b-divvy.h".

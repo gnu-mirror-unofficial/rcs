@@ -42,6 +42,9 @@ extern void close_space (struct divvy *divvy);
 
 /* Idioms.  */
 
+#define SHARED  shared
+#define SINGLE  single
+
 #define intern0(divvy,string)  (intern (divvy, string, strlen (string)))
 
 /* b-divvy.h ends here */

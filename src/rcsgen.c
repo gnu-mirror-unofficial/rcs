@@ -255,7 +255,7 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
       if (!textfile)
         *cb = getsstdin ("t-", "description",
                          "NOTE: This is NOT the log message!\n",
-                         alloc (shared, "new description from stdin",
+                         alloc (SHARED, "new description from stdin",
                                 sizeof (struct buf)));
       else if (!cb->string)
         {
@@ -276,11 +276,11 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
                       if (feof (txt))
                         break;
                     }
-                  accumulate_byte (shared, c);
+                  accumulate_byte (SHARED, c);
                 }
               if (fclose (txt) != 0)
                 Ierror ();
-              p = finish_string (shared, &s);
+              p = finish_string (SHARED, &s);
             }
           *cb = cleanlogmsg (p, s);
         }

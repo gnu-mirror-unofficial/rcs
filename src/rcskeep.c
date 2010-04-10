@@ -136,13 +136,13 @@ keepdate (RILE *fp)
 
               /* Parse dates put out by old versions of RCS.  */
               if (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2]))
-                accumulate_nonzero_bytes (single, "19");
-              accumulate_nonzero_bytes (single, d);
-              accumulate_byte (single, ' ');
-              accumulate_nonzero_bytes (single, t);
+                accumulate_nonzero_bytes (SINGLE, "19");
+              accumulate_nonzero_bytes (SINGLE, d);
+              accumulate_byte (SINGLE, ' ');
+              accumulate_nonzero_bytes (SINGLE, t);
               if (!strchr (t, '-') && !strchr (t, '+'))
-                accumulate_nonzero_bytes (single, "+0000");
-              PREV (date) = finish_string (single, &len);
+                accumulate_nonzero_bytes (SINGLE, "+0000");
+              PREV (date) = finish_string (SINGLE, &len);
             }
         }
       bufautoend (&prevtime);

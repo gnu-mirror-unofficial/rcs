@@ -158,16 +158,16 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
           if (! tmpdir)
             tmpdir = P_tmpdir;
 
-          accumulate_nonzero_bytes (shared, tmpdir);
+          accumulate_nonzero_bytes (SHARED, tmpdir);
           if (SLASH != tmpdir[strlen (tmpdir) - 1])
-            accumulate_byte (shared, SLASH);
-          tmpdir = finish_string (shared, &len);
+            accumulate_byte (SHARED, SLASH);
+          tmpdir = finish_string (SHARED, &len);
         }
       prefix = tmpdir;
     }
-  accumulate_nonzero_bytes (shared, prefix);
-  accumulate_nonzero_bytes (shared, "XXXXXX");
-  fn = finish_string (shared, &len);
+  accumulate_nonzero_bytes (SHARED, prefix);
+  accumulate_nonzero_bytes (SHARED, "XXXXXX");
+  fn = finish_string (SHARED, &len);
   /* Support the 8.3 MS-DOG restriction, blech.  Truncate the non-directory
      filename component to two bytes so that the maximum non-extension name
      is 2 + 6 (Xs) = 8.  The extension is left empty.  What a waste.  */
@@ -195,7 +195,7 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
 
   bufscpy (filename, fn);
   filename->size = len;
-  brush_off (shared, fn);
+  brush_off (SHARED, fn);
   close (fd);
 }
 
@@ -211,7 +211,7 @@ maketemp (int n)
 
       bufautobegin (&rv);
       set_temporary_file_name (&rv, NULL);
-      tpnames[n] = intern (shared, rv.string, rv.size);
+      tpnames[n] = intern (SHARED, rv.string, rv.size);
       bufautoend (&rv);
     }
   return tpnames[n];

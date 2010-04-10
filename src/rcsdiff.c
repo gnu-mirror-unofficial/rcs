@@ -189,7 +189,7 @@ main (int argc, char **argv)
 
   /* Room for runv extra + args [+ --binary] [+ 2 labels]
      + 1 file + 1 trailing null.  */
-  diffv = pointer_array (shared, (1 + argc
+  diffv = pointer_array (SHARED, (1 + argc
                                   + !!OPEN_O_BINARY
                                   + 2 * DIFF_L + 2));
   diffp = diffv + 1;
@@ -321,10 +321,10 @@ main (int argc, char **argv)
 
       for (pp = diffv + 2; pp < diffp;)
         {
-          accumulate_byte (shared, ' ');
-          accumulate_nonzero_bytes (shared, *pp++);
+          accumulate_byte (SHARED, ' ');
+          accumulate_nonzero_bytes (SHARED, *pp++);
         }
-      diffvstr = finish_string (shared, &len);
+      diffvstr = finish_string (SHARED, &len);
     }
 
 #if DIFF_L
@@ -459,8 +459,8 @@ main (int argc, char **argv)
               {
                 const char dotslash[3] = { '.', SLASH, '\0' };
 
-                accumulate_nonzero_bytes (shared, dotslash);
-                diffp[1] = intern0 (shared, MANI (filename));
+                accumulate_nonzero_bytes (SHARED, dotslash);
+                diffp[1] = intern0 (SHARED, MANI (filename));
               }
           }
         else

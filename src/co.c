@@ -314,7 +314,7 @@ preparejoin (register char *j)
     RFATAL ("empty join");
  done:
 
-  joinlist = pointer_array (shared, 1 + lastjoin);
+  joinlist = pointer_array (SHARED, 1 + lastjoin);
   for (int i = 0; i <= lastjoin; i++)
     {
       joinlist[lastjoin - i] = jstuff.cur->entry;

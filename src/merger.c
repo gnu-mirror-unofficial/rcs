@@ -33,8 +33,8 @@ normalize_arg (char const *s)
     {
       const char dotslash[3] = { '.', SLASH, '\0' };
 
-      accumulate_nonzero_bytes (shared, dotslash);
-      return intern0 (shared, s);
+      accumulate_nonzero_bytes (SHARED, dotslash);
+      return intern0 (SHARED, s);
     }
   else
     return s;

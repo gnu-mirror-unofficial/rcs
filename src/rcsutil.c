@@ -41,9 +41,9 @@
 void
 gnurcs_init (void)
 {
-  shared = make_space ("shared");
-  single = make_space ("single");
-  top = memset (alloc (shared, "top", sizeof (*top)), 0, sizeof (*top));
+  SHARED = make_space ("shared");
+  SINGLE = make_space ("single");
+  top = memset (alloc (SHARED, "top", sizeof (*top)), 0, sizeof (*top));
   unbuffer_standard_error ();
   ISR_SCRATCH = isr_init (&BE (quiet));
 }
@@ -72,29 +72,29 @@ testrealloc (void *ptr, size_t size)
 
 void *
 ftestalloc (size_t size)
-/* Allocate a block from the `single' space.  */
+/* Allocate a block from the `SINGLE' space.  */
 {
-  return alloc (single, __func__, size);
+  return alloc (SINGLE, __func__, size);
 }
 
 void
 ffree (void)
-/* Free all blocks in the `single' space.  */
+/* Free all blocks in the `SINGLE' space.  */
 {
-  forget (single);
+  forget (SINGLE);
 }
 
 void
 free_NEXT_str (void)
 {
-  brush_off (single, (void *) NEXT (str));
+  brush_off (SINGLE, (void *) NEXT (str));
 }
 
 char *
 str_save (char const *s)
 /* Save `s' in permanently allocated storage.  */
 {
-  return intern0 (shared, s);
+  return intern0 (SHARED, s);
 }
 
 char *
@@ -102,7 +102,7 @@ fbuf_save (const struct buf *b)
 /* Save `b->string' in storage that will be deallocated
    when we're done with this file.  */
 {
-  return intern0 (single, b->string);
+  return intern0 (SINGLE, b->string);
 }
 
 char *
@@ -525,7 +525,7 @@ getRCSINIT (int argc, char **argv, char ***newargv)
             }
           break;
         }
-      *newargv = pp = pointer_array (shared, n);
+      *newargv = pp = pointer_array (SHARED, n);
       /* Copy program name.  */
       *pp++ = *argv++;
       for (p = q;;)

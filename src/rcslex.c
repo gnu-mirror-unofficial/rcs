@@ -73,7 +73,7 @@ lookup (char const *str)
       {
         /* Empty slot found.  */
         *p = n = ftalloc (struct hshentry);
-        n->num = intern0 (single, str);
+        n->num = intern0 (SINGLE, str);
         n->nexthsh = NULL;
 #ifdef LEXDB
         printf ("\nEntered: %s at %u ", str, ihash);
@@ -93,7 +93,7 @@ Lexinit (void)
    initialize `NEXT (c)', `NEXT (tok)' if `FLOW (from)' != NULL.  */
 {
   if (! LEX (hshtab))
-    LEX (hshtab) = pointer_array (shared, hshsize);
+    LEX (hshtab) = pointer_array (SHARED, hshsize);
   for (int i = 0; i < hshsize; i++)
     LEX (hshtab)[i] = NULL;
 
@@ -197,7 +197,7 @@ nextlex (void)
             }
           /* This extra copy is almost unbearably bletcherous.
              TODO: Make `nextlex' accept "disposition".  */
-          NEXT (str) = intern (single, sp, len);
+          NEXT (str) = intern (SINGLE, sp, len);
           break;
 
         case SBEGIN:           /* long string */
@@ -487,7 +487,7 @@ getphrases (char const *key)
                     NEXT (c) = c;
                     /* FIXME: {Re-}move redundant `strlen' call.
                        All callers are key = Kfoo (constant strings).  */
-                    NEXT (str) = intern0 (single, key);
+                    NEXT (str) = intern0 (SINGLE, key);
                     NEXT (tok) = ID;
                     uncache (fin);
                     goto returnit;
@@ -512,7 +512,7 @@ getphrases (char const *key)
     returnit:;
 #if !large_memory
       r.string = (r.size = p - b.string)
-        ? intern (single, b.string, r.size)
+        ? intern (SINGLE, b.string, r.size)
         : "";
       bufautoend (&b);
 #endif
@@ -625,13 +625,13 @@ savestring (void)
             {
               /* End of string.  */
               NEXT (c) = c;
-              r.string = finish_string (single, &r.size);
+              r.string = finish_string (SINGLE, &r.size);
               uncache (fin);
               return r;
             }
           break;
         }
-      accumulate_byte (single, c);
+      accumulate_byte (SINGLE, c);
     }
 }
 
@@ -810,7 +810,7 @@ fd2RILE (int fd, char const *name, char const *type,
           PFATAL ("%s: too large", name);
         if (! LEX (rilebuf))
           {
-            LEX (rilebuf) = alloc (shared, "rilebuf", sizeof (RILE) * RILES);
+            LEX (rilebuf) = alloc (SHARED, "rilebuf", sizeof (RILE) * RILES);
             memset (LEX (rilebuf), 0, sizeof (RILE) * RILES);
           }
         for (f = LEX (rilebuf); f->base; f++)
