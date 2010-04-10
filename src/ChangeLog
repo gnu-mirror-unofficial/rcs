@@ -1,5 +1,16 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use a space for the token buffer.
+
+	* base.h (manifestation): Add member `tokbuf'.
+	* rcslex.c (tokbuf): Delete var.
+	(lookup): Take `char *', not `struct buf *';
+	save to `single' directly.
+	(Lexinit): Init `LEX (tokbuf)' as a space.
+	(nextlex): Accumulate bytes into `LEX (tokbuf)'; avoid realloc.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Do ISR allocation early on, for all programs.
 
 	* rcsutil.c (gnurcs_init): Init `ISR_SCRATCH' here.

@@ -641,6 +641,10 @@ struct parse_state
   /* True means lexing encountered an error.
      -- buildjoin Lexinit syserror generic_error generic_fatal  */
 
+  void *tokbuf;
+  /* Space for buffering tokens.
+     -- Lexinit nextlex  */
+
   struct next
   {
     enum tokens tok;

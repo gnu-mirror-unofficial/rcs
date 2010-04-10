@@ -34,9 +34,6 @@
 /* Pointer to next hash entry, set by `lookup'.  */
 static struct hshentry *nexthsh;
 
-/* Token buffer.  */
-static struct buf tokbuf;
-
 /* Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
    so hshsize should be odd.
 
@@ -63,13 +60,12 @@ warnignore (void)
 }
 
 static void
-lookup (const struct buf *b)
-/* Look up the character string pointed to by `b->string' in the hashtable.
+lookup (char const *str)
+/* Look up the character string `str' in the hashtable.
    If the string is not present, a new entry for it is created.  In any
    case, the address of the corresponding hashtable entry is placed into
    `nexthsh'.  */
 {
-  char const *str = b->string;
   register unsigned ihash;      /* index into hashtable */
   register char const *sp;
   register struct hshentry *n, **p;
@@ -86,7 +82,7 @@ lookup (const struct buf *b)
       {
         /* Empty slot found.  */
         *p = n = ftalloc (struct hshentry);
-        n->num = fbuf_save (b);
+        n->num = intern0 (single, str);
         n->nexthsh = NULL;
 #ifdef LEXDB
         printf ("\nEntered: %s at %u ", str, ihash);
@@ -119,7 +115,10 @@ Lexinit (void)
       BE (receptive_to_next_hash_key) = true;
       ignored_phrases = false;
       LEX (lno) = 1;
-      bufrealloc (&tokbuf, 2);
+      if (LEX (tokbuf))
+        forget (LEX (tokbuf));
+      else
+        LEX (tokbuf) = make_space ("tokbuf"); /* TODO: smaller chunk size */
       Iget (FLOW (from), NEXT (c));
       /* Initial token.  */
       nextlex ();
@@ -139,9 +138,9 @@ nextlex (void)
   declarecache;
   register FILE *frew;
   register char *sp;
-  char const *limit;
   register enum tokens d;
   register RILE *fin;
+  size_t len;
 
   fin = FLOW (from);
   frew = FLOW (to);
@@ -174,9 +173,8 @@ nextlex (void)
           /* fall into */
         case DIGIT:
         case PERIOD:
-          sp = tokbuf.string;
-          limit = sp + tokbuf.size;
-          *sp++ = c;
+          forget (LEX (tokbuf));
+          accumulate_byte (LEX (tokbuf), c);
           for (;;)
             {
               GETC (frew, c);
@@ -189,9 +187,7 @@ nextlex (void)
                   /* fall into */
                 case DIGIT:
                 case PERIOD:
-                  *sp++ = c;
-                  if (limit <= sp)
-                    sp = bufenlarge (&tokbuf, &limit);
+                  accumulate_byte (LEX (tokbuf), c);
                   continue;
 
                 default:
@@ -199,17 +195,19 @@ nextlex (void)
                 }
               break;
             }
-          *sp = '\0';
+          sp = finish_string (LEX (tokbuf), &len);
           if (d == DIGIT || d == PERIOD)
             {
               d = NUM;
               if (BE (receptive_to_next_hash_key))
                 {
-                  lookup (&tokbuf);
+                  lookup (sp);
                   break;
                 }
             }
-          NEXT (str) = fbuf_save (&tokbuf);
+          /* This extra copy is almost unbearably bletcherous.
+             TODO: Make `nextlex' accept "disposition".  */
+          NEXT (str) = intern (single, sp, len);
           break;
 
         case SBEGIN:           /* long string */
