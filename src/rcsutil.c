@@ -45,6 +45,7 @@ gnurcs_init (void)
   single = make_space ("single");
   top = memset (alloc (shared, "top", sizeof (*top)), 0, sizeof (*top));
   unbuffer_standard_error ();
+  ISR_SCRATCH = isr_init (&BE (quiet));
 }
 
 static void *

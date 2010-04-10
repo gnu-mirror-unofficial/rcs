@@ -835,7 +835,6 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
                         | OPEN_O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, \
                         OPEN_CREAT_READONLY)
 
-  ISR_ENABLE ();
   ISR_DO (CATCHINTS);
   IGNOREINTS ();
 

@@ -836,7 +836,6 @@ fd2RILE (int fd, char const *name, char const *type,
 #if defined HAVE_MMAP
             if (!f->base)
               {
-                ISR_ENABLE ();
                 ISR_DO (CATCHMMAPINTS);
                 f->base = (unsigned char *) mmap (NULL, s,
                                                   PROT_READ,

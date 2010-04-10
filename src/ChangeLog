@@ -1,5 +1,14 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Do ISR allocation early on, for all programs.
+
+	* rcsutil.c (gnurcs_init): Init `ISR_SCRATCH' here.
+	* rcsedit.c (rcswriteopen): Don't init `ISR_SCRATCH'.
+	* rcslex.c (fd2_RILE): Likewise.
+	* b-isr.h (ISR_ENABLE): Delete unused macro.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Get rid of `bufremember'.
 
 	* base.h (bufremember): Delete func decl.
