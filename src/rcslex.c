@@ -31,9 +31,6 @@
 #include "b-divvy.h"
 #include "b-isr.h"
 
-/* Pointer to next hash entry, set by `lookup'.  */
-static struct hshentry *nexthsh;
-
 /* Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
    so hshsize should be odd.
 
@@ -43,18 +40,12 @@ static struct hshentry *nexthsh;
 #define hshsize 511
 #endif
 
-/* Hashtable.  */
-static struct hshentry *hshtab[hshsize];
-
-/* Have we ignored phrases in this RCS file?  */
-static bool ignored_phrases;
-
 void
 warnignore (void)
 {
-  if (!ignored_phrases)
+  if (!LEX (ignoredp))
     {
-      ignored_phrases = true;
+      LEX (ignoredp) = true;
       RWARN ("Unknown phrases like `%s ...;' are present.", NEXT (str));
     }
 }
@@ -64,7 +55,7 @@ lookup (char const *str)
 /* Look up the character string `str' in the hashtable.
    If the string is not present, a new entry for it is created.  In any
    case, the address of the corresponding hashtable entry is placed into
-   `nexthsh'.  */
+   `NEXT (hsh)'.  */
 {
   register unsigned ihash;      /* index into hashtable */
   register char const *sp;
@@ -77,7 +68,7 @@ lookup (char const *str)
     ihash = (ihash << 2) + *sp++;
   ihash %= hshsize;
 
-  for (p = &hshtab[ihash];; p = &n->nexthsh)
+  for (p = &LEX (hshtab)[ihash];; p = &n->nexthsh)
     if (!(n = *p))
       {
         /* Empty slot found.  */
@@ -92,7 +83,7 @@ lookup (char const *str)
     else if (strcmp (str, n->num) == 0)
       /* Match found.  */
       break;
-  nexthsh = n;
+  NEXT (hsh) = n;
   NEXT (str) = n->num;
 }
 
@@ -101,19 +92,18 @@ Lexinit (void)
 /* Initialize lexical analyzer: initialize the hashtable;
    initialize `NEXT (c)', `NEXT (tok)' if `FLOW (from)' != NULL.  */
 {
-  register int c;
-
-  for (c = hshsize; 0 <= --c;)
-    {
-      hshtab[c] = NULL;
-    }
+  if (! LEX (hshtab))
+    LEX (hshtab) = pointer_array (shared, hshsize);
+  for (int i = 0; i < hshsize; i++)
+    LEX (hshtab)[i] = NULL;
 
   LEX (erroneousp) = false;
+  LEX (Oerrloop) = false;
   if (FLOW (from))
     {
       FLOW (to) = NULL;
       BE (receptive_to_next_hash_key) = true;
-      ignored_phrases = false;
+      LEX (ignoredp) = false;
       LEX (lno) = 1;
       if (LEX (tokbuf))
         forget (LEX (tokbuf));
@@ -129,7 +119,7 @@ void
 nextlex (void)
 /* Read the next token and set `NEXT (tok)' to the next token code.
    Only if `receptive_to_next_hash_key', a revision number is entered
-   into the hashtable and a pointer to it is placed into `nexthsh'.
+   into the hashtable and a pointer to it is placed into `NEXT (hsh)'.
    This is useful for avoiding that dates are placed into the hashtable.
    For ID's and NUM's, `NEXT (str)' is set to the character string.
    Assumption: `NEXT (c)' contains the next character.  */
@@ -349,7 +339,7 @@ getnum (void)
 
   if (NEXT (tok) == NUM)
     {
-      num = nexthsh;
+      num = NEXT (hsh);
       nextlex ();
       return num;
     }
@@ -813,15 +803,18 @@ fd2RILE (int fd, char const *name, char const *type,
 #else  /* large_memory */
 #define RILES 3
       {
-        static RILE rilebuf[RILES];
-
         register RILE *f;
         off_t s = status->st_size;
 
         if (s != status->st_size)
           PFATAL ("%s: too large", name);
-        for (f = rilebuf; f->base; f++)
-          if (f == rilebuf + RILES)
+        if (! LEX (rilebuf))
+          {
+            LEX (rilebuf) = alloc (shared, "rilebuf", sizeof (RILE) * RILES);
+            memset (LEX (rilebuf), 0, sizeof (RILE) * RILES);
+          }
+        for (f = LEX (rilebuf); f->base; f++)
+          if (f == LEX (rilebuf) + RILES)
             PFATAL ("too many RILEs");
 #if maps_memory
         f->deallocate = nothing_to_deallocate;
@@ -956,14 +949,12 @@ Iopen (char const *name, char const *type, struct stat *status)
 #endif
 }
 
-static bool Oerrloop;
-
 void
 Oerror (void)
 {
-  if (Oerrloop)
+  if (LEX (Oerrloop))
     PROGRAM (exiterr) ();
-  Oerrloop = true;
+  LEX (Oerrloop) = true;
   fatal_sys ("output error");
 }
 
@@ -1058,7 +1049,7 @@ oflush (void)
   if (fflush (MANI (standard_output)
               ? MANI (standard_output)
               : stdout)
-      != 0 && !Oerrloop)
+      != 0 && !LEX (Oerrloop))
     Oerror ();
 }
 
@@ -1137,8 +1128,8 @@ main (int argc, char *argv[])
 
         case NUM:
           if (BE (receptive_to_next_hash_key))
-            printf ("NUM: %s, index: %d", nexthsh->num,
-                    nexthsh - hshtab);
+            printf ("NUM: %s, index: %d", NEXT (hsh)->num,
+                    NEXT (hsh) - LEX (hshtab));
           else
             printf ("NUM, unentered: %s", NEXT (str));
           /* Alternate between dates and numbers.  */

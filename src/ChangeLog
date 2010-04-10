@@ -1,5 +1,22 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move remaining parse state into `struct parse_state'.
+
+	* base.h (parse_state.next): Add member `hsh'.
+	(parse_state): Add members `rilebuf', `Oerrloop', `ignoredp', `hshtab'.
+	* rcslex.c (nexthsh, hshtab, ignored_phrases): Delete vars.
+	(warnignore): Use `LEX (ignoredp)'.
+	(lookup): Use `LEX (hshtab)', `NEXT (hsh)'.
+	(Lexinit): Allocate `LEX (hshtab)' if necessary;
+	clear `LEX (Oerrloop)'; use `LEX (ignoredp)'.
+	(getnum): Use `NEXT (hsh)'.
+	(fd2_RILE): Init `LEX (rilebuf)' if necessary.
+	(Oerrloop): Delete var.
+	(Oerror, oflush): Use `LEX (Oerrloop)'.
+	[LEXDB] (main): Use `LEX (hshtab)'.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use a space for the token buffer.
 
 	* base.h (manifestation): Add member `tokbuf'.

@@ -637,13 +637,25 @@ struct manifestation
 /* The parse state is used when reading the RCS file.  */
 struct parse_state
 {
+  RILE *rilebuf;
+  /* An array of RILE objects, only used if `large_memory'.
+     -- Lexinit  */
+
   bool erroneousp;
   /* True means lexing encountered an error.
      -- buildjoin Lexinit syserror generic_error generic_fatal  */
 
+  bool Oerrloop;
+  /* True means `Oerror' was called already.
+     -- Oerror Lexinit  */
+
   void *tokbuf;
   /* Space for buffering tokens.
      -- Lexinit nextlex  */
+
+  bool ignoredp;
+  /* Have we ignored phrases in this RCS file?
+     -- warnignore Lexinit  */
 
   struct next
   {
@@ -662,7 +674,15 @@ struct parse_state
     char const *str;
     /* Hold the next ID or NUM value.
        -- lookup nextlex getphrases  */
+
+    struct hshentry *hsh;
+    /* Pointer to next hash entry.
+       -- lookup  */
   } next;
+
+  struct hshentry **hshtab;
+  /* Hash table.
+     -- Lexinit lookup  */
 
   long lno;
   /* Current line-number of input.  FIXME: Make unsigned.
