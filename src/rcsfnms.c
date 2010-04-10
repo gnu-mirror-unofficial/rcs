@@ -139,66 +139,72 @@ homegrown_mkstemp (char *template)
 void
 set_temporary_file_name (struct buf *filename, const char *prefix)
 {
-  static struct buf tmpdir =
-    {
-      .string = NULL,
-      .size = 0
-    };
-  struct buf template;
+  static char *tmpdir;
+  char *fn;
+  size_t len;
   int fd;
 
-  bufautobegin (&template);
-  if (prefix)
-    bufscpy (&template, prefix);
-  else
+  if (!prefix)
     {
-      if (! tmpdir.string)
+      if (! tmpdir)
         {
-          char *v;
-
 #define TRY(envvarname)                         \
-          if (! tmpdir.string                   \
-              && (v = cgetenv (#envvarname)))   \
-            bufscpy (&tmpdir, v)
+          if (! tmpdir)                         \
+            tmpdir = cgetenv (#envvarname)
           TRY (TMPDIR);                 /* Unix tradition */
           TRY (TMP);                    /* DOS tradition */
           TRY (TEMP);                   /* another DOS tradition */
 #undef TRY
-          if (! tmpdir.string)
+          if (! tmpdir)
             {
-              char slash[2] = { SLASH, '\0' };
+              char *v = P_tmpdir;
 
-              bufscpy (&tmpdir, P_tmpdir);
-              bufscat (&tmpdir, slash);
+              while (*v)
+                accumulate_byte (shared, *v++);
+              /* An extra byte in case we need to suffix a slash.
+                 (If there is no need, no problem.)  */
+              accumulate_byte (shared, '\0');
+              tmpdir = finish_string (shared, &len);
+              if (SLASH != tmpdir[len - 1])
+                tmpdir[len - 1] = SLASH;
             }
         }
-      bufscpy (&template, tmpdir.string);
+      prefix = tmpdir;
     }
+  while (*prefix)
+    accumulate_byte (shared, *prefix++);
+  len = 6;
+  while (len--)
+    accumulate_byte (shared, 'X');
+  fn = finish_string (shared, &len);
   /* Support the 8.3 MS-DOG restriction, blech.  Truncate the non-directory
      filename component to two bytes so that the maximum non-extension name
      is 2 + 6 (Xs) = 8.  The extension is left empty.  What a waste.  */
   if ('/' != SLASH)
     {
-      char *end = template.string + template.size;
-      char *lastsep = strrchr (template.string, SLASH);
-      char *ndfc = lastsep ? 1 + lastsep : template.string;
+      char *end = fn + len - 6;
+      char *lastsep = strrchr (fn, SLASH);
+      char *ndfc = lastsep ? 1 + lastsep : fn;
       char *dot;
 
       if (ndfc + 2 < end)
-        *(ndfc + 2) = '\0';
+        {
+          for (dot = ndfc + 2; dot < ndfc + 8; dot++)
+            *dot = 'X';
+          *dot = '\0';
+        }
       /* If any of the (up to 2) remaining bytes are '.', replace it
          with the lowest (decimal) digit of the pid.  Double blech.  */
       if ((dot = strchr (ndfc, '.')))
         *dot = '0' + getpid () % 10;
     }
-  bufscat (&template, "XXXXXX");
 
-  if (0 > (fd = mkstemp (template.string)))
-    PFATAL ("could not make temporary file name (template \"%s\")",
-            template.string);
+  if (0 > (fd = mkstemp (fn)))
+    PFATAL ("could not make temporary file name (template \"%s\")", fn);
 
-  bufscpy (filename, template.string);
-  bufautoend (&template);
+  bufscpy (filename, fn);
+  filename->size = len;
+  brush_off (shared, fn);
   close (fd);
 }
 
