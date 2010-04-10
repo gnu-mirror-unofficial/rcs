@@ -858,7 +858,7 @@ bool yesorno (bool, char const *, ...) printf_string (2, 3);
 struct cbuf cleanlogmsg (char const *, size_t);
 struct cbuf getsstdin (char const *, char const *,
                        char const *, struct buf *);
-void putdesc (bool, char *);
+void putdesc (struct cbuf *, bool, char *);
 void putdftext (struct hshentry const *, RILE *, FILE *, bool);
 
 /* rcskeep */

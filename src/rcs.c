@@ -1384,6 +1384,11 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        struct cbuf newdesc =
+          {
+            .string = NULL,
+            .size = 0
+          };
 
         ffree ();
 
@@ -1517,7 +1522,7 @@ main (int argc, char **argv)
         putadmin ();
         if (ADMIN (head))
           puttree (ADMIN (head), FLOW (rewr));
-        putdesc (textflag, textfile);
+        putdesc (&newdesc, textflag, textfile);
 
         /* Don't conditionalize on non-NULL `ADMIN (head)'; that prevents
            `scanlogtext' from advancing the input pointer to EOF, in

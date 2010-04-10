@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include "b-complain.h"
+#include "b-divvy.h"
 
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
@@ -217,23 +218,20 @@ yesorno (bool default_answer, char const *question, ...)
 }
 
 void
-putdesc (bool textflag, char *textfile)
+putdesc (struct cbuf *cb, bool textflag, char *textfile)
 /* Put the descriptive text into file `FLOW (rewr)'.
+   Also, save the description text into `cb'.
    If `FLOW (from) && !textflag', the text is copied from the old description.
    Otherwise, if `textfile', the text is read from that file, or from
    stdin, if `!textfile'.  A `textfile' with a leading '-' is treated as a
    string, not a pathname.  If `FLOW (from)', the old descriptive text is
    discarded.  Always clear `FLOW (to)'.  */
 {
-  static struct buf desc;
-  static struct cbuf desclean;
-
   register FILE *txt;
   register int c;
   register FILE *frew;
   register char *p;
-  register size_t s;
-  char const *plim;
+  size_t s;
 
   frew = FLOW (rewr);
   if (FLOW (from) && !textflag)
@@ -255,10 +253,11 @@ putdesc (bool textflag, char *textfile)
         }
       aprintf (frew, "\n\n%s\n%c", Kdesc, SDELIM);
       if (!textfile)
-        desclean = getsstdin ("t-", "description",
-                              "NOTE: This is NOT the log message!\n",
-                              &desc);
-      else if (!desclean.string)
+        *cb = getsstdin ("t-", "description",
+                         "NOTE: This is NOT the log message!\n",
+                         alloc (shared, "new description from stdin",
+                                sizeof (struct buf)));
+      else if (!cb->string)
         {
           if (*textfile == '-')
             {
@@ -269,9 +268,6 @@ putdesc (bool textflag, char *textfile)
             {
               if (!(txt = fopenSafer (textfile, "r")))
                 fatal_sys (textfile);
-              bufalloc (&desc, 1);
-              p = desc.string;
-              plim = p + desc.size;
               for (;;)
                 {
                   if ((c = getc (txt)) == EOF)
@@ -280,18 +276,15 @@ putdesc (bool textflag, char *textfile)
                       if (feof (txt))
                         break;
                     }
-                  if (plim <= p)
-                    p = bufenlarge (&desc, &plim);
-                  *p++ = c;
+                  accumulate_byte (shared, c);
                 }
               if (fclose (txt) != 0)
                 Ierror ();
-              s = p - desc.string;
-              p = desc.string;
+              p = finish_string (shared, &s);
             }
-          desclean = cleanlogmsg (p, s);
+          *cb = cleanlogmsg (p, s);
         }
-      putstring (frew, false, desclean, true);
+      putstring (frew, false, *cb, true);
       aputc ('\n', frew);
     }
 }

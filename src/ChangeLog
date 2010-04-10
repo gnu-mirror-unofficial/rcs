@@ -1,5 +1,16 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Make `putdesc' reentrant.
+
+	* rcsgen.c: #include "b-divvy.h".
+	(putdesc): Take pointer to `struct cbuf', save description text
+	there; route input from stdin and file to go into `shared' space.
+	* base.h (putdesc): Update func decl.
+	* ci.c (main): Update call to `putdesc'.
+	* rcs.c (main): Likewise.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move remaining parse state into `struct parse_state'.
 
 	* base.h (parse_state.next): Add member `hsh'.

@@ -803,6 +803,12 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        struct cbuf newdesc =
+          {
+            .string = NULL,
+            .size = 0
+          };
+
         targetdelta = NULL;
         ffree ();
 
@@ -961,7 +967,7 @@ main (int argc, char **argv)
 
         putadmin ();
         puttree (ADMIN (head), FLOW (rewr));
-        putdesc (false, textfile);
+        putdesc (&newdesc, false, textfile);
 
         changework = BE (kws) < MIN_UNCHANGED_EXPAND;
         dolog = true;
