@@ -1,5 +1,12 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Apply tmpdir `SLASH'-suffixing to all candidates.
+
+	* rcsfnms.c (set_temporary_file_name): Use `getenv' directly;
+	do `SLASH'-suffixing for any `tmpdir' found, not just `P_tmpdir'.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: accumulate_nonzero_bytes
 
 	* b-divvy.h (accumulate_nonzero_bytes): New func decl.

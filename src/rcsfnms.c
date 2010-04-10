@@ -150,21 +150,18 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
         {
 #define TRY(envvarname)                         \
           if (! tmpdir)                         \
-            tmpdir = cgetenv (#envvarname)
+            tmpdir = getenv (#envvarname)
           TRY (TMPDIR);                 /* Unix tradition */
           TRY (TMP);                    /* DOS tradition */
           TRY (TEMP);                   /* another DOS tradition */
 #undef TRY
           if (! tmpdir)
-            {
-              accumulate_nonzero_bytes (shared, P_tmpdir);
-              /* An extra byte in case we need to suffix a slash.
-                 (If there is no need, no problem.)  */
-              accumulate_byte (shared, '\0');
-              tmpdir = finish_string (shared, &len);
-              if (SLASH != tmpdir[len - 1])
-                tmpdir[len - 1] = SLASH;
-            }
+            tmpdir = P_tmpdir;
+
+          accumulate_nonzero_bytes (shared, tmpdir);
+          if (SLASH != tmpdir[strlen (tmpdir) - 1])
+            accumulate_byte (shared, SLASH);
+          tmpdir = finish_string (shared, &len);
         }
       prefix = tmpdir;
     }
