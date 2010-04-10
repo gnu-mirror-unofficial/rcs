@@ -24,6 +24,7 @@
 #include <string.h>
 #include <errno.h>
 #include "b-complain.h"
+#include "b-divvy.h"
 #include <ctype.h>
 
 static bool
@@ -117,12 +118,11 @@ keepdate (RILE *fp)
 /* Read a date; check format; if ok, set `PREV (date)'.
    Return 0 on error, lookahead character otherwise.  */
 {
-  struct buf prevday, prevtime, date;
+  struct buf prevday, prevtime;
   register int c;
 
   c = 0;
   bufautobegin (&prevday);
-  bufautobegin (&date);
   if (getval (fp, &prevday, false))
     {
       bufautobegin (&prevtime);
@@ -131,21 +131,22 @@ keepdate (RILE *fp)
           Igeteof (fp, c, c = 0);
           if (c)
             {
+              size_t len;
               register char const *d = prevday.string, *t = prevtime.string;
 
-              bufalloc (&date, strlen (d) + strlen (t) + 9);
-              sprintf (date.string, "%s%s %s%s",
-                       /* Parse dates put out by old versions of RCS.  */
-                       (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2])
-                        ? "19" : ""),
-                       d, t, (strchr (t, '-') || strchr (t, '+')
-                              ? "" : "+0000"));
-              PREV (date) = fbuf_save (&date);
+              /* Parse dates put out by old versions of RCS.  */
+              if (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2]))
+                accumulate_nonzero_bytes (single, "19");
+              accumulate_nonzero_bytes (single, d);
+              accumulate_byte (single, ' ');
+              accumulate_nonzero_bytes (single, t);
+              if (!strchr (t, '-') && !strchr (t, '+'))
+                accumulate_nonzero_bytes (single, "+0000");
+              PREV (date) = finish_string (single, &len);
             }
         }
       bufautoend (&prevtime);
     }
-  bufautoend (&date);
   bufautoend (&prevday);
   return c;
 }

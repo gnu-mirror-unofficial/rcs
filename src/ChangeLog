@@ -1,5 +1,12 @@
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Add to `single' space directly when keeping a date.
+
+	* rcskeep.c: #include "b-divvy.h".
+	(keepdate): Don't call `fbuf_save'; add directly to `single'.
+
+2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Apply tmpdir `SLASH'-suffixing to all candidates.
 
 	* rcsfnms.c (set_temporary_file_name): Use `getenv' directly;
