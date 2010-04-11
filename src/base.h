@@ -609,6 +609,11 @@ struct behavior
   /* Cached time from `time'.
      -- now  */
 
+  bool fixed_SIGCHLD;
+  /* True means SIGCHLD handler has been manually set to SIG_DFL.
+     (Only meaningful if `BAD_WAIT_IF_SIGCHLD_IGNORED'.)
+     -- runv  */
+
   /* The rest of the members in `struct behavior' are scratch spaces
      managed by various subsystems.  */
 

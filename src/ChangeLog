@@ -1,5 +1,13 @@
 2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move SIGCHLD-handler manual-reset state to `struct behavior'.
+
+	* base.h (behavior): Add member `fixed_SIGCHLD'.
+	* rcsutil.c (runv): Use `BE (fixed_SIGCHLD)' to
+	record that the SIGCHLD handler was set to SIG_DFL.
+
+2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move cached "now time" into `struct behavior'.
 
 	* base.h (behavior): Add member `now'.
