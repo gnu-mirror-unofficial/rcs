@@ -1,5 +1,12 @@
 2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move cached username into `struct behavior'.
+
+	* base.h (behavior): Add member `username'.
+	* rcsutil.c (getusername): Cache username in `BE (username)'.
+
+2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move remaining edit state into `struct editstuff'.
 
 	* base.h (behavior): Add member `editstuff'.

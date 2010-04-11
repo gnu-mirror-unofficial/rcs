@@ -601,6 +601,10 @@ struct behavior
        -- zone_set  */
   } zone_offset;
 
+  char *username;
+  /* The login id of the program user.
+     -- getusername  */
+
   /* The rest of the members in `struct behavior' are scratch spaces
      managed by various subsystems.  */
 

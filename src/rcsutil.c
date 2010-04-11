@@ -118,24 +118,23 @@ char const *
 getusername (bool suspicious)
 /* Get the caller's login name.  Trust only `getwpuid' if `suspicious'.  */
 {
-  static char *name;
-
-  if (!name)
+  if (!BE (username))
     {
+#define JAM(x)  (BE (username) = x)
       if (
-           /* Prefer `getenv' unless `suspicious'; it's much faster.  */
+          /* Prefer `getenv' unless `suspicious'; it's much faster.  */
 #if getlogin_is_secure
-           (suspicious
-            || (!(name = cgetenv ("LOGNAME"))
-                && !(name = cgetenv ("USER"))))
-           && !(name = getlogin ())
+          (suspicious
+           || (!JAM (cgetenv ("LOGNAME"))
+               && !JAM (cgetenv ("USER")))
+           && !JAM (getlogin ()))
 #else
-           suspicious
-           || (!(name = cgetenv ("LOGNAME"))
-               && !(name = cgetenv ("USER"))
-               && !(name = getlogin ()))
+          suspicious
+          || (!JAM (cgetenv ("LOGNAME"))
+              && !JAM (getenv ("USER"))
+              && !JAM (getlogin ()))
 #endif
-        )
+          )
         {
 #if defined HAVE_GETUID && defined HAVE_GETPWUID
           struct passwd const *pw = getpwuid (ruid ());
@@ -143,7 +142,7 @@ getusername (bool suspicious)
           if (!pw)
             PFATAL ("no password entry for userid %lu",
                     (unsigned long) ruid ());
-          name = pw->pw_name;
+          JAM (pw->pw_name);
 #else  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
 #if defined HAVE_SETUID
           PFATAL ("setuid not supported");
@@ -152,9 +151,10 @@ getusername (bool suspicious)
 #endif
 #endif  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
         }
-      checksid (name);
+      checksid (BE (username));
+#undef JAM
     }
-  return name;
+  return BE (username);
 }
 
 void
