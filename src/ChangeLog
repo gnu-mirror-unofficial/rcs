@@ -1,5 +1,14 @@
 2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use `SHARED' space for `system' command construction.
+
+	* rcsutil.c [!HAVE_WORKING_FORK] (bufargcat): Delete func.
+	[!HAVE_WORKING_FORK] (accumulate_arg_quoted): New static func.
+	(runv) [!HAVE_WORKING_FORK]: Use `SHARED'
+	space to construct string for `system' call.
+
+2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move cached username into `struct behavior'.
 
 	* base.h (behavior): Add member `username'.

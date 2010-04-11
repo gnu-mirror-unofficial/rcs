@@ -298,32 +298,23 @@ fdreopen (int fd, char const *file, int flags)
 #else  /* !defined HAVE_WORKING_FORK */
 
 static void
-bufargcat (register struct buf *b, int c, register char const *s)
-/* Append to `b' a copy of `c', plus a quoted copy of `s'.  */
+accumulate_arg_quoted (struct divvy *space, int c, register char const *s)
+/* Accumulate to `space' the byte `c', plus a quoted copy of `s'.  */
 {
-  register char *p;
-  register char const *t;
-  size_t bl, sl;
-
-  for (t = s, sl = 0; *t;)
-    sl += 3 * (*t++ == '\'') + 1;
-  bl = strlen (b->string);
-  bufrealloc (b, bl + sl + 4);
-  p = b->string + bl;
-  *p++ = c;
-  *p++ = '\'';
-  while (*s)
-    {
-      if (*s == '\'')
-        {
-          *p++ = '\'';
-          *p++ = '\\';
-          *p++ = '\'';
-        }
-      *p++ = *s++;
-    }
-  *p++ = '\'';
-  *p = '\0';
+#define apostrophe  '\''
+  accumulate_byte (space, c);
+  accumulate_byte (space, apostrophe);
+  while ((c = *s++))
+    switch (c)
+      {
+      case apostrophe:
+        accumulate_nonzero_bytes (space, "'\\'");
+        /* fall through */
+      default:
+        accumulate_byte (space, c);
+      }
+  accumulate_byte (space, apostrophe);
+#undef apostrophe
 }
 
 #endif  /* !defined HAVE_WORKING_FORK */
@@ -409,24 +400,26 @@ runv (int infd, char const *outname, char const **args)
     }
 #endif  /* !defined HAVE_WAITPID */
 #else   /* !defined HAVE_WORKING_FORK */
-    static struct buf b;
-    char const *p;
+    size_t len;
+    char *cmd;
+    char const **p;
 
     /* Use `system'.  On many hosts `system' discards signals.  Yuck!  */
     p = args + 1;
-    bufscpy (&b, *p);
+    accumulate_nonzero_bytes (SHARED, *p);
     while (*++p)
-      bufargcat (&b, ' ', *p);
+      accumulate_arg_quoted (SHARED, ' ', *p);
     if (infd != -1 && infd != STDIN_FILENO)
       {
         char redirection[32];
 
         sprintf (redirection, "<&%d", infd);
-        bufscat (&b, redirection);
+        accumulate_nonzero_bytes (SHARED, redirection);
       }
     if (outname)
-      bufargcat (&b, '>', outname);
-    wstatus = system (b.string);
+      accumulate_arg_quoted (SHARED, '>', outname);
+    wstatus = system (cmd = finish_string (SHARED, &len));
+    brush_off (SHARED, cmd);
 #endif  /* !defined HAVE_WORKING_FORK */
   }
   if (!WIFEXITED (wstatus))
