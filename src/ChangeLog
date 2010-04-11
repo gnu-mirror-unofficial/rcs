@@ -1,5 +1,12 @@
 2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move cached "now time" into `struct behavior'.
+
+	* base.h (behavior): Add member `now'.
+	* rcsutil.c (now): Cache now time in `BE (now)'.
+
+2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use `SHARED' space for `system' command construction.
 
 	* rcsutil.c [!HAVE_WORKING_FORK] (bufargcat): Delete func.

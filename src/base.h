@@ -605,6 +605,10 @@ struct behavior
   /* The login id of the program user.
      -- getusername  */
 
+  time_t now;
+  /* Cached time from `time'.
+     -- now  */
+
   /* The rest of the members in `struct behavior' are scratch spaces
      managed by various subsystems.  */
 

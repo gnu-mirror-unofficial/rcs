@@ -679,11 +679,9 @@ setrid (void)
 time_t
 now (void)
 {
-  static time_t t;
-
-  if (!t && time (&t) == -1)
+  if (!BE (now) && time (&BE (now)) == -1)
     fatal_sys ("time");
-  return t;
+  return BE (now);
 }
 
 /* rcsutil.c ends here */
