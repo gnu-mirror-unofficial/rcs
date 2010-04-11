@@ -605,6 +605,7 @@ struct behavior
      managed by various subsystems.  */
 
   struct isr_scratch *isr;
+  struct editstuff *editstuff;
 };
 
 /* The working file is a manifestation of a particular revision.  */

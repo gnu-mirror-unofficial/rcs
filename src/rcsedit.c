@@ -38,29 +38,17 @@
 #include "b-complain.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
-
-#if !large_memory
-/* Edit file descriptor.  */
-static RILE *fedit;
-/* Edit pathname.  */
-static char const *editname;
-#endif
-
-/* Edit line counter; #lines before cursor.  */
-static long editline;
-/* #adds - #deletes in each edit run, used to correct editline in case
-   file is not rewound after applying one delta.  */
-static long linecorr;
+#include "b-divvy.h"
 
 /* (Somewhat) fleeting files.  */
 enum maker { notmade, real, effective };
 
 struct sff
 {
-  /* Unlink these when done.  */
   struct buf filename;
-  /* (But only if they are in the right mood.)  */
+  /* Unlink this when done.  */
   enum maker volatile disposition;
+  /* (But only if it is in the right mood.)  */
 };
 
 /* Indexes into `sff'.  */
@@ -68,10 +56,41 @@ struct sff
 #define SFFI_NEWDIR   BAD_CREAT0
 
 #define SFF_COUNT  (SFFI_NEWDIR + 2)
-static struct sff sff[SFF_COUNT];
 
-#define lockname    (sff[SFFI_LOCKDIR].filename.string)
-#define newRCSname  (sff[SFFI_NEWDIR].filename.string)
+struct editstuff
+{
+#if !large_memory
+  RILE *fedit;
+  char const *filename;
+  /* Edit file stream and filename.  */
+#endif
+
+  long lcount;
+  /* Edit line counter; #lines before cursor.  */
+  long corr;
+  /* #adds - #deletes in each edit run, used to correct `EDIT (lcount)'
+     in case file is not rewound after applying one delta.  */
+
+  struct sff sff[SFF_COUNT];
+  /* (Somewhat) fleeting files.  */
+
+#if large_memory
+  Iptr_type *line;
+  size_t gap, gapsize, lim;
+  /* `line' contains pointers to the lines in the currently "edited" file.
+     It is a 0-origin array that represents `lim - gapsize' lines.
+     `line[0 .. gap-1]' and `line[gap+gapsize .. lim-1]' hold pointers to lines.
+     `line[gap .. gap+gapsize-1]' contains garbage.
+
+     Any '@'s in lines are duplicated.  Lines are terminated by '\n',
+     or (for a last partial line only) by single '@'.  */
+#endif
+};
+
+#define EDIT(x)  (((struct editstuff *) BE (editstuff))-> x)
+
+#define lockname    (EDIT (sff)[SFFI_LOCKDIR].filename.string)
+#define newRCSname  (EDIT (sff)[SFFI_NEWDIR].filename.string)
 
 int
 un_link (char const *s)
@@ -120,35 +139,29 @@ editLineNumberOverflow (void)
 
 #define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (Iptr_type))
 
-/* `line' contains pointers to the lines in the currently "edited" file.
-   It is a 0-origin array that represents `linelim - gapsize' lines.
-   `line[0 .. gap-1]' and `line[gap+gapsize .. linelim-1]' hold pointers to lines.
-   `line[gap .. gap+gapsize-1]' contains garbage.
-
-   Any '@'s in lines are duplicated.  Lines are terminated by '\n', or
-   (for a last partial line only) by single '@'.  */
-static Iptr_type *line;
-static size_t gap, gapsize, linelim;
-
 static void
 insertline (unsigned long n, Iptr_type l)
 /* Before line `n', insert line `l'.  */
 {
-  if (linelim - gapsize < n)
+  if (EDIT (lim) - EDIT (gapsize) < n)
     editLineNumberOverflow ();
-  if (!gapsize)
-    line = !linelim
-      ? testalloc (sizeof (Iptr_type) * (linelim = gapsize = 1024))
-      : (gap = gapsize = linelim,
-         testrealloc (line, sizeof (Iptr_type) * (linelim <<= 1)));
-  if (n < gap)
-    movelines (line + n + gapsize, line + n, gap - n);
-  else if (gap < n)
-    movelines (line + gap, line + gap + gapsize, n - gap);
+  if (!EDIT (gapsize))
+    EDIT (line) = !EDIT (lim)
+      ? testalloc (sizeof (Iptr_type) * (EDIT (lim) = EDIT (gapsize) = 1024))
+      : (EDIT (gap) = EDIT (gapsize) = EDIT (lim),
+         testrealloc (EDIT (line), sizeof (Iptr_type) * (EDIT (lim) <<= 1)));
+  if (n < EDIT (gap))
+    movelines (EDIT (line) + n + EDIT (gapsize),
+               EDIT (line) + n,
+               EDIT (gap) - n);
+  else if (EDIT (gap) < n)
+    movelines (EDIT (line) + EDIT (gap),
+               EDIT (line) + EDIT (gap) + EDIT (gapsize),
+               n - EDIT (gap));
 
-  line[n] = l;
-  gap = n + 1;
-  gapsize--;
+  EDIT (line)[n] = l;
+  EDIT (gap) = n + 1;
+  EDIT (gapsize)--;
 }
 
 static void
@@ -157,15 +170,19 @@ deletelines (unsigned long n, unsigned long nlines)
 {
   unsigned long l = n + nlines;
 
-  if (linelim - gapsize < l || l < n)
+  if (EDIT (lim) - EDIT (gapsize) < l || l < n)
     editLineNumberOverflow ();
-  if (l < gap)
-    movelines (line + l + gapsize, line + l, gap - l);
-  else if (gap < n)
-    movelines (line + gap, line + gap + gapsize, n - gap);
+  if (l < EDIT (gap))
+    movelines (EDIT (line) + l + EDIT (gapsize),
+               EDIT (line) + l,
+               EDIT (gap) - l);
+  else if (EDIT (gap) < n)
+    movelines (EDIT (line) + EDIT (gap),
+               EDIT (line) + EDIT (gap) + EDIT (gapsize),
+               n - EDIT (gap));
 
-  gap = n;
-  gapsize += nlines;
+  EDIT (gap) = n;
+  EDIT (gapsize) += nlines;
 }
 
 static void
@@ -185,11 +202,11 @@ void
 snapshotedit (FILE *f)
 /* Copy the current state of the edits to `f'.  */
 {
-  register Iptr_type *p, *lim, *l = line;
+  register Iptr_type *p, *lim, *l = EDIT (line);
 
-  for (p = l, lim = l + gap; p < lim;)
+  for (p = l, lim = l + EDIT (gap); p < lim;)
     snapshotline (f, *p++);
-  for (p += gapsize, lim = l + linelim; p < lim;)
+  for (p += EDIT (gapsize), lim = l + EDIT (lim); p < lim;)
     snapshotline (f, *p++);
 }
 
@@ -218,13 +235,13 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
         snapshotedit (outfile);
       else
         {
-          register Iptr_type *p, *lim, *l = line;
+          register Iptr_type *p, *lim, *l = EDIT (line);
           register RILE *fin = FLOW (from);
           Iptr_type here = fin->ptr;
 
-          for (p = l, lim = l + gap; p < lim;)
+          for (p = l, lim = l + EDIT (gap); p < lim;)
             finisheditline (fin, outfile, *p++, delta);
-          for (p += gapsize, lim = l + linelim; p < lim;)
+          for (p += EDIT (gapsize), lim = l + EDIT (lim); p < lim;)
             finisheditline (fin, outfile, *p++, delta);
           fin->ptr = here;
         }
@@ -262,19 +279,21 @@ openfcopy (FILE *f)
 
 static void
 swapeditfiles (FILE *outfile)
-/* Swap `FLOW (result)' and `editname', assign `fedit = FLOW (res)', and
-   rewind `fedit' for reading.  Set `FLOW (res)' to `outfile' if non-NULL;
-   otherwise, set `FLOW (res)' to be `FLOW (result)' opened for reading and
-   writing.  */
+/* Swap `FLOW (result)' and `EDIT (filename)',
+   assign `EDIT (fedit) = FLOW (res)',
+   and rewind `EDIT (fedit)' for reading.
+   Set `FLOW (res)' to `outfile' if non-NULL;
+   otherwise, set `FLOW (res)' to be `FLOW (result)'
+   opened for reading and writing.  */
 {
   char const *tmpptr;
 
-  editline = 0;
-  linecorr = 0;
+  EDIT (lcount) = 0;
+  EDIT (corr) = 0;
   Orewind (FLOW (res));
-  fedit = FLOW (res);
-  tmpptr = editname;
-  editname = FLOW (result);
+  EDIT (fedit) = FLOW (res);
+  tmpptr = EDIT (filename);
+  EDIT (filename) = FLOW (result);
   FLOW (result) = tmpptr;
   openfcopy (outfile);
 }
@@ -284,8 +303,8 @@ snapshotedit (FILE *f)
 /* Copy the current state of the edits to `f'.  */
 {
   finishedit (NULL, NULL, false);
-  fastcopy (fedit, f);
-  Irewind (fedit);
+  fastcopy (EDIT (fedit), f);
+  Irewind (EDIT (fedit));
 }
 
 void
@@ -297,7 +316,7 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
   register RILE *fe;
   register FILE *fc;
 
-  fe = fedit;
+  fe = EDIT (fedit);
   if (fe)
     {
       fc = FLOW (res);
@@ -320,28 +339,28 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
 #endif  /* !large_memory */
 
 #if large_memory
-#define copylines(upto,delta)  (editline = (upto))
+#define copylines(upto,delta)  (EDIT (lcount) = (upto))
 #else  /* !large_memory */
 static void
 copylines (register long upto, struct hshentry const *delta)
-/* Copy input lines `editline+1..upto' from `fedit' to `FLOW (res)'.
+/* Copy input lines `EDIT (lcount)+1..upto' from `EDIT (fedit)' to `FLOW (res)'.
    If `delta', keyword expansion is done simultaneously.
-   `editline' is updated.  Rewinds a file only if necessary.  */
+   `EDIT (lcount)' is updated.  Rewinds a file only if necessary.  */
 {
   register int c;
   declarecache;
   register FILE *fc;
   register RILE *fe;
 
-  if (upto < editline)
+  if (upto < EDIT (lcount))
     {
       /* Swap files.  */
       finishedit (NULL, NULL, false);
       /* Assumes edit only during last pass, from the beginning.  */
     }
-  fe = fedit;
+  fe = EDIT (fedit);
   fc = FLOW (res);
-  if (editline < upto)
+  if (EDIT (lcount) < upto)
     {
       struct expctx ctx = EXPCTX_1OUT (fc, fe, false, true);
 
@@ -351,7 +370,7 @@ copylines (register long upto, struct hshentry const *delta)
             if (expandline (&ctx) <= 1)
               editLineNumberOverflow ();
           }
-        while (++editline < upto);
+        while (++EDIT (lcount) < upto);
       else
         {
           setupcache (fe);
@@ -365,7 +384,7 @@ copylines (register long upto, struct hshentry const *delta)
                 }
               while (c != '\n');
             }
-          while (++editline < upto);
+          while (++EDIT (lcount) < upto);
           uncache (fe);
         }
     }
@@ -386,12 +405,23 @@ xpandstring (struct hshentry const *delta)
     continue;
 }
 
+static void
+ensure_editstuff (void)
+{
+  if (! BE (editstuff))
+    {
+      BE (editstuff) = alloc (SHARED, "editstuff",
+                              sizeof (struct editstuff));
+      memset (BE (editstuff), 0, sizeof (struct editstuff));
+    }
+}
+
 void
 copystring (void)
 /* Copy a string terminated with a single `SDELIM' from `FLOW (from)' to
    `FLOW (res)', replacing all double `SDELIM' with a single `SDELIM'.  If
    `FLOW (to)' is non-NULL, the string also copied unchanged to `FLOW (to)'.
-   `editline' is incremented by the number of lines copied.  Assumption:
+   `EDIT (lcount)' is incremented by the number of lines copied.  Assumption:
    next character read is first string character.  */
 {
   register int c;
@@ -399,6 +429,8 @@ copystring (void)
   register FILE *frew, *fcop;
   register bool amidline;
   register RILE *fin;
+
+  ensure_editstuff ();
 
   fin = FLOW (from);
   setupcache (fin);
@@ -412,7 +444,7 @@ copystring (void)
       switch (c)
         {
         case '\n':
-          ++editline;
+          ++EDIT (lcount);
           ++LEX (lno);
           amidline = false;
           break;
@@ -422,7 +454,7 @@ copystring (void)
             {
               /* End of string.  */
               NEXT (c) = c;
-              editline += amidline;
+              EDIT (lcount) += amidline;
               uncache (fin);
               return;
             }
@@ -440,10 +472,12 @@ enterstring (void)
 /* Like `copystring', except the string is
    put into the `edit' data structure.  */
 {
+  ensure_editstuff ();
+
 #if !large_memory
-  editname = NULL;
-  fedit = NULL;
-  editline = linecorr = 0;
+  EDIT (filename) = NULL;
+  EDIT (fedit) = NULL;
+  EDIT (lcount) = EDIT (corr) = 0;
   FLOW (result) = maketemp (1);
   if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
     fatal_sys (FLOW (result));
@@ -458,8 +492,8 @@ enterstring (void)
   register RILE *fin;
 
   e = 0;
-  gap = 0;
-  gapsize = linelim;
+  EDIT (gap) = 0;
+  EDIT (gapsize) = EDIT (lim);
   fin = FLOW (from);
   setupcache (fin);
   cache (fin);
@@ -485,8 +519,8 @@ enterstring (void)
             {
               /* End of string.  */
               NEXT (c) = c;
-              editline = e + amidline;
-              linecorr = 0;
+              EDIT (lcount) = e + amidline;
+              EDIT (corr) = 0;
               uncache (fin);
               return;
             }
@@ -513,8 +547,9 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
 #if !large_memory
    The result is written to `FLOW (res)'.
    If `delta', keyword expansion is performed simultaneously.
-   If running out of lines in `fedit', `fedit' and `FLOW (res)' are swapped.
-   `editname' is the name of the file that goes with `fedit'.
+   If running out of lines in `EDIT (fedit)',
+   `EDIT (fedit)' and `FLOW (res)' are swapped.
+   `EDIT (filename)' is the name of the file that goes with `EDIT (fedit)'.
 #endif
    If `FLOW (to)' is set, the edit script is also copied verbatim
    to `FLOW (to)'.  Assumes that all these files are open.
@@ -538,8 +573,8 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
 #endif
   struct diffcmd dc;
 
-  editline += linecorr;
-  linecorr = 0;                         /* correct line number */
+  EDIT (lcount) += EDIT (corr);
+  EDIT (corr) = 0;                         /* correct line number */
   frew = FLOW (to);
   fin = FLOW (from);
   setupcache (fin);
@@ -555,12 +590,12 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
         copylines (dc.line1 - 1, delta);
         /* Skip over unwanted lines.  */
         i = dc.nlines;
-        linecorr -= i;
-        editline += i;
+        EDIT (corr) -= i;
+        EDIT (lcount) += i;
 #if large_memory
-        deletelines (editline + linecorr, i);
+        deletelines (EDIT (lcount) + EDIT (corr), i);
 #else  /* !large_memory */
-        fe = fedit;
+        fe = EDIT (fedit);
         do
           {
             /* Skip next line.  */
@@ -584,9 +619,9 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
         copylines (dc.line1, delta);
         i = dc.nlines;
 #if large_memory
-        j = editline + linecorr;
+        j = EDIT (lcount) + EDIT (corr);
 #endif
-        linecorr += i;
+        EDIT (corr) += i;
 #if !large_memory
         f = FLOW (res);
         if (delta)
@@ -716,6 +751,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   struct buf *dirt;
   struct stat statbuf;
 
+  ensure_editstuff ();                  /* ugh */
   waslocked = 0 <= REPO (fd_lock);
   exists =
 #ifdef HAVE_READLINK
@@ -732,7 +768,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   RCSpath = RCSbuf->string;
   sp = basefilename (RCSpath);
   l = sp - RCSpath;
-  dirt = &sff[waslocked].filename;
+  dirt = &EDIT (sff)[waslocked].filename;
   bufscpy (dirt, RCSpath);
   tp = dirt->string + l;
   x = rcssuffix (RCSpath);
@@ -849,7 +885,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   setrid ();
 
   if (0 <= fdesc)
-    sff[SFFI_LOCKDIR].disposition = effective;
+    EDIT (sff)[SFFI_LOCKDIR].disposition = effective;
 
   if (fdescSafer < 0)
     {
@@ -875,7 +911,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
               errno = e;
               if (r != 0)
                 fatal_sys (lockname);
-              bufscpy (&sff[SFFI_LOCKDIR].filename, sp);
+              bufscpy (&EDIT (sff)[SFFI_LOCKDIR].filename, sp);
             }
         }
       REPO (fd_lock) = fdescSafer;
@@ -895,9 +931,9 @@ keepdirtemp (char const *name)
   register int i;
 
   for (i = SFF_COUNT; 0 <= --i;)
-    if (sff[i].filename.string == name)
+    if (EDIT (sff)[i].filename.string == name)
       {
-        sff[i].disposition = notmade;
+        EDIT (sff)[i].disposition = notmade;
         return;
       }
   PFATAL ("keepdirtemp");
@@ -905,19 +941,20 @@ keepdirtemp (char const *name)
 
 char const *
 makedirtemp (bool isworkfile)
-/* Create a unique pathname and store it into `sff'.
-   Because of storage in `sff', `dirtempunlink' can unlink the file later.
+/* Create a unique pathname and store it into `EDIT (sff)'.  Because of
+   storage in `EDIT (sff)', `dirtempunlink' can unlink the file later.
    Return a pointer to the pathname created.
    If `isworkfile', put it into the working file's directory;
    otherwise, put the unique file in RCSfile's directory.  */
 {
   int slot = SFFI_NEWDIR + isworkfile;
 
-  set_temporary_file_name (&sff[slot].filename, isworkfile
+  ensure_editstuff ();
+  set_temporary_file_name (&EDIT (sff)[slot].filename, isworkfile
                            ? MANI (filename)
                            : REPO (filename));
-  sff[slot].disposition = real;
-  return sff[slot].filename.string;
+  EDIT (sff)[slot].disposition = real;
+  return EDIT (sff)[slot].filename.string;
 }
 
 void
@@ -928,15 +965,18 @@ dirtempunlink (void)
   register int i;
   enum maker m;
 
+  if (! BE (editstuff))
+    return;
+
   for (i = SFF_COUNT; 0 <= --i;)
-    if ((m = sff[i].disposition) != notmade)
+    if ((m = EDIT (sff)[i].disposition) != notmade)
       {
         if (m == effective)
           seteid ();
-        un_link (sff[i].filename.string);
+        un_link (EDIT (sff)[i].filename.string);
         if (m == effective)
           setrid ();
-        sff[i].disposition = notmade;
+        EDIT (sff)[i].disposition = notmade;
       }
 }
 

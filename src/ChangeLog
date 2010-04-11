@@ -1,3 +1,21 @@
+2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Move remaining edit state into `struct editstuff'.
+
+	* base.h (behavior): Add member `editstuff'.
+	* rcsedit.c: #include "b-divvy.h".
+	(editstuff): New struct.
+	(fedit, editname, editline, linecorr, sff)
+	(line, gap, gapsize, linelim): Delete vars.
+	(EDIT): New macro.
+	(lockname, newRCSname): Update.
+	(ensure_editstuff): New static func.
+	(insertline, deletelines, snapshotedit, finishedit, swapeditfiles)
+	(copylines, editstring, keepdirtemp, dirtempunlink):
+	Use `EDIT (foo)' instead of deletes vars.
+	(copystring, enterstring, rcswriteopen, makedirtemp): Likewise.
+	Also, call `ensure_editstuff'.
+
 2010-04-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstractions: SHARED, SINGLE
