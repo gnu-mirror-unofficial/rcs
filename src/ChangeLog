@@ -1,5 +1,25 @@
 2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move filename state into `struct fnstuff'; use spaces more.
+
+	* base.h (behavior): Add member `fnstuff'.
+	(init_fnstuff): New func decl.
+	* rcsfnms.c (fnstuff): New struct.
+	(FN): New macro.
+	(init_fnstuff): New func.
+	(RCSbuf, RCSb, RCSerrno, tpnames): Delete vars.
+	(set_temporary_file_name): Use `FN (tmpdir)'.
+	(maketemp, tempunlink): Use `FN (tmpnames)'.
+	(finopen, fin2open): Use `FN (RCSbuf)', `FN (RCSb)', `FN (RCSerrno)'.
+	(pairnames): Use `SINGLE' space for `MANI (filename)' alloc;
+	use `FN (RCSbuf)', `FN (RCSerrno)'.
+	(getfullRCSname): Use `SHARED' for `getcwd' alloc;
+	use `SINGLE' for expanded filename alloc.
+	(getcwd): Remove spurious `static' for local var; add `const'.
+	* rcsutil.c (gnurcs_init): call `init_fnstuff'.
+
+2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move remaining maketime state into `struct maketimestuff'.
 
 	* base.h (behavior): Add member `maketimestuff'.

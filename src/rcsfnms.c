@@ -36,13 +36,27 @@
 static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
 
-static struct buf RCSbuf, RCSb;
-static int RCSerrno;
-
 /* Temp names to be unlinked when done, if they are not 0.
    Must be at least `DIRTEMPNAMES' (see rcsedit.c).  */
 #define TEMPNAMES 5
-static char *volatile tpnames[TEMPNAMES];
+
+struct fnstuff
+{
+  struct buf RCSbuf, RCSb;
+  int RCSerrno;
+  char *volatile tpnames[TEMPNAMES];
+  char *tmpdir;
+  char *cwd;
+};
+
+#define FN(x)  (BE (fnstuff)-> x)
+
+void
+init_fnstuff (void)
+{
+  BE (fnstuff) = alloc (SHARED, "fnstuff", sizeof (struct fnstuff));
+  memset (BE (fnstuff), 0, sizeof (struct fnstuff));
+}
 
 struct compair
 {
@@ -139,7 +153,7 @@ homegrown_mkstemp (char *template)
 void
 set_temporary_file_name (struct buf *filename, const char *prefix)
 {
-  static char *tmpdir;
+#define tmpdir  FN (tmpdir)
   char *fn;
   size_t len;
   int fd;
@@ -197,24 +211,25 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
   filename->size = len;
   brush_off (SHARED, fn);
   close (fd);
+#undef tmpdir
 }
 
 char const *
 maketemp (int n)
 /* Create a unique filename and store it into the `n'th slot
-   in `tpnames' (so that `tempunlink' can unlink the file later).
+   in `FN (tpnames)' (so that `tempunlink' can unlink the file later).
    Return a pointer to the filename created.  */
 {
-  if (!tpnames[n])
+  if (!FN (tpnames)[n])
     {
       struct buf rv;
 
       bufautobegin (&rv);
       set_temporary_file_name (&rv, NULL);
-      tpnames[n] = intern (SHARED, rv.string, rv.size);
+      FN (tpnames)[n] = intern (SHARED, rv.string, rv.size);
       bufautoend (&rv);
     }
-  return tpnames[n];
+  return FN (tpnames)[n];
 }
 
 void
@@ -225,12 +240,12 @@ tempunlink (void)
   register char *p;
 
   for (i = TEMPNAMES; 0 <= --i;)
-    if ((p = tpnames[i]))
+    if ((p = FN (tpnames)[i]))
       {
         unlink (p);
         /* We would tfree(p) here, but this might dump core if we're handling
            a signal.  We're about to exit anyway, so we won't bother.  */
-        tpnames[i] = NULL;
+        FN (tpnames)[i] = NULL;
       }
 }
 
@@ -458,23 +473,23 @@ static bool
 finopen (RILE *(*rcsopen) (struct buf *, struct stat *, bool), bool mustread)
 /* Use `rcsopen' to open an RCS file; `mustread' is set if the file must be
    read.  Set `FLOW (from)' to the result and return true if successful.
-   `RCSb' holds the file's name.  Set `RCSbuf' to the best RCS name found
-   so far, and `RCSerrno' to its errno.  Return true if successful or if
+   `FN (RCSb)' holds the file's name.  Set `FN (RCSbuf)' to the best RCS name found
+   so far, and `FN (RCSerrno)' to its errno.  Return true if successful or if
    an unusual failure.  */
 {
   bool interesting, preferold;
 
   /* We prefer an old name to that of a nonexisting new RCS file,
      unless we tried locking the old name and failed.  */
-  preferold = RCSbuf.string[0] && (mustread || 0 <= REPO (fd_lock));
+  preferold = FN (RCSbuf).string[0] && (mustread || 0 <= REPO (fd_lock));
 
-  FLOW (from) = (*rcsopen) (&RCSb, &REPO (stat), mustread);
+  FLOW (from) = (*rcsopen) (&FN (RCSb), &REPO (stat), mustread);
   interesting = FLOW (from) || errno != ENOENT;
   if (interesting || !preferold)
     {
       /* Use the new name.  */
-      RCSerrno = errno;
-      bufscpy (&RCSbuf, RCSb.string);
+      FN (RCSerrno) = errno;
+      bufscpy (&FN (RCSbuf), FN (RCSb).string);
     }
   return interesting;
 }
@@ -490,16 +505,16 @@ fin2open (char const *d, size_t dlen,
    with length `xlen'.  Use `rcsopen' to open an RCS file; `mustread' is set
    if the file must be read.  Return true if successful.  Try "dRCS/basex"
    first; if that fails and x is nonempty, try "dbasex".  Put these potential
-   names in `RCSb'.  Set `RCSbuf' to the best RCS name found so far, and
-   `RCSerrno' to its errno.  Return true if successful or if an unusual
+   names in `FN (RCSb)'.  Set `FN (RCSbuf)' to the best RCS name found so far, and
+   `FN (RCSerrno)' to its errno.  Return true if successful or if an unusual
    failure.  */
 {
   register char *p;
 
-  bufalloc (&RCSb, dlen + rcslen + 1 + baselen + xlen + 1);
+  bufalloc (&FN (RCSb), dlen + rcslen + 1 + baselen + xlen + 1);
 
   /* Try "dRCS/basex".  */
-  memcpy (p = RCSb.string, d, dlen);
+  memcpy (p = FN (RCSb).string, d, dlen);
   memcpy (p += dlen, rcsdir, rcslen);
   p += rcslen;
   *p++ = SLASH;
@@ -512,8 +527,8 @@ fin2open (char const *d, size_t dlen,
         return true;
 
       /* Try "dbasex".  Start from scratch, because
-         `finopen' may have changed `RCSb'.  */
-      memcpy (p = RCSb.string, d, dlen);
+         `finopen' may have changed `FN (RCSb)'.  */
+      memcpy (p = FN (RCSb).string, d, dlen);
       memcpy (p += dlen, base, baselen);
       memcpy (p += baselen, x, xlen);
       p[xlen] = 0;
@@ -538,8 +553,6 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
 
    Return 0 on all errors, e.g. files that are not regular files.  */
 {
-  static struct buf tempbuf;
-
   register char *p, *arg, *RCS1;
   char const *base, *RCSbase, *x;
   bool paired;
@@ -576,9 +589,8 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
         }
       else
         {
-          bufscpy (&tempbuf, base);
-          MANI (filename) = p = tempbuf.string;
-          p[baselen] = 0;
+          MANI (filename) = intern (SINGLE, base, baselen + 1);
+          MANI (filename)[baselen] = '\0';
         }
     }
   else
@@ -604,13 +616,13 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
   if (RCSbase != RCS1)
     {
       /* A path for RCSfile is given; single RCS file to look for.  */
-      bufscpy (&RCSbuf, RCS1);
-      FLOW (from) = (*rcsopen) (&RCSbuf, &REPO (stat), mustread);
-      RCSerrno = errno;
+      bufscpy (&FN (RCSbuf), RCS1);
+      FLOW (from) = (*rcsopen) (&FN (RCSbuf), &REPO (stat), mustread);
+      FN (RCSerrno) = errno;
     }
   else
     {
-      bufscpy (&RCSbuf, "");
+      bufscpy (&FN (RCSbuf), "");
       if (RCS1)
         /* RCS filename was given without path.  */
         fin2open (arg, (size_t) 0, RCSbase, baselen,
@@ -630,7 +642,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
             }
         }
     }
-  REPO (filename) = p = RCSbuf.string;
+  REPO (filename) = p = FN (RCSbuf).string;
   if (FLOW (from))
     {
       if (!S_ISREG (REPO (stat).st_mode))
@@ -643,12 +655,12 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     }
   else
     {
-      if (RCSerrno != ENOENT || mustread || REPO (fd_lock) < 0)
+      if (FN (RCSerrno) != ENOENT || mustread || REPO (fd_lock) < 0)
         {
-          if (RCSerrno == EEXIST)
+          if (FN (RCSerrno) == EEXIST)
             PERR ("RCS file %s is in use", p);
-          else if (!quiet || RCSerrno != ENOENT)
-            syserror (RCSerrno, p);
+          else if (!quiet || FN (RCSerrno) != ENOENT)
+            syserror (FN (RCSerrno), p);
           return 0;
         }
       InitAdmin ();
@@ -695,40 +707,37 @@ getfullRCSname (void)
     }
   else
     {
-      static struct buf rcsbuf;
-      static char const *wdptr;
-      static struct buf wdbuf;
-      static size_t wdlen, rsiz;
-
       register char const *r;
-      register size_t dlen;
-      register char *d;
-      register char const *wd;
+      char *rv;
+      size_t len;
 
-      if (!(wd = wdptr))
+      if (!FN (cwd))
         {
           /* Get working directory for the first time.  */
           char *PWD = cgetenv ("PWD");
           struct stat PWDstat, dotstat;
 
-          if (!((d = PWD)
+          if (!(0 //(FN (cwd) = PWD)
                 && ROOTPATH (PWD)
                 && stat (PWD, &PWDstat) == 0
                 && stat (".", &dotstat) == 0
                 && SAME_INODE (PWDstat, dotstat)))
             {
-              bufalloc (&wdbuf, SIZEABLE_PATH + 1);
-              while (!(d = getcwd (wdbuf.string, wdbuf.size)))
-                if (errno == ERANGE)
-                  bufalloc (&wdbuf, wdbuf.size << 1);
-                else if ((d = PWD))
-                  break;
-                else
-                  fatal_sys ("getcwd");
+              size_t sz = 64;
+
+              while (!(FN (cwd) = alloc (SHARED, __func__, sz),
+                       getcwd (FN (cwd), sz)))
+                {
+                  brush_off (SHARED, FN (cwd));
+                  if (errno == ERANGE)
+                    sz <<= 1;
+                  else if ((FN (cwd) = PWD))
+                    break;
+                  else
+                    fatal_sys ("getcwd");
+                }
             }
-          wdlen = dir_useful_len (d);
-          d[wdlen] = 0;
-          wdptr = wd = d;
+          FN (cwd)[dir_useful_len (FN (cwd))] = '\0';
         }
       /* Remove leading `./'s from `REPO (filename)'.
          Do not try to handle `../', since removing it may result
@@ -738,15 +747,11 @@ getfullRCSname (void)
         while (isSLASH (r[2]))
           r++;
       /* Build full pathname.  */
-      dlen = wdlen;
-      rsiz = strlen (r) + 1;
-      bufalloc (&rcsbuf, dlen + rsiz + 1);
-      d = rcsbuf.string;
-      memcpy (d, wd, dlen);
-      d += dlen;
-      *d++ = SLASH;
-      strncpy (d, r, rsiz);
-      return rcsbuf.string;
+      accumulate_nonzero_bytes (SINGLE, FN (cwd));
+      accumulate_byte          (SINGLE, SLASH);
+      accumulate_nonzero_bytes (SINGLE, r);
+      rv = finish_string (SINGLE, &len);
+      return rv;
     }
 }
 
@@ -770,7 +775,7 @@ isSLASH (int c)
 char *
 getcwd (char *path, size_t size)
 {
-  static char const usrbinpwd[] = "/usr/bin/pwd";
+  const char const usrbinpwd[] = "/usr/bin/pwd";
 #define binpwd (usrbinpwd+4)
 
   register FILE *fp;

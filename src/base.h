@@ -619,6 +619,7 @@ struct behavior
 
   struct isr_scratch *isr;
   struct editstuff *editstuff;
+  struct fnstuff *fnstuff;
   struct maketimestuff *maketimestuff;
 };
 
@@ -846,6 +847,7 @@ int rcsfcmp (RILE *, struct stat const *, char const *,
              struct hshentry const *);
 
 /* rcsfnms */
+void init_fnstuff (void);
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
 RILE *rcsreadopen (struct buf *, struct stat *, bool);
