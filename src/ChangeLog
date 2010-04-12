@@ -1,5 +1,12 @@
 2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use `obstack_free' more.
+
+	* b-divvy.c (brush_off) [DEBUG]: Display info to stderr.
+	(forget, close_space): Use `obstack_free' directly.
+
+2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstractions: zlloc, ZLLOC
 
 	* b-divvy.h (zlloc): New func decl.

@@ -113,6 +113,9 @@ intern (struct divvy *divvy, char const *s, size_t len)
 void
 brush_off (struct divvy *divvy, void *ptr)
 {
+#ifdef DEBUG
+  complain ("%s: %32s %p #%u\n", divvy->name, "brush-off", ptr, divvy->count);
+#endif
   divvy->count--;
   obstack_free (divvy->space, ptr);
 }
@@ -125,7 +128,7 @@ forget (struct divvy *divvy)
             divvy->name, "forget", divvy->first, divvy->count,
             obstack_room (divvy->space));
 #endif
-  brush_off (divvy, divvy->first);
+  obstack_free (divvy->space, divvy->first);
   divvy->count = 0;
 }
 
@@ -176,7 +179,7 @@ pointer_array (struct divvy *divvy, size_t count)
 void
 close_space (struct divvy *divvy)
 {
-  brush_off (divvy->space, NULL);
+  obstack_free (divvy->space, NULL);
   divvy->count = 0;
   divvy->first = NULL;
   free (divvy->space);
