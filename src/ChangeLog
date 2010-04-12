@@ -1,5 +1,23 @@
 2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use spaces for "ci -k" support.
+
+	* rcskeep.c (sorry): New static func.
+	(badly_terminated): Use `sorry'; also, take `savep', if set,
+	finish and then brush off the partially constructed string.
+	(get0val): Save directly to `SINGLE'; return `char *';
+	don't take `struct buf *'; instead take `bool savep'.
+	(keepid): Return `char *'; don't take `struct buf *'.
+	(getval): Return `char *'; don't take `struct buf *';
+	instead take `bool savep'.
+	(keepdate): Use `SHARED' temporarily for date and time strings.
+	(checknum): Incorporate into unique caller.
+	(keeprev): Return `char *'; set `PREV (rev)' directly.
+	(getoldkeys): Don't keep local `struct buf' objects;
+	use strings saved in `SINGLE' and `PREV (foo)' directly.
+
+2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Re{name,base} abstraction from `ftalloc' to `FALLOC'.
 
 	* b-divvy.h (FALLOC): New macro.

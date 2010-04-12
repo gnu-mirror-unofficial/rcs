@@ -27,30 +27,37 @@
 #include "b-divvy.h"
 #include <ctype.h>
 
-static bool
-badly_terminated (void)
+static char *
+sorry (bool savep, char const *msg)
 {
-  MERR ("badly terminated keyword value");
-  return false;
+  if (savep)
+    {
+      char *partial;
+      size_t len;
+
+      partial = finish_string (SINGLE, &len);
+      brush_off (SINGLE, partial);
+    }
+  if (msg)
+    MERR (msg);
+  return NULL;
 }
 
-static bool
-get0val (register int c, register RILE *fp, struct buf *target, bool optional)
-/* Read a keyword value from `c + fp' into `target', perhaps `optional'ly.
+static char *
+badly_terminated (bool savep)
+{
+  return sorry (savep, "badly terminated keyword value");
+}
+
+static char *
+get0val (register int c, register RILE *fp, bool savep, bool optional)
+/* Read a keyword value from `c + fp', perhaps `optional'ly.
    Same as `getval', except `c'` is the lookahead character.  */
 {
-  register char *tp;
-  char const *tlim;
+  char *val = NULL;
+  size_t len;
   register bool got1;
 
-  if (target)
-    {
-      bufalloc (target, 1);
-      tp = target->string;
-      tlim = tp + target->size;
-    }
-  else
-    tlim = tp = NULL;
   got1 = false;
   for (;;)
     {
@@ -58,59 +65,73 @@ get0val (register int c, register RILE *fp, struct buf *target, bool optional)
         {
         default:
           got1 = true;
-          if (tp)
-            {
-              *tp++ = c;
-              if (tlim <= tp)
-                tp = bufenlarge (target, &tlim);
-            }
+          if (savep)
+            accumulate_byte (SINGLE, c);
           break;
 
         case ' ':
         case '\t':
-          if (tp)
+          if (savep)
             {
-              *tp = '\0';
+              val = finish_string (SINGLE, &len);
 #ifdef KEEPTEST
-              printf ("getval: %s\n", target);
+              printf ("%s: \"%s\"%s\n", __func__, val,
+                      got1 ? "" : " (but that's just whitespace!)");
 #endif
+              if (!got1)
+                {
+                  brush_off (SINGLE, val);
+                  val = NULL;
+                }
             }
-          return got1;
+          if (got1 && !val)
+            val = "non-NULL";
+          return val;
 
         case KDELIM:
           if (!got1 && optional)
-            return false;
+            {
+              if (val)
+                brush_off (SINGLE, val);
+              return NULL;
+            }
           /* fall into */
         case '\n':
-        case 0:
-          return badly_terminated ();
+        case '\0':
+          return badly_terminated (savep);
         }
-      Igeteof (fp, c, return badly_terminated ());
+      Igeteof (fp, c, return badly_terminated (savep));
     }
 }
 
-static bool
-keepid (int c, RILE *fp, struct buf *b)
-/* Get previous identifier from `c + fp' into `b'.  */
+static char *
+keepid (int c, RILE *fp)
+/* Get previous identifier from `c + fp'.  */
 {
+  char *maybe;
+
   if (!c)
-    Igeteof (fp, c, return false);
-  if (!get0val (c, fp, b, false))
-    return false;
-  checksid (b->string);
-  return !LEX (erroneousp);
+    Igeteof (fp, c, return sorry (true, NULL));
+  if (!(maybe = get0val (c, fp, true, false)))
+    return NULL;
+  checksid (maybe);
+  if (LEX (erroneousp))
+    {
+      brush_off (SINGLE, maybe);
+      maybe = NULL;
+    }
+  return maybe;
 }
 
-static bool
-getval (register RILE *fp, struct buf *target, bool optional)
-/* Read a keyword value from `fp' into `target'.  Returns true if one is
-   found, false otherwise.  Does not modify target if it is 0.  Do not report
-   an error if `optional' is set and `kdelim' is found instead.  */
+static char *
+getval (register RILE *fp, bool savep, bool optional)
+/* Read a keyword value from `fp'; return it if found, else NULL.
+   Do not report an error if `optional' is set and `kdelim' is found instead.  */
 {
   int c;
 
-  Igeteof (fp, c, return badly_terminated ());
-  return get0val (c, fp, target, optional);
+  Igeteof (fp, c, return badly_terminated (savep));
+  return get0val (c, fp, savep, optional);
 }
 
 static int
@@ -118,83 +139,82 @@ keepdate (RILE *fp)
 /* Read a date; check format; if ok, set `PREV (date)'.
    Return 0 on error, lookahead character otherwise.  */
 {
-  struct buf prevday, prevtime;
+  char *d, *t;
   register int c;
 
   c = 0;
-  bufautobegin (&prevday);
-  if (getval (fp, &prevday, false))
+  if ((d = getval (fp, true, false)))
     {
-      bufautobegin (&prevtime);
-      if (getval (fp, &prevtime, false))
+      if (! (t = getval (fp, true, false)))
+        brush_off (SINGLE, d);
+      else
         {
           Igeteof (fp, c, c = 0);
-          if (c)
+          if (!c)
+            brush_off (SINGLE, t);
+          else
             {
+              char buf[64];
               size_t len;
-              register char const *d = prevday.string, *t = prevtime.string;
 
-              /* Parse dates put out by old versions of RCS.  */
-              if (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2]))
-                accumulate_nonzero_bytes (SINGLE, "19");
-              accumulate_nonzero_bytes (SINGLE, d);
-              accumulate_byte (SINGLE, ' ');
-              accumulate_nonzero_bytes (SINGLE, t);
-              if (!strchr (t, '-') && !strchr (t, '+'))
-                accumulate_nonzero_bytes (SINGLE, "+0000");
+              snprintf (buf, 64, "%s%s %s%s",
+                        /* Parse dates put out by old versions of RCS.  */
+                        (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2])
+                         ? "19"
+                         : ""),
+                        d, t,
+                        (!strchr (t, '-') && !strchr (t, '+')
+                         ? "+0000"
+                         : ""));
+              /* Do it twice to keep the SINGLE count synchronized.
+                 If count were moot, we could simply brush off `d'.  */
+              brush_off (SINGLE, t);
+              brush_off (SINGLE, d);
               PREV (date) = finish_string (SINGLE, &len);
             }
         }
-      bufautoend (&prevtime);
     }
-  bufautoend (&prevday);
   return c;
 }
 
-static bool
-checknum (char const *s)
+static char const *
+keeprev (RILE *fp)
+/* Get previous revision from `fp'.  */
 {
-  register char const *sp;
-  register int dotcount = 0;
+  char *s = getval (fp, true, false);
 
-  for (sp = s;; sp++)
+  if (s)
     {
-      switch (*sp)
+      register char const *sp;
+      register int dotcount = 0;
+
+      for (sp = s;; sp++)
         {
-        case 0:
-          if (dotcount & 1)
-            return true;
-          else
-            break;
+          switch (*sp)
+            {
+            case 0:
+              if (dotcount & 1)
+                goto done;
+              else
+                break;
 
-        case '.':
-          dotcount++;
-          continue;
+            case '.':
+              dotcount++;
+              continue;
 
-        default:
-          if (isdigit (*sp))
-            continue;
+            default:
+              if (isdigit (*sp))
+                continue;
+              break;
+            }
           break;
         }
-      break;
+      MERR ("%s is not a revision number", s);
+      brush_off (SINGLE, s);
+      s = NULL;
     }
-  MERR ("%s is not a revision number", s);
-  return false;
-}
-
-static bool
-keeprev (RILE *fp)
-/* Get previous revision from `fp' into `b'.  */
-{
-  struct buf rev;
-  bool rv;
-
-  bufautobegin (&rev);
-  if ((rv = (getval (fp, &rev, false)
-             && checknum (rev.string))))
-    PREV (rev) = fbuf_save (&rev);
-  bufautoend (&rev);
-  return rv;
+ done:
+  return PREV (rev) = s;
 }
 
 bool
@@ -211,7 +231,6 @@ getoldkeys (register RILE *fp)
   char keyword[keylength + 1];
   register char *tp;
   bool needs_closing;
-  struct buf author, name, state;
   struct pool_found match;
 
   if (PREV (valid))
@@ -228,21 +247,7 @@ getoldkeys (register RILE *fp)
       needs_closing = true;
     }
 
-  /* Initialize to empty.  */
-#define CLEAR(which)  do                        \
-    {                                           \
-      bufautobegin (&which);                    \
-      PREV (which) = NULL;                      \
-    }                                           \
-  while (0);
-  CLEAR (author);
-  CLEAR (name);
-  CLEAR (state);
-#undef CLEAR
-
-#define KEEPID(c,which)                         \
-  (keepid (c, fp, &which)                       \
-   && (PREV (which) = fbuf_save (&which)))
+#define KEEPID(c,which)  (PREV (which) = keepid (c, fp))
 
   /* We can use anything but `KDELIM' here.  */
   c = '\0';
@@ -301,14 +306,14 @@ getoldkeys (register RILE *fp)
               break;
             case Header:
             case Id:
-              if (!(getval (fp, NULL, false)
+              if (!(getval (fp, false, false)
                     && keeprev (fp)
                     && (c = keepdate (fp))
                     && KEEPID (c, author)
                     && KEEPID ('\0', state)))
                 goto badness;
               /* Skip either ``who'' (new form) or ``Locker: who'' (old).  */
-              if (getval (fp, NULL, true) && getval (fp, NULL, true))
+              if (getval (fp, false, true) && getval (fp, false, true))
                 c = 0;
               else if (LEX (erroneousp))
                 goto badness;
@@ -316,23 +321,20 @@ getoldkeys (register RILE *fp)
                 c = KDELIM;
               break;
             case Locker:
-              getval (fp, NULL, false);
+              getval (fp, false, false);
               c = 0;
               break;
             case Log:
             case RCSfile:
             case Source:
-              if (!getval (fp, NULL, false))
+              if (!getval (fp, false, false))
                 goto badness;
               c = 0;
               break;
             case Name:
-              if (getval (fp, &name, false))
-                {
-                  if (*name.string)
-                    checkssym (name.string);
-                  PREV (name) = fbuf_save (&name);
-                }
+              if ((PREV (name) = getval (fp, true, false))
+                  && *PREV (name))
+                checkssym (PREV (name));
               c = 0;
               break;
             case Revision:
@@ -382,9 +384,6 @@ getoldkeys (register RILE *fp)
   return true;
 
  badness:
-  bufautoend (&author);
-  bufautoend (&name);
-  bufautoend (&state);
   return false;
 }
 
