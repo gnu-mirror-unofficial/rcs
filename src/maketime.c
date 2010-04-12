@@ -21,7 +21,6 @@
 
 #include "base.h"
 #include <time.h>
-#include <string.h>
 #include "partime.h"
 #include "maketime.h"
 #include "b-divvy.h"
@@ -45,9 +44,7 @@ struct maketimestuff
 void
 init_maketimestuff (void)
 {
-  BE (maketimestuff) = alloc (SHARED, "maketimestuff",
-                              sizeof (struct maketimestuff));
-  memset (BE (maketimestuff), 0, sizeof (struct maketimestuff));
+  BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
 }
 
 /* For maximum portability, use only `localtime' and `gmtime'.  Make no

@@ -31,6 +31,7 @@ extern struct divvy *single;
 
 extern struct divvy *make_space (const char const name[]);
 extern void *alloc (struct divvy *divvy, char const *what, size_t len);
+extern void *zlloc (struct divvy *divvy, char const *what, size_t len);
 extern char *intern (struct divvy *divvy, char const *s, size_t len);
 extern void brush_off (struct divvy *divvy, void *ptr);
 extern void forget (struct divvy *divvy);
@@ -45,6 +46,7 @@ extern void close_space (struct divvy *divvy);
 #define SHARED  shared
 #define SINGLE  single
 
+#define ZLLOC(n,type)          (zlloc (SHARED, #type, sizeof (type) * n))
 #define intern0(divvy,string)  (intern (divvy, string, strlen (string)))
 
 /* b-divvy.h ends here */

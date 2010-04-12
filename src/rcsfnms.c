@@ -54,8 +54,7 @@ struct fnstuff
 void
 init_fnstuff (void)
 {
-  BE (fnstuff) = alloc (SHARED, "fnstuff", sizeof (struct fnstuff));
-  memset (BE (fnstuff), 0, sizeof (struct fnstuff));
+  BE (fnstuff) = ZLLOC (1, struct fnstuff);
 }
 
 struct compair

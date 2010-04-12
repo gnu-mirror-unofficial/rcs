@@ -44,7 +44,7 @@ gnurcs_init (void)
 {
   SHARED = make_space ("shared");
   SINGLE = make_space ("single");
-  top = memset (alloc (SHARED, "top", sizeof (*top)), 0, sizeof (*top));
+  top = ZLLOC (1, struct top);
   unbuffer_standard_error ();
   ISR_SCRATCH = isr_init (&BE (quiet));
   init_fnstuff ();

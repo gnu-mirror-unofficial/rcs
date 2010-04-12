@@ -409,11 +409,7 @@ static void
 ensure_editstuff (void)
 {
   if (! BE (editstuff))
-    {
-      BE (editstuff) = alloc (SHARED, "editstuff",
-                              sizeof (struct editstuff));
-      memset (BE (editstuff), 0, sizeof (struct editstuff));
-    }
+    BE (editstuff) = ZLLOC (1, struct editstuff);
 }
 
 void

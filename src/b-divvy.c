@@ -91,6 +91,12 @@ alloc (struct divvy *divvy, char const *what USED_FOR_DEBUG, size_t len)
   return obstack_alloc (divvy->space, len);
 }
 
+void *
+zlloc (struct divvy *divvy, char const *what, size_t len)
+{
+  return memset (alloc (divvy, what, len), 0, len);
+}
+
 char *
 intern (struct divvy *divvy, char const *s, size_t len)
 {

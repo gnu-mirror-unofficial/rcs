@@ -1,5 +1,19 @@
 2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: zlloc, ZLLOC
+
+	* b-divvy.h (zlloc): New func decl.
+	(ZLLOC): New macro.
+	* b-divvy.c (zlloc): New func.
+	* maketime.c: Don't #include <string.h>.
+	(init_maketimestuff): Use `ZLLOC'.
+	* rcsedit.c (ensure_editstuff): Likewise.
+	* rcsfnms.c (init_fnstuff): Likewise.
+	* rcslex.c (fd2_RILE): Likewise.
+	* rcsutil.c (gnurcs_init): Likewise.
+
+2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move filename state into `struct fnstuff'; use spaces more.
 
 	* base.h (behavior): Add member `fnstuff'.

@@ -809,10 +809,7 @@ fd2RILE (int fd, char const *name, char const *type,
         if (s != status->st_size)
           PFATAL ("%s: too large", name);
         if (! LEX (rilebuf))
-          {
-            LEX (rilebuf) = alloc (SHARED, "rilebuf", sizeof (RILE) * RILES);
-            memset (LEX (rilebuf), 0, sizeof (RILE) * RILES);
-          }
+          LEX (rilebuf) = ZLLOC (RILES, RILE);
         for (f = LEX (rilebuf); f->base; f++)
           if (f == LEX (rilebuf) + RILES)
             PFATAL ("too many RILEs");
