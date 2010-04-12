@@ -47,6 +47,7 @@ extern void close_space (struct divvy *divvy);
 #define SINGLE  single
 
 #define ZLLOC(n,type)          (zlloc (SHARED, #type, sizeof (type) * n))
+#define FALLOC(type)           (alloc (SINGLE, #type, sizeof (type)))
 #define intern0(divvy,string)  (intern (divvy, string, strlen (string)))
 
 /* b-divvy.h ends here */

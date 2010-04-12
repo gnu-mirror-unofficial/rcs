@@ -73,13 +73,6 @@ testrealloc (void *ptr, size_t size)
   return okalloc (realloc (ptr, size));
 }
 
-void *
-ftestalloc (size_t size)
-/* Allocate a block from the `SINGLE' space.  */
-{
-  return alloc (SINGLE, __func__, size);
-}
-
 void
 ffree (void)
 /* Free all blocks in the `SINGLE' space.  */

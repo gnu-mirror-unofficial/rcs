@@ -1124,7 +1124,7 @@ addlock (struct hshentry *delta, bool verbose)
             return -1;
           }
       }
-  next = ftalloc (struct rcslock);
+  next = FALLOC (struct rcslock);
   delta->lockedby = next->login = getcaller ();
   next->delta = delta;
   next->nextlock = ADMIN (locks);
@@ -1157,7 +1157,7 @@ addsymbol (char const *num, char const *name, bool rebind)
             return -1;
           }
       }
-  next = ftalloc (struct assoc);
+  next = FALLOC (struct assoc);
   next->symbol = name;
   next->num = num;
   next->nextassoc = ADMIN (assocs);

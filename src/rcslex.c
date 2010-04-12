@@ -72,7 +72,7 @@ lookup (char const *str)
     if (!(n = *p))
       {
         /* Empty slot found.  */
-        *p = n = ftalloc (struct hshentry);
+        *p = n = FALLOC (struct hshentry);
         n->num = intern0 (SINGLE, str);
         n->nexthsh = NULL;
 #ifdef LEXDB

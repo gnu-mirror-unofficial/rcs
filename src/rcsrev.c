@@ -24,6 +24,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "b-complain.h"
+#include "b-divvy.h"
 
 int
 countnumflds (char const *s)
@@ -291,7 +292,7 @@ store1 (struct hshentries ***store, struct hshentry *next)
 {
   register struct hshentries *p;
 
-  p = ftalloc (struct hshentries);
+  p = FALLOC (struct hshentries);
   p->first = next;
   **store = p;
   *store = &p->rest;

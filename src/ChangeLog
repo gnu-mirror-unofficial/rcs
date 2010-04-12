@@ -1,5 +1,24 @@
 2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Re{name,base} abstraction from `ftalloc' to `FALLOC'.
+
+	* b-divvy.h (FALLOC): New macro.
+	* rcs.c: #include "b-divvy.h".
+	(doaccess): Use `FALLOC'.
+	* rcsedit.c (addlock, addsymbol): Likewise.
+	* rcslex.c (lookup): Likewise.
+	* rcsrev.c: #include "b-divvy.h".
+	(store1): Use `FALLOC'.
+	* rcssyn.c: #include "b-divvy.h".
+	(getadmin, getdelta): Use `FALLOC'.
+	* rcsutil.c (ftestalloc): Delete func.
+	* rlog.c: #include "b-divvy.h".
+	(getnumericrev): Use `FALLOC'.
+	* base.h (ftestalloc): Delete func decl.
+	(ftalloc): Delete macro.
+
+2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use `obstack_free' more.
 
 	* b-divvy.c (brush_off) [DEBUG]: Display info to stderr.

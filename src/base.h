@@ -995,10 +995,8 @@ int fdSafer (int);
 int getRCSINIT (int, char **, char ***);
 int run (int, char const *, ...);
 int runv (int, char const *, char const **);
-void *ftestalloc (size_t);
 void *testalloc (size_t);
 void *testrealloc (void *, size_t);
-#define ftalloc(T)  ((T*) ftestalloc (sizeof (T)))
 #define talloc(T)  ((T*) testalloc (sizeof (T)))
 #define tfree(p)  free ((void *)(p))
 

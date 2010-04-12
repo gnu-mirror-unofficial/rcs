@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include "rcs.help"
 #include "b-complain.h"
+#include "b-divvy.h"
 
 struct top *top;
 
@@ -447,7 +448,7 @@ doaccess (void)
           for (p = &ADMIN (allowed);; p = &t->nextaccess)
             if (!(t = *p))
               {
-                *p = t = ftalloc (struct access);
+                *p = t = FALLOC (struct access);
                 t->login = ch->login;
                 t->nextaccess = NULL;
                 changed = true;

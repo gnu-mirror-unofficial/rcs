@@ -24,6 +24,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "b-complain.h"
+#include "b-divvy.h"
 
 #define Kbranches  KS (branches)
 #if COMPAT2
@@ -99,7 +100,7 @@ getadmin (void)
   LastAccess = &ADMIN (allowed);
   while ((id = getid ()))
     {
-      newaccess = ftalloc (struct access);
+      newaccess = FALLOC (struct access);
       newaccess->login = id;
       *LastAccess = newaccess;
       LastAccess = &newaccess->nextaccess;
@@ -120,7 +121,7 @@ getadmin (void)
       else
         {
           /* Add new pair to association list.  */
-          newassoc = ftalloc (struct assoc);
+          newassoc = FALLOC (struct assoc);
           newassoc->symbol = id;
           newassoc->num = delta->num;
           *LastSymbol = newassoc;
@@ -143,7 +144,7 @@ getadmin (void)
       else
         {
           /* Add new pair to lock list.  */
-          newlock = ftalloc (struct rcslock);
+          newlock = FALLOC (struct rcslock);
           newlock->login = id;
           newlock->delta = delta;
           *LastLock = newlock;
@@ -266,7 +267,7 @@ getdelta (void)
   LastBranch = &Delta->branches;
   while ((num = getdnum ()))
     {
-      NewBranch = ftalloc (struct branchhead);
+      NewBranch = FALLOC (struct branchhead);
       NewBranch->hsh = num;
       *LastBranch = NewBranch;
       LastBranch = &NewBranch->nextbranch;

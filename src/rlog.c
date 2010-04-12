@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include "rlog.help"
 #include "b-complain.h"
+#include "b-divvy.h"
 
 struct top *top;
 
@@ -758,7 +759,7 @@ getnumericrev (void)
 
       if (n)
         {
-          pt = ftalloc (struct Revpairs);
+          pt = FALLOC (struct Revpairs);
           pt->numfld = n;
           pt->strtrev = fbuf_save (rstart);
           pt->endrev = fbuf_save (rend);
@@ -770,7 +771,7 @@ getnumericrev (void)
   /* Now take care of `branchflag'.  */
   if (branchflag && (ADMIN (defbr) || ADMIN (head)))
     {
-      pt = ftalloc (struct Revpairs);
+      pt = FALLOC (struct Revpairs);
       pt->strtrev = pt->endrev = ADMIN (defbr) ? ADMIN (defbr)
         : (partialno (&s, ADMIN (head)->num, 1),
            fbuf_save (&s),
