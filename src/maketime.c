@@ -21,8 +21,34 @@
 
 #include "base.h"
 #include <time.h>
+#include <string.h>
 #include "partime.h"
 #include "maketime.h"
+#include "b-divvy.h"
+
+struct maketimestuff
+{
+  char const *TZ;
+  /* The value of env var `TZ'.
+     Only valid/used if `TZ_must_be_set'.
+     -- time2tm  */
+
+  time_t t_cache[2];
+  struct tm tm_cache[2];
+  /* Cache the most recent `t',`tm' pairs;
+     One for `gmtime', one for `localtime'.
+     -- tm2time  */
+};
+
+#define MAKETIMESTUFF(x)  (BE (maketimestuff)-> x)
+
+void
+init_maketimestuff (void)
+{
+  BE (maketimestuff) = alloc (SHARED, "maketimestuff",
+                              sizeof (struct maketimestuff));
+  memset (BE (maketimestuff), 0, sizeof (struct maketimestuff));
+}
 
 /* For maximum portability, use only `localtime' and `gmtime'.  Make no
    assumptions about the `time_t' epoch or the range of `time_t' values.
@@ -58,10 +84,9 @@ time2tm (time_t unixtime, bool localzone)
    Use `gmtime' if available and if `!localzone', `localtime' otherwise.  */
 {
   struct tm *tm;
-#if TZ_must_be_set
-  static char const *TZ;
 
-  if (!TZ && !(TZ = getenv ("TZ")))
+#if TZ_must_be_set
+  if (!MAKETIMESTUFF (TZ) && !(MAKETIMESTUFF (TZ) = getenv ("TZ")))
     PFATAL
       ("The TZ environment variable is not set; please set it to your timezone");
 #endif
@@ -157,10 +182,6 @@ tm2time (struct tm *tm, bool localzone)
    implementations have them anyway, so allow them if `localtime'/`gmtime'
    does.  */
 {
-  /* Cache the most recent `t',`tm' pairs;
-     1 for `gmtime', 1 for `localtime'.  */
-  static time_t t_cache[2];
-  static struct tm tm_cache[2];
   time_t d, gt;
   struct tm const *gtm;
   /* The maximum number of iterations should be enough to handle any
@@ -176,8 +197,8 @@ tm2time (struct tm *tm, bool localzone)
     - (tm->tm_mon < 2 || !isleap (tm->tm_year + TM_YEAR_ORIGIN));
 
   /* Make a first guess.  */
-  gt = t_cache[localzone];
-  gtm = gt ? &tm_cache[localzone] : time2tm (gt, localzone);
+  gt = MAKETIMESTUFF (t_cache)[localzone];
+  gtm = gt ? &MAKETIMESTUFF (tm_cache)[localzone] : time2tm (gt, localzone);
 
   /* Repeatedly use the error from the guess to improve the guess.  */
   while ((d = difftm (tm, gtm)) != 0)
@@ -187,8 +208,8 @@ tm2time (struct tm *tm, bool localzone)
       gt += d;
       gtm = time2tm (gt, localzone);
     }
-  t_cache[localzone] = gt;
-  tm_cache[localzone] = *gtm;
+  MAKETIMESTUFF (t_cache)[localzone] = gt;
+  MAKETIMESTUFF (tm_cache)[localzone] = *gtm;
 
   /* Check that the guess actually matches; overflow can cause `difftm'
      to return 0 even on differing times, or `tm' may have members out of

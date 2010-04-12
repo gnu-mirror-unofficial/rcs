@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+void init_maketimestuff (void);
 struct tm *time2tm (time_t, bool);
 time_t difftm (struct tm const *, struct tm const *);
 time_t str2time (char const *, time_t, long);

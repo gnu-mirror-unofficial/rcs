@@ -619,6 +619,7 @@ struct behavior
 
   struct isr_scratch *isr;
   struct editstuff *editstuff;
+  struct maketimestuff *maketimestuff;
 };
 
 /* The working file is a manifestation of a particular revision.  */

@@ -1,3 +1,18 @@
+2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Move remaining maketime state into `struct maketimestuff'.
+
+	* base.h (behavior): Add member `maketimestuff'.
+	* maketime.c: #include <string.h>, "b-divvy.h".
+	(maketimestuff): New struct.
+	(MAKETIMESTUFF): New macro.
+	(init_maketimestuff): New func.
+	(time2tm): Use `MAKETIMESTUFF (TZ)'.
+	(tm2time): Use `MAKETIMESTUFF (t_cache)', `MAKETIMESTUFF (tm_cache)'.
+	* maketime.h (init_maketimestuff): New func decl.
+	* rcsutil.c: #include "maketime.h".
+	(gnurcs_init): Call `init_maketimestuff'.
+
 2010-04-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Move SIGCHLD-handler manual-reset state to `struct behavior'.

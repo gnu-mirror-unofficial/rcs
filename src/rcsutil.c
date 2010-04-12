@@ -37,6 +37,7 @@
 #include "b-divvy.h"
 #include "b-isr.h"
 #include "gnu-h-v.h"
+#include "maketime.h"
 
 void
 gnurcs_init (void)
@@ -46,6 +47,7 @@ gnurcs_init (void)
   top = memset (alloc (SHARED, "top", sizeof (*top)), 0, sizeof (*top));
   unbuffer_standard_error ();
   ISR_SCRATCH = isr_init (&BE (quiet));
+  init_maketimestuff ();
 }
 
 static void *
