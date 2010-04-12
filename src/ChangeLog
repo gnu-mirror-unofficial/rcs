@@ -1,5 +1,15 @@
 2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use a space for `expandline' scratch.
+
+	* base.h (manifestation): Remove member `keyval'; add `lparts'.
+	* b-kwxout.c: #include "b-divvy.h".
+	(LPARTS): New #define.
+	(ENSURE_LPARTS): New macro.
+	(expandline): Create and use space `LPARTS' for scanning scratch.
+
+2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use spaces for "ci -k" support.
 
 	* rcskeep.c (sorry): New static func.

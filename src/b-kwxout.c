@@ -23,6 +23,7 @@
 #include "base.h"
 #include <string.h>
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-kwxout.h"
 
 static void
@@ -292,6 +293,10 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
     }
 }
 
+#define LPARTS  MANI (lparts)
+
+#define ENSURE_LPARTS()  if (!LPARTS) LPARTS = make_space ("lparts")
+
 int
 expandline (struct expctx *ctx)
 /* Read a line from `ctx->from' and write it to `ctx->to'.  Do keyword
@@ -308,17 +313,19 @@ expandline (struct expctx *ctx)
   register int c;
   declarecache;
   register FILE *out, *frew;
-  register char *tp;
   register int r;
   bool e;
-  char const *tlim;
   struct pool_found matchresult;
+  char *cooked = NULL;
+  size_t len;
+
+  ENSURE_LPARTS ();
 
   setupcache (infile);
   cache (infile);
   out = ctx->to;
   frew = ctx->rewr;
-  bufalloc (&MANI (keyval), keylength + 3);
+  forget (LPARTS);
   e = false;
   r = -1;
 
@@ -357,42 +364,41 @@ expandline (struct expctx *ctx)
 
             case KDELIM:
               r = 0;
-              /* Check for keyword.  First, copy a long
-                 enough string into keystring.  */
-              tp = MANI (keyval).string;
-              *tp++ = KDELIM;
+              /* Check for keyword.  */
+              accumulate_byte (LPARTS, KDELIM);
+              len = 0;
               for (;;)
                 {
                   if (delimstuffed)
                     GETC (frew, c);
                   else
                     cachegeteof (c, goto keystring_eof);
-                  if (tp <= &MANI (keyval).string[keylength])
+                  if (len <= keylength + 3)
                     switch (ctab[c])
                       {
                       case LETTER:
                       case Letter:
-                        *tp++ = c;
+                        accumulate_byte (LPARTS, c);
+                        len++;
                         continue;
                       default:
                         break;
                       }
                   break;
                 }
-              *tp++ = c;
-              *tp = '\0';
-              if (! recognize_keyword (MANI (keyval).string + 1, &matchresult))
+              accumulate_byte (LPARTS, c);
+              cooked = finish_string (LPARTS, &len);
+              if (! recognize_keyword (cooked + 1, &matchresult))
                 {
-                  tp[-1] = 0;
-                  aputs (MANI (keyval).string, out);
-                  continue;     /* last c handled properly */
+                  cooked[len - 1] = '\0';
+                  aputs (cooked, out);
+                  /* Last c handled properly.  */
+                  continue;
                 }
-
               /* Now we have a keyword terminated with a K/VDELIM.  */
               if (c == VDELIM)
                 {
                   /* Try to find closing `KDELIM', and replace value.  */
-                  tlim = MANI (keyval).string + MANI (keyval).size;
                   for (;;)
                     {
                       if (delimstuffed)
@@ -401,9 +407,7 @@ expandline (struct expctx *ctx)
                         cachegeteof (c, goto keystring_eof);
                       if (c == '\n' || c == KDELIM)
                         break;
-                      *tp++ = c;
-                      if (tlim <= tp)
-                        tp = bufenlarge (&MANI (keyval), &tlim);
+                      accumulate_byte (LPARTS, c);
                       if (c == SDELIM && delimstuffed)
                         {
                           /* Skip next `SDELIM'.  */
@@ -420,10 +424,13 @@ expandline (struct expctx *ctx)
                   if (c != KDELIM)
                     {
                       /* Couldn't find closing `KDELIM' -- give up.  */
-                      *tp = '\0';
-                      aputs (MANI (keyval).string, out);
-                      continue; /* last c handled properly */
+                      cooked = finish_string (LPARTS, &len);
+                      aputs (cooked, out);
+                      /* Last c handled properly.  */
+                      continue;
                     }
+                  /* Ignore the region between VDELIM and KDELIM.  */
+                  cooked = finish_string (LPARTS, &len);
                 }
               /* Now put out the new keyword value.  */
               uncache (infile);
@@ -437,8 +444,8 @@ expandline (struct expctx *ctx)
     }
 
 keystring_eof:
-  *tp = '\0';
-  aputs (MANI (keyval).string, out);
+  cooked = finish_string (LPARTS, &len);
+  aputs (cooked, out);
 uncache_exit:
   uncache (infile);
   return r + e;

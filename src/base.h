@@ -645,9 +645,9 @@ struct manifestation
     char *state;
   } prev;
 
-  /* A buffer to (temporarily) hold key values.
+  /* Some space to (temporarily) hold key/value/line fragments.
      -- expandline  */
-  struct buf keyval;
+  struct divvy *lparts;
 };
 
 /* The parse state is used when reading the RCS file.  */
