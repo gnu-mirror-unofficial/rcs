@@ -1,5 +1,11 @@
 2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `readlink'.
+
+	* rcsedit.c (naturalize) [!HAVE_READLINK]: Delete this portion.
+
+2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use a space to stash ignored phrases.
 
 	* base.h (parse_state): Delete member `ignoredp'; add `ignore'.

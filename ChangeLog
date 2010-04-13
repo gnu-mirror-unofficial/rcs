@@ -1,5 +1,12 @@
 2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module `readlink'.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add `readlink'.
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Remove `readlink'.
+
+2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module `obstack'.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add `obstack'.

@@ -679,28 +679,13 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
 
 static int
 naturalize (struct buf *fn, bool *symbolicp)
-/* If we DO NOT have `readlink':
-   Set `*symbolic' to be false.
-   Do a simple `stat'.  Result: success => 1; ENOENT => 0; else -1.
-   ----------------------------------------------------------------------
-   If we DO have `readlink':
-   If `fn' is a symbolic link, resolve it to the name that it points to.
+/* If `fn' is a symbolic link, resolve it to the name that it points to.
    If unsuccessful, set errno and return -1.
    If it points to an existing file, return 1.
    Otherwise, set `errno' to `ENOENT' and return 0.
    On return `*symbolicp' set means the filename was a symlink, and
    `fn' points to the resolved filename (no change if not a symlink).  */
 {
-#ifndef HAVE_READLINK
-  struct stat statbuf;
-
-  *symbolicp = false;
-  return 0 > stat (fn->string, &statbuf)
-    ? (errno == ENOENT
-       ? 0
-       : -1)
-    : 1;
-#else  /* HAVE_READLINK */
   int e;
   ssize_t r;
   int linkcount = _POSIX_SYMLOOP_MAX;
@@ -751,7 +736,6 @@ naturalize (struct buf *fn, bool *symbolicp)
     default:
       return -1;
     }
-#endif /* HAVE_READLINK */
 }
 
 RILE *

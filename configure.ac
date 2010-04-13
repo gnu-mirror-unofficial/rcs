@@ -232,7 +232,6 @@ AC_CHECK_FUNCS_ONCE([
   mmap
   psiginfo
   psignal
-  readlink
   seteuid
   setuid
   sigaction
