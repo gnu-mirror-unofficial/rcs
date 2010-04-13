@@ -606,7 +606,7 @@ branchtip (char const *branch)
 }
 
 bool
-fexpandsym (char const *source, struct buf *target, RILE *fp)
+fexpandsym (char const *source, struct buf *target, struct fro *fp)
 /* Same as `expandsym', except if `fp' is non-NULL,
    it is used to expand `KDELIM'.  */
 {
@@ -811,7 +811,7 @@ main (int argc, char *argv[])
       complain ("No input file\n");
       return EXIT_FAILURE;
     }
-  if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
+  if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
     {
       PFATAL ("can't open input file %s", argv[1]);
     }

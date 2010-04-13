@@ -20,7 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern void Ieof (void) exiting;
 extern void Ierror (void) exiting;
 extern void testIerror (FILE *f);
 extern void Oerror (void) exiting;

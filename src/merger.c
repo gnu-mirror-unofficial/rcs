@@ -25,6 +25,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-fro.h"
 
 static char const *
 normalize_arg (char const *s)
@@ -51,7 +52,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
 {
   register int i;
   FILE *f;
-  RILE *rt;
+  struct fro *rt;
   char const *a[3], *t;
   int s;
 #if !DIFF3_BIN
@@ -79,10 +80,10 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
     {
       if (!(f = fopen_safer (argv[0], "w")))
         fatal_sys (argv[0]);
-      if (!(rt = Iopen (t, "r", NULL)))
+      if (!(rt = fro_open (t, "r", NULL)))
         fatal_sys (t);
-      fastcopy (rt, f);
-      Ifclose (rt);
+      fro_spew (rt, f);
+      fro_close (rt);
       Ofclose (f);
     }
 #else  /* !DIFF3_BIN */

@@ -19,10 +19,10 @@
 
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
-  b-complain.h b-divvy.h b-fb.h b-isr.h b-kwxout.h \
+  b-complain.h b-divvy.h b-fb.h b-fro.h b-isr.h b-kwxout.h \
   base.h gnu-h-v.h maketime.h partime.h \
   b-anchor.c \
-  b-complain.c b-divvy.c b-fb.c b-isr.c b-kwxout.c \
+  b-complain.c b-divvy.c b-fb.c b-fro.c b-isr.c b-kwxout.c \
   bother.c gnu-h-v.c \
   maketime.c merger.c partime.c rcsedit.c rcsfcmp.c rcsfnms.c \
   rcsgen.c rcskeep.c rcslex.c rcsmap.c rcsrev.c rcssyn.c \

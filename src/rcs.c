@@ -27,6 +27,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-fro.h"
 
 struct top *top;
 
@@ -92,7 +93,7 @@ cleanup (void)
 {
   if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
-  Izclose (&FLOW (from));
+  fro_zclose (&FLOW (from));
   Ozclose (&FLOW (res));
   ORCSclose ();
   dirtempunlink ();
@@ -1216,7 +1217,7 @@ main (int argc, char **argv)
                   getchaccess (str_save (ADMIN (allowed)->login), append);
                   ADMIN (allowed) = ADMIN (allowed)->nextaccess;
                 }
-              Izclose (&FLOW (from));
+              fro_zclose (&FLOW (from));
             }
           break;
 
@@ -1537,7 +1538,7 @@ main (int argc, char **argv)
               {
                 if (!cuttail || buildeltatext (gendeltas))
                   {
-                    hey_trundling (true, FLOW (from));
+                    fro_trundling (true, FLOW (from));
                     scanlogtext (NULL, false);
                     /* Copy rest of delta text nodes that are not deleted.  */
                     changed = true;

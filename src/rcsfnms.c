@@ -32,6 +32,7 @@
 #include "same-inode.h"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fro.h"
 
 static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
@@ -459,17 +460,18 @@ rcssuffix (char const *name)
   return NULL;
 }
 
-RILE *
+struct fro *
 rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
 /* Open `RCSpath' for reading and return its `FILE*' descriptor.
    If successful, set `*status' to its status.
    Pass this routine to `pairnames' for read-only access to the file.  */
 {
-  return Iopen (RCSpath->string, FOPEN_RB, status);
+  return fro_open (RCSpath->string, FOPEN_RB, status);
 }
 
 static bool
-finopen (RILE *(*rcsopen) (struct buf *, struct stat *, bool), bool mustread)
+finopen (struct fro *(*rcsopen) (struct buf *, struct stat *, bool),
+         bool mustread)
 /* Use `rcsopen' to open an RCS file; `mustread' is set if the file must be
    read.  Set `FLOW (from)' to the result and return true if successful.
    `FN (RCSb)' holds the file's name.  Set `FN (RCSbuf)' to the best RCS name found
@@ -497,7 +499,7 @@ static bool
 fin2open (char const *d, size_t dlen,
           char const *base, size_t baselen,
           char const *x, size_t xlen,
-          RILE *(*rcsopen) (struct buf *, struct stat *, bool),
+          struct fro *(*rcsopen) (struct buf *, struct stat *, bool),
           bool mustread)
 /* `d' is a directory name with length `dlen' (including trailing slash).
    `base' is a filename with length `baselen'.  `x' is an RCS pathname suffix
@@ -965,7 +967,7 @@ main (int argc, char *argv[])
             {
               diagnose ("RCS file %s exists", REPO (filename));
             }
-          Ifclose (FLOW (from));
+          fro_close (FLOW (from));
           break;
 
         case -1:

@@ -31,6 +31,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-fro.h"
 #include "b-isr.h"
 
 /* Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
@@ -118,7 +119,7 @@ Lexinit (void)
         forget (LEX (tokbuf));
       else
         LEX (tokbuf) = make_space ("tokbuf"); /* TODO: smaller chunk size */
-      Iget (FLOW (from), NEXT (c));
+      GETCHAR (NEXT (c), FLOW (from));
       /* Initial token.  */
       nextlex ();
     }
@@ -133,25 +134,21 @@ nextlex (void)
    For ID's and NUM's, `NEXT (str)' is set to the character string.
    Assumption: `NEXT (c)' contains the next character.  */
 {
-  register int c;
-  declarecache;
+  int c;
   register FILE *frew;
   register char *sp;
   register enum tokens d;
-  register RILE *fin;
+  register struct fro *fin;
   size_t len;
 
   fin = FLOW (from);
   frew = FLOW (to);
-  setupcache (fin);
-  cache (fin);
   c = NEXT (c);
 
   for (;;)
     {
       switch ((d = ctab[c]))
         {
-
         default:
           fatal_syntax ("unknown character `%c'", c);
         case NEWLN:
@@ -162,7 +159,7 @@ nextlex (void)
           /* Note: falls into next case */
 
         case SPACE:
-          GETC (frew, c);
+          TEECHAR ();
           continue;
 
         case IDCHAR:
@@ -176,7 +173,7 @@ nextlex (void)
           accumulate_byte (LEX (tokbuf), c);
           for (;;)
             {
-              GETC (frew, c);
+              TEECHAR ();
               switch (ctab[c])
                 {
                 case IDCHAR:
@@ -217,14 +214,13 @@ nextlex (void)
 
         case COLON:
         case SEMI:
-          GETC (frew, c);
+          TEECHAR ();
           break;
         }
       break;
     }
   NEXT (c) = c;
   NEXT (tok) = d;
-  uncache (fin);
 }
 
 bool
@@ -232,16 +228,13 @@ eoflex (void)
 /* Return true if we look ahead to the end of the input, false otherwise.
    `NEXT (c)' becomes undefined at end of file.  */
 {
-  register int c;
-  declarecache;
+  int c;
   register FILE *fout;
-  register RILE *fin;
+  register struct fro *fin;
 
   c = NEXT (c);
   fin = FLOW (from);
   fout = FLOW (to);
-  setupcache (fin);
-  cache (fin);
 
   for (;;)
     {
@@ -249,18 +242,13 @@ eoflex (void)
         {
         default:
           NEXT (c) = c;
-          uncache (fin);
           return false;
 
         case NEWLN:
           ++LEX (lno);
           /* fall into */
         case SPACE:
-          cachegeteof (c,
-                       {
-                         uncache (fin);
-                         return true;
-                       });
+          GETCHAR_OR (c, fin, return true);
           break;
         }
       if (fout)
@@ -364,11 +352,10 @@ getphrases (char const *key)
    set.  Unlike `ignorephrases', this routine assumes `nextlex' has
    already been invoked before we start.  */
 {
-  declarecache;
-  register int c;
+  int c;
   register char const *kn;
   struct cbuf r;
-  register RILE *fin;
+  register struct fro *fin;
   register FILE *frew;
 
   if (NEXT (tok) != ID || strcmp (NEXT (str), key) == 0)
@@ -378,8 +365,6 @@ getphrases (char const *key)
       warnignore ();
       fin = FLOW (from);
       frew = FLOW (to);
-      setupcache (fin);
-      cache (fin);
       accumulate_nonzero_bytes (LEX (ignore), NEXT (str));
       free_NEXT_str ();
       c = NEXT (c);
@@ -402,14 +387,14 @@ getphrases (char const *key)
                 case Letter:
                 case PERIOD:
                 case SPACE:
-                  GETC (frew, c);
+                  TEECHAR ();
                   continue;
                 case SBEGIN:     /* long string */
                   for (;;)
                     {
                       for (;;)
                         {
-                          GETC (frew, c);
+                          TEECHAR ();
                           SAVECH (c);
                           switch (c)
                             {
@@ -424,21 +409,21 @@ getphrases (char const *key)
                             }
                           break;
                         }
-                      GETC (frew, c);
+                      TEECHAR ();
                       if (c != SDELIM)
                         break;
                       SAVECH (c);
                     }
                   continue;
                 case SEMI:
-                  cacheget (c);
+                  GETCHAR (c, fin);
                   if (ctab[c] == NEWLN)
                     {
                       if (frew)
                         aputc (c, frew);
                       ++ LEX (lno);
                       SAVECH (c);
-                      cacheget (c);
+                      GETCHAR (c, fin);
                     }
                   for (;;)
                     {
@@ -448,7 +433,7 @@ getphrases (char const *key)
                           ++LEX (lno);
                           /* fall into */
                         case SPACE:
-                          cacheget (c);
+                          GETCHAR (c, fin);
                           continue;
 
                         default:
@@ -467,7 +452,7 @@ getphrases (char const *key)
               register char const *ki;
 
               for (kn = key; c && *kn == c; kn++)
-                GETC (frew, c);
+                TEECHAR ();
               if (!*kn)
                 switch (ctab[c])
                   {
@@ -483,7 +468,6 @@ getphrases (char const *key)
                        All callers are key = Kfoo (constant strings).  */
                     NEXT (str) = intern0 (SINGLE, key);
                     NEXT (tok) = ID;
-                    uncache (fin);
                     goto returnit;
                   }
               for (ki = key; ki < kn;)
@@ -492,7 +476,6 @@ getphrases (char const *key)
           else
             {
               NEXT (c) = c;
-              uncache (fin);
               nextlex ();
               break;
             }
@@ -510,18 +493,15 @@ readstring (void)
    If `FLOW (to)' is set, copy every character read to `FLOW (to)'.
    Do not advance `nextlex' at the end.  */
 {
-  register int c;
-  declarecache;
+  int c;
   register FILE *frew;
-  register RILE *fin;
+  register struct fro *fin;
 
   fin = FLOW (from);
   frew = FLOW (to);
-  setupcache (fin);
-  cache (fin);
   for (;;)
     {
-      GETC (frew, c);
+      TEECHAR ();
       switch (c)
         {
         case '\n':
@@ -529,12 +509,11 @@ readstring (void)
           break;
 
         case SDELIM:
-          GETC (frew, c);
+          TEECHAR ();
           if (c != SDELIM)
             {
               /* End of string.  */
               NEXT (c) = c;
-              uncache (fin);
               return;
             }
           break;
@@ -547,29 +526,25 @@ printstring (void)
 /* Copy a string to stdout, until terminated with a single `SDELIM'.
    Do not advance `nextlex' at the end.  */
 {
-  register int c;
-  declarecache;
+  int c;
   register FILE *fout;
-  register RILE *fin;
+  register struct fro *fin;
 
   fin = FLOW (from);
   fout = stdout;
-  setupcache (fin);
-  cache (fin);
   for (;;)
     {
-      cacheget (c);
+      GETCHAR (c, fin);
       switch (c)
         {
         case '\n':
           ++LEX (lno);
           break;
         case SDELIM:
-          cacheget (c);
+          GETCHAR (c, fin);
           if (c != SDELIM)
             {
               NEXT (c) = c;
-              uncache (fin);
               return;
             }
           break;
@@ -585,32 +560,28 @@ savestring (void)
    also copy (unsubstituted) to `FLOW (to)'.  Do not advance `nextlex'
    at the end.  The returned cbuf has exact length.  */
 {
-  register int c;
-  declarecache;
+  int c;
   register FILE *frew;
-  register RILE *fin;
+  register struct fro *fin;
   struct cbuf r;
 
   fin = FLOW (from);
   frew = FLOW (to);
-  setupcache (fin);
-  cache (fin);
   for (;;)
     {
-      GETC (frew, c);
+      TEECHAR ();
       switch (c)
         {
         case '\n':
           ++LEX (lno);
           break;
         case SDELIM:
-          GETC (frew, c);
+          TEECHAR ();
           if (c != SDELIM)
             {
               /* End of string.  */
               NEXT (c) = c;
               r.string = finish_string (SINGLE, &r.size);
-              uncache (fin);
               return r;
             }
           break;
@@ -697,246 +668,6 @@ checkssym (char *sym)
   checksym (sym, 0);
 }
 
-#if !large_memory
-#define Iclose(f) fclose(f)
-#else  /* large_memory */
-#if !maps_memory
-static int
-Iclose (register RILE *f)
-{
-  tfree (f->base);
-  f->base = NULL;
-  return fclose (f->stream);
-}
-#else  /* maps_memory */
-static int
-Iclose (register RILE *f)
-{
-  (*f->deallocate) (f);
-  f->base = NULL;
-  return close (f->fd);
-}
-
-#if defined HAVE_MMAP
-static void
-mmap_deallocate (register RILE *f)
-{
-  if (munmap ((char *) f->base, (size_t) (f->lim - f->base)) != 0)
-    fatal_sys ("munmap");
-}
-#endif  /* defined HAVE_MMAP */
-
-static void
-read_deallocate (RILE *f)
-{
-  tfree (f->base);
-}
-
-static void
-nothing_to_deallocate (RILE *f RCS_UNUSED)
-{
-}
-#endif  /* maps_memory */
-#endif  /* large_memory */
-
-void
-hey_trundling (bool sequentialp, RILE *f)
-/* Advise the mmap machinery (if applicable) that access to `f'
-   is sequential if `sequentialp', otherwise normal.  */
-{
-#if defined HAVE_MADVISE && defined HAVE_MMAP && large_memory
-  if (f->deallocate == mmap_deallocate)
-    madvise ((char *) f->base, (size_t) (f->lim - f->base),
-             sequentialp ? MADV_SEQUENTIAL : MADV_NORMAL);
-#endif
-}
-
-#if large_memory && maps_memory
-static RILE *
-fd2_RILE (int fd, char const *name, register struct stat *status)
-#else
-static RILE *
-fd2RILE (int fd, char const *name, char const *type,
-         register struct stat *status)
-#endif
-{
-  struct stat st;
-
-  if (!status)
-    status = &st;
-  if (fstat (fd, status) != 0)
-    fatal_sys (name);
-  if (!S_ISREG (status->st_mode))
-    {
-      PERR ("`%s' is not a regular file", name);
-      close (fd);
-      errno = EINVAL;
-      return NULL;
-    }
-  else
-    {
-#if !(large_memory && maps_memory)
-      FILE *stream;
-
-      if (!(stream = fdopen (fd, type)))
-        fatal_sys (name);
-#endif  /* !(large_memory && maps_memory) */
-
-#if !large_memory
-      return stream;
-#else  /* large_memory */
-#define RILES 3
-      {
-        register RILE *f;
-        off_t s = status->st_size;
-
-        if (s != status->st_size)
-          PFATAL ("%s: too large", name);
-        if (! LEX (rilebuf))
-          LEX (rilebuf) = ZLLOC (RILES, RILE);
-        for (f = LEX (rilebuf); f->base; f++)
-          if (f == LEX (rilebuf) + RILES)
-            PFATAL ("too many RILEs");
-#if maps_memory
-        f->deallocate = nothing_to_deallocate;
-#endif
-        if (!s)
-          f->base = (void *) &FLOW (to); /* Any nonzero address will do.  */
-        else
-          {
-            f->base = NULL;
-#if defined HAVE_MMAP
-            if (!f->base)
-              {
-                ISR_DO (CATCHMMAPINTS);
-                f->base = (unsigned char *) mmap (NULL, s,
-                                                  PROT_READ,
-                                                  MAP_SHARED, fd,
-                                                  (off_t) 0);
-#ifndef MAP_FAILED
-#define MAP_FAILED (-1)
-#endif
-                if (f->base == (unsigned char *) MAP_FAILED)
-                  f->base = NULL;
-                else
-                  {
-#if has_NFS && MMAP_SIGNAL
-                    /* On many hosts, the superuser can mmap an NFS file
-                       it can't read.  So access the first page now, and
-                       print a nice message if a bus error occurs.  */
-                    access_page (ISR_SCRATCH, name, f->base);
-#endif  /* has_NFS && MMAP_SIGNAL */
-                  }
-                f->deallocate = mmap_deallocate;
-              }
-#endif  /* defined HAVE_MMAP */
-            if (!f->base)
-              {
-                f->base = testalloc (s);
-#if maps_memory
-                {
-                  /* We can't map the file into memory for some reason.
-                     Read it into main memory all at once; this is
-                     the simplest substitute for memory mapping.  */
-                  char *bufptr = (char *) f->base;
-                  size_t bufsiz = s;
-
-                  do
-                    {
-                      ssize_t r = read (fd, bufptr, bufsiz);
-
-                      switch (r)
-                        {
-                        case -1:
-                          fatal_sys (name);
-
-                        case 0:
-                          /* The file must have shrunk!  */
-                          status->st_size = s -= bufsiz;
-                          bufsiz = 0;
-                          break;
-
-                        default:
-                          bufptr += r;
-                          bufsiz -= r;
-                          break;
-                        }
-                    }
-                  while (bufsiz);
-                  if (lseek (fd, (off_t) 0, SEEK_SET) == -1)
-                    fatal_sys (name);
-                  f->deallocate = read_deallocate;
-                }
-#endif  /* maps_memory */
-              }
-          }
-        f->ptr = f->base;
-        f->lim = f->base + s;
-        f->fd = fd;
-#if !maps_memory
-        f->readlim = f->base;
-        f->stream = stream;
-#endif  /* !maps_memory */
-        if (s)
-          hey_trundling (true, f);
-        return f;
-      }
-#endif  /* large_memory */
-    }
-}
-
-#if !maps_memory && large_memory
-bool
-Igetmore (register RILE *f)
-{
-  register size_t r;
-  register size_t s = f->lim - f->readlim;
-
-  if (BUFSIZ < s)
-    s = BUFSIZ;
-  if (! (r = fread (f->readlim, sizeof (*f->readlim), s, f->stream)))
-    {
-      testIerror (f->stream);
-      /* The file might have shrunk!  */
-      f->lim = f->readlim;
-      return false;
-    }
-  f->readlim += r;
-  return true;
-}
-#endif  /* !maps_memory && large_memory */
-
-RILE *
-#if large_memory && maps_memory
-I_open (char const *name, struct stat *status)
-#else
-Iopen (char const *name, char const *type, struct stat *status)
-#endif
-/* Open `name' for reading, return its descriptor, and set `*status'.  */
-{
-  int fd = fd_safer (open (name, O_RDONLY
-#if OPEN_O_BINARY
-                           | (strchr (type, 'b') ? OPEN_O_BINARY :
-                              0)
-#endif
-                           ));
-
-  if (fd < 0)
-    return NULL;
-#if large_memory && maps_memory
-  return fd2_RILE (fd, name, status);
-#else
-  return fd2RILE (fd, name, type, status);
-#endif
-}
-
-void
-Ifclose (RILE *f)
-{
-  if (f && Iclose (f) != 0)
-    Ierror ();
-}
-
 void
 Ofclose (FILE *f)
 {
@@ -945,35 +676,11 @@ Ofclose (FILE *f)
 }
 
 void
-Izclose (RILE **p)
-{
-  Ifclose (*p);
-  *p = NULL;
-}
-
-void
 Ozclose (FILE **p)
 {
   Ofclose (*p);
   *p = NULL;
 }
-
-#if !large_memory
-void
-testIeof (FILE *f)
-{
-  testIerror (f);
-  if (feof (f))
-    Ieof ();
-}
-
-void
-Irewind (FILE *f)
-{
-  if (fseek (f, 0L, SEEK_SET) != 0)
-    Ierror ();
-}
-#endif  /* !large_memory */
 
 void
 Orewind (FILE *f)
@@ -1058,7 +765,7 @@ main (int argc, char *argv[])
       complain ("No input file\n");
       return EXIT_FAILURE;
     }
-  if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
+  if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
     {
       PFATAL ("can't open input file %s", argv[1]);
     }

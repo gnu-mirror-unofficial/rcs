@@ -25,6 +25,7 @@
 #include <errno.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fro.h"
 #include <ctype.h>
 
 static char *
@@ -50,7 +51,7 @@ badly_terminated (bool savep)
 }
 
 static char *
-get0val (register int c, register RILE *fp, bool savep, bool optional)
+get0val (int c, register struct fro *fp, bool savep, bool optional)
 /* Read a keyword value from `c + fp', perhaps `optional'ly.
    Same as `getval', except `c'` is the lookahead character.  */
 {
@@ -100,18 +101,18 @@ get0val (register int c, register RILE *fp, bool savep, bool optional)
         case '\0':
           return badly_terminated (savep);
         }
-      Igeteof (fp, c, return badly_terminated (savep));
+      GETCHAR_OR (c, fp, return badly_terminated (savep));
     }
 }
 
 static char *
-keepid (int c, RILE *fp)
+keepid (int c, struct fro *fp)
 /* Get previous identifier from `c + fp'.  */
 {
   char *maybe;
 
   if (!c)
-    Igeteof (fp, c, return sorry (true, NULL));
+    GETCHAR_OR (c, fp, return sorry (true, NULL));
   if (!(maybe = get0val (c, fp, true, false)))
     return NULL;
   checksid (maybe);
@@ -124,23 +125,23 @@ keepid (int c, RILE *fp)
 }
 
 static char *
-getval (register RILE *fp, bool savep, bool optional)
+getval (register struct fro *fp, bool savep, bool optional)
 /* Read a keyword value from `fp'; return it if found, else NULL.
    Do not report an error if `optional' is set and `kdelim' is found instead.  */
 {
   int c;
 
-  Igeteof (fp, c, return badly_terminated (savep));
+  GETCHAR_OR (c, fp, return badly_terminated (savep));
   return get0val (c, fp, savep, optional);
 }
 
 static int
-keepdate (RILE *fp)
+keepdate (struct fro *fp)
 /* Read a date; check format; if ok, set `PREV (date)'.
    Return 0 on error, lookahead character otherwise.  */
 {
   char *d, *t;
-  register int c;
+  int c;
 
   c = 0;
   if ((d = getval (fp, true, false)))
@@ -149,7 +150,7 @@ keepdate (RILE *fp)
         brush_off (SINGLE, d);
       else
         {
-          Igeteof (fp, c, c = 0);
+          GETCHAR_OR (c, fp, c = 0);
           if (!c)
             brush_off (SINGLE, t);
           else
@@ -178,7 +179,7 @@ keepdate (RILE *fp)
 }
 
 static char const *
-keeprev (RILE *fp)
+keeprev (struct fro *fp)
 /* Get previous revision from `fp'.  */
 {
   char *s = getval (fp, true, false);
@@ -218,7 +219,7 @@ keeprev (RILE *fp)
 }
 
 bool
-getoldkeys (register RILE *fp)
+getoldkeys (register struct fro *fp)
 /* Try to read keyword values for author, date, revision number, and
    state out of the file `fp'.  If `fp' is NULL, `MANI (filename)' is
    opened and closed instead of using `fp'.  The results are placed into
@@ -227,7 +228,7 @@ getoldkeys (register RILE *fp)
    that any of the values were found; instead, caller must check to see
    whether the corresponding arrays contain the empty string.  */
 {
-  register int c;
+  int c;
   char keyword[keylength + 1];
   register char *tp;
   bool needs_closing;
@@ -239,7 +240,7 @@ getoldkeys (register RILE *fp)
   needs_closing = false;
   if (!fp)
     {
-      if (!(fp = Iopen (MANI (filename), FOPEN_R_WORK, NULL)))
+      if (!(fp = fro_open (MANI (filename), FOPEN_R_WORK, NULL)))
         {
           syserror_errno (MANI (filename));
           return false;
@@ -261,7 +262,7 @@ getoldkeys (register RILE *fp)
               tp = keyword;
               for (;;)
                 {
-                  Igeteof (fp, c, goto ok);
+                  GETCHAR_OR (c, fp, goto ok);
                   switch (c)
                     {
                     default:
@@ -282,7 +283,7 @@ getoldkeys (register RILE *fp)
           if (c != VDELIM)
             continue;
           *tp = c;
-          Igeteof (fp, c, goto ok);
+          GETCHAR_OR (c, fp, goto ok);
           switch (c)
             {
             case ' ':
@@ -351,7 +352,7 @@ getoldkeys (register RILE *fp)
               continue;
             }
           if (!c)
-            Igeteof (fp, c, c = 0);
+            GETCHAR_OR (c, fp, c = 0);
           if (c != KDELIM)
             {
               MERR ("closing %c missing on keyword", KDELIM);
@@ -362,14 +363,14 @@ getoldkeys (register RILE *fp)
               && PREV (rev) && PREV (state))
             break;
         }
-      Igeteof (fp, c, goto ok);
+      GETCHAR_OR (c, fp, goto ok);
     }
 
  ok:
   if (needs_closing)
-    Ifclose (fp);
+    fro_close (fp);
   else
-    Irewind (fp);
+    fro_bob (fp);
   /* Prune empty strings.  */
 #define PRUNE(which)                            \
   if (PREV (which) && ! *PREV (which))          \

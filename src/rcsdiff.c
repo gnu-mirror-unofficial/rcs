@@ -26,6 +26,7 @@
 #include "rcsdiff.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fro.h"
 
 struct top *top;
 
@@ -63,7 +64,7 @@ static const s_unique const minus_D =
   };
 
 static int exitstatus;
-static RILE *workptr;
+static struct fro *workptr;
 static struct stat workstat;
 
 static inline bool
@@ -85,8 +86,8 @@ cleanup (void)
 {
   if (LEX (erroneousp))
     exitstatus = DIFF_TROUBLE;
-  Izclose (&FLOW (from));
-  Izclose (&workptr);
+  fro_zclose (&FLOW (from));
+  fro_zclose (&workptr);
 }
 
 static exiting void
@@ -360,7 +361,7 @@ main (int argc, char **argv)
         if (!rev2)
           {
             /* Make sure work file is readable, and get its status.  */
-            if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat)))
+            if (!(workptr = fro_open (MANI (filename), FOPEN_R_WORK, &workstat)))
               {
                 syserror_errno (MANI (filename));
                 continue;
@@ -408,7 +409,7 @@ main (int argc, char **argv)
                  && BE (kws) == kwsub_kv
                  && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
           lexpandarg = "-kkvl";
-        Izclose (&workptr);
+        fro_zclose (&workptr);
 #if DIFF_L
         if (diff_label2)
           {

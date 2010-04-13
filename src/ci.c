@@ -30,6 +30,7 @@
 #include "ci.help"
 #include "b-complain.h"
 #include "b-fb.h"
+#include "b-fro.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
 
@@ -53,7 +54,7 @@ struct Symrev
 
 static FILE *exfile;
 /* Working file pointer.  */
-static RILE *workptr;
+static struct fro *workptr;
 /* New revision number.  */
 static struct buf newdelnum;
 static struct cbuf msg;
@@ -75,8 +76,8 @@ cleanup (void)
 {
   if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
-  Izclose (&FLOW (from));
-  Izclose (&workptr);
+  fro_zclose (&FLOW (from));
+  fro_zclose (&workptr);
   Ozclose (&exfile);
   Ozclose (&FLOW (res));
   ORCSclose ();
@@ -438,14 +439,14 @@ fixwork (mode_t newworkmode, time_t mtime)
     || setmtime (MANI (filename), mtime) != 0
     ? -1 : workstat.st_mode == newworkmode ? 0
 #ifdef HAVE_FCHMOD
-    : fchmod (Ifileno (workptr), newworkmode) == 0 ? 0
+    : fchmod (workptr->fd, newworkmode) == 0 ? 0
 #endif
     : chmod (MANI (filename), newworkmode)
     ;
 }
 
 static int
-xpandfile (RILE *unexfile, struct hshentry const *delta,
+xpandfile (struct fro *unexfile, struct hshentry const *delta,
            char const **exname, bool dolog)
 /* Read `unexfile' and copy it to a file, performing keyword
    substitution with data from `delta'.
@@ -464,7 +465,7 @@ xpandfile (RILE *unexfile, struct hshentry const *delta,
     }
   r = 0;
   if (MIN_UNEXPAND <= BE (kws))
-    fastcopy (unexfile, exfile);
+    fro_spew (unexfile, exfile);
   else
     {
       struct expctx ctx = EXPCTX_1OUT (exfile, unexfile, false, dolog);
@@ -851,7 +852,7 @@ main (int argc, char **argv)
 
         diagnose ("%s  <--  %s", REPO (filename), MANI (filename));
 
-        if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat)))
+        if (!(workptr = fro_open (MANI (filename), FOPEN_R_WORK, &workstat)))
           {
             syserror_errno (MANI (filename));
             continue;
@@ -1022,7 +1023,7 @@ main (int argc, char **argv)
                     Orewind (FLOW (rewr));
                     bad_truncate = 0 > ftruncate (fileno (FLOW (rewr)), (off_t) 0);
 
-                    Irewind (FLOW (from));
+                    fro_bob (FLOW (from));
                     Lexinit ();
                     getadmin ();
                     gettree ();
@@ -1037,7 +1038,7 @@ main (int argc, char **argv)
                       continue;
                     if (dorewrite (true, true) != 0)
                       continue;
-                    fastcopy (FLOW (from), FLOW (rewr));
+                    fro_spew (FLOW (from), FLOW (rewr));
                     if (bad_truncate)
                       while (ftell (FLOW (rewr)) < hwm)
                         /* White out any earlier mistake with '\n's.
@@ -1047,44 +1048,30 @@ main (int argc, char **argv)
               }
             else
               {
-                int wfd = Ifileno (workptr);
+                int wfd = workptr->fd;
                 struct stat checkworkstat;
                 char const *diffv[6 + !!OPEN_O_BINARY], **diffp;
-#if large_memory && !maps_memory
-                FILE *wfile = workptr->stream;
-                long wfile_off;
-#endif
-#if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
-                off_t wfd_off;
-#endif
+                off_t wo;
 
                 diagnose ("new revision: %s; previous revision: %s",
                           newdelta.num, targetdelta->num);
                 newdelta.log = getlogmsg ();
-#if !large_memory
-                Irewind (workptr);
-#if CAN_FFLUSH_IN
-                if (fflush (workptr) != 0)
-                  Ierror ();
-#endif
-#else  /* !large_memory */
-#if !maps_memory
-                if ((wfile_off = ftell (wfile)) == -1
-                    || fseek (wfile, 0L, SEEK_SET) != 0
-#if CAN_FFLUSH_IN
-                    || fflush (wfile) != 0
-#endif
-                  )
-                  Ierror ();
-#endif  /* !maps_memory */
-#endif  /* !large_memory */
-#if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
-                wfd_off = lseek (wfd, (off_t) 0, SEEK_CUR);
-                if (wfd_off == -1
-                    || (wfd_off != 0
-                        && lseek (wfd, (off_t) 0, SEEK_SET) != 0))
-                  Ierror ();
-#endif
+                if (STDIO_P (workptr))
+                  {
+                    bool badness = false;
+
+                    fro_bob (workptr);
+                    if (CAN_FFLUSH_IN)
+                      badness = (0 > fflush (workptr->stream));
+                    else
+                      {
+                        wo = lseek (wfd, 0, SEEK_CUR);
+                        badness = (-1 == wo
+                                   || (wo && 0 > lseek (wfd, 0, SEEK_SET)));
+                      }
+                    if (badness)
+                      Ierror ();
+                  }
                 diffp = diffv;
                 *++diffp = prog_diff;
                 *++diffp = diff_flags;
@@ -1097,17 +1084,13 @@ main (int argc, char **argv)
                 *++diffp = NULL;
                 if (DIFF_TROUBLE == runv (wfd, diffname, diffv))
                   RFATAL ("diff failed");
-#if !CAN_FFLUSH_IN && !(large_memory && maps_memory)
-                if (lseek (wfd, wfd_off, SEEK_CUR) == -1)
+                if (STDIO_P (workptr)
+                    && !CAN_FFLUSH_IN
+                    && 0 > lseek (wfd, wo, SEEK_CUR))
                   Ierror ();
-#endif
-#if large_memory && !maps_memory
-                if (fseek (wfile, wfile_off, SEEK_SET) != 0)
-                  Ierror ();
-#endif
                 if (newhead)
                   {
-                    Irewind (workptr);
+                    fro_bob (workptr);
                     putdftext (&newdelta, workptr, FLOW (rewr), false);
                     if (!putdtext (targetdelta, diffname, FLOW (rewr), true))
                       continue;
@@ -1144,7 +1127,7 @@ main (int argc, char **argv)
 
         if (!keepworkingfile)
           {
-            Izclose (&workptr);
+            fro_zclose (&workptr);
             /* Get rid of old file.  */
             r = un_link (MANI (filename));
           }
@@ -1158,7 +1141,7 @@ main (int argc, char **argv)
             /* Expand if it might change or if we can't fix mode, time.  */
             if (changework || (r = fixwork (newworkmode, mtime)) != 0)
               {
-                Irewind (workptr);
+                fro_bob (workptr);
                 /* Expand keywords in file.  */
                 BE (inclusive_of_Locker_in_Id_val) = lockthis;
                 workdelta->name =
@@ -1181,7 +1164,7 @@ main (int argc, char **argv)
                         break;
                     /* fall into */
                   case 1:
-                    Izclose (&workptr);
+                    fro_zclose (&workptr);
                     aflush (exfile);
                     IGNOREINTS ();
                     r = chnamemod (&exfile, newworkname, MANI (filename),

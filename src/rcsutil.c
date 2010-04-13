@@ -154,42 +154,6 @@ getusername (bool suspicious)
   return BE (username);
 }
 
-void
-fastcopy (register RILE *inf, FILE *outf)
-/* Copy the remainder of file `inf' to `outf'.  */
-{
-#if large_memory
-#if maps_memory
-  awrite ((char const *) inf->ptr, (size_t) (inf->lim - inf->ptr), outf);
-  inf->ptr = inf->lim;
-#else  /* !maps_memory */
-  for (;;)
-    {
-      awrite ((char const *) inf->ptr, (size_t) (inf->readlim - inf->ptr),
-              outf);
-      inf->ptr = inf->readlim;
-      if (inf->ptr == inf->lim)
-        break;
-      Igetmore (inf);
-    }
-#endif  /* !maps_memory */
-#else   /* !large_memory */
-  char buf[BUFSIZ * 8];
-  register size_t rcount;
-
-  /* Now read the rest of the file in blocks.  */
-  while (!feof (inf))
-    {
-      if (!(rcount = fread (buf, sizeof (*buf), sizeof (buf), inf)))
-        {
-          testIerror (inf);
-          return;
-        }
-      awrite (buf, (size_t) rcount, outf);
-    }
-#endif  /* !large_memory */
-}
-
 #ifndef SSIZE_MAX
 /* This does not work in #ifs, but it's good enough for us.
    Underestimating SSIZE_MAX may slow us down, but it won't break us.  */

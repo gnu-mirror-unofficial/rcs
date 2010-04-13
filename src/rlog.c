@@ -26,7 +26,7 @@
 #include "rlog.help"
 #include "b-complain.h"
 #include "b-divvy.h"
-#include "b-fb.h"                       /* Ieof */
+#include "b-fro.h"
 
 struct top *top;
 
@@ -93,7 +93,7 @@ cleanup (void)
 {
   if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
-  Izclose (&FLOW (from));
+  fro_zclose (&FLOW (from));
 }
 
 static exiting void
@@ -253,14 +253,12 @@ getscript (struct hshentry *Delta)
    how many lines added and deleted in the script.  */
 {
   int ed;                               /* editor command */
-  declarecache;
-  register RILE *fin;
-  register int c;
+  register struct fro *fin;
+  int c;
   register long i;
   struct diffcmd dc;
 
   fin = FLOW (from);
-  setupcache (fin);
   initdiffcmd (&dc);
   while (0 <= (ed = getdiffcmd (fin, true, NULL, &dc)))
     if (!ed)
@@ -270,24 +268,22 @@ getscript (struct hshentry *Delta)
         /* Skip scripted lines.  */
         i = dc.nlines;
         Delta->insertlns += i;
-        cache (fin);
         do
           {
             for (;;)
               {
-                cacheget (c);
+                GETCHAR (c, fin);
                 switch (c)
                   {
                   default:
                     continue;
                   case SDELIM:
-                    cacheget (c);
+                    GETCHAR (c, fin);
                     if (c == SDELIM)
                       continue;
                     if (--i)
                       unexpected_EOF ();
                     NEXT (c) = c;
-                    uncache (fin);
                     return;
                   case '\n':
                     break;
@@ -297,7 +293,6 @@ getscript (struct hshentry *Delta)
             ++LEX (lno);
           }
         while (--i);
-        uncache (fin);
       }
 }
 

@@ -29,6 +29,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-fro.h"
 #include "b-isr.h"
 
 struct top *top;
@@ -71,12 +72,13 @@ cleanup (void)
 {
   if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
-  Izclose (&FLOW (from));
+  fro_zclose (&FLOW (from));
   ORCSclose ();
-#if !large_memory
-  if (FLOW (res) != MANI (standard_output))
+  if (FLOW (from)
+      && STDIO_P (FLOW (from))
+      && FLOW (res)
+      && FLOW (res) != MANI (standard_output))
     Ozclose (&FLOW (res));
-#endif
   if (neworkptr != MANI (standard_output))
     Ozclose (&neworkptr);
   dirtempunlink ();
@@ -751,12 +753,10 @@ main (int argc, char **argv)
             joinname = buildrevision (gendeltas, targetdelta,
                                       joinflag && tostdout ? NULL : neworkptr,
                                       BE (kws) < MIN_UNEXPAND);
-#if !large_memory
             if (FLOW (res) == neworkptr)
               FLOW (res) = NULL;             /* Don't close it twice.  */
-#endif
             if (changelock && gendeltas->first != targetdelta)
-              hey_trundling (true, FLOW (from));
+              fro_trundling (true, FLOW (from));
 
             if (donerewrite (changelock, Ttimeflag
                              ? REPO (stat).st_mtime

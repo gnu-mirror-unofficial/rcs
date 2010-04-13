@@ -23,9 +23,10 @@
 #include "base.h"
 #include <string.h>
 #include "b-complain.h"
+#include "b-fro.h"
 
 static int
-discardkeyval (register int c, register RILE *f)
+discardkeyval (int c, register struct fro *f)
 {
   for (;;)
     switch (c)
@@ -34,13 +35,13 @@ discardkeyval (register int c, register RILE *f)
       case '\n':
         return c;
       default:
-        Igeteof (f, c, return EOF);
+        GETCHAR_OR (c, f, return EOF);
         break;
       }
 }
 
 int
-rcsfcmp (register RILE *xfp, struct stat const *xstatp,
+rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
          char const *uname, struct hshentry const *delta)
 /* Compare the files `xfp' and `uname'.  Return zero if `xfp' has the
    same contents as `uname' and neither has keywords, otherwise -1 if
@@ -55,10 +56,10 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
    properly, disregard it and optionally skip log message; otherwise,
    compare value.  */
 {
-  register int xc, uc;
+  int xc, uc;
   char xkeyword[keylength + 2];
   bool eqkeyvals;
-  register RILE *ufp;
+  register struct fro *ufp;
   register bool xeof, ueof;
   register char *tp;
   register char const *sp;
@@ -67,7 +68,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
   struct pool_found match1;
   struct stat ustat;
 
-  if (!(ufp = Iopen (uname, FOPEN_R_WORK, &ustat)))
+  if (!(ufp = fro_open (uname, FOPEN_R_WORK, &ustat)))
     {
       fatal_sys (uname);
     }
@@ -76,20 +77,21 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
     {
       if (!(result = xstatp->st_size != ustat.st_size))
         {
-#if large_memory && maps_memory
-          result = !!memcmp (xfp->base, ufp->base, (size_t) xstatp->st_size);
-#else  /* !(large_memory && maps_memory) */
-          for (;;)
-            {
-              /* Get the next characters.  */
-              Igeteof (xfp, xc, xeof = true);
-              Igeteof (ufp, uc, ueof = true);
-              if (xeof | ueof)
-                goto eof;
-              if (xc != uc)
-                goto return1;
-            }
-#endif  /* !(large_memory && maps_memory) */
+          /* The fast path is possible only if neither file uses stdio.  */
+          if (RM_STDIO != xfp->rm
+              && RM_STDIO != ufp->rm)
+            result = !!memcmp (xfp->base, ufp->base, (size_t) xstatp->st_size);
+          else
+            for (;;)
+              {
+                /* Get the next characters.  */
+                GETCHAR_OR (xc, xfp, xeof = true);
+                GETCHAR_OR (uc, ufp, ueof = true);
+                if (xeof | ueof)
+                  goto eof;
+                if (xc != uc)
+                  goto return1;
+              }
         }
     }
   else
@@ -104,8 +106,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
           if (xc != KDELIM)
             {
               /* Get the next characters.  */
-              Igeteof (xfp, xc, xeof = true);
-              Igeteof (ufp, uc, ueof = true);
+              GETCHAR_OR (xc, xfp, xeof = true);
+              GETCHAR_OR (uc, ufp, ueof = true);
               if (xeof | ueof)
                 goto eof;
             }
@@ -115,8 +117,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
               tp = xkeyword;
               for (;;)
                 {
-                  Igeteof (xfp, xc, xeof = true);
-                  Igeteof (ufp, uc, ueof = true);
+                  GETCHAR_OR (xc, xfp, xeof = true);
+                  GETCHAR_OR (uc, ufp, ueof = true);
                   if (xeof | ueof)
                     goto eof;
                   if (xc != uc)
@@ -157,8 +159,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                       switch (xc)
                         {
                         default:
-                          Igeteof (xfp, xc, xeof = true);
-                          Igeteof (ufp, uc, ueof = true);
+                          GETCHAR_OR (xc, xfp, xeof = true);
+                          GETCHAR_OR (uc, ufp, ueof = true);
                           if (xeof | ueof)
                             goto eof;
                           continue;
@@ -175,8 +177,8 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                   if (xc == KDELIM)
                     {
                       /* Skip closing KDELIM.  */
-                      Igeteof (xfp, xc, xeof = true);
-                      Igeteof (ufp, uc, ueof = true);
+                      GETCHAR_OR (xc, xfp, xeof = true);
+                      GETCHAR_OR (uc, ufp, ueof = true);
                       if (xeof | ueof)
                         goto eof;
                       /* If the keyword is `Log', also
@@ -211,7 +213,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                   if (xc == '\n')
                                     if (--lncnt == 0)
                                       break;
-                                  Igeteof (xfp, xc, goto returnresult);
+                                  GETCHAR_OR (xc, xfp, goto returnresult);
                                 }
                               /* Skip last comment leader.  Can't just
                                  skip another line here, because there
@@ -222,7 +224,7 @@ rcsfcmp (register RILE *xfp, struct stat const *xstatp,
                                 : leaderlen;
                               do
                                 {
-                                  Igeteof (xfp, xc, goto returnresult);
+                                  GETCHAR_OR (xc, xfp, goto returnresult);
                                   /* Read to the end of the comment leader
                                      or '\n', whatever comes first, because
                                      the leader's trailing white space was
@@ -261,7 +263,7 @@ eof:
 return1:
   result = 1;
 returnresult:
-  Ifclose (ufp);
+  fro_close (ufp);
   return result;
 }
 
@@ -285,7 +287,7 @@ main (int argc, char *argv[])
   ADMIN (log_lead).size = strlen (argv[1]);
   delta.log.string = argv[2];
   delta.log.size = strlen (argv[2]);
-  if (rcsfcmp (Iopen (argv[3], FOPEN_R_WORK, NULL), argv[4], &delta))
+  if (rcsfcmp (fro_open (argv[3], FOPEN_R_WORK, NULL), argv[4], &delta))
     printf ("files are the same\n");
   else
     printf ("files are different\n");

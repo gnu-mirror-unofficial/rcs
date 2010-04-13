@@ -28,10 +28,11 @@
 #include "rcsclean.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fro.h"
 
 struct top *top;
 
-static RILE *workptr;
+static struct fro *workptr;
 static int exitstatus;
 
 static void
@@ -39,8 +40,8 @@ cleanup (void)
 {
   if (LEX (erroneousp))
     exitstatus = EXIT_FAILURE;
-  Izclose (&FLOW (from));
-  Izclose (&workptr);
+  fro_zclose (&FLOW (from));
+  fro_zclose (&workptr);
   Ozclose (&FLOW (res));
   ORCSclose ();
   dirtempunlink ();
@@ -252,7 +253,7 @@ main (int argc, char **argv)
         if (!(0 < pairnames (argc, argv,
                              dounlock ? rcswriteopen : rcsreadopen,
                              true, true)
-              && (workptr = Iopen (MANI (filename), FOPEN_R_WORK, &workstat))))
+              && (workptr = fro_open (MANI (filename), FOPEN_R_WORK, &workstat))))
           continue;
 
         if (SAME_INODE (REPO (stat), workstat))
@@ -322,7 +323,7 @@ main (int argc, char **argv)
         if (perform & unlocked)
           {
             if (deltas->first != delta)
-              hey_trundling (true, FLOW (from));
+              fro_trundling (true, FLOW (from));
             if (donerewrite (true, Ttimeflag
                              ? REPO (stat).st_mtime
                              : (time_t) - 1)
@@ -332,7 +333,7 @@ main (int argc, char **argv)
 
         if (!BE (quiet))
           aprintf (stdout, "rm -f %s\n", MANI (filename));
-        Izclose (&workptr);
+        fro_zclose (&workptr);
         if (perform && un_link (MANI (filename)) != 0)
           syserror_errno (MANI (filename));
       }

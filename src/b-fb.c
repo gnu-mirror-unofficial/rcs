@@ -27,12 +27,6 @@
 #include "b-complain.h"
 
 void
-Ieof (void)
-{
-  fatal_syntax ("unexpected end of file");
-}
-
-void
 Ierror (void)
 {
   fatal_sys ("input error");

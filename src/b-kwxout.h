@@ -22,7 +22,7 @@
 struct expctx
 {
   FILE *to, *rewr;
-  RILE *from;
+  struct fro *from;
   struct hshentry const *delta;
   const bool delimstuffed, dolog;
 };

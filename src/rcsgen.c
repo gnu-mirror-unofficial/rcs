@@ -28,6 +28,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-fro.h"
 
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
@@ -446,15 +447,15 @@ putdtext (struct hshentry const *delta, char const *srcname,
    sure the log message ends in '\n'.  Return false on error.  If
    `diffmt', also check that the text is valid "diff -n" output.  */
 {
-  RILE *fin;
+  struct fro *fin;
 
-  if (!(fin = Iopen (srcname, "r", NULL)))
+  if (!(fin = fro_open (srcname, "r", NULL)))
     {
       syserror_errno (srcname);
       return false;
     }
   putdftext (delta, fin, fout, diffmt);
-  Ifclose (fin);
+  fro_close (fin);
   return true;
 }
 
@@ -482,14 +483,13 @@ putstring (register FILE *out, bool delim, struct cbuf s, bool log)
 }
 
 void
-putdftext (struct hshentry const *delta, RILE *finfile,
+putdftext (struct hshentry const *delta, struct fro *finfile,
            FILE *foutfile, bool diffmt)
 /* Like `putdtext', except the source file is already open.  */
 {
-  declarecache;
   register FILE *fout;
-  register int c;
-  register RILE *fin;
+  int c;
+  register struct fro *fin;
   int ed;
   struct diffcmd dc;
 
@@ -506,14 +506,12 @@ putdftext (struct hshentry const *delta, RILE *finfile,
   aprintf (fout, "%s\n%c", Ktext, SDELIM);
 
   fin = finfile;
-  setupcache (fin);
   if (!diffmt)
     {
       /* Copy the file.  */
-      cache (fin);
       for (;;)
         {
-          cachegeteof (c, goto done);
+          GETCHAR_OR (c, fin, goto done);
           if (c == SDELIM)
             /* Double up `SDELIM'.  */
             aputc (SDELIM, fout);
@@ -528,22 +526,20 @@ putdftext (struct hshentry const *delta, RILE *finfile,
       while (0 <= (ed = getdiffcmd (fin, false, fout, &dc)))
         if (ed)
           {
-            cache (fin);
             while (dc.nlines--)
               do
                 {
-                  cachegeteof (c,
-                               {
-                                 if (!dc.nlines)
-                                   goto OK_EOF;
-                                 unexpected_EOF ();
-                               });
+                  GETCHAR_OR (c, fin,
+                              {
+                                if (!dc.nlines)
+                                  goto OK_EOF;
+                                unexpected_EOF ();
+                              });
                   if (c == SDELIM)
                     aputc (SDELIM, fout);
                   aputc (c, fout);
                 }
               while (c != '\n');
-            uncache (fin);
           }
     }
  OK_EOF:

@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include "b-complain.h"
 #include "b-divvy.h"
-#include "b-fb.h"                       /* Ieof */
+#include "b-fro.h"
 
 #define Kbranches  KS (branches)
 #if COMPAT2
@@ -343,7 +343,8 @@ diffLineNumberTooLarge (char const *buf)
 }
 
 int
-getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
+getdiffcmd (struct fro *finfile, bool delimiter, FILE *foutfile,
+            struct diffcmd *dc)
 /* Get an editing command output by "diff -n" from `finfile'.  The input
    is delimited by `SDELIM' if `delimiter' is set, EOF otherwise.  Copy
    a clean version of the command to `foutfile' (if non-NULL).  Return 0
@@ -351,36 +352,32 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
    and length into `dc->line1' and `dc->nlines'.  Keep `dc->adprev' and
    `dc->dafter' up to date.  */
 {
-  register int c;
-  declarecache;
+  int c;
   register FILE *fout;
   register char *p;
-  register RILE *fin;
+  register struct fro *fin;
   long line1, nlines, t;
   char buf[BUFSIZ];
 
   fin = finfile;
   fout = foutfile;
-  setupcache (fin);
-  cache (fin);
-  cachegeteof (c,
-               {
-                 if (delimiter)
-                   unexpected_EOF ();
-                 return -1;
-               });
+  GETCHAR_OR (c, fin,
+              {
+                if (delimiter)
+                  unexpected_EOF ();
+                return -1;
+              });
   if (delimiter)
     {
       if (c == SDELIM)
         {
-          cacheget (c);
+          GETCHAR (c, fin);
           if (c == SDELIM)
             {
               buf[0] = c;
               buf[1] = 0;
               badDiffOutput (buf);
             }
-          uncache (fin);
           NEXT (c) = c;
           if (fout)
             aprintf (fout, "%c%c", SDELIM, c);
@@ -395,10 +392,9 @@ getdiffcmd (RILE *finfile, bool delimiter, FILE *foutfile, struct diffcmd *dc)
           RFATAL ("diff output command line too long");
         }
       *p++ = c;
-      cachegeteof (c, unexpected_EOF ());
+      GETCHAR_OR (c, fin, unexpected_EOF ());
     }
   while (c != '\n');
-  uncache (fin);
   if (delimiter)
     ++LEX (lno);
   *p = '\0';
@@ -482,7 +478,7 @@ main (int argc, char *argv[])
       complain ("No input file\n");
       return EXIT_FAILURE;
     }
-  if (!(FLOW (from) = Iopen (argv[1], FOPEN_R, NULL)))
+  if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
     {
       PFATAL ("can't open input file %s", argv[1]);
     }

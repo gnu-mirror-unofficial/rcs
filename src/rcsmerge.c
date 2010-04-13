@@ -24,6 +24,7 @@
 #include <string.h>
 #include "rcsmerge.help"
 #include "b-complain.h"
+#include "b-fro.h"
 
 struct top *top;
 
@@ -70,7 +71,7 @@ main (int argc, char **argv)
   char const *edarg, *expandarg, *suffixarg, *versionarg, *zonearg;
   bool tostdout;
   int status;
-  RILE *workptr;
+  struct fro *workptr;
   struct buf commarg;
   struct buf numericrev;                /* holds expanded revision number */
   struct hshentries *gendeltas;         /* deltas to be generated */
@@ -166,7 +167,7 @@ main (int argc, char **argv)
           if (BE (kws) == kwsub_b)
             MERR ("merging binary files");
           diagnose ("RCS file: %s", REPO (filename));
-          if (!(workptr = Iopen (MANI (filename), FOPEN_R_WORK, NULL)))
+          if (!(workptr = fro_open (MANI (filename), FOPEN_R_WORK, NULL)))
             fatal_sys (MANI (filename));
 
           /* Read in the delta tree.  */
@@ -192,13 +193,13 @@ main (int argc, char **argv)
                     {
                       if (tostdout)
                         {
-                          fastcopy (workptr, stdout);
+                          fro_spew (workptr, stdout);
                           Ofclose (stdout);
                         }
                     }
                   else
                     {
-                      Izclose (&workptr);
+                      fro_zclose (&workptr);
 
                       for (i = 1; i <= 2; i++)
                         {
@@ -225,7 +226,7 @@ main (int argc, char **argv)
                 }
             }
 
-          Izclose (&workptr);
+          fro_zclose (&workptr);
         }
     }
   tempunlink ();

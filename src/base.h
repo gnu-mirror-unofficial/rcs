@@ -36,9 +36,6 @@
 #ifdef HAVE_NET_ERRNO_H
 #include <net/errno.h>
 #endif
-#ifdef HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
 #endif
@@ -134,13 +131,6 @@ enum kwsub
 /* Shell to run RCS subprograms.  */
 #define RCS_SHELL "/bin/sh"
 
-/* Can main memory hold entire RCS files?  */
-#if MMAP_SIGNAL
-#define large_memory 1
-#else
-#define large_memory 0
-#endif
-
 /* Filename component separation.
    TMPDIR       string           Default directory for temporary files.
    SLASH        char             Principal filename separator.
@@ -218,22 +208,6 @@ enum kwsub
 /* Default state of revisions.  */
 #define DEFAULTSTATE                         "Exp"
 
-/* RILE - readonly file
-   declarecache; - declares local cache for RILE variable(s)
-   setupcache - sets up the local RILE cache, but does not initialize it
-   cache, uncache - caches and uncaches the local RILE;
-   (uncache,cache) is needed around functions that advance the RILE pointer
-   Igeteof(f,c,s) - get a char c from f, executing statement s at EOF
-   cachegeteof(c,s) - Igeteof applied to the local RILE
-   Iget(f,c) - like Igeteof, except EOF is an error
-   cacheget(c) - Iget applied to the local RILE
-   cacheunget(f,c) - read c backwards from cached f
-   Ifileno, Ioffset_type, Irewind, Itell - analogs to stdio routines
-
-   By conventions, macros whose names end in _ are statements, not expressions.
-   Following such macros with `; else' results in a syntax error.
-*/
-
 /* If there is no signal, better to disable mmap entirely.
    We leave MMAP_SIGNAL as 0 to indicate this.  */
 #if !MMAP_SIGNAL
@@ -241,106 +215,11 @@ enum kwsub
 #undef HAVE_MADVISE
 #endif
 
-#define maps_memory  (0 || defined HAVE_MMAP)
-
-#if large_memory
-typedef unsigned char const *Iptr_type;
-typedef struct RILE
-{
-  Iptr_type ptr, lim;
-  /* Not `Iptr_type' for lint's sake (FIXME: Use `Iptr_type' --ttn).  */
-  unsigned char *base;
-  unsigned char *readlim;
-  int fd;
-# if maps_memory
-  void (*deallocate) (struct RILE *);
-# else
-  FILE *stream;
-# endif
-} RILE;
-# if maps_memory
-# define declarecache  register Iptr_type ptr, lim
-# define setupcache(f)  (lim = (f)->lim)
-# define Igeteof(f,c,s)  do                     \
-    if ((f)->ptr == (f)->lim)                   \
-      { s; }                                    \
-    else                                        \
-      (c) = *(f)->ptr++;                        \
-  while (0)
-# define cachegeteof(c,s)  do                   \
-    if (ptr==lim)                               \
-      { s; }                                    \
-    else                                        \
-      (c) = *ptr++;                             \
-  while (0)
-# else  /* !maps_memory */
-bool Igetmore (RILE *);
-# define declarecache  register Iptr_type ptr; register RILE *rRILE
-# define setupcache(f)  (rRILE = (f))
-# define Igeteof(f,c,s)  do                     \
-    if ((f)->ptr == (f)->readlim                \
-        && !Igetmore (f))                       \
-      { s; }                                    \
-    else                                        \
-      (c) = *(f)->ptr++;                        \
-  while (0)
-# define cachegeteof(c,s)  do                   \
-    if (ptr == rRILE->readlim                   \
-        && !Igetmore (rRILE))                   \
-      { s; }                                    \
-    else                                        \
-      (c) = *ptr++;                             \
-  while (0)
-# endif
-#define uncache(f)  ((f)->ptr = ptr)
-#define cache(f)  (ptr = (f)->ptr)
-#define Iget(f,c)  Igeteof (f, c, Ieof ())
-#define cacheget(c)  cachegeteof (c, Ieof ())
-#define cacheunget(f,c)  ((c) = (--ptr)[-1])
-#define Ioffset_type  size_t
-#define Itell(f)  ((f)->ptr - (f)->base)
-#define Irewind(f)  ((f)->ptr = (f)->base)
-#define cacheptr()  ptr
-#define Ifileno(f)  ((f)->fd)
-#else  /* !large_memory */
-#define RILE  FILE
-#define declarecache  register FILE *ptr
-#define setupcache(f)  (ptr = (f))
-#define uncache(f)
-#define cache(f)
-#define Igeteof(f,c,s)  do                      \
-    if (((c) = getc (f)) == EOF)                \
-      {                                         \
-        testIerror (f);                         \
-        if (feof (f))                           \
-          { s; }                                \
-      }                                         \
-  while (0)
-#define cachegeteof(c,s)  Igeteof (ptr, c, s)
-#define Iget(f,c)  do                           \
-    if (((c) = getc (f)) == EOF)                \
-      testIeof (f);                             \
-  while (0)
-#define cacheget(c)  Iget (ptr, c)
-#define cacheunget(f,c)  do                     \
-    if (fseek (ptr, -2L, SEEK_CUR))             \
-      Ierror ();                                \
-    else                                        \
-      cacheget (c);                             \
-  while (0)
-#define Ioffset_type  long
-#define Itell(f)  ftell(f)
-#define Ifileno(f)  fileno(f)
-#endif  /* !large_memory */
-
 /* Print a char, but abort on write error.  */
 #define aputc(c,o)  do                          \
     if (putc (c, o) == EOF)                     \
       testOerror (o);                           \
   while (0)
-
-/* Get a character from an RCS file, perhaps copying to a new RCS file.  */
-#define GETC(o,c) do { cacheget (c); if (o) aputc (c, o); } while (0)
 
 /* Computes mode of the working file: same as `RCSmode',
    but write permission determined by `writable'.  */
@@ -483,7 +362,7 @@ enum markers
 #define EMPTYLOG "*** empty log message ***"
 
 /* The function `pairnames' takes to open the RCS file.  */
-typedef RILE * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
+typedef struct fro * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
 
 /* The locations of RCS programs, for internal use.  */
 extern const char const prog_co[];
@@ -657,10 +536,6 @@ struct manifestation
 /* The parse state is used when reading the RCS file.  */
 struct parse_state
 {
-  RILE *rilebuf;
-  /* An array of RILE objects, only used if `large_memory'.
-     -- Lexinit  */
-
   bool erroneousp;
   /* True means lexing encountered an error.
      -- buildjoin Lexinit syserror generic_error generic_fatal  */
@@ -721,7 +596,7 @@ struct repository
 
   struct stat stat;
   /* Stat info, possibly munged.
-     -- [ci]main [rcs]main fd2{_}RILE (via Iopen, rcs{read,write}open)  */
+     -- [ci]main [rcs]main fro_open (via rcs{read,write}open)  */
 
   struct admin
   {
@@ -762,7 +637,7 @@ struct repository
 /* Various data streams flow in and out of RCS programs.  */
 struct flow
 {
-  RILE *from;
+  struct fro *from;
   /* Input stream for the RCS file.
      -- rcsreadopen pairnames (LEXDB)main (REVTEST)main (SYNTEST)main  */
 
@@ -818,7 +693,7 @@ bool recognize_keyword (char const *, struct pool_found *);
 int merge (bool, char const *, char const *const[3], char const *const[3]);
 
 /* rcsedit */
-RILE *rcswriteopen (struct buf *, struct stat *, bool);
+struct fro *rcswriteopen (struct buf *, struct stat *, bool);
 char const *makedirtemp (bool);
 char const *getcaller (void);
 int addlock (struct hshentry *, bool);
@@ -843,14 +718,14 @@ int un_link (char const *);
 void editstring (struct hshentry const *);
 
 /* rcsfcmp */
-int rcsfcmp (RILE *, struct stat const *, char const *,
+int rcsfcmp (struct fro *, struct stat const *, char const *,
              struct hshentry const *);
 
 /* rcsfnms */
 void init_fnstuff (void);
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
-RILE *rcsreadopen (struct buf *, struct stat *, bool);
+struct fro *rcsreadopen (struct buf *, struct stat *, bool);
 char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
 char const *getfullRCSname (void);
@@ -876,10 +751,10 @@ struct cbuf cleanlogmsg (char const *, size_t);
 struct cbuf getsstdin (char const *, char const *,
                        char const *, struct buf *);
 void putdesc (struct cbuf *, bool, char *);
-void putdftext (struct hshentry const *, RILE *, FILE *, bool);
+void putdftext (struct hshentry const *, struct fro *, FILE *, bool);
 
 /* rcskeep */
-bool getoldkeys (RILE *);
+bool getoldkeys (struct fro *);
 
 /* rcslex */
 char const *getid (void);
@@ -891,8 +766,6 @@ bool getlex (enum tokens);
 struct cbuf getphrases (char const *);
 struct cbuf savestring (void);
 struct hshentry *getnum (void);
-void Ifclose (RILE *);
-void Izclose (RILE **);
 void Lexinit (void);
 void Ofclose (FILE *);
 void Orewind (FILE *);
@@ -911,17 +784,6 @@ void printstring (void);
 void readstring (void);
 void redefined (int);
 void warnignore (void);
-void hey_trundling (bool, RILE *);
-#if large_memory && maps_memory
-RILE *I_open (char const *, struct stat *);
-#define Iopen(f,m,s)  I_open (f, s)
-#else
-RILE *Iopen (char const *, char const *, struct stat *);
-#endif
-#if !large_memory
-void testIeof (FILE *);
-void Irewind (RILE *);
-#endif
 
 /* rcsmap */
 extern const enum tokens const ctab[];
@@ -935,7 +797,7 @@ int cmpnum (char const *, char const *);
 int cmpnumfld (char const *, char const *, int);
 int compartial (char const *, char const *, int);
 bool expandsym (char const *, struct buf *);
-bool fexpandsym (char const *, struct buf *, RILE *);
+bool fexpandsym (char const *, struct buf *, struct fro *);
 struct hshentry *genrevs (char const *, char const *, char const *,
                           char const *, struct hshentries **);
 struct hshentry *gr_revno (char const *revno, struct hshentries **store);
@@ -960,7 +822,7 @@ struct diffcmd
 };
 extern const char const *const expand_names[];
 void unexpected_EOF (void) exiting;
-int getdiffcmd (RILE *, bool, FILE *, struct diffcmd *);
+int getdiffcmd (struct fro *, bool, FILE *, struct diffcmd *);
 void getadmin (void);
 void getdesc (bool);
 void gettree (void);
@@ -995,7 +857,6 @@ void *testrealloc (void *, size_t);
 
 time_t now (void);
 void awrite (char const *, size_t, FILE *);
-void fastcopy (RILE *, FILE *);
 void ffree (void);
 void free_NEXT_str (void);
 void setRCSversion (char const *);
@@ -1013,5 +874,16 @@ void setrid (void);
 #endif
 
 bool isSLASH (int c);
+
+/* Idioms.  */
+
+/* Get a character from `fin', perhaps copying to a `frew'.  */
+#define TEECHAR()  do                           \
+    {                                           \
+      GETCHAR (c, fin);                         \
+      if (frew)                                 \
+        afputc (c, frew);                       \
+    }                                           \
+  while (0)
 
 /* base.h ends here */

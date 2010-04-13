@@ -1,5 +1,106 @@
 2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Overhaul read-only file handling.
+
+	* b-fro.h: New file.
+	* b-fro.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-fro.h, b-fro.c.
+	* b-fb.h (Ieof): Delete func decl.
+	* b-fb.c (Ieof): Delete func.
+	* base.h [HAVE_SYS_MMAN_H]: Don't #include <sys/mman.h>.
+	(large_memory, maps_memory): Delete #define:s.
+	(RILE): Delete typedef.
+	(declarecache, setupcache, cache, uncache, Igeteof, cachegeteof, Iget)
+	(cacheget, cacheunget, Ifileno, Ioffset_type, Irewind, Itell, GETC):
+	Delete macros.
+	(Igetmore): Delete func decl.
+	(open_rcsfile_fn_t): Update typedef.
+	(parse_state): Delete member ‘rilebuf’.
+	(flow): Update type of member ‘from’.
+	(rcswriteopen, rcsfcmp, rcsreadopen, putdftext, getoldkeys):
+	Update return value and parameter types and in func decls.
+	(Ifclose, Izclose, hey_trundling, I_open, Iopen, testIeof)
+	(Irewind): Delete func decls.
+	(fexpandsym, getdiffcmd): Update parameter types and in func decls.
+	(fastcopy): Delete func decl.
+	(TEECHAR): New macro.
+
+	Here,
+	"I" means "#include "b-fro.h"";
+	"U" means "Use ‘struct fro *’ instead of ‘RILE *’; remove caching;
+	           use interface provided by b-fro.h and/or ‘TEECHAR’";
+	"M" means "Merge ‘large_memory’/‘!large_memory’";
+	"R" means "Rework to operate based on ‘STDIO_P (...)’ at runtime".
+	* b-kwxout.c: I.
+	(keyreplace, expandline): U.
+	* b-kwxout.h (expctx): Update type of member ‘from’.
+	* ci.c: I.
+	(workptr): Update type of static var.
+	(cleanup, fixwork, xpandfile): U.
+	(main): U; rework input snapshot, flushing, rewind
+	based on ‘STDIO_P (workptr)’ at runtime.
+	* co.c: I.
+	(cleanup): U; rework ‘FLOW (res)’ closing
+	based on ‘STDIO_P (FLOW (from))’ at runtime.
+	(main): U.
+	* merger.c: I.
+	(merge): U.
+	* rcs.c: I.
+	(cleanup, main): U.
+	* rcsclean.c: I.
+	(workptr): Update type of static var.
+	(cleanup, main): U.
+	* rcsdiff.c: I.
+	(workptr): Update type of static var.
+	(cleanup, main): U.
+	* rcsedit.c: I; remove all cpp cond directives for ‘large_memory’,
+	‘maps_memory’, ‘MMAP_SIGNAL’; disambiguate bifurcated funcs by
+	renaming with _fast and _slow suffixes; generally, R.
+	(editstuff): Include unconditionally members
+	‘fedit’, ‘line’, ‘gap’, ‘gapsize’, ‘lim’.
+	(movelines): Define macro unconditionally.
+	(snapshotedit_fast): U; rename from ‘snapshotedit’ in ‘large_memory’.
+	(snapshotedit_slow): U; rename from ‘snapshotedit’ in ‘!large_memory’.
+	(finishedit_fast): U; rename from ‘finishedit’ in ‘large_memory’.
+	(finishedit_slow): U; rename from ‘finishedit’ in ‘!large_memory’.
+	(fopen_update_truncate): U; M; R.
+	(swapeditfiles): U; on ‘EDIT (fedit)’ jam, specify ‘RM_STDIO’.
+	(copylines): U; M; R.
+	(enterstring): U; R.
+	(UNUSED_IF_LARGE_MEMORY): Delete macro.
+	(editstuff): U; R.
+	(rcswriteopen, donerewrite): U.
+	* rcsfcmp.c: I.
+	(discardkeyval): U.
+	(rcsfcmp): U, R.
+	[FCMPTEST] (main): U.
+	* rcsfnms.c: I.
+	(rcsreadopen, finopen, fin2open): U.
+	[PAIRTEST] (main): U.
+	* rcsgen.c: I.
+	(putdtext, putdftext): U.
+	* rcskeep.c: I.
+	(get0val, keepid, getval, keepdate, keeprev, getoldkeys): U.
+	* rcslex.c: I.
+	(Lexinit, nextlex, eoflex, getphrases)
+	(readstring, printstring, savestring): U.
+	(Iclose, mmap_deallocate, read_deallocate, nothing_to_deallocate)
+	(hey_trundling, fd2_RILE, fd2RILE, Igetmore, I_open, Iopen, Ifclose)
+	(Izclose, testIeof, Irewind): Delete macros/funcs.
+	[LEXDB] (main): U.
+	* rcsmerge.c: I.
+	(main): U.
+	* rcsrev.c (fexpandsym): U.
+	[REVTEST] (main): U.
+	* rcssyn.c: I.
+	(getdiffcmd): U.
+	[SYNTEST] (main): U.
+	* rcsutil.c (fastcopy): Delete func.
+	* rlog.c: I.
+	(cleanup, getscript): U.
+
+2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Move some basic file operation funcs to b-fb.[hc].
 
 	* b-fb.h: New file.

@@ -38,6 +38,7 @@
 #include "unistd-safer.h"
 #include "b-complain.h"
 #include "b-fb.h"
+#include "b-fro.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
 #include "b-divvy.h"
@@ -61,11 +62,9 @@ struct sff
 
 struct editstuff
 {
-#if !large_memory
-  RILE *fedit;
+  struct fro *fedit;
   char const *filename;
   /* Edit file stream and filename.  */
-#endif
 
   long lcount;
   /* Edit line counter; #lines before cursor.  */
@@ -76,7 +75,6 @@ struct editstuff
   struct sff sff[SFF_COUNT];
   /* (Somewhat) fleeting files.  */
 
-#if large_memory
   Iptr_type *line;
   size_t gap, gapsize, lim;
   /* `line' contains pointers to the lines in the currently "edited" file.
@@ -86,7 +84,6 @@ struct editstuff
 
      Any '@'s in lines are duplicated.  Lines are terminated by '\n',
      or (for a last partial line only) by single '@'.  */
-#endif
 };
 
 #define EDIT(x)  (((struct editstuff *) BE (editstuff))-> x)
@@ -136,8 +133,6 @@ editLineNumberOverflow (void)
 {
   fatal_syntax ("edit script refers to line past end of file");
 }
-
-#if large_memory
 
 #define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (Iptr_type))
 
@@ -200,8 +195,8 @@ snapshotline (register FILE *f, register Iptr_type l)
   while (c != '\n');
 }
 
-void
-snapshotedit (FILE *f)
+static void
+snapshotedit_fast (FILE *f)
 /* Copy the current state of the edits to `f'.  */
 {
   register Iptr_type *p, *lim, *l = EDIT (line);
@@ -213,7 +208,7 @@ snapshotedit (FILE *f)
 }
 
 static void
-finisheditline (RILE *fin, FILE *fout, Iptr_type l,
+finisheditline (struct fro *fin, FILE *fout, Iptr_type l,
                 struct hshentry const *delta)
 {
   struct expctx ctx = EXPCTX_1OUT (fout, fin, true, true);
@@ -223,8 +218,8 @@ finisheditline (RILE *fin, FILE *fout, Iptr_type l,
     PFATAL ("finisheditline internal error");
 }
 
-void
-finishedit (struct hshentry const *delta, FILE *outfile, bool done)
+static void
+finishedit_fast (struct hshentry const *delta, FILE *outfile, bool done)
 /* Doing expansion if `delta' is set, output the state of the edits to
    `outfile'.  But do nothing unless `done' is set (which means we are
    on the last pass).  */
@@ -234,11 +229,11 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
       openfcopy (outfile);
       outfile = FLOW (res);
       if (!delta)
-        snapshotedit (outfile);
+        snapshotedit_fast (outfile);
       else
         {
           register Iptr_type *p, *lim, *l = EDIT (line);
-          register RILE *fin = FLOW (from);
+          register struct fro *fin = FLOW (from);
           Iptr_type here = fin->ptr;
 
           for (p = l, lim = l + EDIT (gap); p < lim;)
@@ -250,20 +245,19 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
     }
 }
 
-/* Open a temporary NAME for output, truncating any previous contents.  */
-#define fopen_update_truncate(name)  fopen_safer (name, FOPEN_W_WORK)
-
-#else /* !large_memory */
-
 static FILE *
 fopen_update_truncate (char const *name)
+/* Open a temporary NAME for output, truncating any previous contents.  */
 {
-  if (BAD_FOPEN_WPLUS && un_link (name) != 0)
-    fatal_sys (name);
-  return fopen_safer (name, FOPEN_WPLUS_WORK);
+  if (!STDIO_P (FLOW (from)))
+    return fopen_safer (name, FOPEN_W_WORK);
+  else
+    {
+      if (BAD_FOPEN_WPLUS && un_link (name) != 0)
+        fatal_sys (name);
+      return fopen_safer (name, FOPEN_WPLUS_WORK);
+    }
 }
-
-#endif  /* !large_memory */
 
 void
 openfcopy (FILE *f)
@@ -277,8 +271,6 @@ openfcopy (FILE *f)
     }
 }
 
-#if !large_memory
-
 static void
 swapeditfiles (FILE *outfile)
 /* Swap `FLOW (result)' and `EDIT (filename)',
@@ -289,33 +281,27 @@ swapeditfiles (FILE *outfile)
    opened for reading and writing.  */
 {
   char const *tmpptr;
+  struct fro *newrile = ZLLOC (1, struct fro);
 
   EDIT (lcount) = 0;
   EDIT (corr) = 0;
   Orewind (FLOW (res));
-  EDIT (fedit) = FLOW (res);
+  newrile->rm = RM_STDIO;
+  newrile->stream = FLOW (res);
+  EDIT (fedit) = newrile;
   tmpptr = EDIT (filename);
   EDIT (filename) = FLOW (result);
   FLOW (result) = tmpptr;
   openfcopy (outfile);
 }
 
-void
-snapshotedit (FILE *f)
-/* Copy the current state of the edits to `f'.  */
-{
-  finishedit (NULL, NULL, false);
-  fastcopy (EDIT (fedit), f);
-  Irewind (EDIT (fedit));
-}
-
-void
-finishedit (struct hshentry const *delta, FILE *outfile, bool done)
+static void
+finishedit_slow (struct hshentry const *delta, FILE *outfile, bool done)
 /* Copy the rest of the edit file and close it (if it exists).
    If `delta', perform keyword substitution at the same time.
    If `done' is set, we are finishing the last pass.  */
 {
-  register RILE *fe;
+  register struct fro *fe;
   register FILE *fc;
 
   fe = EDIT (fedit);
@@ -331,67 +317,88 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
         }
       else
         {
-          fastcopy (fe, fc);
+          fro_spew (fe, fc);
         }
-      Ifclose (fe);
+      fro_close (fe);
     }
   if (!done)
     swapeditfiles (outfile);
 }
-#endif  /* !large_memory */
 
-#if large_memory
-#define copylines(upto,delta)  (EDIT (lcount) = (upto))
-#else  /* !large_memory */
+static void
+snapshotedit_slow (FILE *f)
+/* Copy the current state of the edits to `f'.  */
+{
+  finishedit_slow (NULL, NULL, false);
+  fro_spew (EDIT (fedit), f);
+  fro_bob (EDIT (fedit));
+}
+
+void
+finishedit (struct hshentry const *delta, FILE *outfile, bool done)
+{
+  (!STDIO_P (FLOW (from))
+   ? finishedit_fast
+   : finishedit_slow) (delta, outfile, done);
+}
+
+void
+snapshotedit (FILE *f)
+{
+  (!STDIO_P (FLOW (from))
+   ? snapshotedit_fast
+   : snapshotedit_slow) (f);
+}
+
 static void
 copylines (register long upto, struct hshentry const *delta)
 /* Copy input lines `EDIT (lcount)+1..upto' from `EDIT (fedit)' to `FLOW (res)'.
    If `delta', keyword expansion is done simultaneously.
    `EDIT (lcount)' is updated.  Rewinds a file only if necessary.  */
 {
-  register int c;
-  declarecache;
-  register FILE *fc;
-  register RILE *fe;
-
-  if (upto < EDIT (lcount))
+  if (!STDIO_P (FLOW (from)))
+    EDIT (lcount) = upto;
+  else
     {
-      /* Swap files.  */
-      finishedit (NULL, NULL, false);
-      /* Assumes edit only during last pass, from the beginning.  */
-    }
-  fe = EDIT (fedit);
-  fc = FLOW (res);
-  if (EDIT (lcount) < upto)
-    {
-      struct expctx ctx = EXPCTX_1OUT (fc, fe, false, true);
+      int c;
+      register FILE *fc;
+      register struct fro *fe;
 
-      if (delta)
-        do
-          {
-            if (expandline (&ctx) <= 1)
-              editLineNumberOverflow ();
-          }
-        while (++EDIT (lcount) < upto);
-      else
+      if (upto < EDIT (lcount))
         {
-          setupcache (fe);
-          cache (fe);
-          do
+          /* Swap files.  */
+          finishedit_slow (NULL, NULL, false);
+          /* Assumes edit only during last pass, from the beginning.  */
+        }
+      fe = EDIT (fedit);
+      fc = FLOW (res);
+      if (EDIT (lcount) < upto)
+        {
+          struct expctx ctx = EXPCTX_1OUT (fc, fe, false, true);
+
+          if (delta)
+            do
+              {
+                if (expandline (&ctx) <= 1)
+                  editLineNumberOverflow ();
+              }
+            while (++EDIT (lcount) < upto);
+          else
             {
               do
                 {
-                  cachegeteof (c, editLineNumberOverflow ());
-                  aputc (c, fc);
+                  do
+                    {
+                      GETCHAR_OR (c, fe, editLineNumberOverflow ());
+                      aputc (c, fc);
+                    }
+                  while (c != '\n');
                 }
-              while (c != '\n');
+              while (++EDIT (lcount) < upto);
             }
-          while (++EDIT (lcount) < upto);
-          uncache (fe);
         }
     }
 }
-#endif  /* !large_memory */
 
 void
 xpandstring (struct hshentry const *delta)
@@ -422,23 +429,20 @@ copystring (void)
    `EDIT (lcount)' is incremented by the number of lines copied.  Assumption:
    next character read is first string character.  */
 {
-  register int c;
-  declarecache;
+  int c;
   register FILE *frew, *fcop;
   register bool amidline;
-  register RILE *fin;
+  register struct fro *fin;
 
   ensure_editstuff ();
 
   fin = FLOW (from);
-  setupcache (fin);
-  cache (fin);
   frew = FLOW (to);
   fcop = FLOW (res);
   amidline = false;
   for (;;)
     {
-      GETC (frew, c);
+      TEECHAR ();
       switch (c)
         {
         case '\n':
@@ -447,13 +451,12 @@ copystring (void)
           amidline = false;
           break;
         case SDELIM:
-          GETC (frew, c);
+          TEECHAR ();
           if (c != SDELIM)
             {
               /* End of string.  */
               NEXT (c) = c;
               EDIT (lcount) += amidline;
-              uncache (fin);
               return;
             }
           /* fall into */
@@ -472,83 +475,75 @@ enterstring (void)
 {
   ensure_editstuff ();
 
-#if !large_memory
-  EDIT (filename) = NULL;
-  EDIT (fedit) = NULL;
-  EDIT (lcount) = EDIT (corr) = 0;
-  FLOW (result) = maketemp (1);
-  if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
-    fatal_sys (FLOW (result));
-  copystring ();
-#else  /* large_memory */
-  register int c;
-  declarecache;
-  register FILE *frew;
-  register long e, oe;
-  register bool amidline, oamidline;
-  register Iptr_type optr;
-  register RILE *fin;
-
-  e = 0;
-  EDIT (gap) = 0;
-  EDIT (gapsize) = EDIT (lim);
-  fin = FLOW (from);
-  setupcache (fin);
-  cache (fin);
-  hey_trundling (false, fin);
-  frew = FLOW (to);
-  amidline = false;
-  for (;;)
+  if (STDIO_P (FLOW (from)))
     {
-      optr = cacheptr ();
-      GETC (frew, c);
-      oamidline = amidline;
-      oe = e;
-      switch (c)
-        {
-        case '\n':
-          ++e;
-          ++LEX (lno);
-          amidline = false;
-          break;
-        case SDELIM:
-          GETC (frew, c);
-          if (c != SDELIM)
-            {
-              /* End of string.  */
-              NEXT (c) = c;
-              EDIT (lcount) = e + amidline;
-              EDIT (corr) = 0;
-              uncache (fin);
-              return;
-            }
-          /* fall into */
-        default:
-          amidline = true;
-          break;
-        }
-      if (!oamidline)
-        insertline (oe, optr);
+      EDIT (filename) = NULL;
+      EDIT (fedit) = NULL;
+      EDIT (lcount) = EDIT (corr) = 0;
+      FLOW (result) = maketemp (1);
+      if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
+        fatal_sys (FLOW (result));
+      copystring ();
     }
-#endif  /* large_memory */
+  else
+    {
+      int c;
+      register FILE *frew;
+      register long e, oe;
+      register bool amidline, oamidline;
+      register Iptr_type optr;
+      register struct fro *fin;
+
+      e = 0;
+      EDIT (gap) = 0;
+      EDIT (gapsize) = EDIT (lim);
+      fin = FLOW (from);
+      fro_trundling (false, fin);
+      frew = FLOW (to);
+      amidline = false;
+      for (;;)
+        {
+          optr = fin->ptr;
+          TEECHAR ();
+          oamidline = amidline;
+          oe = e;
+          switch (c)
+            {
+            case '\n':
+              ++e;
+              ++LEX (lno);
+              amidline = false;
+              break;
+            case SDELIM:
+              TEECHAR ();
+              if (c != SDELIM)
+                {
+                  /* End of string.  */
+                  NEXT (c) = c;
+                  EDIT (lcount) = e + amidline;
+                  EDIT (corr) = 0;
+                  return;
+                }
+              /* fall into */
+            default:
+              amidline = true;
+              break;
+            }
+          if (!oamidline)
+            insertline (oe, optr);
+        }
+    }
 }
 
-#if large_memory
-#define UNUSED_IF_LARGE_MEMORY  RCS_UNUSED
-#else
-#define UNUSED_IF_LARGE_MEMORY
-#endif
-
 void
-editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
+editstring (struct hshentry const *delta)
 /* Read an edit script from `FLOW (from)' and applies it to the edit file.
-#if !large_memory
-   The result is written to `FLOW (res)'.
-   If `delta', keyword expansion is performed simultaneously.
-   If running out of lines in `EDIT (fedit)',
-   `EDIT (fedit)' and `FLOW (res)' are swapped.
-   `EDIT (filename)' is the name of the file that goes with `EDIT (fedit)'.
-#endif
+   | -- ‘(STDIO_P (FLOW (from)))’ --
+   | The result is written to `FLOW (res)'.
+   | If `delta', keyword expansion is performed simultaneously.
+   | If running out of lines in `EDIT (fedit)',
+   | `EDIT (fedit)' and `FLOW (res)' are swapped.
+   | `EDIT (filename)' is the name of the file that goes with `EDIT (fedit)'.
    If `FLOW (to)' is set, the edit script is also copied verbatim
    to `FLOW (to)'.  Assumes that all these files are open.
    `FLOW (result)' is the name of the file that goes with `FLOW (res)'.
@@ -556,73 +551,65 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
    character of the edit script.  Resets `NEXT (c)' on exit.  */
 {
   int ed;                               /* editor command */
-  register int c;
-  declarecache;
+  int c;
   register FILE *frew;
-#if !large_memory
-  register FILE *f;
+  register FILE *f = NULL;
   long line_lim = LONG_MAX;
-  register RILE *fe;
-#endif
+  register struct fro *fe;
   register long i;
-  register RILE *fin;
-#if large_memory
-  register long j;
-#endif
+  register struct fro *fin;
+  register long j = 0;
   struct diffcmd dc;
 
   EDIT (lcount) += EDIT (corr);
   EDIT (corr) = 0;                         /* correct line number */
   frew = FLOW (to);
   fin = FLOW (from);
-  setupcache (fin);
   initdiffcmd (&dc);
   while (0 <= (ed = getdiffcmd (fin, true, frew, &dc)))
-#if !large_memory
-    if (line_lim <= dc.line1)
+    if (STDIO_P (fin)
+        && line_lim <= dc.line1)
       editLineNumberOverflow ();
-    else
-#endif
-    if (!ed)
+    else if (!ed)
       {
         copylines (dc.line1 - 1, delta);
         /* Skip over unwanted lines.  */
         i = dc.nlines;
         EDIT (corr) -= i;
         EDIT (lcount) += i;
-#if large_memory
-        deletelines (EDIT (lcount) + EDIT (corr), i);
-#else  /* !large_memory */
-        fe = EDIT (fedit);
-        do
+        if (!STDIO_P (fin))
+          deletelines (EDIT (lcount) + EDIT (corr), i);
+        else
           {
-            /* Skip next line.  */
-            do Igeteof (fe, c,
-                        {
-                          if (i != 1)
-                            editLineNumberOverflow ();
-                          line_lim = dc.dafter;
-                          goto done;
-                        });
-            while (c != '\n');
-          done:
-            ;
+            fe = EDIT (fedit);
+            do
+              {
+                /* Skip next line.  */
+                do GETCHAR_OR (c, fe,
+                               {
+                                 if (i != 1)
+                                   editLineNumberOverflow ();
+                                 line_lim = dc.dafter;
+                                 goto done;
+                               });
+                while (c != '\n');
+              done:
+                ;
+              }
+            while (--i);
           }
-        while (--i);
-#endif  /* !large_memory */
       }
     else
       {
         /* Copy lines without deleting any.  */
         copylines (dc.line1, delta);
         i = dc.nlines;
-#if large_memory
-        j = EDIT (lcount) + EDIT (corr);
-#endif
+        if (!STDIO_P (fin))
+          j = EDIT (lcount) + EDIT (corr);
         EDIT (corr) += i;
-#if !large_memory
-        f = FLOW (res);
-        if (delta)
+        if (STDIO_P (fin)
+            && (f = FLOW (res),
+                delta))
           {
             struct expctx ctx = EXPCTX (f, frew, fin, true, true);
 
@@ -642,39 +629,33 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
             while (--i);
           }
         else
-#endif  /* !large_memory */
           {
-            cache (fin);
             do
               {
-#if large_memory
-                insertline (j++, cacheptr ());
-#endif
+                if (!STDIO_P (fin))
+                  insertline (j++, fin->ptr);
                 for (;;)
                   {
-                    GETC (frew, c);
+                    TEECHAR ();
                     if (c == SDELIM)
                       {
-                        GETC (frew, c);
+                        TEECHAR ();
                         if (c != SDELIM)
                           {
                             if (--i)
                               editEndsPrematurely ();
                             NEXT (c) = c;
-                            uncache (fin);
                             return;
                           }
                       }
-#if !large_memory
-                    aputc (c, f);
-#endif
+                    if (STDIO_P (fin))
+                      aputc (c, f);
                     if (c == '\n')
                       break;
                   }
                 ++LEX (lno);
               }
             while (--i);
-            uncache (fin);
           }
       }
 }
@@ -740,10 +721,10 @@ naturalize (struct buf *fn, bool *symbolicp)
     }
 }
 
-RILE *
+struct fro *
 rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 /* Create the lock file corresponding to `RCSbuf'.
-   Then try to open `RCSbuf' for reading and return its `RILE*' descriptor.
+   Then try to open `RCSbuf' for reading and return its `fro*' descriptor.
    Put its status into `*status' too.
    `mustread' is true if the file must already exist, too.
    If all goes well, discard any previously acquired locks,
@@ -751,7 +732,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 {
   register char *tp;
   register char const *sp, *RCSpath, *x;
-  RILE *f;
+  struct fro *f;
   size_t l;
   int e, exists, fdesc, fdescSafer, r;
   bool waslocked;
@@ -899,7 +880,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       e = ENOENT;
       if (exists)
         {
-          f = Iopen (RCSpath, FOPEN_RB, status);
+          f = fro_open (RCSpath, FOPEN_RB, status);
           e = errno;
           if (f && waslocked)
             {
@@ -1277,8 +1258,8 @@ donerewrite (int changed, time_t newRCStime)
     {
       if (FLOW (from))
         {
-          fastcopy (FLOW (from), FLOW (rewr));
-          Izclose (&FLOW (from));
+          fro_spew (FLOW (from), FLOW (rewr));
+          fro_zclose (&FLOW (from));
         }
       if (1 < REPO (stat).st_nlink)
         RWARN ("breaking hard link");

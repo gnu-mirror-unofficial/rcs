@@ -24,7 +24,8 @@
 #include <string.h>
 #include "b-complain.h"
 #include "b-divvy.h"
-#include "b-fb.h"                       /* Ieof */
+#include "b-fb.h"
+#include "b-fro.h"
 #include "b-kwxout.h"
 
 static void
@@ -69,12 +70,12 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
 /* Output the keyword value(s) corresponding to `marker'.
    Attributes are derived from `delta'.  */
 {
-  RILE *infile = ctx->from;
+  struct fro *infile = ctx->from;
   register FILE *out = ctx->to;
   register struct hshentry const *delta = ctx->delta;
   bool dolog = ctx->dolog, delimstuffed = ctx->delimstuffed;
   register char const *sp, *cp, *date;
-  register int c;
+  int c;
   register size_t cs, cw, ls;
   char const *sp1;
   char datebuf[datesize + zonelenmax];
@@ -174,11 +175,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
       else
         {
           bool kdelim_found = false;
-          Ioffset_type chars_read = Itell (infile);
-          declarecache;
-
-          setupcache (infile);
-          cache (infile);
+          off_t chars_read = fro_tello (infile);
 
           c = 0;                /* Pacify `gcc -Wall'.  */
 
@@ -189,24 +186,24 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
             {
               if (!--chars_read)
                 goto done_backing_up;
-              cacheunget (infile, c);
+              fro_get_prev_byte (&c, infile);
               if (c == '\n')
                 break;
               if (c == SDELIM && delimstuffed)
                 {
                   if (!--chars_read)
                     break;
-                  cacheunget (infile, c);
+                  fro_get_prev_byte (&c, infile);
                   if (c != SDELIM)
                     {
-                      cacheget (c);
+                      GETCHAR (c, infile);
                       break;
                     }
                 }
               cs += kdelim_found;
               kdelim_found |= c == KDELIM;
             }
-          cacheget (c);
+          GETCHAR (c, infile);
         done_backing_up:
           ;
 
@@ -217,8 +214,8 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
             {
               leader.string[cw] = c;
               if (c == SDELIM && delimstuffed)
-                cacheget (c);
-              cacheget (c);
+                GETCHAR (c, infile);
+              GETCHAR (c, infile);
             }
 
           /* Convert traditional C or Pascal leader to ` *'.  */
@@ -243,9 +240,8 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
 
           /* Skip `$Log ... $' string.  */
           do
-            cacheget (c);
+            GETCHAR (c, infile);
           while (c != KDELIM);
-          uncache (infile);
         }
       afputc ('\n', out);
       awrite (cp, cs, out);
@@ -309,10 +305,9 @@ expandline (struct expctx *ctx)
    incomplete line is copied, 2 if a complete line is copied; add 1 to
    return value if expansion occurred.  */
 {
-  RILE *infile = ctx->from;
+  struct fro *fin = ctx->from;
   bool delimstuffed = ctx->delimstuffed;
-  register int c;
-  declarecache;
+  int c;
   register FILE *out, *frew;
   register int r;
   bool e;
@@ -322,8 +317,6 @@ expandline (struct expctx *ctx)
 
   ENSURE_LPARTS ();
 
-  setupcache (infile);
-  cache (infile);
   out = ctx->to;
   frew = ctx->rewr;
   forget (LPARTS);
@@ -332,10 +325,11 @@ expandline (struct expctx *ctx)
 
   for (;;)
     {
+#define GETCHAR_ELSE_GOTO(label)  GETCHAR_OR (c, fin, goto label);
       if (delimstuffed)
-        GETC (frew, c);
+        TEECHAR ();
       else
-        cachegeteof (c, goto uncache_exit);
+        GETCHAR_ELSE_GOTO (done);
       for (;;)
         {
           switch (c)
@@ -343,12 +337,12 @@ expandline (struct expctx *ctx)
             case SDELIM:
               if (delimstuffed)
                 {
-                  GETC (frew, c);
+                  TEECHAR ();
                   if (c != SDELIM)
                     {
                       /* End of string.  */
                       NEXT (c) = c;
-                      goto uncache_exit;
+                      goto done;
                     }
                 }
               /* fall into */
@@ -361,7 +355,7 @@ expandline (struct expctx *ctx)
               LEX (lno) += delimstuffed;
               aputc (c, out);
               r = 2;
-              goto uncache_exit;
+              goto done;
 
             case KDELIM:
               r = 0;
@@ -371,9 +365,9 @@ expandline (struct expctx *ctx)
               for (;;)
                 {
                   if (delimstuffed)
-                    GETC (frew, c);
+                    TEECHAR ();
                   else
-                    cachegeteof (c, goto keystring_eof);
+                    GETCHAR_ELSE_GOTO (keystring_eof);
                   if (len <= keylength + 3)
                     switch (ctab[c])
                       {
@@ -403,16 +397,16 @@ expandline (struct expctx *ctx)
                   for (;;)
                     {
                       if (delimstuffed)
-                        GETC (frew, c);
+                        TEECHAR ();
                       else
-                        cachegeteof (c, goto keystring_eof);
+                        GETCHAR_ELSE_GOTO (keystring_eof);
                       if (c == '\n' || c == KDELIM)
                         break;
                       accumulate_byte (LPARTS, c);
                       if (c == SDELIM && delimstuffed)
                         {
                           /* Skip next `SDELIM'.  */
-                          GETC (frew, c);
+                          TEECHAR ();
                           if (c != SDELIM)
                             {
                               /* End of string before closing
@@ -434,21 +428,19 @@ expandline (struct expctx *ctx)
                   cooked = finish_string (LPARTS, &len);
                 }
               /* Now put out the new keyword value.  */
-              uncache (infile);
               keyreplace (&matchresult, ctx);
-              cache (infile);
               e = true;
               break;
             }
           break;
         }
+#undef GETCHAR_ELSE_GOTO
     }
 
 keystring_eof:
   cooked = finish_string (LPARTS, &len);
   aputs (cooked, out);
-uncache_exit:
-  uncache (infile);
+done:
   return r + e;
 }
 
