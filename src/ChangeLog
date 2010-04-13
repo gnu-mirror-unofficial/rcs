@@ -1,3 +1,14 @@
+2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int C] Use a space for symlink-resolution scratch.
+
+	* rcsedit.c (naturalize): Rename from `resolve_symlink';
+	define unconditionally; bifurcate internals for the case of
+	!HAVE_READLINK; take out-arg `symbolicp'; set to indicate
+	symlink resolution occurred; use space for local allocation.
+	(rcswriteopen): Use `naturalize';
+	do failed-symlink-check unconditionally.
+
 2010-04-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use a space for `expandline' scratch.

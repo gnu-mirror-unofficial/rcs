@@ -677,29 +677,43 @@ editstring (struct hshentry const *delta UNUSED_IF_LARGE_MEMORY)
       }
 }
 
-#ifdef HAVE_READLINK
 static int
-resolve_symlink (struct buf *L)
-/* If `L' is a symbolic link, resolve it to the name that it points to.
+naturalize (struct buf *fn, bool *symbolicp)
+/* If we DO NOT have `readlink':
+   Set `*symbolic' to be false.
+   Do a simple `stat'.  Result: success => 1; ENOENT => 0; else -1.
+   ----------------------------------------------------------------------
+   If we DO have `readlink':
+   If `fn' is a symbolic link, resolve it to the name that it points to.
    If unsuccessful, set errno and return -1.
    If it points to an existing file, return 1.
-   Otherwise, set `errno' to `ENOENT' and return 0.  */
+   Otherwise, set `errno' to `ENOENT' and return 0.
+   On return `*symbolicp' set means the filename was a symlink, and
+   `fn' points to the resolved filename (no change if not a symlink).  */
 {
-  char *b, a[SIZEABLE_PATH];
-  int e;
-  ssize_t r, s;
-  struct buf bigbuf;
-  int linkcount = _POSIX_SYMLOOP_MAX;
+#ifndef HAVE_READLINK
+  struct stat statbuf;
 
-  b = a;
-  s = sizeof (a);
-  bufautobegin (&bigbuf);
-  while ((r = readlink (L->string, b, s)) != -1)
-    if (r == s)
+  *symbolicp = false;
+  return 0 > stat (fn->string, &statbuf)
+    ? (errno == ENOENT
+       ? 0
+       : -1)
+    : 1;
+#else  /* HAVE_READLINK */
+  int e;
+  ssize_t r;
+  int linkcount = _POSIX_SYMLOOP_MAX;
+  struct divvy *space = make_space ("nature");
+  size_t len = SIZEABLE_PATH;
+  char *chased = alloc (space, "chased", len);
+  char const *orig = fn->string;
+
+  while ((r = readlink (fn->string, chased, len)) != -1)
+    if (len == (size_t) r)
       {
-        bufalloc (&bigbuf, s << 1);
-        b = bigbuf.string;
-        s = bigbuf.size;
+        len <<= 1;
+        chased = alloc (space, "chased", len);
       }
     else if (!linkcount--)
       {
@@ -708,14 +722,25 @@ resolve_symlink (struct buf *L)
       }
     else
       {
-        /* Splice symbolic link into `L'.  */
-        b[r] = '\0';
-        L->string[ROOTPATH (b) ? 0 : basefilename (L->string) - L->string]
-          = '\0';
-        bufscat (L, b);
+        /* Blech, `readlink' does not NUL-terminate.  */
+        chased[r] = '\0';
+        if (ROOTPATH (chased))
+          {
+            fn->string = chased;
+            fn->size = r;
+          }
+        else
+          {
+            for (char const *p = fn->string; p < basefilename (fn->string); p++)
+              accumulate_byte (space, *p);
+            accumulate_nonzero_bytes (space, chased);
+            fn->string = finish_string (space, &fn->size);
+          }
       }
   e = errno;
-  bufautoend (&bigbuf);
+  if ((*symbolicp = fn->string != orig))
+    fn->string = intern (SINGLE, fn->string, fn->size);
+  close_space (space);
   errno = e;
   switch (e)
     {
@@ -726,8 +751,8 @@ resolve_symlink (struct buf *L)
     default:
       return -1;
     }
+#endif /* HAVE_READLINK */
 }
-#endif  /* defined HAVE_READLINK */
 
 RILE *
 rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
@@ -746,15 +771,11 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   bool waslocked;
   struct buf *dirt;
   struct stat statbuf;
+  bool symbolicp = false;
 
   ensure_editstuff ();                  /* ugh */
   waslocked = 0 <= REPO (fd_lock);
-  exists =
-#ifdef HAVE_READLINK
-    resolve_symlink (RCSbuf);
-#else
-    stat (RCSbuf->string, &statbuf) == 0 ? 1 : errno == ENOENT ? 0 : -1;
-#endif
+  exists = naturalize (RCSbuf, &symbolicp);
   if (exists < (mustread | waslocked))
     /* There's an unusual problem with the RCS file; or the RCS file
        doesn't exist, and we must read or we already have a lock
@@ -768,14 +789,12 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   bufscpy (dirt, RCSpath);
   tp = dirt->string + l;
   x = rcssuffix (RCSpath);
-#ifdef HAVE_READLINK
-  if (!x)
+  if (!x && symbolicp)
     {
       PERR ("symbolic link to non RCS file `%s'", RCSpath);
       errno = EINVAL;
       return NULL;
     }
-#endif
   if (*sp == *x)
     {
       PERR ("RCS pathname `%s' incompatible with suffix `%s'", sp, x);
