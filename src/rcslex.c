@@ -43,9 +43,14 @@
 void
 warnignore (void)
 {
-  if (!LEX (ignoredp))
+  if (!LEX (ignore))
     {
-      LEX (ignoredp) = true;
+      /* This used to be a simple boolean, but we overload it now as a
+         means to avoid the most infelicitous `NEXT (str)' clobbering.
+         If/when that goes away, this can happily resvelten.  */
+      LEX (ignore) = large_memory
+        ? (struct divvy *) -1
+        : make_space ("ignore");
       RWARN ("Unknown phrases like `%s ...;' are present.", NEXT (str));
     }
 }
@@ -103,7 +108,12 @@ Lexinit (void)
     {
       FLOW (to) = NULL;
       BE (receptive_to_next_hash_key) = true;
-      LEX (ignoredp) = false;
+      if (LEX (ignore))
+        {
+          if (!large_memory)
+            close_space (LEX (ignore));
+          LEX (ignore) = NULL;
+        }
       LEX (lno) = 1;
       if (LEX (tokbuf))
         forget (LEX (tokbuf));
@@ -362,12 +372,9 @@ getphrases (char const *key)
   register RILE *fin;
   register FILE *frew;
 #if large_memory
-#define savech_(c) ;
+#define SAVECH(c)
 #else  /* !large_memory */
-  register char *p;
-  char const *limit;
-  struct buf b;
-#define savech_(c)  { if (limit <= p) p = bufenlarge (&b, &limit); *p++ = (c); }
+#define SAVECH(c)  accumulate_byte (LEX (ignore), c)
 #endif  /* !large_memory */
 
   if (NEXT (tok) != ID || strcmp (NEXT (str), key) == 0)
@@ -382,10 +389,7 @@ getphrases (char const *key)
 #if large_memory
       r.string = (char const *) cacheptr () - strlen (NEXT (str)) - 1;
 #else  /* !large_memory */
-      bufautobegin (&b);
-      bufscpy (&b, NEXT (str));
-      p = b.string + strlen (b.string);
-      limit = b.string + b.size;
+      accumulate_nonzero_bytes (LEX (ignore), NEXT (str));
 #endif  /* !large_memory */
       free_NEXT_str ();
       c = NEXT (c);
@@ -393,7 +397,7 @@ getphrases (char const *key)
         {
           for (;;)
             {
-              savech_ (c)
+              SAVECH (c);
               switch (ctab[c])
                 {
                 default:
@@ -415,7 +419,7 @@ getphrases (char const *key)
                       for (;;)
                         {
                           GETC (frew, c);
-                          savech_ (c)
+                          SAVECH (c);
                           switch (c)
                             {
                             case '\n':
@@ -432,7 +436,7 @@ getphrases (char const *key)
                       GETC (frew, c);
                       if (c != SDELIM)
                         break;
-                      savech_ (c)
+                      SAVECH (c);
                     }
                   continue;
                 case SEMI:
@@ -442,7 +446,7 @@ getphrases (char const *key)
                       if (frew)
                         aputc (c, frew);
                       ++ LEX (lno);
-                      savech_ (c)
+                      SAVECH (c);
                       cacheget (c);
                     }
 #if large_memory
@@ -497,7 +501,7 @@ getphrases (char const *key)
                 register char const *ki;
 
                 for (ki = key; ki < kn;)
-                  savech_ (*ki++)
+                  SAVECH (*ki++);
               }
 #endif
             }
@@ -511,13 +515,11 @@ getphrases (char const *key)
         }
     returnit:;
 #if !large_memory
-      r.string = (r.size = p - b.string)
-        ? intern (SINGLE, b.string, r.size)
-        : "";
-      bufautoend (&b);
+      r.string = finish_string (LEX (ignore), &r.size);
 #endif
     }
   return r;
+#undef SAVECH
 }
 
 void

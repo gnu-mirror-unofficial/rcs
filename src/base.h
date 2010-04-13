@@ -669,8 +669,8 @@ struct parse_state
   /* Space for buffering tokens.
      -- Lexinit nextlex  */
 
-  bool ignoredp;
-  /* Have we ignored phrases in this RCS file?
+  struct divvy *ignore;
+  /* Non-NULL if we have ignored phrases in this RCS file.
      -- warnignore Lexinit  */
 
   struct next

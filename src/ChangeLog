@@ -1,5 +1,17 @@
 2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use a space to stash ignored phrases.
+
+	* base.h (parse_state): Delete member `ignoredp'; add `ignore'.
+	* rcslex.c (warnignore): Initialize space
+	for ignored phrases, if not `large_memory'.
+	(Lexinit): If there is space for ignored phrases, clear it.
+	(getphrases): Save ignored phrases in `LEX (ignore)'; rename
+	local macro from `savech_' to `SAVECH'; make it a statement;
+	update its callers finish with a semicolon; #undef it at eofunc.
+
+2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use a space for symlink-resolution scratch.
 
 	* rcsedit.c (naturalize): Rename from `resolve_symlink';
