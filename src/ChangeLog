@@ -1,3 +1,12 @@
+2010-04-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Specify proper expansion context in `finishedit'.
+
+	A translation error was introduced 2010-03-27 by:
+	"Move "expansion + output" to b-kwxout.[hc]; use exp context".
+	* rcsedit.c (finishedit): Specify `delimstuffed' to
+	be false in the expansion context passed to `expandline'.
+
 2010-04-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use gnulib module `readlink'.

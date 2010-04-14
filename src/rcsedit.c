@@ -322,7 +322,7 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
       fc = FLOW (res);
       if (delta)
         {
-          struct expctx ctx = EXPCTX_1OUT (fc, fe, true, true);
+          struct expctx ctx = EXPCTX_1OUT (fc, fe, false, true);
 
           while (1 < expandline (&ctx))
             ;
