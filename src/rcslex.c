@@ -48,9 +48,7 @@ warnignore (void)
       /* This used to be a simple boolean, but we overload it now as a
          means to avoid the most infelicitous `NEXT (str)' clobbering.
          If/when that goes away, this can happily resvelten.  */
-      LEX (ignore) = large_memory
-        ? (struct divvy *) -1
-        : make_space ("ignore");
+      LEX (ignore) = make_space ("ignore");
       RWARN ("Unknown phrases like `%s ...;' are present.", NEXT (str));
     }
 }
@@ -110,8 +108,7 @@ Lexinit (void)
       BE (receptive_to_next_hash_key) = true;
       if (LEX (ignore))
         {
-          if (!large_memory)
-            close_space (LEX (ignore));
+          close_space (LEX (ignore));
           LEX (ignore) = NULL;
         }
       LEX (lno) = 1;
@@ -371,11 +368,6 @@ getphrases (char const *key)
   struct cbuf r;
   register RILE *fin;
   register FILE *frew;
-#if large_memory
-#define SAVECH(c)
-#else  /* !large_memory */
-#define SAVECH(c)  accumulate_byte (LEX (ignore), c)
-#endif  /* !large_memory */
 
   if (NEXT (tok) != ID || strcmp (NEXT (str), key) == 0)
     clear_buf (&r);
@@ -386,15 +378,12 @@ getphrases (char const *key)
       frew = FLOW (to);
       setupcache (fin);
       cache (fin);
-#if large_memory
-      r.string = (char const *) cacheptr () - strlen (NEXT (str)) - 1;
-#else  /* !large_memory */
       accumulate_nonzero_bytes (LEX (ignore), NEXT (str));
-#endif  /* !large_memory */
       free_NEXT_str ();
       c = NEXT (c);
       for (;;)
         {
+#define SAVECH(c)  accumulate_byte (LEX (ignore), c)
           for (;;)
             {
               SAVECH (c);
@@ -449,9 +438,6 @@ getphrases (char const *key)
                       SAVECH (c);
                       cacheget (c);
                     }
-#if large_memory
-                  r.size = (char const *) cacheptr () - 1 - r.string;
-#endif
                   for (;;)
                     {
                       switch (ctab[c])
@@ -476,6 +462,8 @@ getphrases (char const *key)
             }
           if (ctab[c] == Letter)
             {
+              register char const *ki;
+
               for (kn = key; c && *kn == c; kn++)
                 GETC (frew, c);
               if (!*kn)
@@ -496,14 +484,8 @@ getphrases (char const *key)
                     uncache (fin);
                     goto returnit;
                   }
-#if !large_memory
-              {
-                register char const *ki;
-
-                for (ki = key; ki < kn;)
-                  SAVECH (*ki++);
-              }
-#endif
+              for (ki = key; ki < kn;)
+                SAVECH (*ki++);
             }
           else
             {
@@ -512,14 +494,12 @@ getphrases (char const *key)
               nextlex ();
               break;
             }
+#undef SAVECH
         }
     returnit:;
-#if !large_memory
       r.string = finish_string (LEX (ignore), &r.size);
-#endif
     }
   return r;
-#undef SAVECH
 }
 
 void

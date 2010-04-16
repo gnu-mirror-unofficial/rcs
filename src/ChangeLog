@@ -1,3 +1,11 @@
+2010-04-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Always stash ignored phrases, regardless of ‘large_memory’.
+
+	* rcslex.c (warnignore): Always make space.
+	(getphrases): Always accumulate into ‘LEX (ignore)’.
+	(Lexinit): Clear ‘LEX (ignore)’ if set.
+
 2010-04-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: Specify proper expansion context in `finishedit'.
