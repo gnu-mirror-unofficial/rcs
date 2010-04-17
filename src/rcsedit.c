@@ -699,8 +699,9 @@ naturalize (struct buf *fn, bool *symbolicp)
           }
         else
           {
-            for (char const *p = fn->string; p < basefilename (fn->string); p++)
-              accumulate_byte (space, *p);
+            char const *s = fn->string;
+
+            accumulate_range (space, s, basefilename (s));
             accumulate_nonzero_bytes (space, chased);
             fn->string = finish_string (space, &fn->size);
           }

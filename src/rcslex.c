@@ -449,8 +449,6 @@ getphrases (char const *key)
             }
           if (ctab[c] == Letter)
             {
-              register char const *ki;
-
               for (kn = key; c && *kn == c; kn++)
                 TEECHAR ();
               if (!*kn)
@@ -470,8 +468,7 @@ getphrases (char const *key)
                     NEXT (tok) = ID;
                     goto returnit;
                   }
-              for (ki = key; ki < kn;)
-                SAVECH (*ki++);
+              accumulate_range (LEX (ignore), key, kn);
             }
           else
             {

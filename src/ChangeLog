@@ -1,5 +1,14 @@
 2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: accumulate_range
+
+	* b-divvy.h (accumulate_range): New func decl.
+	* b-divvy.c (accumulate_range): New func.
+	* rcsedit.c (naturalize): Use ‘accumulate_range’.
+	* rcslex.c (getphrases): Likewise.
+
+2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use ‘fseeko’ more.
 
 	* rcslex.c (Orewind): Use ‘fseeko’ instead of ‘fseek’.

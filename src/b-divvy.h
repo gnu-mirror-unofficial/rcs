@@ -37,6 +37,8 @@ extern void brush_off (struct divvy *divvy, void *ptr);
 extern void forget (struct divvy *divvy);
 extern void accumulate_byte (struct divvy *divvy, int c);
 extern void accumulate_nonzero_bytes (struct divvy *divvy, char const *s);
+extern void accumulate_range (struct divvy *divvy,
+                              char const *beg, char const *end);
 extern char *finish_string (struct divvy *divvy, size_t *result_len);
 extern void *pointer_array (struct divvy *divvy, size_t count);
 extern void close_space (struct divvy *divvy);
