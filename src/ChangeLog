@@ -1,5 +1,11 @@
 2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use ‘fseeko’ more.
+
+	* rcslex.c (Orewind): Use ‘fseeko’ instead of ‘fseek’.
+
+2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Use ‘ftello’ more.
 
 	* ci.c (main): Use ‘ftello’ instead of ‘ftell’.

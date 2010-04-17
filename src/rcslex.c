@@ -685,7 +685,7 @@ Ozclose (FILE **p)
 void
 Orewind (FILE *f)
 {
-  if (fseek (f, 0L, SEEK_SET) != 0)
+  if (0 > fseeko (f, 0L, SEEK_SET))
     Oerror ();
 }
 
