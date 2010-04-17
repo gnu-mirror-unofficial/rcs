@@ -1017,7 +1017,7 @@ main (int argc, char **argv)
                   /* We have started to build the wrong new RCS file.
                      Start over from the beginning.  */
                   {
-                    long hwm = ftell (FLOW (rewr));
+                    off_t hwm = ftello (FLOW (rewr));
                     bool bad_truncate;
 
                     Orewind (FLOW (rewr));
@@ -1040,7 +1040,7 @@ main (int argc, char **argv)
                       continue;
                     fro_spew (FLOW (from), FLOW (rewr));
                     if (bad_truncate)
-                      while (ftell (FLOW (rewr)) < hwm)
+                      while (ftello (FLOW (rewr)) < hwm)
                         /* White out any earlier mistake with '\n's.
                            This is unlikely.  */
                         afputc ('\n', FLOW (rewr));

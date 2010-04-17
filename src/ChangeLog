@@ -1,5 +1,11 @@
 2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use ‘ftello’ more.
+
+	* ci.c (main): Use ‘ftello’ instead of ‘ftell’.
+
+2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Overhaul read-only file handling.
 
 	* b-fro.h: New file.
