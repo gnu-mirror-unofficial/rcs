@@ -34,7 +34,7 @@
 #include "b-divvy.h"
 #include "b-isr.h"
 
-/* Avoid calling `sprintf' etc., in case they're not reentrant.  */
+/* Avoid calling ‘sprintf’ etc., in case they're not reentrant.  */
 
 static void
 werr (char const *s)
@@ -128,8 +128,8 @@ scratch_from_context (void *c)
 
   /* FIXME: The reference to ISR_SCRATCH prevents this module (b-isr.c)
      from being completely reentrant, which would be a nice, but not
-     necessary, for the future libgnurcs.  The useless `c ? c :'
-     prevents a compiler warning about unused parameter `c'.  */
+     necessary, for the future libgnurcs.  The useless ‘c ? c :’
+     prevents a compiler warning about unused parameter ‘c’.  */
 
   return c ? c : ISR_SCRATCH;
 

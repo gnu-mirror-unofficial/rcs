@@ -34,7 +34,7 @@
 #include "b-isr.h"
 #include "b-kwxout.h"
 
-/* Work around a common `ftruncate' bug: NFS won't let you truncate a file
+/* Work around a common ‘ftruncate’ bug: NFS won't let you truncate a file
    that you currently lack permissions for, even if you had permissions when
    you opened it.  Also, POSIX 1003.1b-1993 sec 5.6.7.2 p 128 l 1022 says
    ftruncate might fail because it's not supported.  */
@@ -95,8 +95,8 @@ exiterr (void)
 
 static void
 incnum (char const *onum, struct buf *nnum)
-/* Increment the last field of revision number `onum'
-   by one and place the result into `nnum'.  */
+/* Increment the last field of revision number ‘onum’
+   by one and place the result into ‘nnum’.  */
 {
   register char *tp, *np;
   register size_t l;
@@ -104,7 +104,7 @@ incnum (char const *onum, struct buf *nnum)
   l = strlen (onum);
   bufalloc (nnum, l + 2);
   np = tp = nnum->string;
-  strncpy (np, onum, 1 + l);    /* `1 +' to include '\0' */
+  strncpy (np, onum, 1 + l);    /* ‘1 +’ to include '\0' */
   for (tp = np + l; np != tp;)
     if (isdigit (*--tp))
       {
@@ -129,10 +129,10 @@ incnum (char const *onum, struct buf *nnum)
 
 static int
 removelock (struct hshentry *delta)
-/* Find the lock held by caller on `delta',
+/* Find the lock held by caller on ‘delta’,
    remove it, and return nonzero if successful.
    Print an error message and return -1 if there is no such lock.
-   An exception is if `!strictly_locking', and caller is the owner of
+   An exception is if ‘!strictly_locking’, and caller is the owner of
    the RCS file.  If caller does not have a lock in this case,
    return 0; return 1 if a lock is actually removed.  */
 {
@@ -164,13 +164,13 @@ removelock (struct hshentry *delta)
 
 static int
 addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
-/* Add a new branch and branch delta at `branchpoint'.
-   If `num' is the null string, append the new branch, incrementing
+/* Add a new branch and branch delta at ‘branchpoint’.
+   If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
-   the new delta and branchhead are in globals `newdelta' and `newbranch', resp.
-   the new number is placed into `num'.
+   the new delta and branchhead are in globals ‘newdelta’ and ‘newbranch’, resp.
+   the new number is placed into ‘num’.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
-   If `removedlock', a lock was already removed.  */
+   If ‘removedlock’, a lock was already removed.  */
 {
   struct branchhead *bhead, **btrail;
   struct buf branchnum;
@@ -269,7 +269,7 @@ addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
 static int
 addelta (void)
 /* Append a delta to the delta tree, whose number is given by
-   `newdelnum'.  Update `ADMIN (head)', `newdelnum', `newdelnumlength',
+   ‘newdelnum’.  Update ‘ADMIN (head)’, ‘newdelnum’, ‘newdelnumlength’,
    and the links in newdelta.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.  */
 {
@@ -283,7 +283,7 @@ addelta (void)
   if (rcsinitflag)
     {
       /* This covers non-existing RCS file,
-         and a file initialized with `rcs -i'.  */
+         and a file initialized with ‘rcs -i’.  */
       if (newdnumlength == 0 && ADMIN (defbr))
         {
           bufscpy (&newdelnum, ADMIN (defbr));
@@ -299,7 +299,7 @@ addelta (void)
                 newdelnum.string);
           return -1;
         }
-      /* (`newdnumlength' == 2 is OK.)  */
+      /* (‘newdnumlength’ == 2 is OK.)  */
       ADMIN (head) = &newdelta;
       newdelta.next = NULL;
       return 0;
@@ -341,7 +341,7 @@ addelta (void)
           return 1;
 
         case 0:
-          /* No existing lock; try `ADMIN (defbr)'.  Update `newdelnum'.  */
+          /* No existing lock; try ‘ADMIN (defbr)’.  Update ‘newdelnum’.  */
           if (BE (strictly_locking) || !myself (REPO (stat).st_uid))
             {
               RERR ("no lock set by %s", getcaller ());
@@ -448,10 +448,10 @@ fixwork (mode_t newworkmode, time_t mtime)
 static int
 xpandfile (struct fro *unexfile, struct hshentry const *delta,
            char const **exname, bool dolog)
-/* Read `unexfile' and copy it to a file, performing keyword
-   substitution with data from `delta'.
+/* Read ‘unexfile’ and copy it to a file, performing keyword
+   substitution with data from ‘delta’.
    Return -1 if unsuccessful, 1 if expansion occurred, 0 otherwise.
-   If successful, store the name into `*exname'.  */
+   If successful, store the name into ‘*exname’.  */
 {
   char const *targetname;
   int e, r;
@@ -489,7 +489,7 @@ xpandfile (struct fro *unexfile, struct hshentry const *delta,
 static struct cbuf
 getlogmsg (void)
 /* Obtain and return a log message.
-   If a log message is given with `-m', return that message.
+   If a log message is given with ‘-m’, return that message.
    If this is the initial revision, return a standard log message.
    Otherwise, read a character string from the terminal.
    Stop after reading EOF or a single '.' on a line.
@@ -844,10 +844,10 @@ main (int argc, char **argv)
             rcsinitflag = !ADMIN (head);
           }
 
-        /* `REPO (filename)' contains the name of the RCS file,
-           and `MANI (filename)' contains the name of the working file.
-           If the RCS file exists, `FLOW (from)' contains the file
-           descriptor for the RCS file, and `REPO (stat)' is set.
+        /* ‘REPO (filename)’ contains the name of the RCS file,
+           and ‘MANI (filename)’ contains the name of the working file.
+           If the RCS file exists, ‘FLOW (from)’ contains the file
+           descriptor for the RCS file, and ‘REPO (stat)’ is set.
            The admin node is initialized.  */
 
         diagnose ("%s  <--  %s", REPO (filename), MANI (filename));
@@ -904,7 +904,7 @@ main (int argc, char **argv)
 
         newdelta.num = newdelnum.string;
         newdelta.branches = NULL;
-        /* This might be changed by `addlock'.  */
+        /* This might be changed by ‘addlock’.  */
         newdelta.lockedby = NULL;
         newdelta.selector = true;
         newdelta.name = NULL;
@@ -913,7 +913,7 @@ main (int argc, char **argv)
 
         /* Set author.  */
         if (author)
-          /* Given by `-w'.  */
+          /* Given by ‘-w’.  */
           newdelta.author = author;
         else if (keepflag && PREV (author))
             /* Preserve old author if possible.  */
@@ -925,7 +925,7 @@ main (int argc, char **argv)
         /* Set state.  */
         newdelta.state = default_state;
         if (state)
-          /* Given by `-s'.  */
+          /* Given by ‘-s’.  */
           newdelta.state = state;
         else if (keepflag && PREV (state))
           /* Preserve old state if possible.  */
@@ -937,7 +937,7 @@ main (int argc, char **argv)
             time2date (workstat.st_mtime, altdate);
           }
         if (*altdate != '\0')
-          /* Given by `-d'.  */
+          /* Given by ‘-d’.  */
           newdelta.date = altdate;
         else if (keepflag && PREV (date))
           {
@@ -948,7 +948,7 @@ main (int argc, char **argv)
         else
           /* Use current date.  */
           newdelta.date = getcurdate ();
-        /* Now check validity of date -- needed because of `-d' and `-k'.  */
+        /* Now check validity of date -- needed because of ‘-d’ and ‘-k’.  */
         if (targetdelta && cmpdate (newdelta.date, targetdelta->date) < 0)
           {
             RERR ("Date %s precedes %s in revision %s.",
@@ -1112,7 +1112,7 @@ main (int argc, char **argv)
               }
           }
 
-        /* Deduce `time_t' of new revision if it is needed later.  */
+        /* Deduce ‘time_t’ of new revision if it is needed later.  */
         wtime = (time_t) - 1;
         if (mtimeflag | Ttimeflag)
           wtime = date2time (workdelta->date);

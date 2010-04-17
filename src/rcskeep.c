@@ -52,8 +52,8 @@ badly_terminated (bool savep)
 
 static char *
 get0val (int c, register struct fro *fp, bool savep, bool optional)
-/* Read a keyword value from `c + fp', perhaps `optional'ly.
-   Same as `getval', except `c'` is the lookahead character.  */
+/* Read a keyword value from ‘c + fp’, perhaps ‘optional’ly.
+   Same as ‘getval’, except ‘c’ is the lookahead character.  */
 {
   char *val = NULL;
   size_t len;
@@ -107,7 +107,7 @@ get0val (int c, register struct fro *fp, bool savep, bool optional)
 
 static char *
 keepid (int c, struct fro *fp)
-/* Get previous identifier from `c + fp'.  */
+/* Get previous identifier from ‘c + fp’.  */
 {
   char *maybe;
 
@@ -126,8 +126,8 @@ keepid (int c, struct fro *fp)
 
 static char *
 getval (register struct fro *fp, bool savep, bool optional)
-/* Read a keyword value from `fp'; return it if found, else NULL.
-   Do not report an error if `optional' is set and `kdelim' is found instead.  */
+/* Read a keyword value from ‘fp’; return it if found, else NULL.
+   Do not report an error if ‘optional’ is set and ‘kdelim’ is found instead.  */
 {
   int c;
 
@@ -137,7 +137,7 @@ getval (register struct fro *fp, bool savep, bool optional)
 
 static int
 keepdate (struct fro *fp)
-/* Read a date; check format; if ok, set `PREV (date)'.
+/* Read a date; check format; if ok, set ‘PREV (date)’.
    Return 0 on error, lookahead character otherwise.  */
 {
   char *d, *t;
@@ -168,7 +168,7 @@ keepdate (struct fro *fp)
                          ? "+0000"
                          : ""));
               /* Do it twice to keep the SINGLE count synchronized.
-                 If count were moot, we could simply brush off `d'.  */
+                 If count were moot, we could simply brush off ‘d’.  */
               brush_off (SINGLE, t);
               brush_off (SINGLE, d);
               PREV (date) = finish_string (SINGLE, &len);
@@ -180,7 +180,7 @@ keepdate (struct fro *fp)
 
 static char const *
 keeprev (struct fro *fp)
-/* Get previous revision from `fp'.  */
+/* Get previous revision from ‘fp’.  */
 {
   char *s = getval (fp, true, false);
 
@@ -221,8 +221,8 @@ keeprev (struct fro *fp)
 bool
 getoldkeys (register struct fro *fp)
 /* Try to read keyword values for author, date, revision number, and
-   state out of the file `fp'.  If `fp' is NULL, `MANI (filename)' is
-   opened and closed instead of using `fp'.  The results are placed into
+   state out of the file ‘fp’.  If ‘fp’ is NULL, ‘MANI (filename)’ is
+   opened and closed instead of using ‘fp’.  The results are placed into
    MANI (prev): .author, .date, .name, .rev and .state members.  On
    error, stop searching and return false.  Returning true doesn't mean
    that any of the values were found; instead, caller must check to see
@@ -250,7 +250,7 @@ getoldkeys (register struct fro *fp)
 
 #define KEEPID(c,which)  (PREV (which) = keepid (c, fp))
 
-  /* We can use anything but `KDELIM' here.  */
+  /* We can use anything but ‘KDELIM’ here.  */
   c = '\0';
   for (;;)
     {

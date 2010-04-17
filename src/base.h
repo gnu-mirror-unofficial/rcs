@@ -74,7 +74,7 @@
 #define ciklog      "checked in with -k by "
 #define ciklog_len  ((sizeof ciklog) - 1)
 
-/* Keyword substitution modes.  The order must agree with `kwsub_pool'.  */
+/* Keyword substitution modes.  The order must agree with ‘kwsub_pool’.  */
 enum kwsub
   {
     kwsub_kv,                           /* $Keyword: value $ */
@@ -119,10 +119,10 @@ enum kwsub
 /* Is getlogin() secure?  Usually it's not.  */
 #define getlogin_is_secure 0
 
-/* Can `rename (A, B)' falsely report success?  */
+/* Can ‘rename (A, B)’ falsely report success?  */
 #define bad_NFS_rename 0
 
-/* Does `setreuid' work?  See top-level README.  */
+/* Does ‘setreuid’ work?  See top-level README.  */
 #define has_setreuid 0
 
 /* Might NFS be used?  */
@@ -134,7 +134,7 @@ enum kwsub
 /* Filename component separation.
    TMPDIR       string           Default directory for temporary files.
    SLASH        char             Principal filename separator.
-   SLASHes      `case SLASHes:'  Labels all filename separators.
+   SLASHes      ‘case SLASHes:’  Labels all filename separators.
    ROOTPATH(p)  expression       Is p an absolute pathname?
    X_DEFAULT    string           Default value for -x option.
 */
@@ -199,7 +199,7 @@ enum kwsub
 
 /* This is good through AD 9,999,999,999,999,999.  */
 #define yearlength                           16
-/* Size of output of `time2date'.  */
+/* Size of output of ‘time2date’.  */
 #define datesize                             (yearlength + 16)
 /* Delimiter for keywords.  */
 #define KDELIM                               '$'
@@ -221,8 +221,8 @@ enum kwsub
       testOerror (o);                           \
   while (0)
 
-/* Computes mode of the working file: same as `RCSmode',
-   but write permission determined by `writable'.  */
+/* Computes mode of the working file: same as ‘RCSmode’,
+   but write permission determined by ‘writable’.  */
 #define WORKMODE(RCSmode, writable)                     \
   (((RCSmode) & (mode_t)~(S_IWUSR|S_IWGRP|S_IWOTH))     \
    | ((writable) ? S_IWUSR : 0))
@@ -238,8 +238,8 @@ enum tokens
 };
 
 /* The actual character is needed for string handling.
-   `SDELIM' must be consistent with `ctab', so that `ctab[SDELIM] == SBEGIN'.
-   There should be no overlap among `SDELIM', `KDELIM' and `VDELIM'.  */
+   ‘SDELIM’ must be consistent with ‘ctab’, so that ‘ctab[SDELIM] == SBEGIN’.
+   There should be no overlap among ‘SDELIM’, ‘KDELIM’ and ‘VDELIM’.  */
 #define SDELIM  '@'
 
 /* Data structures for the symbol table.  */
@@ -266,7 +266,7 @@ struct hshentry
   char const *author;
   char const *lockedby;
 
-  /* State of revision (see `DEFAULTSTATE').  */
+  /* State of revision (see ‘DEFAULTSTATE’).  */
   char const *state;
 
   /* Name (if any) by which retrieved.  */
@@ -348,20 +348,20 @@ struct pool_found
 /* Max length of the (working file) keywords.  */
 #define keylength 8
 
-/* This must be in the same order as in `keyword_pool'.  */
+/* This must be in the same order as in ‘keyword_pool’.  */
 enum markers
 {
   Author, Date, Header, Id,
   Locker, Log, Name, RCSfile, Revision, Source, State
 };
 
-/* This is used by `putdtext' and `scanlogtext'.  */
+/* This is used by ‘putdtext’ and ‘scanlogtext’.  */
 #define DELNUMFORM      "\n\n%s\n%s\n"
 
 /* This is used by ci and rlog.  */
 #define EMPTYLOG "*** empty log message ***"
 
-/* The function `pairnames' takes to open the RCS file.  */
+/* The function ‘pairnames’ takes to open the RCS file.  */
 typedef struct fro * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
 
 /* The locations of RCS programs, for internal use.  */
@@ -399,7 +399,7 @@ struct behavior
      -- unbuffer_standard_error  */
 
   bool quiet;
-  /* This is set from command-line option `-q'.  When set:
+  /* This is set from command-line option ‘-q’.  When set:
      - disable all yn -- yesorno
      - disable warnings -- generic_warn
      - disable error messages -- diagnose catchsigaction
@@ -411,14 +411,14 @@ struct behavior
 
   bool interactive_valid;               /* -- ttystdin */
   bool interactive;
-  /* Should we act as if stdin is a tty?  Set from `-I'.  When set:
+  /* Should we act as if stdin is a tty?  Set from ‘-I’.  When set:
      - enables stdin flushing and newline output -- getcstdin
-     - enables yn (masked by `quiet', above) -- yesorno
+     - enables yn (masked by ‘quiet’, above) -- yesorno
      - enables "enter FOO terminated by ." message -- getsstdin
      - [co] when workfile writable, include name in error message  */
 
   bool inclusive_of_Locker_in_Id_val;
-  /* If set, append locker val when expanding `Id' and locking.  */
+  /* If set, append locker val when expanding ‘Id’ and locking.  */
 
   bool receptive_to_next_hash_key;
   /* If set, next suitable lexeme will be entered into the
@@ -436,13 +436,13 @@ struct behavior
   bool version_set;
   int version;
   /* The "effective RCS version", for backward compatability,
-     normalized via `VERSION' (i.e., current 0, previous -1, etc).
-     `version_set' true means the effective version was set from the
-     command-line option `-V'.  Additional `-V' results in a warning.
+     normalized via ‘VERSION’ (i.e., current 0, previous -1, etc).
+     ‘version_set’ true means the effective version was set from the
+     command-line option ‘-V’.  Additional ‘-V’ results in a warning.
      -- setRCSversion  */
 
   bool stick_with_euid;
-  /* Ignore all calls to `seteid' and `setrid'.
+  /* Ignore all calls to ‘seteid’ and ‘setrid’.
      -- nosetid  */
 
   int ruid, euid;
@@ -457,7 +457,7 @@ struct behavior
 
   int kws;
   /* The keyword substitution (aka "expansion") mode, or -1 (mu).
-     FIXME: Unify with `enum kwsub'.
+     FIXME: Unify with ‘enum kwsub’.
      -- [co]main [rcs]main [rcsclean]main InitAdmin getadmin  */
 
   char const *pe;
@@ -471,12 +471,12 @@ struct behavior
   struct zone_offset
   {
     bool valid;
-    /* When set, use `BE (zone_offset.seconds)' in `date2str'.
+    /* When set, use ‘BE (zone_offset.seconds)’ in ‘date2str’.
        Otherwise, use UTC without timezone indication.
        -- zone_set  */
 
     long seconds;
-    /* Seconds east of UTC, or `TM_LOCAL_ZONE'.
+    /* Seconds east of UTC, or ‘TM_LOCAL_ZONE’.
        -- zone_set  */
   } zone_offset;
 
@@ -485,19 +485,19 @@ struct behavior
      -- getusername  */
 
   time_t now;
-  /* Cached time from `time'.
+  /* Cached time from ‘time’.
      -- now  */
 
   bool fixed_SIGCHLD;
   /* True means SIGCHLD handler has been manually set to SIG_DFL.
-     (Only meaningful if `BAD_WAIT_IF_SIGCHLD_IGNORED'.)
+     (Only meaningful if ‘BAD_WAIT_IF_SIGCHLD_IGNORED’.)
      -- runv  */
 
   bool Oerrloop;
   /* True means ‘Oerror’ was called already.
      -- Oerror Lexinit  */
 
-  /* The rest of the members in `struct behavior' are scratch spaces
+  /* The rest of the members in ‘struct behavior’ are scratch spaces
      managed by various subsystems.  */
 
   struct isr_scratch *isr;
@@ -517,7 +517,7 @@ struct manifestation
   /* [co] Use this if writing to stdout.  */
   FILE *standard_output;
 
-  /* Previous keywords, to accomodate `ci -k'.
+  /* Previous keywords, to accomodate ‘ci -k’.
      -- getoldkeys  */
   struct {
     bool valid;
@@ -555,7 +555,7 @@ struct parse_state
        -- nextlex getphrases  */
 
     int c;
-    /* Next input character, parallel with `tok'.
+    /* Next input character, parallel with ‘tok’.
        -- copystring enterstring editstring expandline
        -- nextlex eoflex getphrases readstring printstring savestring
        -- getdiffcmd
@@ -609,7 +609,7 @@ struct repository
        -- addsymbol InitAdmin  */
 
     struct cbuf log_lead;
-    /* The string to use to start lines expanded for `Log'.  FIXME:ZONK.
+    /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
        -- [rcs]main (FCMPTEST)main InitAdmin getadmin  */
 
     struct cbuf description;
@@ -647,7 +647,7 @@ struct flow
 
   FILE *to;
   /* Output stream for the RCS file.
-     ``Copy of `rewr', but NULL to suppress echo.''
+     ``Copy of ‘rewr’, but NULL to suppress echo.''
      -- [ci]main scanlogtext dorewrite putdesc  */
 
   FILE *res;
@@ -659,7 +659,7 @@ struct flow
      -- openfcopy swapeditfiles  */
 };
 
-/* The top of the structure tree (NB: does not include `program').  */
+/* The top of the structure tree (NB: does not include ‘program’).  */
 struct top
 {
   struct behavior behavior;
@@ -671,7 +671,7 @@ struct top
 
 extern struct top *top;
 
-/* In the future we might move `top' into another structure.
+/* In the future we might move ‘top’ into another structure.
    These abstractions keep the invasiveness to a minimum.  */
 #define PROGRAM(x)    (program. x)
 #define BE(quality)   (top->behavior. quality)
@@ -877,7 +877,7 @@ bool isSLASH (int c);
 
 /* Idioms.  */
 
-/* Get a character from `fin', perhaps copying to a `frew'.  */
+/* Get a character from ‘fin’, perhaps copying to a ‘frew’.  */
 #define TEECHAR()  do                           \
     {                                           \
       GETCHAR (c, fin);                         \

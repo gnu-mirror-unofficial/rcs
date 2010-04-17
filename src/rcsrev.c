@@ -28,8 +28,8 @@
 
 int
 countnumflds (char const *s)
-/* Given a pointer `s' to a dotted number (date or revision number),
-   return the number of digitfields in `s'.  */
+/* Given a pointer ‘s’ to a dotted number (date or revision number),
+   return the number of digitfields in ‘s’.  */
 {
   register char const *sp;
   register int count;
@@ -48,8 +48,8 @@ countnumflds (char const *s)
 
 void
 getbranchno (char const *revno, struct buf *branchno)
-/* Given a revision number `revno', copy the number of the branch on which
-   `revno' is into `branchno'.  If `revno' itself is a branch number, copy
+/* Given a revision number ‘revno’, copy the number of the branch on which
+   ‘revno’ is into ‘branchno’.  If ‘revno’ itself is a branch number, copy
    it unchanged.  */
 {
   register int numflds;
@@ -69,9 +69,9 @@ getbranchno (char const *revno, struct buf *branchno)
 
 int
 cmpnum (char const *num1, char const *num2)
-/* Compare the two dotted numbers `num1' and `num2' lexicographically
+/* Compare the two dotted numbers ‘num1’ and ‘num2’ lexicographically
    by field.  Individual fields are compared numerically.
-   Return <0, 0, >0 if `num1 < num2', `num1 == num2', `num1 > num2',
+   Return <0, 0, >0 if ‘num1 < num2’, ‘num1 == num2’, ‘num1 > num2’,
    respectively.  Omitted fields are assumed to be higher than the existing
    ones.  */
 {
@@ -118,16 +118,16 @@ cmpnum (char const *num1, char const *num2)
 
 int
 cmpnumfld (char const *num1, char const *num2, int fld)
-/* Compare the two dotted numbers at field `fld'.
-   `num1' and `num2' must have at least `fld' fields.
-   `fld' must be positive.  */
+/* Compare the two dotted numbers at field ‘fld’.
+   ‘num1’ and ‘num2’ must have at least ‘fld’ fields.
+   ‘fld’ must be positive.  */
 {
   register char const *s1, *s2;
   register size_t d1, d2;
 
   s1 = num1;
   s2 = num2;
-  /* Skip `fld - 1' fields.  */
+  /* Skip ‘fld - 1’ fields.  */
   while (--fld)
     {
       while (*s1++ != '.')
@@ -135,7 +135,7 @@ cmpnumfld (char const *num1, char const *num2, int fld)
       while (*s2++ != '.')
         continue;
     }
-  /* Now `s1' and `s2' point to the beginning of the respective fields.  */
+  /* Now ‘s1’ and ‘s2’ point to the beginning of the respective fields.  */
   while (*s1 == '0')
     ++s1;
   for (d1 = 0; isdigit (*(s1 + d1)); d1++)
@@ -166,7 +166,7 @@ normalizeyear (char const *date, char year[5])
 
 int
 cmpdate (char const *d1, char const *d2)
-/* Compare the two dates.  This is just like `cmpnum',
+/* Compare the two dates.  This is just like ‘cmpnum’,
    except that for compatibility with old versions of RCS,
    1900 is added to dates with two-digit years.  */
 {
@@ -216,9 +216,9 @@ absent (char const *revno, int field)
 
 int
 compartial (char const *num1, char const *num2, int length)
-/* Compare the first `length' fields of two dot numbers;
+/* Compare the first ‘length’ fields of two dot numbers;
    the omitted field is considered to be larger than any number.
-   Restriction: At least one number has `length' or more fields.  */
+   Restriction: At least one number has ‘length’ or more fields.  */
 {
   register char const *s1, *s2;
   register size_t d1, d2;
@@ -266,8 +266,8 @@ compartial (char const *num1, char const *num2, int length)
 
 char *
 partialno (struct buf *rev1, char const *rev2, register int length)
-/* Copy `length' fields of revision number `rev2' into `rev1'.
-   Return the string of `rev1'.  */
+/* Copy ‘length’ fields of revision number ‘rev2’ into ‘rev1’.
+   Return the string of ‘rev1’.  */
 {
   register char *r1;
 
@@ -287,8 +287,8 @@ partialno (struct buf *rev1, char const *rev2, register int length)
 
 static void
 store1 (struct hshentries ***store, struct hshentry *next)
-/* Allocate a new list node that addresses `next'.
-   Append it to the list that `**store' is the end pointer of.  */
+/* Allocate a new list node that addresses ‘next’.
+   Append it to the list that ‘**store’ is the end pointer of.  */
 {
   register struct hshentries *p;
 
@@ -305,7 +305,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
 /* Given a branchpoint, a revision number, date, author, and state, find the
    deltas necessary to reconstruct the given revision from the branch point
    on.  Pointers to the found deltas are stored in a list beginning with
-   `store'.  `revno' must be on a side branch.  Return NULL on error.
+   ‘store’.  ‘revno’ must be on a side branch.  Return NULL on error.
  */
 {
   int field;
@@ -439,9 +439,9 @@ genbranch (struct hshentry const *bpoint, char const *revno,
 struct hshentry *
 genrevs (char const *revno, char const *date, char const *author,
          char const *state, struct hshentries **store)
-/* Find the deltas needed for reconstructing the revision given by `revno',
-   `date', `author', and `state', and stores pointers to these deltas into a
-   list whose starting address is given by `store'.  Return the last delta
+/* Find the deltas needed for reconstructing the revision given by ‘revno’,
+   ‘date’, ‘author’, and ‘state’, and stores pointers to these deltas into a
+   list whose starting address is given by ‘store’.  Return the last delta
    (target delta).  If the proper delta could not be found, return NULL.  */
 {
   int length;
@@ -508,7 +508,7 @@ genrevs (char const *revno, char const *date, char const *author,
       return next;
     }
 
-  /* Length >= 2.  Find revision; may go low if `length == 2'.  */
+  /* Length >= 2.  Find revision; may go low if ‘length == 2’.  */
   while ((result = cmpnumfld (revno, next->num, 2)) < 0
          && (cmpnumfld (revno, next->num, 1) == 0))
     {
@@ -564,7 +564,7 @@ norev:
 
 struct hshentry *
 gr_revno (char const *revno, struct hshentries **store)
-/* An abbreviated form of `genrevs', when you don't care
+/* An abbreviated form of ‘genrevs’, when you don't care
    about the date, author, or state.  */
 {
   return genrevs (revno, NULL, NULL, NULL, store);
@@ -572,8 +572,8 @@ gr_revno (char const *revno, struct hshentries **store)
 
 static char const *
 lookupsym (char const *id)
-/* Look up `id' in the list of symbolic names starting with pointer
-   `ADMIN (assocs)', and return a pointer to the corresponding
+/* Look up ‘id’ in the list of symbolic names starting with pointer
+   ‘ADMIN (assocs)’, and return a pointer to the corresponding
    revision number.  Return NULL if not present.  */
 {
   register struct assoc const *next;
@@ -586,10 +586,10 @@ lookupsym (char const *id)
 
 bool
 expandsym (char const *source, struct buf *target)
-/* `source' points to a revision number.  Copy the number to `target',
+/* ‘source’ points to a revision number.  Copy the number to ‘target’,
    but replace all symbolic fields in the source number with their
-   numeric values.  Expand a branch followed by `.' to the latest
-   revision on that branch.  Ignore `.' after a revision.  Remove
+   numeric values.  Expand a branch followed by ‘.’ to the latest
+   revision on that branch.  Ignore ‘.’ after a revision.  Remove
    leading zeros.  Return false on error.  */
 {
   return fexpandsym (source, target, NULL);
@@ -607,8 +607,8 @@ branchtip (char const *branch)
 
 bool
 fexpandsym (char const *source, struct buf *target, struct fro *fp)
-/* Same as `expandsym', except if `fp' is non-NULL,
-   it is used to expand `KDELIM'.  */
+/* Same as ‘expandsym’, except if ‘fp’ is non-NULL,
+   it is used to expand ‘KDELIM’.  */
 {
   register char const *sp, *bp;
   register char *tp;
@@ -691,7 +691,7 @@ fexpandsym (char const *source, struct buf *target, struct fro *fp)
                 break;
               else
                 {
-                  /* Insert default branch before initial `.'.  */
+                  /* Insert default branch before initial ‘.’.  */
                   char const *b;
 
                   if (ADMIN (defbr))
@@ -739,7 +739,7 @@ fexpandsym (char const *source, struct buf *target, struct fro *fp)
 
 char const *
 namedrev (char const *name, struct hshentry *delta)
-/* Return `name' if it names `delta', NULL otherwise.  */
+/* Return ‘name’ if it names ‘delta’, NULL otherwise.  */
 {
   if (name)
     {

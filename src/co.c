@@ -95,7 +95,7 @@ exiterr (void)
 
 static bool
 rmworkfile (void)
-/* Prepare to remove `MANI (filename)', if it exists, and if it is read-only.
+/* Prepare to remove ‘MANI (filename)’, if it exists, and if it is read-only.
    Otherwise (file writable), if !quietmode, ask the user whether to
    really delete it (default: fail); otherwise fail.
    Return true if permission is gotten.  */
@@ -120,7 +120,7 @@ rmworkfile (void)
 
 static int
 rmlock (struct hshentry const *delta)
-/* Remove the lock held by caller on `delta'.  Return -1 if
+/* Remove the lock held by caller on ‘delta’.  Return -1 if
   someone else holds the lock, 0 if there is no lock on delta,
   and 1 if a lock was found and removed.  */
 {
@@ -158,7 +158,7 @@ rmlock (struct hshentry const *delta)
       return 1;
     }
   else
-    /* No lock on `delta'.  */
+    /* No lock on ‘delta’.  */
     return 0;
 }
 
@@ -174,8 +174,8 @@ jpush (char const *rev)
 
 static char *
 addjoin (char *joinrev)
-/* Add the number of `joinrev' to `joinlist'; return address
-   of char past `joinrev', or NULL if no such revision exists.  */
+/* Add the number of ‘joinrev’ to ‘joinlist’; return address
+   of char past ‘joinrev’, or NULL if no such revision exists.  */
 {
   register char *j;
   register struct hshentry *d;
@@ -219,8 +219,8 @@ addjoin (char *joinrev)
 
 static char const *
 getancestor (char const *r1, char const *r2)
-/* Return the common ancestor of `r1' and `r2' if successful,
-   `NULL' otherwise.  Work reliably only if `r1' and `r2' are not
+/* Return the common ancestor of ‘r1’ and ‘r2’ if successful,
+   ‘NULL’ otherwise.  Work reliably only if ‘r1’ and ‘r2’ are not
    branch numbers.   */
 {
   static struct buf t1, t2;
@@ -237,7 +237,7 @@ getancestor (char const *r1, char const *r2)
       while (cmpnumfld (r1, r2, l3 + 1) == 0
              && cmpnumfld (r1, r2, l3 + 2) == 0)
         l3 += 2;
-      /* This will terminate since `r1' and `r2' are not the
+      /* This will terminate since ‘r1’ and ‘r2’ are not the
          same; see above.  */
       if (l3 == 0)
         {
@@ -257,9 +257,9 @@ getancestor (char const *r1, char const *r2)
 
 static bool
 preparejoin (register char *j)
-/* Parse join list `j' and place pointers to the
-   revision numbers into `joinlist'.
-   Set `lastjoin' to the last index of the list.  */
+/* Parse join list ‘j’ and place pointers to the
+   revision numbers into ‘joinlist’.
+   Set ‘lastjoin’ to the last index of the list.  */
 {
   bool rv = true;
 
@@ -331,10 +331,10 @@ preparejoin (register char *j)
 
 static bool
 buildjoin (char const *initialfile)
-/* Merge pairs of elements in `joinlist' into `initialfile'.
-   If `MANI (standard_output)' is set, copy result to stdout.
-   All unlinking of `initialfile', `rev2', and `rev3'
-   should be done by `tempunlink'.  */
+/* Merge pairs of elements in ‘joinlist’ into ‘initialfile’.
+   If ‘MANI (standard_output)’ is set, copy result to stdout.
+   All unlinking of ‘initialfile’, ‘rev2’, and ‘rev3’
+   should be done by ‘tempunlink’.  */
 {
   struct buf commarg;
   struct buf subs;
@@ -346,10 +346,10 @@ buildjoin (char const *initialfile)
   bufautobegin (&commarg);
   bufautobegin (&subs);
   rev2 = maketemp (0);
-  rev3 = maketemp (3);      /* `buildrevision' may use 1 and 2 */
+  rev3 = maketemp (3);      /* ‘buildrevision’ may use 1 and 2 */
 
   cov[1] = prog_co;
-  /* `cov[2]' setup below.  */
+  /* ‘cov[2]’ setup below.  */
   p = &cov[3];
   if (expandarg)
     *p++ = expandarg;
@@ -365,7 +365,7 @@ buildjoin (char const *initialfile)
 
   mergev[1] = prog_merge;
   mergev[2] = mergev[4] = "-L";
-  /* Rest of `mergev' setup below.  */
+  /* Rest of ‘mergev’ setup below.  */
 
   i = 0;
   while (i < lastjoin)
@@ -630,9 +630,9 @@ main (int argc, char **argv)
              false) <= 0)
           continue;
 
-        /* `REPO (filename)' contains the name of the RCS file, and
-           `FLOW (from)' points at it.  `MANI (filename)' contains the
-           name of the working file.  Also, `REPO (stat)' has been set.  */
+        /* ‘REPO (filename)’ contains the name of the RCS file, and
+           ‘FLOW (from)’ points at it.  ‘MANI (filename)’ contains the
+           name of the working file.  Also, ‘REPO (stat)’ has been set.  */
         diagnose ("%s  -->  %s", REPO (filename),
                   tostdout ? "standard output" : MANI (filename));
 

@@ -54,7 +54,7 @@ struct sff
   /* (But only if it is in the right mood.)  */
 };
 
-/* Indexes into `sff'.  */
+/* Indexes into ‘sff’.  */
 #define SFFI_LOCKDIR  0
 #define SFFI_NEWDIR   BAD_CREAT0
 
@@ -69,7 +69,7 @@ struct editstuff
   long lcount;
   /* Edit line counter; #lines before cursor.  */
   long corr;
-  /* #adds - #deletes in each edit run, used to correct `EDIT (lcount)'
+  /* #adds - #deletes in each edit run, used to correct ‘EDIT (lcount)’
      in case file is not rewound after applying one delta.  */
 
   struct sff sff[SFF_COUNT];
@@ -77,10 +77,10 @@ struct editstuff
 
   Iptr_type *line;
   size_t gap, gapsize, lim;
-  /* `line' contains pointers to the lines in the currently "edited" file.
-     It is a 0-origin array that represents `lim - gapsize' lines.
-     `line[0 .. gap-1]' and `line[gap+gapsize .. lim-1]' hold pointers to lines.
-     `line[gap .. gap+gapsize-1]' contains garbage.
+  /* ‘line’ contains pointers to the lines in the currently "edited" file.
+     It is a 0-origin array that represents ‘lim - gapsize’ lines.
+     ‘line[0 .. gap-1]’ and ‘line[gap+gapsize .. lim-1]’ hold pointers to lines.
+     ‘line[gap .. gap+gapsize-1]’ contains garbage.
 
      Any '@'s in lines are duplicated.  Lines are terminated by '\n',
      or (for a last partial line only) by single '@'.  */
@@ -93,8 +93,8 @@ struct editstuff
 
 int
 un_link (char const *s)
-/* Remove `s', even if it is unwritable.
-   Ignore `unlink' `ENOENT' failures; NFS generates bogus ones.  */
+/* Remove ‘s’, even if it is unwritable.
+   Ignore ‘unlink’ ‘ENOENT’ failures; NFS generates bogus ones.  */
 {
   int rv = unlink (s);
 
@@ -107,9 +107,9 @@ un_link (char const *s)
         {
           int e = errno;
 
-          /* Forge ahead even if `errno == ENOENT';
+          /* Forge ahead even if ‘errno == ENOENT’;
              some completely brain-damaged hosts (e.g. PCTCP 2.2)
-             return `ENOENT' even for existing unwritable files.  */
+             return ‘ENOENT’ even for existing unwritable files.  */
           if (chmod (s, S_IWUSR) != 0)
             {
               errno = e;
@@ -138,7 +138,7 @@ editLineNumberOverflow (void)
 
 static void
 insertline (unsigned long n, Iptr_type l)
-/* Before line `n', insert line `l'.  */
+/* Before line ‘n’, insert line ‘l’.  */
 {
   if (EDIT (lim) - EDIT (gapsize) < n)
     editLineNumberOverflow ();
@@ -163,7 +163,7 @@ insertline (unsigned long n, Iptr_type l)
 
 static void
 deletelines (unsigned long n, unsigned long nlines)
-/* Delete lines `n' through `n + nlines - 1'.  */
+/* Delete lines ‘n’ through ‘n + nlines - 1’.  */
 {
   unsigned long l = n + nlines;
 
@@ -197,7 +197,7 @@ snapshotline (register FILE *f, register Iptr_type l)
 
 static void
 snapshotedit_fast (FILE *f)
-/* Copy the current state of the edits to `f'.  */
+/* Copy the current state of the edits to ‘f’.  */
 {
   register Iptr_type *p, *lim, *l = EDIT (line);
 
@@ -220,8 +220,8 @@ finisheditline (struct fro *fin, FILE *fout, Iptr_type l,
 
 static void
 finishedit_fast (struct hshentry const *delta, FILE *outfile, bool done)
-/* Doing expansion if `delta' is set, output the state of the edits to
-   `outfile'.  But do nothing unless `done' is set (which means we are
+/* Doing expansion if ‘delta’ is set, output the state of the edits to
+   ‘outfile’.  But do nothing unless ‘done’ is set (which means we are
    on the last pass).  */
 {
   if (done)
@@ -273,11 +273,11 @@ openfcopy (FILE *f)
 
 static void
 swapeditfiles (FILE *outfile)
-/* Swap `FLOW (result)' and `EDIT (filename)',
-   assign `EDIT (fedit) = FLOW (res)',
-   and rewind `EDIT (fedit)' for reading.
-   Set `FLOW (res)' to `outfile' if non-NULL;
-   otherwise, set `FLOW (res)' to be `FLOW (result)'
+/* Swap ‘FLOW (result)’ and ‘EDIT (filename)’,
+   assign ‘EDIT (fedit) = FLOW (res)’,
+   and rewind ‘EDIT (fedit)’ for reading.
+   Set ‘FLOW (res)’ to ‘outfile’ if non-NULL;
+   otherwise, set ‘FLOW (res)’ to be ‘FLOW (result)’
    opened for reading and writing.  */
 {
   char const *tmpptr;
@@ -298,8 +298,8 @@ swapeditfiles (FILE *outfile)
 static void
 finishedit_slow (struct hshentry const *delta, FILE *outfile, bool done)
 /* Copy the rest of the edit file and close it (if it exists).
-   If `delta', perform keyword substitution at the same time.
-   If `done' is set, we are finishing the last pass.  */
+   If ‘delta’, perform keyword substitution at the same time.
+   If ‘done’ is set, we are finishing the last pass.  */
 {
   register struct fro *fe;
   register FILE *fc;
@@ -327,7 +327,7 @@ finishedit_slow (struct hshentry const *delta, FILE *outfile, bool done)
 
 static void
 snapshotedit_slow (FILE *f)
-/* Copy the current state of the edits to `f'.  */
+/* Copy the current state of the edits to ‘f’.  */
 {
   finishedit_slow (NULL, NULL, false);
   fro_spew (EDIT (fedit), f);
@@ -352,9 +352,9 @@ snapshotedit (FILE *f)
 
 static void
 copylines (register long upto, struct hshentry const *delta)
-/* Copy input lines `EDIT (lcount)+1..upto' from `EDIT (fedit)' to `FLOW (res)'.
-   If `delta', keyword expansion is done simultaneously.
-   `EDIT (lcount)' is updated.  Rewinds a file only if necessary.  */
+/* Copy input lines ‘EDIT (lcount)+1..upto’ from ‘EDIT (fedit)’ to ‘FLOW (res)’.
+   If ‘delta’, keyword expansion is done simultaneously.
+   ‘EDIT (lcount)’ is updated.  Rewinds a file only if necessary.  */
 {
   if (!STDIO_P (FLOW (from)))
     EDIT (lcount) = upto;
@@ -402,10 +402,10 @@ copylines (register long upto, struct hshentry const *delta)
 
 void
 xpandstring (struct hshentry const *delta)
-/* Read a string terminated by `SDELIM' from `FLOW (from)' and write it to
-   `FLOW (res)'.  Double `SDELIM' is replaced with single `SDELIM'.  Keyword
-   expansion is performed with data from `delta'.  If `FLOW (to)' is
-   non-NULL, the string is also copied unchanged to `FLOW (to)'.  */
+/* Read a string terminated by ‘SDELIM’ from ‘FLOW (from)’ and write it to
+   ‘FLOW (res)’.  Double ‘SDELIM’ is replaced with single ‘SDELIM’.  Keyword
+   expansion is performed with data from ‘delta’.  If ‘FLOW (to)’ is
+   non-NULL, the string is also copied unchanged to ‘FLOW (to)’.  */
 {
   struct expctx ctx = EXPCTX (FLOW (res), FLOW (to),
                               FLOW (from), true, true);
@@ -423,10 +423,10 @@ ensure_editstuff (void)
 
 void
 copystring (void)
-/* Copy a string terminated with a single `SDELIM' from `FLOW (from)' to
-   `FLOW (res)', replacing all double `SDELIM' with a single `SDELIM'.  If
-   `FLOW (to)' is non-NULL, the string also copied unchanged to `FLOW (to)'.
-   `EDIT (lcount)' is incremented by the number of lines copied.  Assumption:
+/* Copy a string terminated with a single ‘SDELIM’ from ‘FLOW (from)’ to
+   ‘FLOW (res)’, replacing all double ‘SDELIM’ with a single ‘SDELIM’.  If
+   ‘FLOW (to)’ is non-NULL, the string also copied unchanged to ‘FLOW (to)’.
+   ‘EDIT (lcount)’ is incremented by the number of lines copied.  Assumption:
    next character read is first string character.  */
 {
   int c;
@@ -470,8 +470,8 @@ copystring (void)
 
 void
 enterstring (void)
-/* Like `copystring', except the string is
-   put into the `edit' data structure.  */
+/* Like ‘copystring’, except the string is
+   put into the ‘edit’ data structure.  */
 {
   ensure_editstuff ();
 
@@ -537,18 +537,18 @@ enterstring (void)
 
 void
 editstring (struct hshentry const *delta)
-/* Read an edit script from `FLOW (from)' and applies it to the edit file.
+/* Read an edit script from ‘FLOW (from)’ and applies it to the edit file.
    | -- ‘(STDIO_P (FLOW (from)))’ --
-   | The result is written to `FLOW (res)'.
-   | If `delta', keyword expansion is performed simultaneously.
-   | If running out of lines in `EDIT (fedit)',
-   | `EDIT (fedit)' and `FLOW (res)' are swapped.
-   | `EDIT (filename)' is the name of the file that goes with `EDIT (fedit)'.
-   If `FLOW (to)' is set, the edit script is also copied verbatim
-   to `FLOW (to)'.  Assumes that all these files are open.
-   `FLOW (result)' is the name of the file that goes with `FLOW (res)'.
-   Assumes the next input character from `FLOW (from)' is the first
-   character of the edit script.  Resets `NEXT (c)' on exit.  */
+   | The result is written to ‘FLOW (res)’.
+   | If ‘delta’, keyword expansion is performed simultaneously.
+   | If running out of lines in ‘EDIT (fedit)’,
+   | ‘EDIT (fedit)’ and ‘FLOW (res)’ are swapped.
+   | ‘EDIT (filename)’ is the name of the file that goes with ‘EDIT (fedit)’.
+   If ‘FLOW (to)’ is set, the edit script is also copied verbatim
+   to ‘FLOW (to)’.  Assumes that all these files are open.
+   ‘FLOW (result)’ is the name of the file that goes with ‘FLOW (res)’.
+   Assumes the next input character from ‘FLOW (from)’ is the first
+   character of the edit script.  Resets ‘NEXT (c)’ on exit.  */
 {
   int ed;                               /* editor command */
   int c;
@@ -662,12 +662,12 @@ editstring (struct hshentry const *delta)
 
 static int
 naturalize (struct buf *fn, bool *symbolicp)
-/* If `fn' is a symbolic link, resolve it to the name that it points to.
+/* If ‘fn’ is a symbolic link, resolve it to the name that it points to.
    If unsuccessful, set errno and return -1.
    If it points to an existing file, return 1.
-   Otherwise, set `errno' to `ENOENT' and return 0.
-   On return `*symbolicp' set means the filename was a symlink, and
-   `fn' points to the resolved filename (no change if not a symlink).  */
+   Otherwise, set ‘errno’ to ‘ENOENT’ and return 0.
+   On return ‘*symbolicp’ set means the filename was a symlink, and
+   ‘fn’ points to the resolved filename (no change if not a symlink).  */
 {
   int e;
   ssize_t r;
@@ -690,7 +690,7 @@ naturalize (struct buf *fn, bool *symbolicp)
       }
     else
       {
-        /* Blech, `readlink' does not NUL-terminate.  */
+        /* Blech, ‘readlink’ does not NUL-terminate.  */
         chased[r] = '\0';
         if (ROOTPATH (chased))
           {
@@ -724,12 +724,12 @@ naturalize (struct buf *fn, bool *symbolicp)
 
 struct fro *
 rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
-/* Create the lock file corresponding to `RCSbuf'.
-   Then try to open `RCSbuf' for reading and return its `fro*' descriptor.
-   Put its status into `*status' too.
-   `mustread' is true if the file must already exist, too.
+/* Create the lock file corresponding to ‘RCSbuf’.
+   Then try to open ‘RCSbuf’ for reading and return its ‘fro*’ descriptor.
+   Put its status into ‘*status’ too.
+   ‘mustread’ is true if the file must already exist, too.
    If all goes well, discard any previously acquired locks,
-   and set `REPO (fd_lock)' to the file descriptor of the RCS lockfile.  */
+   and set ‘REPO (fd_lock)’ to the file descriptor of the RCS lockfile.  */
 {
   register char *tp;
   register char const *sp, *RCSpath, *x;
@@ -804,18 +804,18 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   f = NULL;
 
   /* good news:
-     `open (f, O_CREAT|O_EXCL|O_TRUNC|..., OPEN_CREAT_READONLY)'
+     ‘open (f, O_CREAT|O_EXCL|O_TRUNC|..., OPEN_CREAT_READONLY)’
      is atomic according to POSIX 1003.1-1990.
 
      bad news:
      NFS ignores O_EXCL and doesn't comply with POSIX 1003.1-1990.
 
      good news:
-     `(O_TRUNC,OPEN_CREAT_READONLY)' normally guarantees atomicity
+     ‘(O_TRUNC,OPEN_CREAT_READONLY)’ normally guarantees atomicity
      even with NFS.
 
      bad news:
-     If you're root, `(O_TRUNC,OPEN_CREAT_READONLY)' doesn't guarantee atomicity.
+     If you're root, ‘(O_TRUNC,OPEN_CREAT_READONLY)’ doesn't guarantee atomicity.
 
      good news:
      Root-over-the-wire NFS access is rare for security reasons.
@@ -831,22 +831,22 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
      - A sends rename (",f,", "f,v").
      - B sends create (",f,").
      - A sends retry of rename (",f,", "f,v").
-     - server receives, does, and acknowledges A's first `rename'.
+     - server receives, does, and acknowledges A's first ‘rename’.
      - A receives acknowledgment, and its RCS program exits.
-     - server receives, does, and acknowledges B's `create'.
-     - server receives, does, and acknowledges A's retry of `rename'.
+     - server receives, does, and acknowledges B's ‘create’.
+     - server receives, does, and acknowledges A's retry of ‘rename’.
      This not only wrongly deletes B's lock, it removes the RCS file!
      Most NFS implementations have idempotency caches that usually prevent
      this scenario, but such caches are finite and can be overrun.
 
-     This problem afflicts not only RCS, which uses `open' and `rename'
+     This problem afflicts not only RCS, which uses ‘open’ and ‘rename’
      to get and release locks; it also afflicts the traditional
-     Unix method of using `link' and `unlink' to get and release locks,
-     and the less traditional method of using `mkdir' and `rmdir'.
+     Unix method of using ‘link’ and ‘unlink’ to get and release locks,
+     and the less traditional method of using ‘mkdir’ and ‘rmdir’.
      There is no easy workaround.
 
-     Any new method based on `lockf' seemingly would be incompatible with
-     the old methods; besides, `lockf' is notoriously buggy under NFS.
+     Any new method based on ‘lockf’ seemingly would be incompatible with
+     the old methods; besides, ‘lockf’ is notoriously buggy under NFS.
      Since this problem afflicts scads of Unix programs, but is so rare
      that nobody seems to be worried about it, we won't worry either.  */
 
@@ -862,7 +862,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
      should succeed.  */
   seteid ();
   fdesc = create (sp);
-  /* Do it now; `setrid' might use stderr.  */
+  /* Do it now; ‘setrid’ might use stderr.  */
   fdescSafer = fd_safer (fdesc);
   e = errno;
   setrid ();
@@ -908,7 +908,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 
 void
 keepdirtemp (char const *name)
-/* Do not unlink `name', either because it's not there any more,
+/* Do not unlink ‘name’, either because it's not there any more,
    or because it has already been unlinked.  */
 {
   register int i;
@@ -924,10 +924,10 @@ keepdirtemp (char const *name)
 
 char const *
 makedirtemp (bool isworkfile)
-/* Create a unique pathname and store it into `EDIT (sff)'.  Because of
-   storage in `EDIT (sff)', `dirtempunlink' can unlink the file later.
+/* Create a unique pathname and store it into ‘EDIT (sff)’.  Because of
+   storage in ‘EDIT (sff)’, ‘dirtempunlink’ can unlink the file later.
    Return a pointer to the pathname created.
-   If `isworkfile', put it into the working file's directory;
+   If ‘isworkfile’, put it into the working file's directory;
    otherwise, put the unique file in RCSfile's directory.  */
 {
   int slot = SFFI_NEWDIR + isworkfile;
@@ -942,7 +942,7 @@ makedirtemp (bool isworkfile)
 
 void
 dirtempunlink (void)
-/* Clean up `makedirtemp' files.
+/* Clean up ‘makedirtemp’ files.
    May be invoked by signal handler.  */
 {
   register int i;
@@ -966,13 +966,13 @@ dirtempunlink (void)
 int
 chnamemod (FILE ** fromp, char const *from, char const *to,
            int set_mode, mode_t mode, time_t mtime)
-/* Rename a file (with stream pointer `*fromp') from `from' to `to'.
-   `from' already exists.
-   If `0 < set_mode', change the mode to `mode', before renaming if possible.
-   If `mtime' is not -1, change its mtime to `mtime' before renaming.
-   Close and clear `*fromp' before renaming it.
-   Unlink `to' if it already exists.
-   Return -1 on error (setting `errno'), 0 otherwise.   */
+/* Rename a file (with stream pointer ‘*fromp’) from ‘from’ to ‘to’.
+   ‘from’ already exists.
+   If ‘0 < set_mode’, change the mode to ‘mode’, before renaming if possible.
+   If ‘mtime’ is not -1, change its mtime to ‘mtime’ before renaming.
+   Close and clear ‘*fromp’ before renaming it.
+   Unlink ‘to’ if it already exists.
+   Return -1 on error (setting ‘errno’), 0 otherwise.   */
 {
   mode_t mode_while_renaming = mode;
   int fchmod_set_mode = 0;
@@ -1010,7 +1010,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 
 #if BAD_B_RENAME
   /* There's a short window of inconsistency
-     during which `to' does not exist.  */
+     during which ‘to’ does not exist.  */
   if (un_link (to) != 0 && errno != ENOENT)
     return -1;
 #endif  /* BAD_B_RENAME */
@@ -1044,8 +1044,8 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 
 int
 setmtime (char const *file, time_t mtime)
-/* Set `file' last modified time to `mtime',
-   but do nothing if `mtime' is -1.  */
+/* Set ‘file’ last modified time to ‘mtime’,
+   but do nothing if ‘mtime’ is -1.  */
 {
   struct utimbuf amtime;
 
@@ -1059,8 +1059,8 @@ setmtime (char const *file, time_t mtime)
 int
 findlock (bool delete, struct hshentry **target)
 /* Find the first lock held by caller and return a pointer
-   to the locked delta; also removes the lock if `delete'.
-   If one lock, put it into `*target'.
+   to the locked delta; also removes the lock if ‘delete’.
+   If one lock, put it into ‘*target’.
    Return 0 for no locks, 1 for one, 2 for two or more.  */
 {
   register struct rcslock *next, **trail, **found;
@@ -1091,9 +1091,9 @@ findlock (bool delete, struct hshentry **target)
 
 int
 addlock (struct hshentry *delta, bool verbose)
-/* Add a lock held by caller to `delta' and return 1 if successful.
-   Print an error message if `verbose' and return -1 if no lock is
-   added because `delta' is locked by somebody other than caller.
+/* Add a lock held by caller to ‘delta’ and return 1 if successful.
+   Print an error message if ‘verbose’ and return -1 if no lock is
+   added because ‘delta’ is locked by somebody other than caller.
    Return 0 if the caller already holds the lock.   */
 {
   register struct rcslock *next;
@@ -1121,9 +1121,9 @@ addlock (struct hshentry *delta, bool verbose)
 
 int
 addsymbol (char const *num, char const *name, bool rebind)
-/* Associate with revision `num' the new symbolic `name'.
-   If `name' already exists and `rebind' is set, associate `name'
-   with `num'; otherwise, print an error message and return false;
+/* Associate with revision ‘num’ the new symbolic ‘name’.
+   If ‘name’ already exists and ‘rebind’ is set, associate ‘name’
+   with ‘num’; otherwise, print an error message and return false;
    Return -1 if unsuccessful, 0 if no change, 1 if change.  */
 {
   register struct assoc *next;
@@ -1189,10 +1189,10 @@ checkaccesslist (void)
 
 int
 dorewrite (bool lockflag, int changed)
-/* Do nothing if not `lockflag'.
-   Prepare to rewrite an RCS file if `changed' is positive.
-   Stop rewriting if `changed' is zero, because there won't be any changes.
-   Fail if `changed' is negative.
+/* Do nothing if not ‘lockflag’.
+   Prepare to rewrite an RCS file if ‘changed’ is positive.
+   Stop rewriting if ‘changed’ is zero, because there won't be any changes.
+   Fail if ‘changed’ is negative.
    Return 0 on success, -1 on failure.  */
 {
   int r = 0, e;
@@ -1245,9 +1245,9 @@ dorewrite (bool lockflag, int changed)
 
 int
 donerewrite (int changed, time_t newRCStime)
-/* Finish rewriting an RCS file if `changed' is nonzero.
-   Set its mode if `changed' is positive.
-   Set its modification time to `newRCStime' unless it is -1.
+/* Finish rewriting an RCS file if ‘changed’ is nonzero.
+   Set its mode if ‘changed’ is positive.
+   Set its modification time to ‘newRCStime’ unless it is -1.
    Return 0 on success, -1 on failure.  */
 {
   int r = 0, e = 0;
@@ -1309,19 +1309,19 @@ ORCSclose (void)
 
 void
 ORCSerror (void)
-/* Like `ORCSclose', except we are cleaning up after an interrupt or
+/* Like ‘ORCSclose’, except we are cleaning up after an interrupt or
    fatal error.  Do not report errors, since this may loop.  This is
    needed only because some brain-damaged hosts (e.g. OS/2) cannot
    unlink files that are open, and some nearly-POSIX hosts (e.g. NFS)
    work better if the files are closed first.  This isn't a completely
    reliable away to work around brain-damaged hosts, because of the gap
-   between actual file opening and setting `FLOW (rewr)' etc., but it's
+   between actual file opening and setting ‘FLOW (rewr)’ etc., but it's
    better than nothing.  */
 {
   if (0 <= REPO (fd_lock))
     close (REPO (fd_lock));
   if (FLOW (rewr))
-    /* Avoid `fclose', since stdio may not be reentrant.  */
+    /* Avoid ‘fclose’, since stdio may not be reentrant.  */
     close (fileno (FLOW (rewr)));
 }
 

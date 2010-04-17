@@ -1,4 +1,4 @@
-/* Parse a string, returning a `struct partime' that describes it.
+/* Parse a string, returning a ‘struct partime’ that describes it.
 
    Copyright (C) 2010 Thien-Thi Nguyen
    Copyright (C) 1993, 1994, 1995 Paul Eggert
@@ -146,7 +146,7 @@ static const struct name_val const zone_names[] = {
 
 static int
 lookup (char const *s, struct name_val const table[])
-/* Look for a prefix of `s' in `table',
+/* Look for a prefix of ‘s’ in ‘table’,
    returning val for first matching entry.  */
 {
   int j;
@@ -170,7 +170,7 @@ done:
 
 static void
 undefine (struct partime *t)
-/* Set `*t' to "undefined" values.  */
+/* Set ‘*t’ to "undefined" values.  */
 {
   t->tm.tm_sec = t->tm.tm_min = t->tm.tm_hour = t->tm.tm_mday = t->tm.tm_mon
     = t->tm.tm_year = t->tm.tm_wday = t->tm.tm_yday
@@ -180,7 +180,7 @@ undefine (struct partime *t)
 
 /* Array of patterns to look for in a date string.  Order is important: we
    look for the first matching pattern whose values do not contradict values
-   that we already know about.  See `parse_pattern_letter' below for the
+   that we already know about.  See ‘parse_pattern_letter’ below for the
    meaning of the pattern codes.  */
 static const char const *const patterns[] = {
   /* These traditional patterns must come first,
@@ -206,8 +206,8 @@ static const char const *const patterns[] = {
 
 static char const *
 parse_fixed (char const *s, int digits, int *res)
-/* Parse an initial prefix of `s' of length `digits'; it must be a
-   number.  Store the parsed number into `*res'.  Return the first
+/* Parse an initial prefix of ‘s’ of length ‘digits’; it must be a
+   number.  Store the parsed number into ‘*res’.  Return the first
    character after the prefix, or 0 if it couldn't be parsed.  */
 {
   int n = 0;
@@ -227,8 +227,8 @@ parse_fixed (char const *s, int digits, int *res)
 
 static char const *
 parse_ranged (char const *s, int digits, int lo, int hi, int *res)
-/* Parse an initial prefix of `s' of length `digits'; it must be a number in
-   the range `lo' through `hi'.  Store the parsed number into `*res'.  Return
+/* Parse an initial prefix of ‘s’ of length ‘digits’; it must be a number in
+   the range ‘lo’ through ‘hi’.  Store the parsed number into ‘*res’.  Return
    the first character after the prefix, or 0 if it couldn't be parsed.  */
 {
   s = parse_fixed (s, digits, res);
@@ -238,11 +238,11 @@ parse_ranged (char const *s, int digits, int lo, int hi, int *res)
 static char const *
 parse_decimal (char const *s, int digits, int lo, int hi,
                int resolution, int *res, int *fres)
-/* Parse an initial prefix of `s' of length `digits'; it must be a number in
-   the range `lo' through `hi' and it may be followed by a fraction that is to
-   be computed using `resolution'.  Store the parsed number into `*res'; store
-   the fraction times `resolution', rounded to the nearest integer, into
-   `*fres'.  Return the first character after the prefix, or 0 if it couldn't
+/* Parse an initial prefix of ‘s’ of length ‘digits’; it must be a number in
+   the range ‘lo’ through ‘hi’ and it may be followed by a fraction that is to
+   be computed using ‘resolution’.  Store the parsed number into ‘*res’; store
+   the fraction times ‘resolution’, rounded to the nearest integer, into
+   ‘*fres’.  Return the first character after the prefix, or 0 if it couldn't
    be parsed.  */
 {
   s = parse_fixed (s, digits, res);
@@ -273,8 +273,8 @@ parse_decimal (char const *s, int digits, int lo, int hi,
 
 char const*
 parzone (char const *s, long *zone)
-/* Parse an initial prefix of `s'; it must denote a time zone.  Set `*zone'
-   to the number of seconds east of GMT, or to `TM_LOCAL_ZONE' if it is the
+/* Parse an initial prefix of ‘s’; it must denote a time zone.  Set ‘*zone’
+   to the number of seconds east of GMT, or to ‘TM_LOCAL_ZONE’ if it is the
    local time zone.  Return the first character after the prefix, or 0 if it
    couldn't be parsed.  */
 {
@@ -365,8 +365,8 @@ parzone (char const *s, long *zone)
 
 static char const *
 parse_pattern_letter (char const *s, int c, struct partime *t)
-/* Parse an initial prefix of `s', matching the pattern whose code is `c'.
-   Set `*t' accordingly.  Return the first character after the prefix, or 0
+/* Parse an initial prefix of ‘s’, matching the pattern whose code is ‘c’.
+   Set ‘*t’ accordingly.  Return the first character after the prefix, or 0
    if it couldn't be parsed.  */
 {
   switch (c)
@@ -574,10 +574,10 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
 
 static char const *
 parse_prefix (char const *str, struct partime *t, int *pi)
-/* Parse an initial prefix of `str', setting `*t' accordingly.  Return the
+/* Parse an initial prefix of ‘str’, setting ‘*t’ accordingly.  Return the
    first character after the prefix, or 0 if it couldn't be parsed.  Start
-   with pattern `*pi'; if success, set `*pi' to the next pattern to try.  Set
-   `*pi' to -1 if we know there are no more patterns to try; if `*pi' is
+   with pattern ‘*pi’; if success, set ‘*pi’ to the next pattern to try.  Set
+   ‘*pi’ to -1 if we know there are no more patterns to try; if ‘*pi’ is
    initially negative, give up immediately.  */
 {
   int i = *pi;
@@ -621,8 +621,8 @@ parse_prefix (char const *str, struct partime *t, int *pi)
 
 static int
 merge_partime (struct partime *t, struct partime const *u)
-/* If there is no conflict, merge into `*t' the additional information in
-   `*u' and return 0.  Otherwise do nothing and return -1.  */
+/* If there is no conflict, merge into ‘*t’ the additional information in
+   ‘*u’ and return 0.  Otherwise do nothing and return -1.  */
 {
 #define conflict(a,b)  ((a) != (b) && TM_DEFINED (a) && TM_DEFINED (b))
   if (conflict (t->tm.tm_sec, u->tm.tm_sec)
@@ -657,9 +657,9 @@ merge_partime (struct partime *t, struct partime const *u)
 
 char const*
 partime (char const *s, struct partime *t)
-/* Parse a date/time prefix of `s', putting the parsed result into `*t'.
+/* Parse a date/time prefix of ‘s’, putting the parsed result into ‘*t’.
    Return the first character after the prefix.  The prefix may contain no
-   useful information; in that case, `*t' will contain only undefined
+   useful information; in that case, ‘*t’ will contain only undefined
    values.  */
 {
   struct partime p;

@@ -38,7 +38,7 @@ static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
 
 /* Temp names to be unlinked when done, if they are not 0.
-   Must be at least `DIRTEMPNAMES' (see rcsedit.c).  */
+   Must be at least ‘DIRTEMPNAMES’ (see rcsedit.c).  */
 #define TEMPNAMES 5
 
 struct fnstuff
@@ -64,7 +64,7 @@ struct compair
 };
 
 /* This table is present only for backwards compatibility.  Normally we
-   ignore this table, and use the prefix of the `$Log' line instead.  */
+   ignore this table, and use the prefix of the ‘$Log’ line instead.  */
 static const struct compair const comtable[] = {
   {"a",    "-- "},              /* Ada */
   {"ada",  "-- "},
@@ -117,7 +117,7 @@ homegrown_mkstemp (char *template)
   char *end = template + strlen (template);
   char const xrep[] = {"abcdefghijklmnopqrstuvwxyz"
                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                       /* Omit '0' => `strlen (xrep)' is prime.  */
+                       /* Omit '0' => ‘strlen (xrep)’ is prime.  */
                        "123456789"};
   struct timeval tv;
   uint64_t n;
@@ -216,8 +216,8 @@ set_temporary_file_name (struct buf *filename, const char *prefix)
 
 char const *
 maketemp (int n)
-/* Create a unique filename and store it into the `n'th slot
-   in `FN (tpnames)' (so that `tempunlink' can unlink the file later).
+/* Create a unique filename and store it into the ‘n’th slot
+   in ‘FN (tpnames)’ (so that ‘tempunlink’ can unlink the file later).
    Return a pointer to the filename created.  */
 {
   if (!FN (tpnames)[n])
@@ -234,7 +234,7 @@ maketemp (int n)
 
 void
 tempunlink (void)
-/* Clean up `maketemp' files.  May be invoked by signal handler.  */
+/* Clean up ‘maketemp’ files.  May be invoked by signal handler.  */
 {
   register int i;
   register char *p;
@@ -251,9 +251,9 @@ tempunlink (void)
 
 static char const *
 bindex (register char const *sp, register int c)
-/* Find the last occurrence of character `c' in string `sp' and return a
+/* Find the last occurrence of character ‘c’ in string ‘sp’ and return a
    pointer to the character just beyond it.  If the character doesn't occur
-   in the string, return `sp'.  */
+   in the string, return ‘sp’.  */
 {
   register char const *r;
 
@@ -315,14 +315,14 @@ InitAdmin (void)
   ADMIN (log_lead).size = strlen (comtable[i].comlead);
   BE (kws) = kwsub_kv;
   clear_buf (&ADMIN (description));
-  /* Note: If `!FLOW (from)', read nothing; only initialize.  */
+  /* Note: If ‘!FLOW (from)’, read nothing; only initialize.  */
   Lexinit ();
 }
 
 void
 bufalloc (register struct buf *b, size_t size)
-/* Ensure `*b' is a name buffer of at least `size' bytes.
-   Old contents of `*b' can be freed; new contents are undefined.  */
+/* Ensure ‘*b’ is a name buffer of at least ‘size’ bytes.
+   Old contents of ‘*b’ can be freed; new contents are undefined.  */
 {
   if (b->size < size)
     {
@@ -338,7 +338,7 @@ bufalloc (register struct buf *b, size_t size)
 
 void
 bufrealloc (register struct buf *b, size_t size)
-/* Like `bufalloc', except preserve old contents of `*b', if any.  */
+/* Like ‘bufalloc’, except preserve old contents of ‘*b’, if any.  */
 {
   if (b->size < size)
     {
@@ -363,7 +363,7 @@ bufautoend (struct buf *b)
 
 char *
 bufenlarge (register struct buf *b, char const **alim)
-/* Make `*b' larger.  Set `*alim' to its new limit,
+/* Make ‘*b’ larger.  Set ‘*alim’ to its new limit,
    and return the relocated value of its old limit.  */
 {
   size_t s = b->size;
@@ -375,7 +375,7 @@ bufenlarge (register struct buf *b, char const **alim)
 
 void
 bufscat (struct buf *b, char const *s)
-/* Concatenate `s' to the end of `b'.  */
+/* Concatenate ‘s’ to the end of ‘b’.  */
 {
   size_t blen = b->string ? strlen (b->string) : 0;
   size_t ssiz = strlen (s) + 1;
@@ -386,7 +386,7 @@ bufscat (struct buf *b, char const *s)
 
 void
 bufscpy (struct buf *b, char const *s)
-/* Copy `s' into `b'.  */
+/* Copy ‘s’ into ‘b’.  */
 {
   size_t ssiz = strlen (s) + 1;
 
@@ -396,7 +396,7 @@ bufscpy (struct buf *b, char const *s)
 
 char const *
 basefilename (char const *p)
-/* Return the address of the base filename of the pathname `p'.  */
+/* Return the address of the base filename of the pathname ‘p’.  */
 {
   register char const *b = p, *q = p;
 
@@ -413,7 +413,7 @@ basefilename (char const *p)
 
 static size_t
 suffixlen (char const *x)
-/* Return the length of `x', an RCS pathname suffix.  */
+/* Return the length of ‘x’, an RCS pathname suffix.  */
 {
   register char const *p;
 
@@ -433,7 +433,7 @@ suffixlen (char const *x)
 
 char const *
 rcssuffix (char const *name)
-/* Return the suffix of `name' if it is an RCS pathname, NULL otherwise.  */
+/* Return the suffix of ‘name’ if it is an RCS pathname, NULL otherwise.  */
 {
   char const *x, *p, *nz;
   size_t nl, xl;
@@ -462,9 +462,9 @@ rcssuffix (char const *name)
 
 struct fro *
 rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
-/* Open `RCSpath' for reading and return its `FILE*' descriptor.
-   If successful, set `*status' to its status.
-   Pass this routine to `pairnames' for read-only access to the file.  */
+/* Open ‘RCSpath’ for reading and return its ‘FILE*’ descriptor.
+   If successful, set ‘*status’ to its status.
+   Pass this routine to ‘pairnames’ for read-only access to the file.  */
 {
   return fro_open (RCSpath->string, FOPEN_RB, status);
 }
@@ -472,10 +472,10 @@ rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
 static bool
 finopen (struct fro *(*rcsopen) (struct buf *, struct stat *, bool),
          bool mustread)
-/* Use `rcsopen' to open an RCS file; `mustread' is set if the file must be
-   read.  Set `FLOW (from)' to the result and return true if successful.
-   `FN (RCSb)' holds the file's name.  Set `FN (RCSbuf)' to the best RCS name found
-   so far, and `FN (RCSerrno)' to its errno.  Return true if successful or if
+/* Use ‘rcsopen’ to open an RCS file; ‘mustread’ is set if the file must be
+   read.  Set ‘FLOW (from)’ to the result and return true if successful.
+   ‘FN (RCSb)’ holds the file's name.  Set ‘FN (RCSbuf)’ to the best RCS name found
+   so far, and ‘FN (RCSerrno)’ to its errno.  Return true if successful or if
    an unusual failure.  */
 {
   bool interesting, preferold;
@@ -501,13 +501,13 @@ fin2open (char const *d, size_t dlen,
           char const *x, size_t xlen,
           struct fro *(*rcsopen) (struct buf *, struct stat *, bool),
           bool mustread)
-/* `d' is a directory name with length `dlen' (including trailing slash).
-   `base' is a filename with length `baselen'.  `x' is an RCS pathname suffix
-   with length `xlen'.  Use `rcsopen' to open an RCS file; `mustread' is set
+/* ‘d’ is a directory name with length ‘dlen’ (including trailing slash).
+   ‘base’ is a filename with length ‘baselen’.  ‘x’ is an RCS pathname suffix
+   with length ‘xlen’.  Use ‘rcsopen’ to open an RCS file; ‘mustread’ is set
    if the file must be read.  Return true if successful.  Try "dRCS/basex"
    first; if that fails and x is nonempty, try "dbasex".  Put these potential
-   names in `FN (RCSb)'.  Set `FN (RCSbuf)' to the best RCS name found so far, and
-   `FN (RCSerrno)' to its errno.  Return true if successful or if an unusual
+   names in ‘FN (RCSb)’.  Set ‘FN (RCSbuf)’ to the best RCS name found so far, and
+   ‘FN (RCSerrno)’ to its errno.  Return true if successful or if an unusual
    failure.  */
 {
   register char *p;
@@ -528,7 +528,7 @@ fin2open (char const *d, size_t dlen,
         return true;
 
       /* Try "dbasex".  Start from scratch, because
-         `finopen' may have changed `FN (RCSb)'.  */
+         ‘finopen’ may have changed ‘FN (RCSb)’.  */
       memcpy (p = FN (RCSb).string, d, dlen);
       memcpy (p += dlen, base, baselen);
       memcpy (p += baselen, x, xlen);
@@ -540,17 +540,17 @@ fin2open (char const *d, size_t dlen,
 int
 pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
            bool mustread, bool quiet)
-/* Pair the pathnames pointed to by `argv'; `argc' indicates how many there
-   are.  Place a pointer to the RCS pathname into `REPO (filename)', and a
-   pointer to the pathname of the working file into `MANI (filename)'.  If
-   both are given, and `MANI (standard_output)' is set, a print a warning.
+/* Pair the pathnames pointed to by ‘argv’; ‘argc’ indicates how many there
+   are.  Place a pointer to the RCS pathname into ‘REPO (filename)’, and a
+   pointer to the pathname of the working file into ‘MANI (filename)’.  If
+   both are given, and ‘MANI (standard_output)’ is set, a print a warning.
 
-   If the RCS file exists, place its status into `REPO (stat)'.
+   If the RCS file exists, place its status into ‘REPO (stat)’.
 
-   If the RCS file exists, open (using `rcsopen') it for reading, place the
-   file pointer into `FLOW (from)', read in the admin-node, and return 1.
-   If the RCS file does not exist and `mustread', print an error unless
-   `quiet' and return 0.  Otherwise, initialize the admin node and return -1.
+   If the RCS file exists, open (using ‘rcsopen’) it for reading, place the
+   file pointer into ‘FLOW (from)’, read in the admin-node, and return 1.
+   If the RCS file does not exist and ‘mustread’, print an error unless
+   ‘quiet’ and return 0.  Otherwise, initialize the admin node and return -1.
 
    Return 0 on all errors, e.g. files that are not regular files.  */
 {
@@ -612,7 +612,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       else
         RCSbase = RCS1 = NULL;
     }
-  /* Now we have a (tentative) RCS pathname in RCS1 and `MANI (filename)'.
+  /* Now we have a (tentative) RCS pathname in RCS1 and ‘MANI (filename)’.
      Second, try to find the right RCS file.  */
   if (RCSbase != RCS1)
     {
@@ -680,8 +680,8 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
 
 static size_t
 dir_useful_len (char const *d)
-/* `d' names a directory; return the number of bytes of its useful part.  To
-   create a file in `d', append a `SLASH' and a file name to the useful part.
+/* ‘d’ names a directory; return the number of bytes of its useful part.  To
+   create a file in ‘d’, append a ‘SLASH’ and a file name to the useful part.
    Ignore trailing slashes if possible; not only are they ugly, but some
    non-POSIX systems misbehave unless the slashes are omitted.  */
 {
@@ -700,7 +700,7 @@ dir_useful_len (char const *d)
 char const *
 getfullRCSname (void)
 /* Return a pointer to the full pathname of the RCS file.
-   Remove leading `./'.  */
+   Remove leading ‘./’.  */
 {
   if (ROOTPATH (REPO (filename)))
     {
@@ -740,11 +740,11 @@ getfullRCSname (void)
             }
           FN (cwd)[dir_useful_len (FN (cwd))] = '\0';
         }
-      /* Remove leading `./'s from `REPO (filename)'.
-         Do not try to handle `../', since removing it may result
+      /* Remove leading ‘./’s from ‘REPO (filename)’.
+         Do not try to handle ‘../’, since removing it may result
          in the wrong answer in the presence of symbolic links.  */
       for (r = REPO (filename); r[0] == '.' && isSLASH (r[1]); r += 2)
-        /* `.////' is equivalent to `./'.  */
+        /* ‘.////’ is equivalent to ‘./’.  */
         while (isSLASH (r[2]))
           r++;
       /* Build full pathname.  */
@@ -900,7 +900,7 @@ getcwd (char *path, size_t size)
 #endif  /* !defined HAVE_GETCWD */
 
 #ifdef PAIRTEST
-/* This is a test program for `pairnames' and `getfullRCSname'.  */
+/* This is a test program for ‘pairnames’ and ‘getfullRCSname’.  */
 
 static exiting void
 exiterr (void)

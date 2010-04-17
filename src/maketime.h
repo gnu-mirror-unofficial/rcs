@@ -1,4 +1,4 @@
-/* Return `time_t' from `struct partime' returned by partime.
+/* Return ‘time_t’ from ‘struct partime’ returned by partime.
 
    Copyright (C) 2010 Thien-Thi Nguyen
    Copyright (C) 1993, 1994, 1995 Paul Eggert

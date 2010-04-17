@@ -27,7 +27,7 @@ struct expctx
   const bool delimstuffed, dolog;
 };
 
-/* Idioms.  Note that .delta is hardcoded `delta'.  */
+/* Idioms.  Note that .delta is hardcoded ‘delta’.  */
 
 #define EXPCTX(TO,REWR,FROM,DELIMSTUFFED,DOLOG)         \
     {                                                   \

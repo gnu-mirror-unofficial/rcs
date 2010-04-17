@@ -29,7 +29,7 @@
 
 static char const *
 normalize_arg (char const *s)
-/* If `s' looks like an option, prepend ./ to it.  Return the result.  */
+/* If ‘s’ looks like an option, prepend ./ to it.  Return the result.  */
 {
   if (*s == '-')
     {
@@ -45,10 +45,10 @@ normalize_arg (char const *s)
 int
 merge (bool tostdout, char const *edarg, char const *const label[3],
        char const *const argv[3])
-/* Do `merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2', where `tostdout'
-   specifies whether `-p' is present, `edarg' gives the editing type
-   (e.g. "-A", or null for the default), `label' gives l0, l1 and l2, and
-   `argv' gives a0, a1 and a2.  Return `DIFF_SUCCESS' or `DIFF_FAILURE'.  */
+/* Do ‘merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2’, where ‘tostdout’
+   specifies whether ‘-p’ is present, ‘edarg’ gives the editing type
+   (e.g. "-A", or null for the default), ‘label’ gives l0, l1 and l2, and
+   ‘argv’ gives a0, a1 and a2.  Return ‘DIFF_SUCCESS’ or ‘DIFF_FAILURE’.  */
 {
   register int i;
   FILE *f;

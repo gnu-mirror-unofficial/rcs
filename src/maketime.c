@@ -28,14 +28,14 @@
 struct maketimestuff
 {
   char const *TZ;
-  /* The value of env var `TZ'.
-     Only valid/used if `TZ_must_be_set'.
+  /* The value of env var ‘TZ’.
+     Only valid/used if ‘TZ_must_be_set’.
      -- time2tm  */
 
   time_t t_cache[2];
   struct tm tm_cache[2];
-  /* Cache the most recent `t',`tm' pairs;
-     One for `gmtime', one for `localtime'.
+  /* Cache the most recent ‘t’,‘tm’ pairs;
+     One for ‘gmtime’, one for ‘localtime’.
      -- tm2time  */
 };
 
@@ -47,10 +47,10 @@ init_maketimestuff (void)
   BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
 }
 
-/* For maximum portability, use only `localtime' and `gmtime'.  Make no
-   assumptions about the `time_t' epoch or the range of `time_t' values.
-   Avoid `mktime' because it's not universal and because there's no easy,
-   portable way for `mktime' to return the inverse of `gmtime'.  */
+/* For maximum portability, use only ‘localtime’ and ‘gmtime’.  Make no
+   assumptions about the ‘time_t’ epoch or the range of ‘time_t’ values.
+   Avoid ‘mktime’ because it's not universal and because there's no easy,
+   portable way for ‘mktime’ to return the inverse of ‘gmtime’.  */
 
 #define TM_YEAR_ORIGIN 1900
 
@@ -67,7 +67,7 @@ static const int const month_yday[] = {
 
 static int
 month_days (struct tm const *tm)
-/* Return the number of days in `tm' month.  */
+/* Return the number of days in ‘tm’ month.  */
 {
   int m = tm->tm_mon;
 
@@ -77,8 +77,8 @@ month_days (struct tm const *tm)
 
 struct tm *
 time2tm (time_t unixtime, bool localzone)
-/* Convert `unixtime' to `struct tm' form.
-   Use `gmtime' if available and if `!localzone', `localtime' otherwise.  */
+/* Convert ‘unixtime’ to ‘struct tm’ form.
+   Use ‘gmtime’ if available and if ‘!localzone’, ‘localtime’ otherwise.  */
 {
   struct tm *tm;
 
@@ -94,7 +94,7 @@ time2tm (time_t unixtime, bool localzone)
 
 time_t
 difftm (struct tm const *a, struct tm const *b)
-/* Return `a - b', measured in seconds.  */
+/* Return ‘a - b’, measured in seconds.  */
 {
   int ay = a->tm_year + (TM_YEAR_ORIGIN - 1);
   int by = b->tm_year + (TM_YEAR_ORIGIN - 1);
@@ -113,14 +113,14 @@ difftm (struct tm const *a, struct tm const *b)
 
 void
 adjzone (register struct tm *t, long seconds)
-/* Adjust time `t' by adding `seconds'.  `seconds' must be at most 24
-   hours' worth.  In `t', adjust only the `year', `mon', `mday', `hour',
-   `min' and `sec' members; plus adjust `wday' if it is defined.  */
+/* Adjust time ‘t’ by adding ‘seconds’.  ‘seconds’ must be at most 24
+   hours' worth.  In ‘t’, adjust only the ‘year’, ‘mon’, ‘mday’, ‘hour’,
+   ‘min’ and ‘sec’ members; plus adjust ‘wday’ if it is defined.  */
 {
-  /* This code can be off by a second if `seconds' is not a multiple of
-     60, if `t' is local time, and if a leap second happens during this
+  /* This code can be off by a second if ‘seconds’ is not a multiple of
+     60, if ‘t’ is local time, and if a leap second happens during this
      minute.  But this bug has never occurred, and most likely will not
-     ever occur.  Liberia, the last country for which `seconds' % 60 was
+     ever occur.  Liberia, the last country for which ‘seconds’ % 60 was
      nonzero, switched to UTC in May 1972; the first leap second was in
      June 1972.  */
   int leap_second = t->tm_sec == 60;
@@ -171,12 +171,12 @@ adjzone (register struct tm *t, long seconds)
 
 time_t
 tm2time (struct tm *tm, bool localzone)
-/* Convert `tm' to `time_t', using `localtime' if `localzone' and `gmtime'
-   otherwise.  From `tm', use only `year', `mon', `mday', `hour', `min',
-   and `sec' members.  Ignore old members `tm_yday' and `tm_wday', but
+/* Convert ‘tm’ to ‘time_t’, using ‘localtime’ if ‘localzone’ and ‘gmtime’
+   otherwise.  From ‘tm’, use only ‘year’, ‘mon’, ‘mday’, ‘hour’, ‘min’,
+   and ‘sec’ members.  Ignore old members ‘tm_yday’ and ‘tm_wday’, but
    fill in their correct values.  Return -1 on failure (e.g. a member out
    of range).  POSIX 1003.1-1990 doesn't allow leap seconds, but some
-   implementations have them anyway, so allow them if `localtime'/`gmtime'
+   implementations have them anyway, so allow them if ‘localtime’/‘gmtime’
    does.  */
 {
   time_t d, gt;
@@ -208,8 +208,8 @@ tm2time (struct tm *tm, bool localzone)
   MAKETIMESTUFF (t_cache)[localzone] = gt;
   MAKETIMESTUFF (tm_cache)[localzone] = *gtm;
 
-  /* Check that the guess actually matches; overflow can cause `difftm'
-     to return 0 even on differing times, or `tm' may have members out of
+  /* Check that the guess actually matches; overflow can cause ‘difftm’
+     to return 0 even on differing times, or ‘tm’ may have members out of
      range (e.g. bad leap seconds).  */
   if ((tm->tm_year ^ gtm->tm_year)
       | (tm->tm_mon ^ gtm->tm_mon)
@@ -224,9 +224,9 @@ tm2time (struct tm *tm, bool localzone)
 
 static time_t
 maketime (struct partime const *pt, time_t default_time)
-/* Check `*pt' and convert it to `time_t'.  If it is incompletely specified,
-   use `default_time' to fill it out.  Use `localtime' if `pt->zone' is the
-   special value `TM_LOCAL_ZONE'.  Return -1 on failure.  ISO 8601 day-of-year
+/* Check ‘*pt’ and convert it to ‘time_t’.  If it is incompletely specified,
+   use ‘default_time’ to fill it out.  Use ‘localtime’ if ‘pt->zone’ is the
+   special value ‘TM_LOCAL_ZONE’.  Return -1 on failure.  ISO 8601 day-of-year
    and week numbers are not yet supported.  */
 {
   bool localzone = pt->zone == TM_LOCAL_ZONE;
@@ -262,7 +262,7 @@ maketime (struct partime const *pt, time_t default_time)
         }
     }
 
-  /* Convert from `partime' year (Gregorian) to POSIX year.  */
+  /* Convert from ‘partime’ year (Gregorian) to POSIX year.  */
   tm.tm_year -= TM_YEAR_ORIGIN;
 
   /* Set remaining default fields to be their minimum values.  */
@@ -281,7 +281,7 @@ maketime (struct partime const *pt, time_t default_time)
     adjzone (&tm, -pt->zone);
   wday = tm.tm_wday;
 
-  /* Convert and fill in the rest of the `tm'.  */
+  /* Convert and fill in the rest of the ‘tm’.  */
   r = tm2time (&tm, localzone);
 
   /* Check weekday.  */
@@ -293,7 +293,7 @@ maketime (struct partime const *pt, time_t default_time)
 
 time_t
 str2time (char const *source, time_t default_time, long default_zone)
-/* Parse a free-format date in `source', returning a Unix format time.  */
+/* Parse a free-format date in ‘source’, returning a Unix format time.  */
 {
   struct partime pt;
 

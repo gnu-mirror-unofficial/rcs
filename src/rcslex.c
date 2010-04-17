@@ -49,7 +49,7 @@ warnignore (void)
   if (!LEX (ignore))
     {
       /* This used to be a simple boolean, but we overload it now as a
-         means to avoid the most infelicitous `NEXT (str)' clobbering.
+         means to avoid the most infelicitous ‘NEXT (str)’ clobbering.
          If/when that goes away, this can happily resvelten.  */
       LEX (ignore) = make_space ("ignore");
       RWARN ("Unknown phrases like `%s ...;' are present.", NEXT (str));
@@ -58,10 +58,10 @@ warnignore (void)
 
 static void
 lookup (char const *str)
-/* Look up the character string `str' in the hashtable.
+/* Look up the character string ‘str’ in the hashtable.
    If the string is not present, a new entry for it is created.  In any
    case, the address of the corresponding hashtable entry is placed into
-   `NEXT (hsh)'.  */
+   ‘NEXT (hsh)’.  */
 {
   register unsigned ihash;      /* index into hashtable */
   register char const *sp;
@@ -96,7 +96,7 @@ lookup (char const *str)
 void
 Lexinit (void)
 /* Initialize lexical analyzer: initialize the hashtable;
-   initialize `NEXT (c)', `NEXT (tok)' if `FLOW (from)' != NULL.  */
+   initialize ‘NEXT (c)’, ‘NEXT (tok)’ if ‘FLOW (from)’ != NULL.  */
 {
   if (! LEX (hshtab))
     LEX (hshtab) = pointer_array (SHARED, hshsize);
@@ -127,12 +127,12 @@ Lexinit (void)
 
 void
 nextlex (void)
-/* Read the next token and set `NEXT (tok)' to the next token code.
-   Only if `receptive_to_next_hash_key', a revision number is entered
-   into the hashtable and a pointer to it is placed into `NEXT (hsh)'.
+/* Read the next token and set ‘NEXT (tok)’ to the next token code.
+   Only if ‘receptive_to_next_hash_key’, a revision number is entered
+   into the hashtable and a pointer to it is placed into ‘NEXT (hsh)’.
    This is useful for avoiding that dates are placed into the hashtable.
-   For ID's and NUM's, `NEXT (str)' is set to the character string.
-   Assumption: `NEXT (c)' contains the next character.  */
+   For ID's and NUM's, ‘NEXT (str)’ is set to the character string.
+   Assumption: ‘NEXT (c)’ contains the next character.  */
 {
   int c;
   register FILE *frew;
@@ -202,14 +202,14 @@ nextlex (void)
                 }
             }
           /* This extra copy is almost unbearably bletcherous.
-             TODO: Make `nextlex' accept "disposition".  */
+             TODO: Make ‘nextlex’ accept "disposition".  */
           NEXT (str) = intern (SINGLE, sp, len);
           break;
 
         case SBEGIN:           /* long string */
           d = STRING;
           /* Note: Only the initial SBEGIN has been read.
-             Read the string, and reset `NEXT (c)' afterwards.  */
+             Read the string, and reset ‘NEXT (c)’ afterwards.  */
           break;
 
         case COLON:
@@ -226,7 +226,7 @@ nextlex (void)
 bool
 eoflex (void)
 /* Return true if we look ahead to the end of the input, false otherwise.
-   `NEXT (c)' becomes undefined at end of file.  */
+   ‘NEXT (c)’ becomes undefined at end of file.  */
 {
   int c;
   register FILE *fout;
@@ -258,8 +258,8 @@ eoflex (void)
 
 bool
 getlex (enum tokens token)
-/* Check if `NEXT (tok)' is the same as `token'.  If so, advance the input
-   by calling `nextlex' and return true.  Otherwise return false.
+/* Check if ‘NEXT (tok)’ is the same as ‘token’.  If so, advance the input
+   by calling ‘nextlex’ and return true.  Otherwise return false.
    Doesn't work for strings and keywords; loses the character string for
    ids.  */
 {
@@ -274,8 +274,8 @@ getlex (enum tokens token)
 
 bool
 getkeyopt (char const *key)
-/* If the current token is a keyword identical to `key',
-   advance the input by calling `nextlex' and return true;
+/* If the current token is a keyword identical to ‘key’,
+   advance the input by calling ‘nextlex’ and return true;
    otherwise return false.  */
 {
   if (NEXT (tok) == ID && strcmp (key, NEXT (str)) == 0)
@@ -290,8 +290,8 @@ getkeyopt (char const *key)
 
 void
 getkey (char const *key)
-/* Check that the current input token is a keyword identical to `key',
-   and advance the input by calling `nextlex'.  */
+/* Check that the current input token is a keyword identical to ‘key’,
+   and advance the input by calling ‘nextlex’.  */
 {
   if (!getkeyopt (key))
     fatal_syntax ("missing '%s' keyword", key);
@@ -299,8 +299,8 @@ getkey (char const *key)
 
 void
 getkeystring (char const *key)
-/* Check that the current input token is a keyword identical to `key',
-   and advance the input by calling `nextlex'; then look ahead for a
+/* Check that the current input token is a keyword identical to ‘key’,
+   and advance the input by calling ‘nextlex’; then look ahead for a
    string.  */
 {
   getkey (key);
@@ -310,8 +310,8 @@ getkeystring (char const *key)
 
 char const *
 getid (void)
-/* Check if `NEXT (tok)' is an identifier.  If so, advance the input by
-   calling `nextlex' and return a pointer to the identifier; otherwise
+/* Check if ‘NEXT (tok)’ is an identifier.  If so, advance the input by
+   calling ‘nextlex’ and return a pointer to the identifier; otherwise
    returns NULL.  Treat keywords as identifiers.  */
 {
   register char const *name;
@@ -328,9 +328,9 @@ getid (void)
 
 struct hshentry *
 getnum (void)
-/* Check if `NEXT (tok)' is a number.  If so, advance the input by calling
-   `nextlex' and return a pointer to the hashtable entry.  Otherwise
-   returns NULL.  Doesn't work if not `receptive_to_next_hash_key'.  */
+/* Check if ‘NEXT (tok)’ is a number.  If so, advance the input by calling
+   ‘nextlex’ and return a pointer to the hashtable entry.  Otherwise
+   returns NULL.  Doesn't work if not ‘receptive_to_next_hash_key’.  */
 {
   register struct hshentry *num;
 
@@ -346,10 +346,10 @@ getnum (void)
 
 struct cbuf
 getphrases (char const *key)
-/* Get a series of phrases that do not start with `key'.  Return
+/* Get a series of phrases that do not start with ‘key’.  Return
    resulting buffer.  Stop when the next phrase starts with a token that
-   is not an identifier, or is `key'.  Copy input to `FLOW (to)' if it is
-   set.  Unlike `ignorephrases', this routine assumes `nextlex' has
+   is not an identifier, or is ‘key’.  Copy input to ‘FLOW (to)’ if it is
+   set.  Unlike ‘ignorephrases’, this routine assumes ‘nextlex’ has
    already been invoked before we start.  */
 {
   int c;
@@ -462,7 +462,7 @@ getphrases (char const *key)
                     break;
                   default:
                     NEXT (c) = c;
-                    /* FIXME: {Re-}move redundant `strlen' call.
+                    /* FIXME: {Re-}move redundant ‘strlen’ call.
                        All callers are key = Kfoo (constant strings).  */
                     NEXT (str) = intern0 (SINGLE, key);
                     NEXT (tok) = ID;
@@ -486,9 +486,9 @@ getphrases (char const *key)
 
 void
 readstring (void)
-/* Skip over characters until terminating single `SDELIM'.
-   If `FLOW (to)' is set, copy every character read to `FLOW (to)'.
-   Do not advance `nextlex' at the end.  */
+/* Skip over characters until terminating single ‘SDELIM’.
+   If ‘FLOW (to)’ is set, copy every character read to ‘FLOW (to)’.
+   Do not advance ‘nextlex’ at the end.  */
 {
   int c;
   register FILE *frew;
@@ -520,8 +520,8 @@ readstring (void)
 
 void
 printstring (void)
-/* Copy a string to stdout, until terminated with a single `SDELIM'.
-   Do not advance `nextlex' at the end.  */
+/* Copy a string to stdout, until terminated with a single ‘SDELIM’.
+   Do not advance ‘nextlex’ at the end.  */
 {
   int c;
   register FILE *fout;
@@ -552,9 +552,9 @@ printstring (void)
 
 struct cbuf
 savestring (void)
-/* Return a `SDELIM'-terminated cbuf read from file `FLOW (from)',
-   replacing double `SDELIM' is with `SDELIM'.  If `FLOW (to)' is set,
-   also copy (unsubstituted) to `FLOW (to)'.  Do not advance `nextlex'
+/* Return a ‘SDELIM’-terminated cbuf read from file ‘FLOW (from)’,
+   replacing double ‘SDELIM’ is with ‘SDELIM’.  If ‘FLOW (to)’ is set,
+   also copy (unsubstituted) to ‘FLOW (to)’.  Do not advance ‘nextlex’
    at the end.  The returned cbuf has exact length.  */
 {
   int c;
@@ -589,11 +589,11 @@ savestring (void)
 
 static char *
 checkidentifier (register char *id, int delimiter, register bool dotok)
-/* Check whether the string starting at `id' is an identifier and return
+/* Check whether the string starting at ‘id’ is an identifier and return
    a pointer to the delimiter after the identifier.  White space,
-   `delimiter' and 0 are legal delimiters.  Abort the program if not a
-   legal identifier.  Useful for checking commands.  If `!delimiter',
-   the only delimiter is 0.  Allow '.' in identifier only if `dotok' is
+   ‘delimiter’ and 0 are legal delimiters.  Abort the program if not a
+   legal identifier.  Useful for checking commands.  If ‘!delimiter’,
+   the only delimiter is 0.  Allow '.' in identifier only if ‘dotok’ is
    set.  */
 {
   register char *temp;
@@ -630,7 +630,7 @@ checkidentifier (register char *id, int delimiter, register bool dotok)
                                  && c != '\t'
                                  && c != '\n'))))
     {
-      /* Append '\0' to end of `id' before error message.  */
+      /* Append '\0' to end of ‘id’ before error message.  */
       while ((c = *id) && c != ' ' && c != '\t' && c != '\n'
              && c != delim)
         id++;
@@ -654,7 +654,7 @@ checksym (char *sym, int delimiter)
 
 void
 checksid (char *id)
-/* Check whether the string `id' is an identifier.  */
+/* Check whether the string ‘id’ is an identifier.  */
 {
   checkid (id, 0);
 }
@@ -711,14 +711,14 @@ redefined (int c)
 
 void
 afputc (int c, register FILE *f)
-/* `afputc (c, f)' acts like `aputc (c, f)' but is smaller and slower.  */
+/* ‘afputc (c, f)’ acts like ‘aputc (c, f)’ but is smaller and slower.  */
 {
   aputc (c, f);
 }
 
 void
 aputs (char const *s, FILE *iop)
-/* Put string `s' on file `iop', abort on error.  */
+/* Put string ‘s’ on file ‘iop’, abort on error.  */
 {
   if (fputs (s, iop) < 0)
     Oerror ();
@@ -726,7 +726,7 @@ aputs (char const *s, FILE *iop)
 
 void
 aprintf (FILE * iop, char const *fmt, ...)
-/* Formatted output.  Same as `fprintf' in <stdio.h>,
+/* Formatted output.  Same as ‘fprintf’ in <stdio.h>,
    but abort program on error.  */
 {
   va_list ap;

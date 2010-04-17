@@ -66,15 +66,15 @@ struct Datepairs
 
 /* A version-specific format string.  */
 static char const *insDelFormat;
-/* The `-b' option.  */
+/* The ‘-b’ option.  */
 static bool branchflag;
-/* The `-l' option.  */
+/* The ‘-l’ option.  */
 static bool lockflag;
 
-/* Date range in `-d' option.  */
+/* Date range in ‘-d’ option.  */
 static struct Datepairs *datelist, *duelst;
 
-/* Revision or branch range in `-r' option.  */
+/* Revision or branch range in ‘-r’ option.  */
 static struct Revpairs *revlist, *Revlst;
 
 /* Login names in author option.  */
@@ -83,7 +83,7 @@ static struct authors *authorlist;
 /* Lockers in locker option.  */
 static struct rcslockers *lockerlist;
 
-/* States in `-s' option.  */
+/* States in ‘-s’ option.  */
 static struct stateattri *statelist;
 
 static int exitstatus;
@@ -105,7 +105,7 @@ exiterr (void)
 static void
 getlocker (char *argv)
 /* Get the login names of lockers from command line
-   and store in `lockerlist'.  */
+   and store in ‘lockerlist’.  */
 {
   register char c;
   struct rcslockers *newlocker;
@@ -142,9 +142,9 @@ static void
 putadelta (register struct hshentry const *node,
            register struct hshentry const *editscript,
            bool trunk)
-/* Print delta `node' if `node->selector' is set.
-   `editscript' indicates where the editscript is stored;
-   `trunk' !false indicates this node is in trunk.  */
+/* Print delta ‘node’ if ‘node->selector’ is set.
+   ‘editscript’ indicates where the editscript is stored;
+   ‘trunk’ !false indicates this node is in trunk.  */
 {
   static char emptych[] = EMPTYLOG;
   register FILE *out;
@@ -217,7 +217,7 @@ static void putforest (struct branchhead const *);
 
 static void
 putree (struct hshentry const *root)
-/* Print delta tree from `root' (not including trunk)
+/* Print delta tree from ‘root’ (not including trunk)
    in reverse order on each branch.  */
 {
   if (!root)
@@ -228,7 +228,7 @@ putree (struct hshentry const *root)
 
 static void
 putabranch (struct hshentry const *root)
-/* Print one branch from `root'.  */
+/* Print one branch from ‘root’.  */
 {
   if (!root)
     return;
@@ -238,7 +238,7 @@ putabranch (struct hshentry const *root)
 
 static void
 putforest (struct branchhead const *branchroot)
-/* Print branches that have the same direct ancestor `branchroot'.  */
+/* Print branches that have the same direct ancestor ‘branchroot’.  */
 {
   if (!branchroot)
     return;
@@ -249,7 +249,7 @@ putforest (struct branchhead const *branchroot)
 
 static void
 getscript (struct hshentry *Delta)
-/* Read edit script of `Delta' and count
+/* Read edit script of ‘Delta’ and count
    how many lines added and deleted in the script.  */
 {
   int ed;                               /* editor command */
@@ -300,7 +300,7 @@ static struct hshentry const *
 readdeltalog (void)
 /* Get the log message and skip the text of a deltatext node.
    Return the delta found.  Assume the current lexeme is not
-   yet in `NEXT (tok)'; do not advance `NEXT (tok)'.  */
+   yet in ‘NEXT (tok)’; do not advance ‘NEXT (tok)’.  */
 {
   register struct hshentry *Delta;
 
@@ -326,7 +326,7 @@ readdeltalog (void)
 
 static char
 extractdelta (struct hshentry const *pdelta)
-/* Return true if `pdelta' matches the selection critera.  */
+/* Return true if ‘pdelta’ matches the selection critera.  */
 {
   struct rcslock const *plock;
   struct stateattri const *pstate;
@@ -368,7 +368,7 @@ extractdelta (struct hshentry const *pdelta)
 
 static void
 exttree (struct hshentry *root)
-/* Select revisions, starting with `root'.  */
+/* Select revisions, starting with ‘root’.  */
 {
   struct branchhead const *newbranch;
 
@@ -389,7 +389,7 @@ exttree (struct hshentry *root)
 
 static void
 getauthor (char *argv)
-/* Get the author's name from command line and store in `authorlist'.  */
+/* Get the author's name from command line and store in ‘authorlist’.  */
 {
   register int c;
   struct authors *newauthor;
@@ -426,7 +426,7 @@ getauthor (char *argv)
 
 static void
 getstate (char *argv)
-/* Get the states of revisions from command line and store in `statelist'.  */
+/* Get the states of revisions from command line and store in ‘statelist’.  */
 {
   register char c;
   struct stateattri *newstate;
@@ -462,7 +462,7 @@ getstate (char *argv)
 static void
 trunclocks (void)
 /* Truncate the list of locks to those that are held by the
-   id's on` lockerlist'.  Do not truncate if `lockerlist' empty.  */
+   id's on ‘lockerlist’.  Do not truncate if ‘lockerlist’ empty.  */
 {
   struct rcslockers const *plocker;
   struct rcslock *p, **pp;
@@ -470,7 +470,7 @@ trunclocks (void)
   if (!lockerlist)
     return;
 
-  /* Shorten locks to those contained in `lockerlist'.  */
+  /* Shorten locks to those contained in ‘lockerlist’.  */
   for (pp = &ADMIN (locks); (p = *pp);)
     for (plocker = lockerlist;;)
       if (strcmp (plocker->login, p->login) == 0)
@@ -487,9 +487,9 @@ trunclocks (void)
 
 static void
 recentdate (struct hshentry const *root, struct Datepairs *pd)
-/* Find the delta that is closest to the cutoff date `pd' among the
-   revisions selected by `exttree'.  Successively narrow down the
-   interval given by `pd', and set the `strtdate' of `pd' to the date
+/* Find the delta that is closest to the cutoff date ‘pd’ among the
+   revisions selected by ‘exttree’.  Successively narrow down the
+   interval given by ‘pd’, and set the ‘strtdate’ of ‘pd’ to the date
    of the selected delta.  */
 {
   struct branchhead const *newbranch;
@@ -517,8 +517,8 @@ recentdate (struct hshentry const *root, struct Datepairs *pd)
 
 static int
 extdate (struct hshentry *root)
-/* Select revisions which are in the date range specified in `duelst'
-   and `datelist', starting at `root'.  Return number of revisions
+/* Select revisions which are in the date range specified in ‘duelst’
+   and ‘datelist’, starting at ‘root’.  Return number of revisions
    selected, including those already selected.  */
 {
   struct branchhead const *newbranch;
@@ -571,8 +571,8 @@ extdate (struct hshentry *root)
 
 static void
 getdatepair (char *argv)
-/* Get time range from command line and store in `datelist' if
- a time range specified or in `duelst' if a time spot specified.  */
+/* Get time range from command line and store in ‘datelist’ if
+ a time range specified or in ‘duelst’ if a time spot specified.  */
 {
   register char c;
   struct Datepairs *nextdate;
@@ -625,7 +625,7 @@ getdatepair (char *argv)
               duelst = nextdate;
               goto end;
             }
-          else                   /* DATE< or DATE> (see `switchflag') */
+          else                   /* DATE< or DATE> (see ‘switchflag’) */
             {
               bool eq = argv[1] == '=';
 
@@ -665,7 +665,7 @@ getdatepair (char *argv)
 
 static bool
 checkrevpair (char const *num1, char const *num2)
-/* Check whether `num1', `num2' are a legal pair, i.e.
+/* Check whether ‘num1’, ‘num2’ are a legal pair, i.e.
    only the last field differs and have same number of
    fields (if length <= 2, may be different if first field).  */
 {
@@ -684,8 +684,8 @@ checkrevpair (char const *num1, char const *num2)
 
 static bool
 getnumericrev (void)
-/* Get the numeric name of revisions stored in `revlist'; store
-   them in `Revlst'.  If `branchflag', also add default branch.  */
+/* Get the numeric name of revisions stored in ‘revlist’; store
+   them in ‘Revlst’.  If ‘branchflag’, also add default branch.  */
 {
   struct Revpairs *ptr, *pt;
   int n;
@@ -764,7 +764,7 @@ getnumericrev (void)
         }
       ptr = ptr->rnext;
     }
-  /* Now take care of `branchflag'.  */
+  /* Now take care of ‘branchflag’.  */
   if (branchflag && (ADMIN (defbr) || ADMIN (head)))
     {
       pt = FALLOC (struct Revpairs);
@@ -785,7 +785,7 @@ freebufs:
 
 static void
 getrevpairs (register char *argv)
-/* Get revision or branch range from command line; store in `revlist'.  */
+/* Get revision or branch range from command line; store in ‘revlist’.  */
 {
   register char c;
   struct Revpairs *nextrevpair;
@@ -1069,15 +1069,15 @@ main (int argc, char **argv)
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
           continue;
 
-        /* `REPO (filename)' contains the name of the RCS file,
-           and `FLOW (from)' the file descriptor;
-           `MANI (filename)' contains the name of the working file.  */
+        /* ‘REPO (filename)’ contains the name of the RCS file,
+           and ‘FLOW (from)’ the file descriptor;
+           ‘MANI (filename)’ contains the name of the working file.  */
 
-        /* Keep only those locks given by `-l'.  */
+        /* Keep only those locks given by ‘-l’.  */
         if (lockflag)
           trunclocks ();
 
-        /* Do nothing if `-L' is given and there are no locks.  */
+        /* Do nothing if ‘-L’ is given and there are no locks.  */
         if (onlylockflag && !ADMIN (locks))
           continue;
 
@@ -1093,7 +1093,7 @@ main (int argc, char **argv)
           continue;
 
         /* Print RCS pathname, working pathname and optional
-           administrative information.  Could use `getfullRCSname'
+           administrative information.  Could use ‘getfullRCSname’
            here, but that is very slow.  */
         aprintf (out, headFormat, REPO (filename), MANI (filename),
                  ADMIN (head) ? " " : "",
@@ -1146,7 +1146,7 @@ main (int argc, char **argv)
 
             exttree (ADMIN (head));
 
-            /* Get most recently date of the dates pointed by `duelst'.  */
+            /* Get most recently date of the dates pointed by ‘duelst’.  */
             currdate = duelst;
             while (currdate)
               {
@@ -1171,7 +1171,7 @@ main (int argc, char **argv)
             while (!(delta = readdeltalog ())->selector || --revno)
               continue;
             if (delta->next && countnumflds (delta->num) == 2)
-              /* Read through `delta->next' to get its `insertlns'.  */
+              /* Read through ‘delta->next’ to get its ‘insertlns’.  */
               while (readdeltalog () != delta->next)
                 continue;
             putrunk ();

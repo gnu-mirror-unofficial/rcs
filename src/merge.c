@@ -116,7 +116,7 @@ main (int argc, char **argv)
   if (argc != 4)
     PFATAL ("%s arguments%s", argc < 4 ? "not enough" : "too many", usage);
 
-  /* This copy keeps us `const'-clean.  */
+  /* This copy keeps us ‘const’-clean.  */
   arg[0] = argv[0];
   arg[1] = argv[1];
   arg[2] = argv[2];

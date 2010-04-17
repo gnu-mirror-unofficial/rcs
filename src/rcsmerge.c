@@ -130,7 +130,7 @@ main (int argc, char **argv)
           zone_set (a);
           break;
         case 'T':
-          /* Ignore `-T', so that env var `RCSINIT' can contain `-T'.  */
+          /* Ignore ‘-T’, so that env var ‘RCSINIT’ can contain ‘-T’.  */
           if (*a)
             goto unknown;
           break;
@@ -205,10 +205,10 @@ main (int argc, char **argv)
                         {
                           diagnose ("retrieving revision %s", xrev[i]);
                           bufscpy (&commarg, "-p");
-                          /* Not `xrev[i]', for $Name's sake.  */
+                          /* Not ‘xrev[i]’, for $Name's sake.  */
                           bufscat (&commarg, rev[i]);
                           if (run (-1,
-                                   /* Don't collide with merger.c `maketemp'.  */
+                                   /* Don't collide with merger.c ‘maketemp’.  */
                                    arg[i] = maketemp (i + 2),
                                    prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,

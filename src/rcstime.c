@@ -43,7 +43,7 @@ time2date (time_t unixtime, char date[datesize])
 
 static time_t
 str2time_checked (char const *source, time_t default_time, long default_zone)
-/* Like `str2time', except die if an error was found.  */
+/* Like ‘str2time’, except die if an error was found.  */
 {
   time_t t = str2time (source, default_time, default_zone);
 
@@ -54,8 +54,8 @@ str2time_checked (char const *source, time_t default_time, long default_zone)
 
 void
 str2date (char const *source, char target[datesize])
-/* Parse a free-format date in `source', convert it into
-   RCS internal format, and store the result into `target'.  */
+/* Parse a free-format date in ‘source’, convert it into
+   RCS internal format, and store the result into ‘target’.  */
 {
   time2date (str2time_checked (source, now (),
                                BE (zone_offset.valid)
@@ -68,7 +68,7 @@ str2date (char const *source, char target[datesize])
 
 time_t
 date2time (char const source[datesize])
-/* Convert an RCS internal format date to `time_t'.  */
+/* Convert an RCS internal format date to ‘time_t’.  */
 {
   char s[datesize + zonelenmax];
 
@@ -77,7 +77,7 @@ date2time (char const source[datesize])
 
 void
 zone_set (char const *s)
-/* Set the time zone for `date2str' output.  */
+/* Set the time zone for ‘date2str’ output.  */
 {
   if ((BE (zone_offset.valid) = !!(*s)))
     {
@@ -93,8 +93,8 @@ zone_set (char const *s)
 
 char const *
 date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
-/* Format a user-readable form of the RCS format `date'
-   into the buffer `datebuf'.  Return `datebuf'.  */
+/* Format a user-readable form of the RCS format ‘date’
+   into the buffer ‘datebuf’.  Return ‘datebuf’.  */
 {
   register char const *p = date;
 

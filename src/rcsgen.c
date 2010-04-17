@@ -35,12 +35,12 @@ enum stringwork
 
 static void
 scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
-/* Scan delta text nodes up to and including the one given by `delta'.
-   For the one given by `delta', the log message is saved into
-   `delta->log' if `needlog' is set; `func' specifies how to handle the
-   text.  Similarly, if `needlog', `delta->igtext' is set to the ignored
+/* Scan delta text nodes up to and including the one given by ‘delta’.
+   For the one given by ‘delta’, the log message is saved into
+   ‘delta->log’ if ‘needlog’ is set; ‘func’ specifies how to handle the
+   text.  Similarly, if ‘needlog’, ‘delta->igtext’ is set to the ignored
    phrases.  Assume the initial lexeme must be read in first.  Does not
-   advance `NEXT (tok)' after it is finished.  */
+   advance ‘NEXT (tok)’ after it is finished.  */
 {
   struct hshentry const *nextdelta;
   struct cbuf cb;
@@ -97,16 +97,16 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
 char const *
 buildrevision (struct hshentries const *deltas, struct hshentry *target,
                FILE *outfile, bool expandflag)
-/* Generate the revision given by `target' by retrieving all deltas given
-   by parameter `deltas' and combining them.  If `outfile' is set, the
+/* Generate the revision given by ‘target’ by retrieving all deltas given
+   by parameter ‘deltas’ and combining them.  If ‘outfile’ is set, the
    revision is output to it, otherwise write into a temporary file.
-   Temporary files are allocated by `maketemp'.  If `expandflag' is set,
-   keyword expansion is performed.  Return NULL if `outfile' is set, the
+   Temporary files are allocated by ‘maketemp’.  If ‘expandflag’ is set,
+   keyword expansion is performed.  Return NULL if ‘outfile’ is set, the
    name of the temporary file otherwise.
 
    Algorithm: Copy initial revision unchanged.  Then edit all revisions
    but the last one into it, alternating input and output files
-   (`FLOW (result)' and `editname').  The last revision is then edited in,
+   (‘FLOW (result)’ and ‘editname’).  The last revision is then edited in,
    performing simultaneous keyword substitution (this saves one extra
    pass).  All this simplifies if only one revision needs to be generated,
    or no keyword expansion is necessary, or if output goes to stdout.  */
@@ -221,13 +221,13 @@ yesorno (bool default_answer, char const *question, ...)
 
 void
 putdesc (struct cbuf *cb, bool textflag, char *textfile)
-/* Put the descriptive text into file `FLOW (rewr)'.
-   Also, save the description text into `cb'.
-   If `FLOW (from) && !textflag', the text is copied from the old description.
-   Otherwise, if `textfile', the text is read from that file, or from
-   stdin, if `!textfile'.  A `textfile' with a leading '-' is treated as a
-   string, not a pathname.  If `FLOW (from)', the old descriptive text is
-   discarded.  Always clear `FLOW (to)'.  */
+/* Put the descriptive text into file ‘FLOW (rewr)’.
+   Also, save the description text into ‘cb’.
+   If ‘FLOW (from) && !textflag’, the text is copied from the old description.
+   Otherwise, if ‘textfile’, the text is read from that file, or from
+   stdin, if ‘!textfile’.  A ‘textfile’ with a leading '-' is treated as a
+   string, not a pathname.  If ‘FLOW (from)’, the old descriptive text is
+   discarded.  Always clear ‘FLOW (to)’.  */
 {
   register FILE *txt;
   register int c;
@@ -395,7 +395,7 @@ putadmin (void)
 
 static void
 putdelta (register struct hshentry const *node, register FILE *fout)
-/* Output the delta `node' to `fout'.  */
+/* Output the delta ‘node’ to ‘fout’.  */
 {
   struct branchhead const *nextbranch;
 
@@ -418,7 +418,7 @@ putdelta (register struct hshentry const *node, register FILE *fout)
 
 void
 puttree (struct hshentry const *root, register FILE *fout)
-/* Output the delta tree with base `root' in preorder to `fout'.  */
+/* Output the delta tree with base ‘root’ in preorder to ‘fout’.  */
 {
   struct branchhead const *nextbranch;
 
@@ -441,11 +441,11 @@ puttree (struct hshentry const *root, register FILE *fout)
 bool
 putdtext (struct hshentry const *delta, char const *srcname,
           FILE *fout, bool diffmt)
-/* Output a deltatext node with delta number `delta->num', log message
-   `delta->log', ignored phrases `delta->igtext' and text `srcname' to
-   `fout'.  Double up all `SDELIM's in both the log and the text.  Make
+/* Output a deltatext node with delta number ‘delta->num’, log message
+   ‘delta->log’, ignored phrases ‘delta->igtext’ and text ‘srcname’ to
+   ‘fout’.  Double up all ‘SDELIM’s in both the log and the text.  Make
    sure the log message ends in '\n'.  Return false on error.  If
-   `diffmt', also check that the text is valid "diff -n" output.  */
+   ‘diffmt’, also check that the text is valid "diff -n" output.  */
 {
   struct fro *fin;
 
@@ -461,9 +461,9 @@ putdtext (struct hshentry const *delta, char const *srcname,
 
 void
 putstring (register FILE *out, bool delim, struct cbuf s, bool log)
-/* Output to `out' one `SDELIM' if `delim', then the string `s' with
-   `SDELIM's doubled.  If `log' is set then `s' is a log string; append
-   a newline if `s' is nonempty.  */
+/* Output to ‘out’ one ‘SDELIM’ if ‘delim’, then the string ‘s’ with
+   ‘SDELIM’s doubled.  If ‘log’ is set then ‘s’ is a log string; append
+   a newline if ‘s’ is nonempty.  */
 {
   register char const *sp;
   register size_t ss;
@@ -485,7 +485,7 @@ putstring (register FILE *out, bool delim, struct cbuf s, bool log)
 void
 putdftext (struct hshentry const *delta, struct fro *finfile,
            FILE *foutfile, bool diffmt)
-/* Like `putdtext', except the source file is already open.  */
+/* Like ‘putdtext’, except the source file is already open.  */
 {
   register FILE *fout;
   int c;
@@ -513,7 +513,7 @@ putdftext (struct hshentry const *delta, struct fro *finfile,
         {
           GETCHAR_OR (c, fin, goto done);
           if (c == SDELIM)
-            /* Double up `SDELIM'.  */
+            /* Double up ‘SDELIM’.  */
             aputc (SDELIM, fout);
           aputc (c, fout);
         }

@@ -36,7 +36,7 @@ struct top *top;
    as when the revision specified is by different symbolic names, so we
    need to detect those options and disable the optimization.
 
-   The `s_unique', `minus_y' `minus_D', and `longopt_maybe_p' are for
+   The ‘s_unique’, ‘minus_y’ ‘minus_D’, and ‘longopt_maybe_p’ are for
    detecting the long variants in a GNU getopt_long(3)-compatible way.  */
 
 struct unique
@@ -290,7 +290,7 @@ main (int argc, char **argv)
             zone_set (*argv + 2);
             goto option_handled;
           case 'T':
-            /* Ignore `-T', so that env var `RCSINIT' can contain `-T'.  */
+            /* Ignore ‘-T’, so that env var ‘RCSINIT’ can contain ‘-T’.  */
             if (*a)
               goto unknown;
             break;
@@ -426,7 +426,7 @@ main (int argc, char **argv)
 
         diagnose ("retrieving revision %s", xrev1);
         bufscpy (&commarg, "-p");
-        /* Not `xrev1', for $Name's sake.  */
+        /* Not ‘xrev1’, for $Name's sake.  */
         bufscat (&commarg, rev1);
 
         pp = &cov[3 + !DIFF_L];
@@ -468,7 +468,7 @@ main (int argc, char **argv)
           {
             diagnose ("retrieving revision %s", xrev2);
             bufscpy (&commarg, "-p");
-            /* Not `xrev2', for $Name's sake.  */
+            /* Not ‘xrev2’, for $Name's sake.  */
             bufscat (&commarg, rev2);
             cov[3 + !DIFF_L] = commarg.string;
             diffp[1] = maketemp (1);

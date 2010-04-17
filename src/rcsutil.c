@@ -76,7 +76,7 @@ testrealloc (void *ptr, size_t size)
 
 void
 ffree (void)
-/* Free all blocks in the `SINGLE' space.  */
+/* Free all blocks in the ‘SINGLE’ space.  */
 {
   forget (SINGLE);
 }
@@ -89,14 +89,14 @@ free_NEXT_str (void)
 
 char *
 str_save (char const *s)
-/* Save `s' in permanently allocated storage.  */
+/* Save ‘s’ in permanently allocated storage.  */
 {
   return intern0 (SHARED, s);
 }
 
 char *
 fbuf_save (const struct buf *b)
-/* Save `b->string' in storage that will be deallocated
+/* Save ‘b->string’ in storage that will be deallocated
    when we're done with this file.  */
 {
   return intern0 (SINGLE, b->string);
@@ -104,7 +104,7 @@ fbuf_save (const struct buf *b)
 
 char *
 cgetenv (char const *name)
-/* Like `getenv', but return a copy; `getenv' can overwrite old results.  */
+/* Like ‘getenv’, but return a copy; ‘getenv’ can overwrite old results.  */
 {
   register char *p;
 
@@ -113,13 +113,13 @@ cgetenv (char const *name)
 
 char const *
 getusername (bool suspicious)
-/* Get the caller's login name.  Trust only `getwpuid' if `suspicious'.  */
+/* Get the caller's login name.  Trust only ‘getwpuid’ if ‘suspicious’.  */
 {
   if (!BE (username))
     {
 #define JAM(x)  (BE (username) = x)
       if (
-          /* Prefer `getenv' unless `suspicious'; it's much faster.  */
+          /* Prefer ‘getenv’ unless ‘suspicious’; it's much faster.  */
 #if getlogin_is_secure
           (suspicious
            || (!JAM (cgetenv ("LOGNAME"))
@@ -163,7 +163,7 @@ getusername (bool suspicious)
 void
 awrite (char const *buf, size_t chars, FILE *f)
 {
-  /* POSIX 1003.1-1990 `ssize_t' hack.  */
+  /* POSIX 1003.1-1990 ‘ssize_t’ hack.  */
   while (SSIZE_MAX < chars)
     {
       if (fwrite (buf, sizeof (*buf), SSIZE_MAX, f) != SSIZE_MAX)
@@ -201,7 +201,7 @@ fdreopen (int fd, char const *file, int flags)
 
 static void
 accumulate_arg_quoted (struct divvy *space, int c, register char const *s)
-/* Accumulate to `space' the byte `c', plus a quoted copy of `s'.  */
+/* Accumulate to ‘space’ the byte ‘c’, plus a quoted copy of ‘s’.  */
 {
 #define apostrophe  '\''
   accumulate_byte (space, c);
@@ -226,9 +226,9 @@ accumulate_arg_quoted (struct divvy *space, int c, register char const *s)
 int
 runv (int infd, char const *outname, char const **args)
 /* Run a command.
-   `infd', if not -1, is the input file descriptor.
-   `outname', if non-NULL, is the name of the output file.
-   `args[1..]' form the command to be run; `args[0]' might be modified.  */
+   ‘infd’, if not -1, is the input file descriptor.
+   ‘outname’, if non-NULL, is the name of the output file.
+   ‘args[1..]’ form the command to be run; ‘args[0]’ might be modified.  */
 {
   int wstatus;
 
@@ -256,7 +256,7 @@ runv (int infd, char const *outname, char const **args)
             && STDIN_FILENO != (close (STDIN_FILENO),
                                 fcntl (infd, F_DUPFD, STDIN_FILENO)))
           {
-            /* Avoid `perror' since it may misuse buffers.  */
+            /* Avoid ‘perror’ since it may misuse buffers.  */
             complain ("%s: I/O redirection failed\n", args[1]);
             _Exit (DIFF_TROUBLE);
           }
@@ -265,7 +265,7 @@ runv (int infd, char const *outname, char const **args)
           if (fdreopen (STDOUT_FILENO, outname,
                         O_CREAT | O_TRUNC | O_WRONLY) < 0)
             {
-              /* Avoid `perror' since it may misuse buffers.  */
+              /* Avoid ‘perror’ since it may misuse buffers.  */
               complain ("%s: %s: cannot create\n", args[1], outname);
               _Exit (DIFF_TROUBLE);
             }
@@ -279,7 +279,7 @@ runv (int infd, char const *outname, char const **args)
           }
 #endif
 
-        /* Avoid `perror' since it may misuse buffers.  */
+        /* Avoid ‘perror’ since it may misuse buffers.  */
         complain ("%s: not found\n", notfound);
         _Exit (DIFF_TROUBLE);
       }
@@ -305,7 +305,7 @@ runv (int infd, char const *outname, char const **args)
     char *cmd;
     char const **p;
 
-    /* Use `system'.  On many hosts `system' discards signals.  Yuck!  */
+    /* Use ‘system’.  On many hosts ‘system’ discards signals.  Yuck!  */
     p = args + 1;
     accumulate_nonzero_bytes (SHARED, *p);
     while (*++p)
@@ -339,8 +339,8 @@ runv (int infd, char const *outname, char const **args)
 int
 run (int infd, char const *outname, ...)
 /* Run a command.
-   `infd', if not -1, is the input file descriptor.
-   `outname', if non-NULL, is the name of the output file.
+   ‘infd’, if not -1, is the input file descriptor.
+   ‘outname’, if non-NULL, is the name of the output file.
    The remaining arguments specify the command and its arguments.  */
 {
   va_list ap;
@@ -395,7 +395,7 @@ getRCSINIT (int argc, char **argv, char ***newargv)
   else
     {
       n = argc + 2;
-      /* Count spaces in `RCSINIT' to allocate a new arg vector.
+      /* Count spaces in ‘RCSINIT’ to allocate a new arg vector.
          This is an upper bound, but it's OK even if too large.  */
       for (p = q;;)
         {
@@ -493,8 +493,8 @@ uid_t
 ruid (void)
 {
 #ifndef HAVE_GETUID
-  /* Programmer error: We used to conditionally define `ruid'
-     (only when `defined HAVE_GETUID'), so it makes no sense
+  /* Programmer error: We used to conditionally define ‘ruid’
+     (only when ‘defined HAVE_GETUID’), so it makes no sense
      to call it otherwise.  */
   abort ();
 #endif
@@ -522,15 +522,15 @@ euid (void)
 #if defined HAVE_SETUID
 
 /* Setuid execution really works only with POSIX 1003.1a Draft 5
-   `seteuid', because it lets us switch back and forth between arbitrary
-   users.  If `seteuid' doesn't work, we fall back on `setuid', which
+   ‘seteuid’, because it lets us switch back and forth between arbitrary
+   users.  If ‘seteuid’ doesn't work, we fall back on ‘setuid’, which
    works if saved setuid is supported, unless the real or effective user
    is root.  This area is such a mess that we always check switches at
    runtime.  */
 
 static void
 set_uid_to (uid_t u)
-/* Become user `u'.  */
+/* Become user ‘u’.  */
 {
   if (euid () == ruid ())
     return;
@@ -555,7 +555,7 @@ set_uid_to (uid_t u)
 
 void
 nosetid (void)
-/* Ignore all calls to `seteid' and `setrid'.  */
+/* Ignore all calls to ‘seteid’ and ‘setrid’.  */
 {
   BE (stick_with_euid) = true;
 }

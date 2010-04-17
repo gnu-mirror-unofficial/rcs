@@ -34,7 +34,7 @@
 
 static void
 getsemi (char const *key)
-/* Get a semicolon to finish off a phrase started by `key'.  */
+/* Get a semicolon to finish off a phrase started by ‘key’.  */
 {
   if (!getlex (SEMI))
     fatal_syntax ("missing ';' after '%s'", key);
@@ -186,8 +186,8 @@ getadmin (void)
 
 void
 ignorephrases (const char *key)
-/* Ignore a series of phrases that do not start with `key'.  Stop when the
-   next phrase starts with a token that is not an identifier, or is `key'.  */
+/* Ignore a series of phrases that do not start with ‘key’.  Stop when the
+   next phrase starts with a token that is not an identifier, or is ‘key’.  */
 {
   for (;;)
     {
@@ -222,7 +222,7 @@ static char const *
 getkeyval (char const *keyword, enum tokens token, bool optional)
 /* Read a pair of the form:
    <keyword> <token> ;
-   where `token' is one of `ID' or `NUM'.  `optional' indicates whether
+   where ‘token’ is one of ‘ID’ or ‘NUM’.  ‘optional’ indicates whether
    <token> is optional.  Return a pointer to the actual character string
    of <id> or <num>.  */
 {
@@ -289,8 +289,8 @@ getdelta (void)
 
 void
 gettree (void)
-/* Read in the delta tree with `getdelta',
-   then update the `lockedby' fields.  */
+/* Read in the delta tree with ‘getdelta’,
+   then update the ‘lockedby’ fields.  */
 {
   struct rcslock const *currlock;
 
@@ -306,8 +306,8 @@ gettree (void)
 
 void
 getdesc (bool prdesc)
-/* Read in descriptive text.  `NEXT (tok)' is not advanced afterwards.
-   If `prdesc' is set, then print text to stdout.  */
+/* Read in descriptive text.  ‘NEXT (tok)’ is not advanced afterwards.
+   If ‘prdesc’ is set, then print text to stdout.  */
 {
   getkeystring (Kdesc);
   if (prdesc)
@@ -324,7 +324,7 @@ unexpected_EOF (void)
 
 void
 initdiffcmd (register struct diffcmd *dc)
-/* Initialize `*dc' suitably for `getdiffcmd'.  */
+/* Initialize ‘*dc’ suitably for ‘getdiffcmd’.  */
 {
   dc->adprev = 0;
   dc->dafter = 0;
@@ -345,12 +345,12 @@ diffLineNumberTooLarge (char const *buf)
 int
 getdiffcmd (struct fro *finfile, bool delimiter, FILE *foutfile,
             struct diffcmd *dc)
-/* Get an editing command output by "diff -n" from `finfile'.  The input
-   is delimited by `SDELIM' if `delimiter' is set, EOF otherwise.  Copy
-   a clean version of the command to `foutfile' (if non-NULL).  Return 0
+/* Get an editing command output by "diff -n" from ‘finfile’.  The input
+   is delimited by ‘SDELIM’ if ‘delimiter’ is set, EOF otherwise.  Copy
+   a clean version of the command to ‘foutfile’ (if non-NULL).  Return 0
    for 'd', 1 for 'a', and -1 for EOF.  Store the command's line number
-   and length into `dc->line1' and `dc->nlines'.  Keep `dc->adprev' and
-   `dc->dafter' up to date.  */
+   and length into ‘dc->line1’ and ‘dc->nlines’.  Keep ‘dc->adprev’ and
+   ‘dc->dafter’ up to date.  */
 {
   int c;
   register FILE *fout;

@@ -30,8 +30,8 @@
 
 static void
 escape_string (register FILE *out, register char const *s)
-/* Output to `out' the string `s',
-   escaping chars that would break `ci -k'.  */
+/* Output to ‘out’ the string ‘s’,
+   escaping chars that would break ‘ci -k’.  */
 {
   register char c;
 
@@ -67,8 +67,8 @@ escape_string (register FILE *out, register char const *s)
 
 static void
 keyreplace (struct pool_found *marker, struct expctx *ctx)
-/* Output the keyword value(s) corresponding to `marker'.
-   Attributes are derived from `delta'.  */
+/* Output the keyword value(s) corresponding to ‘marker’.
+   Attributes are derived from ‘delta’.  */
 {
   struct fro *infile = ctx->from;
   register FILE *out = ctx->to;
@@ -90,7 +90,6 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
     aprintf (out, "%c%s", KDELIM, marker->sym->bytes);
   if (exp != kwsub_k)
     {
-
       if (exp != kwsub_v)
         aprintf (out, "%c%c", VDELIM,
                  marker->i == Log && RCSv < VERSION (5) ? '\t' : ' ');
@@ -177,10 +176,10 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
           bool kdelim_found = false;
           off_t chars_read = fro_tello (infile);
 
-          c = 0;                /* Pacify `gcc -Wall'.  */
+          c = 0;                /* Pacify ‘gcc -Wall’.  */
 
           /* Back up to the start of the current input line,
-             setting `cs' to the number of characters before `$Log'.  */
+             setting ‘cs’ to the number of characters before ‘$Log’.  */
           cs = 0;
           for (;;)
             {
@@ -207,7 +206,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
         done_backing_up:
           ;
 
-          /* Copy characters before `$Log' into `leader'.  */
+          /* Copy characters before ‘$Log’ into ‘leader’.  */
           bufalloc (&leader, cs);
           cp = leader.string;
           for (cw = 0; cw < cs; cw++)
@@ -218,7 +217,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
               GETCHAR (c, infile);
             }
 
-          /* Convert traditional C or Pascal leader to ` *'.  */
+          /* Convert traditional C or Pascal leader to " *".  */
           for (cw = 0; cw < cs; cw++)
             if (ctab[(unsigned char) cp[cw]] != SPACE)
               break;
@@ -238,7 +237,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
                   break;
             }
 
-          /* Skip `$Log ... $' string.  */
+          /* Skip ‘$Log ... $’ string.  */
           do
             GETCHAR (c, infile);
           while (c != KDELIM);
@@ -296,12 +295,12 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
 
 int
 expandline (struct expctx *ctx)
-/* Read a line from `ctx->from' and write it to `ctx->to'.  Do keyword
-   expansion with data from `ctx->delta'.  If `ctx->delimstuffed' is true,
-   double `SDELIM' is replaced with single `SDELIM'.  If `ctx->rewr' is
-   set, copy the line unchanged to `ctx->rewr'.  `ctx->delimstuffed' must
-   be true if `ctx->rewr' is set.  Append revision history to log only if
-   `ctx->dolog' is set.  Return -1 if no data is copied, 0 if an
+/* Read a line from ‘ctx->from’ and write it to ‘ctx->to’.  Do keyword
+   expansion with data from ‘ctx->delta’.  If ‘ctx->delimstuffed’ is true,
+   double ‘SDELIM’ is replaced with single ‘SDELIM’.  If ‘ctx->rewr’ is
+   set, copy the line unchanged to ‘ctx->rewr’.  ‘ctx->delimstuffed’ must
+   be true if ‘ctx->rewr’ is set.  Append revision history to log only if
+   ‘ctx->dolog’ is set.  Return -1 if no data is copied, 0 if an
    incomplete line is copied, 2 if a complete line is copied; add 1 to
    return value if expansion occurred.  */
 {
@@ -393,7 +392,7 @@ expandline (struct expctx *ctx)
               /* Now we have a keyword terminated with a K/VDELIM.  */
               if (c == VDELIM)
                 {
-                  /* Try to find closing `KDELIM', and replace value.  */
+                  /* Try to find closing ‘KDELIM’, and replace value.  */
                   for (;;)
                     {
                       if (delimstuffed)
@@ -405,12 +404,12 @@ expandline (struct expctx *ctx)
                       accumulate_byte (LPARTS, c);
                       if (c == SDELIM && delimstuffed)
                         {
-                          /* Skip next `SDELIM'.  */
+                          /* Skip next ‘SDELIM’.  */
                           TEECHAR ();
                           if (c != SDELIM)
                             {
                               /* End of string before closing
-                                 `KDELIM' or newline.  */
+                                 ‘KDELIM’ or newline.  */
                               NEXT (c) = c;
                               goto keystring_eof;
                             }
@@ -418,7 +417,7 @@ expandline (struct expctx *ctx)
                     }
                   if (c != KDELIM)
                     {
-                      /* Couldn't find closing `KDELIM' -- give up.  */
+                      /* Couldn't find closing ‘KDELIM’ -- give up.  */
                       cooked = finish_string (LPARTS, &len);
                       aputs (cooked, out);
                       /* Last c handled properly.  */

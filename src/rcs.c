@@ -111,7 +111,7 @@ exiterr (void)
 static void
 getassoclst (bool flag, char *sp)
 /* Associate a symbolic name to a revision or branch,
-   and store in `assoclst'.  */
+   and store in ‘assoclst’.  */
 {
   struct Symrev *pt;
   char const *temp;
@@ -165,7 +165,7 @@ getchaccess (char const *login, enum changeaccess command)
 
 static void
 getaccessor (char *opt, enum changeaccess command)
-/* Get the accessor list of options `-e' and `-a'; store in `chaccess'.  */
+/* Get the accessor list of options ‘-e’ and ‘-a’; store in ‘chaccess’.  */
 {
   register int c;
   register char *sp;
@@ -224,7 +224,7 @@ getmessage (char *option)
 
 static void
 getstates (char *sp)
-/* Get one state attribute and the corresponding rev; store in `statelst'.  */
+/* Get one state attribute and the corresponding rev; store in ‘statelst’.  */
 {
   char const *temp;
   struct Status *pt;
@@ -242,7 +242,7 @@ getstates (char *sp)
 
   if (c == '\0')
     {
-      /* Change state of default branch or `ADMIN (head)'.  */
+      /* Change state of default branch or ‘ADMIN (head)’.  */
       chgheadstate = true;
       headstate = temp;
       return;
@@ -265,7 +265,7 @@ getstates (char *sp)
 
 static void
 getdelrev (char *sp)
-/* Get revision range or branch to be deleted; place in `delrev'.  */
+/* Get revision range or branch to be deleted; place in ‘delrev’.  */
 {
   int c;
   struct delrevpair *pt;
@@ -335,12 +335,12 @@ getdelrev (char *sp)
 
 static void
 scanlogtext (struct hshentry *delta, bool edit)
-/* Scan delta text nodes up to and including the one given by `delta',
-   or up to last one present, if `!delta'.  For the one given by
-   `delta' (if `delta'), the log message is saved into `delta->log' if
-   `delta == cuttail'; the text is edited if `edit' is set, else
+/* Scan delta text nodes up to and including the one given by ‘delta’,
+   or up to last one present, if ‘!delta’.  For the one given by
+   ‘delta’ (if ‘delta’), the log message is saved into ‘delta->log’ if
+   ‘delta == cuttail’; the text is edited if ‘edit’ is set, else
    copied.  Assume the initial lexeme must be read in first.  Do not
-   advance `NEXT (tok)' after it is finished, except if `!delta'.  */
+   advance ‘NEXT (tok)’ after it is finished, except if ‘!delta’.  */
 {
   struct hshentry const *nextdelta;
   struct cbuf cb;
@@ -401,7 +401,7 @@ scanlogtext (struct hshentry *delta, bool edit)
 
 static struct Lockrev **
 rmnewlocklst (char const *which)
-/* Remove lock to revision `which' from `newlocklst'.  */
+/* Remove lock to revision ‘which’ from ‘newlocklst’.  */
 {
   struct Lockrev *pt, **pre;
 
@@ -466,7 +466,7 @@ doaccess (void)
 
 static bool
 sendmail (char const *Delta, char const *who)
-/* Mail to `who', informing him that his lock on `Delta' was broken by
+/* Mail to ‘who’, informing him that his lock on ‘Delta’ was broken by
    caller.  Ask first whether to go ahead.  Return false on error or if
    user decides not to break the lock.  */
 {
@@ -533,7 +533,7 @@ sendmail (char const *Delta, char const *who)
 
 static bool
 breaklock (struct hshentry const *delta)
-/* Find the lock held by caller on `delta', and remove it.
+/* Find the lock held by caller on ‘delta’, and remove it.
    Send mail if a lock different from the caller's is broken.
    Print an error message if there is no such lock or error.  */
 {
@@ -561,9 +561,9 @@ breaklock (struct hshentry const *delta)
 
 static struct hshentry *
 searchcutpt (char const *object, int length, struct hshentries *store)
-/* Search store and return entry with number being `object'.
-   `cuttail' is 0, if the entry is `ADMIN (head)'; otherwise, it
-   is the entry point to the one with number being `object'.  */
+/* Search store and return entry with number being ‘object’.
+   ‘cuttail’ is 0, if the entry is ‘ADMIN (head)’; otherwise, it
+   is the entry point to the one with number being ‘object’.  */
 {
   cuthead = NULL;
   while (compartial (store->first->num, object, length))
@@ -576,7 +576,7 @@ searchcutpt (char const *object, int length, struct hshentries *store)
 
 static bool
 branchpoint (struct hshentry *strt, struct hshentry *tail)
-/* Check whether the deltas between `strt' and `tail' are locked or
+/* Check whether the deltas between ‘strt’ and ‘tail’ are locked or
    branch point, return 1 if any is locked or branch point; otherwise,
    return 0 and mark deleted.  */
 {
@@ -606,9 +606,9 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
 static bool
 removerevs (void)
 /* Get the revision range to be removed, and place the first revision
-   removed in `delstrt', the revision before `delstrt' in `cuthead'
-   (0, if `delstrt' is head), and the revision after the last removed
-   revision in `cuttail' (0 if the last is a leaf).  */
+   removed in ‘delstrt’, the revision before ‘delstrt’ in ‘cuthead’
+   (0, if ‘delstrt’ is head), and the revision after the last removed
+   revision in ‘cuttail’ (0 if the last is a leaf).  */
 {
   struct hshentry *target, *target2, *temp;
   int length;
@@ -776,7 +776,7 @@ removerevs (void)
 
 static bool
 doassoc (void)
-/* Add or delete (if !revno) association that is stored in `assoclst'.  */
+/* Add or delete (if !revno) association that is stored in ‘assoclst’.  */
 {
   char const *p;
   bool changed = false;
@@ -855,10 +855,10 @@ setlock (char const *rev)
 
 static bool
 dolocks (void)
-/* Remove lock for caller or first lock if `unlockcaller' is set;
-   remove locks which are stored in `rmvlocklst',
-   add new locks which are stored in `newlocklst',
-   add lock for `ADMIN (defbr)' or `ADMIN (head)' if `lockhead' is set.  */
+/* Remove lock for caller or first lock if ‘unlockcaller’ is set;
+   remove locks which are stored in ‘rmvlocklst’,
+   add new locks which are stored in ‘newlocklst’,
+   add lock for ‘ADMIN (defbr)’ or ‘ADMIN (head)’ if ‘lockhead’ is set.  */
 {
   struct Lockrev const *lockpt;
   struct hshentry *target;
@@ -907,7 +907,7 @@ dolocks (void)
             else
               changed |= breaklock (target);
           }
-        /* `breaklock' does its own `diagnose'.  */
+        /* ‘breaklock’ does its own ‘diagnose’.  */
       }
 
   /* Add new locks which stored in newlocklst.  */
@@ -949,7 +949,7 @@ domessages (void)
 static bool
 rcs_setstate (char const *rev, char const *status)
 /* Given a revision or branch number, find the corresponding delta
-   and sets its state to `status'.  */
+   and sets its state to ‘status’.  */
 {
   struct hshentry *target;
 
@@ -973,7 +973,7 @@ rcs_setstate (char const *rev, char const *status)
 
 static bool
 buildeltatext (struct hshentries const *deltas)
-/* Put the delta text on `FLOW (rewr)' and make necessary
+/* Put the delta text on ‘FLOW (rewr)’ and make necessary
    change to delta text.  */
 {
   register FILE *fcut;          /* temporary file to rebuild delta tree */
@@ -1421,9 +1421,9 @@ main (int argc, char **argv)
               }
           }
 
-        /* `REPO (filename)' contains the name of the RCS file, and
-           `MANI (filename)' contains the name of the working file.
-           If `!initflag', `FLOW (from)' contains the file descriptor
+        /* ‘REPO (filename)’ contains the name of the RCS file, and
+           ‘MANI (filename)’ contains the name of the working file.
+           If ‘!initflag’, ‘FLOW (from)’ contains the file descriptor
            for the RCS file.  The admin node is initialized.  */
 
         diagnose ("RCS file: %s", REPO (filename));
@@ -1527,8 +1527,8 @@ main (int argc, char **argv)
           puttree (ADMIN (head), FLOW (rewr));
         putdesc (&newdesc, textflag, textfile);
 
-        /* Don't conditionalize on non-NULL `ADMIN (head)'; that prevents
-           `scanlogtext' from advancing the input pointer to EOF, in
+        /* Don't conditionalize on non-NULL ‘ADMIN (head)’; that prevents
+           ‘scanlogtext’ from advancing the input pointer to EOF, in
            the process "marking" the intervening log messages to be
            discarded later.  The result is bogus log messages.  See
            <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=69193>.  */

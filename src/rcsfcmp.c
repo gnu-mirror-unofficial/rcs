@@ -43,12 +43,12 @@ discardkeyval (int c, register struct fro *f)
 int
 rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
          char const *uname, struct hshentry const *delta)
-/* Compare the files `xfp' and `uname'.  Return zero if `xfp' has the
-   same contents as `uname' and neither has keywords, otherwise -1 if
+/* Compare the files ‘xfp’ and ‘uname’.  Return zero if ‘xfp’ has the
+   same contents as ‘uname’ and neither has keywords, otherwise -1 if
    they are the same ignoring keyword values, and 1 if they differ even
-   ignoring keyword values.  For the `Log' keyword, skip the log message
-   given by the parameter `delta' in `xfp'.  Thus, return nonpositive if
-   `xfp' contains the same as `uname', with the keywords expanded.
+   ignoring keyword values.  For the ‘Log’ keyword, skip the log message
+   given by the parameter ‘delta’ in ‘xfp’.  Thus, return nonpositive if
+   ‘xfp’ contains the same as ‘uname’, with the keywords expanded.
 
    Implementation: character-by-character comparison until $ is found.
    If a $ is found, read in the marker keywords; if they are real
@@ -181,8 +181,8 @@ rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
                       GETCHAR_OR (uc, ufp, ueof = true);
                       if (xeof | ueof)
                         goto eof;
-                      /* If the keyword is `Log', also
-                         skip the log message in `xfp'.  */
+                      /* If the keyword is ‘Log’, also
+                         skip the log message in ‘xfp’.  */
                       if (match1.i == Log)
                         {
                           /* First, compute the number of LFs in log msg.  */
@@ -196,7 +196,7 @@ rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
                             {
                               /* This log message was inserted.  Skip
                                  its header.  The number of newlines to
-                                 skip is `1 + (C + 1) * (1 + L + 1)',
+                                 skip is ‘1 + (C + 1) * (1 + L + 1)’,
                                  where C is the number of newlines in
                                  the comment leader, and L is the number
                                  of newlines in the log string.  */
@@ -236,7 +236,7 @@ rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
                     }
                   else
                     {
-                      /* Both end in the same character, but not a `KDELIM'.
+                      /* Both end in the same character, but not a ‘KDELIM’.
                          Must compare string values.  */
 #ifdef FCMPTEST
                       printf

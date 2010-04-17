@@ -78,8 +78,8 @@ pool_lookup (const uint8_t pool[], const char *start, size_t len,
 
 int
 recognize_kwsub (const char *start, size_t len)
-/* Search for match in `kwsub_pool' for byte range `start' length `len'.
-   Return its `enum kwsub' if successful, otherwise -1.  */
+/* Search for match in ‘kwsub_pool’ for byte range ‘start’ length ‘len’.
+   Return its ‘enum kwsub’ if successful, otherwise -1.  */
 {
   struct pool_found found;
 
@@ -107,10 +107,10 @@ kwsub_string (enum kwsub i)
 
 bool
 recognize_keyword (char const *string, struct pool_found *found)
-/* Check whether `string' starts with a keyword followed by a
-   `KDELIM' or a `VDELIM'.  Return true if successful.  In that
-   case, `found' will hold a pointer to the found `struct tinysym',
-   as well as the associated `enum marker' value.  */
+/* Check whether ‘string’ starts with a keyword followed by a
+   ‘KDELIM’ or a ‘VDELIM’.  Return true if successful.  In that
+   case, ‘found’ will hold a pointer to the found ‘struct tinysym’,
+   as well as the associated ‘enum marker’ value.  */
 {
   const char delims[3] = { KDELIM, VDELIM, '\0' };
   size_t limit = strcspn (string, delims);

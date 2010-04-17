@@ -103,7 +103,7 @@ match (register FILE *fp)
 
 static int
 scanfile (register FILE *file, char const *name)
-/* Scan an open `file' (perhaps with `name') for keywords.  Return
+/* Scan an open ‘file’ (perhaps with ‘name’) for keywords.  Return
    -1 if there's a write error; exit immediately on a read error.  */
 {
   register int c;
@@ -132,9 +132,9 @@ scanfile (register FILE *file, char const *name)
   if (ferror (file) || fclose (file) != 0)
     {
       reportError (name);
-      /* The following is equivalent to `exit (EXIT_FAILURE)', but we
-         invoke `exiterr' to keep lint happy.  The DOS and OS/2 ports
-         need `exiterr'.  */
+      /* The following is equivalent to ‘exit (EXIT_FAILURE)’, but we
+         invoke ‘exiterr’ to keep lint happy.  The DOS and OS/2 ports
+         need ‘exiterr’.  */
       fflush (stdout);
       exiterr ();
     }
