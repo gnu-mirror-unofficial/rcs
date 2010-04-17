@@ -27,8 +27,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "unistd-safer.h"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"
 #include "b-isr.h"
 
 /* Our hash algorithm is h[0] = 0, h[i+1] = 4*h[i] + c,
@@ -101,7 +103,7 @@ Lexinit (void)
     LEX (hshtab)[i] = NULL;
 
   LEX (erroneousp) = false;
-  LEX (Oerrloop) = false;
+  BE (Oerrloop) = false;
   if (FLOW (from))
     {
       FLOW (to) = NULL;
@@ -912,12 +914,12 @@ Iopen (char const *name, char const *type, struct stat *status)
 #endif
 /* Open `name' for reading, return its descriptor, and set `*status'.  */
 {
-  int fd = fdSafer (open (name, O_RDONLY
+  int fd = fd_safer (open (name, O_RDONLY
 #if OPEN_O_BINARY
-                          | (strchr (type, 'b') ? OPEN_O_BINARY :
-                             0)
+                           | (strchr (type, 'b') ? OPEN_O_BINARY :
+                              0)
 #endif
-                          ));
+                           ));
 
   if (fd < 0)
     return NULL;
@@ -926,41 +928,6 @@ Iopen (char const *name, char const *type, struct stat *status)
 #else
   return fd2RILE (fd, name, type, status);
 #endif
-}
-
-void
-Oerror (void)
-{
-  if (LEX (Oerrloop))
-    PROGRAM (exiterr) ();
-  LEX (Oerrloop) = true;
-  fatal_sys ("output error");
-}
-
-void
-Ieof (void)
-{
-  fatal_syntax ("unexpected end of file");
-}
-
-void
-Ierror (void)
-{
-  fatal_sys ("input error");
-}
-
-void
-testIerror (FILE *f)
-{
-  if (ferror (f))
-    Ierror ();
-}
-
-void
-testOerror (FILE *o)
-{
-  if (ferror (o))
-    Oerror ();
 }
 
 void
@@ -1028,7 +995,7 @@ oflush (void)
   if (fflush (MANI (standard_output)
               ? MANI (standard_output)
               : stdout)
-      != 0 && !LEX (Oerrloop))
+      != 0 && !BE (Oerrloop))
     Oerror ();
 }
 

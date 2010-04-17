@@ -35,7 +35,9 @@
 #endif
 #include <fcntl.h>
 #include "same-inode.h"
+#include "unistd-safer.h"
 #include "b-complain.h"
+#include "b-fb.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
 #include "b-divvy.h"
@@ -249,7 +251,7 @@ finishedit (struct hshentry const *delta, FILE *outfile, bool done)
 }
 
 /* Open a temporary NAME for output, truncating any previous contents.  */
-#define fopen_update_truncate(name)  fopenSafer (name, FOPEN_W_WORK)
+#define fopen_update_truncate(name)  fopen_safer (name, FOPEN_W_WORK)
 
 #else /* !large_memory */
 
@@ -258,7 +260,7 @@ fopen_update_truncate (char const *name)
 {
   if (BAD_FOPEN_WPLUS && un_link (name) != 0)
     fatal_sys (name);
-  return fopenSafer (name, FOPEN_WPLUS_WORK);
+  return fopen_safer (name, FOPEN_WPLUS_WORK);
 }
 
 #endif  /* !large_memory */
@@ -879,7 +881,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   seteid ();
   fdesc = create (sp);
   /* Do it now; `setrid' might use stderr.  */
-  fdescSafer = fdSafer (fdesc);
+  fdescSafer = fd_safer (fdesc);
   e = errno;
   setrid ();
 

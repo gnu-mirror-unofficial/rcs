@@ -28,6 +28,7 @@
 #include "co.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"
 #include "b-isr.h"
 
 struct top *top;
@@ -658,7 +659,7 @@ main (int argc, char **argv)
                 continue;
               }
             neworkname = makedirtemp (1);
-            if (!(neworkptr = fopenSafer (neworkname, FOPEN_W_WORK)))
+            if (!(neworkptr = fopen_safer (neworkname, FOPEN_W_WORK)))
               {
                 if (errno == EACCES)
                   MERR ("permission denied on parent directory");

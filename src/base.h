@@ -614,6 +614,10 @@ struct behavior
      (Only meaningful if `BAD_WAIT_IF_SIGCHLD_IGNORED'.)
      -- runv  */
 
+  bool Oerrloop;
+  /* True means ‘Oerror’ was called already.
+     -- Oerror Lexinit  */
+
   /* The rest of the members in `struct behavior' are scratch spaces
      managed by various subsystems.  */
 
@@ -660,10 +664,6 @@ struct parse_state
   bool erroneousp;
   /* True means lexing encountered an error.
      -- buildjoin Lexinit syserror generic_error generic_fatal  */
-
-  bool Oerrloop;
-  /* True means `Oerror' was called already.
-     -- Oerror Lexinit  */
 
   void *tokbuf;
   /* Space for buffering tokens.
@@ -883,9 +883,6 @@ bool getoldkeys (RILE *);
 
 /* rcslex */
 char const *getid (void);
-void Ieof (void) exiting;
-void Ierror (void) exiting;
-void Oerror (void) exiting;
 char *checkid (char *, int);
 char *checksym (char *, int);
 bool eoflex (void);
@@ -913,8 +910,6 @@ void oflush (void);
 void printstring (void);
 void readstring (void);
 void redefined (int);
-void testIerror (FILE *);
-void testOerror (FILE *);
 void warnignore (void);
 void hey_trundling (bool, RILE *);
 #if large_memory && maps_memory
@@ -986,12 +981,10 @@ void zone_set (char const *);
 
 /* rcsutil */
 void gnurcs_init (void);
-FILE *fopenSafer (char const *, char const *);
 char *cgetenv (char const *);
 char *fbuf_save (const struct buf *);
 char *str_save (char const *);
 char const *getusername (bool);
-int fdSafer (int);
 int getRCSINIT (int, char **, char ***);
 int run (int, char const *, ...);
 int runv (int, char const *, char const **);

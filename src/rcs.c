@@ -26,6 +26,7 @@
 #include "rcs.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"
 
 struct top *top;
 
@@ -483,7 +484,7 @@ sendmail (char const *Delta, char const *who)
   /* Go ahead with breaking.  */
 #ifdef SENDMAIL
   messagefile = maketemp (0);
-  if (!(mailmess = fopenSafer (messagefile, "w+")))
+  if (!(mailmess = fopen_safer (messagefile, "w+")))
     {
       fatal_sys (messagefile);
     }
@@ -983,7 +984,7 @@ buildeltatext (struct hshentries const *deltas)
   if (cuthead)
     {
       cutname = maketemp (3);
-      if (!(fcut = fopenSafer (cutname, FOPEN_WPLUS_WORK)))
+      if (!(fcut = fopen_safer (cutname, FOPEN_WPLUS_WORK)))
         {
           fatal_sys (cutname);
         }

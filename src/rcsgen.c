@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"
 
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
@@ -266,7 +267,7 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
             }
           else
             {
-              if (!(txt = fopenSafer (textfile, "r")))
+              if (!(txt = fopen_safer (textfile, "r")))
                 fatal_sys (textfile);
               for (;;)
                 {
@@ -337,7 +338,7 @@ putadmin (void)
     {
 #if BAD_CREAT0
       ORCSclose ();
-      fout = fopenSafer (makedirtemp (0), FOPEN_WB);
+      fout = fopen_safer (makedirtemp (0), FOPEN_WB);
 #else  /* !BAD_CREAT0 */
       int fo = REPO (fd_lock);
 

@@ -26,6 +26,7 @@
 #include "rlog.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"                       /* Ieof */
 
 struct top *top;
 

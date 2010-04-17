@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"                       /* Ieof */
 
 #define Kbranches  KS (branches)
 #if COMPAT2

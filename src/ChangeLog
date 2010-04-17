@@ -1,3 +1,38 @@
+2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move some basic file operation funcs to b-fb.[hc].
+
+	* b-fb.h: New file.
+	* b-fb.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-fb.h, b-fb.c.
+	* b-kwxout.c: #include "b-fb.h".
+	* base.h (behavior): Move member ‘Oerrloop’ to here ...
+	(parse_state): ... from here.
+	(Ieof, Ierror, testIerror, Oerror, testOerror)
+	(fopenSafer, fdSafer): Delete func decls.
+	* ci.c: #include "b-fb.h".
+	(xpandfile): Use ‘fopen_safer’.
+	* co.c: #include "b-fb.h".
+	(main): Use ‘fopen_safer’.
+	* merger.c: #include "b-fb.h".
+	(merge): Use ‘fopen_safer’.
+	* rcs.c: #include "b-fb.h".
+	(sendmail, buildeltatext): Use ‘fopen_safer’.
+	* rcsedit.c: #include "unistd-safer.h", "b-fb.h".
+	[large_memory] (fopen_update_truncate): Use ‘fopen_safer’.
+	(rcswriteopen): Use ‘fd_safer’.
+	* rcsgen.c: #include "b-fb.h".
+	(putdesc, putadmin): Use ‘fopen_safer’.
+	* rcslex.c: #include "unistd-safer.h", "b-fb.h".
+	(Lexinit): Update ‘Oerrloop’ init.
+	(Iopen): Use ‘fd_safer’.
+	(Ieof, Ierror, testIerror, Oerror, testOerror): Delete funcs.
+	(Ifclose): Update ‘Oerrloop’ ref.
+	* rcssyn.c: #include "b-fb.h".
+	* rcsutil.c: #include "b-fb.h".
+	(dupSafer, fdSafer, fopenSafer): Delete funcs.
+	* rlog.c: #include "b-fb.h".
+
 2010-04-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Always stash ignored phrases, regardless of ‘large_memory’.

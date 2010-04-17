@@ -29,6 +29,7 @@
 #include "same-inode.h"
 #include "ci.help"
 #include "b-complain.h"
+#include "b-fb.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
 
@@ -455,7 +456,7 @@ xpandfile (RILE *unexfile, struct hshentry const *delta,
   int e, r;
 
   targetname = makedirtemp (1);
-  if (!(exfile = fopenSafer (targetname, FOPEN_W_WORK)))
+  if (!(exfile = fopen_safer (targetname, FOPEN_W_WORK)))
     {
       syserror_errno (targetname);
       MERR ("can't build working file");

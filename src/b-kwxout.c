@@ -24,6 +24,7 @@
 #include <string.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"                       /* Ieof */
 #include "b-kwxout.h"
 
 static void

@@ -35,6 +35,7 @@
 #endif
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"
 #include "b-isr.h"
 #include "gnu-h-v.h"
 #include "maketime.h"
@@ -209,65 +210,6 @@ awrite (char const *buf, size_t chars, FILE *f)
 
   if (fwrite (buf, sizeof (*buf), chars, f) != chars)
     Oerror ();
-}
-
-static int
-dupSafer (int fd)
-/* Dup a file descriptor; the result must not be stdin, stdout, or stderr.  */
-{
-  return fcntl (fd, F_DUPFD, STDERR_FILENO + 1);
-}
-
-int
-fdSafer (int fd)
-/* Renumber a file descriptor so that it's not stdin, stdout, or stderr.  */
-{
-  if (STDIN_FILENO <= fd && fd <= STDERR_FILENO)
-    {
-      int f = dupSafer (fd);
-      int e = errno;
-
-      close (fd);
-      errno = e;
-      fd = f;
-    }
-  return fd;
-}
-
-FILE *
-fopenSafer (char const *filename, char const *type)
-/* Like `fopen', except the result is never stdin, stdout, or stderr.  */
-{
-  FILE *stream = fopen (filename, type);
-
-  if (stream)
-    {
-      int fd = fileno (stream);
-
-      if (STDIN_FILENO <= fd && fd <= STDERR_FILENO)
-        {
-          int f = dupSafer (fd);
-
-          if (f < 0)
-            {
-              int e = errno;
-
-              fclose (stream);
-              errno = e;
-              return NULL;
-            }
-          if (fclose (stream) != 0)
-            {
-              int e = errno;
-
-              close (f);
-              errno = e;
-              return NULL;
-            }
-          stream = fdopen (f, type);
-        }
-    }
-  return stream;
 }
 
 #if defined HAVE_WORKING_FORK

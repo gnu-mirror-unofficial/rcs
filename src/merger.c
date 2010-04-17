@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-fb.h"
 
 static char const *
 normalize_arg (char const *s)
@@ -76,7 +77,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
     PWARN ("conflicts during merge");
   if (t)
     {
-      if (!(f = fopenSafer (argv[0], "w")))
+      if (!(f = fopen_safer (argv[0], "w")))
         fatal_sys (argv[0]);
       if (!(rt = Iopen (t, "r", NULL)))
         fatal_sys (t);
@@ -98,7 +99,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
       s = DIFF_FAILURE;
       PWARN ("overlaps or other problems during merge");
     }
-  if (!(f = fopenSafer (t, "a+")))
+  if (!(f = fopen_safer (t, "a+")))
     fatal_sys (t);
   aputs (tostdout ? "1,$p\n" : "w\n", f);
   Orewind (f);
