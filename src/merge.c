@@ -22,6 +22,7 @@
 #include "base.h"
 #include "merge.help"
 #include "b-complain.h"
+#include "b-feph.h"
 
 struct top *top;
 

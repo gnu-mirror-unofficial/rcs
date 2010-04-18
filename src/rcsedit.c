@@ -38,27 +38,11 @@
 #include "unistd-safer.h"
 #include "b-complain.h"
 #include "b-fb.h"
+#include "b-feph.h"
 #include "b-fro.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
 #include "b-divvy.h"
-
-/* (Somewhat) fleeting files.  */
-enum maker { notmade, real, effective };
-
-struct sff
-{
-  struct buf filename;
-  /* Unlink this when done.  */
-  enum maker volatile disposition;
-  /* (But only if it is in the right mood.)  */
-};
-
-/* Indexes into ‘sff’.  */
-#define SFFI_LOCKDIR  0
-#define SFFI_NEWDIR   BAD_CREAT0
-
-#define SFF_COUNT  (SFFI_NEWDIR + 2)
 
 struct editstuff
 {
@@ -72,9 +56,6 @@ struct editstuff
   /* #adds - #deletes in each edit run, used to correct ‘EDIT (lcount)’
      in case file is not rewound after applying one delta.  */
 
-  struct sff sff[SFF_COUNT];
-  /* (Somewhat) fleeting files.  */
-
   Iptr_type *line;
   size_t gap, gapsize, lim;
   /* ‘line’ contains pointers to the lines in the currently "edited" file.
@@ -84,12 +65,14 @@ struct editstuff
 
      Any '@'s in lines are duplicated.  Lines are terminated by '\n',
      or (for a last partial line only) by single '@'.  */
+
+  struct sff *sff;
 };
 
 #define EDIT(x)  (((struct editstuff *) BE (editstuff))-> x)
 
-#define lockname    (EDIT (sff)[SFFI_LOCKDIR].filename.string)
-#define newRCSname  (EDIT (sff)[SFFI_NEWDIR].filename.string)
+#define lockname    (BE (sff)[SFFI_LOCKDIR].filename)
+#define newRCSname  (BE (sff)[SFFI_NEWDIR].filename)
 
 int
 un_link (char const *s)
@@ -799,7 +782,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       *tp = '_';
     }
 
-  bufscpy (&EDIT (sff)[waslocked].filename, lfn);
+  BE (sff)[waslocked].filename = lfn;
 
   f = NULL;
 
@@ -868,7 +851,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   setrid ();
 
   if (0 <= fdesc)
-    EDIT (sff)[SFFI_LOCKDIR].disposition = effective;
+    BE (sff)[SFFI_LOCKDIR].disposition = effective;
 
   if (fdescSafer < 0)
     {
@@ -894,7 +877,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
               errno = e;
               if (r != 0)
                 fatal_sys (lockname);
-              bufscpy (&EDIT (sff)[SFFI_LOCKDIR].filename, lfn);
+              BE (sff)[SFFI_LOCKDIR].filename = lfn;
             }
         }
       REPO (fd_lock) = fdescSafer;
@@ -904,63 +887,6 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 
   errno = e;
   return f;
-}
-
-void
-keepdirtemp (char const *name)
-/* Do not unlink ‘name’, either because it's not there any more,
-   or because it has already been unlinked.  */
-{
-  register int i;
-
-  for (i = SFF_COUNT; 0 <= --i;)
-    if (EDIT (sff)[i].filename.string == name)
-      {
-        EDIT (sff)[i].disposition = notmade;
-        return;
-      }
-  PFATAL ("keepdirtemp");
-}
-
-char const *
-makedirtemp (bool isworkfile)
-/* Create a unique pathname and store it into ‘EDIT (sff)’.  Because of
-   storage in ‘EDIT (sff)’, ‘dirtempunlink’ can unlink the file later.
-   Return a pointer to the pathname created.
-   If ‘isworkfile’, put it into the working file's directory;
-   otherwise, put the unique file in RCSfile's directory.  */
-{
-  int slot = SFFI_NEWDIR + isworkfile;
-
-  ensure_editstuff ();
-  set_temporary_file_name (&EDIT (sff)[slot].filename, isworkfile
-                           ? MANI (filename)
-                           : REPO (filename));
-  EDIT (sff)[slot].disposition = real;
-  return EDIT (sff)[slot].filename.string;
-}
-
-void
-dirtempunlink (void)
-/* Clean up ‘makedirtemp’ files.
-   May be invoked by signal handler.  */
-{
-  register int i;
-  enum maker m;
-
-  if (! BE (editstuff))
-    return;
-
-  for (i = SFF_COUNT; 0 <= --i;)
-    if ((m = EDIT (sff)[i].disposition) != notmade)
-      {
-        if (m == effective)
-          seteid ();
-        un_link (EDIT (sff)[i].filename.string);
-        if (m == effective)
-          setrid ();
-        EDIT (sff)[i].disposition = notmade;
-      }
 }
 
 int

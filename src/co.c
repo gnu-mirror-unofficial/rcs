@@ -29,6 +29,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-feph.h"
 #include "b-fro.h"
 #include "b-isr.h"
 
@@ -660,7 +661,7 @@ main (int argc, char **argv)
                       MANI (filename));
                 continue;
               }
-            neworkname = makedirtemp (1);
+            neworkname = makedirtemp (true);
             if (!(neworkptr = fopen_safer (neworkname, FOPEN_W_WORK)))
               {
                 if (errno == EACCES)

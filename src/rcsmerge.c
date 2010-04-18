@@ -24,6 +24,7 @@
 #include <string.h>
 #include "rcsmerge.help"
 #include "b-complain.h"
+#include "b-feph.h"
 #include "b-fro.h"
 
 struct top *top;

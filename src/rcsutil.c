@@ -36,6 +36,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-feph.h"
 #include "b-isr.h"
 #include "gnu-h-v.h"
 #include "maketime.h"
@@ -48,6 +49,7 @@ gnurcs_init (void)
   top = ZLLOC (1, struct top);
   unbuffer_standard_error ();
   ISR_SCRATCH = isr_init (&BE (quiet));
+  init_ephemstuff ();
   init_fnstuff ();
   init_maketimestuff ();
 }

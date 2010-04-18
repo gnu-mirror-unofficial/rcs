@@ -30,6 +30,7 @@
 #include "ci.help"
 #include "b-complain.h"
 #include "b-fb.h"
+#include "b-feph.h"
 #include "b-fro.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
@@ -456,7 +457,7 @@ xpandfile (struct fro *unexfile, struct hshentry const *delta,
   char const *targetname;
   int e, r;
 
-  targetname = makedirtemp (1);
+  targetname = makedirtemp (true);
   if (!(exfile = fopen_safer (targetname, FOPEN_W_WORK)))
     {
       syserror_errno (targetname);

@@ -343,7 +343,7 @@ putadmin (void)
     {
 #if BAD_CREAT0
       ORCSclose ();
-      fout = fopen_safer (makedirtemp (0), FOPEN_WB);
+      fout = fopen_safer (makedirtemp (false), FOPEN_WB);
 #else  /* !BAD_CREAT0 */
       int fo = REPO (fd_lock);
 

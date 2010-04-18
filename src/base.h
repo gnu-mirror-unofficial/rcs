@@ -389,6 +389,17 @@ struct program
 };
 extern const struct program program;
 
+/* (Somewhat) fleeting files.  */
+enum maker { notmade, real, effective };
+
+struct sff
+{
+  char const *filename;
+  /* Unlink this when done.  */
+  enum maker disposition;
+  /* (But only if it is in the right mood.)  */
+};
+
 /* A program controls the behavior of subsystems by setting these.
    Subsystems also communicate via these settings.  */
 struct behavior
@@ -497,11 +508,15 @@ struct behavior
   /* True means ‘Oerror’ was called already.
      -- Oerror Lexinit  */
 
+  struct sff *sff;
+  /* (Somewhat) fleeting files.  */
+
   /* The rest of the members in ‘struct behavior’ are scratch spaces
      managed by various subsystems.  */
 
   struct isr_scratch *isr;
   struct editstuff *editstuff;
+  struct ephemstuff *ephemstuff;
   struct fnstuff *fnstuff;
   struct maketimestuff *maketimestuff;
 };
@@ -694,7 +709,6 @@ int merge (bool, char const *, char const *const[3], char const *const[3]);
 
 /* rcsedit */
 struct fro *rcswriteopen (struct buf *, struct stat *, bool);
-char const *makedirtemp (bool);
 char const *getcaller (void);
 int addlock (struct hshentry *, bool);
 int addsymbol (char const *, char const *, bool);
@@ -707,10 +721,8 @@ int setmtime (char const *, time_t);
 void ORCSclose (void);
 void ORCSerror (void);
 void copystring (void);
-void dirtempunlink (void);
 void enterstring (void);
 void finishedit (struct hshentry const *, FILE *, bool);
-void keepdirtemp (char const *);
 void openfcopy (FILE *);
 void snapshotedit (FILE *);
 void xpandstring (struct hshentry const *);
@@ -729,15 +741,12 @@ struct fro *rcsreadopen (struct buf *, struct stat *, bool);
 char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
 char const *getfullRCSname (void);
-void set_temporary_file_name (struct buf *filename, const char *prefix);
-char const *maketemp (int);
 char const *rcssuffix (char const *);
 int pairnames (int, char **, open_rcsfile_fn_t *, bool, bool);
 void bufalloc (struct buf *, size_t);
 void bufautoend (struct buf *);
 void bufscat (struct buf *, char const *);
 void bufscpy (struct buf *, char const *);
-void tempunlink (void);
 
 /* rcsgen */
 char const *buildrevision (struct hshentries const *,
@@ -872,6 +881,10 @@ void setrid (void);
 #endif
 
 bool isSLASH (int c);
+
+/* Indexes into ‘BE (sff)’.  */
+#define SFFI_LOCKDIR  0
+#define SFFI_NEWDIR   BAD_CREAT0
 
 /* Idioms.  */
 

@@ -25,6 +25,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-fb.h"
+#include "b-feph.h"
 #include "b-fro.h"
 
 static char const *

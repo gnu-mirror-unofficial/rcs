@@ -32,21 +32,16 @@
 #include "same-inode.h"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-feph.h"
 #include "b-fro.h"
 
 static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
 
-/* Temp names to be unlinked when done, if they are not 0.
-   Must be at least ‘DIRTEMPNAMES’ (see rcsedit.c).  */
-#define TEMPNAMES 5
-
 struct fnstuff
 {
   struct buf RCSbuf, RCSb;
   int RCSerrno;
-  char *volatile tpnames[TEMPNAMES];
-  char *tmpdir;
   char *cwd;
 };
 
@@ -106,148 +101,6 @@ static const struct compair const comtable[] = {
   {"y",    " * "},              /* yacc */
   {NULL,   "# "}                /* default for unknown suffix; must be last */
 };
-
-#ifndef HAVE_MKSTEMP
-static int
-homegrown_mkstemp (char *template)
-/* Like mkstemp(2), but never return EINVAL.  That is, never check for
-   missing "XXXXXX" since we know the unique caller DTRT.  */
-{
-  int pid = getpid ();
-  char *end = template + strlen (template);
-  char const xrep[] = {"abcdefghijklmnopqrstuvwxyz"
-                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                       /* Omit '0' => ‘strlen (xrep)’ is prime.  */
-                       "123456789"};
-  struct timeval tv;
-  uint64_t n;
-  int fd = -1;
-
-  for (int patience = 42 * 42;
-       0 > fd && patience;
-       patience--)
-    {
-      if (0 > gettimeofday (&tv, NULL))
-        return -1;
-      /* Cast to ensure 64-bit shift.  */
-      n = pid | (uint64_t)(tv.tv_sec ^ tv.tv_usec) << 32;
-      for (char *w = end - 6; n && w < end; w++)
-        {
-          *w = xrep[n % 61];
-          n = n / 61;
-        }
-      fd = open (template, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-    }
-  if (0 > fd)
-    errno = EEXIST;
-  return fd;
-}
-
-#define mkstemp  homegrown_mkstemp
-#endif  /* !defined HAVE_MKSTEMP */
-
-/* Set contents of FILENAME to the name of a temporary file made from a
-   template with that starts with PREFIX.  If PREFIX is NULL, use the system
-   "temporary directory".  (Specify the empty string for cwd.)  If no name is
-   possible, signal a fatal error.  */
-void
-set_temporary_file_name (struct buf *filename, const char *prefix)
-{
-#define tmpdir  FN (tmpdir)
-  char *fn;
-  size_t len;
-  int fd;
-
-  if (!prefix)
-    {
-      if (! tmpdir)
-        {
-#define TRY(envvarname)                         \
-          if (! tmpdir)                         \
-            tmpdir = getenv (#envvarname)
-          TRY (TMPDIR);                 /* Unix tradition */
-          TRY (TMP);                    /* DOS tradition */
-          TRY (TEMP);                   /* another DOS tradition */
-#undef TRY
-          if (! tmpdir)
-            tmpdir = P_tmpdir;
-
-          accumulate_nonzero_bytes (SHARED, tmpdir);
-          if (SLASH != tmpdir[strlen (tmpdir) - 1])
-            accumulate_byte (SHARED, SLASH);
-          tmpdir = finish_string (SHARED, &len);
-        }
-      prefix = tmpdir;
-    }
-  accumulate_nonzero_bytes (SHARED, prefix);
-  accumulate_nonzero_bytes (SHARED, "XXXXXX");
-  fn = finish_string (SHARED, &len);
-  /* Support the 8.3 MS-DOG restriction, blech.  Truncate the non-directory
-     filename component to two bytes so that the maximum non-extension name
-     is 2 + 6 (Xs) = 8.  The extension is left empty.  What a waste.  */
-  if ('/' != SLASH)
-    {
-      char *end = fn + len - 6;
-      char *lastsep = strrchr (fn, SLASH);
-      char *ndfc = lastsep ? 1 + lastsep : fn;
-      char *dot;
-
-      if (ndfc + 2 < end)
-        {
-          for (dot = ndfc + 2; dot < ndfc + 8; dot++)
-            *dot = 'X';
-          *dot = '\0';
-        }
-      /* If any of the (up to 2) remaining bytes are '.', replace it
-         with the lowest (decimal) digit of the pid.  Double blech.  */
-      if ((dot = strchr (ndfc, '.')))
-        *dot = '0' + getpid () % 10;
-    }
-
-  if (0 > (fd = mkstemp (fn)))
-    PFATAL ("could not make temporary file name (template \"%s\")", fn);
-
-  bufscpy (filename, fn);
-  filename->size = len;
-  brush_off (SHARED, fn);
-  close (fd);
-#undef tmpdir
-}
-
-char const *
-maketemp (int n)
-/* Create a unique filename and store it into the ‘n’th slot
-   in ‘FN (tpnames)’ (so that ‘tempunlink’ can unlink the file later).
-   Return a pointer to the filename created.  */
-{
-  if (!FN (tpnames)[n])
-    {
-      struct buf rv;
-
-      bufautobegin (&rv);
-      set_temporary_file_name (&rv, NULL);
-      FN (tpnames)[n] = intern (SHARED, rv.string, rv.size);
-      bufautoend (&rv);
-    }
-  return FN (tpnames)[n];
-}
-
-void
-tempunlink (void)
-/* Clean up ‘maketemp’ files.  May be invoked by signal handler.  */
-{
-  register int i;
-  register char *p;
-
-  for (i = TEMPNAMES; 0 <= --i;)
-    if ((p = FN (tpnames)[i]))
-      {
-        unlink (p);
-        /* We would tfree(p) here, but this might dump core if we're handling
-           a signal.  We're about to exit anyway, so we won't bother.  */
-        FN (tpnames)[i] = NULL;
-      }
-}
 
 static char const *
 bindex (register char const *sp, register int c)

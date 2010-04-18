@@ -1,5 +1,50 @@
 2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move temporary filename funcs to b-feph.[hc].
+
+	* b-feph.h: New file.
+	* b-feph.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-feph.h, b-feph.c.
+	* base.h (maker): New enum.
+	(sff): New struct.
+	(behavior): Add members ‘sff’, ‘ephemstuff’.
+	(makedirtemp, dirtempunlink, keepdirtemp, set_temporary_file_name)
+	(maketemp, tempunlink): Delete func decls.
+	(SFFI_LOCKDIR, SFFI_NEWDIR): New #define:s.
+
+	Here,
+	"I" means "#include "b-feph.h"";
+	"B" means "Call ‘makedirtemp’ with boolean value".
+	* ci.c: I.
+	(xpandfile): B.
+	* co.c: I.
+	(main): B.
+	* merge.c: I.
+	* merger.c: I.
+	* rcs.c: I.
+	* rcsclean.c: I.
+	* rcsdiff.c: I.
+	* rcsedit.c: #include "b-feph.h".
+	(maker): Delete enum.
+	(sff): Delete struct.
+	(SFFI_LOCKDIR, SFFI_NEWDIR, SFF_COUNT): Delete #define:s.
+	(editstuff): Convert member ‘sff’ type from array to pointer.
+	(lockname, newRCSname): Use ‘BE (sff)’.
+	(rcswriteopen): Likewise.  Also, modify ‘BE (sff)’ directly.
+	(keepdirtemp, makedirtemp, dirtempunlink): Delete funcs.
+	* rcsfnms.c: #include "b-feph.h".
+	(TEMPNAMES): Delete #define.
+	(fnstuff): Delete members ‘tpnames’, ‘tmpdir’.
+	[!HAVE_MKSTEMP] (homegrown_mkstemp): Delete func.
+	[!HAVE_MKSTEMP] (mkstemp): Delete #define.
+	(set_temporary_file_name, maketemp, tempunlink): Delete funcs.
+	* rcsgen.c [BAD_CREAT0] (putadmin): B.
+	* rcsmerge.c: I.
+	* rcsutil.c: I.
+	(gnurcs_init): Init ‘BE (ephemstuff)’.
+
+2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] When constructing the lockfile name, save directly to ‘SHARED’.
 
 	* rcsedit.c (rcswriteopen): Use ‘SHARED’
