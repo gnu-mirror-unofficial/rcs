@@ -735,7 +735,6 @@ char const *rcssuffix (char const *);
 int pairnames (int, char **, open_rcsfile_fn_t *, bool, bool);
 void bufalloc (struct buf *, size_t);
 void bufautoend (struct buf *);
-void bufrealloc (struct buf *, size_t);
 void bufscat (struct buf *, char const *);
 void bufscpy (struct buf *, char const *);
 void tempunlink (void);

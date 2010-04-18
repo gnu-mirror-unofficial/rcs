@@ -1,5 +1,12 @@
 2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Make ‘bufrealloc’ static.
+
+	* rcsfnms.c (bufrealloc): Make static.
+	* base.h (bufrealloc): Delete func decl.
+
+2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] When reading from stdin, save directly to ‘SHARED’.
 
 	* rcsgen.c (getsstdin): Don't take ‘struct buf *’; save

@@ -336,7 +336,7 @@ bufalloc (register struct buf *b, size_t size)
     }
 }
 
-void
+static void
 bufrealloc (register struct buf *b, size_t size)
 /* Like ‘bufalloc’, except preserve old contents of ‘*b’, if any.  */
 {
