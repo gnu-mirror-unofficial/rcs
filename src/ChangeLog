@@ -1,5 +1,12 @@
 2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	merge: On bad or incorrect # of options, don't display usage info.
+
+	* merge.c (usage): Delete var.
+	(badoption, main): Don't display usage info.
+
+2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move temporary filename funcs to b-feph.[hc].
 
 	* b-feph.h: New file.

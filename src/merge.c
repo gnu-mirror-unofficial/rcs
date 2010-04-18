@@ -26,13 +26,10 @@
 
 struct top *top;
 
-static char const usage[] =
-  "\nmerge: usage: merge [-AeEpqxX3] [-L lab [-L lab [-L lab]]] file1 file2 file3";
-
 static void
 badoption (char const *a)
 {
-  PERR ("unknown option: %s%s", a, usage);
+  PERR ("unknown option: %s", a);
 }
 
 static exiting void
@@ -115,7 +112,7 @@ main (int argc, char **argv)
     }
 
   if (argc != 4)
-    PFATAL ("%s arguments%s", argc < 4 ? "not enough" : "too many", usage);
+    PFATAL ("%s arguments", argc < 4 ? "not enough" : "too many");
 
   /* This copy keeps us ‘const’-clean.  */
   arg[0] = argv[0];
