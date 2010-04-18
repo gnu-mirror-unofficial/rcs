@@ -748,8 +748,7 @@ bool putdtext (struct hshentry const *, char const *, FILE *, bool);
 bool ttystdin (void);
 bool yesorno (bool, char const *, ...) printf_string (2, 3);
 struct cbuf cleanlogmsg (char const *, size_t);
-struct cbuf getsstdin (char const *, char const *,
-                       char const *, struct buf *);
+struct cbuf getsstdin (char const *, char const *, char const *);
 void putdesc (struct cbuf *, bool, char *);
 void putdftext (struct hshentry const *, struct fro *, FILE *, bool);
 

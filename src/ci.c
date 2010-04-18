@@ -535,7 +535,7 @@ getlogmsg (void)
     }
 
   /* Now read string from stdin.  */
-  logmsg = getsstdin ("m", "log message", "", &logbuf);
+  logmsg = getsstdin ("m", "log message", "");
 
   /* Now check whether the log message is not empty.  */
   if (logmsg.size)

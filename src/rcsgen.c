@@ -256,9 +256,7 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
       aprintf (frew, "\n\n%s\n%c", Kdesc, SDELIM);
       if (!textfile)
         *cb = getsstdin ("t-", "description",
-                         "NOTE: This is NOT the log message!\n",
-                         alloc (SHARED, "new description from stdin",
-                                sizeof (struct buf)));
+                         "NOTE: This is NOT the log message!\n");
       else if (!cb->string)
         {
           if (*textfile == '-')
@@ -292,13 +290,13 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
 }
 
 struct cbuf
-getsstdin (char const *option, char const *name,
-           char const *note, struct buf *buf)
+getsstdin (char const *option, char const *name, char const *note)
 {
   register int c;
   register char *p;
-  register size_t i;
   register bool tty = ttystdin ();
+  size_t len, column = 0;
+  bool dot_in_first_column_p = false, discardp = false;
 
 #define prompt  complain
   if (tty)
@@ -308,22 +306,28 @@ getsstdin (char const *option, char const *name,
     RFATAL ("can't reread redirected stdin for %s; use -%s<%s>",
             name, option, name);
 
-  for (i = 0, p = 0;
-       c = getcstdin (), !feof (stdin);
-       bufrealloc (buf, i + 1), p = buf->string, p[i++] = c)
-    if (c == '\n')
-      {
-        if (i && p[i - 1] == '.' && (i == 1 || p[i - 2] == '\n'))
-          {
-            /* Remove trailing '.'.  */
-            --i;
-            break;
-          }
-        else if (tty)
-          prompt (">> ");
-      }
+  while (c = getcstdin (), !feof (stdin))
+    {
+      if (!column)
+        dot_in_first_column_p = ('.' == c);
+      if (c == '\n')
+        {
+          if (1 == column && dot_in_first_column_p)
+            {
+              discardp = true;
+              break;
+            }
+          else if (tty)
+            prompt (">> ");
+          column = 0;
+        }
+      else
+        column++;
+      accumulate_byte (SHARED, c);
+    }
+  p = finish_string (SHARED, &len);
 #undef prompt
-  return cleanlogmsg (p, i);
+  return cleanlogmsg (p, len - (discardp ? 1 : 0));
 }
 
 void

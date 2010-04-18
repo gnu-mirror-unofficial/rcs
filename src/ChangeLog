@@ -1,3 +1,13 @@
+2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] When reading from stdin, save directly to ‘SHARED’.
+
+	* rcsgen.c (getsstdin): Don't take ‘struct buf *’; save
+	directly to ‘SHARED’; rewrite sole-dot-on-line detection/handling.
+	(putdesc): Update call to ‘getsstdin’.
+	* ci.c (getlogmsg): Update call to ‘getlogmsg’.
+	* base.h (getsstdin): Update func decl.
+
 2010-04-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstraction: accumulate_range
