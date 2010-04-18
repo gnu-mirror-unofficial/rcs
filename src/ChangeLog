@@ -1,3 +1,16 @@
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Encapsulate parameters for ‘pairnames’ subroutines.
+
+	* rcsfnms.c (fnstuff): Delete members ‘RCSb’, ‘RCSbuf’, ‘RCSerrno’.
+	(maybe): New struct.
+	(finopen): Take a ‘struct maybe *’; extract ‘filename’, ‘open’ and
+	‘mustread’ from it; if succesful, modify its ‘bestfit’ and ‘eno’.
+	(fin2open): Use '\0' instead of naked 0; take a ‘struct maybe *’;
+	init its member ‘filename’; pass it to ‘finopen’.
+	(pairnames): Construct a ‘struct maybe’ to pass to ‘fin2open’;
+	if filename found, save its ‘bestfit’ to ‘REPO (filename)’.
+
 2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Use ‘open_rcsfile_fn_t’ more.

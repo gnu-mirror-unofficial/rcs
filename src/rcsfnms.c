@@ -40,8 +40,6 @@ static const char const rcsdir[] = "RCS";
 
 struct fnstuff
 {
-  struct buf RCSbuf, RCSb;
-  int RCSerrno;
   char *cwd;
 };
 
@@ -322,27 +320,47 @@ rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
   return fro_open (RCSpath->string, FOPEN_RB, status);
 }
 
+/* A combination of probe parameters and results for ‘pairnames’ through
+   ‘fin2open’ through ‘finopen’ through {‘rcsreadopen’, ‘rcswriteopen’}.
+   The probe protocol is to set ‘open’ and ‘mustread’ once, and try various
+   permutations of basename, directory and extension (-x) in ‘filename’,
+   finally recording ‘errno’ in ‘eno’ and the "best RCS filename found"
+   in ‘bestfit’ (otherwise failing).  */
+struct maybe
+{
+  /* Input parameters, constant.  */
+  open_rcsfile_fn_t *open;
+  bool mustread;
+
+  /* Input parameter, varying.  */
+  struct buf filename;
+
+  /* Output parameters.  */
+  struct buf bestfit;
+  int eno;
+};
+
 static bool
-finopen (open_rcsfile_fn_t *rcsopen, bool mustread)
-/* Use ‘rcsopen’ to open an RCS file; ‘mustread’ is set if the file must be
+finopen (struct maybe *m)
+/* Use ‘m->open’ to open an RCS file; ‘m->mustread’ is set if the file must be
    read.  Set ‘FLOW (from)’ to the result and return true if successful.
-   ‘FN (RCSb)’ holds the file's name.  Set ‘FN (RCSbuf)’ to the best RCS name found
-   so far, and ‘FN (RCSerrno)’ to its errno.  Return true if successful or if
+   ‘m->filename’ holds the file's name.  Set ‘m->bestfit’ to the best RCS name
+   found so far, and ‘m->eno’ to its errno.  Return true if successful or if
    an unusual failure.  */
 {
   bool interesting, preferold;
 
   /* We prefer an old name to that of a nonexisting new RCS file,
      unless we tried locking the old name and failed.  */
-  preferold = FN (RCSbuf).string[0] && (mustread || 0 <= REPO (fd_lock));
+  preferold = m->bestfit.string[0] && (m->mustread || 0 <= REPO (fd_lock));
 
-  FLOW (from) = (*rcsopen) (&FN (RCSb), &REPO (stat), mustread);
+  FLOW (from) = (m->open) (&m->filename, &REPO (stat), m->mustread);
   interesting = FLOW (from) || errno != ENOENT;
   if (interesting || !preferold)
     {
       /* Use the new name.  */
-      FN (RCSerrno) = errno;
-      bufscpy (&FN (RCSbuf), FN (RCSb).string);
+      m->eno = errno;
+      bufscpy (&m->bestfit, m->filename.string);
     }
   return interesting;
 }
@@ -351,57 +369,55 @@ static bool
 fin2open (char const *d, size_t dlen,
           char const *base, size_t baselen,
           char const *x, size_t xlen,
-          open_rcsfile_fn_t *rcsopen,
-          bool mustread)
+          struct maybe *m)
 /* ‘d’ is a directory name with length ‘dlen’ (including trailing slash).
-   ‘base’ is a filename with length ‘baselen’.  ‘x’ is an RCS pathname suffix
-   with length ‘xlen’.  Use ‘rcsopen’ to open an RCS file; ‘mustread’ is set
-   if the file must be read.  Return true if successful.  Try "dRCS/basex"
-   first; if that fails and x is nonempty, try "dbasex".  Put these potential
-   names in ‘FN (RCSb)’.  Set ‘FN (RCSbuf)’ to the best RCS name found so far, and
-   ‘FN (RCSerrno)’ to its errno.  Return true if successful or if an unusual
-   failure.  */
+   ‘base’ is a filename with length ‘baselen’.
+   ‘x’ is an RCS pathname suffix with length ‘xlen’.
+   Use ‘m->open’ to open an RCS file; ‘m->mustread’ is set if the file
+   must be read.  Return true if successful.  Try "dRCS/basex" first; if
+   that fails and x is nonempty, try "dbasex".  Put these potential
+   names in ‘m->filename’ for ‘finopen’ to wrangle.  */
 {
   register char *p;
 
-  bufalloc (&FN (RCSb), dlen + rcslen + 1 + baselen + xlen + 1);
+  bufalloc (&m->filename, dlen + rcslen + 1 + baselen + xlen + 1);
 
   /* Try "dRCS/basex".  */
-  memcpy (p = FN (RCSb).string, d, dlen);
+  memcpy (p = m->filename.string, d, dlen);
   memcpy (p += dlen, rcsdir, rcslen);
   p += rcslen;
   *p++ = SLASH;
   memcpy (p, base, baselen);
   memcpy (p += baselen, x, xlen);
-  p[xlen] = 0;
+  p[xlen] = '\0';
   if (xlen)
     {
-      if (finopen (rcsopen, mustread))
+      if (finopen (m))
         return true;
 
       /* Try "dbasex".  Start from scratch, because
-         ‘finopen’ may have changed ‘FN (RCSb)’.  */
-      memcpy (p = FN (RCSb).string, d, dlen);
+         ‘finopen’ may have changed ‘m->filename’.  */
+      memcpy (p = m->filename.string, d, dlen);
       memcpy (p += dlen, base, baselen);
       memcpy (p += baselen, x, xlen);
-      p[xlen] = 0;
+      p[xlen] = '\0';
     }
-  return finopen (rcsopen, mustread);
+  return finopen (m);
 }
 
 int
 pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
            bool mustread, bool quiet)
 /* Pair the pathnames pointed to by ‘argv’; ‘argc’ indicates how many there
-   are.  Place a pointer to the RCS pathname into ‘REPO (filename)’, and a
-   pointer to the pathname of the working file into ‘MANI (filename)’.  If
-   both are given, and ‘MANI (standard_output)’ is set, a print a warning.
+   are.  Place a pointer to the RCS filename into ‘REPO (filename)’, and a
+   pointer to the filename of the working file into ‘MANI (filename)’.  If
+   both are given, and ‘MANI (standard_output)’ is set, display a warning.
 
-   If the RCS file exists, place its status into ‘REPO (stat)’.
+   If the RCS file exists, place its status into ‘REPO (stat)’, open it for
+   reading (using ‘rcsopen’), place the file pointer into ‘FLOW (from)’, read
+   in the admin-node, and return 1.
 
-   If the RCS file exists, open (using ‘rcsopen’) it for reading, place the
-   file pointer into ‘FLOW (from)’, read in the admin-node, and return 1.
-   If the RCS file does not exist and ‘mustread’, print an error unless
+   If the RCS file does not exist and ‘mustread’, display an error unless
    ‘quiet’ and return 0.  Otherwise, initialize the admin node and return -1.
 
    Return 0 on all errors, e.g. files that are not regular files.  */
@@ -410,6 +426,12 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
   char const *base, *RCSbase, *x;
   bool paired;
   size_t arglen, dlen, baselen, xlen;
+  struct maybe maybe =
+    {
+      /* ‘.filename’ initialized by ‘fin2open’.  */
+      .open = rcsopen,
+      .mustread = mustread
+    };
 
   REPO (fd_lock) = -1;
 
@@ -466,20 +488,21 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     }
   /* Now we have a (tentative) RCS pathname in RCS1 and ‘MANI (filename)’.
      Second, try to find the right RCS file.  */
+  bufautobegin (&maybe.bestfit);
   if (RCSbase != RCS1)
     {
       /* A path for RCSfile is given; single RCS file to look for.  */
-      bufscpy (&FN (RCSbuf), RCS1);
-      FLOW (from) = (*rcsopen) (&FN (RCSbuf), &REPO (stat), mustread);
-      FN (RCSerrno) = errno;
+      bufscpy (&maybe.bestfit, RCS1);
+      FLOW (from) = (*rcsopen) (&maybe.bestfit, &REPO (stat), mustread);
+      maybe.eno = errno;
     }
   else
     {
-      bufscpy (&FN (RCSbuf), "");
+      bufscpy (&maybe.bestfit, "");
       if (RCS1)
         /* RCS filename was given without path.  */
         fin2open (arg, (size_t) 0, RCSbase, baselen,
-                  x, strlen (x), rcsopen, mustread);
+                  x, strlen (x), &maybe);
       else
         {
           /* No RCS pathname was given.
@@ -487,7 +510,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
           dlen = base - arg;
           x = BE (pe);
           while (!fin2open (arg, dlen, base, baselen,
-                            x, xlen = suffixlen (x), rcsopen, mustread))
+                            x, xlen = suffixlen (x), &maybe))
             {
               x += xlen;
               if (!*x++)
@@ -495,7 +518,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
             }
         }
     }
-  REPO (filename) = p = FN (RCSbuf).string;
+  REPO (filename) = p = str_save (maybe.bestfit.string);
   if (FLOW (from))
     {
       if (!S_ISREG (REPO (stat).st_mode))
@@ -508,12 +531,12 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     }
   else
     {
-      if (FN (RCSerrno) != ENOENT || mustread || REPO (fd_lock) < 0)
+      if (maybe.eno != ENOENT || mustread || REPO (fd_lock) < 0)
         {
-          if (FN (RCSerrno) == EEXIST)
+          if (maybe.eno == EEXIST)
             PERR ("RCS file %s is in use", p);
-          else if (!quiet || FN (RCSerrno) != ENOENT)
-            syserror (FN (RCSerrno), p);
+          else if (!quiet || maybe.eno != ENOENT)
+            syserror (maybe.eno, p);
           return 0;
         }
       InitAdmin ();
@@ -523,6 +546,8 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     MWARN ("Working file ignored due to -p option");
 
   PREV (valid) = false;
+  bufautoend (&maybe.filename);
+  bufautoend (&maybe.bestfit);
   return FLOW (from) ? 1 : -1;
 }
 
