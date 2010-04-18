@@ -1,5 +1,12 @@
 2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Use ‘open_rcsfile_fn_t’ more.
+
+	* rcsfnms.c (finopen, fin2open):
+	Use ‘open_rcsfile_fn_t’ in arglist.
+
+2010-04-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	merge: On bad or incorrect # of options, don't display usage info.
 
 	* merge.c (usage): Delete var.

@@ -323,8 +323,7 @@ rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
 }
 
 static bool
-finopen (struct fro *(*rcsopen) (struct buf *, struct stat *, bool),
-         bool mustread)
+finopen (open_rcsfile_fn_t *rcsopen, bool mustread)
 /* Use ‘rcsopen’ to open an RCS file; ‘mustread’ is set if the file must be
    read.  Set ‘FLOW (from)’ to the result and return true if successful.
    ‘FN (RCSb)’ holds the file's name.  Set ‘FN (RCSbuf)’ to the best RCS name found
@@ -352,7 +351,7 @@ static bool
 fin2open (char const *d, size_t dlen,
           char const *base, size_t baselen,
           char const *x, size_t xlen,
-          struct fro *(*rcsopen) (struct buf *, struct stat *, bool),
+          open_rcsfile_fn_t *rcsopen,
           bool mustread)
 /* ‘d’ is a directory name with length ‘dlen’ (including trailing slash).
    ‘base’ is a filename with length ‘baselen’.  ‘x’ is an RCS pathname suffix
