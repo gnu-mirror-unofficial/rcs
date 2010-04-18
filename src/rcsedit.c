@@ -734,12 +734,12 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
   register char *tp;
   register char const *sp, *RCSpath, *x;
   struct fro *f;
-  size_t l;
+  size_t len;
   int e, exists, fdesc, fdescSafer, r;
   bool waslocked;
-  struct buf *dirt;
   struct stat statbuf;
   bool symbolicp = false;
+  char *lfn;                            /* lock filename */
 
   ensure_editstuff ();                  /* ugh */
   waslocked = 0 <= REPO (fd_lock);
@@ -751,11 +751,9 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
     return NULL;
 
   RCSpath = RCSbuf->string;
-  sp = basefilename (RCSpath);
-  l = sp - RCSpath;
-  dirt = &EDIT (sff)[waslocked].filename;
-  bufscpy (dirt, RCSpath);
-  tp = dirt->string + l;
+  accumulate_nonzero_bytes (SHARED, RCSbuf->string);
+  lfn = finish_string (SHARED, &len);
+  sp = basefilename (lfn);
   x = rcssuffix (RCSpath);
   if (!x && symbolicp)
     {
@@ -778,19 +776,21 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
          | foo,v  -- RCS filename with suffix ,v
          | ,foo,  -- lock filename
       */
-      *tp++ = *x;
-      while (*sp)
-        *tp++ = *sp++;
-      *--tp = '\0';
+      tp = lfn + len;
+      *tp-- = '\0';
+      while (sp < tp)
+        {
+          *tp = tp[-1];
+          tp--;
+        }
+      *tp = *x;
     }
   else
     {
       /* The suffix is empty.  The lock filename is the RCS filename
          with last char replaced by '_'.  */
-      while ((*tp++ = *sp++))
-        continue;
-      tp -= 2;
-      if (*tp == '_')
+      tp = lfn + len - 1;
+      if ('_' == *tp)
         {
           PERR ("RCS pathname `%s' ends with `%c'", RCSpath, *tp);
           errno = EINVAL;
@@ -799,7 +799,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       *tp = '_';
     }
 
-  sp = dirt->string;
+  bufscpy (&EDIT (sff)[waslocked].filename, lfn);
 
   f = NULL;
 
@@ -861,7 +861,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
      i.e.  if two processes try it simultaneously, at most one
      should succeed.  */
   seteid ();
-  fdesc = create (sp);
+  fdesc = create (lfn);
   /* Do it now; ‘setrid’ might use stderr.  */
   fdescSafer = fd_safer (fdesc);
   e = errno;
@@ -872,7 +872,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 
   if (fdescSafer < 0)
     {
-      if (e == EACCES && stat (sp, &statbuf) == 0)
+      if (e == EACCES && stat (lfn, &statbuf) == 0)
         /* The RCS file is busy.  */
         e = EEXIST;
     }
@@ -894,7 +894,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
               errno = e;
               if (r != 0)
                 fatal_sys (lockname);
-              bufscpy (&EDIT (sff)[SFFI_LOCKDIR].filename, sp);
+              bufscpy (&EDIT (sff)[SFFI_LOCKDIR].filename, lfn);
             }
         }
       REPO (fd_lock) = fdescSafer;
