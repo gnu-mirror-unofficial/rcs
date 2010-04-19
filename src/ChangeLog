@@ -1,5 +1,11 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] For ‘co -j’, save merge(1)-command args in ‘SINGLE’.
+
+	* co.c (buildjoin): Save arg strings in ‘SINGLE’.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Encapsulate ‘pairnames’ probe protocol state entirely.
 
 	* base.h (maybe): New struct.
