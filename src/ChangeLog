@@ -1,5 +1,12 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Trim some unused #include directives.
+
+	* rcsfnms.c: Don't #include <stdint.h>,
+	<sys/time.h>, <fcntl.h>, <sys/wait.h>.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Revert forced-‘if’ introduced 2010-04-12.
 
 	* rcsfnms.c (getfullRCSname): Revert ‘if (!0)’.

@@ -23,12 +23,8 @@
 #include "base.h"
 #include <string.h>
 #include <errno.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <sys/time.h>                   /* gettimeofday */
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/wait.h>
 #include "same-inode.h"
 #include "b-complain.h"
 #include "b-divvy.h"
