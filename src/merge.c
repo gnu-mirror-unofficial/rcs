@@ -26,12 +26,6 @@
 
 struct top *top;
 
-static void
-badoption (char const *a)
-{
-  PERR ("unknown option: %s", a);
-}
-
 static exiting void
 exiterr (void)
 {
@@ -104,11 +98,11 @@ main (int argc, char **argv)
           return 0;
 
         default:
-          badoption (a - 2);
+          bad_option (a - 2);
           continue;
         }
       if (*a)
-        badoption (a - 2);
+        bad_option (a - 2);
     }
 
   if (argc != 4)

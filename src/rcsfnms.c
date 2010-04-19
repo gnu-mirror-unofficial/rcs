@@ -798,7 +798,7 @@ main (int argc, char *argv[])
           BE (quiet) = true;
           break;
         default:
-          PERR ("unknown option: %s", *argv);
+          bad_option (*argv);
           break;
         }
     }

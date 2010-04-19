@@ -235,7 +235,7 @@ main (int argc, char **argv)
 
         default:
         unknown:
-          PERR ("unknown option: %s", *argv);
+          bad_option (*argv);
         }
     }
 

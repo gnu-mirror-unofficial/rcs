@@ -1375,7 +1375,7 @@ main (int argc, char **argv)
           /* fall into */
         default:
         unknown:
-          PERR ("unknown option: %s", *argv);
+          bad_option (*argv);
         };
     }
   /* (End processing of options.)  */

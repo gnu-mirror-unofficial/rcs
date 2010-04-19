@@ -1,5 +1,22 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: bad_option
+
+	* base.h (bad_option): New func decl.
+	* rcsutil.c (bad_option): New func.
+	* ci.c (main): Use ‘bad_option’.
+	* co.c (main): Likewise.
+	* merge.c (badoption): Delete func.
+	(main): Use ‘bad_option’.
+	* rcs.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsfnms.c [PAIRTEST] (main): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rlog.c (main): Likewise.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	rcsclean: On unknown option, don't display usage info.
 
 	* rcsclean.c (main): Don't display usage info.

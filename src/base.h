@@ -852,6 +852,7 @@ void zone_set (char const *);
 
 /* rcsutil */
 void gnurcs_init (void);
+void bad_option (char const *);
 char *cgetenv (char const *);
 char *fbuf_save (const struct buf *);
 char *str_save (char const *);

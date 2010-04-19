@@ -53,6 +53,12 @@ gnurcs_init (void)
   init_maketimestuff ();
 }
 
+void
+bad_option (char const *option)
+{
+  PERR ("unknown option: %s", option);
+}
+
 static void *
 okalloc (void * p)
 {
