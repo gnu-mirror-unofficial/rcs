@@ -595,7 +595,7 @@ getfullRCSname (void)
           char *PWD = cgetenv ("PWD");
           struct stat PWDstat, dotstat;
 
-          if (!(0 //(FN (cwd) = PWD)
+          if (!((FN (cwd) = PWD)
                 && ROOTPATH (PWD)
                 && stat (PWD, &PWDstat) == 0
                 && stat (".", &dotstat) == 0
