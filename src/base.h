@@ -135,20 +135,20 @@ enum kwsub
    TMPDIR       string           Default directory for temporary files.
    SLASH        char             Principal filename separator.
    SLASHes      ‘case SLASHes:’  Labels all filename separators.
-   ROOTPATH(p)  expression       Is p an absolute pathname?
+   ABSFNAME(p)  expression       Is p an absolute filename?
    X_DEFAULT    string           Default value for -x option.
 */
 #if !WOE
 #define TMPDIR "/tmp"
 #define SLASH '/'
 #define SLASHes '/'
-#define ROOTPATH(p)  (isSLASH ((p)[0]))
+#define ABSFNAME(p)  (isSLASH ((p)[0]))
 #define X_DEFAULT ",v"
 #else /* WOE */
 #define TMPDIR "\\tmp"
 #define SLASH "'\\'"
 #define SLASHes '\\': case '/': case ':'
-#define ROOTPATH(p)  (isSLASH ((p)[0]) || (p)[0] && (p)[1] == ':')
+#define ABSFNAME(p)  (isSLASH ((p)[0]) || (p)[0] && (p)[1] == ':')
 #define X_DEFAULT "\\,v"
 #endif
 
@@ -168,10 +168,10 @@ enum kwsub
 /* end cruft formerly from from conf.h */
 
 #ifdef _POSIX_PATH_MAX
-#define SIZEABLE_PATH _POSIX_PATH_MAX
+#define SIZEABLE_FILENAME_LEN  _POSIX_PATH_MAX
 #else
-/* Size of a large path; not a hard limit.  */
-#define SIZEABLE_PATH 255
+/* Size of a large filename; not a hard limit.  */
+#define SIZEABLE_FILENAME_LEN  255
 #endif
 
 /* Backwards compatibility with old versions of RCS.  */

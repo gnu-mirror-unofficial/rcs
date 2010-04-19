@@ -934,7 +934,7 @@ main (int argc, char **argv)
   struct rcslock const *currlock;
   bool descflag, selectflag;
   bool onlylockflag;                   /* print only files with locks */
-  bool onlyRCSflag;                    /* print only RCS pathname */
+  bool onlyRCSflag;                    /* print only RCS filename */
   bool pre5;
   bool shownames;
   int revno;
@@ -1056,7 +1056,7 @@ main (int argc, char **argv)
       symbolFormat = "\n\t%s: %s";
     }
 
-  /* Now handle all pathnames.  */
+  /* Now handle all filenames.  */
   if (LEX (erroneousp))
     cleanup ();
   else if (argc < 1)
@@ -1092,7 +1092,7 @@ main (int argc, char **argv)
         if (!getnumericrev ())
           continue;
 
-        /* Print RCS pathname, working pathname and optional
+        /* Print RCS filename, working filename and optional
            administrative information.  Could use ‘getfullRCSname’
            here, but that is very slow.  */
         aprintf (out, headFormat, REPO (filename), MANI (filename),

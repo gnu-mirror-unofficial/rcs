@@ -656,7 +656,7 @@ naturalize (struct buf *fn, bool *symbolicp)
   ssize_t r;
   int linkcount = _POSIX_SYMLOOP_MAX;
   struct divvy *space = make_space ("nature");
-  size_t len = SIZEABLE_PATH;
+  size_t len = SIZEABLE_FILENAME_LEN;
   char *chased = alloc (space, "chased", len);
   char const *orig = fn->string;
 
@@ -675,7 +675,7 @@ naturalize (struct buf *fn, bool *symbolicp)
       {
         /* Blech, ‘readlink’ does not NUL-terminate.  */
         chased[r] = '\0';
-        if (ROOTPATH (chased))
+        if (ABSFNAME (chased))
           {
             fn->string = chased;
             fn->size = r;
@@ -715,7 +715,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
    and set ‘REPO (fd_lock)’ to the file descriptor of the RCS lockfile.  */
 {
   register char *tp;
-  register char const *sp, *RCSpath, *x;
+  register char const *sp, *repofn, *x;
   struct fro *f;
   size_t len;
   int e, exists, fdesc, fdescSafer, r;
@@ -733,20 +733,20 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
        elsewhere.  */
     return NULL;
 
-  RCSpath = RCSbuf->string;
+  repofn = RCSbuf->string;
   accumulate_nonzero_bytes (SHARED, RCSbuf->string);
   lfn = finish_string (SHARED, &len);
   sp = basefilename (lfn);
-  x = rcssuffix (RCSpath);
+  x = rcssuffix (repofn);
   if (!x && symbolicp)
     {
-      PERR ("symbolic link to non RCS file `%s'", RCSpath);
+      PERR ("symbolic link to non RCS file `%s'", repofn);
       errno = EINVAL;
       return NULL;
     }
   if (*sp == *x)
     {
-      PERR ("RCS pathname `%s' incompatible with suffix `%s'", sp, x);
+      PERR ("RCS filename `%s' incompatible with suffix `%s'", sp, x);
       errno = EINVAL;
       return NULL;
     }
@@ -775,7 +775,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       tp = lfn + len - 1;
       if ('_' == *tp)
         {
-          PERR ("RCS pathname `%s' ends with `%c'", RCSpath, *tp);
+          PERR ("RCS filename `%s' ends with `%c'", repofn, *tp);
           errno = EINVAL;
           return NULL;
         }
@@ -864,7 +864,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       e = ENOENT;
       if (exists)
         {
-          f = fro_open (RCSpath, FOPEN_RB, status);
+          f = fro_open (repofn, FOPEN_RB, status);
           e = errno;
           if (f && waslocked)
             {

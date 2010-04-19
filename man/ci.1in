@@ -12,7 +12,7 @@ ci \- check in RCS revisions
 .SH DESCRIPTION
 .B ci
 stores new revisions into \*r files.
-Each pathname matching an \*r suffix
+Each filename matching an \*r suffix
 is taken to be an \*r file.
 All others
 are assumed to be working files containing new revisions.
@@ -451,11 +451,11 @@ for details.
 .TP
 .BI \-x "suffixes"
 specifies the suffixes for \*r files.
-A nonempty suffix matches any pathname ending in the suffix.
-An empty suffix matches any pathname of the form
-.BI RCS/ path
+A nonempty suffix matches any filename ending in the suffix.
+An empty suffix matches any filename of the form
+.BI RCS/ frag
 or
-.IB path1 /RCS/ path2.
+.IB frag1 /RCS/ frag2.
 The
 .B \-x
 option can specify a list of suffixes
@@ -522,16 +522,16 @@ Pairs of \*r files and working files can be specified in three ways
 (see also the
 example section).
 .PP
-1) Both the \*r file and the working file are given.  The \*r pathname is of
+1) Both the \*r file and the working file are given.  The \*r filename is of
 the form
-.IB path1 / workfileX
-and the working pathname is of the form
-.IB path2 / workfile
+.IB frag1 / workfileX
+and the working filename is of the form
+.IB frag2 / workfile
 where
-.IB path1 /
+.IB frag1 /
 and
-.IB path2 /
-are (possibly different or empty) paths,
+.IB frag2 /
+are (possibly different or empty) filenames,
 .I workfile
 is a filename, and
 .I X
@@ -539,7 +539,7 @@ is an \*r suffix.
 If
 .I X
 is empty,
-.IB path1 /
+.IB frag1 /
 must start with
 .B RCS/
 or must contain
@@ -548,7 +548,7 @@ or must contain
 2) Only the \*r file is given.  Then the working file is created in the current
 directory and its name is derived from the name of the \*r file
 by removing
-.IB path1 /
+.IB frag1 /
 and the suffix
 .IR X .
 .PP
@@ -558,13 +558,13 @@ Then
 considers each \*r suffix
 .I X
 in turn, looking for an \*r file of the form
-.IB path2 /RCS/ workfileX
+.IB frag2 /RCS/ workfileX
 or (if the former is not found and
 .I X
 is nonempty)
-.IB path2 / workfileX.
+.IB frag2 / workfileX.
 .PP
-If the \*r file is specified without a path in 1) and 2),
+If the \*r file is specified without a filename in 1) and 2),
 .B ci
 looks for the \*r file first in the directory
 .B ./RCS
@@ -573,7 +573,7 @@ directory.
 .PP
 .B ci
 reports an error if an attempt to open an \*r file fails for an unusual reason,
-even if the \*r file's pathname is just one of several possibilities.
+even if the \*r file's name is just one of several possibilities.
 For example, to suppress use of \*r commands in a directory
 .IR d ,
 create a regular file named
@@ -727,7 +727,7 @@ should not be
 or any other user with special powers.
 Mutually suspicious sets of users should use different administrators.
 .IP \(bu \nn
-Choose a pathname
+Choose a filename
 .I B
 to be a directory of files to be executed by the users.
 .IP \(bu \nn
@@ -756,7 +756,7 @@ as follows:
 .IP \(bu \nn
 Have each user prepend
 .I B
-to their path as follows:
+to their command search path as follows:
 .LP
 .RS
 .nf

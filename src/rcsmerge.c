@@ -155,7 +155,7 @@ main (int argc, char **argv)
   if (!rev[1])
     PFATAL ("no base revision number given");
 
-  /* Now handle all pathnames.  */
+  /* Now handle all filenames.  */
   if (!LEX (erroneousp))
     {
       if (argc < 1)

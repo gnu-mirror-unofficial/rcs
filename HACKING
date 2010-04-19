@@ -17,6 +17,7 @@ It lives in the repo but is not included in the distribution.
 ***** DONE rcsdiff longopt handling (debian #334004)
 ***** DONE document rlog -q (debian #69257)
 ***** DONE temp file security hole in rcsfreeze (debian #27845)
+***** DONE don't say "path" when referring to file names
 *** features
 ***** recognize keyword `commitid' (debian #352527)
 ***** ident accept numbers as well as letters (debian #157891)
@@ -33,8 +34,8 @@ It lives in the repo but is not included in the distribution.
 
 *** Bring back sccstorcs.
 
-*** Add a way to put only the interesting part of the path into the $Header
-    keyword expansion.
+*** Add a way to put only the interesting part of the filename into
+    the $Header keyword expansion.
 
 *** rcs should be able to fix minor mistakes in checkin dates and authors.
 
@@ -70,7 +71,7 @@ It lives in the repo but is not included in the distribution.
 
 *** Add locker commentary, e.g. `co -l -m"checkout to fix merge bug" foo'
     to tell others why you checked out `foo'.  Also record the time when the
-    revision was locked, and perhaps the working pathname (if applicable).
+    revision was locked, and perhaps the working filename (if applicable).
 
 *** Let the user mark an RCS revision as deleted; checking out such a revision
     would result in no working file.  Similarly, using `co -d' with a date

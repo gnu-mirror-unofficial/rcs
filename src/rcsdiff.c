@@ -346,7 +346,7 @@ main (int argc, char **argv)
   cov[3] = "-M";
 #endif
 
-  /* Now handle all pathnames.  */
+  /* Now handle all filenames.  */
   if (LEX (erroneousp))
     cleanup ();
   else if (argc < 1)

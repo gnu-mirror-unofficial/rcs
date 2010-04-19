@@ -226,7 +226,7 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
    If ‘FLOW (from) && !textflag’, the text is copied from the old description.
    Otherwise, if ‘textfile’, the text is read from that file, or from
    stdin, if ‘!textfile’.  A ‘textfile’ with a leading '-' is treated as a
-   string, not a pathname.  If ‘FLOW (from)’, the old descriptive text is
+   string, not a filename.  If ‘FLOW (from)’, the old descriptive text is
    discarded.  Always clear ‘FLOW (to)’.  */
 {
   register FILE *txt;

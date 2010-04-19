@@ -173,9 +173,9 @@ maketemp (int n)
 
 char const *
 makedirtemp (bool isworkfile)
-/* Create a unique pathname and store it into ‘BE (sff)’.  Because of
+/* Create a unique filename and store it into ‘BE (sff)’.  Because of
    storage in ‘BE (sff)’, ‘dirtempunlink’ can unlink the file later.
-   Return a pointer to the pathname created.
+   Return a pointer to the filename created.
    If ‘isworkfile’, put it into the working file's directory;
    otherwise, put the unique file in RCSfile's directory.  */
 {

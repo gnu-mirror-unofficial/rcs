@@ -1,3 +1,18 @@
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Don't say "path" when referring to file names.
+
+	* ci.1in: Instead of "path", say "filename" or
+	"frag" or "directory component" or simply "name".
+	* co.1in: Likewise.
+	* ident.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsclean.1in: Likewise.
+	* rcsdiff.1in: Likewise.
+	* rcsintro.1in: Likewise.
+	* rcsmerge.1in: Likewise.
+	* rlog.1in: Likewise.
+
 2010-03-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use GNU Automake.

@@ -13,14 +13,14 @@ rlog \- print log messages and other information about RCS files
 .B rlog
 prints information about \*r files.
 .PP
-Pathnames matching an \*r suffix denote \*r files;
+Filenames matching an \*r suffix denote \*r files;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
 .PP
 .B rlog
 prints the following information for each
-\*r file: \*r pathname, working pathname, head (i.e., the number
+\*r file: \*r filename, working filename, head (i.e., the number
 of the latest revision on the trunk), default branch, access list, locks,
 symbolic names, suffix, total number of revisions,
 number of revisions selected for printing, and
@@ -52,10 +52,10 @@ and
 .B \-R
 Print only the name of the \*r file.
 This is convenient for translating a
-working pathname into an \*r pathname.
+working filename into an \*r filename.
 .TP
 .B \-h
-Print only the \*r pathname, working pathname, head,
+Print only the \*r filename, working filename, head,
 default branch, access list, locks,
 symbolic names, and suffix.
 .TP

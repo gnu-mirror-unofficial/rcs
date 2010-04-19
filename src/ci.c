@@ -798,7 +798,7 @@ main (int argc, char **argv)
     }
   /* (End processing of options.)  */
 
-  /* Handle all pathnames.  */
+  /* Handle all filenames.  */
   if (LEX (erroneousp))
     cleanup ();
   else if (argc < 1)

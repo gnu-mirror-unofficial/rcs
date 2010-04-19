@@ -293,12 +293,12 @@ this allows @command{rcs -oS -nS}.
 @item @command{co -u} shouldn't complain about a @samp{+w} working
 file if contents don't change.
 
-@item Add a @samp{-} option to take the list of pathnames from
-standard input.  Perhaps the pathnames should be null-terminated, not
-newline-terminated, so that pathnames that contain newlines are handled
+@item Add a @samp{-} option to take the list of filenames from
+standard input.  Perhaps the filenames should be null-terminated, not
+newline-terminated, so that filenames that contain newlines are handled
 properly.
 
-@item Permit multiple option-pathname pairs,
+@item Permit multiple option--filename pairs,
 e.g., @command{co -r1.4 a -r1.5 b}.
 
 @item Add an option to break a symbolic link to an RCS file,
@@ -335,9 +335,9 @@ terminal.
 
 @item Let the user specify a search path for default branches,
 e.g. to use @var{L} as the default branch if it works, and @var{M}
-otherwise.  Let the user require that at least one entry in the default
-branch path works.  Let the user say that later entries in the default
-branch path are read only, i.e. one cannot check in changes to them.
+otherwise.  Let the user require that at least one entry in the
+search path works.  Let the user say that later entries in the
+search path are read only, i.e. one cannot check in changes to them.
 This should be an option settable by @samp{RCSINIT}.
 
 @item Add a way for a user to see which revisions affected which lines.

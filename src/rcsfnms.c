@@ -1,4 +1,4 @@
-/* RCS filename and pathname handling
+/* RCS filename handling
 
    Copyright (C) 2010 Thien-Thi Nguyen
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
@@ -230,7 +230,7 @@ bufscpy (struct buf *b, char const *s)
 
 char const *
 basefilename (char const *p)
-/* Return the address of the base filename of the pathname ‘p’.  */
+/* Return the address of the base filename of the filename ‘p’.  */
 {
   register char const *b = p, *q = p;
 
@@ -247,7 +247,7 @@ basefilename (char const *p)
 
 static size_t
 suffixlen (char const *x)
-/* Return the length of ‘x’, an RCS pathname suffix.  */
+/* Return the length of ‘x’, an RCS filename suffix.  */
 {
   register char const *p;
 
@@ -267,7 +267,7 @@ suffixlen (char const *x)
 
 char const *
 rcssuffix (char const *name)
-/* Return the suffix of ‘name’ if it is an RCS pathname, NULL otherwise.  */
+/* Return the suffix of ‘name’ if it is an RCS filename, NULL otherwise.  */
 {
   char const *x, *p, *nz;
   size_t nl, xl;
@@ -295,12 +295,12 @@ rcssuffix (char const *name)
 }
 
 struct fro *
-rcsreadopen (struct buf *RCSpath, struct stat *status, bool mustread RCS_UNUSED)
-/* Open ‘RCSpath’ for reading and return its ‘FILE*’ descriptor.
+rcsreadopen (struct buf *filename, struct stat *status, bool mustread RCS_UNUSED)
+/* Open ‘filename’ for reading and return its ‘FILE*’ descriptor.
    If successful, set ‘*status’ to its status.
    Pass this routine to ‘pairnames’ for read-only access to the file.  */
 {
-  return fro_open (RCSpath->string, FOPEN_RB, status);
+  return fro_open (filename->string, FOPEN_RB, status);
 }
 
 /* A combination of probe parameters and results for ‘pairnames’ through
@@ -355,7 +355,7 @@ fin2open (char const *d, size_t dlen,
           struct maybe *m)
 /* ‘d’ is a directory name with length ‘dlen’ (including trailing slash).
    ‘base’ is a filename with length ‘baselen’.
-   ‘x’ is an RCS pathname suffix with length ‘xlen’.
+   ‘x’ is an RCS filename suffix with length ‘xlen’.
    Use ‘m->open’ to open an RCS file; ‘m->mustread’ is set if the file
    must be read.  Return true if successful.  Try "dRCS/basex" first; if
    that fails and x is nonempty, try "dbasex".  Put these potential
@@ -391,7 +391,7 @@ fin2open (char const *d, size_t dlen,
 int
 pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
            bool mustread, bool quiet)
-/* Pair the pathnames pointed to by ‘argv’; ‘argc’ indicates how many there
+/* Pair the filenames pointed to by ‘argv’; ‘argc’ indicates how many there
    are.  Place a pointer to the RCS filename into ‘REPO (filename)’, and a
    pointer to the filename of the working file into ‘MANI (filename)’.  If
    both are given, and ‘MANI (standard_output)’ is set, display a warning.
@@ -419,10 +419,10 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
   REPO (fd_lock) = -1;
 
   if (!(arg = *argv))
-    return 0;                   /* already paired pathname */
+    return 0;                   /* already paired filename */
   if (*arg == '-')
     {
-      PERR ("%s option is ignored after pathnames", arg);
+      PERR ("%s option is ignored after filenames", arg);
       return 0;
     }
 
@@ -432,7 +432,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
   /* First check suffix to see whether it is an RCS file or not.  */
   if ((x = rcssuffix (arg)))
     {
-      /* RCS pathname given.  */
+      /* RCS filename given.  */
       RCS1 = arg;
       RCSbase = base;
       baselen = x - base;
@@ -456,7 +456,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       /* Working file given; now try to find RCS file.  */
       MANI (filename) = arg;
       baselen = strlen (base);
-      /* Derive RCS pathname.  */
+      /* Derive RCS filename.  */
       if (1 < argc
           && (x = rcssuffix (RCS1 = argv[1]))
           && RCS1 + baselen <= x
@@ -469,12 +469,12 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
       else
         RCSbase = RCS1 = NULL;
     }
-  /* Now we have a (tentative) RCS pathname in RCS1 and ‘MANI (filename)’.
+  /* Now we have a (tentative) RCS filename in RCS1 and ‘MANI (filename)’.
      Second, try to find the right RCS file.  */
   bufautobegin (&maybe.bestfit);
   if (RCSbase != RCS1)
     {
-      /* A path for RCSfile is given; single RCS file to look for.  */
+      /* A filename is given; single RCS file to look for.  */
       bufscpy (&maybe.bestfit, RCS1);
       FLOW (from) = (*rcsopen) (&maybe.bestfit, &REPO (stat), mustread);
       maybe.eno = errno;
@@ -483,12 +483,12 @@ pairnames (int argc, char **argv, open_rcsfile_fn_t *rcsopen,
     {
       bufscpy (&maybe.bestfit, "");
       if (RCS1)
-        /* RCS filename was given without path.  */
+        /* RCS filename was given without a directory component.  */
         fin2open (arg, (size_t) 0, RCSbase, baselen,
                   x, strlen (x), &maybe);
       else
         {
-          /* No RCS pathname was given.
+          /* No RCS filename was given.
              Try each suffix in turn.  */
           dlen = base - arg;
           x = BE (pe);
@@ -559,10 +559,10 @@ dir_useful_len (char const *d)
 
 char const *
 getfullRCSname (void)
-/* Return a pointer to the full pathname of the RCS file.
+/* Return a pointer to the full filename of the RCS file.
    Remove leading ‘./’.  */
 {
-  if (ROOTPATH (REPO (filename)))
+  if (ABSFNAME (REPO (filename)))
     {
       return REPO (filename);
     }
@@ -579,7 +579,7 @@ getfullRCSname (void)
           struct stat PWDstat, dotstat;
 
           if (!((BE (cwd) = PWD)
-                && ROOTPATH (PWD)
+                && ABSFNAME (PWD)
                 && stat (PWD, &PWDstat) == 0
                 && stat (".", &dotstat) == 0
                 && SAME_INODE (PWDstat, dotstat)))
@@ -607,7 +607,7 @@ getfullRCSname (void)
         /* ‘.////’ is equivalent to ‘./’.  */
         while (isSLASH (r[2]))
           r++;
-      /* Build full pathname.  */
+      /* Build full filename.  */
       accumulate_nonzero_bytes (SINGLE, BE (cwd));
       accumulate_byte          (SINGLE, SLASH);
       accumulate_nonzero_bytes (SINGLE, r);
@@ -634,7 +634,7 @@ isSLASH (int c)
 
 #if !defined HAVE_GETCWD
 char *
-getcwd (char *path, size_t size)
+getcwd (char *buf, size_t size)
 {
   const char const usrbinpwd[] = "/usr/bin/pwd";
 #define binpwd (usrbinpwd+4)
@@ -679,7 +679,7 @@ getcwd (char *path, size_t size)
   fp = NULL;
   wstatus = 0;
   readerror = toolong = false;
-  p = path;
+  p = buf;
   if (0 <= child)
     {
       fp = fdopen (fd[0], "r");
@@ -687,7 +687,7 @@ getcwd (char *path, size_t size)
       if (fp)
         {
           lim = p + size;
-          for (p = path;; *p++ = c)
+          for (p = buf;; *p++ = c)
             {
               if ((c = getc (fp)) < 0)
                 {
@@ -749,13 +749,13 @@ getcwd (char *path, size_t size)
       errno = ERANGE;
       return NULL;
     }
-  if (wstatus || p == path || *--p != '\n')
+  if (wstatus || p == buf || *--p != '\n')
     {
       errno = EACCES;
       return NULL;
     }
   *p = '\0';
-  return path;
+  return buf;
 }
 #endif  /* !defined HAVE_GETCWD */
 
@@ -810,7 +810,7 @@ main (int argc, char *argv[])
       if (result != 0)
         {
           diagnose
-            ("RCS pathname: %s; working pathname: %s\nFull RCS pathname: %s",
+            ("RCS filename: %s; working filename: %s\nFull RCS filename: %s",
              REPO (filename), MANI (filename), getfullRCSname ());
         }
       switch (result)

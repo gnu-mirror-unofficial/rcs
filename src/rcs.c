@@ -1207,7 +1207,7 @@ main (int argc, char **argv)
           /* Append access list according to accessfile.  */
           if (!*a)
             {
-              PERR ("missing pathname after -A");
+              PERR ("missing filename after -A");
               break;
             }
           *argv = a;
@@ -1380,7 +1380,7 @@ main (int argc, char **argv)
     }
   /* (End processing of options.)  */
 
-  /* Now handle all pathnames.  */
+  /* Now handle all filenames.  */
   if (LEX (erroneousp))
     cleanup ();
   else if (argc < 1)

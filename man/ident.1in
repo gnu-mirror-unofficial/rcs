@@ -101,14 +101,14 @@ The login name of the user who checked in the revision.
 The date and time the revision was checked in.
 .TP
 .B $\&Header$
-A standard header containing the full pathname of the \*r file, the
+A standard header containing the full filename of the \*r file, the
 revision number, the date and time, the author, the state,
 and the locker (if locked).
 .TP
 .B $\&Id$
 Same as
 .BR $\&Header$ ,
-except that the \*r filename is without a path.
+except that the \*r filename is without directory components.
 .TP
 .B $\&Locker$
 The login name of the user who locked the revision (empty if not locked).
@@ -124,13 +124,13 @@ purposes, this is equivalent to
 The symbolic name used to check out the revision, if any.
 .TP
 .B $\&RCSfile$
-The name of the \*r file without a path.
+The name of the \*r file without directory components.
 .TP
 .B $\&Revision$
 The revision number assigned to the revision.
 .TP
 .B $\&Source$
-The full pathname of the \*r file.
+The full filename of the \*r file.
 .TP
 .B $\&State$
 The state assigned to the revision with the

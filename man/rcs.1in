@@ -33,7 +33,7 @@ the
 .B \-i
 option is present.
 .PP
-Pathnames matching an \*r suffix denote \*r files;
+Filenames matching an \*r suffix denote \*r files;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
@@ -43,7 +43,7 @@ Revision numbers use the syntax described in
 .TP
 .B \-i
 Create and initialize a new \*r file, but do not deposit any revision.
-If the \*r file has no path prefix, try to place it
+If the \*r file has no directory component, try to place it
 first into the subdirectory
 .BR ./RCS ,
 and then into the current directory.
@@ -295,7 +295,7 @@ Write descriptive text from the contents of the named
 into the \*r file, deleting the existing text.
 The
 .IR file
-pathname cannot begin with
+name cannot begin with
 .BR \- .
 If
 .I file
@@ -379,7 +379,7 @@ by discarding information that would confuse version
 .B \-x
 option, and requires a
 .B ,v
-suffix on an \*r pathname.
+suffix on an \*r filename.
 .SH FILES
 .B rcs
 accesses files much as
@@ -398,7 +398,7 @@ See
 .BR ci (1)
 for details.
 .SH DIAGNOSTICS
-The \*r pathname and the revisions outdated are written to
+The \*r filename and the revisions outdated are written to
 the diagnostic output.
 The exit status is zero if and only if all operations were successful.
 .SH IDENTIFICATION

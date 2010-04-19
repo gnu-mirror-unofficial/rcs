@@ -1,5 +1,20 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Don't say "path" when referring to file names.
+
+	Files whose only changes were to comments are omitted.
+	* base.h (ABSFNAME): Rename from ‘ROOTPATH’.
+	(SIZEABLE_FILENAME_LEN): Rename from ‘SIZEABLE_PATH’.
+	* rcs.c (main): Say "filename" in error message.
+	* rcsedit.c (naturalize): Use ‘SIZEABLE_FILENAME_LEN’, ‘ABSFNAME’.
+	(rcswriteopen): Rename local var; say "filename" in error messages.
+	* rcsfnms.c (rcsreadopen): Rename arg; nfc.
+	(getfullRCSname): Use ‘ABSFNAME’.
+	[!HAVE_GETCWD] (getcwd): Rename arg; nfc.
+	[PAIRTEST] (main): Say "filename" in diagnostic.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move cached cwd to ‘struct behavior’.
 
 	* base.h (behavior): Add member ‘cwd’; delete member ‘fnstuff’.
