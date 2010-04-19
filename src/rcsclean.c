@@ -151,8 +151,6 @@ const struct program program =
 int
 main (int argc, char **argv)
 {
-  static char const usage[] =
-    "\nrcsclean: usage: rcsclean -ksubst -{nqru}[rev] -T -Vn -xsuff -zzone file ...";
   static struct buf revision;
   char *a, **newargv;
   char const *rev, *p;
@@ -237,7 +235,7 @@ main (int argc, char **argv)
 
         default:
         unknown:
-          PERR ("unknown option: %s%s", *argv, usage);
+          PERR ("unknown option: %s", *argv);
         }
     }
 

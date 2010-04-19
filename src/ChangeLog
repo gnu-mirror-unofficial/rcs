@@ -1,5 +1,11 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	rcsclean: On unknown option, don't display usage info.
+
+	* rcsclean.c (main): Don't display usage info.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Don't say "path" when referring to file names.
 
 	Files whose only changes were to comments are omitted.
