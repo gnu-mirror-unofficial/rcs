@@ -165,7 +165,7 @@ main (int argc, char **argv)
   char const *cov[10 + !DIFF_L];
   char const **diffv, **diffp, **diffpend;      /* argv for subsidiary diff */
   char const **pp, *diffvstr = NULL;
-  struct buf commarg;
+  struct cbuf commarg;
   struct buf numericrev;        /* expanded revision number */
   struct hshentries *gendeltas; /* deltas to be generated */
   struct hshentry *target;
@@ -178,7 +178,6 @@ main (int argc, char **argv)
 
   exitstatus = DIFF_SUCCESS;
 
-  bufautobegin (&commarg);
   bufautobegin (&numericrev);
   revnums = 0;
   rev1 = rev2 = xrev2 = NULL;
@@ -425,10 +424,7 @@ main (int argc, char **argv)
           }
 #endif
 
-        diagnose ("retrieving revision %s", xrev1);
-        bufscpy (&commarg, "-p");
-        /* Not ‘xrev1’, for $Name's sake.  */
-        bufscat (&commarg, rev1);
+        commarg = minus_p (xrev1, rev1);
 
         pp = &cov[3 + !DIFF_L];
         *pp++ = commarg.string;
@@ -467,10 +463,7 @@ main (int argc, char **argv)
           }
         else
           {
-            diagnose ("retrieving revision %s", xrev2);
-            bufscpy (&commarg, "-p");
-            /* Not ‘xrev2’, for $Name's sake.  */
-            bufscat (&commarg, rev2);
+            commarg = minus_p (xrev2, rev2);
             cov[3 + !DIFF_L] = commarg.string;
             diffp[1] = maketemp (1);
             if (runv (-1, diffp[1], cov))

@@ -1,5 +1,14 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: minus_p
+
+	* base.h (minus_p): New func decl.
+	* rcsutil.c (minus_p): New func.
+	* rcsdiff.c (main): Use ‘minus_p’.
+	* rcsmerge.c (main): Likewise.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] For ‘co -j’, save merge(1)-command args in ‘SINGLE’.
 
 	* co.c (buildjoin): Save arg strings in ‘SINGLE’.

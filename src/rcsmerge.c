@@ -73,7 +73,6 @@ main (int argc, char **argv)
   bool tostdout;
   int status;
   struct fro *workptr;
-  struct buf commarg;
   struct buf numericrev;                /* holds expanded revision number */
   struct hshentries *gendeltas;         /* deltas to be generated */
   struct hshentry *target;
@@ -81,7 +80,6 @@ main (int argc, char **argv)
   CHECK_HV ();
   gnurcs_init ();
 
-  bufautobegin (&commarg);
   bufautobegin (&numericrev);
   edarg = rev[1] = rev[2] = NULL;
   status = 0;                           /* Keep lint happy.  */
@@ -204,10 +202,8 @@ main (int argc, char **argv)
 
                       for (i = 1; i <= 2; i++)
                         {
-                          diagnose ("retrieving revision %s", xrev[i]);
-                          bufscpy (&commarg, "-p");
-                          /* Not ‘xrev[i]’, for $Name's sake.  */
-                          bufscat (&commarg, rev[i]);
+                          struct cbuf commarg = minus_p (xrev[i], rev[i]);
+
                           if (run (-1,
                                    /* Don't collide with merger.c ‘maketemp’.  */
                                    arg[i] = maketemp (i + 2),

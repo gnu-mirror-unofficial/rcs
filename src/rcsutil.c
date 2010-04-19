@@ -59,6 +59,19 @@ bad_option (char const *option)
   PERR ("unknown option: %s", option);
 }
 
+struct cbuf
+minus_p (char const *xrev, char const *rev)
+{
+  struct cbuf rv;
+
+  diagnose ("retrieving revision %s", xrev);
+  accumulate_nonzero_bytes (SINGLE, "-p");
+  /* Not ‘xrev’, for $Name's sake.  */
+  accumulate_nonzero_bytes (SINGLE, rev);
+  rv.string = finish_string (SINGLE, &rv.size);
+  return rv;
+}
+
 static void *
 okalloc (void * p)
 {
