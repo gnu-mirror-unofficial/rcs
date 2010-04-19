@@ -34,19 +34,6 @@
 static const char const rcsdir[] = "RCS";
 #define rcslen  (sizeof rcsdir - 1)
 
-struct fnstuff
-{
-  char *cwd;
-};
-
-#define FN(x)  (BE (fnstuff)-> x)
-
-void
-init_fnstuff (void)
-{
-  BE (fnstuff) = ZLLOC (1, struct fnstuff);
-}
-
 struct compair
 {
   char const *suffix, *comlead;
@@ -585,13 +572,13 @@ getfullRCSname (void)
       char *rv;
       size_t len;
 
-      if (!FN (cwd))
+      if (!BE (cwd))
         {
           /* Get working directory for the first time.  */
           char *PWD = cgetenv ("PWD");
           struct stat PWDstat, dotstat;
 
-          if (!((FN (cwd) = PWD)
+          if (!((BE (cwd) = PWD)
                 && ROOTPATH (PWD)
                 && stat (PWD, &PWDstat) == 0
                 && stat (".", &dotstat) == 0
@@ -599,19 +586,19 @@ getfullRCSname (void)
             {
               size_t sz = 64;
 
-              while (!(FN (cwd) = alloc (SHARED, __func__, sz),
-                       getcwd (FN (cwd), sz)))
+              while (!(BE (cwd) = alloc (SHARED, __func__, sz),
+                       getcwd (BE (cwd), sz)))
                 {
-                  brush_off (SHARED, FN (cwd));
+                  brush_off (SHARED, BE (cwd));
                   if (errno == ERANGE)
                     sz <<= 1;
-                  else if ((FN (cwd) = PWD))
+                  else if ((BE (cwd) = PWD))
                     break;
                   else
                     fatal_sys ("getcwd");
                 }
             }
-          FN (cwd)[dir_useful_len (FN (cwd))] = '\0';
+          BE (cwd)[dir_useful_len (BE (cwd))] = '\0';
         }
       /* Remove leading ‘./’s from ‘REPO (filename)’.
          Do not try to handle ‘../’, since removing it may result
@@ -621,7 +608,7 @@ getfullRCSname (void)
         while (isSLASH (r[2]))
           r++;
       /* Build full pathname.  */
-      accumulate_nonzero_bytes (SINGLE, FN (cwd));
+      accumulate_nonzero_bytes (SINGLE, BE (cwd));
       accumulate_byte          (SINGLE, SLASH);
       accumulate_nonzero_bytes (SINGLE, r);
       rv = finish_string (SINGLE, &len);

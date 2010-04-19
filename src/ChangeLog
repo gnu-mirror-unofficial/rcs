@@ -1,5 +1,17 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move cached cwd to ‘struct behavior’.
+
+	* base.h (behavior): Add member ‘cwd’; delete member ‘fnstuff’.
+	(init_fnstuff): Delete func decl.
+	* rcsfnms.c (fnstuff): Delete struct.
+	(FN): Delete macro.
+	(init_fnstuff): Delete func.
+	(getfullRCSname): Use ‘BE (cwd)’ instead of ‘FN (cwd)’.
+	* rcsutil.c (gnurcs_init): Don't init fnstuff.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Trim some unused #include directives.
 
 	* rcsfnms.c: Don't #include <stdint.h>,

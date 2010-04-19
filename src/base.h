@@ -508,6 +508,10 @@ struct behavior
   /* True means ‘Oerror’ was called already.
      -- Oerror Lexinit  */
 
+  char *cwd;
+  /* The current working directory.
+     -- getfullRCSname  */
+
   struct sff *sff;
   /* (Somewhat) fleeting files.  */
 
@@ -517,7 +521,6 @@ struct behavior
   struct isr_scratch *isr;
   struct editstuff *editstuff;
   struct ephemstuff *ephemstuff;
-  struct fnstuff *fnstuff;
   struct maketimestuff *maketimestuff;
 };
 
@@ -734,7 +737,6 @@ int rcsfcmp (struct fro *, struct stat const *, char const *,
              struct hshentry const *);
 
 /* rcsfnms */
-void init_fnstuff (void);
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
 struct fro *rcsreadopen (struct buf *, struct stat *, bool);
