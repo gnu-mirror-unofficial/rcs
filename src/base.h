@@ -361,8 +361,36 @@ enum markers
 /* This is used by ci and rlog.  */
 #define EMPTYLOG "*** empty log message ***"
 
+struct maybe;
+
 /* The function ‘pairnames’ takes to open the RCS file.  */
-typedef struct fro * (open_rcsfile_fn_t) (struct buf *, struct stat *, bool);
+typedef struct fro * (open_rcsfile_fn) (struct maybe *);
+
+/* A combination of probe parameters and results for ‘pairnames’ through
+   ‘fin2open’ through ‘finopen’ through {‘rcsreadopen’, ‘rcswriteopen’}
+   (and ‘naturalize’ in the case of ‘rcswriteopen’).
+
+   The probe protocol is to set ‘open’ and ‘mustread’ once, and try various
+   permutations of basename, directory and extension (-x) in ‘tentative’,
+   finally recording ‘errno’ in ‘eno’, the "best RCS filename found" in
+   ‘bestfit’, and stat(2) info in ‘status’ (otherwise failing).  */
+struct maybe
+{
+  /* Input parameters, constant.  */
+  open_rcsfile_fn *open;
+  bool mustread;
+
+  /* Input parameter, varying.  */
+  struct cbuf tentative;
+
+  /* Scratch.  */
+  struct divvy *space;
+
+  /* Output parameters.  */
+  struct cbuf bestfit;
+  struct stat *status;
+  int eno;
+};
 
 /* The locations of RCS programs, for internal use.  */
 extern const char const prog_co[];
@@ -711,7 +739,7 @@ bool recognize_keyword (char const *, struct pool_found *);
 int merge (bool, char const *, char const *const[3], char const *const[3]);
 
 /* rcsedit */
-struct fro *rcswriteopen (struct buf *, struct stat *, bool);
+struct fro *rcswriteopen (struct maybe *);
 char const *getcaller (void);
 int addlock (struct hshentry *, bool);
 int addsymbol (char const *, char const *, bool);
@@ -739,12 +767,12 @@ int rcsfcmp (struct fro *, struct stat const *, char const *,
 /* rcsfnms */
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
-struct fro *rcsreadopen (struct buf *, struct stat *, bool);
+struct fro *rcsreadopen (struct maybe *);
 char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
 char const *getfullRCSname (void);
 char const *rcssuffix (char const *);
-int pairnames (int, char **, open_rcsfile_fn_t *, bool, bool);
+int pairnames (int, char **, open_rcsfile_fn *, bool, bool);
 void bufalloc (struct buf *, size_t);
 void bufautoend (struct buf *);
 void bufscat (struct buf *, char const *);

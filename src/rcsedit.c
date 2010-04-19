@@ -644,7 +644,7 @@ editstring (struct hshentry const *delta)
 }
 
 static int
-naturalize (struct buf *fn, bool *symbolicp)
+naturalize (struct maybe *m, bool *symbolicp)
 /* If ‘fn’ is a symbolic link, resolve it to the name that it points to.
    If unsuccessful, set errno and return -1.
    If it points to an existing file, return 1.
@@ -655,7 +655,8 @@ naturalize (struct buf *fn, bool *symbolicp)
   int e;
   ssize_t r;
   int linkcount = _POSIX_SYMLOOP_MAX;
-  struct divvy *space = make_space ("nature");
+  struct cbuf *fn = &m->tentative;
+  struct divvy *space = m->space;
   size_t len = SIZEABLE_FILENAME_LEN;
   char *chased = alloc (space, "chased", len);
   char const *orig = fn->string;
@@ -690,9 +691,7 @@ naturalize (struct buf *fn, bool *symbolicp)
           }
       }
   e = errno;
-  if ((*symbolicp = fn->string != orig))
-    fn->string = intern (SINGLE, fn->string, fn->size);
-  close_space (space);
+  *symbolicp = fn->string != orig;
   errno = e;
   switch (e)
     {
@@ -706,14 +705,15 @@ naturalize (struct buf *fn, bool *symbolicp)
 }
 
 struct fro *
-rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
-/* Create the lock file corresponding to ‘RCSbuf’.
-   Then try to open ‘RCSbuf’ for reading and return its ‘fro*’ descriptor.
-   Put its status into ‘*status’ too.
-   ‘mustread’ is true if the file must already exist, too.
+rcswriteopen (struct maybe *m)
+/* Create the lock file corresponding to ‘m->tentative’.  Then try to
+   open ‘m->tentative’ for reading and return its ‘fro*’ descriptor.
+   Put its status into ‘*(m->status)’ too.
+   ‘m->mustread’ is true if the file must already exist, too.
    If all goes well, discard any previously acquired locks,
    and set ‘REPO (fd_lock)’ to the file descriptor of the RCS lockfile.  */
 {
+  struct cbuf *RCSbuf = &m->tentative;
   register char *tp;
   register char const *sp, *repofn, *x;
   struct fro *f;
@@ -726,16 +726,16 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
 
   ensure_editstuff ();                  /* ugh */
   waslocked = 0 <= REPO (fd_lock);
-  exists = naturalize (RCSbuf, &symbolicp);
-  if (exists < (mustread | waslocked))
+  exists = naturalize (m, &symbolicp);
+  if (exists < (m->mustread | waslocked))
     /* There's an unusual problem with the RCS file; or the RCS file
        doesn't exist, and we must read or we already have a lock
        elsewhere.  */
     return NULL;
 
   repofn = RCSbuf->string;
-  accumulate_nonzero_bytes (SHARED, RCSbuf->string);
-  lfn = finish_string (SHARED, &len);
+  accumulate_nonzero_bytes (m->space, RCSbuf->string);
+  lfn = finish_string (m->space, &len);
   sp = basefilename (lfn);
   x = rcssuffix (repofn);
   if (!x && symbolicp)
@@ -782,7 +782,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       *tp = '_';
     }
 
-  BE (sff)[waslocked].filename = lfn;
+  BE (sff)[waslocked].filename = intern (SINGLE, lfn, len);
 
   f = NULL;
 
@@ -864,7 +864,7 @@ rcswriteopen (struct buf *RCSbuf, struct stat *status, bool mustread)
       e = ENOENT;
       if (exists)
         {
-          f = fro_open (repofn, FOPEN_RB, status);
+          f = fro_open (repofn, FOPEN_RB, m->status);
           e = errno;
           if (f && waslocked)
             {

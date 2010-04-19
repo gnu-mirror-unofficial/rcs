@@ -1,5 +1,25 @@
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Encapsulate ‘pairnames’ probe protocol state entirely.
+
+	* base.h (maybe): New struct.
+	(open_rcsfile_fn): Rename from ‘open_rcsfile_fn_t’; rewrite arglist.
+	(rcswriteopen, rcsreadopen, pairnames): Update func decls.
+	* rcsedit.c (naturalize): Take ‘struct maybe *’; use its space
+	intead of a local one; don't save new filename in ‘SINGLE’.
+	(rcswriteopen): Take ‘struct maybe *’; update call to ‘naturalize’;
+	save not-yet-validated filenames in ‘m->space’; don't save to
+	‘SINGLE’ until after validation; pass ‘m->status’ to ‘fro_open’.
+	* rcsfnms.c (rcsreadopen): Take ‘struct maybe *’.
+	(maybe): Delete struct.
+	(finopen): Update call to ‘m->open’; update ‘m->bestfit’ assignment.
+	(fin2open): Build the strings in ‘m->space’; point ‘m->tentative’.
+	(pairnames): Update type name of ‘rcsopen’ in arglist; set
+	‘maybe.status’; make a space for ‘maybe.space’; update ‘maybe.bestfit’
+	init; update call to ‘rcsopen’; close space before returning.
+
+2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: bad_option
 
 	* base.h (bad_option): New func decl.
