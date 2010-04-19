@@ -29,6 +29,7 @@
 #include "same-inode.h"
 #include "ci.help"
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -57,7 +58,7 @@ static FILE *exfile;
 /* Working file pointer.  */
 static struct fro *workptr;
 /* New revision number.  */
-static struct buf newdelnum;
+static struct cbuf newdelnum;
 static struct cbuf msg;
 static int exitstatus;
 /* Forces check-in.  */
@@ -94,24 +95,32 @@ exiterr (void)
   _Exit (EXIT_FAILURE);
 }
 
+#define ACCB(b)   accumulate_byte (SHARED, b)
+#define ACCS(s)   accumulate_nonzero_bytes (SHARED, s)
+#define OK(x)     (x)->string = finish_string (SHARED, &((x)->size))
+#define JAM(x,s)  do { ACCS (s); OK (x); } while (0)
+#define ADD(x,s)  do { ACCS ((x)->string); JAM (x, s); } while (0)
+
 static void
-incnum (char const *onum, struct buf *nnum)
+incnum (char const *onum, struct cbuf *nnum)
 /* Increment the last field of revision number ‘onum’
-   by one and place the result into ‘nnum’.  */
+   by one into a ‘SHARED’ string and point ‘nnum’ at it.  */
 {
   register char *tp, *np;
   register size_t l;
 
-  l = strlen (onum);
-  bufalloc (nnum, l + 2);
-  np = tp = nnum->string;
-  strncpy (np, onum, 1 + l);    /* ‘1 +’ to include '\0' */
+  ACCS (onum);
+  ACCB ('\0');
+  np = finish_string (SHARED, &nnum->size);
+  nnum->string = np;
+  l = nnum->size - 1;
   for (tp = np + l; np != tp;)
     if (isdigit (*--tp))
       {
         if (*tp != '9')
           {
             ++*tp;
+            nnum->size--;
             return;
           }
         *tp = '0';
@@ -164,12 +173,12 @@ removelock (struct hshentry *delta)
 }
 
 static int
-addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
+addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
 /* Add a new branch and branch delta at ‘branchpoint’.
    If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
    the new delta and branchhead are in globals ‘newdelta’ and ‘newbranch’, resp.
-   the new number is placed into ‘num’.
+   the new number is placed into a ‘SHARED’ string with ‘num’ pointing to it.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
    If ‘removedlock’, a lock was already removed.  */
 {
@@ -187,11 +196,11 @@ addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
       branchpoint->branches = &newbranch;
       if (numlength == 0)
         {
-          bufscpy (num, branchpoint->num);
-          bufscat (num, ".1.1");
+          JAM (num, branchpoint->num);
+          ADD (num, ".1.1");
         }
       else if (numlength & 1)
-        bufscat (num, ".1");
+        ADD (num, ".1");
       newbranch.nextbranch = NULL;
 
     }
@@ -206,7 +215,7 @@ addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
       getbranchno (bhead->hsh->num, &branchnum);
       incnum (branchnum.string, num);
       bufautoend (&branchnum);
-      bufscat (num, ".1");
+      ADD (num, ".1");
       newbranch.nextbranch = NULL;
     }
   else
@@ -231,7 +240,7 @@ addbranch (struct hshentry *branchpoint, struct buf *num, bool removedlock)
           newbranch.nextbranch = *btrail;
           *btrail = &newbranch;
           if (numlength & 1)
-            bufscat (num, ".1");
+            ADD (num, ".1");
         }
       else
         {
@@ -274,7 +283,7 @@ addelta (void)
    and the links in newdelta.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.  */
 {
-  register char *tp;
+  register char const *tp;
   register int i;
   int removedlock;
   int newdnumlength;            /* actual length of new rev. num. */
@@ -287,13 +296,13 @@ addelta (void)
          and a file initialized with ‘rcs -i’.  */
       if (newdnumlength == 0 && ADMIN (defbr))
         {
-          bufscpy (&newdelnum, ADMIN (defbr));
+          JAM (&newdelnum, ADMIN (defbr));
           newdnumlength = countnumflds (ADMIN (defbr));
         }
       if (newdnumlength == 0)
-        bufscpy (&newdelnum, "1.1");
+        JAM (&newdelnum, "1.1");
       else if (newdnumlength == 1)
-        bufscat (&newdelnum, ".1");
+        ADD (&newdelnum, ".1");
       else if (newdnumlength > 2)
         {
           RERR ("Branch point doesn't exist for revision %s.",
@@ -334,7 +343,7 @@ addelta (void)
           else
             {
               /* Middle revision; start a new branch.  */
-              bufscpy (&newdelnum, "");
+              JAM (&newdelnum, "");
               return addbranch (targetdelta, &newdelnum, true);
             }
           incnum (targetdelta->num, &newdelnum);
@@ -349,9 +358,7 @@ addelta (void)
               return -1;
             }
           if (ADMIN (defbr))
-            {
-              bufscpy (&newdelnum, ADMIN (defbr));
-            }
+            JAM (&newdelnum, ADMIN (defbr));
           else
             {
               incnum (ADMIN (head)->num, &newdelnum);
@@ -369,7 +376,7 @@ addelta (void)
           if (cmpnumfld (newdelnum.string, ADMIN (head)->num, 1) == 0)
             incnum (ADMIN (head)->num, &newdelnum);
           else
-            bufscat (&newdelnum, ".1");
+            ADD (&newdelnum, ".1");
         }
       if (cmpnum (newdelnum.string, ADMIN (head)->num) <= 0)
         {
@@ -389,22 +396,23 @@ addelta (void)
     }
   else
     {
+      struct cbuf old = newdelnum;      /* sigh */
+
       /* Put new revision on side branch.  First, get branch point.  */
-      tp = newdelnum.string;
+      tp = old.string;
       for (i = newdnumlength - ((newdnumlength & 1) ^ 1); --i;)
         while (*tp++ != '.')
           continue;
-      /* Kill final dot to get old delta temporarily.  */
-      *--tp = '\0';
-      if (! (targetdelta = gr_revno (newdelnum.string, &gendeltas)))
+      /* Ignore rest to get old delta.  */
+      accumulate_range (SHARED, old.string, tp - 1);
+      old.string = finish_string (SHARED, &old.size);
+      if (! (targetdelta = gr_revno (old.string, &gendeltas)))
         return -1;
-      if (cmpnum (targetdelta->num, newdelnum.string) != 0)
+      if (cmpnum (targetdelta->num, old.string) != 0)
         {
-          RERR ("can't find branch point %s", newdelnum.string);
+          RERR ("can't find branch point %s", old.string);
           return -1;
         }
-      /* Restore final dot.  */
-      *tp = '.';
       return addbranch (targetdelta, &newdelnum, false);
     }
 }
@@ -896,7 +904,7 @@ main (int argc, char **argv)
           gettree ();
 
         /* Expand symbolic revision number.  */
-        if (!fexpandsym (krev, &newdelnum, workptr))
+        if (!fully_numeric (&newdelnum, krev, workptr))
           continue;
 
         /* Splice new delta into tree.  */

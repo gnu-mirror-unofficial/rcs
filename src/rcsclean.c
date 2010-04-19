@@ -151,7 +151,6 @@ const struct program program =
 int
 main (int argc, char **argv)
 {
-  static struct buf revision;
   char *a, **newargv;
   char const *rev, *p;
   bool dounlock, perform, unlocked, unlockflag, waslocked, Ttimeflag;
@@ -266,9 +265,11 @@ main (int argc, char **argv)
         p = NULL;
         if (rev)
           {
-            if (!fexpandsym (rev, &revision, workptr))
+            struct cbuf numeric;
+
+            if (!fully_numeric (&numeric, rev, workptr))
               continue;
-            p = revision.string;
+            p = numeric.string;
           }
         else if (ADMIN (head))
           switch (unlockflag ? findlock (false, &delta) : 0)

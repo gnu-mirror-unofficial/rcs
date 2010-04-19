@@ -166,7 +166,6 @@ main (int argc, char **argv)
   char const **diffv, **diffp, **diffpend;      /* argv for subsidiary diff */
   char const **pp, *diffvstr = NULL;
   struct cbuf commarg;
-  struct buf numericrev;        /* expanded revision number */
   struct hshentries *gendeltas; /* deltas to be generated */
   struct hshentry *target;
   char *a, *dcp, **newargv;
@@ -178,7 +177,6 @@ main (int argc, char **argv)
 
   exitstatus = DIFF_SUCCESS;
 
-  bufautobegin (&numericrev);
   revnums = 0;
   rev1 = rev2 = xrev2 = NULL;
 #if DIFF_L
@@ -353,6 +351,8 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        struct cbuf numericrev;
+
         ffree ();
 
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
@@ -379,7 +379,7 @@ main (int argc, char **argv)
         if (revnums == 0 || !*rev1)
           rev1 = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
 
-        if (!fexpandsym (rev1, &numericrev, workptr))
+        if (!fully_numeric (&numericrev, rev1, workptr))
           continue;
         if (! (target = gr_revno (numericrev.string, &gendeltas)))
           continue;
@@ -393,10 +393,11 @@ main (int argc, char **argv)
         lexpandarg = expandarg;
         if (revnums == 2)
           {
-            if (!fexpandsym (*rev2 ? rev2 : (ADMIN (defbr)
-                                             ? ADMIN (defbr)
-                                             : ADMIN (head)->num),
-                             &numericrev, workptr))
+            if (!fully_numeric (&numericrev,
+                                *rev2 ? rev2 : (ADMIN (defbr)
+                                                ? ADMIN (defbr)
+                                                : ADMIN (head)->num),
+                                workptr))
               continue;
             if (! (target = gr_revno (numericrev.string, &gendeltas)))
               continue;

@@ -1,5 +1,24 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘fully_numeric’, not ‘fexpandsym’; zonk the latter.
+
+	* ci.c: #include "b-divvy.h".
+	(newdelnum): Change type to ‘struct cbuf’.
+	(ACCB, ACCS, OK, JAM, ADD): New macros.
+	(incnum): Take ‘struct cbuf *’; accumulate into ‘SHARED’.
+	(addbranch): Likewise.
+	(addelta): Accumulate into ‘SHARED’; pass new string to ‘cmpnum’.
+	(main): Use ‘fully_numeric’.
+	* rcsclean.c (main): Use ‘fully_numeric’.
+	* rcsdiff.c (main): Likewise.
+	* rcsmerge.c: #include "b-divvy.h".
+	(main): Use ‘fully_numeric’.
+	* rcsrev.c (fexpandsym): Delete func.
+	(expandsym): Use ‘fully_numeric’.
+	* base.h (fexpandsym): Delete func decl.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: fully_numeric
 
 	* base.h (fully_numeric): New func decl.

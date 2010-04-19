@@ -24,6 +24,7 @@
 #include <string.h>
 #include "rcsmerge.help"
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-feph.h"
 #include "b-fro.h"
 
@@ -73,14 +74,12 @@ main (int argc, char **argv)
   bool tostdout;
   int status;
   struct fro *workptr;
-  struct buf numericrev;                /* holds expanded revision number */
   struct hshentries *gendeltas;         /* deltas to be generated */
   struct hshentry *target;
 
   CHECK_HV ();
   gnurcs_init ();
 
-  bufautobegin (&numericrev);
   edarg = rev[1] = rev[2] = NULL;
   status = 0;                           /* Keep lint happy.  */
   tostdout = false;
@@ -160,6 +159,7 @@ main (int argc, char **argv)
         PFATAL ("no input file");
       if (0 < pairnames (argc, argv, rcsreadopen, true, false))
         {
+          struct cbuf numericrev;
 
           if (argc > 2 || (argc == 2 && argv[1]))
             PWARN ("excess arguments ignored");
@@ -177,13 +177,13 @@ main (int argc, char **argv)
 
           if (!*rev[1])
             rev[1] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
-          if (fexpandsym (rev[1], &numericrev, workptr)
+          if (fully_numeric (&numericrev, rev[1], workptr)
               && (target = gr_revno (numericrev.string, &gendeltas)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
                 rev[2] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
-              if (fexpandsym (rev[2], &numericrev, workptr)
+              if (fully_numeric (&numericrev, rev[2], workptr)
                   && (target = gr_revno (numericrev.string, &gendeltas)))
                 {
                   xrev[2] = target->num;
