@@ -1,3 +1,21 @@
+2010-04-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Move conditionally-compiled test programs to yarrrr.c.
+
+	* yarrrr.c: New file.
+	* Makefile.am (EXTRA_DIST): Add yarrrr.c.
+	(YALL, YPROGS): New vars.
+	(y-STR2TIME, y-FCMP, y-PAIRS, y-KEEP, y-LEX, y-REV, y-SYN)
+	(y-all, y-clean): New targets.
+	* base.h: Comment munging; nfc.
+	* maketime.c [TEST]: Delete #ifdef .. #endif block.
+	* rcsfcmp.c [FCMPTEST]: Likewise.
+	* rcsfnms.c [PAIRTEST]: Likewise.
+	* rcskeep.c [KEEPTEST]: Likewise.
+	* rcslex.c [LEXDB]: Likewise.
+	* rcsrev.c [REVTEST]: Likewise.
+	* rcssyn.c [SYNTEST]: Likewise.
+
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstraction: minus_p

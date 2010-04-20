@@ -388,24 +388,4 @@ getoldkeys (register struct fro *fp)
   return false;
 }
 
-#ifdef KEEPTEST
-/* Print the keyword values found.  */
-
-const struct program program = { .name = "keeptest" };
-
-int
-main (int argc, char *argv[])
-{
-  while (*(++argv))
-    {
-      MANI (filename) = *argv;
-      getoldkeys (NULL);
-      printf ("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
-              *argv, PREV (rev), PREV (date), PREV (author),
-              PREV (name), PREV (state));
-    }
-  return EXIT_SUCCESS;
-}
-#endif  /* KEEPTEST */
-
 /* rcskeep.c ends here */

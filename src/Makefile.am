@@ -43,7 +43,7 @@ PATHPREFIX =
 TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$$(pwd)/0pre/bin:$$PATH" sh
 TESTS = alive.test
 
-EXTRA_DIST = TAGS rcsfreeze.sh $(TESTS)
+EXTRA_DIST = TAGS rcsfreeze.sh $(TESTS) yarrrr.c
 
 dist-hook:
 	rm -f $(distdir)/bother.c
@@ -110,5 +110,19 @@ xorlf:
 	rm -f $@.c
 
 FORCE:;
+
+
+# yarrrr!
+YALL = STR2TIME FCMP PAIRS KEEP LEX REV SYN
+YPROGS = $(YALL:%=y-%)
+
+$(YPROGS): yarrrr.c libparts.a
+	$(COMPILE) $$(echo $@ | sed s/^../-DTEST_/) \
+	  -o $@ $< $(LDADD)
+
+y-all: $(YPROGS)
+
+y-clean:
+	rm -f $(YPROGS)
 
 # Makefile.am ends here

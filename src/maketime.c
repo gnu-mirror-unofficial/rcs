@@ -304,22 +304,4 @@ str2time (char const *source, time_t default_time, long default_zone)
   return maketime (&pt, default_time);
 }
 
-#ifdef TEST
-#include <stdio.h>
-int
-main (int argc, char **argv)
-{
-  time_t default_time = time (NULL);
-  long default_zone = argv[1] ? atol (argv[1]) : 0;
-  char buf[1000];
-
-  while (gets (buf))
-    {
-      time_t t = str2time (buf, default_time, default_zone);
-      printf ("%s", asctime (gmtime (&t)));
-    }
-  return 0;
-}
-#endif
-
 /* maketime.c ends here */

@@ -267,31 +267,4 @@ returnresult:
   return result;
 }
 
-#ifdef FCMPTEST
-/* The test program prints out whether two files are identical,
-   except for keywords.  */
-
-const struct program program = { .name = "rcsfcmp" };
-
-int
-main (int argc, char *argv[])
-/* Arguments:
-   1st: comment leader
-   2nd: log message
-   3rd: expanded file
-   4th: unexpanded file  */
-{
-  struct hshentry delta;
-
-  ADMIN (log_lead).string = argv[1];
-  ADMIN (log_lead).size = strlen (argv[1]);
-  delta.log.string = argv[2];
-  delta.log.size = strlen (argv[2]);
-  if (rcsfcmp (fro_open (argv[3], FOPEN_R_WORK, NULL), argv[4], &delta))
-    printf ("files are the same\n");
-  else
-    printf ("files are different\n");
-}
-#endif  /* defined FCMPTEST */
-
 /* rcsfcmp.c ends here */

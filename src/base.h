@@ -634,11 +634,11 @@ struct repository
 {
   char const *filename;
   /* What it's called on disk.
-     -- pairnames (PAIRTEST)main  */
+     -- pairnames  */
 
   int fd_lock;
   /* The file descriptor of the RCS file lockfile.
-     -- rcswriteopen ORCSclose pairnames putadmin (SYNTEST)main  */
+     -- rcswriteopen ORCSclose pairnames putadmin  */
 
   struct stat stat;
   /* Stat info, possibly munged.
@@ -656,7 +656,7 @@ struct repository
 
     struct cbuf log_lead;
     /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
-       -- [rcs]main (FCMPTEST)main InitAdmin getadmin  */
+       -- [rcs]main InitAdmin getadmin  */
 
     struct cbuf description;
     /* The description string, if any.  Not functionally relevant.
@@ -685,7 +685,7 @@ struct flow
 {
   struct fro *from;
   /* Input stream for the RCS file.
-     -- rcsreadopen pairnames (LEXDB)main (REVTEST)main (SYNTEST)main  */
+     -- rcsreadopen pairnames  */
 
   FILE *rewr;
   /* Output stream for echoing input stream.
