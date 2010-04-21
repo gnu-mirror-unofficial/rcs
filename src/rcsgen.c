@@ -116,13 +116,6 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
       /* Only latest revision to generate.  */
       openfcopy (outfile);
       scandeltatext (target, expandflag ? expand : copy, true);
-      if (outfile)
-        return NULL;
-      else
-        {
-          Ozclose (&FLOW (res));
-          return FLOW (result);
-        }
     }
   else
     {
@@ -141,11 +134,11 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
         }
       scandeltatext (target, expandflag ? edit_expand : edit, true);
       finishedit (expandflag ? target : NULL, outfile, true);
-      if (outfile)
-        return NULL;
-      Ozclose (&FLOW (res));
-      return FLOW (result);
     }
+  if (outfile)
+    return NULL;
+  Ozclose (&FLOW (res));
+  return FLOW (result);
 }
 
 struct cbuf
