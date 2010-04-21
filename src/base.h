@@ -768,15 +768,12 @@ int rcsfcmp (struct fro *, struct stat const *, char const *,
 #define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
 struct fro *rcsreadopen (struct maybe *);
-char *bufenlarge (struct buf *, char const **);
 char const *basefilename (char const *);
 char const *getfullRCSname (void);
 char const *rcssuffix (char const *);
 int pairnames (int, char **, open_rcsfile_fn *, bool, bool);
 void bufalloc (struct buf *, size_t);
 void bufautoend (struct buf *);
-void bufscat (struct buf *, char const *);
-void bufscpy (struct buf *, char const *);
 
 /* rcsgen */
 char const *buildrevision (struct hshentries const *,

@@ -170,62 +170,12 @@ bufalloc (register struct buf *b, size_t size)
     }
 }
 
-static void
-bufrealloc (register struct buf *b, size_t size)
-/* Like ‘bufalloc’, except preserve old contents of ‘*b’, if any.  */
-{
-  if (b->size < size)
-    {
-      if (!b->size)
-        bufalloc (b, size);
-      else
-        {
-          while ((b->size <<= 1) < size)
-            continue;
-          b->string = testrealloc (b->string, b->size);
-        }
-    }
-}
-
 void
 bufautoend (struct buf *b)
 /* Free an auto buffer at block exit.  */
 {
   if (b->size)
     tfree (b->string);
-}
-
-char *
-bufenlarge (register struct buf *b, char const **alim)
-/* Make ‘*b’ larger.  Set ‘*alim’ to its new limit,
-   and return the relocated value of its old limit.  */
-{
-  size_t s = b->size;
-
-  bufrealloc (b, s + 1);
-  *alim = b->string + b->size;
-  return b->string + s;
-}
-
-void
-bufscat (struct buf *b, char const *s)
-/* Concatenate ‘s’ to the end of ‘b’.  */
-{
-  size_t blen = b->string ? strlen (b->string) : 0;
-  size_t ssiz = strlen (s) + 1;
-
-  bufrealloc (b, blen + ssiz);
-  strncpy (b->string + blen, s, ssiz);
-}
-
-void
-bufscpy (struct buf *b, char const *s)
-/* Copy ‘s’ into ‘b’.  */
-{
-  size_t ssiz = strlen (s) + 1;
-
-  bufalloc (b, ssiz);
-  strncpy (b->string, s, ssiz);
 }
 
 char const *

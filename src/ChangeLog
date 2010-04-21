@@ -1,5 +1,12 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Prune some now-obsoleted funcs.
+
+	* base.h (bufenlarge, bufscat, bufscpy): Delete func decls.
+	* rcsfnms.c (bufrealloc, bufenlarge, bufscat, bufscpy): Delete funcs.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘expandsym’ with ‘fully_numeric_no_k’.
 
 	* base.h (expandsym): Delete func decl.
