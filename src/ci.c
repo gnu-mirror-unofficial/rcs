@@ -183,7 +183,6 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
    If ‘removedlock’, a lock was already removed.  */
 {
   struct branchhead *bhead, **btrail;
-  struct buf branchnum;
   int result;
   int field, numlength;
   static struct branchhead newbranch;   /* new branch to be inserted */
@@ -211,10 +210,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
       while (bhead->nextbranch)
         bhead = bhead->nextbranch;
       bhead->nextbranch = &newbranch;
-      bufautobegin (&branchnum);
-      getbranchno (bhead->hsh->num, &branchnum);
-      incnum (branchnum.string, num);
-      bufautoend (&branchnum);
+      incnum (BRANCHNO (bhead->hsh->num), num);
       ADD (num, ".1");
       newbranch.nextbranch = NULL;
     }
@@ -245,10 +241,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
       else
         {
           /* Branch exists; append to end.  */
-          bufautobegin (&branchnum);
-          getbranchno (num->string, &branchnum);
-          targetdelta = gr_revno (branchnum.string, &gendeltas);
-          bufautoend (&branchnum);
+          targetdelta = gr_revno (BRANCHNO (num->string), &gendeltas);
           if (!targetdelta)
             return -1;
           if (cmpnum (num->string, targetdelta->num) <= 0)

@@ -693,9 +693,7 @@ removerevs (void)
             }
           else
             temp = searchcutpt (target->num, length, gendeltas);
-          /* Get branch number.  */
-          getbranchno (temp->num, &numrev);
-          gr_revno (numrev.string, &gendeltas);
+          gr_revno (BRANCHNO (temp->num), &gendeltas);
         }
       if (branchpoint (temp, cuttail))
         {

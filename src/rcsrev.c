@@ -90,6 +90,9 @@ take (size_t count, char const *rev)
   struct cbuf rv;
   char const *end = rev;
 
+  if (!count)
+    count = -2 + (1U | (1 + countnumflds (rev)));
+
   while (count--)
     while ('.' != *end++)
       continue;
@@ -97,20 +100,6 @@ take (size_t count, char const *rev)
   accumulate_range (SINGLE, rev, end - 1);
   rv.string = finish_string (SINGLE, &rv.size);
   return rv;
-}
-
-void
-getbranchno (char const *revno, struct buf *branchno)
-/* Given a revision number ‘revno’, copy the number of the branch on which
-   ‘revno’ is into ‘branchno’.  If ‘revno’ itself is a branch number, copy
-   it unchanged.  */
-{
-  size_t nfields = countnumflds (revno);
-
-  bufscpy (branchno,
-           (nfields & 1
-            ? revno
-            : TAKE (nfields - 1, revno)));
 }
 
 int

@@ -839,7 +839,6 @@ struct hshentry *genrevs (char const *, char const *, char const *,
                           char const *, struct hshentries **);
 struct hshentry *gr_revno (char const *revno, struct hshentries **store);
 int countnumflds (char const *);
-void getbranchno (char const *, struct buf *);
 
 /* rcssyn */
 /* Minimum value for no logical expansion.  */
@@ -930,5 +929,7 @@ bool isSLASH (int c);
   while (0)
 
 #define TAKE(count,rev)  (take (count, rev).string)
+
+#define BRANCHNO(rev)    TAKE (0, rev)
 
 /* base.h ends here */

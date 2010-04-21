@@ -1,5 +1,18 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘BRANCHNO’, not ‘getbranchno’; zonk the latter.
+
+	* rcsrev.c (take): If ‘count’ is zero, take it
+	to be the number of fields right for a branch number.
+	(getbranchno): Delete func.
+	* base.h (getbranchno): Delete func decl.
+	(BRANCHNO): New macro.
+	* ci.c (addbranch): Use ‘BRANCHNO’.
+	* rcs.c (removerevs): Likewise.
+	* rlog.c (putadelta): Likewise.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘TAKE’, not ‘partialno’; zonk the latter.
 
 	* base.h (take): New func decl.

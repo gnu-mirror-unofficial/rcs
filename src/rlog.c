@@ -151,7 +151,6 @@ putadelta (register struct hshentry const *node,
   char const *s;
   size_t n;
   struct branchhead const *newbranch;
-  struct buf branchnum;
   char datebuf[datesize + zonelenmax];
   bool pre5 = BE (version) < VERSION (5);
 
@@ -180,15 +179,12 @@ putadelta (register struct hshentry const *node,
   newbranch = node->branches;
   if (newbranch)
     {
-      bufautobegin (&branchnum);
       aputs ("\nbranches:", out);
       while (newbranch)
         {
-          getbranchno (newbranch->hsh->num, &branchnum);
-          aprintf (out, "  %s;", branchnum.string);
+          aprintf (out, "  %s;", BRANCHNO (newbranch->hsh->num));
           newbranch = newbranch->nextbranch;
         }
-      bufautoend (&branchnum);
     }
 
   afputc ('\n', out);
