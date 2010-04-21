@@ -1,5 +1,13 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: take
+
+	* rcsrev.c (take): New static func.
+	(TAKE): New macro.
+	(getbranchno, absent, partialno, genbranch, genrevs): Use ‘TAKE’.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘fully_numeric’, not ‘fexpandsym’; zonk the latter.
 
 	* ci.c: #include "b-divvy.h".

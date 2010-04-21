@@ -82,25 +82,37 @@ accumulate_branchno (struct divvy *space, char const *revno)
     accumulate_range (space, revno, end);
 }
 
+static struct cbuf
+take (size_t count, char const *rev)
+/* Copy ‘count’ (must be non-zero) fields of revision
+   ‘rev’ into ‘SINGLE’.  Return the new string.  */
+{
+  struct cbuf rv;
+  char const *end = rev;
+
+  while (count--)
+    while ('.' != *end++)
+      continue;
+
+  accumulate_range (SINGLE, rev, end - 1);
+  rv.string = finish_string (SINGLE, &rv.size);
+  return rv;
+}
+
+#define TAKE(count,rev)  (take (count, rev).string)
+
 void
 getbranchno (char const *revno, struct buf *branchno)
 /* Given a revision number ‘revno’, copy the number of the branch on which
    ‘revno’ is into ‘branchno’.  If ‘revno’ itself is a branch number, copy
    it unchanged.  */
 {
-  register int numflds;
-  register char *tp;
+  size_t nfields = countnumflds (revno);
 
-  bufscpy (branchno, revno);
-  numflds = countnumflds (revno);
-  if (!(numflds & 1))
-    {
-      tp = branchno->string;
-      while (--numflds)
-        while (*tp++ != '.')
-          continue;
-      *(tp - 1) = '\0';
-    }
+  bufscpy (branchno,
+           (nfields & 1
+            ? revno
+            : TAKE (nfields - 1, revno)));
 }
 
 int
@@ -242,12 +254,8 @@ cantfindbranch (char const *revno, char const date[datesize],
 static void
 absent (char const *revno, int field)
 {
-  struct buf t;
-
-  bufautobegin (&t);
   RERR ("%s %s absent", field & 1 ? "revision" : "branch",
-        partialno (&t, revno, field));
-  bufautoend (&t);
+        TAKE (field, revno));
 }
 
 int
@@ -305,19 +313,7 @@ partialno (struct buf *rev1, char const *rev2, register int length)
 /* Copy ‘length’ fields of revision number ‘rev2’ into ‘rev1’.
    Return the string of ‘rev1’.  */
 {
-  register char *r1;
-
-  bufscpy (rev1, rev2);
-  r1 = rev1->string;
-  while (length)
-    {
-      while (*r1 != '.' && *r1)
-        ++r1;
-      ++r1;
-      length--;
-    }
-  /* Eliminate last '.'.  */
-  *(r1 - 1) = '\0';
+  bufscpy (rev1, TAKE (length, rev2));
   return rev1->string;
 }
 
@@ -348,7 +344,6 @@ genbranch (struct hshentry const *bpoint, char const *revno,
   register struct hshentry *next, *trail;
   register struct branchhead const *bhead;
   int result;
-  struct buf t;
   char datebuf[datesize + zonelenmax];
 
   field = 3;
@@ -358,10 +353,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
     {
       if (!bhead)
         {
-          bufautobegin (&t);
-          RERR ("no side branches present for %s",
-                partialno (&t, revno, field - 1));
-          bufautoend (&t);
+          RERR ("no side branches present for %s", TAKE (field - 1, revno));
           return NULL;
         }
 
@@ -371,10 +363,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           bhead = bhead->nextbranch;
           if (!bhead)
             {
-              bufautobegin (&t);
-              RERR ("branch number %s too high",
-                    partialno (&t, revno, field));
-              bufautoend (&t);
+              RERR ("branch number %s too high", TAKE (field, revno));
               return NULL;
             }
         }
@@ -423,10 +412,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
       /* Length > field.  Find revision.  Check low.  */
       if (cmpnumfld (revno, next->num, field + 1) < 0)
         {
-          bufautobegin (&t);
-          RERR ("revision number %s too low",
-                partialno (&t, revno, field + 1));
-          bufautoend (&t);
+          RERR ("revision number %s too low", TAKE (field + 1, revno));
           return NULL;
         }
       do
@@ -484,10 +470,7 @@ genrevs (char const *revno, char const *date, char const *author,
   register struct hshentry *next;
   int result;
   char const *branchnum;
-  struct buf t;
   char datebuf[datesize + zonelenmax];
-
-  bufautobegin (&t);
 
   if (!(next = ADMIN (head)))
     {
@@ -506,7 +489,7 @@ genrevs (char const *revno, char const *date, char const *author,
           next = next->next;
           if (!next)
             {
-              RERR ("branch number %s too low", partialno (&t, revno, 1));
+              RERR ("branch number %s too low", TAKE (1, revno));
               goto norev;
             }
         }
@@ -532,7 +515,7 @@ genrevs (char const *revno, char const *date, char const *author,
         }
       if (!next || (cmpnumfld (branchnum, next->num, 1) != 0)) /* overshot */
         {
-          cantfindbranch (length ? revno : partialno (&t, branchnum, 1),
+          cantfindbranch (length ? revno : TAKE (1, branchnum),
                           date, author, state);
           goto norev;
         }
@@ -556,7 +539,7 @@ genrevs (char const *revno, char const *date, char const *author,
 
   if (!next || cmpnumfld (revno, next->num, 1) != 0)
     {
-      RERR ("revision number %s too low", partialno (&t, revno, 2));
+      RERR ("revision number %s too low", TAKE (2, revno));
       goto norev;
     }
   if ((length > 2) && (result != 0))
@@ -594,7 +577,6 @@ genrevs (char const *revno, char const *date, char const *author,
     }
 
 norev:
-  bufautoend (&t);
   return NULL;
 }
 
