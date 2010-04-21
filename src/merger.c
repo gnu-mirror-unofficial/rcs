@@ -85,7 +85,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
         fatal_sys (t);
       fro_spew (rt, f);
       fro_close (rt);
-      Ofclose (f);
+      Ozclose (&f);
     }
 #else  /* !DIFF3_BIN */
   for (i = 0; i < 2; i++)
@@ -108,7 +108,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   aflush (f);
   if (run (fileno (f), NULL, ED, "-", a[0], NULL))
     PROGRAM (exiterr) ();
-  Ofclose (f);
+  Ozclose (&f);
 #endif  /* !DIFF3_BIN */
 
   tempunlink ();

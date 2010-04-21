@@ -193,7 +193,7 @@ main (int argc, char **argv)
                       if (tostdout)
                         {
                           fro_spew (workptr, stdout);
-                          Ofclose (stdout);
+                          fclose (stdout);
                         }
                     }
                   else

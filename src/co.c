@@ -812,7 +812,7 @@ main (int argc, char **argv)
       }
 
   tempunlink ();
-  Ofclose (MANI (standard_output));
+  Ozclose (&MANI (standard_output));
   return exitstatus;
 }
 

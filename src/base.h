@@ -798,7 +798,6 @@ struct cbuf getphrases (char const *);
 struct cbuf savestring (void);
 struct hshentry *getnum (void);
 void Lexinit (void);
-void Ofclose (FILE *);
 void Orewind (FILE *);
 void Ozclose (FILE **);
 void aflush (FILE *);

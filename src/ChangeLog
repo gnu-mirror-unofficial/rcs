@@ -1,5 +1,18 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘Ofclose’ with ‘Ozclose’ or plain ‘fclose’.
+
+	* co.c (main): Use ‘Ozclose’.
+	* merger.c (merge): Likewise.
+	* rcs.c (buildeltatext): Likewise.
+	* rcsclean.c (main): Use ‘fclose’.
+	* rcslex.c (Ofclose): Incorporate into ‘Ozclose’.
+	* rcsmerge.c (main): Use ‘fclose’.
+	* rlog.c (main): Use ‘Ozclose’.
+	* base.h (Ofclose): Delete func decl.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int C] Factor func-finish code.
 
 	* rcsgen.c (buildrevision): Move common finish to end of func.

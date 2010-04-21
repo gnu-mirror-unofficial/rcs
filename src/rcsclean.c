@@ -340,7 +340,7 @@ main (int argc, char **argv)
 
   tempunlink ();
   if (!BE (quiet))
-    Ofclose (stdout);
+    fclose (stdout);
   return exitstatus;
 }
 

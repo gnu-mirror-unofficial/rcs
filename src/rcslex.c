@@ -666,16 +666,10 @@ checkssym (char *sym)
 }
 
 void
-Ofclose (FILE *f)
-{
-  if (f && fclose (f) != 0)
-    Oerror ();
-}
-
-void
 Ozclose (FILE **p)
 {
-  Ofclose (*p);
+  if (*p && EOF == fclose (*p))
+    Oerror ();
   *p = NULL;
 }
 

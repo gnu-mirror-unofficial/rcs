@@ -975,7 +975,7 @@ buildeltatext (struct hshentries const *deltas)
 /* Put the delta text on ‘FLOW (rewr)’ and make necessary
    change to delta text.  */
 {
-  register FILE *fcut;          /* temporary file to rebuild delta tree */
+  FILE *fcut;                       /* temporary file to rebuild delta tree */
   char const *cutname;
 
   fcut = NULL;
@@ -1022,7 +1022,7 @@ buildeltatext (struct hshentries const *deltas)
       *++diffp = '\0';
       if (DIFF_TROUBLE == runv (fileno (fcut), diffname, diffv))
         RFATAL ("diff failed");
-      Ofclose (fcut);
+      Ozclose (&fcut);
       return putdtext (cuttail, diffname, FLOW (rewr), true);
     }
   else

@@ -919,7 +919,7 @@ const struct program program =
 int
 main (int argc, char **argv)
 {
-  register FILE *out;
+  FILE *out;
   char *a, **newargv;
   struct Datepairs *currdate;
   char const *accessListString, *accessFormat;
@@ -1174,7 +1174,7 @@ main (int argc, char **argv)
           }
         aputs (equal_line, out);
       }
-  Ofclose (out);
+  Ozclose (&out);
   return exitstatus;
 }
 
