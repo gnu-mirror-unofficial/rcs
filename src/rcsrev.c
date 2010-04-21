@@ -26,6 +26,30 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 
+static int
+split (char const *s, char const **lastdot)
+/* Given a pointer ‘s’ to a dotted number (date or revision number),
+   return the number of fields in ‘s’, and set ‘*lastdot’ to point
+   to the last '.' (or NULL if there is none).  */
+{
+  size_t count;
+
+  *lastdot = NULL;
+  if (!s || !*s)
+    return 0;
+  count = 1;
+  do
+    {
+      if (*s++ == '.')
+        {
+          *lastdot = s - 1;
+          count++;
+        }
+    }
+  while (*s);
+  return count;
+}
+
 int
 countnumflds (char const *s)
 /* Given a pointer ‘s’ to a dotted number (date or revision number),
@@ -44,6 +68,18 @@ countnumflds (char const *s)
     }
   while (*sp);
   return (count);
+}
+
+static void
+accumulate_branchno (struct divvy *space, char const *revno)
+{
+  char const *end;
+  int nfields = split (revno, &end);
+
+  if (nfields & 1)
+    accumulate_nonzero_bytes (space, revno);
+  else
+    accumulate_range (space, revno, end);
 }
 
 void
@@ -571,6 +607,20 @@ gr_revno (char const *revno, struct hshentries **store)
 }
 
 static char const *
+rev_from_symbol (struct cbuf const *id)
+/* Look up ‘id’ in the list of symbolic names starting with pointer
+   ‘ADMIN (assocs)’, and return a pointer to the corresponding
+   revision number.  Return NULL if not present.  */
+{
+  register struct assoc const *next;
+
+  for (next = ADMIN (assocs); next; next = next->nextassoc)
+    if (!strncmp (next->symbol, id->string, id->size))
+      return next->num;
+  return NULL;
+}
+
+static char const *
 lookupsym (char const *id)
 /* Look up ‘id’ in the list of symbolic names starting with pointer
    ‘ADMIN (assocs)’, and return a pointer to the corresponding
@@ -584,17 +634,6 @@ lookupsym (char const *id)
   return NULL;
 }
 
-bool
-expandsym (char const *source, struct buf *target)
-/* ‘source’ points to a revision number.  Copy the number to ‘target’,
-   but replace all symbolic fields in the source number with their
-   numeric values.  Expand a branch followed by ‘.’ to the latest
-   revision on that branch.  Ignore ‘.’ after a revision.  Remove
-   leading zeros.  Return false on error.  */
-{
-  return fexpandsym (source, target, NULL);
-}
-
 static char const *
 branchtip (char const *branch)
 {
@@ -606,43 +645,48 @@ branchtip (char const *branch)
 }
 
 bool
-fexpandsym (char const *source, struct buf *target, struct fro *fp)
-/* Same as ‘expandsym’, except if ‘fp’ is non-NULL,
-   it is used to expand ‘KDELIM’.  */
+fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
+/* Expand ‘source’, pointing ‘ans’ at a new string in ‘SHARED’,
+   with all symbolic fields replaced with their numeric values.
+   Expand a branch followed by ‘.’ to the latest revision on that branch.
+   Ignore ‘.’ after a revision.  Remove leading zeros.
+   If ‘fp’ is non-NULL, it is used to expand "$" (i.e., ‘KDELIM’).
+   Return true if successful, otherwise false.  */
 {
-  register char const *sp, *bp;
-  register char *tp;
-  char const *tlim;
+  register char const *sp, *bp = NULL;
   int dots;
+  bool have_branch = false;
+  char *ugh = NULL;
+
+  /* TODO: Allocate on ‘SINGLE’ (pending ‘free_NEXT_str’ fixup).  */
+
+#define FRESH()    if (ugh) brush_off (SHARED, ugh)
+#define ACCB(b)    accumulate_byte (SHARED, b)
+#define ACCS(s)    accumulate_nonzero_bytes (SHARED, s)
+#define ACCR(b,e)  accumulate_range (SHARED, b, e)
+#define OK()       ugh = finish_string (SHARED, &ans->size), ans->string = ugh
 
   sp = source;
-  bufalloc (target, 1);
-  tp = target->string;
   if (!sp || !*sp)
-    {
-      /* Accept 0 pointer as a legal value.  */
-      *tp = '\0';
-      return true;
-    }
+    /* Accept NULL pointer as a legal value.  */
+    goto success;
   if (sp[0] == KDELIM && !sp[1])
     {
       if (!getoldkeys (fp))
-        return false;
+        goto sorry;
       if (!PREV (rev))
         {
           MERR ("working file lacks revision number");
-          return false;
+          goto sorry;
         }
-      bufscpy (target, PREV (rev));
-      return true;
+      ACCS (PREV (rev));
+      goto success;
     }
-  tlim = tp + target->size;
   dots = 0;
 
   for (;;)
     {
-      register char *p = tp;
-      size_t s = tp - target->string;
+      char const *was = sp;
       bool id = false;
 
       for (;;)
@@ -655,9 +699,7 @@ fexpandsym (char const *source, struct buf *target, struct fro *fp)
               id = true;
               /* fall into */
             case DIGIT:
-              if (tlim <= p)
-                p = bufenlarge (target, &tlim);
-              *p++ = *sp++;
+              sp++;
               continue;
 
             default:
@@ -665,28 +707,39 @@ fexpandsym (char const *source, struct buf *target, struct fro *fp)
             }
           break;
         }
-      if (tlim <= p)
-        p = bufenlarge (target, &tlim);
-      *p = '\0';
-      tp = target->string + s;
 
       if (id)
         {
-          bp = lookupsym (tp);
-          if (!bp)
+          struct cbuf orig =
             {
-              RERR ("Symbolic name `%s' is undefined.", tp);
-              return false;
+              .string = was,
+              .size = sp - was
+            };
+          char const *expanded = rev_from_symbol (&orig);
+
+          if (!expanded)
+            {
+              RERR ("Symbolic name `%s' is undefined.", was);
+              goto sorry;
             }
+          ACCS (expanded);
+          have_branch = true;
         }
       else
         {
-          /* Skip leading zeros.  */
-          for (bp = tp; *bp == '0' && isdigit (bp[1]); bp++)
-            continue;
-
-          if (!*bp)
+          if (was != sp)
             {
+              ACCR (was, sp);
+              bp = was;
+            }
+
+          /* Skip leading zeros.  */
+          while ('0' == sp[0] && isdigit (sp[1]))
+            sp++;
+
+          if (!bp)
+            {
+              int s = 0;                /* FAKE */
               if (s || *sp != '.')
                 break;
               else
@@ -700,41 +753,77 @@ fexpandsym (char const *source, struct buf *target, struct fro *fp)
                     b = ADMIN (head)->num;
                   else
                     break;
-                  getbranchno (b, target);
-                  bp = tp = target->string;
-                  tlim = tp + target->size;
+                  OK (); FRESH ();
+                  accumulate_branchno (SHARED, b);
                 }
             }
         }
 
-      while ((*tp++ = *bp++))
-        if (tlim <= tp)
-          tp = bufenlarge (target, &tlim);
-
       switch (*sp++)
         {
         case '\0':
-          return true;
+          goto success;
 
         case '.':
           if (!*sp)
             {
               if (dots & 1)
                 break;
-              if (!(bp = branchtip (target->string)))
-                return false;
-              bufscpy (target, bp);
-              return true;
+              OK ();
+              if (!(bp = branchtip (ans->string)))
+                goto sorry;
+              ACCS (ans->string);
+              ACCS (bp);
+              goto success;
             }
           ++dots;
-          tp[-1] = '.';
+          ACCB ('.');
           continue;
         }
       break;
     }
 
   RERR ("improper revision number: %s", source);
+
+ sorry:
+  OK ();
+  FRESH ();
   return false;
+ success:
+  OK ();
+  return true;
+
+#undef OK
+#undef ACCR
+#undef ACCS
+#undef ACCB
+#undef FRESH
+}
+
+bool
+fexpandsym (char const *source, struct buf *target, struct fro *fp)
+/* ‘source’ points to a revision number.  Copy the number to ‘target’,
+   but replace all symbolic fields in the source number with their
+   numeric values.  Expand a branch followed by ‘.’ to the latest
+   revision on that branch.  Ignore ‘.’ after a revision.  Remove
+   leading zeros.  If ‘fp’ is non-NULL, it is used to expand ‘KDELIM’.
+   Return false on error.  */
+{
+  struct cbuf full;
+  bool rv = fully_numeric (&full, source, fp);
+
+  if (rv)
+    {
+      bufscpy (target, full.string);
+      target->size = full.size;
+    }
+  return rv;
+}
+
+bool
+expandsym (char const *source, struct buf *target)
+{
+  return fexpandsym (source, target, NULL);
 }
 
 char const *

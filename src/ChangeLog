@@ -1,3 +1,14 @@
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Add abstraction: fully_numeric
+
+	* base.h (fully_numeric): New func decl.
+	* rcsrev.c (split, accumulate_branchno, rev_from_symbol):
+	New static funcs.
+	(fully_numeric): New func.
+	(fexpandsym): Use ‘fully_numeric’.
+	(expandsym): Move after ‘fexpandsym’; nfc.
+
 2010-04-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Move conditionally-compiled test programs to yarrrr.c.

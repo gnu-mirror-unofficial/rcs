@@ -834,6 +834,7 @@ int cmpnum (char const *, char const *);
 int cmpnumfld (char const *, char const *, int);
 int compartial (char const *, char const *, int);
 bool expandsym (char const *, struct buf *);
+bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
 bool fexpandsym (char const *, struct buf *, struct fro *);
 struct hshentry *genrevs (char const *, char const *, char const *,
                           char const *, struct hshentries **);
