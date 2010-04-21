@@ -100,20 +100,22 @@ exiterr (void)
 
 #if DIFF_L
 static char const *
-setup_label (struct buf *b, char const *num, char const date[datesize])
+setup_label (char const *num, char const date[datesize])
 {
-  char *p;
+  size_t len;
   char datestr[datesize + zonelenmax];
 
   date2str (date, datestr);
-  bufalloc (b, (strlen (MANI (filename)) + sizeof datestr
-                + 4 + (num ? strlen (num) : 0)));
-  p = b->string;
+  accumulate_nonzero_bytes (SHARED, "-L");
+  accumulate_nonzero_bytes (SHARED, MANI (filename));
+  accumulate_byte (SHARED, '\t');
+  accumulate_nonzero_bytes (SHARED, datestr);
   if (num)
-    sprintf (p, "-L%s\t%s\t%s", MANI (filename), datestr, num);
-  else
-    sprintf (p, "-L%s\t%s", MANI (filename), datestr);
-  return p;
+    {
+      accumulate_byte (SHARED, '\t');
+      accumulate_nonzero_bytes (SHARED, num);
+    }
+  return finish_string (SHARED, &len);
 }
 #endif
 
@@ -157,7 +159,6 @@ main (int argc, char **argv)
   char const *xrev1, *xrev2;    /* expanded revision numbers */
   char const *expandarg, *lexpandarg, *suffixarg, *versionarg, *zonearg;
 #if DIFF_L
-  static struct buf labelbuf[2];
   int file_labels;
   char const **diff_label1, **diff_label2;
   char date2[datesize];
@@ -386,8 +387,7 @@ main (int argc, char **argv)
         xrev1 = target->num;
 #if DIFF_L
         if (diff_label1)
-          *diff_label1 =
-            setup_label (&labelbuf[0], target->num, target->date);
+          *diff_label1 = setup_label (target->num, target->date);
 #endif
 
         lexpandarg = expandarg;
@@ -415,12 +415,11 @@ main (int argc, char **argv)
         if (diff_label2)
           {
             if (revnums == 2)
-              *diff_label2 =
-                setup_label (&labelbuf[1], target->num, target->date);
+              *diff_label2 = setup_label (target->num, target->date);
             else
               {
                 time2date (workstat.st_mtime, date2);
-                *diff_label2 = setup_label (&labelbuf[1], NULL, date2);
+                *diff_label2 = setup_label (NULL, date2);
               }
           }
 #endif

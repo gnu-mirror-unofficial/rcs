@@ -502,26 +502,22 @@ getlogmsg (void)
   static struct cbuf const
     emptylog = { emptych, sizeof (emptych) - sizeof (char) },
     initiallog = { initialch, sizeof (initialch) - sizeof (char)};
-  static struct buf logbuf;
   static struct cbuf logmsg;
-  register char *tp;
-  register size_t i;
-  char const *caller;
 
   if (msg.size)
     return msg;
 
   if (keepflag)
     {
+      char datebuf[datesize + zonelenmax];
+
       /* Generate standard log message.  */
-      caller = getcaller ();
-      i = ciklog_len + 1 + strlen (caller) + 3;
-      bufalloc (&logbuf, i + datesize + zonelenmax);
-      tp = logbuf.string;
-      sprintf (tp, "%s%s at ", ciklog, caller);
-      date2str (getcurdate (), tp + i);
-      logmsg.string = tp;
-      logmsg.size = strlen (tp);
+      date2str (getcurdate (), datebuf);
+      ACCS (ciklog);
+      ACCS (getcaller ());
+      ACCS (" at ");
+      ACCS (datebuf);
+      OK (&logmsg);
       return logmsg;
     }
 

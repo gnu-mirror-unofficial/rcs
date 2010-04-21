@@ -1,5 +1,15 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘SHARED’ more.
+
+	* b-kwxout.c (keyreplace): Save $Log leader temporarily in ‘SHARED’.
+	* ci.c (getlogmsg): For -k, save log message in ‘SHARED’.
+	* rcsdiff.c [DIFF_L] (setup_label): Don't take
+	‘struct buf *’; construct label in ‘SHARED’.
+	(main) [DIFF_L]: Update calls to ‘setup_label’.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Prune some now-obsoleted funcs.
 
 	* base.h (bufenlarge, bufscat, bufscpy): Delete func decls.

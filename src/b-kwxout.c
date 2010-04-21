@@ -158,14 +158,13 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
 
   if (marker->i == Log && dolog)
     {
-      struct buf leader;
+      char *leader = NULL;
 
       sp = delta->log.string;
       ls = delta->log.size;
       if (sizeof (ciklog) - 1 <= ls
           && !memcmp (sp, ciklog, sizeof (ciklog) - 1))
         return;
-      bufautobegin (&leader);
       if (BE (version) < VERSION (5))
         {
           cp = ADMIN (log_lead).string;
@@ -207,11 +206,11 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
           ;
 
           /* Copy characters before ‘$Log’ into ‘leader’.  */
-          bufalloc (&leader, cs);
-          cp = leader.string;
+          leader = alloc (SHARED, "leader", 1 + cs);
+          cp = leader;
           for (cw = 0; cw < cs; cw++)
             {
-              leader.string[cw] = c;
+              leader[cw] = c;
               if (c == SDELIM && delimstuffed)
                 GETCHAR (c, infile);
               GETCHAR (c, infile);
@@ -230,7 +229,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
                 if (++i == cs)
                   {
                     PWARN ("`%c* $Log' is obsolescent; use ` * $Log'.", cp[cw]);
-                    leader.string[cw] = ' ';
+                    leader[cw] = ' ';
                     break;
                   }
                 else if (ctab[(unsigned char) cp[i]] != SPACE)
@@ -285,7 +284,8 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
               while (c != '\n');
             }
         }
-      bufautoend (&leader);
+      if (leader)
+        brush_off (SHARED, leader);
     }
 }
 
