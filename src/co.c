@@ -181,7 +181,7 @@ addjoin (char *joinrev)
   register char *j;
   register struct hshentry *d;
   char terminator;
-  struct buf numrev;
+  struct cbuf numrev;
   struct hshentries *joindeltas;
 
   j = joinrev;
@@ -204,11 +204,9 @@ addjoin (char *joinrev)
     }
   terminator = *--j;
   *j = '\0';
-  bufautobegin (&numrev);
   d = NULL;
-  if (expandsym (joinrev, &numrev))
+  if (fully_numeric_no_k (&numrev, joinrev))
     d = gr_revno (numrev.string, &joindeltas);
-  bufautoend (&numrev);
   *j = terminator;
   if (d)
     {
@@ -478,7 +476,6 @@ main (int argc, char **argv)
   int changelock;
   int expmode, r, workstatstat;
   bool tostdout, Ttimeflag;
-  struct buf numericrev;           /* expanded revision number */
   char finaldate[datesize];
 #if OPEN_O_BINARY
   int stdout_mode = 0;
@@ -490,7 +487,6 @@ main (int argc, char **argv)
   setrid ();
   author = date = rev = state = NULL;
   joinflag = NULL;
-  bufautobegin (&numericrev);
   expmode = -1;
   BE (pe) = X_DEFAULT;
   tostdout = false;
@@ -695,11 +691,13 @@ main (int argc, char **argv)
           }
         else
           {
+            struct cbuf numericrev;
             int locks = lockflag ? findlock (false, &targetdelta) : 0;
+
             if (rev)
               {
                 /* Expand symbolic revision number.  */
-                if (!expandsym (rev, &numericrev))
+                if (!fully_numeric_no_k (&numericrev, rev))
                   continue;
               }
             else
@@ -709,10 +707,10 @@ main (int argc, char **argv)
                   default:
                     continue;
                   case 0:
-                    bufscpy (&numericrev, ADMIN (defbr) ? ADMIN (defbr) : "");
+                    numericrev.string = ADMIN (defbr) ? ADMIN (defbr) : "";
                     break;
                   case 1:
-                    bufscpy (&numericrev, targetdelta->num);
+                    numericrev.string = intern0 (SHARED, targetdelta->num);
                     break;
                   }
               }

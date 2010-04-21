@@ -76,7 +76,7 @@ struct delrevpair
   int code;
 };
 
-static struct buf numrev;
+static struct cbuf numrev;
 static char const *headstate;
 static bool chgheadstate, lockhead, unlockcaller, suppress_mail;
 static int exitstatus;
@@ -615,7 +615,7 @@ removerevs (void)
   int length;
   int cmp;
 
-  if (!expandsym (delrev.strt, &numrev))
+  if (!fully_numeric_no_k (&numrev, delrev.strt))
     return false;
   target = gr_revno (numrev.string, &gendeltas);
   if (!target)
@@ -705,7 +705,7 @@ removerevs (void)
     }
 
   /* -o rev1-rev2 */
-  if (!expandsym (delrev.end, &numrev))
+  if (!fully_numeric_no_k (&numrev, delrev.end))
     return false;
   if (length != countnumflds (numrev.string)
       || (length > 2 && compartial (numrev.string, target->num, length - 1)))
@@ -808,8 +808,8 @@ doassoc (void)
           if (curassoc->revno[0])
             {
               p = NULL;
-              if (expandsym (curassoc->revno, &numrev))
-                p = fbuf_save (&numrev);
+              if (fully_numeric_no_k (&numrev, curassoc->revno))
+                p = numrev.string;
             }
           else if (!(p = tiprev ()))
             RERR ("no latest revision to associate with symbol %s", ssymbol);
@@ -828,7 +828,7 @@ setlock (char const *rev)
   struct hshentry *target;
   int r;
 
-  if (expandsym (rev, &numrev))
+  if (fully_numeric_no_k (&numrev, rev))
     {
       target = gr_revno (numrev.string, &gendeltas);
       if (target)
@@ -895,7 +895,7 @@ dolocks (void)
 
   /* Remove locks which are stored in rmvlocklst.  */
   for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->nextrev)
-    if (expandsym (lockpt->revno, &numrev))
+    if (fully_numeric_no_k (&numrev, lockpt->revno))
       {
         target = gr_revno (numrev.string, &gendeltas);
         if (target)
@@ -934,7 +934,7 @@ domessages (void)
   bool changed = false;
 
   for (p = messagelst; p; p = p->nextmessage)
-    if (expandsym (p->revno, &numrev) &&
+    if (fully_numeric_no_k (&numrev, p->revno) &&
         (target = gr_revno (numrev.string, &gendeltas)))
       {
         /* We can't check the old log -- it's much later in the file.
@@ -952,7 +952,7 @@ rcs_setstate (char const *rev, char const *status)
 {
   struct hshentry *target;
 
-  if (expandsym (rev, &numrev))
+  if (fully_numeric_no_k (&numrev, rev))
     {
       target = gr_revno (numrev.string, &gendeltas);
       if (target)
@@ -1138,7 +1138,7 @@ main (int argc, char **argv)
   bool strictlock, strict_selected, Ttimeflag;
   bool keepRCStime;
   size_t commsymlen;
-  struct buf branchnum;
+  struct cbuf branchnum;
   struct Lockrev *lockpt;
   struct Lockrev **curlock, **rmvlock;
   struct Status *curstate;
@@ -1154,7 +1154,6 @@ main (int argc, char **argv)
   nextstate = &statelst;
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
-  bufautobegin (&branchnum);
   commsymlen = 0;
   curlock = &newlocklst;
   rmvlock = &rmvlocklst;
@@ -1458,7 +1457,7 @@ main (int argc, char **argv)
           }
 
         /* Update default branch.  */
-        if (branchflag && expandsym (branchsym, &branchnum))
+        if (branchflag && fully_numeric_no_k (&branchnum, branchsym))
           {
             if (countnumflds (branchnum.string))
               {

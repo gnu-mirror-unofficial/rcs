@@ -833,7 +833,6 @@ int cmpdate (char const *, char const *);
 int cmpnum (char const *, char const *);
 int cmpnumfld (char const *, char const *, int);
 int compartial (char const *, char const *, int);
-bool expandsym (char const *, struct buf *);
 bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
 struct hshentry *genrevs (char const *, char const *, char const *,
                           char const *, struct hshentries **);
@@ -931,5 +930,7 @@ bool isSLASH (int c);
 #define TAKE(count,rev)  (take (count, rev).string)
 
 #define BRANCHNO(rev)    TAKE (0, rev)
+
+#define fully_numeric_no_k(cb,source)  fully_numeric (cb, source, NULL)
 
 /* base.h ends here */

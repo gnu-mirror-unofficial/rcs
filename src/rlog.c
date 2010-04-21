@@ -685,14 +685,12 @@ getnumericrev (void)
 {
   struct Revpairs *ptr, *pt;
   int n;
-  struct buf s, e;
+  struct cbuf s, e;
   char const *lrev;
-  struct buf const *rstart, *rend;
+  struct cbuf const *rstart, *rend;
 
   Revlst = NULL;
   ptr = revlist;
-  bufautobegin (&s);
-  bufautobegin (&e);
   while (ptr)
     {
       n = 0;
@@ -703,40 +701,45 @@ getnumericrev (void)
         {
 
         case 1:                         /* -rREV */
-          if (!expandsym (ptr->strtrev, &s))
+          if (!fully_numeric_no_k (&s, ptr->strtrev))
             goto freebufs;
           rend = &s;
           n = countnumflds (s.string);
           if (!n && (lrev = tiprev ()))
             {
-              bufscpy (&s, lrev);
+              s.string = lrev;
               n = countnumflds (lrev);
             }
           break;
 
         case 2:                         /* -rREV: */
-          if (!expandsym (ptr->strtrev, &s))
+          if (!fully_numeric_no_k (&s, ptr->strtrev))
             goto freebufs;
-          bufscpy (&e, s.string);
-          n = countnumflds (s.string);
-          (n < 2 ? e.string : strrchr (e.string, '.'))[0] = 0;
+          if (2 > (n = countnumflds (s.string)))
+            e.string = "";
+          else
+            {
+              accumulate_range (SHARED, s.string, strrchr (s.string, '.'));
+              e.string = finish_string (SHARED, &e.size);
+            }
           break;
 
         case 3:                         /* -r:REV */
-          if (!expandsym (ptr->endrev, &e))
+          if (!fully_numeric_no_k (&e, ptr->endrev))
             goto freebufs;
           if ((n = countnumflds (e.string)) < 2)
-            bufscpy (&s, ".0");
+            s.string = ".0";
           else
             {
-              bufscpy (&s, e.string);
-              KSTRCPY (strrchr (s.string, '.'), ".0");
+              accumulate_range (SHARED, e.string, strrchr (e.string, '.'));
+              accumulate_nonzero_bytes (SHARED, ".0");
+              s.string = finish_string (SHARED, &s.size);
             }
           break;
 
         default:                        /* -rREV1:REV2 */
-          if (!(expandsym (ptr->strtrev, &s)
-                && expandsym (ptr->endrev, &e)
+          if (!(fully_numeric_no_k (&s, ptr->strtrev)
+                && fully_numeric_no_k (&e, ptr->endrev)
                 && checkrevpair (s.string, e.string)))
             goto freebufs;
           n = countnumflds (s.string);
@@ -753,8 +756,8 @@ getnumericrev (void)
         {
           pt = FALLOC (struct Revpairs);
           pt->numfld = n;
-          pt->strtrev = fbuf_save (rstart);
-          pt->endrev = fbuf_save (rend);
+          pt->strtrev = rstart->string;
+          pt->endrev = rend->string;
           pt->rnext = Revlst;
           Revlst = pt;
         }
@@ -773,8 +776,6 @@ getnumericrev (void)
     }
 
 freebufs:
-  bufautoend (&s);
-  bufautoend (&e);
   return !ptr;
 }
 

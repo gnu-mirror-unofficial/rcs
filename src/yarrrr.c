@@ -313,7 +313,7 @@ const struct program program =
 int
 yarrrr (int argc, char *argv[argc])
 {
-  struct buf numricrevno;
+  struct cbuf numricrevno;
   char symrevno[100];           /* used for input of revision numbers */
   char author[20];
   char state[20];
@@ -337,7 +337,6 @@ yarrrr (int argc, char *argv[argc])
 
   getdesc (false);
 
-  bufautobegin (&numricrevno);
   do
     {
       /* All output goes to stderr, to have diagnostics and
@@ -350,8 +349,10 @@ yarrrr (int argc, char *argv[argc])
       if (*symrevno == '.')
         break;
       prompt ("%s;\n", symrevno);
-      expandsym (symrevno, &numricrevno);
-      prompt ("expanded number: %s; ", numricrevno.string);
+      complain ("expanded number: %s\n",
+                (fully_numeric_no_k (&numricrevno, symrevno)
+                 ? numricrevno.string
+                 " <INVALID>"));
       prompt ("Date: ");
       more (date);
       prompt ("%s; ", date);
@@ -377,7 +378,6 @@ yarrrr (int argc, char *argv[argc])
 #undef prompt
     }
   while (true);
-  bufautoend (&numricrevno);
   complain ("done\n");
   return EXIT_SUCCESS;
 }

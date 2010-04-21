@@ -760,25 +760,6 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
 #undef FRESH
 }
 
-bool
-expandsym (char const *source, struct buf *target)
-/* ‘source’ points to a revision number.  Copy the number to ‘target’,
-   but replace all symbolic fields in the source number with their
-   numeric values.  Expand a branch followed by ‘.’ to the latest
-   revision on that branch.  Ignore ‘.’ after a revision.  Remove
-   leading zeros.  */
-{
-  struct cbuf full;
-  bool rv = fully_numeric (&full, source, NULL);
-
-  if (rv)
-    {
-      bufscpy (target, full.string);
-      target->size = full.size;
-    }
-  return rv;
-}
-
 char const *
 namedrev (char const *name, struct hshentry *delta)
 /* Return ‘name’ if it names ‘delta’, NULL otherwise.  */

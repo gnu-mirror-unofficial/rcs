@@ -1,5 +1,19 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘expandsym’ with ‘fully_numeric_no_k’.
+
+	* base.h (expandsym): Delete func decl.
+	(fully_numeric_no_k): New macro.
+	* co.c (addjoin, main): Use ‘fully_numeric_no_k’.
+	* rcs.c (numrev): Change var type to ‘struct cbuf’.
+	(removerevs, doassoc, setlock, dolocks, domessages)
+	(rcs_setstate, main): Use ‘fully_numeric_no_k’.
+	* rcsrev.c (expandsym): Delete func.
+	* rlog.c (getnumericrev): Use ‘fully_numeric_no_k’.
+	* yarrrr.c [TEST_REV] (yarrrr): Likewise.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘BRANCHNO’, not ‘getbranchno’; zonk the latter.
 
 	* rcsrev.c (take): If ‘count’ is zero, take it
