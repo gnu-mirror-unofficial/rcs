@@ -1,5 +1,11 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Prune now-obsolete ‘struct buf’.
+
+	* base.h (buf): Delete struct.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘Ofclose’ with ‘Ozclose’ or plain ‘fclose’.
 
 	* co.c (main): Use ‘Ozclose’.

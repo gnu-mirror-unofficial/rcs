@@ -244,11 +244,6 @@ enum tokens
 
 /* Data structures for the symbol table.  */
 
-struct buf                              /* mutable */
-{
-  char *string;
-  size_t size;
-};
 struct cbuf                             /* immutable */
 {
   char const *string;
