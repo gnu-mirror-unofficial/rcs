@@ -82,7 +82,7 @@ accumulate_branchno (struct divvy *space, char const *revno)
     accumulate_range (space, revno, end);
 }
 
-static struct cbuf
+struct cbuf
 take (size_t count, char const *rev)
 /* Copy ‘count’ (must be non-zero) fields of revision
    ‘rev’ into ‘SINGLE’.  Return the new string.  */
@@ -98,8 +98,6 @@ take (size_t count, char const *rev)
   rv.string = finish_string (SINGLE, &rv.size);
   return rv;
 }
-
-#define TAKE(count,rev)  (take (count, rev).string)
 
 void
 getbranchno (char const *revno, struct buf *branchno)
@@ -306,15 +304,6 @@ compartial (char const *num1, char const *num2, int length)
       if (*s2 == '.')
         s2++;
     }
-}
-
-char *
-partialno (struct buf *rev1, char const *rev2, register int length)
-/* Copy ‘length’ fields of revision number ‘rev2’ into ‘rev1’.
-   Return the string of ‘rev1’.  */
-{
-  bufscpy (rev1, TAKE (length, rev2));
-  return rev1->string;
 }
 
 static void

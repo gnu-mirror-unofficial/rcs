@@ -826,7 +826,7 @@ void warnignore (void);
 extern const enum tokens const ctab[];
 
 /* rcsrev */
-char *partialno (struct buf *, char const *, int);
+struct cbuf take (size_t count, char const *rev);
 char const *namedrev (char const *, struct hshentry *);
 char const *tiprev (void);
 int cmpdate (char const *, char const *);
@@ -928,5 +928,7 @@ bool isSLASH (int c);
         afputc (c, frew);                       \
     }                                           \
   while (0)
+
+#define TAKE(count,rev)  (take (count, rev).string)
 
 /* base.h ends here */

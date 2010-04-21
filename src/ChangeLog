@@ -1,5 +1,18 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘TAKE’, not ‘partialno’; zonk the latter.
+
+	* base.h (take): New func decl.
+	(partialno): Delete func decl.
+	(TAKE): Move macro to here...
+	* rcsrev.c (TAKE): ... from here.
+	(take): Make non-static.
+	(partialno): Delete func.
+	* co.c (getancestor): Use ‘TAKE’.
+	* rlog.c (getnumericrev): Likewise.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: take
 
 	* rcsrev.c (take): New static func.

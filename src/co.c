@@ -224,8 +224,7 @@ getancestor (char const *r1, char const *r2)
    ‘NULL’ otherwise.  Work reliably only if ‘r1’ and ‘r2’ are not
    branch numbers.   */
 {
-  static struct buf t1, t2;
-
+  char const *t1, *t2;
   int l1, l2, l3;
   char const *r;
 
@@ -233,6 +232,9 @@ getancestor (char const *r1, char const *r2)
   l2 = countnumflds (r2);
   if ((2 < l1 || 2 < l2) && cmpnum (r1, r2) != 0)
     {
+  /* TODO: Don't bother saving in ‘SHARED’.  */
+#define SAFE(s)  intern0 (SHARED, s)
+
       /* Not on main trunk or identical.  */
       l3 = 0;
       while (cmpnumfld (r1, r2, l3 + 1) == 0
@@ -243,14 +245,16 @@ getancestor (char const *r1, char const *r2)
       if (l3 == 0)
         {
           /* No common prefix; common ancestor on main trunk.  */
-          partialno (&t1, r1, l1 > 2 ? 2 : l1);
-          partialno (&t2, r2, l2 > 2 ? 2 : l2);
-          r = cmpnum (t1.string, t2.string) < 0 ? t1.string : t2.string;
+          t1 = TAKE (l1 > 2 ? 2 : l1, r1);
+          t2 = TAKE (l2 > 2 ? 2 : l2, r2);
+          r = cmpnum (t1, t2) < 0 ? t1 : t2;
           if (cmpnum (r, r1) != 0 && cmpnum (r, r2) != 0)
-            return r;
+            return SAFE (r);
         }
       else if (cmpnumfld (r1, r2, l3 + 1) != 0)
-        return partialno (&t1, r1, l3);
+        return SAFE (TAKE (l3, r1));
+
+#undef SAFE
     }
   RERR ("common ancestor of %s and %s undefined", r1, r2);
   return NULL;

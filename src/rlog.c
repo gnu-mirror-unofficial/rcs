@@ -768,10 +768,9 @@ getnumericrev (void)
   if (branchflag && (ADMIN (defbr) || ADMIN (head)))
     {
       pt = FALLOC (struct Revpairs);
-      pt->strtrev = pt->endrev = ADMIN (defbr) ? ADMIN (defbr)
-        : (partialno (&s, ADMIN (head)->num, 1),
-           fbuf_save (&s),
-           s.string);
+      pt->strtrev = pt->endrev = ADMIN (defbr)
+        ? ADMIN (defbr)
+        : TAKE (1, ADMIN (head)->num);
       pt->rnext = Revlst;
       Revlst = pt;
       pt->numfld = countnumflds (pt->strtrev);
