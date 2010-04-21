@@ -153,31 +153,6 @@ InitAdmin (void)
   Lexinit ();
 }
 
-void
-bufalloc (register struct buf *b, size_t size)
-/* Ensure ‘*b’ is a name buffer of at least ‘size’ bytes.
-   Old contents of ‘*b’ can be freed; new contents are undefined.  */
-{
-  if (b->size < size)
-    {
-      if (b->size)
-        tfree (b->string);
-      else
-        b->size = sizeof (void *);
-      while (b->size < size)
-        b->size <<= 1;
-      b->string = testalloc (b->size);
-    }
-}
-
-void
-bufautoend (struct buf *b)
-/* Free an auto buffer at block exit.  */
-{
-  if (b->size)
-    tfree (b->string);
-}
-
 char const *
 basefilename (char const *p)
 /* Return the address of the base filename of the filename ‘p’.  */

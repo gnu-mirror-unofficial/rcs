@@ -765,15 +765,12 @@ int rcsfcmp (struct fro *, struct stat const *, char const *,
              struct hshentry const *);
 
 /* rcsfnms */
-#define bufautobegin(b)  clear_buf (b)
 #define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
 struct fro *rcsreadopen (struct maybe *);
 char const *basefilename (char const *);
 char const *getfullRCSname (void);
 char const *rcssuffix (char const *);
 int pairnames (int, char **, open_rcsfile_fn *, bool, bool);
-void bufalloc (struct buf *, size_t);
-void bufautoend (struct buf *);
 
 /* rcsgen */
 char const *buildrevision (struct hshentries const *,
@@ -878,7 +875,6 @@ void gnurcs_init (void);
 void bad_option (char const *);
 struct cbuf minus_p (char const *xrev, char const *rev);
 char *cgetenv (char const *);
-char *fbuf_save (const struct buf *);
 char *str_save (char const *);
 char const *getusername (bool);
 int getRCSINIT (int, char **, char ***);

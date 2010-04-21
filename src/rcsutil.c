@@ -115,14 +115,6 @@ str_save (char const *s)
 }
 
 char *
-fbuf_save (const struct buf *b)
-/* Save ‘b->string’ in storage that will be deallocated
-   when we're done with this file.  */
-{
-  return intern0 (SINGLE, b->string);
-}
-
-char *
 cgetenv (char const *name)
 /* Like ‘getenv’, but return a copy; ‘getenv’ can overwrite old results.  */
 {

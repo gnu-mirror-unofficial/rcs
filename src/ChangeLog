@@ -1,5 +1,14 @@
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Prune some now-obsoleted macros/funcs.
+
+	* base.h (bufautobegin): Delete macro.
+	(bufalloc, bufautoend, fbuf_save): Delete func decls.
+	* rcsfnms.c (bufalloc, bufautoend): Delete funcs.
+	* rcsutil.c (fbuf_save): Delete func.
+
+2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘SHARED’ more.
 
 	* b-kwxout.c (keyreplace): Save $Log leader temporarily in ‘SHARED’.
