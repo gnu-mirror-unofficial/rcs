@@ -52,28 +52,6 @@
 #define printf_string(m, n)
 #endif
 
-#define KS(x)  (#x)
-
-/* The set of RCS file keywords.  */
-#define Kaccess    KS (access)
-#define Kauthor    KS (author)
-#define Kbranch    KS (branch)
-#define Kcomment   KS (comment)
-#define Kdate      KS (date)
-#define Kdesc      KS (desc)
-#define Kexpand    KS (expand)
-#define Khead      KS (head)
-#define Klocks     KS (locks)
-#define Klog       KS (log)
-#define Knext      KS (next)
-#define Kstate     KS (state)
-#define Kstrict    KS (strict)
-#define Ksymbols   KS (symbols)
-#define Ktext      KS (text)
-
-#define ciklog      "checked in with -k by "
-#define ciklog_len  ((sizeof ciklog) - 1)
-
 /* Keyword substitution modes.  The order must agree with ‘kwsub_pool’.  */
 enum kwsub
   {
@@ -339,6 +317,9 @@ struct pool_found
   int i;
   struct tinysym *sym;
 };
+
+#define TINY(x)       (tiny_ ## x)
+#define TINY_DECL(x)  const struct tinysym (TINY (x))
 
 /* Max length of the (working file) keywords.  */
 #define keylength 8
@@ -725,6 +706,23 @@ extern struct top *top;
 #define FLOW(member)  (top->flow. member)
 
 /* b-anchor */
+extern TINY_DECL (ciklog);
+extern TINY_DECL (access);
+extern TINY_DECL (author);
+extern TINY_DECL (branch);
+extern TINY_DECL (comment);
+extern TINY_DECL (date);
+extern TINY_DECL (desc);
+extern TINY_DECL (expand);
+extern TINY_DECL (head);
+extern TINY_DECL (locks);
+extern TINY_DECL (log);
+extern TINY_DECL (next);
+extern TINY_DECL (state);
+extern TINY_DECL (strict);
+extern TINY_DECL (symbols);
+extern TINY_DECL (text);
+bool looking_at (struct tinysym const *sym, char const *start);
 int recognize_kwsub (struct cbuf const *x);
 int str2expmode (char const *s);
 const char const *kwsub_string (enum kwsub);
@@ -787,9 +785,9 @@ char const *getid (void);
 char *checkid (char *, int);
 char *checksym (char *, int);
 bool eoflex (void);
-bool getkeyopt (char const *);
+bool getkeyopt (struct tinysym const *);
 bool getlex (enum tokens);
-struct cbuf getphrases (char const *);
+struct cbuf getphrases (struct tinysym const *);
 struct cbuf savestring (void);
 struct hshentry *getnum (void);
 void Lexinit (void);
@@ -801,8 +799,8 @@ void aprintf (FILE *, char const *, ...) printf_string (2, 3);
 void aputs (char const *, FILE *);
 void checksid (char *);
 void checkssym (char *);
-void getkey (char const *);
-void getkeystring (char const *);
+void getkey (struct tinysym const *);
+void getkeystring (struct tinysym const *);
 void nextlex (void);
 void oflush (void);
 void printstring (void);
@@ -849,7 +847,7 @@ int getdiffcmd (struct fro *, bool, FILE *, struct diffcmd *);
 void getadmin (void);
 void getdesc (bool);
 void gettree (void);
-void ignorephrases (char const *);
+void ignorephrases (struct tinysym const *);
 void initdiffcmd (struct diffcmd *);
 void putadmin (void);
 void putstring (FILE *, bool, struct cbuf, bool);
@@ -919,5 +917,9 @@ bool isSLASH (int c);
 #define BRANCHNO(rev)    TAKE (0, rev)
 
 #define fully_numeric_no_k(cb,source)  fully_numeric (cb, source, NULL)
+
+#define TINYS(x)  ((char *)(x)->bytes)
+
+#define TINYKS(x)  TINYS (&TINY (x))
 
 /* base.h ends here */

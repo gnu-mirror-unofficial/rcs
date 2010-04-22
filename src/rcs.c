@@ -361,16 +361,16 @@ scanlogtext (struct hshentry *delta, bool edit)
       if (nextdelta->selector)
         {
           FLOW (to) = FLOW (rewr);
-          aprintf (FLOW (rewr), DELNUMFORM, nextdelta->num, Klog);
+          aprintf (FLOW (rewr), DELNUMFORM, nextdelta->num, TINYKS (log));
         }
-      getkeystring (Klog);
+      getkeystring (&TINY (log));
       if (nextdelta == cuttail)
         {
           cb = savestring ();
           if (!delta->log.string)
             delta->log = cleanlogmsg (cb.string, cb.size);
           nextlex ();
-          delta->igtext = getphrases (Ktext);
+          delta->igtext = getphrases (&TINY (text));
         }
       else
         {
@@ -384,9 +384,9 @@ scanlogtext (struct hshentry *delta, bool edit)
             }
           else
             readstring ();
-          ignorephrases (Ktext);
+          ignorephrases (&TINY (text));
         }
-      getkeystring (Ktext);
+      getkeystring (&TINY (text));
 
       if (delta == nextdelta)
         break;

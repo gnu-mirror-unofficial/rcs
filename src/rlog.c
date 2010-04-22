@@ -305,13 +305,13 @@ readdeltalog (void)
   nextlex ();
   if (!(Delta = getnum ()))
     fatal_syntax ("delta number corrupted");
-  getkeystring (Klog);
+  getkeystring (&TINY (log));
   if (Delta->log.string)
     fatal_syntax ("duplicate delta log");
   Delta->log = savestring ();
 
-  ignorephrases (Ktext);
-  getkeystring (Ktext);
+  ignorephrases (&TINY (text));
+  getkeystring (&TINY (text));
   Delta->insertlns = Delta->deletelns = 0;
   if (Delta != ADMIN (head))
     getscript (Delta);

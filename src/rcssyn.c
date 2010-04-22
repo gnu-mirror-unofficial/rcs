@@ -27,17 +27,17 @@
 #include "b-divvy.h"
 #include "b-fro.h"
 
-#define Kbranches  KS (branches)
+static TINY_DECL (branches);
 #if COMPAT2
-#define Ksuffix    KS (suffix)
+static TINY_DECL (suffix);
 #endif
 
 static void
-getsemi (char const *key)
+getsemi (struct tinysym const *key)
 /* Get a semicolon to finish off a phrase started by ‘key’.  */
 {
   if (!getlex (SEMI))
-    fatal_syntax ("missing ';' after '%s'", key);
+    fatal_syntax ("missing ';' after '%s'", TINYS (key));
 }
 
 static struct hshentry *
@@ -67,21 +67,21 @@ getadmin (void)
 
   REPO (ndelt) = 0;
 
-  getkey (Khead);
+  getkey (&TINY (head));
   ADMIN (head) = getdnum ();
-  getsemi (Khead);
+  getsemi (&TINY (head));
 
   ADMIN (defbr) = NULL;
-  if (getkeyopt (Kbranch))
+  if (getkeyopt (&TINY (branch)))
     {
       if ((delta = getnum ()))
         ADMIN (defbr) = delta->num;
-      getsemi (Kbranch);
+      getsemi (&TINY (branch));
     }
 
 #if COMPAT2
   /* Read suffix.  Only in release 2 format.  */
-  if (getkeyopt (Ksuffix))
+  if (getkeyopt (&TINY (suffix)))
     {
       if (NEXT (tok) == STRING)
         {
@@ -93,11 +93,11 @@ getadmin (void)
         {
           nextlex ();
         }
-      getsemi (Ksuffix);
+      getsemi (&TINY (suffix));
     }
 #endif  /* COMPAT2 */
 
-  getkey (Kaccess);
+  getkey (&TINY (access));
   LastAccess = &ADMIN (allowed);
   while ((id = getid ()))
     {
@@ -107,9 +107,9 @@ getadmin (void)
       LastAccess = &newaccess->nextaccess;
     }
   *LastAccess = NULL;
-  getsemi (Kaccess);
+  getsemi (&TINY (access));
 
-  getkey (Ksymbols);
+  getkey (&TINY (symbols));
   LastSymbol = &ADMIN (assocs);
   while ((id = getid ()))
     {
@@ -130,9 +130,9 @@ getadmin (void)
         }
     }
   *LastSymbol = NULL;
-  getsemi (Ksymbols);
+  getsemi (&TINY (symbols));
 
-  getkey (Klocks);
+  getkey (&TINY (locks));
   LastLock = &ADMIN (locks);
   while ((id = getid ()))
     {
@@ -153,24 +153,24 @@ getadmin (void)
         }
     }
   *LastLock = NULL;
-  getsemi (Klocks);
+  getsemi (&TINY (locks));
 
-  if ((BE (strictly_locking) = getkeyopt (Kstrict)))
-    getsemi (Kstrict);
+  if ((BE (strictly_locking) = getkeyopt (&TINY (strict))))
+    getsemi (&TINY (strict));
 
   clear_buf (&ADMIN (log_lead));
-  if (getkeyopt (Kcomment))
+  if (getkeyopt (&TINY (comment)))
     {
       if (NEXT (tok) == STRING)
         {
           ADMIN (log_lead) = savestring ();
           nextlex ();
         }
-      getsemi (Kcomment);
+      getsemi (&TINY (comment));
     }
 
   BE (kws) = kwsub_kv;
-  if (getkeyopt (Kexpand))
+  if (getkeyopt (&TINY (expand)))
     {
       if (NEXT (tok) == STRING)
         {
@@ -179,20 +179,20 @@ getadmin (void)
             fatal_syntax ("unknown expand mode %.*s", (int) cb.size, cb.string);
           nextlex ();
         }
-      getsemi (Kexpand);
+      getsemi (&TINY (expand));
     }
-  ADMIN (description) = getphrases (Kdesc);
+  ADMIN (description) = getphrases (&TINY (desc));
 }
 
 void
-ignorephrases (const char *key)
+ignorephrases (struct tinysym const *key)
 /* Ignore a series of phrases that do not start with ‘key’.  Stop when the
    next phrase starts with a token that is not an identifier, or is ‘key’.  */
 {
   for (;;)
     {
       nextlex ();
-      if (NEXT (tok) != ID || strcmp (NEXT (str), key) == 0)
+      if (NEXT (tok) != ID || looking_at (key, NEXT (str)))
         break;
       warnignore ();
       BE (receptive_to_next_hash_key) = false;
@@ -219,7 +219,7 @@ ignorephrases (const char *key)
 }
 
 static char const *
-getkeyval (char const *keyword, enum tokens token, bool optional)
+getkeyval (struct tinysym const *keyword, enum tokens token, bool optional)
 /* Read a pair of the form:
    <keyword> <token> ;
    where ‘token’ is one of ‘ID’ or ‘NUM’.  ‘optional’ indicates whether
@@ -237,7 +237,7 @@ getkeyval (char const *keyword, enum tokens token, bool optional)
   else
     {
       if (!optional)
-        fatal_syntax ("missing %s", keyword);
+        fatal_syntax ("missing %s", TINYS (keyword));
     }
   getsemi (keyword);
   return (val);
@@ -256,15 +256,15 @@ getdelta (void)
 
   /* Don't enter dates into hashtable.  */
   BE (receptive_to_next_hash_key) = false;
-  Delta->date = getkeyval (Kdate, NUM, false);
+  Delta->date = getkeyval (&TINY (date), NUM, false);
   /* Reset BE (receptive_to_next_hash_key) for revision numbers.  */
   BE (receptive_to_next_hash_key) = true;
 
-  Delta->author = getkeyval (Kauthor, ID, false);
+  Delta->author = getkeyval (&TINY (author), ID, false);
 
-  Delta->state = getkeyval (Kstate, ID, true);
+  Delta->state = getkeyval (&TINY (state), ID, true);
 
-  getkey (Kbranches);
+  getkey (&TINY (branches));
   LastBranch = &Delta->branches;
   while ((num = getdnum ()))
     {
@@ -274,15 +274,15 @@ getdelta (void)
       LastBranch = &NewBranch->nextbranch;
     }
   *LastBranch = NULL;
-  getsemi (Kbranches);
+  getsemi (&TINY (branches));
 
-  getkey (Knext);
+  getkey (&TINY (next));
   Delta->next = num = getdnum ();
-  getsemi (Knext);
+  getsemi (&TINY (next));
   Delta->lockedby = NULL;
   Delta->log.string = NULL;
   Delta->selector = true;
-  Delta->ig = getphrases (Kdesc);
+  Delta->ig = getphrases (&TINY (desc));
   REPO (ndelt)++;
   return true;
 }
@@ -309,7 +309,7 @@ getdesc (bool prdesc)
 /* Read in descriptive text.  ‘NEXT (tok)’ is not advanced afterwards.
    If ‘prdesc’ is set, then print text to stdout.  */
 {
-  getkeystring (Kdesc);
+  getkeystring (&TINY (desc));
   if (prdesc)
     printstring ();                     /* echo string */
   else

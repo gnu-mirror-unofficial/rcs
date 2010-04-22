@@ -513,7 +513,7 @@ getlogmsg (void)
 
       /* Generate standard log message.  */
       date2str (getcurdate (), datebuf);
-      ACCS (ciklog);
+      ACCS (TINYKS (ciklog));
       ACCS (getcaller ());
       ACCS (" at ");
       ACCS (datebuf);

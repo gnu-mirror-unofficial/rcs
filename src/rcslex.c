@@ -273,12 +273,12 @@ getlex (enum tokens token)
 }
 
 bool
-getkeyopt (char const *key)
+getkeyopt (struct tinysym const *key)
 /* If the current token is a keyword identical to ‘key’,
    advance the input by calling ‘nextlex’ and return true;
    otherwise return false.  */
 {
-  if (NEXT (tok) == ID && strcmp (key, NEXT (str)) == 0)
+  if (NEXT (tok) == ID && looking_at (key, NEXT (str)))
     {
       /* Match found.  */
       free_NEXT_str ();
@@ -289,23 +289,23 @@ getkeyopt (char const *key)
 }
 
 void
-getkey (char const *key)
+getkey (struct tinysym const *key)
 /* Check that the current input token is a keyword identical to ‘key’,
    and advance the input by calling ‘nextlex’.  */
 {
   if (!getkeyopt (key))
-    fatal_syntax ("missing '%s' keyword", key);
+    fatal_syntax ("missing '%s' keyword", TINYS (key));
 }
 
 void
-getkeystring (char const *key)
+getkeystring (struct tinysym const *key)
 /* Check that the current input token is a keyword identical to ‘key’,
    and advance the input by calling ‘nextlex’; then look ahead for a
    string.  */
 {
   getkey (key);
   if (NEXT (tok) != STRING)
-    fatal_syntax ("missing string after '%s' keyword", key);
+    fatal_syntax ("missing string after '%s' keyword", TINYS (key));
 }
 
 char const *
@@ -345,7 +345,7 @@ getnum (void)
 }
 
 struct cbuf
-getphrases (char const *key)
+getphrases (struct tinysym const *key)
 /* Get a series of phrases that do not start with ‘key’.  Return
    resulting buffer.  Stop when the next phrase starts with a token that
    is not an identifier, or is ‘key’.  Copy input to ‘FLOW (to)’ if it is
@@ -358,7 +358,7 @@ getphrases (char const *key)
   register struct fro *fin;
   register FILE *frew;
 
-  if (NEXT (tok) != ID || strcmp (NEXT (str), key) == 0)
+  if (NEXT (tok) != ID || looking_at (key, NEXT (str)))
     clear_buf (&r);
   else
     {
@@ -449,7 +449,7 @@ getphrases (char const *key)
             }
           if (ctab[c] == Letter)
             {
-              for (kn = key; c && *kn == c; kn++)
+              for (kn = TINYS (key); c && *kn == c; kn++)
                 TEECHAR ();
               if (!*kn)
                 switch (ctab[c])
@@ -462,13 +462,11 @@ getphrases (char const *key)
                     break;
                   default:
                     NEXT (c) = c;
-                    /* FIXME: {Re-}move redundant ‘strlen’ call.
-                       All callers are key = Kfoo (constant strings).  */
-                    NEXT (str) = intern0 (SINGLE, key);
+                    NEXT (str) = intern (SINGLE, TINYS (key), key->len);
                     NEXT (tok) = ID;
                     goto returnit;
                   }
-              accumulate_range (LEX (ignore), key, kn);
+              accumulate_range (LEX (ignore), TINYS (key), kn);
             }
           else
             {

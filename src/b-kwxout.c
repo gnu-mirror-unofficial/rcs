@@ -162,8 +162,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
 
       sp = delta->log.string;
       ls = delta->log.size;
-      if (sizeof (ciklog) - 1 <= ls
-          && !memcmp (sp, ciklog, sizeof (ciklog) - 1))
+      if (looking_at (&TINY (ciklog), delta->log.string))
         return;
       if (BE (version) < VERSION (5))
         {

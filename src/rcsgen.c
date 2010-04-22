@@ -54,20 +54,20 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
         {
           fatal_syntax ("delta number corrupted");
         }
-      getkeystring (Klog);
+      getkeystring (&TINY (log));
       if (needlog && delta == nextdelta)
         {
           cb = savestring ();
           delta->log = cleanlogmsg (cb.string, cb.size);
           nextlex ();
-          delta->igtext = getphrases (Ktext);
+          delta->igtext = getphrases (&TINY (text));
         }
       else
         {
           readstring ();
-          ignorephrases (Ktext);
+          ignorephrases (&TINY (text));
         }
-      getkeystring (Ktext);
+      getkeystring (&TINY (text));
 
       if (delta == nextdelta)
         break;
@@ -232,7 +232,7 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
   if (FLOW (from) && !textflag)
     {
       /* Copy old description.  */
-      aprintf (frew, "\n\n%s%c", Kdesc, NEXT (c));
+      aprintf (frew, "\n\n%s%c", TINYKS (desc), NEXT (c));
       FLOW (to) = FLOW (rewr);
       getdesc (false);
       FLOW (to) = NULL;
@@ -246,7 +246,7 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
           /* Skip old description.  */
           getdesc (false);
         }
-      aprintf (frew, "\n\n%s\n%c", Kdesc, SDELIM);
+      aprintf (frew, "\n\n%s\n%c", TINYKS (desc), SDELIM);
       if (!textfile)
         *cb = getsstdin ("t-", "description",
                          "NOTE: This is NOT the log message!\n");
@@ -348,26 +348,26 @@ putadmin (void)
         fatal_sys (REPO (filename));
     }
 
-  aprintf (fout, "%s\t%s;\n", Khead,
+  aprintf (fout, "%s\t%s;\n", TINYKS (head),
            ADMIN (head) ? ADMIN (head)->num : "");
   if (ADMIN (defbr) && VERSION (4) <= BE (version))
-    aprintf (fout, "%s\t%s;\n", Kbranch, ADMIN (defbr));
+    aprintf (fout, "%s\t%s;\n", TINYKS (branch), ADMIN (defbr));
 
-  aputs (Kaccess, fout);
+  aputs (TINYKS (access), fout);
   curaccess = ADMIN (allowed);
   while (curaccess)
     {
       aprintf (fout, "\n\t%s", curaccess->login);
       curaccess = curaccess->nextaccess;
     }
-  aprintf (fout, ";\n%s", Ksymbols);
+  aprintf (fout, ";\n%s", TINYKS (symbols));
   curassoc = ADMIN (assocs);
   while (curassoc)
     {
       aprintf (fout, "\n\t%s:%s", curassoc->symbol, curassoc->num);
       curassoc = curassoc->nextassoc;
     }
-  aprintf (fout, ";\n%s", Klocks);
+  aprintf (fout, ";\n%s", TINYKS (locks));
   curlock = ADMIN (locks);
   while (curlock)
     {
@@ -375,17 +375,17 @@ putadmin (void)
       curlock = curlock->nextlock;
     }
   if (BE (strictly_locking))
-    aprintf (fout, "; %s", Kstrict);
+    aprintf (fout, "; %s", TINYKS (strict));
   aprintf (fout, ";\n");
   if (ADMIN (log_lead).size)
     {
-      aprintf (fout, "%s\t", Kcomment);
+      aprintf (fout, "%s\t", TINYKS (comment));
       putstring (fout, true, ADMIN (log_lead), false);
       aprintf (fout, ";\n");
     }
   if (BE (kws) != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
-             Kexpand, SDELIM, kwsub_string (BE (kws)), SDELIM);
+             TINYKS (expand), SDELIM, kwsub_string (BE (kws)), SDELIM);
   awrite (ADMIN (description).string, ADMIN (description).size, fout);
   aputc ('\n', fout);
 }
@@ -400,8 +400,8 @@ putdelta (register struct hshentry const *node, register FILE *fout)
     return;
 
   aprintf (fout, "\n%s\n%s\t%s;\t%s %s;\t%s %s;\nbranches",
-           node->num, Kdate, node->date, Kauthor, node->author,
-           Kstate, node->state ? node->state : "");
+           node->num, TINYKS (date), node->date, TINYKS (author), node->author,
+           TINYKS (state), node->state ? node->state : "");
   nextbranch = node->branches;
   while (nextbranch)
     {
@@ -409,7 +409,7 @@ putdelta (register struct hshentry const *node, register FILE *fout)
       nextbranch = nextbranch->nextbranch;
     }
 
-  aprintf (fout, ";\n%s\t%s;\n", Knext, node->next ? node->next->num : "");
+  aprintf (fout, ";\n%s\t%s;\n", TINYKS (next), node->next ? node->next->num : "");
   awrite (node->ig.string, node->ig.size, fout);
 }
 
@@ -491,7 +491,7 @@ putdftext (struct hshentry const *delta, struct fro *finfile,
   struct diffcmd dc;
 
   fout = foutfile;
-  aprintf (fout, DELNUMFORM, delta->num, Klog);
+  aprintf (fout, DELNUMFORM, delta->num, TINYKS (log));
 
   /* Put log.  */
   putstring (fout, true, delta->log, true);
@@ -500,7 +500,7 @@ putdftext (struct hshentry const *delta, struct fro *finfile,
   awrite (delta->igtext.string, delta->igtext.size, fout);
 
   /* Put text.  */
-  aprintf (fout, "%s\n%c", Ktext, SDELIM);
+  aprintf (fout, "%s\n%c", TINYKS (text), SDELIM);
 
   fin = finfile;
   if (!diffmt)

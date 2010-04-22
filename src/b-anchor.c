@@ -28,6 +28,33 @@ const char const diff_flags[] = DIFFFLAGS;
 const char const equal_line[] =
   "=============================================================================\n";
 
+#define TINY_INIT(x)  { .len = sizeof (x) - 1, .bytes = x }
+#define TINYK(x)      TINY_DECL (x) = TINY_INIT (#x)
+
+/* For libgnurcs.so, these should be coalesced into a pool.  */
+TINY_DECL (ciklog) = TINY_INIT ("checked in with -k by ");
+TINYK (access);
+TINYK (author);
+TINYK (branch);
+TINYK (comment);
+TINYK (date);
+TINYK (desc);
+TINYK (expand);
+TINYK (head);
+TINYK (locks);
+TINYK (log);
+TINYK (next);
+TINYK (state);
+TINYK (strict);
+TINYK (symbols);
+TINYK (text);
+
+bool
+looking_at (struct tinysym const *sym, char const *start)
+{
+  return 0 == memcmp (start, sym->bytes, sym->len);
+}
+
 static const uint8_t kwsub_pool[22] =
 {
   6 /* count */,

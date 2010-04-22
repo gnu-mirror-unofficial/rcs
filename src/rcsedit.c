@@ -1131,7 +1131,7 @@ dorewrite (bool lockflag, int changed)
             return -1;
           putadmin ();
           puttree (ADMIN (head), FLOW (rewr));
-          aprintf (FLOW (rewr), "\n\n%s%c", Kdesc, NEXT (c));
+          aprintf (FLOW (rewr), "\n\n%s%c", TINYKS (desc), NEXT (c));
           FLOW (to) = FLOW (rewr);
         }
       else

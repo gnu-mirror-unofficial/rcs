@@ -1,5 +1,46 @@
 2010-04-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use tinysym for parsing "RCS file keywords".
+
+	* b-anchor.c (TINY_INIT, TINYK): New macros.
+	(tiny_ciklog, tiny_access, tiny_author, tiny_branch, tiny_comment)
+	(tiny_date, tiny_desc, tiny_expand, tiny_head, tiny_locks, tiny_log)
+	(tiny_next, tiny_state, tiny_strict, tiny_symbols, tiny_text):
+	New ‘struct tinysym’ objects, via ‘TINY_DECL’, ‘TINYK’.
+	(looking_at): New func.
+	* base.h (KS): Delete macro.
+	(Kaccess, Kauthor, Kbranch, Kcomment, Kdate, Kdesc)
+	(Kexpand, Khead, Klocks, Klog, Knext, Kstate, Kstrict)
+	(Ksymbols, Ktext, ciklog, ciklog_len): Delete #define:s.
+	(TINY, TINY_DECL): New macros.
+	(tiny_ciklog, tiny_access, tiny_author, tiny_branch, tiny_comment)
+	(tiny_date, tiny_desc, tiny_expand, tiny_head, tiny_locks, tiny_log)
+	(tiny_next, tiny_state, tiny_strict, tiny_symbols, tiny_text):
+	New ‘struct tinysym’ object decls, via ‘TINY_DECL’.
+	(looking_at): New func decl.
+	(getkeyopt, getphrases, getkey, getkeystring)
+	(ignorephrases): Update func decls.
+	(TINYS, TINYKS): New macros.
+	* b-kwxout.c (keyreplace): Use ‘looking_at’, ‘TINY (ciklog)’.
+	* rcsfcmp.c (rcsfcmp): Likewise.
+	* ci.c (getlogmsg): Use ‘TINYKS’.
+	* rcsedit.c (dorewrite): Likewise.
+	* rcs.c (scanlogtext): Pass ‘&TINY (foo)’.
+	* rcsgen.c (scandeltatext): Likewise.
+	(putdesc, putadmin, putdelta, putdftext): Use ‘TINYKS’.
+	* rcslex.c (getkeyopt, getkey, getkeystring): Take ‘struct tinysym *’.
+	(getphrases): Likewise; use ‘intern’.
+	* rcssyn.c (Kbranches): Replace #define with ‘TINY_DECL (branches)’.
+	[COMPAT2] (Ksuffix): Replace #define with ‘TINY_DECL (suffix)’.
+	(getsemi): Take ‘struct tinysym *’.
+	(getadmin): Pass ‘&TINY (foo)’.
+	(ignorephrases): Take ‘struct tinysym *’; use ‘looking_at’.
+	(getkeyval): Take ‘struct tinysym *’; use ‘TINYS’.
+	(getdelta, getdesc): Pass ‘&TINY (foo)’.
+	* rlog.c (readdeltalog): Likewise.
+
+2010-04-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Tighten ‘recognize_kwsub’, ‘str2expmode’.
 
 	* b-anchor.c (pool_lookup, recognize_kwsub):
