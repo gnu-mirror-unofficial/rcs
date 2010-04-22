@@ -551,7 +551,7 @@ With
 a numeric time zone offset is appended; otherwise, the date is \*u.
 .TP
 .B $\&Header$
-A standard header containing the full filename of the \*r file, the
+A standard header containing the full file name of the \*r file, the
 revision number, the date and time, the author, the state,
 and the locker (if locked).
 With
@@ -561,14 +561,14 @@ a numeric time zone offset is appended to the date; otherwise, the date is \*u.
 .B $\&Id$
 Same as
 .BR $\&Header$ ,
-except that the \*r filename is without the directory components.
+except that the \*r file name is without the directory components.
 .TP
 .B $\&Locker$
 The login name of the user who locked the revision (empty if not locked).
 .TP
 .B $\&Log$
 The log message supplied during checkin, preceded by a header
-containing the \*r filename, the revision number, the author, and the date
+containing the \*r file name, the revision number, the author, and the date
 and time.
 With
 .BI \-z zone
@@ -640,7 +640,7 @@ The name of the \*r file without directory components.
 The revision number assigned to the revision.
 .TP
 .B $\&Source$
-The full filename of the \*r file.
+The full file name of the \*r file.
 .TP
 .B $\&State$
 The state assigned to the revision with the
@@ -698,7 +698,7 @@ See
 .BR ci (1)
 for details.
 .SH DIAGNOSTICS
-The \*r filename, the working filename,
+The \*r file name, the working file name,
 and the revision number retrieved are
 written to the diagnostic output.
 The exit status is zero if and only if all operations were successful.

@@ -1,3 +1,14 @@
+2010-04-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "file name" or "file-name" instead of "filename".
+
+	* ci.1in: Instead of "filename", say "filename" or "file-name".
+	* co.1in: Likewise.
+	* ident.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsintro.1in: Likewise.
+	* rlog.1in: Likewise.
+
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Don't say "path" when referring to file names.

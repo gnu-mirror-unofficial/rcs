@@ -1,3 +1,10 @@
+2010-04-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "file name" or "file-name" instead of "filename".
+
+	* doc/rcs.texi (Still missing, Common options, Description)
+	(ci, rcs): Instead of "filename", say "file name" or "file-name".
+
 2010-04-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Don't say "path" when referring to file names.

@@ -293,9 +293,9 @@ this allows @command{rcs -oS -nS}.
 @item @command{co -u} shouldn't complain about a @samp{+w} working
 file if contents don't change.
 
-@item Add a @samp{-} option to take the list of filenames from
-standard input.  Perhaps the filenames should be null-terminated, not
-newline-terminated, so that filenames that contain newlines are handled
+@item Add a @samp{-} option to take the list of file names from
+standard input.  Perhaps the file names should be null-terminated, not
+newline-terminated, so that those that contain newlines are handled
 properly.
 
 @item Permit multiple option--filename pairs,
@@ -399,11 +399,11 @@ co -u1.4  foo   # ok
 @end example
 
 @noindent
-Furthermore, options must appear before filenames (if any) on the
+Furthermore, options must appear before file names (if any) on the
 command line.
 
 @example
-ident foo -q    # wrong, option after filename
+ident foo -q    # wrong, option after file name
 ident -q foo    # ok
 @end example
 
@@ -512,11 +512,11 @@ date/time must be quoted if it contains spaces.
 @cindex description text, specifying
 
 Some commands accept an option of the form @samp{-t-@var{text}}
-or @samp{-t@var{filename}}.  This option is to set or update the
+or @samp{-t@var{file-name}}.  This option is to set or update the
 RCS file description text.  In the first form, @var{text} is used
 directly, excluding the leading hyphen (@samp{-}) that distinguishes the
 two forms.  In the second form, the description text is taken from the
-contents of @var{filename}.
+contents of @var{file-name}.
 
 @node Substitution mode option
 @subsection Substitution mode option
@@ -706,7 +706,7 @@ For @option{-N}, overwrite any previous assignment.
 @xref{Misc common options}.  Set the state.
 
 @item -t-@var{text}
-@itemx -t@var{filename}
+@itemx -t@var{file-name}
 @xref{Description option}.
 
 @item -T
@@ -879,8 +879,8 @@ Append @var{logins} (comma-separated list of usernames) to access-list.
 Erase @var{logins} (comma-separated list of usernames) from access-list.
 If @var{logins} is omitted, clear the access-list.
 
-@item -A@var{filename}
-Append access-list of @var{filename} to current access-list.
+@item -A@var{file-name}
+Append access-list of @var{file-name} to current access-list.
 
 @item -b[@var{rev}]
 Set default branch to that of @var{rev} or
@@ -933,7 +933,7 @@ beginning of branch to @var{rev}
 @xref{Misc common options}.  Set state.
 
 @item -t-@var{text}
-@itemx -t@var{filename}
+@itemx -t@var{file-name}
 @xref{Description option}.  Replace description.
 
 @item -V

@@ -12,7 +12,7 @@ ci \- check in RCS revisions
 .SH DESCRIPTION
 .B ci
 stores new revisions into \*r files.
-Each filename matching an \*r suffix
+Each file name matching an \*r suffix
 is taken to be an \*r file.
 All others
 are assumed to be working files containing new revisions.
@@ -451,8 +451,8 @@ for details.
 .TP
 .BI \-x "suffixes"
 specifies the suffixes for \*r files.
-A nonempty suffix matches any filename ending in the suffix.
-An empty suffix matches any filename of the form
+A nonempty suffix matches any file name ending in the suffix.
+An empty suffix matches any file name of the form
 .BI RCS/ frag
 or
 .IB frag1 /RCS/ frag2.
@@ -476,7 +476,7 @@ The default for
 .IR suffixes
 is installation-dependent; normally it is
 .B ,v/
-for hosts like Unix that permit commas in filenames,
+for hosts like Unix that permit commas in file names,
 and is empty (i.e. just the empty suffix) for other hosts.
 .TP
 .BI \-z zone
@@ -522,18 +522,18 @@ Pairs of \*r files and working files can be specified in three ways
 (see also the
 example section).
 .PP
-1) Both the \*r file and the working file are given.  The \*r filename is of
-the form
+1) Both the \*r file and the working file are given.
+The \*r file name is of the form
 .IB frag1 / workfileX
-and the working filename is of the form
+and the working file name is of the form
 .IB frag2 / workfile
 where
 .IB frag1 /
 and
 .IB frag2 /
-are (possibly different or empty) filenames,
+are (possibly different or empty) file names,
 .I workfile
-is a filename, and
+is a file name, and
 .I X
 is an \*r suffix.
 If
@@ -564,7 +564,7 @@ or (if the former is not found and
 is nonempty)
 .IB frag2 / workfileX.
 .PP
-If the \*r file is specified without a filename in 1) and 2),
+If the \*r file is specified without a file name in 1) and 2),
 .B ci
 looks for the \*r file first in the directory
 .B ./RCS
@@ -641,10 +641,10 @@ under
 A semaphore file or files are created in the directory containing the \*r file.
 With a nonempty suffix, the semaphore names begin with
 the first character of the suffix; therefore, do not specify an suffix
-whose first character could be that of a working filename.
+whose first character could be that of a working file name.
 With an empty suffix, the semaphore names end with
 .B _
-so working filenames should not end in
+so working file names should not end in
 .BR _ .
 .PP
 .B ci
@@ -727,7 +727,7 @@ should not be
 or any other user with special powers.
 Mutually suspicious sets of users should use different administrators.
 .IP \(bu \nn
-Choose a filename
+Choose a file name
 .I B
 to be a directory of files to be executed by the users.
 .IP \(bu \nn
