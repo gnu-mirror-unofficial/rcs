@@ -1,3 +1,15 @@
+2010-04-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Tighten ‘recognize_kwsub’, ‘str2expmode’.
+
+	* b-anchor.c (pool_lookup, recognize_kwsub):
+	Don't take START, LEN; instead take a ‘struct cbuf *’.
+	(str2expmode): New func.
+	(recognize_keyword): Update call to ‘pool_lookup’.
+	* rcssyn.c (getadmin): Update call to ‘recognize_kwsub’.
+	* base.h (recognize_kwsub): Update func decl.
+	(str2expmode): Convert from macro to func decl.
+
 2010-04-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Prune now-obsolete ‘struct buf’.

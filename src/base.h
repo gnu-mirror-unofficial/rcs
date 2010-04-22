@@ -725,8 +725,8 @@ extern struct top *top;
 #define FLOW(member)  (top->flow. member)
 
 /* b-anchor */
-int recognize_kwsub (const char *, size_t);
-#define str2expmode(s)  (recognize_kwsub ((s), strlen (s)))
+int recognize_kwsub (struct cbuf const *x);
+int str2expmode (char const *s);
 const char const *kwsub_string (enum kwsub);
 bool recognize_keyword (char const *, struct pool_found *);
 

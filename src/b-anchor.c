@@ -56,7 +56,7 @@ static const uint8_t keyword_pool[80] =
 };
 
 static bool
-pool_lookup (const uint8_t pool[], const char *start, size_t len,
+pool_lookup (const uint8_t pool[], struct cbuf const *x,
              struct pool_found *found)
 {
   const uint8_t *p = pool + 1;
@@ -65,7 +65,7 @@ pool_lookup (const uint8_t pool[], const char *start, size_t len,
     {
       size_t symlen = *p;
 
-      if (len == symlen && !memcmp (p + 1, start, symlen))
+      if (x->size == symlen && !memcmp (p + 1, x->string, symlen))
         {
           found->i = i;
           found->sym = (struct tinysym *) p;
@@ -77,15 +77,29 @@ pool_lookup (const uint8_t pool[], const char *start, size_t len,
 }
 
 int
-recognize_kwsub (const char *start, size_t len)
-/* Search for match in ‘kwsub_pool’ for byte range ‘start’ length ‘len’.
+recognize_kwsub (struct cbuf const *x)
+/* Search for match in ‘kwsub_pool’ for byte range ‘x->string’ length ‘x->size’.
    Return its ‘enum kwsub’ if successful, otherwise -1.  */
 {
   struct pool_found found;
 
-  return pool_lookup (kwsub_pool, start, len, &found)
+  return pool_lookup (kwsub_pool, x, &found)
     ? found.i
     : -1;
+}
+
+int
+str2expmode (char const *s)
+/* Search for match in ‘kwsub_pool’ for string ‘s’.
+   Return its ‘enum kwsub’ if successful, otherwise -1.  */
+{
+  const struct cbuf x =
+    {
+      .string = s,
+      .size = strlen (s)
+    };
+
+  return recognize_kwsub (&x);
 }
 
 const char const *
@@ -114,10 +128,15 @@ recognize_keyword (char const *string, struct pool_found *found)
 {
   const char delims[3] = { KDELIM, VDELIM, '\0' };
   size_t limit = strcspn (string, delims);
+  const struct cbuf x =
+    {
+      .string = string,
+      .size = limit
+    };
 
   return ((KDELIM == string[limit]
            || VDELIM == string[limit])
-          && pool_lookup (keyword_pool, string, limit, found));
+          && pool_lookup (keyword_pool, &x, found));
 }
 
 /* b-anchor.c ends here */

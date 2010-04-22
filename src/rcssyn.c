@@ -175,7 +175,7 @@ getadmin (void)
       if (NEXT (tok) == STRING)
         {
           cb = savestring ();
-          if ((BE (kws) = recognize_kwsub (cb.string, cb.size)) < 0)
+          if (0 > (BE (kws) = recognize_kwsub (&cb)))
             fatal_syntax ("unknown expand mode %.*s", (int) cb.size, cb.string);
           nextlex ();
         }
