@@ -83,53 +83,11 @@ static const struct compair const comtable[] = {
   {NULL,   "# "}                /* default for unknown suffix; must be last */
 };
 
-static char const *
-bindex (register char const *sp, register int c)
-/* Find the last occurrence of character ‘c’ in string ‘sp’ and return a
-   pointer to the character just beyond it.  If the character doesn't occur
-   in the string, return ‘sp’.  */
-{
-  register char const *r;
-
-  r = sp;
-  while (*sp)
-    {
-      if (*sp++ == c)
-        r = sp;
-    }
-  return r;
-}
-
-static bool
-suffix_matches (register char const *suffix, register char const *pattern)
-{
-  register int c;
-
-  if (!pattern)
-    return true;
-  for (;;)
-    switch (*suffix++ - (c = *pattern++))
-      {
-      case 0:
-        if (!c)
-          return true;
-        break;
-
-      case 'A' - 'a':
-        if (ctab[c] == Letter)
-          break;
-        /* fall into */
-      default:
-        return false;
-      }
-}
-
 static void
 InitAdmin (void)
 /* Initialize an admin node.  */
 {
-  register char const *Suffix;
-  register int i;
+  register char const *ext;
 
   ADMIN (head) = NULL;
   ADMIN (defbr) = NULL;
@@ -139,14 +97,17 @@ InitAdmin (void)
   BE (strictly_locking) = STRICT_LOCKING;
 
   /* Guess the comment leader from the suffix.  */
-  Suffix = bindex (MANI (filename), '.');
-  if (Suffix == MANI (filename))
+  ext = (ext = strrchr (MANI (filename), '.'))
+    ? 1 + ext
     /* Empty suffix; will get default.  */
-    Suffix = "";
-  for (i = 0; !suffix_matches (Suffix, comtable[i].suffix); i++)
-    continue;
-  ADMIN (log_lead).string = comtable[i].comlead;
-  ADMIN (log_lead).size = strlen (comtable[i].comlead);
+    : "";
+  for (struct compair const *ent = comtable; ; ent++)
+    if (!ent->suffix || !strcasecmp (ent->suffix, ext))
+      {
+        ADMIN (log_lead).string = ent->comlead;
+        ADMIN (log_lead).size = strlen (ent->comlead);
+        break;
+      }
   BE (kws) = kwsub_kv;
   clear_buf (&ADMIN (description));
   /* Note: If ‘!FLOW (from)’, read nothing; only initialize.  */
