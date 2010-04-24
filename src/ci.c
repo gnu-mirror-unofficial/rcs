@@ -95,11 +95,11 @@ exiterr (void)
   _Exit (EXIT_FAILURE);
 }
 
-#define ACCB(b)   accumulate_byte (SHARED, b)
-#define ACCS(s)   accumulate_nonzero_bytes (SHARED, s)
+#define ACCF(...)  accf (SHARED, __VA_ARGS__)
+
 #define OK(x)     (x)->string = finish_string (SHARED, &((x)->size))
-#define JAM(x,s)  do { ACCS (s); OK (x); } while (0)
-#define ADD(x,s)  do { ACCS ((x)->string); JAM (x, s); } while (0)
+#define JAM(x,s)  do { ACCF ("%s", s); OK (x); } while (0)
+#define ADD(x,s)  do { ACCF ("%s", (x)->string); JAM (x, s); } while (0)
 
 static void
 incnum (char const *onum, struct cbuf *nnum)
@@ -109,8 +109,7 @@ incnum (char const *onum, struct cbuf *nnum)
   register char *tp, *np;
   register size_t l;
 
-  ACCS (onum);
-  ACCB ('\0');
+  ACCF ("%s%c", onum, '\0');
   np = finish_string (SHARED, &nnum->size);
   nnum->string = np;
   l = nnum->size - 1;
@@ -513,10 +512,7 @@ getlogmsg (void)
 
       /* Generate standard log message.  */
       date2str (getcurdate (), datebuf);
-      ACCS (TINYKS (ciklog));
-      ACCS (getcaller ());
-      ACCS (" at ");
-      ACCS (datebuf);
+      ACCF ("%s%s at %s", TINYKS (ciklog), getcaller (), datebuf);
       OK (&logmsg);
       return logmsg;
     }

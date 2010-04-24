@@ -106,15 +106,9 @@ setup_label (char const *num, char const date[datesize])
   char datestr[datesize + zonelenmax];
 
   date2str (date, datestr);
-  accumulate_nonzero_bytes (SHARED, "-L");
-  accumulate_nonzero_bytes (SHARED, MANI (filename));
-  accumulate_byte (SHARED, '\t');
-  accumulate_nonzero_bytes (SHARED, datestr);
+  accf (SHARED, "-L%s\t%s", MANI (filename), datestr);
   if (num)
-    {
-      accumulate_byte (SHARED, '\t');
-      accumulate_nonzero_bytes (SHARED, num);
-    }
+    accf (SHARED, "\t%s", num);
   return finish_string (SHARED, &len);
 }
 #endif
@@ -320,10 +314,7 @@ main (int argc, char **argv)
       size_t len;
 
       for (pp = diffv + 2; pp < diffp;)
-        {
-          accumulate_byte (SHARED, ' ');
-          accumulate_nonzero_bytes (SHARED, *pp++);
-        }
+        accf (SHARED, " %s", *pp++);
       diffvstr = finish_string (SHARED, &len);
     }
 
@@ -455,9 +446,7 @@ main (int argc, char **argv)
             diffp[1] = MANI (filename);
             if (*MANI (filename) == '-')
               {
-                const char dotslash[3] = { '.', SLASH, '\0' };
-
-                accumulate_nonzero_bytes (SHARED, dotslash);
+                accf (SHARED, ".%c", SLASH);
                 diffp[1] = intern0 (SHARED, MANI (filename));
               }
           }

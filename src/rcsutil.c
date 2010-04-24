@@ -65,9 +65,8 @@ minus_p (char const *xrev, char const *rev)
   struct cbuf rv;
 
   diagnose ("retrieving revision %s", xrev);
-  accumulate_nonzero_bytes (SINGLE, "-p");
   /* Not ‘xrev’, for $Name's sake.  */
-  accumulate_nonzero_bytes (SINGLE, rev);
+  accf (SINGLE, "-p%s", rev);
   rv.string = finish_string (SINGLE, &rv.size);
   return rv;
 }
@@ -215,20 +214,10 @@ static void
 accumulate_arg_quoted (struct divvy *space, int c, register char const *s)
 /* Accumulate to ‘space’ the byte ‘c’, plus a quoted copy of ‘s’.  */
 {
-#define apostrophe  '\''
-  accumulate_byte (space, c);
-  accumulate_byte (space, apostrophe);
+  accf (space, "%c'", c);
   while ((c = *s++))
-    switch (c)
-      {
-      case apostrophe:
-        accumulate_nonzero_bytes (space, "'\\'");
-        /* fall through */
-      default:
-        accumulate_byte (space, c);
-      }
-  accumulate_byte (space, apostrophe);
-#undef apostrophe
+    accf (space, "%s%c", '\'' == c ? "'\\'" : "", c);
+  accf (space, "'");
 }
 
 #endif  /* !defined HAVE_WORKING_FORK */
@@ -319,16 +308,11 @@ runv (int infd, char const *outname, char const **args)
 
     /* Use ‘system’.  On many hosts ‘system’ discards signals.  Yuck!  */
     p = args + 1;
-    accumulate_nonzero_bytes (SHARED, *p);
+    accs (SHARED, *p);
     while (*++p)
       accumulate_arg_quoted (SHARED, ' ', *p);
     if (infd != -1 && infd != STDIN_FILENO)
-      {
-        char redirection[32];
-
-        sprintf (redirection, "<&%d", infd);
-        accumulate_nonzero_bytes (SHARED, redirection);
-      }
+      accf (SHARED, "<&%d", infd);
     if (outname)
       accumulate_arg_quoted (SHARED, '>', outname);
     wstatus = system (cmd = finish_string (SHARED, &len));

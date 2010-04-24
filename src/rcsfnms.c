@@ -480,9 +480,7 @@ getfullRCSname (void)
         while (isSLASH (r[2]))
           r++;
       /* Build full filename.  */
-      accumulate_nonzero_bytes (SINGLE, BE (cwd));
-      accumulate_byte          (SINGLE, SLASH);
-      accumulate_nonzero_bytes (SINGLE, r);
+      accf (SINGLE, "%s%c%s", BE (cwd), SLASH, r);
       rv = finish_string (SINGLE, &len);
       return rv;
     }

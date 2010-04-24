@@ -365,7 +365,7 @@ getphrases (struct tinysym const *key)
       warnignore ();
       fin = FLOW (from);
       frew = FLOW (to);
-      accumulate_nonzero_bytes (LEX (ignore), NEXT (str));
+      accs (LEX (ignore), NEXT (str));
       free_NEXT_str ();
       c = NEXT (c);
       for (;;)

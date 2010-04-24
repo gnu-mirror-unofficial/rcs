@@ -35,8 +35,8 @@ extern void *zlloc (struct divvy *divvy, char const *what, size_t len);
 extern char *intern (struct divvy *divvy, char const *s, size_t len);
 extern void brush_off (struct divvy *divvy, void *ptr);
 extern void forget (struct divvy *divvy);
+extern void accf (struct divvy *divvy, char const *fmt, ...);
 extern void accumulate_byte (struct divvy *divvy, int c);
-extern void accumulate_nonzero_bytes (struct divvy *divvy, char const *s);
 extern void accumulate_range (struct divvy *divvy,
                               char const *beg, char const *end);
 extern char *finish_string (struct divvy *divvy, size_t *result_len);
@@ -51,5 +51,6 @@ extern void close_space (struct divvy *divvy);
 #define ZLLOC(n,type)          (zlloc (SHARED, #type, sizeof (type) * n))
 #define FALLOC(type)           (alloc (SINGLE, #type, sizeof (type)))
 #define intern0(divvy,string)  (intern (divvy, string, strlen (string)))
+#define accs(divvy,string)     accf (divvy, "%s", string)
 
 /* b-divvy.h ends here */

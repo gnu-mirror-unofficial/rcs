@@ -1,3 +1,28 @@
+2010-04-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘obstack-printf’.
+
+	* b-divvy.c (accf): New func.
+	(accumulate_nonzero_bytes): Delete func.
+	* b-divvy.h (accf): New func decl.
+	(accumulate_nonzero_bytes): Delete func decl.
+	(accs): New macro.
+	* b-feph.c (jam_sff): Use ‘accf’.
+	* ci.c (ACCB, ACCS): Delete macros.
+	(ACCF): New macro.
+	(JAM, ADD, incnum, getlogmsg): Use ‘ACCF’.
+	* co.c (buildjoin): Use ‘accf’.
+	* merger.c (normalize_arg): Likewise.
+	* rcsdiff.c (setup_label, main): Likewise.
+	* rcsedit.c (naturalize, rcswriteopen): Use ‘accs’.
+	* rcsfnms.c (getfullRCSname): Use ‘accf’.
+	* rcslex.c (getphrases): Use ‘accs’.
+	* rcsrev.c (accumulate_branchno): Likewise.
+	(fully_numeric): Use ‘accf’, ‘accs’.
+	* rcsutil.c (minus_p, accumulate_arg_quoted): Use ‘accf’.
+	(runv): Use ‘accs’, ‘accf’.
+	* rlog.c (getnumericrev): Use ‘accf’.
+
 2010-04-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Tighten ‘InitAdmin’.

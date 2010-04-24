@@ -34,9 +34,7 @@ normalize_arg (char const *s)
 {
   if (*s == '-')
     {
-      const char dotslash[3] = { '.', SLASH, '\0' };
-
-      accumulate_nonzero_bytes (SHARED, dotslash);
+      accf (SHARED, ".%c", SLASH);
       return intern0 (SHARED, s);
     }
   else

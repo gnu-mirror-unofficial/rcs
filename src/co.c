@@ -371,29 +371,22 @@ buildjoin (char const *initialfile)
   i = 0;
   while (i < lastjoin)
     {
-#define ACCS(s)  accumulate_nonzero_bytes (SINGLE, s)
-#define ACCB(c)  accumulate_byte (SINGLE, c)
+#define ACCF(...)  accf (SINGLE, __VA_ARGS__)
       /* Prepare marker for merge.  */
       if (i == 0)
         subs = intern0 (SINGLE, targetdelta->num);
       else
         {
-          ACCS (subs);
-          ACCB (',');
-          ACCS (joinlist[i - 2]);
-          ACCB (':');
-          ACCS (joinlist[i - 1]);
+          ACCF ("%s,%s:%s", subs, joinlist[i - 2], joinlist[i - 1]);
           subs = finish_string (SINGLE, &len);
         }
       diagnose ("revision %s", joinlist[i]);
-      ACCS ("-p");
-      ACCS (joinlist[i]);
+      ACCF ("-p%s", joinlist[i]);
       cov[2] = finish_string (SINGLE, &len);
       if (runv (-1, rev2, cov))
         goto badmerge;
       diagnose ("revision %s", joinlist[i + 1]);
-      ACCS ("-p");
-      ACCS (joinlist[i + 1]);
+      ACCF ("-p%s", joinlist[i + 1]);
       cov[2] = finish_string (SINGLE, &len);
       if (runv (-1, rev3, cov))
         goto badmerge;
@@ -412,8 +405,7 @@ buildjoin (char const *initialfile)
       if (DIFF_TROUBLE == runv (-1, NULL, mergev))
           goto badmerge;
       i = i + 2;
-#undef ACCB
-#undef ACCS
+#undef ACCF
     }
   return true;
 

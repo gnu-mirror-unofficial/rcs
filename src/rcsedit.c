@@ -686,7 +686,7 @@ naturalize (struct maybe *m, bool *symbolicp)
             char const *s = fn->string;
 
             accumulate_range (space, s, basefilename (s));
-            accumulate_nonzero_bytes (space, chased);
+            accs (space, chased);
             fn->string = finish_string (space, &fn->size);
           }
       }
@@ -734,7 +734,7 @@ rcswriteopen (struct maybe *m)
     return NULL;
 
   repofn = RCSbuf->string;
-  accumulate_nonzero_bytes (m->space, RCSbuf->string);
+  accs (m->space, RCSbuf->string);
   lfn = finish_string (m->space, &len);
   sp = basefilename (lfn);
   x = rcssuffix (repofn);

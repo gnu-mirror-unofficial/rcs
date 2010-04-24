@@ -732,7 +732,7 @@ getnumericrev (void)
           else
             {
               accumulate_range (SHARED, e.string, strrchr (e.string, '.'));
-              accumulate_nonzero_bytes (SHARED, ".0");
+              accf (SHARED, ".0");
               s.string = finish_string (SHARED, &s.size);
             }
           break;

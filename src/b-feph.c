@@ -107,6 +107,8 @@ jam_sff (struct sff *sff, const char *prefix)
     {
       if (! tmpdir)
         {
+          char slash[2] = { SLASH, '\0' };
+
 #define TRY(envvarname)                         \
           if (! tmpdir)                         \
             tmpdir = getenv (#envvarname)
@@ -117,15 +119,13 @@ jam_sff (struct sff *sff, const char *prefix)
           if (! tmpdir)
             tmpdir = P_tmpdir;
 
-          accumulate_nonzero_bytes (SHARED, tmpdir);
-          if (SLASH != tmpdir[strlen (tmpdir) - 1])
-            accumulate_byte (SHARED, SLASH);
+          accf (SHARED, "%s%s", tmpdir,
+                SLASH != tmpdir[strlen (tmpdir) - 1] ? slash : "");
           tmpdir = finish_string (SHARED, &len);
         }
       prefix = tmpdir;
     }
-  accumulate_nonzero_bytes (SHARED, prefix);
-  accumulate_nonzero_bytes (SHARED, "XXXXXX");
+  accf (SHARED, "%sXXXXXX", prefix);
   fn = finish_string (SHARED, &len);
   /* Support the 8.3 MS-DOG restriction, blech.  Truncate the non-directory
      filename component to two bytes so that the maximum non-extension name

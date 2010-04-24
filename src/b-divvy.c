@@ -133,18 +133,19 @@ forget (struct divvy *divvy)
 }
 
 void
-accumulate_byte (struct divvy *divvy, int c)
+accf (struct divvy *divvy, char const *fmt, ...)
 {
-  obstack_1grow (divvy->space, c);
+  va_list args;
+
+  va_start (args, fmt);
+  obstack_vprintf (divvy->space, fmt, args);
+  va_end (args);
 }
 
 void
-accumulate_nonzero_bytes (struct divvy *divvy, char const *s)
+accumulate_byte (struct divvy *divvy, int c)
 {
-  struct obstack *o = divvy->space;
-
-  while (*s)
-    obstack_1grow (o, *s++);
+  obstack_1grow (divvy->space, c);
 }
 
 void

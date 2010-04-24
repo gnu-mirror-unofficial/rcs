@@ -77,7 +77,7 @@ accumulate_branchno (struct divvy *space, char const *revno)
   int nfields = split (revno, &end);
 
   if (nfields & 1)
-    accumulate_nonzero_bytes (space, revno);
+    accs (space, revno);
   else
     accumulate_range (space, revno, end);
 }
@@ -620,9 +620,11 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
 
   /* TODO: Allocate on ‘SINGLE’ (pending ‘free_NEXT_str’ fixup).  */
 
+#define ACCF(...)  accf (SHARED, __VA_ARGS__)
+
 #define FRESH()    if (ugh) brush_off (SHARED, ugh)
 #define ACCB(b)    accumulate_byte (SHARED, b)
-#define ACCS(s)    accumulate_nonzero_bytes (SHARED, s)
+#define ACCS(s)    accs (SHARED, s)
 #define ACCR(b,e)  accumulate_range (SHARED, b, e)
 #define OK()       ugh = finish_string (SHARED, &ans->size), ans->string = ugh
 
@@ -732,8 +734,7 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
               OK ();
               if (!(bp = branchtip (ans->string)))
                 goto sorry;
-              ACCS (ans->string);
-              ACCS (bp);
+              ACCF ("%s%s", ans->string, bp);
               goto success;
             }
           ++dots;
@@ -758,6 +759,7 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
 #undef ACCS
 #undef ACCB
 #undef FRESH
+#undef ACCF
 }
 
 char const *
