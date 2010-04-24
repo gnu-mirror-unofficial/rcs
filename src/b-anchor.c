@@ -36,6 +36,7 @@ TINY_DECL (ciklog) = TINY_INIT ("checked in with -k by ");
 TINYK (access);
 TINYK (author);
 TINYK (branch);
+TINYK (branches);
 TINYK (comment);
 TINYK (date);
 TINYK (desc);

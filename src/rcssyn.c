@@ -27,7 +27,6 @@
 #include "b-divvy.h"
 #include "b-fro.h"
 
-static TINY_DECL (branches);
 #if COMPAT2
 static TINY_DECL (suffix);
 #endif

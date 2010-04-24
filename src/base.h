@@ -710,6 +710,7 @@ extern TINY_DECL (ciklog);
 extern TINY_DECL (access);
 extern TINY_DECL (author);
 extern TINY_DECL (branch);
+extern TINY_DECL (branches);
 extern TINY_DECL (comment);
 extern TINY_DECL (date);
 extern TINY_DECL (desc);
