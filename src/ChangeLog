@@ -1,5 +1,11 @@
 2010-04-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Enable 64-bit file offsets.
+
+	* base.h (_FILE_OFFSET_BITS): New #define.
+
+2010-04-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Make ‘tiny_branches’ global.
 
 	* base.h (tiny_branches): New var decl (via ‘TINY_DECL’).
