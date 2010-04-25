@@ -1,5 +1,15 @@
 2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: must_get_delta_num
+
+	* rcslex.c (must_get_delta_num): New func.
+	* base.h (must_get_delta_num): New func decl.
+	* rcs.c (scanlogtext): Use ‘must_get_delta_num’.
+	* rcsgen.c (scandeltatext): Likewise.
+	* rlog.c (readdeltalog): Likewise.
+
+2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘strlen’ less.
 
 	* rcs.c (main): Use ‘commsymlen’.

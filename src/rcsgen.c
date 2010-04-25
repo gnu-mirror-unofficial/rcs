@@ -49,11 +49,7 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
     {
       if (eoflex ())
         fatal_syntax ("can't find delta for revision %s", delta->num);
-      nextlex ();
-      if (!(nextdelta = getnum ()))
-        {
-          fatal_syntax ("delta number corrupted");
-        }
+      nextdelta = must_get_delta_num ();
       getkeystring (&TINY (log));
       if (needlog && delta == nextdelta)
         {

@@ -793,6 +793,7 @@ bool getlex (enum tokens);
 struct cbuf getphrases (struct tinysym const *);
 struct cbuf savestring (void);
 struct hshentry *getnum (void);
+struct hshentry *must_get_delta_num (void);
 void Lexinit (void);
 void Orewind (FILE *);
 void Ozclose (FILE **);

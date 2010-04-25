@@ -302,9 +302,7 @@ readdeltalog (void)
 
   if (eoflex ())
     fatal_syntax ("missing delta log");
-  nextlex ();
-  if (!(Delta = getnum ()))
-    fatal_syntax ("delta number corrupted");
+  Delta = must_get_delta_num ();
   getkeystring (&TINY (log));
   if (Delta->log.string)
     fatal_syntax ("duplicate delta log");

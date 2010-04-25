@@ -344,6 +344,18 @@ getnum (void)
     return NULL;
 }
 
+struct hshentry *
+must_get_delta_num (void)
+{
+  struct hshentry *rv;
+
+  nextlex ();
+  if (!(rv = getnum ()))
+    fatal_syntax ("delta number corrupted");
+
+  return rv;
+}
+
 struct cbuf
 getphrases (struct tinysym const *key)
 /* Get a series of phrases that do not start with ‘key’.  Return

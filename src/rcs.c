@@ -355,9 +355,7 @@ scanlogtext (struct hshentry *delta, bool edit)
             RFATAL ("can't find delta for revision %s", delta->num);
           return;               /* no more delta text nodes */
         }
-      nextlex ();
-      if (!(nextdelta = getnum ()))
-        fatal_syntax ("delta number corrupted");
+      nextdelta = must_get_delta_num ();
       if (nextdelta->selector)
         {
           FLOW (to) = FLOW (rewr);
