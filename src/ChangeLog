@@ -1,5 +1,17 @@
 2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘SHARED’ more.
+
+	* ci.c (addassoclst): Use ‘ZLLOC’.
+	* rcs.c (getassoclst, getchaccess)
+	(getmessage, getstates, main): Likewise.
+	(rmnewlocklst): Don't ‘tfree’.
+	* rlog.c (getlocker, getauthor, getstate)
+	(getdatepair, getrevpairs): Use ‘ZLLOC’.
+	* base.h (talloc, tfree): Delete macros.
+
+2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Bifurcate ‘fro_getbyte’ to fro_{try,must}_getbyte.
 
 	* b-fro.c (GETBYTE_BODY): New macro.

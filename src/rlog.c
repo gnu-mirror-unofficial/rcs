@@ -122,7 +122,7 @@ getlocker (char *argv)
 
   while (c != '\0')
     {
-      newlocker = talloc (struct rcslockers);
+      newlocker = ZLLOC (1, struct rcslockers);
       newlocker->lockerlink = lockerlist;
       newlocker->login = argv;
       lockerlist = newlocker;
@@ -394,7 +394,7 @@ getauthor (char *argv)
     continue;
   if (c == '\0')
     {
-      authorlist = talloc (struct authors);
+      authorlist = ZLLOC (1, struct authors);
       authorlist->login = getusername (false);
       authorlist->nextauthor = NULL;
       return;
@@ -402,7 +402,7 @@ getauthor (char *argv)
 
   while (c != '\0')
     {
-      newauthor = talloc (struct authors);
+      newauthor = ZLLOC (1, struct authors);
       newauthor->nextauthor = authorlist;
       newauthor->login = argv;
       authorlist = newauthor;
@@ -437,7 +437,7 @@ getstate (char *argv)
 
   while (c != '\0')
     {
-      newstate = talloc (struct stateattri);
+      newstate = ZLLOC (1, struct stateattri);
       newstate->nextstate = statelist;
       newstate->status = argv;
       statelist = newstate;
@@ -586,7 +586,7 @@ getdatepair (char *argv)
   while (c != '\0')
     {
       switchflag = false;
-      nextdate = talloc (struct Datepairs);
+      nextdate = ZLLOC (1, struct Datepairs);
       if (c == '<')                     /* <DATE */
         {
           c = *++argv;
@@ -801,7 +801,7 @@ getrevpairs (register char *argv)
     {
       while (c == ' ' || c == '\t' || c == '\n')
         c = *++argv;
-      nextrevpair = talloc (struct Revpairs);
+      nextrevpair = ZLLOC (1, struct Revpairs);
       nextrevpair->rnext = revlist;
       revlist = nextrevpair;
       nextrevpair->numfld = 1;

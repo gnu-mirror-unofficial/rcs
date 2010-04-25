@@ -134,7 +134,7 @@ getassoclst (bool flag, char *sp)
       return;
     }
 
-  pt = talloc (struct Symrev);
+  pt = ZLLOC (1, struct Symrev);
   pt->ssymbol = temp;
   pt->override = flag;
   /* Delete symbol.  */
@@ -156,7 +156,7 @@ getchaccess (char const *login, enum changeaccess command)
 {
   register struct chaccess *pt;
 
-  pt = talloc (struct chaccess);
+  pt = ZLLOC (1, struct chaccess);
   pt->login = login;
   pt->command = command;
   pt->nextchaccess = NULL;
@@ -215,7 +215,7 @@ getmessage (char *option)
       PERR ("-m option lacks log message");
       return;
     }
-  pt = talloc (struct Message);
+  pt = ZLLOC (1, struct Message);
   pt->revno = option;
   pt->message = cb;
   pt->nextmessage = NULL;
@@ -256,7 +256,7 @@ getstates (char *sp)
 
   while ((c = *++sp) == ' ' || c == '\t' || c == '\n')
     continue;
-  pt = talloc (struct Status);
+  pt = ZLLOC (1, struct Status);
   pt->status = temp;
   pt->revno = sp;
   pt->nextstatus = NULL;
@@ -409,10 +409,7 @@ rmnewlocklst (char const *which)
     if (strcmp (pt->revno, which) != 0)
       pre = &pt->nextrev;
     else
-      {
-        *pre = pt->nextrev;
-        tfree (pt);
-      }
+      *pre = pt->nextrev;
   return pre;
 }
 
@@ -1230,7 +1227,7 @@ main (int argc, char **argv)
               lockhead = true;
               break;
             }
-          *curlock = lockpt = talloc (struct Lockrev);
+          *curlock = lockpt = ZLLOC (1, struct Lockrev);
           lockpt->revno = a;
           lockpt->nextrev = NULL;
           curlock = &lockpt->nextrev;
@@ -1243,7 +1240,7 @@ main (int argc, char **argv)
               unlockcaller = true;
               break;
             }
-          *rmvlock = lockpt = talloc (struct Lockrev);
+          *rmvlock = lockpt = ZLLOC (1, struct Lockrev);
           lockpt->revno = a;
           lockpt->nextrev = NULL;
           rmvlock = &lockpt->nextrev;

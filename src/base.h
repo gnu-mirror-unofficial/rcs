@@ -878,8 +878,6 @@ int run (int, char const *, ...);
 int runv (int, char const *, char const **);
 void *testalloc (size_t);
 void *testrealloc (void *, size_t);
-#define talloc(T)  ((T*) testalloc (sizeof (T)))
-#define tfree(p)  free ((void *)(p))
 
 time_t now (void);
 void awrite (char const *, size_t, FILE *);

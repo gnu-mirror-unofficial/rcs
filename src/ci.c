@@ -543,7 +543,7 @@ addassoclst (bool flag, char const *sp)
 {
   struct Symrev *pt;
 
-  pt = talloc (struct Symrev);
+  pt = ZLLOC (1, struct Symrev);
   pt->ssymbol = sp;
   pt->override = flag;
   pt->nextsym = NULL;
