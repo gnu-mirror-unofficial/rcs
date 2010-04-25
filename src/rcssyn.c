@@ -50,6 +50,18 @@ getdnum (void)
   return delta;
 }
 
+static struct hshentry *
+must_get_colon_delta_num (char const *role)
+{
+  struct hshentry *rv;
+
+  if (!getlex (COLON))
+    fatal_syntax ("missing ':' in %s", role);
+  if (!(rv = getnum ()))
+    fatal_syntax ("missing number in %s", role);
+  return rv;
+}
+
 void
 getadmin (void)
 /* Read an <admin> and initialize the appropriate global variables.  */
@@ -112,21 +124,13 @@ getadmin (void)
   LastSymbol = &ADMIN (assocs);
   while ((id = getid ()))
     {
-      if (!getlex (COLON))
-        fatal_syntax ("missing ':' in symbolic name definition");
-      if (!(delta = getnum ()))
-        {
-          fatal_syntax ("missing number in symbolic name definition");
-        }
-      else
-        {
-          /* Add new pair to association list.  */
-          newassoc = FALLOC (struct assoc);
-          newassoc->symbol = id;
-          newassoc->num = delta->num;
-          *LastSymbol = newassoc;
-          LastSymbol = &newassoc->nextassoc;
-        }
+      delta = must_get_colon_delta_num ("symbolic name definition");
+      /* Add new pair to association list.  */
+      newassoc = FALLOC (struct assoc);
+      newassoc->symbol = id;
+      newassoc->num = delta->num;
+      *LastSymbol = newassoc;
+      LastSymbol = &newassoc->nextassoc;
     }
   *LastSymbol = NULL;
   getsemi (&TINY (symbols));
@@ -135,21 +139,13 @@ getadmin (void)
   LastLock = &ADMIN (locks);
   while ((id = getid ()))
     {
-      if (!getlex (COLON))
-        fatal_syntax ("missing ':' in lock");
-      if (!(delta = getdnum ()))
-        {
-          fatal_syntax ("missing number in lock");
-        }
-      else
-        {
-          /* Add new pair to lock list.  */
-          newlock = FALLOC (struct rcslock);
-          newlock->login = id;
-          newlock->delta = delta;
-          *LastLock = newlock;
-          LastLock = &newlock->nextlock;
-        }
+      delta = must_get_colon_delta_num ("lock");
+      /* Add new pair to lock list.  */
+      newlock = FALLOC (struct rcslock);
+      newlock->login = id;
+      newlock->delta = delta;
+      *LastLock = newlock;
+      LastLock = &newlock->nextlock;
     }
   *LastLock = NULL;
   getsemi (&TINY (locks));

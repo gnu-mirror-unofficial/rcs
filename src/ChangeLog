@@ -1,5 +1,12 @@
 2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: must_get_colon_delta_num
+
+	* rcssyn.c (must_get_colon_delta_num): New static func.
+	(getadmin): Use it.
+
+2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: must_get_delta_num
 
 	* rcslex.c (must_get_delta_num): New func.
