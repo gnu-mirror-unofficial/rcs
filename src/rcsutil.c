@@ -71,28 +71,6 @@ minus_p (char const *xrev, char const *rev)
   return rv;
 }
 
-static void *
-okalloc (void * p)
-{
-  if (!p)
-    PFATAL ("out of memory");
-  return p;
-}
-
-void *
-testalloc (size_t size)
-/* Allocate a block, testing that the allocation succeeded.  */
-{
-  return okalloc (malloc (size));
-}
-
-void *
-testrealloc (void *ptr, size_t size)
-/* Reallocate a block, testing that the allocation succeeded.  */
-{
-  return okalloc (realloc (ptr, size));
-}
-
 void
 ffree (void)
 /* Free all blocks in the ‘SINGLE’ space.  */

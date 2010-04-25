@@ -30,6 +30,7 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
 #ifdef HAVE_UTIME_H
 #include <utime.h>
 #endif
@@ -73,6 +74,28 @@ struct editstuff
 
 #define lockname    (BE (sff)[SFFI_LOCKDIR].filename)
 #define newRCSname  (BE (sff)[SFFI_NEWDIR].filename)
+
+static void *
+okalloc (void * p)
+{
+  if (!p)
+    PFATAL ("out of memory");
+  return p;
+}
+
+static void *
+testalloc (size_t size)
+/* Allocate a block, testing that the allocation succeeded.  */
+{
+  return okalloc (malloc (size));
+}
+
+static void *
+testrealloc (void *ptr, size_t size)
+/* Reallocate a block, testing that the allocation succeeded.  */
+{
+  return okalloc (realloc (ptr, size));
+}
 
 int
 un_link (char const *s)

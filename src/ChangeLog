@@ -1,5 +1,14 @@
 2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move ‘testalloc’, ‘testrealloc’; make them static.
+
+	* rcsedit.c: #include <stdlib.h>.
+	(okalloc, testalloc, testrealloc): New static funcs.
+	* rcsutil.c (okalloc, testalloc, testrealloc): Delete funcs.
+	* base.h (testalloc, testrealloc): Delete func decls.
+
+2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘SHARED’ more.
 
 	* ci.c (addassoclst): Use ‘ZLLOC’.

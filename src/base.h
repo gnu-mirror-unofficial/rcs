@@ -876,8 +876,6 @@ char const *getusername (bool);
 int getRCSINIT (int, char **, char ***);
 int run (int, char const *, ...);
 int runv (int, char const *, char const **);
-void *testalloc (size_t);
-void *testrealloc (void *, size_t);
 
 time_t now (void);
 void awrite (char const *, size_t, FILE *);
