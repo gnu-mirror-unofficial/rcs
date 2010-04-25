@@ -1,3 +1,12 @@
+2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘strlen’ less.
+
+	* rcs.c (main): Use ‘commsymlen’.
+	* rcsfnms.c (pairnames): Use ‘intern’, ‘maybe.bestfit.size’.
+	* rcslex.c (lookup): Use ‘intern’.
+	* rcstime.c (date2str): Track write count via ‘sprintf’ rv.
+
 2010-04-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Enable 64-bit file offsets.

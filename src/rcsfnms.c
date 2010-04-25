@@ -374,7 +374,8 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
             }
         }
     }
-  REPO (filename) = p = str_save (maybe.bestfit.string);
+  REPO (filename) = p = intern (SINGLE, maybe.bestfit.string,
+                                maybe.bestfit.size);
   if (FLOW (from))
     {
       if (!S_ISREG (REPO (stat).st_mode))

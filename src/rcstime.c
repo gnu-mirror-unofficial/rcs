@@ -109,7 +109,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
     {
       struct tm t;
       struct tm const *z;
-      int non_hour;
+      int non_hour, w;
       long zone;
       char c;
 
@@ -140,19 +140,19 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
           zone = -zone;
           c = '-';
         }
-      sprintf (datebuf, proper_dot_2 ("%.2d-%.2d-%.2d %.2d:%.2d:%.2d%c%.2d",
-                                      "%02d-%02d-%02d %02d:%02d:%02d%c%02d"),
-               z->tm_year + 1900,
-               z->tm_mon + 1, z->tm_mday, z->tm_hour, z->tm_min, z->tm_sec,
-               c, (int) (zone / (60 * 60)));
+      w = sprintf (datebuf, proper_dot_2 ("%.2d-%.2d-%.2d %.2d:%.2d:%.2d%c%.2d",
+                                          "%02d-%02d-%02d %02d:%02d:%02d%c%02d"),
+                   z->tm_year + 1900,
+                   z->tm_mon + 1, z->tm_mday, z->tm_hour, z->tm_min, z->tm_sec,
+                   c, (int) (zone / (60 * 60)));
       if ((non_hour = zone % (60 * 60)))
         {
           const char *fmt = proper_dot_2 (":%.2d",
                                           ":%02d");
 
-          sprintf (datebuf + strlen (datebuf), fmt, non_hour / 60);
+          w += sprintf (datebuf + w, fmt, non_hour / 60);
           if ((non_hour %= 60))
-            sprintf (datebuf + strlen (datebuf), fmt, non_hour);
+            w += sprintf (datebuf + w, fmt, non_hour);
         }
     }
   return datebuf;

@@ -79,7 +79,7 @@ lookup (char const *str)
       {
         /* Empty slot found.  */
         *p = n = FALLOC (struct hshentry);
-        n->num = intern0 (SINGLE, str);
+        n->num = intern (SINGLE, str, sp - str);
         n->nexthsh = NULL;
 #ifdef LEXDB
         printf ("\nEntered: %s at %u ", str, ihash);

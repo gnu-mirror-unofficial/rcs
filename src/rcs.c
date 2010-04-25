@@ -1447,7 +1447,7 @@ main (int argc, char **argv)
              memcmp (commsyml, ADMIN (log_lead).string, commsymlen) != 0))
           {
             ADMIN (log_lead).string = commsyml;
-            ADMIN (log_lead).size = strlen (commsyml);
+            ADMIN (log_lead).size = commsymlen;
             changed = true;
           }
         if (0 <= expmode && BE (kws) != expmode)
