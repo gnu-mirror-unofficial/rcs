@@ -1,5 +1,18 @@
 2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Bifurcate ‘fro_getbyte’ to fro_{try,must}_getbyte.
+
+	* b-fro.c (GETBYTE_BODY): New macro.
+	(fro_getbyte): Delete func.
+	(fro_try_getbyte, fro_must_getbyte): New funcs.
+	(fro_get_prev_byte): Use ‘fro_must_getbyte’.
+	* b-fro.h (fro_getbyte): Delete func decl.
+	(fro_try_getbyte, fro_must_getbyte): New func decls.
+	(GETCHAR_OR) Use ‘fro_try_getbyte’.
+	(GETCHAR): Use ‘fro_must_getbyte’.
+
+2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: must_get_colon_delta_num
 
 	* rcssyn.c (must_get_colon_delta_num): New static func.

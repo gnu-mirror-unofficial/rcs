@@ -43,7 +43,8 @@ extern void fro_zclose (struct fro **p);
 extern void fro_close (struct fro *f);
 extern off_t fro_tello (struct fro *f);
 extern void fro_bob (struct fro *f);
-extern bool fro_getbyte (int *c, struct fro *f, bool noerror);
+extern bool fro_try_getbyte (int *c, struct fro *f);
+extern void fro_must_getbyte (int *c, struct fro *f);
 extern void fro_get_prev_byte (int *c, struct fro *f);
 extern void fro_trundling (bool sequentialp, struct fro *f);
 extern void fro_spew (struct fro *f, FILE *to);
@@ -54,11 +55,11 @@ extern void fro_spew (struct fro *f, FILE *to);
 
 /* Get a char into ‘c’ from ‘f’, executing statement ‘s’ at EOF.  */
 #define GETCHAR_OR(c,f,s)  do                   \
-    if (fro_getbyte (&(c), (f), true))          \
+    if (fro_try_getbyte (&(c), (f)))            \
       { s; }                                    \
   while (0)
 
 /* Like ‘GETCHAR_OR’, except EOF is an error.  */
-#define GETCHAR(c,f)  fro_getbyte (&(c), (f), false)
+#define GETCHAR(c,f)  fro_must_getbyte (&(c), (f))
 
 /* b-fro.h ends here */

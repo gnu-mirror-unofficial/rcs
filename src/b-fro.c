@@ -233,45 +233,49 @@ fro_bob (struct fro *f)
     }
 }
 
-bool
-fro_getbyte (int *c, struct fro *f, bool noerror)
-/* Try to get another byte from ‘f’.
-   If at EOF, signal "unexpected end of file"
-   or return true depending on the value of ‘noerror’.
-   Otherwise, set ‘*c’ to the value and return false.  */
-{
-  switch (f->rm)
-    {
-#define DONE()  do                              \
-        {                                       \
-          if (noerror)                          \
-            return true;                        \
-          fatal_syntax                          \
-            ("unexpected end of file");         \
-        }                                       \
-      while (0)
-
-    case RM_MMAP:
-    case RM_MEM:
-      if (f->ptr == f->lim)
-        DONE ();
-      *c = *f->ptr++;
-      break;
-    case RM_STDIO:
-      {
-        FILE *stream = f->stream;
-        int maybe = getc (stream);
-
-        if (EOF == maybe)
-          {
-            testIerror (stream);
-            DONE ();
-          }
-        *c = maybe;
-      }
-      break;
+#define GETBYTE_BODY()                          \
+  switch (f->rm)                                \
+    {                                           \
+    case RM_MMAP:                               \
+    case RM_MEM:                                \
+      if (f->ptr == f->lim)                     \
+        DONE ();                                \
+      *c = *f->ptr++;                           \
+      break;                                    \
+    case RM_STDIO:                              \
+      {                                         \
+        FILE *stream = f->stream;               \
+        int maybe = getc (stream);              \
+                                                \
+        if (EOF == maybe)                       \
+          {                                     \
+            testIerror (stream);                \
+            DONE ();                            \
+          }                                     \
+        *c = maybe;                             \
+      }                                         \
+      break;                                    \
     }
+
+bool
+fro_try_getbyte (int *c, struct fro *f)
+/* Try to get another byte from ‘f’ and set ‘*c’ to it.
+   If at EOF, return true.  */
+{
+#define DONE()  return true
+  GETBYTE_BODY ();
+#undef DONE
   return false;
+}
+
+void
+fro_must_getbyte (int *c, struct fro *f)
+/* Try to get another byte from ‘f’ and set ‘*c’ to it.
+   If at EOF, signal "unexpected end of file".  */
+{
+#define DONE()  fatal_syntax ("unexpected end of file")
+  GETBYTE_BODY ();
+#undef DONE
 }
 
 void
@@ -286,7 +290,7 @@ fro_get_prev_byte (int *c, struct fro *f)
     case RM_STDIO:
       if (0 > fseeko (f->stream, -2, SEEK_CUR))
         Ierror ();
-      fro_getbyte (c, f, false);
+      fro_must_getbyte (c, f);
       break;
     }
 }
