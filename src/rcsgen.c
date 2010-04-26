@@ -34,7 +34,8 @@ enum stringwork
 { enter, copy, edit, expand, edit_expand };
 
 static void
-scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
+scandeltatext (struct editstuff *es, struct hshentry *delta,
+               enum stringwork func, bool needlog)
 /* Scan delta text nodes up to and including the one given by ‘delta’.
    For the one given by ‘delta’, the log message is saved into
    ‘delta->log’ if ‘needlog’ is set; ‘func’ specifies how to handle the
@@ -73,19 +74,19 @@ scandeltatext (struct hshentry *delta, enum stringwork func, bool needlog)
   switch (func)
     {
     case enter:
-      enterstring ();
+      enterstring (es);
       break;
     case copy:
-      copystring ();
+      copystring (es);
       break;
     case expand:
       xpandstring (delta);
       break;
     case edit:
-      editstring (NULL);
+      editstring (es, NULL);
       break;
     case edit_expand:
-      editstring (delta);
+      editstring (es, delta);
       break;
     }
 }
@@ -107,29 +108,31 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
    pass).  All this simplifies if only one revision needs to be generated,
    or no keyword expansion is necessary, or if output goes to stdout.  */
 {
+  struct editstuff *es = make_editstuff ();
+
   if (deltas->first == target)
     {
       /* Only latest revision to generate.  */
       openfcopy (outfile);
-      scandeltatext (target, expandflag ? expand : copy, true);
+      scandeltatext (es, target, expandflag ? expand : copy, true);
     }
   else
     {
       /* Several revisions to generate.
          Get initial revision without keyword expansion.  */
-      scandeltatext (deltas->first, enter, false);
+      scandeltatext (es, deltas->first, enter, false);
       while ((deltas = deltas->rest)->rest)
         {
           /* Do all deltas except last one.  */
-          scandeltatext (deltas->first, edit, false);
+          scandeltatext (es, deltas->first, edit, false);
         }
       if (expandflag || outfile)
         {
           /* First, get to beginning of file.  */
-          finishedit (NULL, outfile, false);
+          finishedit (es, NULL, outfile, false);
         }
-      scandeltatext (target, expandflag ? edit_expand : edit, true);
-      finishedit (expandflag ? target : NULL, outfile, true);
+      scandeltatext (es, target, expandflag ? edit_expand : edit, true);
+      finishedit (es, expandflag ? target : NULL, outfile, true);
     }
   if (outfile)
     return NULL;

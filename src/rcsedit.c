@@ -70,10 +70,16 @@ struct editstuff
   struct sff *sff;
 };
 
-#define EDIT(x)  (((struct editstuff *) BE (editstuff))-> x)
+#define EDIT(x)  (es-> x)
 
 #define lockname    (BE (sff)[SFFI_LOCKDIR].filename)
 #define newRCSname  (BE (sff)[SFFI_NEWDIR].filename)
+
+struct editstuff *
+make_editstuff (void)
+{
+  return ZLLOC (1, struct editstuff);
+}
 
 static void *
 okalloc (void * p)
@@ -143,7 +149,7 @@ editLineNumberOverflow (void)
 #define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (Iptr_type))
 
 static void
-insertline (unsigned long n, Iptr_type l)
+insertline (struct editstuff *es, unsigned long n, Iptr_type l)
 /* Before line ‘n’, insert line ‘l’.  */
 {
   if (EDIT (lim) - EDIT (gapsize) < n)
@@ -168,7 +174,7 @@ insertline (unsigned long n, Iptr_type l)
 }
 
 static void
-deletelines (unsigned long n, unsigned long nlines)
+deletelines (struct editstuff *es, unsigned long n, unsigned long nlines)
 /* Delete lines ‘n’ through ‘n + nlines - 1’.  */
 {
   unsigned long l = n + nlines;
@@ -202,7 +208,7 @@ snapshotline (register FILE *f, register Iptr_type l)
 }
 
 static void
-snapshotedit_fast (FILE *f)
+snapshotedit_fast (struct editstuff *es, FILE *f)
 /* Copy the current state of the edits to ‘f’.  */
 {
   register Iptr_type *p, *lim, *l = EDIT (line);
@@ -225,7 +231,8 @@ finisheditline (struct fro *fin, FILE *fout, Iptr_type l,
 }
 
 static void
-finishedit_fast (struct hshentry const *delta, FILE *outfile, bool done)
+finishedit_fast (struct editstuff *es, struct hshentry const *delta,
+                 FILE *outfile, bool done)
 /* Doing expansion if ‘delta’ is set, output the state of the edits to
    ‘outfile’.  But do nothing unless ‘done’ is set (which means we are
    on the last pass).  */
@@ -235,7 +242,7 @@ finishedit_fast (struct hshentry const *delta, FILE *outfile, bool done)
       openfcopy (outfile);
       outfile = FLOW (res);
       if (!delta)
-        snapshotedit_fast (outfile);
+        snapshotedit_fast (es, outfile);
       else
         {
           register Iptr_type *p, *lim, *l = EDIT (line);
@@ -278,7 +285,7 @@ openfcopy (FILE *f)
 }
 
 static void
-swapeditfiles (FILE *outfile)
+swapeditfiles (struct editstuff *es, FILE *outfile)
 /* Swap ‘FLOW (result)’ and ‘EDIT (filename)’,
    assign ‘EDIT (fedit) = FLOW (res)’,
    and rewind ‘EDIT (fedit)’ for reading.
@@ -302,7 +309,8 @@ swapeditfiles (FILE *outfile)
 }
 
 static void
-finishedit_slow (struct hshentry const *delta, FILE *outfile, bool done)
+finishedit_slow (struct editstuff *es, struct hshentry const *delta,
+                 FILE *outfile, bool done)
 /* Copy the rest of the edit file and close it (if it exists).
    If ‘delta’, perform keyword substitution at the same time.
    If ‘done’ is set, we are finishing the last pass.  */
@@ -328,36 +336,37 @@ finishedit_slow (struct hshentry const *delta, FILE *outfile, bool done)
       fro_close (fe);
     }
   if (!done)
-    swapeditfiles (outfile);
+    swapeditfiles (es, outfile);
 }
 
 static void
-snapshotedit_slow (FILE *f)
+snapshotedit_slow (struct editstuff *es, FILE *f)
 /* Copy the current state of the edits to ‘f’.  */
 {
-  finishedit_slow (NULL, NULL, false);
+  finishedit_slow (es, NULL, NULL, false);
   fro_spew (EDIT (fedit), f);
   fro_bob (EDIT (fedit));
 }
 
 void
-finishedit (struct hshentry const *delta, FILE *outfile, bool done)
+finishedit (struct editstuff *es, struct hshentry const *delta,
+            FILE *outfile, bool done)
 {
   (!STDIO_P (FLOW (from))
    ? finishedit_fast
-   : finishedit_slow) (delta, outfile, done);
+   : finishedit_slow) (es, delta, outfile, done);
 }
 
 void
-snapshotedit (FILE *f)
+snapshotedit (struct editstuff *es, FILE *f)
 {
   (!STDIO_P (FLOW (from))
    ? snapshotedit_fast
-   : snapshotedit_slow) (f);
+   : snapshotedit_slow) (es, f);
 }
 
 static void
-copylines (register long upto, struct hshentry const *delta)
+copylines (struct editstuff *es, register long upto, struct hshentry const *delta)
 /* Copy input lines ‘EDIT (lcount)+1..upto’ from ‘EDIT (fedit)’ to ‘FLOW (res)’.
    If ‘delta’, keyword expansion is done simultaneously.
    ‘EDIT (lcount)’ is updated.  Rewinds a file only if necessary.  */
@@ -373,7 +382,7 @@ copylines (register long upto, struct hshentry const *delta)
       if (upto < EDIT (lcount))
         {
           /* Swap files.  */
-          finishedit_slow (NULL, NULL, false);
+          finishedit_slow (es, NULL, NULL, false);
           /* Assumes edit only during last pass, from the beginning.  */
         }
       fe = EDIT (fedit);
@@ -420,15 +429,8 @@ xpandstring (struct hshentry const *delta)
     continue;
 }
 
-static void
-ensure_editstuff (void)
-{
-  if (! BE (editstuff))
-    BE (editstuff) = ZLLOC (1, struct editstuff);
-}
-
 void
-copystring (void)
+copystring (struct editstuff *es)
 /* Copy a string terminated with a single ‘SDELIM’ from ‘FLOW (from)’ to
    ‘FLOW (res)’, replacing all double ‘SDELIM’ with a single ‘SDELIM’.  If
    ‘FLOW (to)’ is non-NULL, the string also copied unchanged to ‘FLOW (to)’.
@@ -439,8 +441,6 @@ copystring (void)
   register FILE *frew, *fcop;
   register bool amidline;
   register struct fro *fin;
-
-  ensure_editstuff ();
 
   fin = FLOW (from);
   frew = FLOW (to);
@@ -475,12 +475,10 @@ copystring (void)
 }
 
 void
-enterstring (void)
+enterstring (struct editstuff *es)
 /* Like ‘copystring’, except the string is
    put into the ‘edit’ data structure.  */
 {
-  ensure_editstuff ();
-
   if (STDIO_P (FLOW (from)))
     {
       EDIT (filename) = NULL;
@@ -489,7 +487,7 @@ enterstring (void)
       FLOW (result) = maketemp (1);
       if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
         fatal_sys (FLOW (result));
-      copystring ();
+      copystring (es);
     }
   else
     {
@@ -536,13 +534,13 @@ enterstring (void)
               break;
             }
           if (!oamidline)
-            insertline (oe, optr);
+            insertline (es, oe, optr);
         }
     }
 }
 
 void
-editstring (struct hshentry const *delta)
+editstring (struct editstuff *es, struct hshentry const *delta)
 /* Read an edit script from ‘FLOW (from)’ and applies it to the edit file.
    | -- ‘(STDIO_P (FLOW (from)))’ --
    | The result is written to ‘FLOW (res)’.
@@ -578,13 +576,13 @@ editstring (struct hshentry const *delta)
       editLineNumberOverflow ();
     else if (!ed)
       {
-        copylines (dc.line1 - 1, delta);
+        copylines (es, dc.line1 - 1, delta);
         /* Skip over unwanted lines.  */
         i = dc.nlines;
         EDIT (corr) -= i;
         EDIT (lcount) += i;
         if (!STDIO_P (fin))
-          deletelines (EDIT (lcount) + EDIT (corr), i);
+          deletelines (es, EDIT (lcount) + EDIT (corr), i);
         else
           {
             fe = EDIT (fedit);
@@ -608,7 +606,7 @@ editstring (struct hshentry const *delta)
     else
       {
         /* Copy lines without deleting any.  */
-        copylines (dc.line1, delta);
+        copylines (es, dc.line1, delta);
         i = dc.nlines;
         if (!STDIO_P (fin))
           j = EDIT (lcount) + EDIT (corr);
@@ -639,7 +637,7 @@ editstring (struct hshentry const *delta)
             do
               {
                 if (!STDIO_P (fin))
-                  insertline (j++, fin->ptr);
+                  insertline (es, j++, fin->ptr);
                 for (;;)
                   {
                     TEECHAR ();
@@ -747,7 +745,6 @@ rcswriteopen (struct maybe *m)
   bool symbolicp = false;
   char *lfn;                            /* lock filename */
 
-  ensure_editstuff ();                  /* ugh */
   waslocked = 0 <= REPO (fd_lock);
   exists = naturalize (m, &symbolicp);
   if (exists < (m->mustread | waslocked))

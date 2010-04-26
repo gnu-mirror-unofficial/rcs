@@ -1,3 +1,27 @@
+2010-04-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Allocate edit state lazily.
+
+	Here, "F" means "Take ‘struct editstuff *’ as first arg".
+	* rcsedit.c (EDIT): Update macro.
+	(make_editstuff): New func.
+	(insertline, deletelines, snapshotedit_fast, finishedit_fast)
+	(swapeditfiles, finishedit_slow, snapshotedit_slow, finishedit)
+	(snapshotedit, copylines): F.
+	(ensure_editstuff): Delete func.
+	(copystring): F; don't call ‘ensure_editstuff’.
+	(enterstring): Likewise.
+	(editstring): F.
+	(rcswriteopen): Don't call ‘ensure_editstuff’.
+	* rcsgen.c (scandeltatext): F.
+	(buildrevision): Create a ‘struct editstuff’ to pass around.
+	* rcs.c (scanlogtext, buildeltatext): F.
+	(main): Create a ‘struct editstuff’ to pass around.
+	* base.h (struct behavior): Remove member ‘editstuff’.
+	(make_editstuff): New func decl.
+	(copystring, enterstring, finishedit)
+	(snapshotedit, editstring): Update func decls.
+
 2010-04-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Move ‘testalloc’, ‘testrealloc’; make them static.

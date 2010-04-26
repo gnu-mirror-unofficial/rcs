@@ -525,7 +525,6 @@ struct behavior
      managed by various subsystems.  */
 
   struct isr_scratch *isr;
-  struct editstuff *editstuff;
   struct ephemstuff *ephemstuff;
   struct maketimestuff *maketimestuff;
 };
@@ -735,6 +734,7 @@ bool recognize_keyword (char const *, struct pool_found *);
 int merge (bool, char const *, char const *const[3], char const *const[3]);
 
 /* rcsedit */
+struct editstuff *make_editstuff (void);
 struct fro *rcswriteopen (struct maybe *);
 char const *getcaller (void);
 int addlock (struct hshentry *, bool);
@@ -747,14 +747,14 @@ int findlock (bool, struct hshentry **);
 int setmtime (char const *, time_t);
 void ORCSclose (void);
 void ORCSerror (void);
-void copystring (void);
-void enterstring (void);
-void finishedit (struct hshentry const *, FILE *, bool);
+void copystring (struct editstuff *);
+void enterstring (struct editstuff *);
+void finishedit (struct editstuff *, struct hshentry const *, FILE *, bool);
 void openfcopy (FILE *);
-void snapshotedit (FILE *);
+void snapshotedit (struct editstuff *, FILE *);
 void xpandstring (struct hshentry const *);
 int un_link (char const *);
-void editstring (struct hshentry const *);
+void editstring (struct editstuff *es, struct hshentry const *);
 
 /* rcsfcmp */
 int rcsfcmp (struct fro *, struct stat const *, char const *,

@@ -335,7 +335,7 @@ getdelrev (char *sp)
 }
 
 static void
-scanlogtext (struct hshentry *delta, bool edit)
+scanlogtext (struct editstuff *es, struct hshentry *delta, bool edit)
 /* Scan delta text nodes up to and including the one given by ‘delta’,
    or up to last one present, if ‘!delta’.  For the one given by
    ‘delta’ (if ‘delta’), the log message is saved into ‘delta->log’ if
@@ -393,9 +393,9 @@ scanlogtext (struct hshentry *delta, bool edit)
     }
   /* got the one we're looking for */
   if (edit)
-    editstring (NULL);
+    editstring (es, NULL);
   else
-    enterstring ();
+    enterstring (es);
 }
 
 static struct Lockrev **
@@ -966,7 +966,7 @@ rcs_setstate (char const *rev, char const *status)
 }
 
 static bool
-buildeltatext (struct hshentries const *deltas)
+buildeltatext (struct editstuff *es, struct hshentries const *deltas)
 /* Put the delta text on ‘FLOW (rewr)’ and make necessary
    change to delta text.  */
 {
@@ -975,7 +975,7 @@ buildeltatext (struct hshentries const *deltas)
 
   fcut = NULL;
   cuttail->selector = false;
-  scanlogtext (deltas->first, false);
+  scanlogtext (es, deltas->first, false);
   if (cuthead)
     {
       cutname = maketemp (3);
@@ -987,17 +987,17 @@ buildeltatext (struct hshentries const *deltas)
       while (deltas->first != cuthead)
         {
           deltas = deltas->rest;
-          scanlogtext (deltas->first, true);
+          scanlogtext (es, deltas->first, true);
         }
 
-      snapshotedit (fcut);
+      snapshotedit (es, fcut);
       Orewind (fcut);
       aflush (fcut);
     }
 
   while (deltas->first != cuttail)
-    scanlogtext ((deltas = deltas->rest)->first, true);
-  finishedit (NULL, NULL, true);
+    scanlogtext (es, (deltas = deltas->rest)->first, true);
+  finishedit (es, NULL, NULL, true);
   Ozclose (&FLOW (res));
 
   if (fcut)
@@ -1529,10 +1529,12 @@ main (int argc, char **argv)
           {
             if (delrev.strt || messagelst)
               {
-                if (!cuttail || buildeltatext (gendeltas))
+                struct editstuff *es = make_editstuff ();
+
+                if (!cuttail || buildeltatext (es, gendeltas))
                   {
                     fro_trundling (true, FLOW (from));
-                    scanlogtext (NULL, false);
+                    scanlogtext (es, NULL, false);
                     /* Copy rest of delta text nodes that are not deleted.  */
                     changed = true;
                   }
