@@ -23,29 +23,8 @@
 #include <time.h>
 #include "partime.h"
 #include "maketime.h"
-#include "b-divvy.h"
-
-struct maketimestuff
-{
-  char const *TZ;
-  /* The value of env var ‘TZ’.
-     Only valid/used if ‘TZ_must_be_set’.
-     -- time2tm  */
-
-  time_t t_cache[2];
-  struct tm tm_cache[2];
-  /* Cache the most recent ‘t’,‘tm’ pairs;
-     One for ‘gmtime’, one for ‘localtime’.
-     -- tm2time  */
-};
 
 #define MAKETIMESTUFF(x)  (BE (maketimestuff)-> x)
-
-void
-init_maketimestuff (void)
-{
-  BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
-}
 
 /* For maximum portability, use only ‘localtime’ and ‘gmtime’.  Make no
    assumptions about the ‘time_t’ epoch or the range of ‘time_t’ values.

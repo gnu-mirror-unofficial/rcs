@@ -1,5 +1,15 @@
 2010-04-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Make ‘struct maketimestuff’ definition global.
+
+	* maketime.h (maketimestuff): Move struct def to here...
+	* maketime.c: Don't #include "b-divvy.h".
+	(maketimestuff): ...from here.
+	(init_maketimestuff): Delete func.
+	* rcsutil.c (gnurcs_init): Init ‘BE (maketimestuff)’ directly.
+
+2010-04-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Allocate edit state lazily.
 
 	Here, "F" means "Take ‘struct editstuff *’ as first arg".

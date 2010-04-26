@@ -19,7 +19,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-void init_maketimestuff (void);
+struct maketimestuff
+{
+  char const *TZ;
+  /* The value of env var ‘TZ’.
+     Only valid/used if ‘TZ_must_be_set’.
+     -- time2tm  */
+
+  time_t t_cache[2];
+  struct tm tm_cache[2];
+  /* Cache the most recent ‘t’,‘tm’ pairs;
+     One for ‘gmtime’, one for ‘localtime’.
+     -- tm2time  */
+};
+
 struct tm *time2tm (time_t, bool);
 time_t difftm (struct tm const *, struct tm const *);
 time_t str2time (char const *, time_t, long);

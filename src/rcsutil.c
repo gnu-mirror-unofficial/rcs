@@ -50,7 +50,7 @@ gnurcs_init (void)
   unbuffer_standard_error ();
   ISR_SCRATCH = isr_init (&BE (quiet));
   init_ephemstuff ();
-  init_maketimestuff ();
+  BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
 }
 
 void
