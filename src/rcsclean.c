@@ -28,6 +28,7 @@
 #include "rcsclean.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-feph.h"
 #include "b-fro.h"
 
@@ -74,12 +75,6 @@ unlock (struct hshentry *delta)
   return false;
 }
 
-struct link
-{
-  char        *entry;
-  struct link *next;
-};
-
 static int
 get_directory (char const *dirname, char ***aargv)
 /* Put a vector of all DIRNAME's directory entries names into *AARGV.
@@ -91,11 +86,13 @@ get_directory (char const *dirname, char ***aargv)
   DIR *d;
   struct dirent *e;
   struct divvy *justme = make_space ("justme");
-  struct link *prev = NULL, *cur = NULL;
-  size_t entries = 0;
+  size_t i, entries = 0;
+  struct wlink head, *tp;
 
   if (!(d = opendir (dirname)))
     fatal_sys (dirname);
+  head.next = NULL;
+  tp = &head;
   while ((errno = 0, e = readdir (d)))
     {
       char const *en = e->d_name;
@@ -104,20 +101,14 @@ get_directory (char const *dirname, char ***aargv)
         continue;
       if (rcssuffix (en))
         continue;
-      cur = pointer_array (justme, 2);
-      cur->entry = intern0 (SHARED, en);
-      cur->next = prev;
-      prev = cur;
+      tp = wextend (tp, intern0 (SHARED, en), justme);
       entries++;
     }
   if (errno || closedir (d) != 0)
     fatal_sys (dirname);
   *aargv = pointer_array (SHARED, entries);
-  for (size_t i = 0; i < entries; i++)
-    {
-      (*aargv)[i] = cur->entry;
-      cur = cur->next;
-    }
+  for (tp = head.next, i = 0; i < entries; tp = tp->next, i++)
+    (*aargv)[i] = tp->entry;
   close_space (justme);
   return entries;
 }

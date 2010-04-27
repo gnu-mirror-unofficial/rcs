@@ -1,5 +1,21 @@
 2010-04-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] New abstractions: extend, wextend
+
+	* b-esds.h: New file.
+	* b-esds.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-esds.h, b-esds.c.
+	* co.c: #include "b-esds.h".
+	(struct link): Delete.
+	(struct jstuff): Delete members ‘prev’, ‘cur’; add ‘head’, ‘tp’.
+	(jpush): Use ‘extend’.
+	(preparejoin): Accumulate ‘joinlist’ components in order.
+	* rcsclean.c: #include "b-esds.h".
+	(struct link): Delete.
+	(get_directory): Use ‘wextend’.
+
+2010-04-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: fro_spew_partial
 
 	* b-fro.h (struct range): New.

@@ -28,6 +28,7 @@
 #include "co.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -46,16 +47,11 @@ static bool forceflag;
 /* Index of last element in `joinlist'.  */
 static int lastjoin;
 
-/* Other data structures and state for -j.  (TODO: Consolidate all.)   */
-struct link
-{
-  char const  *entry;
-  struct link *next;
-};
+/* State for -j.  */
 struct jstuff
 {
   struct divvy *jstuff;
-  struct link *prev, *cur;
+  struct link head, *tp;
 };
 static struct jstuff jstuff;
 
@@ -166,10 +162,7 @@ rmlock (struct hshentry const *delta)
 static void
 jpush (char const *rev)
 {
-  jstuff.cur = pointer_array (jstuff.jstuff, 2);
-  jstuff.cur->entry = rev;
-  jstuff.cur->next = jstuff.prev;
-  jstuff.prev = jstuff.cur;
+  jstuff.tp = extend (jstuff.tp, rev, jstuff.jstuff);
   lastjoin++;
 }
 
@@ -267,7 +260,8 @@ preparejoin (register char *j)
   bool rv = true;
 
   jstuff.jstuff = make_space ("jstuff");
-  jstuff.prev = jstuff.cur = NULL;
+  jstuff.head.next = NULL;
+  jstuff.tp = &jstuff.head;
 
   lastjoin = -1;
   for (;;)
@@ -299,16 +293,16 @@ preparejoin (register char *j)
         {
           if (lastjoin == 0)            /* first pair */
             {
-              char const **atone = &jstuff.cur->entry;
+              char const *two = jstuff.tp->entry;
 
-              /* Common ancestor missing.  */
-              jpush (*atone);
               /* Derive common ancestor.  */
-              if (! (*atone = getancestor (targetdelta->num, *atone)))
+              if (! (jstuff.tp->entry = getancestor (targetdelta->num, two)))
                 {
                   rv = false;
                   goto done;
                 }
+              /* Common ancestor missing.  */
+              jpush (two);
             }
           else
             {
@@ -321,14 +315,11 @@ preparejoin (register char *j)
  done:
 
   joinlist = pointer_array (SHARED, 1 + lastjoin);
-  for (int i = 0; i <= lastjoin; i++)
-    {
-      joinlist[lastjoin - i] = jstuff.cur->entry;
-      jstuff.cur = jstuff.cur->next;
-    }
+  jstuff.tp = jstuff.head.next;
+  for (int i = 0; i <= lastjoin; i++, jstuff.tp = jstuff.tp->next)
+    joinlist[i] = jstuff.tp->entry;
   close_space (jstuff.jstuff);
   jstuff.jstuff = NULL;
-  jstuff.prev = jstuff.cur = NULL;
   return rv;
 }
 
