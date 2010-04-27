@@ -20,6 +20,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+struct range
+{
+  off_t beg;
+  off_t end;
+};
+
 enum readmethod
   {
     RM_MMAP,
@@ -31,6 +37,7 @@ typedef char *Iptr_type;
 struct fro
 {
   int fd;
+  off_t end;
   enum readmethod rm;
   Iptr_type ptr, lim, base;
   void (*deallocate) (struct fro *);
@@ -47,6 +54,7 @@ extern bool fro_try_getbyte (int *c, struct fro *f);
 extern void fro_must_getbyte (int *c, struct fro *f);
 extern void fro_get_prev_byte (int *c, struct fro *f);
 extern void fro_trundling (bool sequentialp, struct fro *f);
+extern void fro_spew_partial (FILE *to, struct fro *f, struct range *r);
 extern void fro_spew (struct fro *f, FILE *to);
 
 /* Idioms.  */

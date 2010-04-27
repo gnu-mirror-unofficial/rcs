@@ -82,6 +82,7 @@ fro_open (char const *name, char const *type, struct stat *status)
   s = status->st_size;
 
   f = ZLLOC (1, struct fro);
+  f->end = s;
 
   /* Determine the read method.  */
   f->rm = status->st_size <= REASONABLE_MMAP_SIZE
@@ -321,34 +322,54 @@ fro_trundling (bool sequentialp USED_IF_HAVE_MADVISE, struct fro *f)
 }
 
 void
-fro_spew (struct fro *f, FILE *to)
-/* Copy the remainder of file ‘f’ to ‘outf’.  */
+fro_spew_partial (FILE *to, struct fro *f, struct range *r)
 {
   switch (f->rm)
     {
     case RM_MMAP:
     case RM_MEM:
-      awrite ((char const *) f->ptr, f->lim - f->ptr, to);
-      f->ptr = f->lim;
+      /* TODO: Handle range larger than ‘size_t’.  */
+      awrite ((char const *) f->base + r->beg, r->end - r->beg, to);
+      if (f->end == r->end)
+        f->ptr = f->lim;
       break;
     case RM_STDIO:
       {
         char buf[BUFSIZ * 8];
         size_t count;
+        off_t pos = r->beg;
 
-        /* Now read the rest of the file in blocks.  */
-        while (!feof (f->stream))
+        fseeko (f->stream, pos, SEEK_SET);
+        while (pos < r->end)
           {
-            if (!(count = fread (buf, sizeof (*buf), sizeof (buf), f->stream)))
+            if (!(count = fread (buf, sizeof (*buf),
+                                 (pos < r->end - sizeof (buf)
+                                  ? sizeof (buf)
+                                  : r->beg - pos),
+                                 f->stream)))
               {
                 testIerror (f->stream);
                 return;
               }
             awrite (buf, count, to);
+            pos += count;
           }
       }
       break;
     }
+}
+
+void
+fro_spew (struct fro *f, FILE *to)
+/* Copy the remainder of file ‘f’ to ‘outf’.  */
+{
+  struct range finish =
+    {
+      .beg = fro_tello (f),
+      .end = f->end
+    };
+
+  fro_spew_partial (to, f, &finish);
 }
 
 /* b-fro.c ends here */

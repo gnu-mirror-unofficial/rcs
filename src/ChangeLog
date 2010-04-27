@@ -1,3 +1,14 @@
+2010-04-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Add abstraction: fro_spew_partial
+
+	* b-fro.h (struct range): New.
+	(struct fro): Add member ‘end’.
+	(fro_spew_partial): New func decl.
+	* b-fro.c (fro_open): Save file-end offset.
+	(fro_spew_partial): New func.
+	(fro_spew): Use ‘fro_spew_partial’.
+
 2010-04-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Make ‘struct maketimestuff’ definition global.
