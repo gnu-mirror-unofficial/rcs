@@ -1,5 +1,21 @@
 2010-04-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: STR_DIFF, STR_SAME
+
+	* base.h (STR_DIFF, STR_SAME): New macros.
+	* ci.c (removelock, addbranch, main): Use one or both of them.
+	* co.c (rmlock): Likewise.
+	* rcs.c (rmnewlocklst, doaccess, breaklock, doassoc)
+	(rcs_setstate, main): Likewise.
+	* rcsclean.c (unlock): Likewise.
+	* rcsedit.c (findlock, addlock, addsymbol, checkaccesslist): Likewise.
+	* rcslex.c (lookup): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rcsrev.c (genbranch, genrevs, lookupsym, namedrev): Likewise.
+	* rlog.c (extractdelta, trunclocks): Likewise.
+
+2010-04-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Rework remaining function-static variables.
 
 	* ci.c (newbranch): New file-static var, moved to here...

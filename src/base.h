@@ -903,6 +903,9 @@ bool isSLASH (int c);
 
 /* Idioms.  */
 
+#define STR_DIFF(a,b)  (strcmp ((a), (b)))
+#define STR_SAME(a,b)  (! STR_DIFF ((a), (b)))
+
 /* Get a character from ‘fin’, perhaps copying to a ‘frew’.  */
 #define TEECHAR()  do                           \
     {                                           \

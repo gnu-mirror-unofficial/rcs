@@ -64,7 +64,7 @@ unlock (struct hshentry *delta)
   register struct rcslock **al, *l;
 
   if (delta && delta->lockedby
-      && strcmp (getcaller (), delta->lockedby) == 0)
+      && STR_SAME (getcaller (), delta->lockedby))
     for (al = &ADMIN (locks); (l = *al); al = &l->nextlock)
       if (l->delta == delta)
         {

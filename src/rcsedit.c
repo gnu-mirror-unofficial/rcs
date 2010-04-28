@@ -1013,7 +1013,7 @@ findlock (bool delete, struct hshentry **target)
 
   found = 0;
   for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
-    if (strcmp (getcaller (), next->login) == 0)
+    if (STR_SAME (getcaller (), next->login))
       {
         if (found)
           {
@@ -1047,7 +1047,7 @@ addlock (struct hshentry *delta, bool verbose)
   for (next = ADMIN (locks); next; next = next->nextlock)
     if (cmpnum (delta->num, next->delta->num) == 0)
       {
-        if (strcmp (getcaller (), next->login) == 0)
+        if (STR_SAME (getcaller (), next->login))
           return 0;
         else
           {
@@ -1075,9 +1075,9 @@ addsymbol (char const *num, char const *name, bool rebind)
   register struct assoc *next;
 
   for (next = ADMIN (assocs); next; next = next->nextassoc)
-    if (strcmp (name, next->symbol) == 0)
+    if (STR_SAME (name, next->symbol))
       {
-        if (strcmp (next->num, num) == 0)
+        if (STR_SAME (next->num, num))
           return 0;
         else if (rebind)
           {
@@ -1118,13 +1118,13 @@ checkaccesslist (void)
   register struct access const *next;
 
   if (!ADMIN (allowed) || myself (REPO (stat).st_uid)
-      || strcmp (getcaller (), "root") == 0)
+      || STR_SAME (getcaller (), "root"))
     return true;
 
   next = ADMIN (allowed);
   do
     {
-      if (strcmp (getcaller (), next->login) == 0)
+      if (STR_SAME (getcaller (), next->login))
         return true;
     }
   while ((next = next->nextaccess));

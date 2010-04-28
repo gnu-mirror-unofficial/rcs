@@ -329,12 +329,12 @@ extractdelta (struct hshentry const *pdelta)
 
   /* Only certain authors wanted.  */
   if ((pauthor = authorlist))
-    while (strcmp (pauthor->login, pdelta->author) != 0)
+    while (STR_DIFF (pauthor->login, pdelta->author))
       if (!(pauthor = pauthor->nextauthor))
         return false;
   /* Only certain states wanted.  */
   if ((pstate = statelist))
-    while (strcmp (pstate->status, pdelta->state) != 0)
+    while (STR_DIFF (pstate->status, pdelta->state))
       if (!(pstate = pstate->nextstate))
         return false;
   /* Only locked revisions wanted.  */
@@ -466,7 +466,7 @@ trunclocks (void)
   /* Shorten locks to those contained in ‘lockerlist’.  */
   for (pp = &ADMIN (locks); (p = *pp);)
     for (plocker = lockerlist;;)
-      if (strcmp (plocker->login, p->login) == 0)
+      if (STR_SAME (plocker->login, p->login))
         {
           pp = &p->nextlock;
           break;

@@ -406,7 +406,7 @@ rmnewlocklst (char const *which)
 
   pre = &newlocklst;
   while ((pt = *pre))
-    if (strcmp (pt->revno, which) != 0)
+    if (STR_DIFF (pt->revno, which))
       pre = &pt->nextrev;
     else
       *pre = pt->nextrev;
@@ -435,7 +435,7 @@ doaccess (void)
             }
           else
             for (p = &ADMIN (allowed); (t = *p); p = &t->nextaccess)
-              if (strcmp (ch->login, t->login) == 0)
+              if (STR_SAME (ch->login, t->login))
                 {
                   *p = t->nextaccess;
                   changed = true;
@@ -452,7 +452,7 @@ doaccess (void)
                 changed = true;
                 break;
               }
-            else if (strcmp (ch->login, t->login) == 0)
+            else if (STR_SAME (ch->login, t->login))
               break;
           break;
         }
@@ -538,9 +538,9 @@ breaklock (struct hshentry const *delta)
 
   num = delta->num;
   for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
-    if (strcmp (num, next->delta->num) == 0)
+    if (STR_SAME (num, next->delta->num))
       {
-        if (strcmp (getcaller (), next->login) != 0
+        if (STR_DIFF (getcaller (), next->login)
             && !sendmail (num, next->login))
           {
             RERR ("revision %s still locked by %s", num, next->login);
@@ -791,7 +791,7 @@ doassoc (void)
                 RWARN ("can't delete nonexisting symbol %s", ssymbol);
                 break;
               }
-            else if (strcmp (pt->symbol, ssymbol) == 0)
+            else if (STR_SAME (pt->symbol, ssymbol))
               {
                 *pre = pt->nextassoc;
                 changed = true;
@@ -955,7 +955,7 @@ rcs_setstate (char const *rev, char const *status)
           if (!(countnumflds (numrev.string) & 1)
               && cmpnum (target->num, numrev.string))
             RERR ("can't set state of nonexisting revision %s", numrev.string);
-          else if (strcmp (target->state, status) != 0)
+          else if (STR_DIFF (target->state, status))
             {
               target->state = status;
               return true;
@@ -1489,7 +1489,7 @@ main (int argc, char **argv)
               {
                 if (!ADMIN (head))
                   RWARN ("can't change states in an empty tree");
-                else if (strcmp (ADMIN (head)->state, headstate) != 0)
+                else if (STR_DIFF (ADMIN (head)->state, headstate))
                   {
                     ADMIN (head)->state = headstate;
                     changed = true;

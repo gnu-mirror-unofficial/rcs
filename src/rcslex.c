@@ -86,7 +86,7 @@ lookup (char const *str)
 #endif
         break;
       }
-    else if (strcmp (str, n->num) == 0)
+    else if (STR_SAME (str, n->num))
       /* Match found.  */
       break;
   NEXT (hsh) = n;

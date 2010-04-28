@@ -360,8 +360,8 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           do
             {
               if ((!date || cmpdate (date, next->date) >= 0)
-                  && (!author || strcmp (author, next->author) == 0)
-                  && (!state || strcmp (state, next->state) == 0))
+                  && (!author || STR_SAME (author, next->author))
+                  && (!state || STR_SAME (state, next->state)))
                 trail = next;
               next = next->next;
             }
@@ -416,12 +416,12 @@ genbranch (struct hshentry const *bpoint, char const *revno,
                     trail->num, date2str (trail->date, datebuf));
               return NULL;
             }
-          if (author && strcmp (author, trail->author) != 0)
+          if (author && STR_DIFF (author, trail->author))
             {
               RERR ("Revision %s has author %s.", trail->num, trail->author);
               return NULL;
             }
-          if (state && strcmp (state, trail->state) != 0)
+          if (state && STR_DIFF (state, trail->state))
             {
               RERR ("Revision %s has state %s.",
                     trail->num, trail->state ? trail->state : "<empty>");
@@ -485,8 +485,8 @@ genrevs (char const *revno, char const *date, char const *author,
       while (next
              && cmpnumfld (branchnum, next->num, 1) == 0
              && ((date && cmpdate (date, next->date) < 0)
-                 || (author && strcmp (author, next->author) != 0)
-                 || (state && strcmp (state, next->state) != 0)))
+                 || (author && STR_DIFF (author, next->author))
+                 || (state && STR_DIFF (state, next->state))))
         {
           store1 (&store, next);
           next = next->next;
@@ -539,12 +539,12 @@ genrevs (char const *revno, char const *date, char const *author,
                 next->num, date2str (next->date, datebuf));
           return NULL;
         }
-      if (author && strcmp (author, next->author) != 0)
+      if (author && STR_DIFF (author, next->author))
         {
           RERR ("Revision %s has author %s.", next->num, next->author);
           return NULL;
         }
-      if (state && strcmp (state, next->state) != 0)
+      if (state && STR_DIFF (state, next->state))
         {
           RERR ("Revision %s has state %s.",
                 next->num, next->state ? next->state : "<empty>");
@@ -589,7 +589,7 @@ lookupsym (char const *id)
   register struct assoc const *next;
 
   for (next = ADMIN (assocs); next; next = next->nextassoc)
-    if (strcmp (id, next->symbol) == 0)
+    if (STR_SAME (id, next->symbol))
       return next->num;
   return NULL;
 }
@@ -785,7 +785,7 @@ namedrev (char const *name, struct hshentry *delta)
           case UNKN:
             if (!*p && id
                 && (val = lookupsym (id))
-                && strcmp (val, delta->num) == 0)
+                && STR_SAME (val, delta->num))
               return id;
             /* fall into */
           default:

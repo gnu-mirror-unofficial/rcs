@@ -152,7 +152,7 @@ removelock (struct hshentry *delta)
   for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
     if (next->delta == delta)
       {
-        if (strcmp (getcaller (), next->login) == 0)
+        if (STR_SAME (getcaller (), next->login))
           {
             /* We found a lock on delta by caller; delete it.  */
             *trail = next->nextlock;
@@ -264,7 +264,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
   newbranch.hsh = &newdelta;
   newdelta.next = NULL;
   if (branchpoint->lockedby)
-    if (strcmp (branchpoint->lockedby, getcaller ()) == 0)
+    if (STR_SAME (branchpoint->lockedby, getcaller ()))
       return removelock (branchpoint);  /* This returns 1.  */
   return removedlock;
 }
@@ -1002,7 +1002,7 @@ main (int argc, char **argv)
             expname =
               buildrevision (gendeltas, targetdelta, NULL, false);
             if (!forceciflag
-                && strcmp (newdelta.state, targetdelta->state) == 0
+                && STR_SAME (newdelta.state, targetdelta->state)
                 && ((changework = rcsfcmp (workptr, &workstat, expname,
                                           targetdelta))
                     <= 0))

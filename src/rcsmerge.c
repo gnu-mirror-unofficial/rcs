@@ -189,7 +189,7 @@ main (int argc, char **argv)
                 {
                   xrev[2] = target->num;
 
-                  if (strcmp (xrev[1], xrev[2]) == 0)
+                  if (STR_SAME (xrev[1], xrev[2]))
                     {
                       if (tostdout)
                         {

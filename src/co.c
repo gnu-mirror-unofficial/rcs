@@ -124,19 +124,19 @@ rmlock (struct hshentry const *delta)
   register struct rcslock *next, *trail;
   char const *num;
   struct rcslock dummy;
-  int whomatch, nummatch;
+  bool whomatch, nummatch;
 
   num = delta->num;
   dummy.nextlock = next = ADMIN (locks);
   trail = &dummy;
   while (next)
     {
-      whomatch = strcmp (getcaller (), next->login);
-      nummatch = strcmp (num, next->delta->num);
-      if ((whomatch == 0) && (nummatch == 0))
+      whomatch = STR_SAME (getcaller (), next->login);
+      nummatch = STR_SAME (num, next->delta->num);
+      if (whomatch && nummatch)
         break;
       /* Found a lock on delta by caller.  */
-      if ((whomatch != 0) && (nummatch == 0))
+      if (!whomatch && nummatch)
         {
           RERR ("revision %s locked by %s; use co -r or rcs -u",
                 num, next->login);
