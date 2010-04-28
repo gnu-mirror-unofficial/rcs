@@ -26,6 +26,7 @@
 #include "rlog.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fro.h"
 
 struct top *top;
@@ -921,7 +922,7 @@ main (int argc, char **argv)
   struct Datepairs *currdate;
   char const *accessListString, *accessFormat;
   char const *headFormat, *symbolFormat;
-  struct access const *curaccess;
+  struct link const *curaccess;
   struct assoc const *curassoc;
   struct hshentry const *delta;
   struct rcslock const *currlock;
@@ -1107,8 +1108,8 @@ main (int argc, char **argv)
         curaccess = ADMIN (allowed);
         while (curaccess)
           {
-            aprintf (out, accessFormat, curaccess->login);
-            curaccess = curaccess->nextaccess;
+            aprintf (out, accessFormat, curaccess->entry);
+            curaccess = curaccess->next;
           }
 
         if (shownames)

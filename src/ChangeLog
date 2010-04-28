@@ -1,5 +1,23 @@
 2010-04-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘struct link’ instead of ‘struct access’.
+
+	Here, "U" means "Update to use ‘struct link’".
+	* base.h (struct access): Delete.
+	(struct repository): Use ‘struct link’ for ‘admin.allowed’.
+	* rcs.c: #include "b-esds.h".
+	(doaccess, main): U.
+	* rcsedit.c: #include "b-esds.h".
+	(checkaccesslist): U.
+	* rcsgen.c: #include "b-esds.h".
+	(putadmin): U.
+	* rcssyn.c: #include "b-esds.h".
+	(getadmin): U.
+	* rlog.c: #include "b-esds.h".
+	(main): U.
+
+2010-04-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstractions: STR_DIFF, STR_SAME
 
 	* base.h (STR_DIFF, STR_SAME): New macros.

@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fro.h"
 
 #if COMPAT2
@@ -66,12 +67,11 @@ void
 getadmin (void)
 /* Read an <admin> and initialize the appropriate global variables.  */
 {
+  struct link fake, *tp;
   register char const *id;
-  struct access *newaccess;
   struct assoc *newassoc;
   struct rcslock *newlock;
   struct hshentry *delta;
-  struct access **LastAccess;
   struct assoc **LastSymbol;
   struct rcslock **LastLock;
   struct cbuf cb;
@@ -109,15 +109,11 @@ getadmin (void)
 #endif  /* COMPAT2 */
 
   getkey (&TINY (access));
-  LastAccess = &ADMIN (allowed);
+  fake.next = ADMIN (allowed);
+  tp = &fake;
   while ((id = getid ()))
-    {
-      newaccess = FALLOC (struct access);
-      newaccess->login = id;
-      *LastAccess = newaccess;
-      LastAccess = &newaccess->nextaccess;
-    }
-  *LastAccess = NULL;
+    tp = extend (tp, id, SINGLE);
+  ADMIN (allowed) = fake.next;
   getsemi (&TINY (access));
 
   getkey (&TINY (symbols));

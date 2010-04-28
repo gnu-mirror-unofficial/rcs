@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fb.h"
 #include "b-fro.h"
 
@@ -329,7 +330,7 @@ putadmin (void)
   register FILE *fout;
   struct assoc const *curassoc;
   struct rcslock const *curlock;
-  struct access const *curaccess;
+  struct link const *curaccess;
 
   if (!(fout = FLOW (rewr)))
     {
@@ -356,8 +357,8 @@ putadmin (void)
   curaccess = ADMIN (allowed);
   while (curaccess)
     {
-      aprintf (fout, "\n\t%s", curaccess->login);
-      curaccess = curaccess->nextaccess;
+      aprintf (fout, "\n\t%s", (char const *)curaccess->entry);
+      curaccess = curaccess->next;
     }
   aprintf (fout, ";\n%s", TINYKS (symbols));
   curassoc = ADMIN (assocs);

@@ -285,13 +285,6 @@ struct branchhead
   struct branchhead *nextbranch;
 };
 
-/* Access-list element. */
-struct access
-{
-  char const *login;
-  struct access *nextaccess;
-};
-
 /* List element for locks.  */
 struct rcslock
 {
@@ -623,7 +616,7 @@ struct repository
 
   struct admin
   {
-    struct access *allowed;
+    struct link *allowed;
     /* List of usernames who may modify the repo.
        -- InitAdmin doaccess [rcs]main  */
 

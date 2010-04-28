@@ -26,6 +26,7 @@
 #include "rcs.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -417,7 +418,7 @@ static bool
 doaccess (void)
 {
   register struct chaccess *ch;
-  register struct access **p, *t;
+  register struct link **p, *t;
   register bool changed = false;
 
   for (ch = chaccess; ch; ch = ch->nextchaccess)
@@ -434,25 +435,23 @@ doaccess (void)
                 }
             }
           else
-            for (p = &ADMIN (allowed); (t = *p); p = &t->nextaccess)
-              if (STR_SAME (ch->login, t->login))
+            for (p = &ADMIN (allowed); (t = *p); p = &t->next)
+              if (STR_SAME (ch->login, t->entry))
                 {
-                  *p = t->nextaccess;
+                  *p = t->next;
                   changed = true;
                   break;
                 }
           break;
         case append:
-          for (p = &ADMIN (allowed);; p = &t->nextaccess)
+          for (p = &ADMIN (allowed);; p = &t->next)
             if (!(t = *p))
               {
-                *p = t = FALLOC (struct access);
-                t->login = ch->login;
-                t->nextaccess = NULL;
+                *p = extend (*p, ch->login, SINGLE);
                 changed = true;
                 break;
               }
-            else if (STR_SAME (ch->login, t->login))
+            else if (STR_SAME (ch->login, t->entry))
               break;
           break;
         }
@@ -1207,8 +1206,8 @@ main (int argc, char **argv)
             {
               while (ADMIN (allowed))
                 {
-                  getchaccess (str_save (ADMIN (allowed)->login), append);
-                  ADMIN (allowed) = ADMIN (allowed)->nextaccess;
+                  getchaccess (str_save (ADMIN (allowed)->entry), append);
+                  ADMIN (allowed) = ADMIN (allowed)->next;
                 }
               fro_zclose (&FLOW (from));
             }

@@ -38,12 +38,13 @@
 #include "same-inode.h"
 #include "unistd-safer.h"
 #include "b-complain.h"
+#include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
-#include "b-divvy.h"
 
 struct editstuff
 {
@@ -1115,7 +1116,7 @@ checkaccesslist (void)
    file, the access list is empty, or caller is on the access list.
    Otherwise, print an error message and return false.  */
 {
-  register struct access const *next;
+  register struct link const *next;
 
   if (!ADMIN (allowed) || myself (REPO (stat).st_uid)
       || STR_SAME (getcaller (), "root"))
@@ -1124,10 +1125,10 @@ checkaccesslist (void)
   next = ADMIN (allowed);
   do
     {
-      if (STR_SAME (getcaller (), next->login))
+      if (STR_SAME (getcaller (), next->entry))
         return true;
     }
-  while ((next = next->nextaccess));
+  while ((next = next->next));
 
   RERR ("user %s not on the access list", getcaller ());
   return false;
