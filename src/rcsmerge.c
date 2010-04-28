@@ -62,10 +62,11 @@ const struct program program =
     .exiterr = exiterr
   };
 
+#define quietarg  "-q"
+
 int
 main (int argc, char **argv)
 {
-  static char const quietarg[] = "-q";
   register int i;
   char *a, **newargv;
   char const *arg[3];

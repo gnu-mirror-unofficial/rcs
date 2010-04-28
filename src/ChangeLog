@@ -1,3 +1,22 @@
+2010-04-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Rework remaining function-static variables.
+
+	* ci.c (newbranch): New file-static var, moved to here...
+	(addbranch): ...from here.
+	(getcurdate_buffer): New file-static var, renamed/moved to here...
+	(getcurdate): ...from ‘buffer’, here.
+	(FIRST): New #define.
+	(logmsg): New file-static var, move to here...
+	(getlogmsg): ...from here; also, construct "empty checkin"
+	and "initial revision" messages dynamically.
+	(default_state): New file-static var, moved to here...
+	(main): ...from here.
+	* rcsmerge.c (quietarg): New #define.
+	(main): Delete func-static var ‘quietarg’.
+	* rlog.c (putdelta): Delete func-static
+	var ‘emptych’; use ‘EMPTYLOG’ directly.
+
 2010-04-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] New abstractions: extend, wextend

@@ -171,20 +171,21 @@ removelock (struct hshentry *delta)
   return -1;
 }
 
+static struct branchhead newbranch;   /* new branch to be inserted */
+
 static int
 addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
 /* Add a new branch and branch delta at ‘branchpoint’.
    If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
-   the new delta and branchhead are in globals ‘newdelta’ and ‘newbranch’, resp.
-   the new number is placed into a ‘SHARED’ string with ‘num’ pointing to it.
+   The new delta and branchhead are in globals ‘newdelta’ and ‘newbranch’, resp.
+   The new number is placed into a ‘SHARED’ string with ‘num’ pointing to it.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
    If ‘removedlock’, a lock was already removed.  */
 {
   struct branchhead *bhead, **btrail;
   int result;
   int field, numlength;
-  static struct branchhead newbranch;   /* new branch to be inserted */
 
   numlength = countnumflds (num->string);
 
@@ -420,15 +421,15 @@ addsyms (char const *num)
   return true;
 }
 
+static char getcurdate_buffer[datesize];
+
 static char const *
 getcurdate (void)
 /* Return a pointer to the current date.  */
 {
-  static char buffer[datesize];
-
-  if (!buffer[0])
-    time2date (now (), buffer);
-  return buffer;
+  if (!getcurdate_buffer[0])
+    time2date (now (), getcurdate_buffer);
+  return getcurdate_buffer;
 }
 
 static int
@@ -487,6 +488,10 @@ xpandfile (struct fro *unexfile, struct hshentry const *delta,
 
 /* --------------------- G E T L O G M S G --------------------------------*/
 
+#define FIRST  "Initial revision"
+
+static struct cbuf logmsg;
+
 static struct cbuf
 getlogmsg (void)
 /* Obtain and return a log message.
@@ -497,12 +502,6 @@ getlogmsg (void)
    Prompt the first time called for the log message; during all
    later calls ask whether the previous log message can be reused.  */
 {
-  static char const emptych[] = EMPTYLOG, initialch[] = "Initial revision";
-  static struct cbuf const
-    emptylog = { emptych, sizeof (emptych) - sizeof (char) },
-    initiallog = { initialch, sizeof (initialch) - sizeof (char)};
-  static struct cbuf logmsg;
-
   if (msg.size)
     return msg;
 
@@ -519,7 +518,15 @@ getlogmsg (void)
 
   if (!targetdelta && (cmpnum (newdelnum.string, "1.1") == 0
                        || cmpnum (newdelnum.string, "1.0") == 0))
-    return initiallog;
+    {
+      struct cbuf const initiallog =
+        {
+          .string = FIRST,
+          .size = sizeof (FIRST) - 1
+        };
+
+      return initiallog;
+    }
 
   if (logmsg.size)
     {
@@ -532,9 +539,12 @@ getlogmsg (void)
   logmsg = getsstdin ("m", "log message", "");
 
   /* Now check whether the log message is not empty.  */
-  if (logmsg.size)
-    return logmsg;
-  return emptylog;
+  if (!logmsg.size)
+    {
+      logmsg.string = EMPTYLOG;
+      logmsg.size = sizeof (EMPTYLOG) - 1;
+    }
+  return logmsg;
 }
 
 static void
@@ -602,10 +612,12 @@ const struct program program =
     .exiterr = exiterr
   };
 
+/* Use a variable instead of simple #define for fast identity compare.  */
+static char const default_state[] = DEFAULTSTATE;
+
 int
 main (int argc, char **argv)
 {
-  static char const default_state[] = DEFAULTSTATE;
   char altdate[datesize];
   char olddate[datesize];
   char newdatebuf[datesize + zonelenmax];

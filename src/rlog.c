@@ -146,7 +146,6 @@ putadelta (register struct hshentry const *node,
    ‘editscript’ indicates where the editscript is stored;
    ‘trunk’ !false indicates this node is in trunk.  */
 {
-  static char emptych[] = EMPTYLOG;
   register FILE *out;
   char const *s;
   size_t n;
@@ -191,8 +190,8 @@ putadelta (register struct hshentry const *node,
   s = node->log.string;
   if (!(n = node->log.size))
     {
-      s = emptych;
-      n = sizeof (emptych) - 1;
+      s = EMPTYLOG;
+      n = sizeof (EMPTYLOG) - 1;
     }
   awrite (s, n, out);
   if (s[n - 1] != '\n')
