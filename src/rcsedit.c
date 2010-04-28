@@ -1073,29 +1073,35 @@ addsymbol (char const *num, char const *name, bool rebind)
    with ‘num’; otherwise, print an error message and return false;
    Return -1 if unsuccessful, 0 if no change, 1 if change.  */
 {
-  register struct assoc *next;
+  struct wlink fake, *tp;
+  struct symdef *d;
 
-  for (next = ADMIN (assocs); next; next = next->nextassoc)
-    if (STR_SAME (name, next->symbol))
-      {
-        if (STR_SAME (next->num, num))
-          return 0;
-        else if (rebind)
-          {
-            next->num = num;
-            return 1;
-          }
-        else
-          {
-            RERR ("symbolic name %s already bound to %s", name, next->num);
-            return -1;
-          }
-      }
-  next = FALLOC (struct assoc);
-  next->symbol = name;
-  next->num = num;
-  next->nextassoc = ADMIN (assocs);
-  ADMIN (assocs) = next;
+  fake.next = ADMIN (assocs);
+  for (tp = &fake; tp->next; tp = tp->next)
+    {
+      d = tp->next->entry;
+      if (STR_SAME (name, d->meaningful))
+        {
+          if (STR_SAME (d->underlying, num))
+            return 0;
+          else if (rebind)
+            {
+              d->underlying = num;
+              return 1;
+            }
+          else
+            {
+              RERR ("symbolic name %s already bound to %s",
+                    name, d->underlying);
+              return -1;
+            }
+        }
+    }
+  d = FALLOC (struct symdef);
+  d->meaningful = name;
+  d->underlying = num;
+  wextend (tp, d, SINGLE);
+  ADMIN (assocs) = fake.next;
   return 1;
 }
 

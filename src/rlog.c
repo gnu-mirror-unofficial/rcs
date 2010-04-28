@@ -923,7 +923,7 @@ main (int argc, char **argv)
   char const *accessListString, *accessFormat;
   char const *headFormat, *symbolFormat;
   struct link const *curaccess;
-  struct assoc const *curassoc;
+  struct wlink const *curassoc;
   struct hshentry const *delta;
   struct rcslock const *currlock;
   bool descflag, selectflag;
@@ -1114,12 +1114,31 @@ main (int argc, char **argv)
 
         if (shownames)
           {
+            /* Reverse the output order for excruciating backward
+               compatability (ah, the joys of procrastination).  */
+            struct wlink *reversed = NULL, *ls = ADMIN (assocs);
+
+            if (!ls || !ls->next)
+              reversed = ls;
+            else
+              while (ls)
+                {
+                  struct wlink *pair = FALLOC (struct wlink);
+
+                  pair->entry = ls->entry;
+                  pair->next = reversed;
+                  reversed = pair;
+                  ls = ls->next;
+                }
+
             /* Print symbolic names.  */
             aputs ("\nsymbolic names:", out);
-            for (curassoc = ADMIN (assocs);
-                 curassoc;
-                 curassoc = curassoc->nextassoc)
-              aprintf (out, symbolFormat, curassoc->symbol, curassoc->num);
+            for (curassoc = reversed; curassoc; curassoc = curassoc->next)
+              {
+                struct symdef *d = curassoc->entry;
+
+                aprintf (out, symbolFormat, d->meaningful, d->underlying);
+              }
           }
         if (pre5)
           {

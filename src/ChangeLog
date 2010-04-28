@@ -1,5 +1,22 @@
 2010-04-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘struct assoc’ with ‘struct wlink’ + ‘struct symdef’.
+
+	Here, "U" means "Update to use ‘struct wlink’ + ‘struct symdef’".
+	* base.h (struct assoc): Delete.
+	(struct symdef): New.
+	(struct repository): Use ‘struct wlink’ for ‘admin.assocs’.
+	* rcs.c (doassoc): U.
+	* rcsedit.c (addsymbol): U.
+	* rcsgen.c (putadmin): U.
+	* rcsrev.c: #include "b-esds.h".
+	(rev_from_symbol): U.
+	(lookupsym): Use ‘rev_from_symbol’.
+	* rcssyn.c (getadmin): U.
+	* rlog.c (main): U.
+
+2010-04-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘struct link’ instead of ‘struct access’.
 
 	Here, "U" means "Update to use ‘struct link’".

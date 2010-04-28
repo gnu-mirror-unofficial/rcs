@@ -294,11 +294,10 @@ struct rcslock
 };
 
 /* List element for symbolic names.  */
-struct assoc
+struct symdef
 {
-  char const *symbol;
-  char const *num;
-  struct assoc *nextassoc;
+  char const *meaningful;
+  char const *underlying;
 };
 
 /* Symbol-pool particulars.  */
@@ -620,8 +619,8 @@ struct repository
     /* List of usernames who may modify the repo.
        -- InitAdmin doaccess [rcs]main  */
 
-    struct assoc *assocs;
-    /* List of symbolic names.
+    struct wlink *assocs;
+    /* List of ‘struct symdef’ (symbolic names).
        -- addsymbol InitAdmin  */
 
     struct cbuf log_lead;

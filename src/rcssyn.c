@@ -68,11 +68,10 @@ getadmin (void)
 /* Read an <admin> and initialize the appropriate global variables.  */
 {
   struct link fake, *tp;
+  struct wlink wfake, *wtp;
   register char const *id;
-  struct assoc *newassoc;
   struct rcslock *newlock;
   struct hshentry *delta;
-  struct assoc **LastSymbol;
   struct rcslock **LastLock;
   struct cbuf cb;
 
@@ -117,18 +116,20 @@ getadmin (void)
   getsemi (&TINY (access));
 
   getkey (&TINY (symbols));
-  LastSymbol = &ADMIN (assocs);
+  wfake.next = ADMIN (assocs);
+  wtp = &wfake;
   while ((id = getid ()))
     {
+      struct symdef *d;
+
       delta = must_get_colon_delta_num ("symbolic name definition");
       /* Add new pair to association list.  */
-      newassoc = FALLOC (struct assoc);
-      newassoc->symbol = id;
-      newassoc->num = delta->num;
-      *LastSymbol = newassoc;
-      LastSymbol = &newassoc->nextassoc;
+      d = FALLOC (struct symdef);
+      d->meaningful = id;
+      d->underlying = delta->num;
+      wtp = wextend (wtp, d, SINGLE);
     }
-  *LastSymbol = NULL;
+  ADMIN (assocs) = wfake.next;
   getsemi (&TINY (symbols));
 
   getkey (&TINY (locks));

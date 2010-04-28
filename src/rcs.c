@@ -774,7 +774,7 @@ doassoc (void)
   char const *p;
   bool changed = false;
   struct Symrev const *curassoc;
-  struct assoc **pre, *pt;
+  struct wlink **pre, *pt;
 
   /* Add new associations.  */
   for (curassoc = assoclst; curassoc; curassoc = curassoc->nextsym)
@@ -784,15 +784,15 @@ doassoc (void)
       if (!curassoc->revno)
         {
           /* Delete symbol.  */
-          for (pre = &ADMIN (assocs);; pre = &pt->nextassoc)
+          for (pre = &ADMIN (assocs);; pre = &pt->next)
             if (!(pt = *pre))
               {
                 RWARN ("can't delete nonexisting symbol %s", ssymbol);
                 break;
               }
-            else if (STR_SAME (pt->symbol, ssymbol))
+            else if (STR_SAME (((struct symdef *)pt)->meaningful, ssymbol))
               {
-                *pre = pt->nextassoc;
+                *pre = pt->next;
                 changed = true;
                 break;
               }

@@ -328,7 +328,7 @@ putadmin (void)
 /* Output the admin node.  */
 {
   register FILE *fout;
-  struct assoc const *curassoc;
+  struct wlink const *curassoc;
   struct rcslock const *curlock;
   struct link const *curaccess;
 
@@ -364,8 +364,10 @@ putadmin (void)
   curassoc = ADMIN (assocs);
   while (curassoc)
     {
-      aprintf (fout, "\n\t%s:%s", curassoc->symbol, curassoc->num);
-      curassoc = curassoc->nextassoc;
+      struct symdef *d = curassoc->entry;
+
+      aprintf (fout, "\n\t%s:%s", d->meaningful, d->underlying);
+      curassoc = curassoc->next;
     }
   aprintf (fout, ";\n%s", TINYKS (locks));
   curlock = ADMIN (locks);

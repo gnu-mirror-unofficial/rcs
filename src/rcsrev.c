@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 
 static int
 split (char const *s, char const **lastdot)
@@ -572,11 +573,15 @@ rev_from_symbol (struct cbuf const *id)
    ‘ADMIN (assocs)’, and return a pointer to the corresponding
    revision number.  Return NULL if not present.  */
 {
-  register struct assoc const *next;
+  register struct wlink const *next;
 
-  for (next = ADMIN (assocs); next; next = next->nextassoc)
-    if (!strncmp (next->symbol, id->string, id->size))
-      return next->num;
+  for (next = ADMIN (assocs); next; next = next->next)
+    {
+      struct symdef *d = next->entry;
+
+      if (!strncmp (d->meaningful, id->string, id->size))
+        return d->underlying;
+    }
   return NULL;
 }
 
@@ -586,12 +591,13 @@ lookupsym (char const *id)
    ‘ADMIN (assocs)’, and return a pointer to the corresponding
    revision number.  Return NULL if not present.  */
 {
-  register struct assoc const *next;
+  struct cbuf identifier =
+    {
+      .string = id,
+      .size = strlen (id)
+    };
 
-  for (next = ADMIN (assocs); next; next = next->nextassoc)
-    if (STR_SAME (id, next->symbol))
-      return next->num;
-  return NULL;
+  return rev_from_symbol (&identifier);
 }
 
 static char const *
