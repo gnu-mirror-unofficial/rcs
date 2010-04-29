@@ -55,7 +55,7 @@ struct editstuff
   long lcount;
   /* Edit line counter; #lines before cursor.  */
   long corr;
-  /* #adds - #deletes in each edit run, used to correct ‘EDIT (lcount)’
+  /* #adds - #deletes in each edit run, used to correct ‘es->lcount’
      in case file is not rewound after applying one delta.  */
 
   Iptr_type *line;
@@ -70,8 +70,6 @@ struct editstuff
 
   struct sff *sff;
 };
-
-#define EDIT(x)  (es-> x)
 
 #define lockname    (BE (sff)[SFFI_LOCKDIR].filename)
 #define newRCSname  (BE (sff)[SFFI_NEWDIR].filename)
@@ -153,25 +151,25 @@ static void
 insertline (struct editstuff *es, unsigned long n, Iptr_type l)
 /* Before line ‘n’, insert line ‘l’.  */
 {
-  if (EDIT (lim) - EDIT (gapsize) < n)
+  if (es->lim - es->gapsize < n)
     editLineNumberOverflow ();
-  if (!EDIT (gapsize))
-    EDIT (line) = !EDIT (lim)
-      ? testalloc (sizeof (Iptr_type) * (EDIT (lim) = EDIT (gapsize) = 1024))
-      : (EDIT (gap) = EDIT (gapsize) = EDIT (lim),
-         testrealloc (EDIT (line), sizeof (Iptr_type) * (EDIT (lim) <<= 1)));
-  if (n < EDIT (gap))
-    movelines (EDIT (line) + n + EDIT (gapsize),
-               EDIT (line) + n,
-               EDIT (gap) - n);
-  else if (EDIT (gap) < n)
-    movelines (EDIT (line) + EDIT (gap),
-               EDIT (line) + EDIT (gap) + EDIT (gapsize),
-               n - EDIT (gap));
+  if (!es->gapsize)
+    es->line = !es->lim
+      ? testalloc (sizeof (Iptr_type) * (es->lim = es->gapsize = 1024))
+      : (es->gap = es->gapsize = es->lim,
+         testrealloc (es->line, sizeof (Iptr_type) * (es->lim <<= 1)));
+  if (n < es->gap)
+    movelines (es->line + n + es->gapsize,
+               es->line + n,
+               es->gap - n);
+  else if (es->gap < n)
+    movelines (es->line + es->gap,
+               es->line + es->gap + es->gapsize,
+               n - es->gap);
 
-  EDIT (line)[n] = l;
-  EDIT (gap) = n + 1;
-  EDIT (gapsize)--;
+  es->line[n] = l;
+  es->gap = n + 1;
+  es->gapsize--;
 }
 
 static void
@@ -180,19 +178,19 @@ deletelines (struct editstuff *es, unsigned long n, unsigned long nlines)
 {
   unsigned long l = n + nlines;
 
-  if (EDIT (lim) - EDIT (gapsize) < l || l < n)
+  if (es->lim - es->gapsize < l || l < n)
     editLineNumberOverflow ();
-  if (l < EDIT (gap))
-    movelines (EDIT (line) + l + EDIT (gapsize),
-               EDIT (line) + l,
-               EDIT (gap) - l);
-  else if (EDIT (gap) < n)
-    movelines (EDIT (line) + EDIT (gap),
-               EDIT (line) + EDIT (gap) + EDIT (gapsize),
-               n - EDIT (gap));
+  if (l < es->gap)
+    movelines (es->line + l + es->gapsize,
+               es->line + l,
+               es->gap - l);
+  else if (es->gap < n)
+    movelines (es->line + es->gap,
+               es->line + es->gap + es->gapsize,
+               n - es->gap);
 
-  EDIT (gap) = n;
-  EDIT (gapsize) += nlines;
+  es->gap = n;
+  es->gapsize += nlines;
 }
 
 static void
@@ -212,11 +210,11 @@ static void
 snapshotedit_fast (struct editstuff *es, FILE *f)
 /* Copy the current state of the edits to ‘f’.  */
 {
-  register Iptr_type *p, *lim, *l = EDIT (line);
+  register Iptr_type *p, *lim, *l = es->line;
 
-  for (p = l, lim = l + EDIT (gap); p < lim;)
+  for (p = l, lim = l + es->gap; p < lim;)
     snapshotline (f, *p++);
-  for (p += EDIT (gapsize), lim = l + EDIT (lim); p < lim;)
+  for (p += es->gapsize, lim = l + es->lim; p < lim;)
     snapshotline (f, *p++);
 }
 
@@ -243,14 +241,14 @@ finishedit_fast (struct editstuff *es, struct hshentry const *delta,
         snapshotedit_fast (es, outfile);
       else
         {
-          register Iptr_type *p, *lim, *l = EDIT (line);
+          register Iptr_type *p, *lim, *l = es->line;
           register struct fro *fin = FLOW (from);
           Iptr_type here = fin->ptr;
           struct expctx ctx = EXPCTX_1OUT (outfile, fin, true, true);
 
-          for (p = l, lim = l + EDIT (gap); p < lim;)
+          for (p = l, lim = l + es->gap; p < lim;)
             finisheditline (&ctx, *p++);
-          for (p += EDIT (gapsize), lim = l + EDIT (lim); p < lim;)
+          for (p += es->gapsize, lim = l + es->lim; p < lim;)
             finisheditline (&ctx, *p++);
           fin->ptr = here;
         }
@@ -285,9 +283,9 @@ openfcopy (FILE *f)
 
 static void
 swapeditfiles (struct editstuff *es, FILE *outfile)
-/* Swap ‘FLOW (result)’ and ‘EDIT (filename)’,
-   assign ‘EDIT (fedit) = FLOW (res)’,
-   and rewind ‘EDIT (fedit)’ for reading.
+/* Swap ‘FLOW (result)’ and ‘es->filename’,
+   assign ‘es->fedit = FLOW (res)’,
+   and rewind ‘es->fedit’ for reading.
    Set ‘FLOW (res)’ to ‘outfile’ if non-NULL;
    otherwise, set ‘FLOW (res)’ to be ‘FLOW (result)’
    opened for reading and writing.  */
@@ -295,14 +293,14 @@ swapeditfiles (struct editstuff *es, FILE *outfile)
   char const *tmpptr;
   struct fro *newrile = ZLLOC (1, struct fro);
 
-  EDIT (lcount) = 0;
-  EDIT (corr) = 0;
+  es->lcount = 0;
+  es->corr = 0;
   Orewind (FLOW (res));
   newrile->rm = RM_STDIO;
   newrile->stream = FLOW (res);
-  EDIT (fedit) = newrile;
-  tmpptr = EDIT (filename);
-  EDIT (filename) = FLOW (result);
+  es->fedit = newrile;
+  tmpptr = es->filename;
+  es->filename = FLOW (result);
   FLOW (result) = tmpptr;
   openfcopy (outfile);
 }
@@ -317,7 +315,7 @@ finishedit_slow (struct editstuff *es, struct hshentry const *delta,
   register struct fro *fe;
   register FILE *fc;
 
-  fe = EDIT (fedit);
+  fe = es->fedit;
   if (fe)
     {
       fc = FLOW (res);
@@ -343,8 +341,8 @@ snapshotedit_slow (struct editstuff *es, FILE *f)
 /* Copy the current state of the edits to ‘f’.  */
 {
   finishedit_slow (es, NULL, NULL, false);
-  fro_spew (EDIT (fedit), f);
-  fro_bob (EDIT (fedit));
+  fro_spew (es->fedit, f);
+  fro_bob (es->fedit);
 }
 
 void
@@ -366,27 +364,27 @@ snapshotedit (struct editstuff *es, FILE *f)
 
 static void
 copylines (struct editstuff *es, register long upto, struct hshentry const *delta)
-/* Copy input lines ‘EDIT (lcount)+1..upto’ from ‘EDIT (fedit)’ to ‘FLOW (res)’.
+/* Copy input lines ‘es->lcount+1..upto’ from ‘es->fedit’ to ‘FLOW (res)’.
    If ‘delta’, keyword expansion is done simultaneously.
-   ‘EDIT (lcount)’ is updated.  Rewinds a file only if necessary.  */
+   ‘es->lcount’ is updated.  Rewinds a file only if necessary.  */
 {
   if (!STDIO_P (FLOW (from)))
-    EDIT (lcount) = upto;
+    es->lcount = upto;
   else
     {
       int c;
       register FILE *fc;
       register struct fro *fe;
 
-      if (upto < EDIT (lcount))
+      if (upto < es->lcount)
         {
           /* Swap files.  */
           finishedit_slow (es, NULL, NULL, false);
           /* Assumes edit only during last pass, from the beginning.  */
         }
-      fe = EDIT (fedit);
+      fe = es->fedit;
       fc = FLOW (res);
-      if (EDIT (lcount) < upto)
+      if (es->lcount < upto)
         {
           struct expctx ctx = EXPCTX_1OUT (fc, fe, false, true);
 
@@ -396,7 +394,7 @@ copylines (struct editstuff *es, register long upto, struct hshentry const *delt
                 if (expandline (&ctx) <= 1)
                   editLineNumberOverflow ();
               }
-            while (++EDIT (lcount) < upto);
+            while (++es->lcount < upto);
           else
             {
               do
@@ -408,7 +406,7 @@ copylines (struct editstuff *es, register long upto, struct hshentry const *delt
                     }
                   while (c != '\n');
                 }
-              while (++EDIT (lcount) < upto);
+              while (++es->lcount < upto);
             }
         }
     }
@@ -433,7 +431,7 @@ copystring (struct editstuff *es)
 /* Copy a string terminated with a single ‘SDELIM’ from ‘FLOW (from)’ to
    ‘FLOW (res)’, replacing all double ‘SDELIM’ with a single ‘SDELIM’.  If
    ‘FLOW (to)’ is non-NULL, the string also copied unchanged to ‘FLOW (to)’.
-   ‘EDIT (lcount)’ is incremented by the number of lines copied.  Assumption:
+   ‘es->lcount’ is incremented by the number of lines copied.  Assumption:
    next character read is first string character.  */
 {
   int c;
@@ -451,7 +449,7 @@ copystring (struct editstuff *es)
       switch (c)
         {
         case '\n':
-          ++EDIT (lcount);
+          ++es->lcount;
           ++LEX (lno);
           amidline = false;
           break;
@@ -461,7 +459,7 @@ copystring (struct editstuff *es)
             {
               /* End of string.  */
               NEXT (c) = c;
-              EDIT (lcount) += amidline;
+              es->lcount += amidline;
               return;
             }
           /* fall into */
@@ -480,9 +478,9 @@ enterstring (struct editstuff *es)
 {
   if (STDIO_P (FLOW (from)))
     {
-      EDIT (filename) = NULL;
-      EDIT (fedit) = NULL;
-      EDIT (lcount) = EDIT (corr) = 0;
+      es->filename = NULL;
+      es->fedit = NULL;
+      es->lcount = es->corr = 0;
       FLOW (result) = maketemp (1);
       if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
         fatal_sys (FLOW (result));
@@ -498,8 +496,8 @@ enterstring (struct editstuff *es)
       register struct fro *fin;
 
       e = 0;
-      EDIT (gap) = 0;
-      EDIT (gapsize) = EDIT (lim);
+      es->gap = 0;
+      es->gapsize = es->lim;
       fin = FLOW (from);
       fro_trundling (false, fin);
       frew = FLOW (to);
@@ -523,8 +521,8 @@ enterstring (struct editstuff *es)
                 {
                   /* End of string.  */
                   NEXT (c) = c;
-                  EDIT (lcount) = e + amidline;
-                  EDIT (corr) = 0;
+                  es->lcount = e + amidline;
+                  es->corr = 0;
                   return;
                 }
               /* fall into */
@@ -544,9 +542,9 @@ editstring (struct editstuff *es, struct hshentry const *delta)
    | -- ‘(STDIO_P (FLOW (from)))’ --
    | The result is written to ‘FLOW (res)’.
    | If ‘delta’, keyword expansion is performed simultaneously.
-   | If running out of lines in ‘EDIT (fedit)’,
-   | ‘EDIT (fedit)’ and ‘FLOW (res)’ are swapped.
-   | ‘EDIT (filename)’ is the name of the file that goes with ‘EDIT (fedit)’.
+   | If running out of lines in ‘es->fedit’,
+   | ‘es->fedit’ and ‘FLOW (res)’ are swapped.
+   | ‘es->filename’ is the name of the file that goes with ‘es->fedit’.
    If ‘FLOW (to)’ is set, the edit script is also copied verbatim
    to ‘FLOW (to)’.  Assumes that all these files are open.
    ‘FLOW (result)’ is the name of the file that goes with ‘FLOW (res)’.
@@ -564,8 +562,8 @@ editstring (struct editstuff *es, struct hshentry const *delta)
   register long j = 0;
   struct diffcmd dc;
 
-  EDIT (lcount) += EDIT (corr);
-  EDIT (corr) = 0;                         /* correct line number */
+  es->lcount += es->corr;
+  es->corr = 0;                         /* correct line number */
   frew = FLOW (to);
   fin = FLOW (from);
   initdiffcmd (&dc);
@@ -578,13 +576,13 @@ editstring (struct editstuff *es, struct hshentry const *delta)
         copylines (es, dc.line1 - 1, delta);
         /* Skip over unwanted lines.  */
         i = dc.nlines;
-        EDIT (corr) -= i;
-        EDIT (lcount) += i;
+        es->corr -= i;
+        es->lcount += i;
         if (!STDIO_P (fin))
-          deletelines (es, EDIT (lcount) + EDIT (corr), i);
+          deletelines (es, es->lcount + es->corr, i);
         else
           {
-            fe = EDIT (fedit);
+            fe = es->fedit;
             do
               {
                 /* Skip next line.  */
@@ -608,8 +606,8 @@ editstring (struct editstuff *es, struct hshentry const *delta)
         copylines (es, dc.line1, delta);
         i = dc.nlines;
         if (!STDIO_P (fin))
-          j = EDIT (lcount) + EDIT (corr);
-        EDIT (corr) += i;
+          j = es->lcount + es->corr;
+        es->corr += i;
         if (STDIO_P (fin)
             && (f = FLOW (res),
                 delta))

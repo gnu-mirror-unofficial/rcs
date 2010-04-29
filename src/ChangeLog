@@ -1,5 +1,15 @@
 2010-04-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] For rcsedit.c, use es->foo directly.
+
+	* rcsedit.c (EDIT): Delete macro.
+	(insertline): Use ‘es->foo’ instead of ‘EDIT (foo)’.
+	(deletelines, snapshotedit_fast, finishedit_fast, swapeditfiles)
+	(finishedit_slow, snapshotedit_slow, copylines, copystring)
+	(enterstring, editstring): Likewise.
+
+2010-04-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Tighten ‘finishedit_fast’.
 
 	* rcsedit.c (finisheditline): Take ‘struct expctx *’.
