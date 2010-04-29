@@ -221,20 +221,17 @@ snapshotedit_fast (struct editstuff *es, FILE *f)
 }
 
 static void
-finisheditline (struct fro *fin, FILE *fout, Iptr_type l,
-                struct hshentry const *delta)
+finisheditline (struct expctx *ctx, Iptr_type l)
 {
-  struct expctx ctx = EXPCTX_1OUT (fout, fin, true, true);
-
-  fin->ptr = l;
-  if (expandline (&ctx) < 0)
+  ctx->from->ptr = l;
+  if (expandline (ctx) < 0)
     PFATAL ("finisheditline internal error");
 }
 
 static void
 finishedit_fast (struct editstuff *es, struct hshentry const *delta,
                  FILE *outfile, bool done)
-/* Doing expansion if ‘delta’ is set, output the state of the edits to
+/* Do expansion if ‘delta’ is set, output the state of the edits to
    ‘outfile’.  But do nothing unless ‘done’ is set (which means we are
    on the last pass).  */
 {
@@ -249,11 +246,12 @@ finishedit_fast (struct editstuff *es, struct hshentry const *delta,
           register Iptr_type *p, *lim, *l = EDIT (line);
           register struct fro *fin = FLOW (from);
           Iptr_type here = fin->ptr;
+          struct expctx ctx = EXPCTX_1OUT (outfile, fin, true, true);
 
           for (p = l, lim = l + EDIT (gap); p < lim;)
-            finisheditline (fin, outfile, *p++, delta);
+            finisheditline (&ctx, *p++);
           for (p += EDIT (gapsize), lim = l + EDIT (lim); p < lim;)
-            finisheditline (fin, outfile, *p++, delta);
+            finisheditline (&ctx, *p++);
           fin->ptr = here;
         }
     }
