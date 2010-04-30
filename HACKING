@@ -19,7 +19,7 @@ It lives in the repo but is not included in the distribution.
 ***** DONE temp file security hole in rcsfreeze (debian #27845)
 ***** DONE don't say "path" when referring to file names
 *** features
-***** recognize keyword ‘commitid’ (debian #352527)
+***** DONE recognize keyword ‘commitid’ (debian #352527)
 ***** ident accept numbers as well as letters (debian #157891)
 
 * coding standards
