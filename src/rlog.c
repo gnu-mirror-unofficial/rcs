@@ -311,7 +311,7 @@ readdeltalog (void)
     fatal_syntax ("duplicate delta log");
   Delta->log = savestring ();
 
-  ignorephrases (&TINY (text));
+  nextlex ();
   getkeystring (&TINY (text));
   Delta->insertlns = Delta->deletelns = 0;
   if (Delta != ADMIN (head))

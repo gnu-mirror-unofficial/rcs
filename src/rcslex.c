@@ -43,19 +43,6 @@
 #define hshsize 511
 #endif
 
-void
-warnignore (void)
-{
-  if (!LEX (ignore))
-    {
-      /* This used to be a simple boolean, but we overload it now as a
-         means to avoid the most infelicitous ‘NEXT (str)’ clobbering.
-         If/when that goes away, this can happily resvelten.  */
-      LEX (ignore) = make_space ("ignore");
-      RWARN ("Unknown phrases like `%s ...;' are present.", NEXT (str));
-    }
-}
-
 static void
 lookup (char const *str)
 /* Look up the character string ‘str’ in the hashtable.
@@ -109,11 +96,6 @@ Lexinit (void)
     {
       FLOW (to) = NULL;
       BE (receptive_to_next_hash_key) = true;
-      if (LEX (ignore))
-        {
-          close_space (LEX (ignore));
-          LEX (ignore) = NULL;
-        }
       LEX (lno) = 1;
       if (LEX (tokbuf))
         forget (LEX (tokbuf));
@@ -354,144 +336,6 @@ must_get_delta_num (void)
     fatal_syntax ("delta number corrupted");
 
   return rv;
-}
-
-struct cbuf
-getphrases (struct tinysym const *key)
-/* Get a series of phrases that do not start with ‘key’.  Return
-   resulting buffer.  Stop when the next phrase starts with a token that
-   is not an identifier, or is ‘key’.  Copy input to ‘FLOW (to)’ if it is
-   set.  Unlike ‘ignorephrases’, this routine assumes ‘nextlex’ has
-   already been invoked before we start.  */
-{
-  int c;
-  register char const *kn;
-  struct cbuf r;
-  register struct fro *fin;
-  register FILE *frew;
-
-  if (NEXT (tok) != ID || looking_at (key, NEXT (str)))
-    clear_buf (&r);
-  else
-    {
-      warnignore ();
-      fin = FLOW (from);
-      frew = FLOW (to);
-      accs (LEX (ignore), NEXT (str));
-      free_NEXT_str ();
-      c = NEXT (c);
-      for (;;)
-        {
-#define SAVECH(c)  accumulate_byte (LEX (ignore), c)
-          for (;;)
-            {
-              SAVECH (c);
-              switch (ctab[c])
-                {
-                default:
-                  fatal_syntax ("unknown character `%c'", c);
-                case NEWLN:
-                  ++LEX (lno);
-                  /* fall into */
-                case COLON:
-                case DIGIT:
-                case LETTER:
-                case Letter:
-                case PERIOD:
-                case SPACE:
-                  TEECHAR ();
-                  continue;
-                case SBEGIN:     /* long string */
-                  for (;;)
-                    {
-                      for (;;)
-                        {
-                          TEECHAR ();
-                          SAVECH (c);
-                          switch (c)
-                            {
-                            case '\n':
-                              ++LEX (lno);
-                              /* fall into */
-                            default:
-                              continue;
-
-                            case SDELIM:
-                              break;
-                            }
-                          break;
-                        }
-                      TEECHAR ();
-                      if (c != SDELIM)
-                        break;
-                      SAVECH (c);
-                    }
-                  continue;
-                case SEMI:
-                  GETCHAR (c, fin);
-                  if (ctab[c] == NEWLN)
-                    {
-                      if (frew)
-                        aputc (c, frew);
-                      ++ LEX (lno);
-                      SAVECH (c);
-                      GETCHAR (c, fin);
-                    }
-                  for (;;)
-                    {
-                      switch (ctab[c])
-                        {
-                        case NEWLN:
-                          ++LEX (lno);
-                          /* fall into */
-                        case SPACE:
-                          GETCHAR (c, fin);
-                          continue;
-
-                        default:
-                          break;
-                        }
-                      break;
-                    }
-                  if (frew)
-                    aputc (c, frew);
-                  break;
-                }
-              break;
-            }
-          if (ctab[c] == Letter)
-            {
-              for (kn = TINYS (key); c && *kn == c; kn++)
-                TEECHAR ();
-              if (!*kn)
-                switch (ctab[c])
-                  {
-                  case DIGIT:
-                  case LETTER:
-                  case Letter:
-                  case IDCHAR:
-                  case PERIOD:
-                    break;
-                  default:
-                    NEXT (c) = c;
-                    NEXT (str) = intern (SINGLE, TINYS (key), key->len);
-                    NEXT (tok) = ID;
-                    goto returnit;
-                  }
-              accumulate_range (LEX (ignore), TINYS (key), kn);
-            }
-          else
-            {
-              NEXT (c) = c;
-              nextlex ();
-              break;
-            }
-#undef SAVECH
-        }
-    returnit:;
-      r.string = finish_string (LEX (ignore), &r.size);
-    }
-  return r;
 }
 
 void

@@ -40,8 +40,7 @@ scandeltatext (struct editstuff *es, struct hshentry *delta,
 /* Scan delta text nodes up to and including the one given by ‘delta’.
    For the one given by ‘delta’, the log message is saved into
    ‘delta->log’ if ‘needlog’ is set; ‘func’ specifies how to handle the
-   text.  Similarly, if ‘needlog’, ‘delta->igtext’ is set to the ignored
-   phrases.  Assume the initial lexeme must be read in first.  Does not
+   text.  Assume the initial lexeme must be read in first.  Does not
    advance ‘NEXT (tok)’ after it is finished.  */
 {
   struct hshentry const *nextdelta;
@@ -57,14 +56,10 @@ scandeltatext (struct editstuff *es, struct hshentry *delta,
         {
           cb = savestring ();
           delta->log = cleanlogmsg (cb.string, cb.size);
-          nextlex ();
-          delta->igtext = getphrases (&TINY (text));
         }
       else
-        {
-          readstring ();
-          ignorephrases (&TINY (text));
-        }
+        readstring ();
+      nextlex ();
       getkeystring (&TINY (text));
 
       if (delta == nextdelta)
@@ -391,8 +386,6 @@ putadmin (void)
   if (BE (kws) != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
              TINYKS (expand), SDELIM, kwsub_string (BE (kws)), SDELIM);
-  awrite (ADMIN (description).string, ADMIN (description).size, fout);
-  aputc ('\n', fout);
 }
 
 static void
@@ -417,7 +410,6 @@ putdelta (register struct hshentry const *node, register FILE *fout)
   aprintf (fout, ";\n%s\t%s;\n", TINYKS (next), node->next ? node->next->num : "");
   if (node->commitid)
     aprintf (fout, "%s\t%s;\n", TINYKS (commitid), node->commitid);
-  awrite (node->ig.string, node->ig.size, fout);
 }
 
 void
@@ -446,10 +438,10 @@ bool
 putdtext (struct hshentry const *delta, char const *srcname,
           FILE *fout, bool diffmt)
 /* Output a deltatext node with delta number ‘delta->num’, log message
-   ‘delta->log’, ignored phrases ‘delta->igtext’ and text ‘srcname’ to
-   ‘fout’.  Double up all ‘SDELIM’s in both the log and the text.  Make
-   sure the log message ends in '\n'.  Return false on error.  If
-   ‘diffmt’, also check that the text is valid "diff -n" output.  */
+   ‘delta->log’, and text ‘srcname’ to ‘fout’.  Double up all ‘SDELIM’s
+   in both the log and the text.  Make sure the log message ends in '\n'.
+   Return false on error.  If ‘diffmt’, also check that the text is valid
+   "diff -n" output.  */
 {
   struct fro *fin;
 
@@ -503,9 +495,6 @@ putdftext (struct hshentry const *delta, struct fro *finfile,
   /* Put log.  */
   putstring (fout, true, delta->log, true);
   aputc ('\n', fout);
-  /* Put ignored phrases.  */
-  awrite (delta->igtext.string, delta->igtext.size, fout);
-
   /* Put text.  */
   aprintf (fout, "%s\n%c", TINYKS (text), SDELIM);
 

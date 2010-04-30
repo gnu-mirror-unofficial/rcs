@@ -1,5 +1,12 @@
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Freeze RCS file syntax; drop ‘newphrase’ support.
+
+	* rcsfile.5in: Remove ‘newphrase’ production components; the
+	‘newphrase’ production itself; and the paragraph describing it.
+
+2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Fix rcsfile(5) typo.
 
 	* rcsfile.5in (id): Add asterisk after first production component.

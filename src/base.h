@@ -273,12 +273,6 @@ struct hshentry
   /* The ‘commitid’ added by CVS; only used for reading.  */
   char const *commitid;
 
-  /* Ignored phrases in admin part.  */
-  struct cbuf ig;
-
-  /* Ignored phrases in deltatext part.  */
-  struct cbuf igtext;
-
   /* Next revision on same branch, with same hash value.  */
   struct hshentry *next;
   struct hshentry *nexthsh;
@@ -578,10 +572,6 @@ struct parse_state
   /* Space for buffering tokens.
      -- Lexinit nextlex  */
 
-  struct divvy *ignore;
-  /* Non-NULL if we have ignored phrases in this RCS file.
-     -- warnignore Lexinit  */
-
   struct next
   {
     enum tokens tok;
@@ -645,10 +635,6 @@ struct repository
     struct cbuf log_lead;
     /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
        -- [rcs]main InitAdmin getadmin  */
-
-    struct cbuf description;
-    /* The description string, if any.  Not functionally relevant.
-       -- InitAdmin getadmin  */
 
     struct rcslock *locks;
     /* List of locks.
@@ -809,7 +795,6 @@ void putdftext (struct hshentry const *delta, struct fro *finfile,
 bool getoldkeys (struct fro *);
 
 /* rcslex */
-void warnignore (void);
 void Lexinit (void);
 void nextlex (void);
 bool eoflex (void);
@@ -820,7 +805,6 @@ void getkeystring (struct tinysym const *key);
 char const *getid (void);
 struct hshentry *getnum (void);
 struct hshentry *must_get_delta_num (void);
-struct cbuf getphrases (struct tinysym const *key);
 void readstring (void);
 void printstring (void);
 struct cbuf savestring (void);
@@ -858,7 +842,6 @@ char const *tiprev (void);
 
 /* rcssyn */
 void getadmin (void);
-void ignorephrases (struct tinysym const *key);
 void gettree (void);
 void getdesc (bool);
 void unexpected_EOF (void)

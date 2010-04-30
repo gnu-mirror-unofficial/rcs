@@ -914,8 +914,6 @@ main (int argc, char **argv)
         newdelta.lockedby = NULL;
         newdelta.selector = true;
         newdelta.name = NULL;
-        clear_buf (&newdelta.ig);
-        clear_buf (&newdelta.igtext);
 
         /* Set author.  */
         if (author)

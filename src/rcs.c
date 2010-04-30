@@ -368,8 +368,6 @@ scanlogtext (struct editstuff *es, struct hshentry *delta, bool edit)
           cb = savestring ();
           if (!delta->log.string)
             delta->log = cleanlogmsg (cb.string, cb.size);
-          nextlex ();
-          delta->igtext = getphrases (&TINY (text));
         }
       else
         {
@@ -383,8 +381,8 @@ scanlogtext (struct editstuff *es, struct hshentry *delta, bool edit)
             }
           else
             readstring ();
-          ignorephrases (&TINY (text));
         }
+      nextlex ();
       getkeystring (&TINY (text));
 
       if (delta == nextdelta)

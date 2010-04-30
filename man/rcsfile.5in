@@ -36,7 +36,6 @@ nonterminal symbols are in
 .IR italics .
 .LP
 .nr w \w'\f3deltatext\fP '
-.nr y \w'\f3newphrase\fP '
 .if \nw<\ny .nr w \ny
 .nr x \w'\f3branches\fP'
 .nr y \w'{ \f3comment\fP'
@@ -55,7 +54,6 @@ nonterminal symbols are in
 		\f3locks\fP	{\f2id\fP \f3:\fP \f2num\fP}*\f3;\fP  {\f3strict  ;\fP}
 		{ \f3comment\fP	{\f2string\fP}\f3;\fP }
 		{ \f3expand\fP	{\f2string\fP}\f3;\fP }
-		{ \f2newphrase\fP }*
 .LP
 \f2delta\fP	::=	\f2num\fP
 		\f3date\fP	\f2num\fP\f3;\fP
@@ -64,13 +62,11 @@ nonterminal symbols are in
 		\f3branches\fP	{\f2num\fP}*\f3;\fP
 		\f3next\fP	{\f2num\fP}\f3;\fP
 		{ \f3commitid\fP \f2sym\fP\f3;\fP }
-		{ \f2newphrase\fP }*
 .LP
 \f2desc\fP	::=	\f3desc\fP	\f2string\fP
 .LP
 \f2deltatext\fP	::=	\f2num\fP
 		\f3log\fP	\f2string\fP
-		{ \f2newphrase\fP }*
 		\f3text\fP	\f2string\fP
 .LP
 \f2num\fP	::=	{\f2digit\fP | \f3.\fP}+
@@ -86,8 +82,6 @@ nonterminal symbols are in
 \f2special\fP	::=	\f3$\fP | \f3,\fP | \f3.\fP | \f3:\fP | \f3;\fP | \f3@\fP
 .LP
 \f2string\fP	::=	\f3@\fP{any character, with \f3@\fP doubled}*\f3@\fP
-.LP
-\f2newphrase\fP	::=	\f2id\fP \f2word\fP* \f3;\fP
 .LP
 \f2word\fP	::=	\f2id\fP | \f2num\fP | \f2string\fP | \f3:\fP
 .fi
@@ -121,14 +115,6 @@ contains just the last two digits of the year
 for years from 1900 through 1999,
 and all the digits of years thereafter.
 Dates use the Gregorian calendar; times use UTC.
-.PP
-The
-.I newphrase
-productions in the grammar are reserved for future extensions
-to the format of \*r files.
-No
-.I newphrase
-will begin with any keyword already in use.
 .PP
 The
 .I delta

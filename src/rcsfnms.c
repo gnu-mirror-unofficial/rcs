@@ -109,7 +109,6 @@ InitAdmin (void)
         break;
       }
   BE (kws) = kwsub_kv;
-  clear_buf (&ADMIN (description));
   /* Note: If ‘!FLOW (from)’, read nothing; only initialize.  */
   Lexinit ();
 }

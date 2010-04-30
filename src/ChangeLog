@@ -1,5 +1,27 @@
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Freeze RCS file syntax; drop ‘newphrase’ support.
+
+	* base.h (struct hshentry): Delete members ‘ig’, ‘igtext’.
+	(struct parse_state): Delete member ‘ignore’.
+	(struct repository): Delete member ‘description’.
+	(warnignore, getphrases, ignorephrases): Delete func decls.
+	* ci.c (main): Don't init ‘newdelta.ig’, ‘newdelta.igtext’.
+	* rcs.c (scanlogtext): Expect ‘text’ after ‘log’.
+	* rcsfnms.c (InitAdmin): Don't init ‘ADMIN (description)’.
+	* rcsgen.c (scandeltatext): Expect ‘text’ after ‘log’.
+	(putadmin): Don't bother w/ ‘ADMIN (description)’ output.
+	(putdelta, putdftext): Don't bother w/ "ignored phrases" output.
+	* rcslex.c (warnignore): Delete func.
+	(Lexinit): Don't bother w/ ‘LEX (ignore)’ init.
+	(getphrases): Delete func.
+	* rcssyn.c (getadmin): Don't init ‘ADMIN (description)’.
+	(ignorephrases): Delete func.
+	(getdelta): Don't bother lookng for "ignorable phrases".
+	* rlog.c (readdeltalog): Expect ‘text’ after ‘log’.
+
+2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Clean up base.h; nfc.
 
 	* base.h: Reorder top-level forms;

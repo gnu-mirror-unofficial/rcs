@@ -173,41 +173,6 @@ getadmin (void)
         }
       getsemi (&TINY (expand));
     }
-  ADMIN (description) = getphrases (&TINY (desc));
-}
-
-void
-ignorephrases (struct tinysym const *key)
-/* Ignore a series of phrases that do not start with ‘key’.  Stop when the
-   next phrase starts with a token that is not an identifier, or is ‘key’.  */
-{
-  for (;;)
-    {
-      nextlex ();
-      if (NEXT (tok) != ID || looking_at (key, NEXT (str)))
-        break;
-      warnignore ();
-      BE (receptive_to_next_hash_key) = false;
-      for (;; nextlex ())
-        {
-          switch (NEXT (tok))
-            {
-            case SEMI:
-              BE (receptive_to_next_hash_key) = true;
-              break;
-            case ID:
-            case NUM:
-              free_NEXT_str ();
-              continue;
-            case STRING:
-              readstring ();
-              continue;
-            default:
-              continue;
-            }
-          break;
-        }
-    }
 }
 
 static char const *
@@ -285,7 +250,6 @@ getdelta (void)
       nextlex ();
       getsemi (&TINY (commitid));
     }
-  Delta->ig = getphrases (&TINY (desc));
   REPO (ndelt)++;
   return true;
 }
