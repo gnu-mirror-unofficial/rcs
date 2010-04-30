@@ -253,6 +253,9 @@ struct hshentry
   /* List of first revisions on branches.  */
   struct branchhead *branches;
 
+  /* The ‘commitid’ added by CVS; only used for reading.  */
+  char const *commitid;
+
   /* Ignored phrases in admin part.  */
   struct cbuf ig;
 
@@ -701,6 +704,7 @@ extern TINY_DECL (author);
 extern TINY_DECL (branch);
 extern TINY_DECL (branches);
 extern TINY_DECL (comment);
+extern TINY_DECL (commitid);
 extern TINY_DECL (date);
 extern TINY_DECL (desc);
 extern TINY_DECL (expand);

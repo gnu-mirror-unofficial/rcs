@@ -63,6 +63,7 @@ nonterminal symbols are in
 		\f3state\fP	{\f2id\fP}\f3;\fP
 		\f3branches\fP	{\f2num\fP}*\f3;\fP
 		\f3next\fP	{\f2num\fP}\f3;\fP
+		{ \f3commitid\fP \f2sym\fP\f3;\fP }
 		{ \f2newphrase\fP }*
 .LP
 \f2desc\fP	::=	\f3desc\fP	\f2string\fP

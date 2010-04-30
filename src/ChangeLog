@@ -1,5 +1,16 @@
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Recognize ‘commitid SYMBOL’ in RCS file delta tree.
+
+	* base.h (struct hshentry): Add member ‘commitid’.
+	(tiny_commitid): New var decl, via ‘TINY_DECL’.
+	* b-anchor.c (tiny_commitid): New var, via ‘TINYK’.
+	* rcssyn.c (getdelta): Recognize ‘commitid’; validate/save its value.
+	* rcsgen.c (putdelta): Output ‘commitid’ info, if available.
+	* rlog.c (putadelta): Likewise.
+
+2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move ‘expandline’ scratch to expansion context.
 
 	* b-kwxout.h (struct expctx): Add member ‘lparts’.

@@ -274,6 +274,17 @@ getdelta (void)
   Delta->lockedby = NULL;
   Delta->log.string = NULL;
   Delta->selector = true;
+  /* CVS adds ‘commitid’; roll with it.  */
+  Delta->commitid = NULL;
+  if (getkeyopt (&TINY (commitid)))
+    {
+      /* TODO: Use ‘checkssym’ if/when it takes ‘char const *’.  */
+      if (strchr (NEXT (str), '.'))
+        PFATAL ("invalid symbol `%s'", NEXT (str));
+      Delta->commitid = NEXT (str);
+      nextlex ();
+      getsemi (&TINY (commitid));
+    }
   Delta->ig = getphrases (&TINY (desc));
   REPO (ndelt)++;
   return true;

@@ -412,6 +412,8 @@ putdelta (register struct hshentry const *node, register FILE *fout)
     }
 
   aprintf (fout, ";\n%s\t%s;\n", TINYKS (next), node->next ? node->next->num : "");
+  if (node->commitid)
+    aprintf (fout, "%s\t%s;\n", TINYKS (commitid), node->commitid);
   awrite (node->ig.string, node->ig.size, fout);
 }
 

@@ -38,6 +38,7 @@ TINYK (author);
 TINYK (branch);
 TINYK (branches);
 TINYK (comment);
+TINYK (commitid);
 TINYK (date);
 TINYK (desc);
 TINYK (expand);

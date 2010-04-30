@@ -187,6 +187,9 @@ putadelta (register struct hshentry const *node,
         }
     }
 
+  if (node->commitid)
+    aprintf (out, "%s commitid: %s", editscript ? ";" : "", node->commitid);
+
   afputc ('\n', out);
   s = node->log.string;
   if (!(n = node->log.size))
