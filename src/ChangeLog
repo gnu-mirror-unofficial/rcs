@@ -1,5 +1,13 @@
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Clean up base.h; nfc.
+
+	* base.h: Reorder top-level forms;
+	add variable names to func decls.
+	(expand_names): Delete now-unused var decl.
+
+2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: format_assocs
 
 	* base.h (format_assocs): New func decl.

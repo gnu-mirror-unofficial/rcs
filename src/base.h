@@ -188,6 +188,23 @@ enum kwsub
 /* Default state of revisions.  */
 #define DEFAULTSTATE                         "Exp"
 
+/* Minimum value for no logical expansion.  */
+#define MIN_UNEXPAND  kwsub_o
+/* The minimum value guaranteed to yield an identical file.  */
+#define MIN_UNCHANGED_EXPAND  (OPEN_O_BINARY ? kwsub_b : kwsub_o)
+
+struct diffcmd
+{
+  /* Number of first line.  */
+  long line1;
+  /* Number of lines affected.  */
+  long nlines;
+  /* Previous 'a' line1+1 or 'd' line1.  */
+  long adprev;
+  /* Sum of previous 'd' line1 and previous 'd' nlines.  */
+  long dafter;
+};
+
 /* If there is no signal, better to disable mmap entirely.
    We leave MMAP_SIGNAL as 0 to indicate this.  */
 #if !MMAP_SIGNAL
@@ -333,6 +350,9 @@ enum markers
 
 /* This is used by ci and rlog.  */
 #define EMPTYLOG "*** empty log message ***"
+
+/* Maxiumum length of time zone string, e.g. "+12:34:56".  */
+#define zonelenmax  9
 
 struct maybe;
 
@@ -719,162 +739,156 @@ extern TINY_DECL (text);
 bool looking_at (struct tinysym const *sym, char const *start);
 int recognize_kwsub (struct cbuf const *x);
 int str2expmode (char const *s);
-const char const *kwsub_string (enum kwsub);
-bool recognize_keyword (char const *, struct pool_found *);
+const char const *kwsub_string (enum kwsub i);
+bool recognize_keyword (char const *string, struct pool_found *found);
 
-/* merge */
-int merge (bool, char const *, char const *const[3], char const *const[3]);
+/* merger */
+int merge (bool tostdout, char const *edarg,
+           char const *const label[3],
+           char const *const argv[3]);
 
 /* rcsedit */
 struct editstuff *make_editstuff (void);
-struct fro *rcswriteopen (struct maybe *);
+int un_link (char const *s);
+void openfcopy (FILE *f);
+void finishedit (struct editstuff *es, struct hshentry const * delta,
+                 FILE *outfile, bool done);
+void snapshotedit (struct editstuff *es, FILE *f);
+void xpandstring (struct hshentry const *delta);
+void copystring (struct editstuff *es);
+void enterstring (struct editstuff *es);
+void editstring (struct editstuff *es, struct hshentry const *delta);
+struct fro *rcswriteopen (struct maybe *m);
+int chnamemod (FILE **fromp, char const *from, char const *to,
+               int set_mode, mode_t mode, time_t mtime);
+int setmtime (char const *file, time_t mtime);
+int findlock (bool delete, struct hshentry **target);
+int addlock (struct hshentry *delta, bool verbose);
+int addsymbol (char const *num, char const *name, bool rebind);
 char const *getcaller (void);
-int addlock (struct hshentry *, bool);
-int addsymbol (char const *, char const *, bool);
 bool checkaccesslist (void);
-int chnamemod (FILE **, char const *, char const *, int, mode_t, time_t);
-int donerewrite (int, time_t);
-int dorewrite (bool, int);
-int findlock (bool, struct hshentry **);
-int setmtime (char const *, time_t);
+int dorewrite (bool lockflag, int changed);
+int donerewrite (int changed, time_t newRCStime);
 void ORCSclose (void);
 void ORCSerror (void);
-void copystring (struct editstuff *);
-void enterstring (struct editstuff *);
-void finishedit (struct editstuff *, struct hshentry const *, FILE *, bool);
-void openfcopy (FILE *);
-void snapshotedit (struct editstuff *, FILE *);
-void xpandstring (struct hshentry const *);
-int un_link (char const *);
-void editstring (struct editstuff *es, struct hshentry const *);
 
 /* rcsfcmp */
-int rcsfcmp (struct fro *, struct stat const *, char const *,
-             struct hshentry const *);
+int rcsfcmp (struct fro *xfp, struct stat const *xstatp,
+             char const *uname, struct hshentry const *delta);
 
 /* rcsfnms */
-#define clear_buf(b)  (((b)->string = 0, (b)->size = 0))
-struct fro *rcsreadopen (struct maybe *);
-char const *basefilename (char const *);
+char const *basefilename (char const *p);
+char const *rcssuffix (char const *name);
+struct fro *rcsreadopen (struct maybe *m);
+int pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
+               bool mustread, bool quiet);
 char const *getfullRCSname (void);
-char const *rcssuffix (char const *);
-int pairnames (int, char **, open_rcsfile_fn *, bool, bool);
+bool isSLASH (int c);
 
 /* rcsgen */
-void format_assocs (FILE *out, char const *fmt);
-char const *buildrevision (struct hshentries const *,
-                           struct hshentry *, FILE *, bool);
-int getcstdin (void);
-bool putdtext (struct hshentry const *, char const *, FILE *, bool);
+char const *buildrevision (struct hshentries const *deltas,
+                           struct hshentry *target,
+                           FILE *outfile, bool expandflag);
+struct cbuf cleanlogmsg (char const *m, size_t s);
 bool ttystdin (void);
-bool yesorno (bool, char const *, ...) printf_string (2, 3);
-struct cbuf cleanlogmsg (char const *, size_t);
-struct cbuf getsstdin (char const *, char const *, char const *);
-void putdesc (struct cbuf *, bool, char *);
-void putdftext (struct hshentry const *, struct fro *, FILE *, bool);
+int getcstdin (void);
+bool yesorno (bool default_answer, char const *question, ...)
+  printf_string (2, 3);
+void putdesc (struct cbuf *cb, bool textflag, char *textfile);
+struct cbuf getsstdin (char const *option, char const *name, char const *note);
+void format_assocs (FILE *out, char const *fmt);
+void putadmin (void);
+void puttree (struct hshentry const *root, FILE *fout);
+bool putdtext (struct hshentry const *delta, char const *srcname,
+               FILE *fout, bool diffmt);
+void putstring (FILE *out, bool delim, struct cbuf s, bool log);
+void putdftext (struct hshentry const *delta, struct fro *finfile,
+                FILE *foutfile, bool diffmt);
 
 /* rcskeep */
 bool getoldkeys (struct fro *);
 
 /* rcslex */
-char const *getid (void);
-char *checkid (char *, int);
-char *checksym (char *, int);
+void warnignore (void);
+void Lexinit (void);
+void nextlex (void);
 bool eoflex (void);
-bool getkeyopt (struct tinysym const *);
-bool getlex (enum tokens);
-struct cbuf getphrases (struct tinysym const *);
-struct cbuf savestring (void);
+bool getlex (enum tokens token);
+bool getkeyopt (struct tinysym const *key);
+void getkey (struct tinysym const *key);
+void getkeystring (struct tinysym const *key);
+char const *getid (void);
 struct hshentry *getnum (void);
 struct hshentry *must_get_delta_num (void);
-void Lexinit (void);
-void Orewind (FILE *);
-void Ozclose (FILE **);
-void aflush (FILE *);
-void afputc (int, FILE *);
-void aprintf (FILE *, char const *, ...) printf_string (2, 3);
-void aputs (char const *, FILE *);
-void checksid (char *);
-void checkssym (char *);
-void getkey (struct tinysym const *);
-void getkeystring (struct tinysym const *);
-void nextlex (void);
-void oflush (void);
-void printstring (void);
+struct cbuf getphrases (struct tinysym const *key);
 void readstring (void);
-void redefined (int);
-void warnignore (void);
+void printstring (void);
+struct cbuf savestring (void);
+char *checkid (char *id, int delimiter);
+char *checksym (char *sym, int delimiter);
+void checksid (char *id);
+void checkssym (char *sym);
+void Ozclose (FILE **p);
+void Orewind (FILE *f);
+void aflush (FILE *f);
+void oflush (void);
+void redefined (int c);
+void afputc (int c, FILE *f);
+void aputs (char const *s, FILE *iop);
+void aprintf (FILE *iop, char const *fmt, ...)
+  printf_string (2, 3);
 
 /* rcsmap */
 extern const enum tokens const ctab[];
 
 /* rcsrev */
+int countnumflds (char const *s);
 struct cbuf take (size_t count, char const *rev);
-char const *namedrev (char const *, struct hshentry *);
-char const *tiprev (void);
-int cmpdate (char const *, char const *);
-int cmpnum (char const *, char const *);
-int cmpnumfld (char const *, char const *, int);
-int compartial (char const *, char const *, int);
-bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
-struct hshentry *genrevs (char const *, char const *, char const *,
-                          char const *, struct hshentries **);
+int cmpnum (char const *num1, char const *num2);
+int cmpnumfld (char const *num1, char const *num2, int fld);
+int cmpdate (char const *d1, char const *d2);
+int compartial (char const *num1, char const *num2, int length);
+struct hshentry *genrevs (char const *revno, char const *date,
+                          char const *author, char const *state,
+                          struct hshentries **store);
 struct hshentry *gr_revno (char const *revno, struct hshentries **store);
-int countnumflds (char const *);
+bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
+char const *namedrev (char const *name, struct hshentry *delta);
+char const *tiprev (void);
 
 /* rcssyn */
-/* Minimum value for no logical expansion.  */
-#define MIN_UNEXPAND  kwsub_o
-/* The minimum value guaranteed to yield an identical file.  */
-#define MIN_UNCHANGED_EXPAND  (OPEN_O_BINARY ? kwsub_b : kwsub_o)
-struct diffcmd
-{
-  /* Number of first line.  */
-  long line1;
-  /* Number of lines affected.  */
-  long nlines;
-  /* Previous 'a' line1+1 or 'd' line1.  */
-  long adprev;
-  /* Sum of previous 'd' line1 and previous 'd' nlines.  */
-  long dafter;
-};
-extern const char const *const expand_names[];
-void unexpected_EOF (void) exiting;
-int getdiffcmd (struct fro *, bool, FILE *, struct diffcmd *);
 void getadmin (void);
-void getdesc (bool);
+void ignorephrases (struct tinysym const *key);
 void gettree (void);
-void ignorephrases (struct tinysym const *);
-void initdiffcmd (struct diffcmd *);
-void putadmin (void);
-void putstring (FILE *, bool, struct cbuf, bool);
-void puttree (struct hshentry const *, FILE *);
+void getdesc (bool);
+void unexpected_EOF (void)
+  exiting;
+void initdiffcmd (struct diffcmd *dc);
+int getdiffcmd (struct fro *finfile, bool delimiter,
+                FILE *foutfile, struct diffcmd *dc);
 
 /* rcstime */
-/* Maxiumum length of time zone string, e.g. "+12:34:56".  */
-#define zonelenmax  9
-char const *date2str (char const[datesize], char[datesize + zonelenmax]);
-time_t date2time (char const[datesize]);
-void str2date (char const *, char[datesize]);
-void time2date (time_t, char[datesize]);
-void zone_set (char const *);
+void time2date (time_t unixtime, char date[datesize]);
+void str2date (char const *source, char target[datesize]);
+time_t date2time (char const source[datesize]);
+void zone_set (char const *s);
+char const *date2str (char const date[datesize],
+                      char datebuf[datesize + zonelenmax]);
 
 /* rcsutil */
 void gnurcs_init (void);
-void bad_option (char const *);
+void bad_option (char const *option);
 struct cbuf minus_p (char const *xrev, char const *rev);
-char *cgetenv (char const *);
-char *str_save (char const *);
-char const *getusername (bool);
-int getRCSINIT (int, char **, char ***);
-int run (int, char const *, ...);
-int runv (int, char const *, char const **);
-
-time_t now (void);
-void awrite (char const *, size_t, FILE *);
 void ffree (void);
 void free_NEXT_str (void);
-void setRCSversion (char const *);
+char *str_save (char const *s);
+char *cgetenv (char const *name);
+char const *getusername (bool suspicious);
+void awrite (char const *buf, size_t chars, FILE *f);
+int runv (int infd, char const *outname, char const **args);
+int run (int infd, char const *outname, ...);
+void setRCSversion (char const *str);
+int getRCSINIT (int argc, char **argv, char ***newargv);
 uid_t ruid (void);
 bool myself (uid_t);
 #if defined HAVE_SETUID
@@ -887,14 +901,15 @@ void setrid (void);
 #define seteid()
 #define setrid()
 #endif
-
-bool isSLASH (int c);
+time_t now (void);
 
 /* Indexes into ‘BE (sff)’.  */
 #define SFFI_LOCKDIR  0
 #define SFFI_NEWDIR   BAD_CREAT0
 
 /* Idioms.  */
+
+#define clear_buf(b)  (((b)->string = NULL, (b)->size = 0))
 
 #define STR_DIFF(a,b)  (strcmp ((a), (b)))
 #define STR_SAME(a,b)  (! STR_DIFF ((a), (b)))
