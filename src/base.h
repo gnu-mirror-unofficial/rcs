@@ -761,6 +761,7 @@ char const *rcssuffix (char const *);
 int pairnames (int, char **, open_rcsfile_fn *, bool, bool);
 
 /* rcsgen */
+void format_assocs (FILE *out, char const *fmt);
 char const *buildrevision (struct hshentries const *,
                            struct hshentry *, FILE *, bool);
 int getcstdin (void);

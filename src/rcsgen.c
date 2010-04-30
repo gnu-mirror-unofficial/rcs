@@ -324,11 +324,21 @@ getsstdin (char const *option, char const *name, char const *note)
 }
 
 void
+format_assocs (FILE *out, char const *fmt)
+{
+  for (struct wlink *ls = ADMIN (assocs); ls; ls = ls->next)
+    {
+      struct symdef *d = ls->entry;
+
+      aprintf (out, fmt, d->meaningful, d->underlying);
+    }
+}
+
+void
 putadmin (void)
 /* Output the admin node.  */
 {
   register FILE *fout;
-  struct wlink const *curassoc;
   struct rcslock const *curlock;
   struct link const *curaccess;
 
@@ -361,14 +371,7 @@ putadmin (void)
       curaccess = curaccess->next;
     }
   aprintf (fout, ";\n%s", TINYKS (symbols));
-  curassoc = ADMIN (assocs);
-  while (curassoc)
-    {
-      struct symdef *d = curassoc->entry;
-
-      aprintf (fout, "\n\t%s:%s", d->meaningful, d->underlying);
-      curassoc = curassoc->next;
-    }
+  format_assocs (fout, "\n\t%s:%s");
   aprintf (fout, ";\n%s", TINYKS (locks));
   curlock = ADMIN (locks);
   while (curlock)

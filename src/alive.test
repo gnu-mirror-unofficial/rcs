@@ -423,9 +423,9 @@ branch:
 locks: strict
 access list:
 symbolic names:
-	N: 2.1
-	Oz: 2.1
 	n: 1.8
+	Oz: 2.1
+	N: 2.1
 keyword substitution: kv
 total revisions: 13;	selected revisions: 1
 description:

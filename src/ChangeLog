@@ -1,5 +1,15 @@
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: format_assocs
+
+	* base.h (format_assocs): New func decl.
+	* rcsgen.c (format_assocs): New func.
+	(putadmin): Use ‘format_assocs’.
+	* rlog.c (main): Likewise.
+	* alive.test: Update expected rlog(1) output.
+
+2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Recognize ‘commitid SYMBOL’ in RCS file delta tree.
 
 	* base.h (struct hshentry): Add member ‘commitid’.
