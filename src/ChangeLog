@@ -1,3 +1,13 @@
+2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Move ‘expandline’ scratch to expansion context.
+
+	* b-kwxout.h (struct expctx): Add member ‘lparts’.
+	* b-kwxout.c (LPARTS): Delete #define.
+	(ENSURE_LPARTS): Delete macro.
+	(expandline): Create/use space directly in expansion context.
+	* base.h (struct manifestation): Delete member ‘lparts’.
+
 2010-04-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] For rcsedit.c, use es->foo directly.

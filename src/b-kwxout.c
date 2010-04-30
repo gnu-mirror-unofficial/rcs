@@ -288,10 +288,6 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
     }
 }
 
-#define LPARTS  MANI (lparts)
-
-#define ENSURE_LPARTS()  if (!LPARTS) LPARTS = make_space ("lparts")
-
 int
 expandline (struct expctx *ctx)
 /* Read a line from ‘ctx->from’ and write it to ‘ctx->to’.  Do keyword
@@ -303,6 +299,7 @@ expandline (struct expctx *ctx)
    incomplete line is copied, 2 if a complete line is copied; add 1 to
    return value if expansion occurred.  */
 {
+  struct divvy *lparts = ctx->lparts;
   struct fro *fin = ctx->from;
   bool delimstuffed = ctx->delimstuffed;
   int c;
@@ -313,11 +310,12 @@ expandline (struct expctx *ctx)
   char *cooked = NULL;
   size_t len;
 
-  ENSURE_LPARTS ();
+  if (!lparts)
+    lparts = ctx->lparts = make_space ("lparts");
 
   out = ctx->to;
   frew = ctx->rewr;
-  forget (LPARTS);
+  forget (lparts);
   e = false;
   r = -1;
 
@@ -358,7 +356,7 @@ expandline (struct expctx *ctx)
             case KDELIM:
               r = 0;
               /* Check for keyword.  */
-              accumulate_byte (LPARTS, KDELIM);
+              accumulate_byte (lparts, KDELIM);
               len = 0;
               for (;;)
                 {
@@ -371,7 +369,7 @@ expandline (struct expctx *ctx)
                       {
                       case LETTER:
                       case Letter:
-                        accumulate_byte (LPARTS, c);
+                        accumulate_byte (lparts, c);
                         len++;
                         continue;
                       default:
@@ -379,8 +377,8 @@ expandline (struct expctx *ctx)
                       }
                   break;
                 }
-              accumulate_byte (LPARTS, c);
-              cooked = finish_string (LPARTS, &len);
+              accumulate_byte (lparts, c);
+              cooked = finish_string (lparts, &len);
               if (! recognize_keyword (cooked + 1, &matchresult))
                 {
                   cooked[len - 1] = '\0';
@@ -400,7 +398,7 @@ expandline (struct expctx *ctx)
                         GETCHAR_ELSE_GOTO (keystring_eof);
                       if (c == '\n' || c == KDELIM)
                         break;
-                      accumulate_byte (LPARTS, c);
+                      accumulate_byte (lparts, c);
                       if (c == SDELIM && delimstuffed)
                         {
                           /* Skip next ‘SDELIM’.  */
@@ -417,13 +415,13 @@ expandline (struct expctx *ctx)
                   if (c != KDELIM)
                     {
                       /* Couldn't find closing ‘KDELIM’ -- give up.  */
-                      cooked = finish_string (LPARTS, &len);
+                      cooked = finish_string (lparts, &len);
                       aputs (cooked, out);
                       /* Last c handled properly.  */
                       continue;
                     }
                   /* Ignore the region between VDELIM and KDELIM.  */
-                  cooked = finish_string (LPARTS, &len);
+                  cooked = finish_string (lparts, &len);
                 }
               /* Now put out the new keyword value.  */
               keyreplace (&matchresult, ctx);
@@ -436,7 +434,7 @@ expandline (struct expctx *ctx)
     }
 
 keystring_eof:
-  cooked = finish_string (LPARTS, &len);
+  cooked = finish_string (lparts, &len);
   aputs (cooked, out);
 done:
   return r + e;

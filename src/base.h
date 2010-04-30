@@ -542,10 +542,6 @@ struct manifestation
     char *rev;
     char *state;
   } prev;
-
-  /* Some space to (temporarily) hold key/value/line fragments.
-     -- expandline  */
-  struct divvy *lparts;
 };
 
 /* The parse state is used when reading the RCS file.  */

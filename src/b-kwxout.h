@@ -25,6 +25,10 @@ struct expctx
   struct fro *from;
   struct hshentry const *delta;
   const bool delimstuffed, dolog;
+
+  /* Some space to (temporarily) hold key/value/line fragments
+     (for kwxout-internal use; not set by callers).  */
+  struct divvy *lparts;
 };
 
 /* Idioms.  Note that .delta is hardcoded ‘delta’.  */
