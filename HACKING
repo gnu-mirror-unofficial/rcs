@@ -19,7 +19,7 @@ It lives in the repo but is not included in the distribution.
 ***** DONE temp file security hole in rcsfreeze (debian #27845)
 ***** DONE don't say "path" when referring to file names
 *** features
-***** recognize keyword `commitid' (debian #352527)
+***** recognize keyword ‘commitid’ (debian #352527)
 ***** ident accept numbers as well as letters (debian #157891)
 
 * coding standards
@@ -30,7 +30,7 @@ It lives in the repo but is not included in the distribution.
 ***** format: while hacking, ttn-style; on release, scrunch to GNU
 ***** changes titled with suffix "; nfc." can be excluded
 
-* possible future changes (see manual for the more feasible ones)      :ARCHIVE:
+* possible future changes (see manual for the more feasible ones)
 
 *** Bring back sccstorcs.
 
@@ -50,9 +50,9 @@ It lives in the repo but is not included in the distribution.
     the next undeleted revision exists, but are merely appended to the log
     message of that revision.
 
-*** ci -k should be able to get keyword values from the first `$Log' entry.
+*** ci -k should be able to get keyword values from the first ‘$Log’ entry.
 
-* require a change to RCS file format				       :ARCHIVE:
+* require a change to RCS file format
 
 *** Allow keyword expansion to be changed on a per-revision basis,
     not on a per-file basis as now.  This would allow -ko to be used on
@@ -69,15 +69,15 @@ It lives in the repo but is not included in the distribution.
     Don't bother to use a .Z extension that would exceed file name length
     limits; just look at the magic number.
 
-*** Add locker commentary, e.g. `co -l -m"checkout to fix merge bug" foo'
-    to tell others why you checked out `foo'.  Also record the time when the
+*** Add locker commentary, e.g. ‘co -l -m"checkout to fix merge bug" foo’
+    to tell others why you checked out ‘foo’.  Also record the time when the
     revision was locked, and perhaps the working filename (if applicable).
 
 *** Let the user mark an RCS revision as deleted; checking out such a revision
-    would result in no working file.  Similarly, using `co -d' with a date
+    would result in no working file.  Similarly, using ‘co -d’ with a date
     either before the initial revision or after the file was marked deleted
     should remove the working file.  For extra credit, extend the notion of
-    `deleted' to include `renamed'.  RCS should support arbitrary combinations
+    ‘deleted’ to include ‘renamed’.  RCS should support arbitrary combinations
     of renaming and deletion, e.g. renaming A to B and B to A, checking in new
     revisions to both files, and then renaming them back.
 
@@ -91,10 +91,10 @@ It lives in the repo but is not included in the distribution.
 
 *** Add rcs options for changing keyword names, e.g. XConsortium instead of Id.
 
-*** Add a `$Description' keyword; but this may be tricky,
+*** Add a ‘$Description’ keyword; but this may be tricky,
     since descriptions can contain newlines and $s.
 
-*** Add a `$Copyright' keyword that expands to a copyright notice.
+*** Add a ‘$Copyright’ keyword that expands to a copyright notice.
 
 *** Add frozen branches a la SCCS.
     In general, be able to emulate all of SCCS, so that an SCCS-to-RCS program
@@ -125,5 +125,5 @@ It lives in the repo but is not included in the distribution.
 *** Extend the ,v grammar so that keywords need not be in a fixed order.
 
 *** Internationalize messages.
-    This requires a change in RCS file format because of the `empty log
-    message' and `checked in with -k' hacks inside RCS files.
+    This requires a change in RCS file format because of the ‘empty log
+    message’ and ‘checked in with -k’ hacks inside RCS files.
