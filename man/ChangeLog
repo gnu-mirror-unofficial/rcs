@@ -1,5 +1,11 @@
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[man] Fix rcsfile(5) typo.
+
+	* rcsfile.5in (id): Add asterisk after first production component.
+
+2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Recognize ‘commitid SYMBOL’ in RCS file delta tree.
 
 	* rcsfile.5in (delta): Add optional ‘commitid’ to production.
