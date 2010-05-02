@@ -1,3 +1,9 @@
+2010-05-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘bool’ more.
+
+	* base.h (struct hshentry): Change type of member ‘selector’ to bool.
+
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Freeze RCS file syntax; drop ‘newphrase’ support.

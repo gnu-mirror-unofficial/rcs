@@ -282,7 +282,7 @@ struct hshentry
   long deletelns;
 
   /* True if selected, false if deleted.  */
-  char selector;
+  bool selector;
 };
 
 /* List of hash entries.  */
