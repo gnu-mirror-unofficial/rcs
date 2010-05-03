@@ -260,73 +260,41 @@ getstates (char *sp)
 }
 
 static void
-getdelrev (char *sp)
-/* Get revision range or branch to be deleted; place in ‘delrev’.  */
+putdelrev (char const *b, char const *e, bool sawsep)
 {
-  int c;
-  struct delrevpair *pt;
-  int separator;
-
-  pt = &delrev;
-  while ((c = (*++sp)) == ' ' || c == '\n' || c == '\t')
-    continue;
-
-  /* Support old ambiguous '-' syntax; this will go away.  */
-  if (strchr (sp, ':'))
-    separator = ':';
-  else
+  if (delrev.strt || delrev.end)
     {
-      if (strchr (sp, '-') && VERSION (5) <= BE (version))
-        PWARN ("`-' is obsolete in `-o%s'; use `:' instead", sp);
-      separator = '-';
-    }
-
-  if (c == separator)
-    {                           /* -o:rev */
-      while ((c = (*++sp)) == ' ' || c == '\n' || c == '\t')
-        continue;
-      pt->strt = sp;
-      pt->code = 1;
-      while (c != ' ' && c != '\n' && c != '\t' && c != '\0')
-        c = (*++sp);
-      *sp = '\0';
-      pt->end = NULL;
+      PWARN ("ignoring spurious `-o' range `%s:%s'",
+             b ? b : "(unspecified)",
+             e ? e : "(unspecified)");
       return;
     }
-  else
+
+  if (!sawsep)
+    /* -o rev or branch */
     {
-      pt->strt = sp;
-      while (c != ' ' && c != '\n' && c != '\t' && c != '\0'
-             && c != separator)
-        c = *++sp;
-      *sp = '\0';
-      while (c == ' ' || c == '\n' || c == '\t')
-        c = *++sp;
-      if (c == '\0')
-        {                       /* -o rev or branch */
-          pt->code = 0;
-          pt->end = NULL;
-          return;
-        }
-      if (c != separator)
-        {
-          PERR ("invalid range %s %s after -o", pt->strt, sp);
-        }
-      while ((c = *++sp) == ' ' || c == '\n' || c == '\t')
-        continue;
-      if (!c)
-        {                       /* -orev: */
-          pt->code = 2;
-          pt->end = NULL;
-          return;
-        }
+      delrev.strt = b;
+      delrev.code = 0;
     }
-  /* -orev1:rev2 */
-  pt->end = sp;
-  pt->code = 3;
-  while (c != ' ' && c != '\n' && c != '\t' && c != '\0')
-    c = *++sp;
-  *sp = '\0';
+  else if (!b || !b[0])
+    /* -o:rev */
+    {
+      delrev.strt = e;                  /* FIXME: weird */
+      delrev.code = 1;
+    }
+  else if (!e[0])
+    /* -orev: */
+    {
+      delrev.strt = b;
+      delrev.code = 2;
+    }
+  else
+    /* -orev1:rev2 */
+    {
+      delrev.strt = b;
+      delrev.end = e;
+      delrev.code = 3;
+    }
 }
 
 static void
@@ -1296,7 +1264,7 @@ main (int argc, char **argv)
               PERR ("missing revision range after -o");
               break;
             }
-          getdelrev ((*argv) + 1);
+          parse_revpairs ('o', (*argv) + 2, putdelrev);
           break;
 
         case 's':

@@ -862,6 +862,8 @@ char const *date2str (char const date[datesize],
 void gnurcs_init (void);
 void bad_option (char const *option);
 struct cbuf minus_p (char const *xrev, char const *rev);
+void parse_revpairs (char option, char *arg,
+                     void (*put) (char const *b, char const *e, bool sawsep));
 void ffree (void);
 void free_NEXT_str (void);
 char *str_save (char const *s);

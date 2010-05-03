@@ -72,6 +72,76 @@ minus_p (char const *xrev, char const *rev)
 }
 
 void
+parse_revpairs (char option, char *arg,
+                void (*put) (char const *b, char const *e, bool sawsep))
+/* Destructively tokenize string ‘arg’ for ‘option’ (either 'r' or 'o')
+   into comma- or semicolon-separated chunks.  For each chunk, tokenize
+   a "range": either REV, REV1:, :REV1, or REV1:REV2, where ':' can also
+   be '-' (old ambiguous syntax that will go away with RCS 6.x).
+   Call ‘put’ for each pair thus found.  */
+{
+  register char c;
+  int separator = strchr (arg, ':') ? ':' : '-';
+  char const *b = NULL, *e = NULL;
+
+  c = *arg;
+
+  /* Support old ambiguous '-' syntax; this will go away.  */
+  if ('-' == separator
+      && strchr (arg, '-')
+      && VERSION (5) <= BE (version))
+    PWARN ("`-' is obsolete in `-%c%s'; use `:' instead", option, arg);
+
+  for (;;)
+    {
+#define SKIPWS()  while (c == ' ' || c == '\t' || c == '\n') c = *++arg
+#define NOMORE    '\0': case ' ': case '\t': case '\n': case ',': case ';'
+#define TRUNDLE()                               \
+      for (;; c = *++arg)                       \
+        {                                       \
+          switch (c)                            \
+            {                                   \
+            default:                            \
+              continue;                         \
+            case NOMORE:                        \
+              break;                            \
+            case ':': case '-':                 \
+              if (c == separator)               \
+                break;                          \
+              continue;                         \
+            }                                   \
+          break;                                \
+        }                                       \
+      *arg = '\0'
+
+      SKIPWS ();
+      b = arg;
+      TRUNDLE ();
+      SKIPWS ();
+      if (c == separator)
+        {
+          while ((c = *++arg) == ' ' || c == '\t' || c == '\n')
+            continue;
+          e = arg;
+          TRUNDLE ();
+          put (b, e, true);
+          SKIPWS ();
+        }
+      else
+        put (b, e, false);
+      if (!c)
+        break;
+      else if (c == ',' || c == ';')
+        c = *++arg;
+      else
+        PERR ("missing `,' near `%c%s'", c, arg + 1);
+#undef TRUNDLE
+#undef NOMORE
+#undef SKIPWS
+    }
+}
+
+void
 ffree (void)
 /* Free all blocks in the ‘SINGLE’ space.  */
 {

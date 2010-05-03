@@ -1,5 +1,18 @@
 2010-05-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: parse_revpairs
+
+	* rcsutil.c (parse_revpairs): New func.
+	* base.h (parse_revpairs): New func decl.
+	* rcs.c (putdelrev): New static func.
+	(getdelrev): Delete func.
+	(main): Use ‘parse_revpairs’.
+	* rlog.c (putrevpairs): New static func.
+	(getrevpairs): Delete func.
+	(main): Use ‘parse_revpairs’.
+
+2010-05-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	ident: Make error message more conventional.
 
 	* ident.c (reportError): Delete func.

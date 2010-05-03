@@ -767,101 +767,22 @@ freebufs:
 }
 
 static void
-getrevpairs (register char *argv)
-/* Get revision or branch range from command line; store in ‘revlist’.  */
+putrevpairs (char const *b, char const *e, bool sawsep)
+/* Store a revision or branch range into ‘revlist’.  */
 {
-  register char c;
-  struct Revpairs *nextrevpair;
-  int separator;
+  struct Revpairs *rp = ZLLOC (1, struct Revpairs);
 
-  c = *argv;
-
-  /* Support old ambiguous '-' syntax; this will go away.  */
-  if (strchr (argv, ':'))
-    separator = ':';
-  else
-    {
-      if (strchr (argv, '-') && VERSION (5) <= BE (version))
-        PWARN ("`-' is obsolete in `-r%s'; use `:' instead", argv);
-      separator = '-';
-    }
-
-  for (;;)
-    {
-      while (c == ' ' || c == '\t' || c == '\n')
-        c = *++argv;
-      nextrevpair = ZLLOC (1, struct Revpairs);
-      nextrevpair->rnext = revlist;
-      revlist = nextrevpair;
-      nextrevpair->numfld = 1;
-      nextrevpair->strtrev = argv;
-      for (;; c = *++argv)
-        {
-          switch (c)
-            {
-            default:
-              continue;
-            case '\0':
-            case ' ':
-            case '\t':
-            case '\n':
-            case ',':
-            case ';':
-              break;
-            case ':':
-            case '-':
-              if (c == separator)
-                break;
-              continue;
-            }
-          break;
-        }
-      *argv = '\0';
-      while (c == ' ' || c == '\t' || c == '\n')
-        c = *++argv;
-      if (c == separator)
-        {
-          while ((c = *++argv) == ' ' || c == '\t' || c == '\n')
-            continue;
-          nextrevpair->endrev = argv;
-          for (;; c = *++argv)
-            {
-              switch (c)
-                {
-                default:
-                  continue;
-                case '\0':
-                case ' ':
-                case '\t':
-                case '\n':
-                case ',':
-                case ';':
-                  break;
-                case ':':
-                case '-':
-                  if (c == separator)
-                    break;
-                  continue;
-                }
-              break;
-            }
-          *argv = '\0';
-          while (c == ' ' || c == '\t' || c == '\n')
-            c = *++argv;
-          nextrevpair->numfld =
-            (!nextrevpair->endrev[0]
-             ? 2                        /* -rREV: */
-             : (!nextrevpair->strtrev[0]
-                ? 3                     /* -r:REV */
-                : 4));                  /* -rREV1:REV2 */
-        }
-      if (!c)
-        break;
-      else if (c == ',' || c == ';')
-        c = *++argv;
-      else
-        PERR ("missing `,' near `%c%s'", c, argv + 1);
-    }
+  rp->strtrev = b;
+  rp->endrev = e;
+  rp->numfld = (!sawsep
+                ? 1                     /* -rREV */
+                : (!e[0]
+                   ? 2                  /* -rREV: */
+                   : (!b[0]
+                      ? 3               /* -r:REV */
+                      : 4)));           /* -rREV1:REV2 */
+  rp->rnext = revlist;
+  revlist = rp;
 }
 
 /*:help
@@ -958,7 +879,7 @@ main (int argc, char **argv)
           break;
 
         case 'r':
-          getrevpairs (a);
+          parse_revpairs ('r', a, putrevpairs);
           break;
 
         case 'd':
