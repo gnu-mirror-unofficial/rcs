@@ -31,24 +31,6 @@
 
 struct top *top;
 
-struct rcslockers
-{
-  char const *login;
-  struct rcslockers *lockerlink;
-};
-
-struct stateattri
-{
-  char const *status;
-  struct stateattri *nextstate;
-};
-
-struct authors
-{
-  char const *login;
-  struct authors *nextauthor;
-};
-
 struct Revpairs
 {
   int numfld;
@@ -79,13 +61,13 @@ static struct Datepairs *datelist, *duelst;
 static struct Revpairs *revlist, *Revlst;
 
 /* Login names in author option.  */
-static struct authors *authorlist;
+static struct link *authorlist;
 
 /* Lockers in locker option.  */
-static struct rcslockers *lockerlist;
+static struct link *lockerlist;
 
 /* States in ‘-s’ option.  */
-static struct stateattri *statelist;
+static struct link *statelist;
 
 static int exitstatus;
 
@@ -109,7 +91,7 @@ getlocker (char *argv)
    and store in ‘lockerlist’.  */
 {
   register char c;
-  struct rcslockers *newlocker;
+  struct link fake, *tp;
 
   argv--;
   while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -121,18 +103,20 @@ getlocker (char *argv)
       return;
     }
 
+  fake.next = lockerlist;
+  tp = &fake;
   while (c != '\0')
     {
-      newlocker = ZLLOC (1, struct rcslockers);
-      newlocker->lockerlink = lockerlist;
-      newlocker->login = argv;
-      lockerlist = newlocker;
+      tp = extend (tp, argv, SHARED);
       while ((c = *++argv) && c != ',' && c != ' ' && c != '\t' && c != '\n'
              && c != ';')
         continue;
       *argv = '\0';
       if (c == '\0')
-        return;
+        {
+          lockerlist = fake.next;
+          return;
+        }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
              || c == ';')
         continue;
@@ -326,20 +310,20 @@ extractdelta (struct hshentry const *pdelta)
 /* Return true if ‘pdelta’ matches the selection critera.  */
 {
   struct rcslock const *plock;
-  struct stateattri const *pstate;
-  struct authors const *pauthor;
+  struct link const *pstate;
+  struct link const *pauthor;
   struct Revpairs const *prevision;
   int length;
 
   /* Only certain authors wanted.  */
   if ((pauthor = authorlist))
-    while (STR_DIFF (pauthor->login, pdelta->author))
-      if (!(pauthor = pauthor->nextauthor))
+    while (STR_DIFF (pauthor->entry, pdelta->author))
+      if (!(pauthor = pauthor->next))
         return false;
   /* Only certain states wanted.  */
   if ((pstate = statelist))
-    while (STR_DIFF (pstate->status, pdelta->state))
-      if (!(pstate = pstate->nextstate))
+    while (STR_DIFF (pstate->entry, pdelta->state))
+      if (!(pstate = pstate->next))
         return false;
   /* Only locked revisions wanted.  */
   if (lockflag)
@@ -389,32 +373,32 @@ getauthor (char *argv)
 /* Get the author's name from command line and store in ‘authorlist’.  */
 {
   register int c;
-  struct authors *newauthor;
+  struct link fake, *tp;
 
   argv--;
   while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
          || c == ';')
     continue;
+  fake.next = authorlist;
+  tp = &fake;
   if (c == '\0')
     {
-      authorlist = ZLLOC (1, struct authors);
-      authorlist->login = getusername (false);
-      authorlist->nextauthor = NULL;
+      tp = extend (tp, getusername (false), SHARED);
       return;
     }
 
   while (c != '\0')
     {
-      newauthor = ZLLOC (1, struct authors);
-      newauthor->nextauthor = authorlist;
-      newauthor->login = argv;
-      authorlist = newauthor;
+      tp = extend (tp, argv, SHARED);
       while ((c = *++argv) && c != ',' && c != ' ' && c != '\t' && c != '\n'
              && c != ';')
         continue;
       *argv = '\0';
       if (c == '\0')
-        return;
+        {
+          authorlist = fake.next;
+          return;
+        }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
              || c == ';')
         continue;
@@ -426,7 +410,7 @@ getstate (char *argv)
 /* Get the states of revisions from command line and store in ‘statelist’.  */
 {
   register char c;
-  struct stateattri *newstate;
+  struct link fake, *tp;
 
   argv--;
   while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -438,18 +422,20 @@ getstate (char *argv)
       return;
     }
 
+  fake.next = statelist;
+  tp = &fake;
   while (c != '\0')
     {
-      newstate = ZLLOC (1, struct stateattri);
-      newstate->nextstate = statelist;
-      newstate->status = argv;
-      statelist = newstate;
+      tp = extend (tp, argv, SHARED);
       while ((c = *++argv) && c != ',' && c != ' ' && c != '\t' && c != '\n'
              && c != ';')
         continue;
       *argv = '\0';
       if (c == '\0')
-        return;
+        {
+          statelist = fake.next;
+          return;
+        }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
              || c == ';')
         continue;
@@ -461,7 +447,7 @@ trunclocks (void)
 /* Truncate the list of locks to those that are held by the
    id's on ‘lockerlist’.  Do not truncate if ‘lockerlist’ empty.  */
 {
-  struct rcslockers const *plocker;
+  struct link const *plocker;
   struct rcslock *p, **pp;
 
   if (!lockerlist)
@@ -470,12 +456,12 @@ trunclocks (void)
   /* Shorten locks to those contained in ‘lockerlist’.  */
   for (pp = &ADMIN (locks); (p = *pp);)
     for (plocker = lockerlist;;)
-      if (STR_SAME (plocker->login, p->login))
+      if (STR_SAME (plocker->entry, p->login))
         {
           pp = &p->nextlock;
           break;
         }
-      else if (!(plocker = plocker->lockerlink))
+      else if (!(plocker = plocker->next))
         {
           *pp = p->nextlock;
           break;

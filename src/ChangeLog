@@ -1,3 +1,18 @@
+2010-05-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘struct link’ more.
+
+	* rlog.c (struct rcslockers): Delete.
+	(struct stateattri, struct authors): Likewise.
+	(authorlist, lockerlist, statelist): Change type to ‘struct link *’.
+	(getlocker, getauthor, getstate): Use ‘extend’.
+	(extractdelta, trunclocks): Update to walk ‘struct link *’ list.
+	* rcs.c (struct Lockrev): Delete.
+	(newlocklst, rmvlocklst): Change type to ‘struct link *’.
+	(rmnewlocklst): Return ‘struct link *’.
+	(dolocks): Update to walk ‘struct link *’ list.
+	(main): Use ‘extend’.
+
 2010-05-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘bool’ more.

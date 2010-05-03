@@ -33,12 +33,6 @@
 
 struct top *top;
 
-struct Lockrev
-{
-  char const *revno;
-  struct Lockrev *nextrev;
-};
-
 struct Symrev
 {
   char const *revno;
@@ -81,7 +75,7 @@ static struct cbuf numrev;
 static char const *headstate;
 static bool chgheadstate, lockhead, unlockcaller, suppress_mail;
 static int exitstatus;
-static struct Lockrev *newlocklst, *rmvlocklst;
+static struct link *newlocklst, *rmvlocklst;
 static struct Message *messagelst, **nextmessage;
 static struct Status *statelst, **nextstate;
 static struct Symrev *assoclst, **nextassoc;
@@ -397,19 +391,19 @@ scanlogtext (struct editstuff *es, struct hshentry *delta, bool edit)
     enterstring (es);
 }
 
-static struct Lockrev **
+static struct link *
 rmnewlocklst (char const *which)
 /* Remove lock to revision ‘which’ from ‘newlocklst’.  */
 {
-  struct Lockrev *pt, **pre;
+  struct link *pt, **pre;
 
   pre = &newlocklst;
   while ((pt = *pre))
-    if (STR_DIFF (pt->revno, which))
-      pre = &pt->nextrev;
+    if (STR_DIFF (pt->entry, which))
+      pre = &pt->next;
     else
-      *pre = pt->nextrev;
-  return pre;
+      *pre = pt->next;
+  return *pre;
 }
 
 static bool
@@ -851,7 +845,7 @@ dolocks (void)
    add new locks which are stored in ‘newlocklst’,
    add lock for ‘ADMIN (defbr)’ or ‘ADMIN (head)’ if ‘lockhead’ is set.  */
 {
-  struct Lockrev const *lockpt;
+  struct link const *lockpt;
   struct hshentry *target;
   bool changed = false;
 
@@ -886,15 +880,16 @@ dolocks (void)
     }
 
   /* Remove locks which are stored in rmvlocklst.  */
-  for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->nextrev)
-    if (fully_numeric_no_k (&numrev, lockpt->revno))
+  for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->next)
+    if (fully_numeric_no_k (&numrev, lockpt->entry))
       {
         target = gr_revno (numrev.string, &gendeltas);
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
                 && cmpnum (target->num, numrev.string))
-              RERR ("can't unlock nonexisting revision %s", lockpt->revno);
+              RERR ("can't unlock nonexisting revision %s",
+                    (char const *) lockpt->entry);
             else
               changed |= breaklock (target);
           }
@@ -902,8 +897,8 @@ dolocks (void)
       }
 
   /* Add new locks which stored in newlocklst.  */
-  for (lockpt = newlocklst; lockpt; lockpt = lockpt->nextrev)
-    changed |= setlock (lockpt->revno);
+  for (lockpt = newlocklst; lockpt; lockpt = lockpt->next)
+    changed |= setlock (lockpt->entry);
 
   if (lockhead)
     {
@@ -1131,8 +1126,8 @@ main (int argc, char **argv)
   bool keepRCStime;
   size_t commsymlen;
   struct cbuf branchnum;
-  struct Lockrev *lockpt;
-  struct Lockrev **curlock, **rmvlock;
+  struct link fakelock, *tplock;
+  struct link fakerm, *tprm;
   struct Status *curstate;
 
   CHECK_HV ();
@@ -1147,8 +1142,10 @@ main (int argc, char **argv)
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
   commsymlen = 0;
-  curlock = &newlocklst;
-  rmvlock = &rmvlocklst;
+  fakelock.next = newlocklst;
+  tplock = &fakelock;
+  fakerm.next = rmvlocklst;
+  tprm = &fakerm;
   expmode = -1;
   BE (pe) = X_DEFAULT;
   initflag = textflag = false;
@@ -1224,10 +1221,7 @@ main (int argc, char **argv)
               lockhead = true;
               break;
             }
-          *curlock = lockpt = ZLLOC (1, struct Lockrev);
-          lockpt->revno = a;
-          lockpt->nextrev = NULL;
-          curlock = &lockpt->nextrev;
+          tplock = extend (tplock, a, SHARED);
           break;
 
         case 'u':
@@ -1237,11 +1231,9 @@ main (int argc, char **argv)
               unlockcaller = true;
               break;
             }
-          *rmvlock = lockpt = ZLLOC (1, struct Lockrev);
-          lockpt->revno = a;
-          lockpt->nextrev = NULL;
-          rmvlock = &lockpt->nextrev;
-          curlock = rmnewlocklst (lockpt->revno);
+          tprm = extend (tprm, a, SHARED);
+          newlocklst = fakelock.next;
+          tplock = rmnewlocklst (a);
           break;
 
         case 'L':
@@ -1367,6 +1359,8 @@ main (int argc, char **argv)
           bad_option (*argv);
         };
     }
+  newlocklst = fakelock.next;
+  rmvlocklst = fakerm.next;
   /* (End processing of options.)  */
 
   /* Now handle all filenames.  */
