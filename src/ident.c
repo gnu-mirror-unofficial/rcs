@@ -34,16 +34,6 @@ exiterr (void)
   _Exit (EXIT_FAILURE);
 }
 
-static void
-reportError (char const *s)
-{
-  int e = errno;
-
-  complain ("%s error: ", PROGRAM (name));
-  errno = e;
-  perror (s);
-}
-
 static int
 match (register FILE *fp)
 /* Group substring between two KDELIM's; then do pattern match.  */
@@ -131,7 +121,7 @@ scanfile (register FILE *file, char const *name)
     }
   if (ferror (file) || fclose (file) != 0)
     {
-      reportError (name);
+      syserror_errno (name);
       /* The following is equivalent to ‘exit (EXIT_FAILURE)’, but we
          invoke ‘exiterr’ to keep lint happy.  The DOS and OS/2 ports
          need ‘exiterr’.  */
@@ -194,7 +184,7 @@ main (int argc, char **argv)
       {
         if (!(fp = fopen (a, FOPEN_RB)))
           {
-            reportError (a);
+            syserror_errno (a);
             status = EXIT_FAILURE;
           }
         else if (scanfile (fp, a) != 0
@@ -205,7 +195,7 @@ main (int argc, char **argv)
 
   if (ferror (stdout) || fclose (stdout) != 0)
     {
-      reportError ("standard output");
+      syserror_errno ("standard output");
       status = EXIT_FAILURE;
     }
   return status;

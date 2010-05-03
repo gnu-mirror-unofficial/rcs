@@ -1,5 +1,12 @@
 2010-05-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	ident: Make error message more conventional.
+
+	* ident.c (reportError): Delete func.
+	(scanfile, main): Use ‘syserror_errno’.
+
+2010-05-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘struct link’ more.
 
 	* rlog.c (struct rcslockers): Delete.
