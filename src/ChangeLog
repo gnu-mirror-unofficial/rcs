@@ -1,3 +1,11 @@
+2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Make ‘keepdate’ actually keep the date.
+
+	Regression introduced 2010-04-12,
+	"Use spaces for "ci -k" support".
+	* rcskeep.c (keepdate): Use ‘intern’, not ‘finish_string’.
+
 2010-05-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstraction: parse_revpairs

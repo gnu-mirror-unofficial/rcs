@@ -158,20 +158,21 @@ keepdate (struct fro *fp)
               char buf[64];
               size_t len;
 
-              snprintf (buf, 64, "%s%s %s%s",
-                        /* Parse dates put out by old versions of RCS.  */
-                        (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2])
-                         ? "19"
-                         : ""),
-                        d, t,
-                        (!strchr (t, '-') && !strchr (t, '+')
-                         ? "+0000"
-                         : ""));
+              len = snprintf
+                (buf, 64, "%s%s %s%s",
+                 /* Parse dates put out by old versions of RCS.  */
+                 (isdigit (d[0]) && isdigit (d[1]) && !isdigit (d[2])
+                  ? "19"
+                  : ""),
+                 d, t,
+                 (!strchr (t, '-') && !strchr (t, '+')
+                  ? "+0000"
+                  : ""));
               /* Do it twice to keep the SINGLE count synchronized.
                  If count were moot, we could simply brush off ‘d’.  */
               brush_off (SINGLE, t);
               brush_off (SINGLE, d);
-              PREV (date) = finish_string (SINGLE, &len);
+              PREV (date) = intern (SINGLE, buf, len);
             }
         }
     }
