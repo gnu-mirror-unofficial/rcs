@@ -33,15 +33,6 @@
 
 struct top *top;
 
-/* These structures hold user-specified (hence "u_" prefix)
-   variants of their base.h cousins.  */
-
-struct u_symdef
-{
-  struct symdef u;
-  bool override;
-};
-
 struct Message
 {
   char const *revno;

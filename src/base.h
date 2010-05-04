@@ -314,6 +314,14 @@ struct symdef
   char const *underlying;
 };
 
+/* Like ‘struct symdef’, for ci(1) and rcs(1).
+   The "u_" prefix stands for user-setting.  */
+struct u_symdef
+{
+  struct symdef u;
+  bool override;
+};
+
 /* Symbol-pool particulars.  */
 struct tinysym
 {

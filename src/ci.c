@@ -30,6 +30,7 @@
 #include "ci.help"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -46,13 +47,6 @@
 #endif
 
 struct top *top;
-
-struct Symrev
-{
-  char const *ssymbol;
-  bool override;
-  struct Symrev *nextsym;
-};
 
 static FILE *exfile;
 /* Working file pointer.  */
@@ -71,7 +65,7 @@ static struct hshentry *targetdelta;
 /* New delta to be inserted.  */
 static struct hshentry newdelta;
 static struct stat workstat;
-static struct Symrev *assoclst, **nextassoc;
+static struct link assoclst;
 
 static void
 cleanup (void)
@@ -413,11 +407,16 @@ addelta (void)
 static bool
 addsyms (char const *num)
 {
-  register struct Symrev *p;
+  struct link *ls;
+  struct u_symdef const *ud;
 
-  for (p = assoclst; p; p = p->nextsym)
-    if (addsymbol (num, p->ssymbol, p->override) < 0)
-      return false;
+  for (ls = assoclst.next; ls; ls = ls->next)
+    {
+      ud = ls->entry;
+
+      if (addsymbol (num, ud->u.meaningful, ud->override) < 0)
+        return false;
+    }
   return true;
 }
 
@@ -547,18 +546,12 @@ getlogmsg (void)
   return logmsg;
 }
 
-static void
-addassoclst (bool flag, char const *sp)
-/* Make a linked list of Symbolic names.  */
+static char const *
+first_meaningful_symbolic_name (void)
 {
-  struct Symrev *pt;
+  struct u_symdef const *ud = assoclst.next->entry;
 
-  pt = ZLLOC (1, struct Symrev);
-  pt->ssymbol = sp;
-  pt->override = flag;
-  pt->nextsym = NULL;
-  *nextassoc = pt;
-  nextassoc = &pt->nextsym;
+  return ud->u.meaningful;
 }
 
 /*:help
@@ -637,6 +630,7 @@ main (int argc, char **argv)
   mode_t newworkmode;           /* mode for working file */
   time_t mtime, wtime;
   struct hshentry *workdelta;
+  struct link *tp_assoc = &assoclst;
 
   CHECK_HV ();
   gnurcs_init ();
@@ -650,7 +644,6 @@ main (int argc, char **argv)
   altdate[0] = '\0';            /* empty alternate date for -d */
   usestatdate = false;
   BE (pe) = X_DEFAULT;
-  nextassoc = &assoclst;
 
   argc = getRCSINIT (argc, argv, &newargv);
   argv = newargv;
@@ -714,23 +707,22 @@ main (int argc, char **argv)
           break;
 
         case 'n':
-          if (!*a)
-            {
-              PERR ("missing symbolic name after -n");
-              break;
-            }
-          checkssym (a);
-          addassoclst (false, a);
-          break;
-
         case 'N':
-          if (!*a)
-            {
-              PERR ("missing symbolic name after -N");
-              break;
-            }
-          checkssym (a);
-          addassoclst (true, a);
+          {
+            char option = a[-1];
+            struct u_symdef *ud;
+
+            if (!*a)
+              {
+                PERR ("missing symbolic name after -%c", option);
+                break;
+              }
+            checkssym (a);
+            ud = ZLLOC (1, struct u_symdef);
+            ud->override = ('N' == option);
+            ud->u.meaningful = a;
+            tp_assoc = extend (tp_assoc, ud, SHARED);
+          }
           break;
 
         case 's':
@@ -1015,7 +1007,7 @@ main (int argc, char **argv)
                     lockthis = 0;
                   }
                 dolog = false;
-                if (!(changedRCS = lockflag < removedlock || assoclst))
+                if (!(changedRCS = lockflag < removedlock || assoclst.next))
                   workdelta = targetdelta;
                 else
                   /* We have started to build the wrong new RCS file.
@@ -1149,8 +1141,8 @@ main (int argc, char **argv)
                 /* Expand keywords in file.  */
                 BE (inclusive_of_Locker_in_Id_val) = lockthis;
                 workdelta->name =
-                  namedrev (assoclst
-                            ? assoclst->ssymbol
+                  namedrev (assoclst.next
+                            ? first_meaningful_symbolic_name ()
                             : (keepflag && PREV (name)
                                ? PREV (name)
                                : rev),

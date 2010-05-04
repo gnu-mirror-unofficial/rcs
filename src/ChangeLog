@@ -1,5 +1,21 @@
 2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘struct u_symdef’ more.
+
+	* rcs.c (struct u_symdef): Move from here...
+	* base.h (struct u_symdef): ...to here.
+	* ci.c: #include "b-esds.h".
+	(struct Symrev): Delete.
+	(assoclst): Change type to ‘struct link’.
+	(nextassoc): Delete var.
+	(addsyms): Update to walk ‘struct link’ list.
+	(addassoclst): Delete func.
+	(first_meaningful_symbolic_name): New static func.
+	(main): Combine ‘-n’, ‘-N’ handling; update ‘assoclst’
+	init and access; use ‘first_meaningful_symbolic_name’.
+
+2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘struct link’ more.
 
 	* rcs.c (struct chaccess): Delete member ‘nextchaccess’.
