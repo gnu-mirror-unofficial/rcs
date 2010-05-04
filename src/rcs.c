@@ -33,12 +33,13 @@
 
 struct top *top;
 
-struct Symrev
+/* These structures hold user-specified (hence "u_" prefix)
+   variants of their base.h cousins.  */
+
+struct u_symdef
 {
-  char const *revno;
-  char const *ssymbol;
+  struct symdef u;
   bool override;
-  struct Symrev *nextsym;
 };
 
 struct Message
@@ -78,7 +79,7 @@ static int exitstatus;
 static struct link *newlocklst, *rmvlocklst;
 static struct Message *messagelst, **nextmessage;
 static struct Status *statelst, **nextstate;
-static struct Symrev *assoclst, **nextassoc;
+static struct link assoclst;
 static struct chaccess *chaccess, **nextchaccess;
 static struct delrevpair delrev;
 static struct hshentry *cuthead, *cuttail, *delstrt;
@@ -105,45 +106,47 @@ exiterr (void)
 }
 
 static void
-getassoclst (bool flag, char *sp)
+getassoclst (struct link **tp, char *sp)
 /* Associate a symbolic name to a revision or branch,
    and store in ‘assoclst’.  */
 {
-  struct Symrev *pt;
-  char const *temp;
-  int c;
+  char option = *sp++;
+  struct u_symdef *ud;
+  char const *name;
+  int c = *sp;
 
-  while ((c = *++sp) == ' ' || c == '\t' || c == '\n')
-    continue;
-  temp = sp;
+#define SKIPWS()  while (c == ' ' || c == '\t' || c == '\n') c = *++sp
+
+  SKIPWS ();
+  name = sp;
   /* Check for invalid symbolic name.  */
   sp = checksym (sp, ':');
   c = *sp;
   *sp = '\0';
-  while (c == ' ' || c == '\t' || c == '\n')
-    c = *++sp;
+  SKIPWS ();
 
   if (c != ':' && c != '\0')
     {
-      PERR ("invalid string %s after option -n or -N", sp);
+      PERR ("invalid string `%s' after option `-%c'", sp, option);
       return;
     }
 
-  pt = ZLLOC (1, struct Symrev);
-  pt->ssymbol = temp;
-  pt->override = flag;
-  /* Delete symbol.  */
+  ud = ZLLOC (1, struct u_symdef);
+  ud->u.meaningful = name;
+  ud->override = ('N' == option);
   if (c == '\0')
-    pt->revno = NULL;
+    /* Delete symbol.  */
+    ud->u.underlying = NULL;
   else
+    /* Add association.  */
     {
-      while ((c = *++sp) == ' ' || c == '\n' || c == '\t')
-        continue;
-      pt->revno = sp;
+      c = *++sp;
+      SKIPWS ();
+      ud->u.underlying = sp;
     }
-  pt->nextsym = NULL;
-  *nextassoc = pt;
-  nextassoc = &pt->nextsym;
+  *tp = extend (*tp, ud, SHARED);
+
+#undef SKIPWS
 }
 
 static void
@@ -729,17 +732,18 @@ removerevs (void)
 
 static bool
 doassoc (void)
-/* Add or delete (if !revno) association that is stored in ‘assoclst’.  */
+/* Add or delete (if !underlying) association that is stored in ‘assoclst’.  */
 {
   char const *p;
   bool changed = false;
-  struct Symrev const *curassoc;
 
-  for (curassoc = assoclst; curassoc; curassoc = curassoc->nextsym)
+  for (struct link *cur = assoclst.next; cur; cur = cur->next)
     {
-      char const *ssymbol = curassoc->ssymbol;
+      struct u_symdef const *u = cur->entry;
+      char const *ssymbol = u->u.meaningful;
+      char const *under = u->u.underlying;
 
-      if (!curassoc->revno)
+      if (!under)
         /* Delete symbol.  */
         {
           struct wlink box, *tp;
@@ -762,16 +766,14 @@ doassoc (void)
       else
         /* Add new association.  */
         {
-          if (curassoc->revno[0])
-            {
-              p = NULL;
-              if (fully_numeric_no_k (&numrev, curassoc->revno))
-                p = numrev.string;
-            }
+          if (under[0])
+            p = fully_numeric_no_k (&numrev, under)
+              ? numrev.string
+              : NULL;
           else if (!(p = tiprev ()))
             RERR ("no latest revision to associate with symbol %s", ssymbol);
           if (p)
-            changed |= addsymbol (p, ssymbol, curassoc->override);
+            changed |= addsymbol (p, ssymbol, u->override);
         }
     }
   return changed;
@@ -1100,13 +1102,14 @@ main (int argc, char **argv)
   struct link fakelock, *tplock;
   struct link fakerm, *tprm;
   struct Status *curstate;
+  struct link *tp_assoc;
 
   CHECK_HV ();
   gnurcs_init ();
 
   nosetid ();
 
-  nextassoc = &assoclst;
+  tp_assoc = &assoclst;
   nextchaccess = &chaccess;
   nextmessage = &messagelst;
   nextstate = &statelst;
@@ -1230,22 +1233,14 @@ main (int argc, char **argv)
 
         case 'n':
           /* Add new association: error, if name exists.  */
-          if (!*a)
-            {
-              PERR ("missing symbolic name after -n");
-              break;
-            }
-          getassoclst (false, (*argv) + 1);
-          break;
-
         case 'N':
           /* Add or change association.  */
           if (!*a)
             {
-              PERR ("missing symbolic name after -N");
+              PERR ("missing symbolic name after -%c", (*argv)[1]);
               break;
             }
-          getassoclst (true, (*argv) + 1);
+          getassoclst (&tp_assoc, (*argv) + 1);
           break;
 
         case 'm':

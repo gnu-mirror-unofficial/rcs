@@ -1,5 +1,19 @@
 2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘struct Symrev’ with ‘struct link’ + ‘struct u_symdef’.
+
+	* rcs.c (struct Symrev): Delete.
+	(struct u_symdef): New.
+	(assoclst): Change type to ‘struct link’.
+	(nextassoc): Delete var.
+	(getassoclst): Don't take ‘flag’; instead, take ‘struct link **’;
+	compute override flag from first char in ‘sp’; add local macro
+	to skip whitespace; create a ‘struct u_symdef’; use ‘extend’.
+	(doassoc): Update to walk ‘struct link’ list.
+	(main): Update call to ‘getassoclst’; combine ‘-n’, ‘-N’ handling.
+
+2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	rcs: Fix bug: Correctly delete symbolic name.
 
 	Regression introduced 2010-04-28,
