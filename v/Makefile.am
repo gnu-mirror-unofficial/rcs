@@ -23,7 +23,8 @@ PATHPREFIX =
 
 TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$$(pwd)/../src/0pre/bin:$$PATH" sh
 TESTS = alive.test \
-  t000.test
+  t000.test \
+  t001.test
 
 EXTRA_DIST = $(TESTS)
 

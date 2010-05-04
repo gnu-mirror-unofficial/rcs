@@ -1,5 +1,15 @@
 2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	rcs: Fix bug: Correctly delete symbolic name.
+
+	Regression introduced 2010-04-28,
+	"Replace ‘struct assoc’ with ‘struct wlink’ + ‘struct symdef’".
+	* rcs.c (doassoc): Use local variable of type
+	‘struct symdef *’ to assign from ‘void *’ instead of
+	typecast; also, assign from ‘tp->entry’, not ‘tp’.
+
+2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Make ‘keepdate’ actually keep the date.
 
 	Regression introduced 2010-04-12,

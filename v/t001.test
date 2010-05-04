@@ -1,0 +1,29 @@
+# t001.test                                             -*- shell-script -*-
+
+. common
+
+w=$wd/x
+v=$wd/x,v
+
+# Initialize empty RCS file.
+do_and_show 'rcs -i -t-t001 $v' ; do_rlog ; cp $v ${v}SAVE
+# Add a revision.
+echo nonempty > $w
+do_and_show 'ci -u -r4.20 -mHELLO $w'
+# Name it (via rcs, not via ci).
+do_and_show 'rcs -nWONDERFUL: $w' ; do_rlog | tee $wd/last-rlog
+
+# We expect the name to appear in the RCS file.
+grep '	WONDERFUL: 4.20' $wd/last-rlog \
+    || exit 1
+
+# Remove the name.
+do_and_show 'rcs -nWONDERFUL $w' ; do_rlog | tee $wd/last-rlog
+
+# We expect the name to NOT appear in the RCS file.
+grep '	WONDERFUL: 4.20' $wd/last-rlog \
+    && exit 1
+
+exit 0
+
+# t001.test ends here

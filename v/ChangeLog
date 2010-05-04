@@ -1,3 +1,12 @@
+2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	rcs: Fix bug: Correctly delete symbolic name.
+
+	Regression introduced 2010-04-28,
+	"Replace ‘struct assoc’ with ‘struct wlink’ + ‘struct symdef’".
+	* t001.test: New file.
+	* Makefile.am (TESTS): Add t001.test.
+
 2010-03-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use GNU Automake.

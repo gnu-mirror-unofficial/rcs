@@ -734,30 +734,33 @@ doassoc (void)
   char const *p;
   bool changed = false;
   struct Symrev const *curassoc;
-  struct wlink **pre, *pt;
 
-  /* Add new associations.  */
   for (curassoc = assoclst; curassoc; curassoc = curassoc->nextsym)
     {
       char const *ssymbol = curassoc->ssymbol;
 
       if (!curassoc->revno)
+        /* Delete symbol.  */
         {
-          /* Delete symbol.  */
-          for (pre = &ADMIN (assocs);; pre = &pt->next)
-            if (!(pt = *pre))
-              {
-                RWARN ("can't delete nonexisting symbol %s", ssymbol);
-                break;
-              }
-            else if (STR_SAME (((struct symdef *)pt)->meaningful, ssymbol))
-              {
-                *pre = pt->next;
-                changed = true;
-                break;
-              }
+          struct wlink box, *tp;
+          struct symdef *d = NULL;
+
+          for (box.next = ADMIN (assocs), tp = &box; tp->next; tp = tp->next)
+            {
+              d = tp->next->entry;
+              if (STR_SAME (ssymbol, d->meaningful))
+                {
+                  tp->next = tp->next->next;
+                  changed = true;
+                  break;
+                }
+            }
+          ADMIN (assocs) = box.next;
+          if (!d)
+            RWARN ("can't delete nonexisting symbol %s", ssymbol);
         }
       else
+        /* Add new association.  */
         {
           if (curassoc->revno[0])
             {
