@@ -1,5 +1,13 @@
 2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	rcs: Fix bug: Correctly erase/append access-list entries.
+
+	Regression introduced 2010-04-28,
+	"Use ‘struct link’ instead of ‘struct access’".
+	* rcs.c (doaccess): Rewrite list walking for both erase/append.
+
+2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘struct Symrev’ with ‘struct link’ + ‘struct u_symdef’.
 
 	* rcs.c (struct Symrev): Delete.

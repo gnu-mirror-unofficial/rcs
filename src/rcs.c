@@ -381,8 +381,8 @@ static bool
 doaccess (void)
 {
   register struct chaccess *ch;
-  register struct link **p, *t;
   register bool changed = false;
+  struct link box, *tp;
 
   for (ch = chaccess; ch; ch = ch->nextchaccess)
     {
@@ -398,24 +398,28 @@ doaccess (void)
                 }
             }
           else
-            for (p = &ADMIN (allowed); (t = *p); p = &t->next)
-              if (STR_SAME (ch->login, t->entry))
+            for (box.next = ADMIN (allowed), tp = &box;
+                 tp->next; tp = tp->next)
+              if (STR_SAME (ch->login, tp->next->entry))
                 {
-                  *p = t->next;
+                  tp->next = tp->next->next;
                   changed = true;
+                  ADMIN (allowed) = box.next;
                   break;
                 }
           break;
         case append:
-          for (p = &ADMIN (allowed);; p = &t->next)
-            if (!(t = *p))
-              {
-                *p = extend (*p, ch->login, SINGLE);
-                changed = true;
-                break;
-              }
-            else if (STR_SAME (ch->login, t->entry))
+          for (box.next = ADMIN (allowed), tp = &box;
+               tp->next; tp = tp->next)
+            if (STR_SAME (ch->login, tp->next->entry))
+              /* Do nothing; already present.  */
               break;
+          if (!tp->next)
+            {
+              extend (tp, ch->login, SINGLE);
+              changed = true;
+              ADMIN (allowed) = box.next;
+            }
           break;
         }
     }

@@ -10,6 +10,7 @@ do_and_show 'rcs -i -t-t001 $v' ; do_rlog ; cp $v ${v}SAVE
 # Add a revision.
 echo nonempty > $w
 do_and_show 'ci -u -r4.20 -mHELLO $w'
+
 # Name it (via rcs, not via ci).
 do_and_show 'rcs -nWONDERFUL: $w' ; do_rlog | tee $wd/last-rlog
 
@@ -23,6 +24,33 @@ do_and_show 'rcs -nWONDERFUL $w' ; do_rlog | tee $wd/last-rlog
 # We expect the name to NOT appear in the RCS file.
 grep '	WONDERFUL: 4.20' $wd/last-rlog \
     && exit 1
+
+# This function is for the subsequent access-list tests.
+getaccesslist ()
+{
+    echo $(rlog $w | sed -e '/^access/,/^symbolic/!d;/^[as]/d')
+}
+
+# Add some logins to the access list.
+do_and_show 'rcs -afoo,bar -abaz $w'
+
+# We expect the logins to appear in the RCS file.
+test 'foo bar baz' = "$(getaccesslist)" \
+    || exit 1
+
+# Try to add some previously added logins.
+do_and_show 'rcs -abaz,bar $w'
+
+# We expect there to be no change.
+test 'foo bar baz' = "$(getaccesslist)" \
+    || exit 1
+
+# Zonk one.
+do_and_show 'rcs -efoo $w'
+
+# We expect it to NOT appear in the RCS file.
+test 'bar baz' = "$(getaccesslist)" \
+    || exit 1
 
 exit 0
 
