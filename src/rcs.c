@@ -62,7 +62,6 @@ struct chaccess
 {
   char const *login;
   enum changeaccess command;
-  struct chaccess *nextchaccess;
 };
 
 struct delrevpair
@@ -80,7 +79,7 @@ static struct link *newlocklst, *rmvlocklst;
 static struct Message *messagelst, **nextmessage;
 static struct Status *statelst, **nextstate;
 static struct link assoclst;
-static struct chaccess *chaccess, **nextchaccess;
+static struct link chaccess;
 static struct delrevpair delrev;
 static struct hshentry *cuthead, *cuttail, *delstrt;
 static struct hshentries *gendeltas;
@@ -150,20 +149,18 @@ getassoclst (struct link **tp, char *sp)
 }
 
 static void
-getchaccess (char const *login, enum changeaccess command)
+getchaccess (struct link **tp, char const *login, enum changeaccess command)
 {
-  register struct chaccess *pt;
+  register struct chaccess *ch;
 
-  pt = ZLLOC (1, struct chaccess);
-  pt->login = login;
-  pt->command = command;
-  pt->nextchaccess = NULL;
-  *nextchaccess = pt;
-  nextchaccess = &pt->nextchaccess;
+  ch = ZLLOC (1, struct chaccess);
+  ch->login = login;
+  ch->command = command;
+  *tp = extend (*tp, ch, SHARED);
 }
 
 static void
-getaccessor (char *opt, enum changeaccess command)
+getaccessor (struct link **tp, char *opt, enum changeaccess command)
 /* Get the accessor list of options ‘-e’ and ‘-a’; store in ‘chaccess’.  */
 {
   register int c;
@@ -176,7 +173,7 @@ getaccessor (char *opt, enum changeaccess command)
     {
       if (command == erase && sp - opt == 1)
         {
-          getchaccess (NULL, command);
+          getchaccess (tp, NULL, command);
           return;
         }
       PERR ("missing login name after option -a or -e");
@@ -185,7 +182,7 @@ getaccessor (char *opt, enum changeaccess command)
 
   while (c != '\0')
     {
-      getchaccess (sp, command);
+      getchaccess (tp, sp, command);
       sp = checkid (sp, ',');
       c = *sp;
       *sp = '\0';
@@ -380,16 +377,18 @@ rmnewlocklst (char const *which)
 static bool
 doaccess (void)
 {
-  register struct chaccess *ch;
   register bool changed = false;
-  struct link box, *tp;
+  struct link *ls, box, *tp;
 
-  for (ch = chaccess; ch; ch = ch->nextchaccess)
+  for (ls = chaccess.next; ls; ls = ls->next)
     {
+      struct chaccess const *ch = ls->entry;
+      char const *login = ch->login;
+
       switch (ch->command)
         {
         case erase:
-          if (!ch->login)
+          if (!login)
             {
               if (ADMIN (allowed))
                 {
@@ -400,7 +399,7 @@ doaccess (void)
           else
             for (box.next = ADMIN (allowed), tp = &box;
                  tp->next; tp = tp->next)
-              if (STR_SAME (ch->login, tp->next->entry))
+              if (STR_SAME (login, tp->next->entry))
                 {
                   tp->next = tp->next->next;
                   changed = true;
@@ -411,12 +410,12 @@ doaccess (void)
         case append:
           for (box.next = ADMIN (allowed), tp = &box;
                tp->next; tp = tp->next)
-            if (STR_SAME (ch->login, tp->next->entry))
+            if (STR_SAME (login, tp->next->entry))
               /* Do nothing; already present.  */
               break;
           if (!tp->next)
             {
-              extend (tp, ch->login, SINGLE);
+              extend (tp, login, SINGLE);
               changed = true;
               ADMIN (allowed) = box.next;
             }
@@ -1106,7 +1105,7 @@ main (int argc, char **argv)
   struct link fakelock, *tplock;
   struct link fakerm, *tprm;
   struct Status *curstate;
-  struct link *tp_assoc;
+  struct link *tp_assoc, *tp_chacc;
 
   CHECK_HV ();
   gnurcs_init ();
@@ -1114,7 +1113,7 @@ main (int argc, char **argv)
   nosetid ();
 
   tp_assoc = &assoclst;
-  nextchaccess = &chaccess;
+  tp_chacc = &chaccess;
   nextmessage = &messagelst;
   nextstate = &statelst;
   branchsym = commsyml = textfile = NULL;
@@ -1164,7 +1163,7 @@ main (int argc, char **argv)
 
         case 'a':
           /* Add new accessor.  */
-          getaccessor (*argv + 1, append);
+          getaccessor (&tp_chacc, *argv + 1, append);
           break;
 
         case 'A':
@@ -1179,7 +1178,8 @@ main (int argc, char **argv)
             {
               while (ADMIN (allowed))
                 {
-                  getchaccess (str_save (ADMIN (allowed)->entry), append);
+                  getchaccess (&tp_chacc, str_save (ADMIN (allowed)->entry),
+                               append);
                   ADMIN (allowed) = ADMIN (allowed)->next;
                 }
               fro_zclose (&FLOW (from));
@@ -1188,7 +1188,7 @@ main (int argc, char **argv)
 
         case 'e':
           /* Remove accessors.  */
-          getaccessor (*argv + 1, erase);
+          getaccessor (&tp_chacc, *argv + 1, erase);
           break;
 
         case 'l':

@@ -1,5 +1,17 @@
 2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘struct link’ more.
+
+	* rcs.c (struct chaccess): Delete member ‘nextchaccess’.
+	(chaccess): Change type to ‘struct link’.
+	(nextchaccess): Delete var.
+	(getchaccess): Take ‘struct link **’; use ‘extend’.
+	(getaccessor): Take ‘struct link **’; update call to ‘getchaccess’.
+	(doaccess): Update to walk ‘struct link’ list.
+	(main): Update calls to ‘getaccessor’, ‘getchaccess’.
+
+2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	rcs: Fix bug: Correctly erase/append access-list entries.
 
 	Regression introduced 2010-04-28,
