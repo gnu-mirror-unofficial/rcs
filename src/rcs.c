@@ -33,11 +33,10 @@
 
 struct top *top;
 
-struct Message
+struct u_log
 {
   char const *revno;
   struct cbuf message;
-  struct Message *nextmessage;
 };
 
 struct Status
@@ -67,7 +66,7 @@ static char const *headstate;
 static bool chgheadstate, lockhead, unlockcaller, suppress_mail;
 static int exitstatus;
 static struct link *newlocklst, *rmvlocklst;
-static struct Message *messagelst, **nextmessage;
+static struct link messagelst;
 static struct Status *statelst, **nextstate;
 static struct link assoclst;
 static struct link chaccess;
@@ -183,9 +182,9 @@ getaccessor (struct link **tp, char *opt, enum changeaccess command)
 }
 
 static void
-getmessage (char *option)
+getmessage (struct link **tp, char *option)
 {
-  struct Message *pt;
+  struct u_log *um;
   struct cbuf cb;
   char *m;
 
@@ -201,12 +200,10 @@ getmessage (char *option)
       PERR ("-m option lacks log message");
       return;
     }
-  pt = ZLLOC (1, struct Message);
-  pt->revno = option;
-  pt->message = cb;
-  pt->nextmessage = NULL;
-  *nextmessage = pt;
-  nextmessage = &pt->nextmessage;
+  um = ZLLOC (1, struct u_log);
+  um->revno = option;
+  um->message = cb;
+  *tp = extend (*tp, um, SHARED);
 }
 
 static void
@@ -884,18 +881,21 @@ static bool
 domessages (void)
 {
   struct hshentry *target;
-  struct Message *p;
   bool changed = false;
 
-  for (p = messagelst; p; p = p->nextmessage)
-    if (fully_numeric_no_k (&numrev, p->revno) &&
-        (target = gr_revno (numrev.string, &gendeltas)))
-      {
-        /* We can't check the old log -- it's much later in the file.
-           We pessimistically assume that it changed.  */
-        target->log = p->message;
-        changed = true;
-      }
+  for (struct link *ls = messagelst.next; ls; ls = ls->next)
+    {
+      struct u_log const *um = ls->entry;
+
+      if (fully_numeric_no_k (&numrev, um->revno)
+          && (target = gr_revno (numrev.string, &gendeltas)))
+        {
+          /* We can't check the old log -- it's much later in the file.
+             We pessimistically assume that it changed.  */
+          target->log = um->message;
+          changed = true;
+        }
+    }
   return changed;
 }
 
@@ -1096,7 +1096,7 @@ main (int argc, char **argv)
   struct link fakelock, *tplock;
   struct link fakerm, *tprm;
   struct Status *curstate;
-  struct link *tp_assoc, *tp_chacc;
+  struct link *tp_assoc, *tp_chacc, *tp_log;
 
   CHECK_HV ();
   gnurcs_init ();
@@ -1105,7 +1105,7 @@ main (int argc, char **argv)
 
   tp_assoc = &assoclst;
   tp_chacc = &chaccess;
-  nextmessage = &messagelst;
+  tp_log = &messagelst;
   nextstate = &statelst;
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
@@ -1240,7 +1240,7 @@ main (int argc, char **argv)
 
         case 'm':
           /* Change log message.  */
-          getmessage (a);
+          getmessage (&tp_log, a);
           break;
 
         case 'M':
@@ -1479,7 +1479,7 @@ main (int argc, char **argv)
            <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=69193>.  */
         if (1)
           {
-            if (delrev.strt || messagelst)
+            if (delrev.strt || messagelst.next)
               {
                 struct editstuff *es = make_editstuff ();
 

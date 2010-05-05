@@ -1,5 +1,17 @@
 2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘struct Message’ with ‘struct link’ + ‘struct u_log’.
+
+	* rcs.c (struct u_log): New.
+	(struct Message): Delete.
+	(messagelst): Change type to ‘struct link’.
+	(nextmessage): Delete var.
+	(getmessage): Take ‘struct link **’; use ‘extend’.
+	(domessages): Update to walk ‘struct link’ list.
+	(main): Update call to ‘getmessage’; update ‘messagelst’ access.
+
+2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘struct Revpairs’ with ‘struct link’ + ‘struct revrange’.
 
 	* rlog.c (struct revrange): New.
