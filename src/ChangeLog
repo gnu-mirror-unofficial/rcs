@@ -1,5 +1,17 @@
 2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘struct Revpairs’ with ‘struct link’ + ‘struct revrange’.
+
+	* rlog.c (struct revrange): New.
+	(struct Revpairs): Delete.
+	(revlist, Revlst): Change type to ‘struct link *’.
+	(extractdelta): Update to walk ‘struct link’ list.
+	(PUSH): New macro.
+	(getnumericrev): Update to walk ‘struct link’ list; use ‘PUSH’.
+	(putrevpairs): Use ‘PUSH’.
+
+2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: prepend
 
 	* b-esds.h (prepend): New func decl.

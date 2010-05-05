@@ -31,12 +31,11 @@
 
 struct top *top;
 
-struct Revpairs
+struct revrange
 {
-  int numfld;
-  char const *strtrev;
-  char const *endrev;
-  struct Revpairs *rnext;
+  char const *beg;
+  char const *end;
+  int nfield;
 };
 
 struct Datepairs
@@ -57,8 +56,10 @@ static bool lockflag;
 /* Date range in ‘-d’ option.  */
 static struct Datepairs *datelist, *duelst;
 
-/* Revision or branch range in ‘-r’ option.  */
-static struct Revpairs *revlist, *Revlst;
+/* Revision or branch range in ‘-r’ option.
+   On the first pass (option processing), push onto ‘revlist’.
+   After ‘gettree’, walk ‘revlist’ and push onto ‘Revlst’.  */
+static struct link *revlist, *Revlst;
 
 /* Login names in author option.  */
 static struct link *authorlist;
@@ -312,7 +313,6 @@ extractdelta (struct hshentry const *pdelta)
   struct rcslock const *plock;
   struct link const *pstate;
   struct link const *pauthor;
-  struct Revpairs const *prevision;
   int length;
 
   /* Only certain authors wanted.  */
@@ -333,17 +333,18 @@ extractdelta (struct hshentry const *pdelta)
       else if (plock->delta == pdelta)
         break;
   /* Only certain revs or branches wanted.  */
-  if ((prevision = Revlst))
-    for (;;)
-      {
-        length = prevision->numfld;
-        if (countnumflds (pdelta->num) == length + (length & 1)
-            && 0 <= compartial (pdelta->num, prevision->strtrev, length)
-            && 0 <= compartial (prevision->endrev, pdelta->num, length))
-          break;
-        if (!(prevision = prevision->rnext))
-          return false;
-      }
+  for (struct link *ls = Revlst; ls;)
+    {
+      struct revrange const *rr = ls->entry;
+
+      length = rr->nfield;
+      if (countnumflds (pdelta->num) == length + (length & 1)
+          && 0 <= compartial (pdelta->num, rr->beg, length)
+          && 0 <= compartial (rr->end, pdelta->num, length))
+        break;
+      if (! (ls = ls->next))
+        return false;
+    }
   return true;
 }
 
@@ -665,30 +666,34 @@ checkrevpair (char const *num1, char const *num2)
 
 #define KSTRCPY(to,kstr)  strncpy (to, kstr, sizeof kstr)
 
+#define PUSH(x,ls)  ls = prepend (x, ls, SHARED)
+
 static bool
 getnumericrev (void)
 /* Get the numeric name of revisions stored in ‘revlist’; store
    them in ‘Revlst’.  If ‘branchflag’, also add default branch.  */
 {
-  struct Revpairs *ptr, *pt;
+  struct link *ls;
+  struct revrange *rr;
   int n;
   struct cbuf s, e;
   char const *lrev;
   struct cbuf const *rstart, *rend;
 
   Revlst = NULL;
-  ptr = revlist;
-  while (ptr)
+  for (ls = revlist; ls; ls = ls->next)
     {
+      struct revrange const *from = ls->entry;
+
       n = 0;
       rstart = &s;
       rend = &e;
 
-      switch (ptr->numfld)
+      switch (from->nfield)
         {
 
         case 1:                         /* -rREV */
-          if (!fully_numeric_no_k (&s, ptr->strtrev))
+          if (!fully_numeric_no_k (&s, from->beg))
             goto freebufs;
           rend = &s;
           n = countnumflds (s.string);
@@ -700,7 +705,7 @@ getnumericrev (void)
           break;
 
         case 2:                         /* -rREV: */
-          if (!fully_numeric_no_k (&s, ptr->strtrev))
+          if (!fully_numeric_no_k (&s, from->beg))
             goto freebufs;
           if (2 > (n = countnumflds (s.string)))
             e.string = "";
@@ -712,7 +717,7 @@ getnumericrev (void)
           break;
 
         case 3:                         /* -r:REV */
-          if (!fully_numeric_no_k (&e, ptr->endrev))
+          if (!fully_numeric_no_k (&e, from->end))
             goto freebufs;
           if ((n = countnumflds (e.string)) < 2)
             s.string = ".0";
@@ -725,8 +730,8 @@ getnumericrev (void)
           break;
 
         default:                        /* -rREV1:REV2 */
-          if (!(fully_numeric_no_k (&s, ptr->strtrev)
-                && fully_numeric_no_k (&e, ptr->endrev)
+          if (!(fully_numeric_no_k (&s, from->beg)
+                && fully_numeric_no_k (&e, from->end)
                 && checkrevpair (s.string, e.string)))
             goto freebufs;
           n = countnumflds (s.string);
@@ -741,48 +746,44 @@ getnumericrev (void)
 
       if (n)
         {
-          pt = FALLOC (struct Revpairs);
-          pt->numfld = n;
-          pt->strtrev = rstart->string;
-          pt->endrev = rend->string;
-          pt->rnext = Revlst;
-          Revlst = pt;
+          rr = FALLOC (struct revrange);
+          rr->nfield = n;
+          rr->beg = rstart->string;
+          rr->end = rend->string;
+          PUSH (rr, Revlst);
         }
-      ptr = ptr->rnext;
     }
   /* Now take care of ‘branchflag’.  */
   if (branchflag && (ADMIN (defbr) || ADMIN (head)))
     {
-      pt = FALLOC (struct Revpairs);
-      pt->strtrev = pt->endrev = ADMIN (defbr)
+      rr = FALLOC (struct revrange);
+      rr->beg = rr->end = ADMIN (defbr)
         ? ADMIN (defbr)
         : TAKE (1, ADMIN (head)->num);
-      pt->rnext = Revlst;
-      Revlst = pt;
-      pt->numfld = countnumflds (pt->strtrev);
+      rr->nfield = countnumflds (rr->beg);
+      PUSH (rr, Revlst);
     }
 
 freebufs:
-  return !ptr;
+  return !ls;
 }
 
 static void
 putrevpairs (char const *b, char const *e, bool sawsep)
 /* Store a revision or branch range into ‘revlist’.  */
 {
-  struct Revpairs *rp = ZLLOC (1, struct Revpairs);
+  struct revrange *rr = ZLLOC (1, struct revrange);
 
-  rp->strtrev = b;
-  rp->endrev = e;
-  rp->numfld = (!sawsep
+  rr->beg = b;
+  rr->end = e;
+  rr->nfield = (!sawsep
                 ? 1                     /* -rREV */
                 : (!e[0]
                    ? 2                  /* -rREV: */
                    : (!b[0]
                       ? 3               /* -r:REV */
                       : 4)));           /* -rREV1:REV2 */
-  rp->rnext = revlist;
-  revlist = rp;
+  PUSH (rr, revlist);
 }
 
 /*:help
