@@ -45,4 +45,14 @@ wextend (struct wlink *tp, void *x, struct divvy *to)
   EXTEND_BODY (wlink);
 }
 
+struct link *
+prepend (void const *x, struct link *ls, struct divvy *to)
+{
+  struct link *pair = NEWPAIR (to, link);
+
+  pair->entry = x;
+  pair->next = ls;
+  return pair;
+}
+
 /* b-esds.c ends here */

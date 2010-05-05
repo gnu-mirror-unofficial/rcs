@@ -32,5 +32,6 @@ struct wlink
 
 extern struct link *extend (struct link *tp, void const *x, struct divvy *to);
 extern struct wlink *wextend (struct wlink *tp, void *x, struct divvy *to);
+extern struct link *prepend (void const *x, struct link *ls, struct divvy *to);
 
 /* b-esds.h ends here */
