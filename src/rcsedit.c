@@ -58,7 +58,7 @@ struct editstuff
   /* #adds - #deletes in each edit run, used to correct ‘es->lcount’
      in case file is not rewound after applying one delta.  */
 
-  Iptr_type *line;
+  char **line;
   size_t gap, gapsize, lim;
   /* ‘line’ contains pointers to the lines in the currently "edited" file.
      It is a 0-origin array that represents ‘lim - gapsize’ lines.
@@ -145,19 +145,19 @@ editLineNumberOverflow (void)
   fatal_syntax ("edit script refers to line past end of file");
 }
 
-#define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (Iptr_type))
+#define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (char *))
 
 static void
-insertline (struct editstuff *es, unsigned long n, Iptr_type l)
+insertline (struct editstuff *es, unsigned long n, char *l)
 /* Before line ‘n’, insert line ‘l’.  */
 {
   if (es->lim - es->gapsize < n)
     editLineNumberOverflow ();
   if (!es->gapsize)
     es->line = !es->lim
-      ? testalloc (sizeof (Iptr_type) * (es->lim = es->gapsize = 1024))
+      ? testalloc (sizeof (char *) * (es->lim = es->gapsize = 1024))
       : (es->gap = es->gapsize = es->lim,
-         testrealloc (es->line, sizeof (Iptr_type) * (es->lim <<= 1)));
+         testrealloc (es->line, sizeof (char *) * (es->lim <<= 1)));
   if (n < es->gap)
     movelines (es->line + n + es->gapsize,
                es->line + n,
@@ -194,7 +194,7 @@ deletelines (struct editstuff *es, unsigned long n, unsigned long nlines)
 }
 
 static void
-snapshotline (register FILE *f, register Iptr_type l)
+snapshotline (register FILE *f, register char *l)
 {
   register int c;
   do
@@ -210,7 +210,7 @@ static void
 snapshotedit_fast (struct editstuff *es, FILE *f)
 /* Copy the current state of the edits to ‘f’.  */
 {
-  register Iptr_type *p, *lim, *l = es->line;
+  register char **p, **lim, **l = es->line;
 
   for (p = l, lim = l + es->gap; p < lim;)
     snapshotline (f, *p++);
@@ -219,7 +219,7 @@ snapshotedit_fast (struct editstuff *es, FILE *f)
 }
 
 static void
-finisheditline (struct expctx *ctx, Iptr_type l)
+finisheditline (struct expctx *ctx, char *l)
 {
   ctx->from->ptr = l;
   if (expandline (ctx) < 0)
@@ -241,9 +241,9 @@ finishedit_fast (struct editstuff *es, struct hshentry const *delta,
         snapshotedit_fast (es, outfile);
       else
         {
-          register Iptr_type *p, *lim, *l = es->line;
+          register char **p, **lim, **l = es->line;
           register struct fro *fin = FLOW (from);
-          Iptr_type here = fin->ptr;
+          char *here = fin->ptr;
           struct expctx ctx = EXPCTX_1OUT (outfile, fin, true, true);
 
           for (p = l, lim = l + es->gap; p < lim;)
@@ -492,7 +492,7 @@ enterstring (struct editstuff *es)
       register FILE *frew;
       register long e, oe;
       register bool amidline, oamidline;
-      register Iptr_type optr;
+      register char *optr;
       register struct fro *fin;
 
       e = 0;

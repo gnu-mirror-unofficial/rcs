@@ -33,13 +33,12 @@ enum readmethod
     RM_STDIO
   };
 
-typedef char *Iptr_type;
 struct fro
 {
   int fd;
   off_t end;
   enum readmethod rm;
-  Iptr_type ptr, lim, base;
+  char *ptr, *lim, *base;
   void (*deallocate) (struct fro *);
   FILE *stream;
 };
