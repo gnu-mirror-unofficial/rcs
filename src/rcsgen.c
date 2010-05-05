@@ -130,6 +130,7 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
       scandeltatext (es, target, expandflag ? edit_expand : edit, true);
       finishedit (es, expandflag ? target : NULL, outfile, true);
     }
+  unmake_editstuff (es);
   if (outfile)
     return NULL;
   Ozclose (&FLOW (res));

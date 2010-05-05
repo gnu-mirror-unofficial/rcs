@@ -743,6 +743,7 @@ int merge (bool tostdout, char const *edarg,
 
 /* rcsedit */
 struct editstuff *make_editstuff (void);
+void unmake_editstuff (struct editstuff *es);
 int un_link (char const *s);
 void openfcopy (FILE *f);
 void finishedit (struct editstuff *es, struct hshentry const * delta,

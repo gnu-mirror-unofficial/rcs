@@ -1,5 +1,14 @@
 2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Free edit state when done.
+
+	* rcsedit.c (unmake_editstuff): New func.
+	* base.h (unmake_editstuff): New func decl.
+	* rcs.c (main): Use ‘unmake_editstuff’.
+	* rcsgen.c (buildrevision): Likewise.
+
+2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘Iptr_type’ with ‘char *’.
 
 	* b-fro.h (Iptr_type): Delete typedef.

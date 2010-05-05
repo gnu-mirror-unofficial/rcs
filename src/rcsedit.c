@@ -80,6 +80,13 @@ make_editstuff (void)
   return ZLLOC (1, struct editstuff);
 }
 
+void
+unmake_editstuff (struct editstuff *es)
+{
+  free (es->line);
+  memset (es, 0, sizeof (struct editstuff));
+}
+
 static void *
 okalloc (void * p)
 {

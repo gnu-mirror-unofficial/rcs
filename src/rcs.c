@@ -1490,6 +1490,7 @@ main (int argc, char **argv)
                     /* Copy rest of delta text nodes that are not deleted.  */
                     changed = true;
                   }
+                unmake_editstuff (es);
               }
           }
 
