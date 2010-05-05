@@ -33,7 +33,7 @@ struct top *top;
 
 /* Normally, if the two revisions specified are the same, we avoid calling
    the underlying diff on the theory that it will produce no output.  This
-   does not, hold generally for -y (--side-by-side) and -D (--ifdef), such
+   does not hold for -y (--side-by-side) and -D (--ifdef), however, such
    as when the revision specified is by different symbolic names, so we
    need to detect those options and disable the optimization.
 
