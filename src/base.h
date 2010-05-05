@@ -749,7 +749,6 @@ void openfcopy (FILE *f);
 void finishedit (struct editstuff *es, struct hshentry const * delta,
                  FILE *outfile, bool done);
 void snapshotedit (struct editstuff *es, FILE *f);
-void xpandstring (struct hshentry const *delta);
 void copystring (struct editstuff *es);
 void enterstring (struct editstuff *es);
 void editstring (struct editstuff *es, struct hshentry const *delta);

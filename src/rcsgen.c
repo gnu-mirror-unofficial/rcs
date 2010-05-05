@@ -30,6 +30,7 @@
 #include "b-esds.h"
 #include "b-fb.h"
 #include "b-fro.h"
+#include "b-kwxout.h"
 
 enum stringwork
 { enter, copy, edit, expand, edit_expand };
@@ -76,7 +77,18 @@ scandeltatext (struct editstuff *es, struct hshentry *delta,
       copystring (es);
       break;
     case expand:
-      xpandstring (delta);
+      /* Read a string terminated by ‘SDELIM’ from ‘FLOW (from)’ and
+         write it to ‘FLOW (res)’.  Double ‘SDELIM’ is replaced with
+         single ‘SDELIM’.  Keyword expansion is performed with data
+         from ‘delta’.  If ‘FLOW (to)’ is non-NULL, the string is
+         also copied unchanged to ‘FLOW (to)’.  */
+      {
+        struct expctx ctx = EXPCTX (FLOW (res), FLOW (to),
+                                    FLOW (from), true, true);
+
+        while (1 < expandline (&ctx))
+          continue;
+      }
       break;
     case edit:
       editstring (es, NULL);

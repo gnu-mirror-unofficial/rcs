@@ -1,5 +1,14 @@
 2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Incorporate ‘xpandstring’ into unique caller.
+
+	* rcsgen.c: #include "b-kwxout.h".
+	(scandeltatext): Incorporate ‘xpandstring’.
+	* rcsedit.c (xpandstring): Delete func.
+	* base.h (xpandstring): Delete func decl.
+
+2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Free edit state when done.
 
 	* rcsedit.c (unmake_editstuff): New func.

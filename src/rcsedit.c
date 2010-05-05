@@ -420,20 +420,6 @@ copylines (struct editstuff *es, register long upto, struct hshentry const *delt
 }
 
 void
-xpandstring (struct hshentry const *delta)
-/* Read a string terminated by ‘SDELIM’ from ‘FLOW (from)’ and write it to
-   ‘FLOW (res)’.  Double ‘SDELIM’ is replaced with single ‘SDELIM’.  Keyword
-   expansion is performed with data from ‘delta’.  If ‘FLOW (to)’ is
-   non-NULL, the string is also copied unchanged to ‘FLOW (to)’.  */
-{
-  struct expctx ctx = EXPCTX (FLOW (res), FLOW (to),
-                              FLOW (from), true, true);
-
-  while (1 < expandline (&ctx))
-    continue;
-}
-
-void
 copystring (struct editstuff *es)
 /* Copy a string terminated with a single ‘SDELIM’ from ‘FLOW (from)’ to
    ‘FLOW (res)’, replacing all double ‘SDELIM’ with a single ‘SDELIM’.  If
