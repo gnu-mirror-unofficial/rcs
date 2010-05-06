@@ -1118,19 +1118,13 @@ checkaccesslist (void)
    file, the access list is empty, or caller is on the access list.
    Otherwise, print an error message and return false.  */
 {
-  register struct link const *next;
-
   if (!ADMIN (allowed) || myself (REPO (stat).st_uid)
       || STR_SAME (getcaller (), "root"))
     return true;
 
-  next = ADMIN (allowed);
-  do
-    {
-      if (STR_SAME (getcaller (), next->entry))
-        return true;
-    }
-  while ((next = next->next));
+  for (struct link *ls = ADMIN (allowed); ls; ls = ls->next)
+    if (STR_SAME (getcaller (), ls->entry))
+      return true;
 
   RERR ("user %s not on the access list", getcaller ());
   return false;

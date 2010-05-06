@@ -320,7 +320,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
  */
 {
   int field;
-  register struct hshentry *next, *trail;
+  register struct hshentry *d, *trail;
   register struct wlink const *bhead;
   int result;
   char datebuf[datesize + zonelenmax];
@@ -337,8 +337,8 @@ genbranch (struct hshentry const *bpoint, char const *revno,
         }
 
       /* Find branch head.  Branches are arranged in increasing order.  */
-      while (next = bhead->entry,
-             0 < (result = cmpnumfld (revno, next->num, field)))
+      while (d = bhead->entry,
+             0 < (result = cmpnumfld (revno, d->num, field)))
         {
           bhead = bhead->next;
           if (!bhead)
@@ -354,20 +354,20 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           return NULL;
         }
 
-      next = bhead->entry;
+      d = bhead->entry;
       if (length == field)
         {
           /* Pick latest one on that branch.  */
           trail = NULL;
           do
             {
-              if ((!date || cmpdate (date, next->date) >= 0)
-                  && (!author || STR_SAME (author, next->author))
-                  && (!state || STR_SAME (state, next->state)))
-                trail = next;
-              next = next->next;
+              if ((!date || cmpdate (date, d->date) >= 0)
+                  && (!author || STR_SAME (author, d->author))
+                  && (!state || STR_SAME (state, d->state)))
+                trail = d;
+              d = d->next;
             }
-          while (next);
+          while (d);
 
           if (!trail)
             {
@@ -377,31 +377,31 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           else
             {
               /* Print up to last one suitable.  */
-              next = bhead->entry;
-              while (next != trail)
+              d = bhead->entry;
+              while (d != trail)
                 {
-                  store1 (&store, next);
-                  next = next->next;
+                  store1 (&store, d);
+                  d = d->next;
                 }
-              store1 (&store, next);
+              store1 (&store, d);
             }
           *store = NULL;
-          return next;
+          return d;
         }
 
       /* Length > field.  Find revision.  Check low.  */
-      if (cmpnumfld (revno, next->num, field + 1) < 0)
+      if (cmpnumfld (revno, d->num, field + 1) < 0)
         {
           RERR ("revision number %s too low", TAKE (field + 1, revno));
           return NULL;
         }
       do
         {
-          store1 (&store, next);
-          trail = next;
-          next = next->next;
+          store1 (&store, d);
+          trail = d;
+          d = d->next;
         }
-      while (next && cmpnumfld (revno, next->num, field + 1) >= 0);
+      while (d && cmpnumfld (revno, d->num, field + 1) >= 0);
 
       if ((length > field + 1)
           /* Need exact hit.  */
@@ -446,12 +446,12 @@ genrevs (char const *revno, char const *date, char const *author,
    (target delta).  If the proper delta could not be found, return NULL.  */
 {
   int length;
-  register struct hshentry *next;
+  register struct hshentry *d;
   int result;
   char const *branchnum;
   char datebuf[datesize + zonelenmax];
 
-  if (!(next = ADMIN (head)))
+  if (!(d = ADMIN (head)))
     {
       RERR ("RCS file empty");
       goto norev;
@@ -462,11 +462,11 @@ genrevs (char const *revno, char const *date, char const *author,
   if (length >= 1)
     {
       /* At least one field; find branch exactly.  */
-      while ((result = cmpnumfld (revno, next->num, 1)) < 0)
+      while ((result = cmpnumfld (revno, d->num, 1)) < 0)
         {
-          store1 (&store, next);
-          next = next->next;
-          if (!next)
+          store1 (&store, d);
+          d = d->next;
+          if (!d)
             {
               RERR ("branch number %s too low", TAKE (1, revno));
               goto norev;
@@ -482,17 +482,17 @@ genrevs (char const *revno, char const *date, char const *author,
   if (length <= 1)
     {
       /* Pick latest one on given branch.  */
-      branchnum = next->num;    /* works even for empty revno */
-      while (next
-             && cmpnumfld (branchnum, next->num, 1) == 0
-             && ((date && cmpdate (date, next->date) < 0)
-                 || (author && STR_DIFF (author, next->author))
-                 || (state && STR_DIFF (state, next->state))))
+      branchnum = d->num;               /* works even for empty revno */
+      while (d
+             && cmpnumfld (branchnum, d->num, 1) == 0
+             && ((date && cmpdate (date, d->date) < 0)
+                 || (author && STR_DIFF (author, d->author))
+                 || (state && STR_DIFF (state, d->state))))
         {
-          store1 (&store, next);
-          next = next->next;
+          store1 (&store, d);
+          d = d->next;
         }
-      if (!next || (cmpnumfld (branchnum, next->num, 1) != 0)) /* overshot */
+      if (!d || (cmpnumfld (branchnum, d->num, 1) != 0)) /* overshot */
         {
           cantfindbranch (length ? revno : TAKE (1, branchnum),
                           date, author, state);
@@ -500,23 +500,23 @@ genrevs (char const *revno, char const *date, char const *author,
         }
       else
         {
-          store1 (&store, next);
+          store1 (&store, d);
         }
       *store = NULL;
-      return next;
+      return d;
     }
 
   /* Length >= 2.  Find revision; may go low if ‘length == 2’.  */
-  while ((result = cmpnumfld (revno, next->num, 2)) < 0
-         && (cmpnumfld (revno, next->num, 1) == 0))
+  while ((result = cmpnumfld (revno, d->num, 2)) < 0
+         && (cmpnumfld (revno, d->num, 1) == 0))
     {
-      store1 (&store, next);
-      next = next->next;
-      if (!next)
+      store1 (&store, d);
+      d = d->next;
+      if (!d)
         break;
     }
 
-  if (!next || cmpnumfld (revno, next->num, 1) != 0)
+  if (!d || cmpnumfld (revno, d->num, 1) != 0)
     {
       RERR ("revision number %s too low", TAKE (2, revno));
       goto norev;
@@ -528,31 +528,31 @@ genrevs (char const *revno, char const *date, char const *author,
     }
 
   /* Print last one.  */
-  store1 (&store, next);
+  store1 (&store, d);
 
   if (length > 2)
-    return genbranch (next, revno, length, date, author, state, store);
+    return genbranch (d, revno, length, date, author, state, store);
   else
     {                                   /* length == 2 */
-      if (date && cmpdate (date, next->date) < 0)
+      if (date && cmpdate (date, d->date) < 0)
         {
           RERR ("Revision %s has date %s.",
-                next->num, date2str (next->date, datebuf));
+                d->num, date2str (d->date, datebuf));
           return NULL;
         }
-      if (author && STR_DIFF (author, next->author))
+      if (author && STR_DIFF (author, d->author))
         {
-          RERR ("Revision %s has author %s.", next->num, next->author);
+          RERR ("Revision %s has author %s.", d->num, d->author);
           return NULL;
         }
-      if (state && STR_DIFF (state, next->state))
+      if (state && STR_DIFF (state, d->state))
         {
           RERR ("Revision %s has state %s.",
-                next->num, next->state ? next->state : "<empty>");
+                d->num, d->state ? d->state : "<empty>");
           return NULL;
         }
       *store = NULL;
-      return next;
+      return d;
     }
 
 norev:
@@ -573,11 +573,9 @@ rev_from_symbol (struct cbuf const *id)
    ‘ADMIN (assocs)’, and return a pointer to the corresponding
    revision number.  Return NULL if not present.  */
 {
-  register struct wlink const *next;
-
-  for (next = ADMIN (assocs); next; next = next->next)
+  for (struct wlink *ls = ADMIN (assocs); ls; ls = ls->next)
     {
-      struct symdef *d = next->entry;
+      struct symdef *d = ls->entry;
 
       if (!strncmp (d->meaningful, id->string, id->size))
         return d->underlying;

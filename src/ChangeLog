@@ -1,5 +1,13 @@
 2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Avoid ‘next’ as a local variable name.
+
+	* rcsedit.c (checkaccesslist): Rewrite ‘do-while’ as ‘for’ loop.
+	* rcsrev.c (genbranch, genrevs): Rename local var ‘next’ to ‘d’.
+	(rev_from_symbol): Rename local var ‘next’ to ‘ls’.
+
+2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘struct wlink’ for hash table buckets.
 
 	* base.h (struct hshentry): Delete member ‘nexthsh’.
