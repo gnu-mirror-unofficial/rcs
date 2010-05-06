@@ -309,7 +309,6 @@ static char
 extractdelta (struct hshentry const *pdelta)
 /* Return true if ‘pdelta’ matches the selection critera.  */
 {
-  struct rcslock const *plock;
   struct link const *pstate;
   struct link const *pauthor;
   int length;
@@ -326,11 +325,16 @@ extractdelta (struct hshentry const *pdelta)
         return false;
   /* Only locked revisions wanted.  */
   if (lockflag)
-    for (plock = ADMIN (locks);; plock = plock->nextlock)
-      if (!plock)
-        return false;
-      else if (plock->delta == pdelta)
-        break;
+    for (struct wlink *ls = ADMIN (locks);; ls = ls->next)
+      {
+        struct rcslock *rl;
+
+        if (!ls)
+          return false;
+        rl = ls->entry;
+        if (rl->delta == pdelta)
+          break;
+      }
   /* Only certain revs or branches wanted.  */
   for (struct link *ls = Revlst; ls;)
     {
@@ -448,24 +452,29 @@ trunclocks (void)
    id's on ‘lockerlist’.  Do not truncate if ‘lockerlist’ empty.  */
 {
   struct link const *plocker;
-  struct rcslock *p, **pp;
+  struct wlink wfake, *wtp;
 
   if (!lockerlist)
     return;
 
   /* Shorten locks to those contained in ‘lockerlist’.  */
-  for (pp = &ADMIN (locks); (p = *pp);)
-    for (plocker = lockerlist;;)
-      if (STR_SAME (plocker->entry, p->login))
-        {
-          pp = &p->nextlock;
-          break;
-        }
-      else if (!(plocker = plocker->next))
-        {
-          *pp = p->nextlock;
-          break;
-        }
+  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next;)
+    {
+      struct rcslock *rl = wtp->next->entry;
+
+      for (plocker = lockerlist;;)
+        if (STR_SAME (plocker->entry, rl->login))
+          {
+            wtp = wtp->next;
+            break;
+          }
+        else if (!(plocker = plocker->next))
+          {
+            wtp->next = wtp->next->next;
+            ADMIN (locks) = wfake.next;
+            break;
+          }
+    }
 }
 
 static void
@@ -823,7 +832,6 @@ main (int argc, char **argv)
   char const *headFormat, *symbolFormat;
   struct link const *curaccess;
   struct hshentry const *delta;
-  struct rcslock const *currlock;
   bool descflag, selectflag;
   bool onlylockflag;                   /* print only files with locks */
   bool onlyRCSflag;                    /* print only RCS filename */
@@ -991,12 +999,11 @@ main (int argc, char **argv)
                  ADMIN (head) ? ADMIN (head)->num : "",
                  ADMIN (defbr) ? " " : "", ADMIN (defbr) ? ADMIN (defbr) : "",
                  BE (strictly_locking) ? " strict" : "");
-        currlock = ADMIN (locks);
-        while (currlock)
+        for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
           {
-            aprintf (out, symbolFormat, currlock->login,
-                     currlock->delta->num);
-            currlock = currlock->nextlock;
+            struct rcslock *rl = ls->entry;
+
+            aprintf (out, symbolFormat, rl->login, rl->delta->num);
           }
         if (BE (strictly_locking) && pre5)
           aputs ("  ;  strict" + (ADMIN (locks) ? 3 : 0), out);

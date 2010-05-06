@@ -347,7 +347,6 @@ putadmin (void)
 /* Output the admin node.  */
 {
   register FILE *fout;
-  struct rcslock const *curlock;
   struct link const *curaccess;
 
   if (!(fout = FLOW (rewr)))
@@ -381,11 +380,11 @@ putadmin (void)
   aprintf (fout, ";\n%s", TINYKS (symbols));
   format_assocs (fout, "\n\t%s:%s");
   aprintf (fout, ";\n%s", TINYKS (locks));
-  curlock = ADMIN (locks);
-  while (curlock)
+  for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
     {
-      aprintf (fout, "\n\t%s:%s", curlock->login, curlock->delta->num);
-      curlock = curlock->nextlock;
+      struct rcslock *rl = ls->entry;
+
+      aprintf (fout, "\n\t%s:%s", rl->login, rl->delta->num);
     }
   if (BE (strictly_locking))
     aprintf (fout, "; %s", TINYKS (strict));

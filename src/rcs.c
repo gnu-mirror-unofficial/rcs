@@ -483,24 +483,32 @@ breaklock (struct hshentry const *delta)
    Send mail if a lock different from the caller's is broken.
    Print an error message if there is no such lock or error.  */
 {
-  register struct rcslock *next, **trail;
+  struct wlink wfake, *wtp;
   char const *num;
 
   num = delta->num;
-  for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
-    if (STR_SAME (num, next->delta->num))
-      {
-        if (STR_DIFF (getcaller (), next->login)
-            && !sendmail (num, next->login))
-          {
-            RERR ("revision %s still locked by %s", num, next->login);
-            return false;
-          }
-        diagnose ("%s unlocked", next->delta->num);
-        *trail = next->nextlock;
-        next->delta->lockedby = NULL;
-        return true;
-      }
+  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+    {
+      struct rcslock *rl = wtp->next->entry;
+      struct hshentry *d = rl->delta;
+
+      if (STR_SAME (num, d->num))
+        {
+          char const *before = rl->login;
+
+          if (STR_DIFF (getcaller (), before)
+              && !sendmail (num, before))
+            {
+              RERR ("revision %s still locked by %s", num, before);
+              return false;
+            }
+          diagnose ("%s unlocked", num);
+          wtp->next = wtp->next->next;
+          ADMIN (locks) = wfake.next;
+          d->lockedby = NULL;
+          return true;
+        }
+    }
   RERR ("no lock set on revision %s", num);
   return false;
 }
@@ -527,7 +535,6 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
    return 0 and mark deleted.  */
 {
   struct hshentry *pt;
-  struct rcslock const *lockpt;
 
   for (pt = strt; pt != tail; pt = pt->next)
     {
@@ -537,12 +544,16 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
           RERR ("can't remove branch point %s", pt->num);
           return true;
         }
-      for (lockpt = ADMIN (locks); lockpt; lockpt = lockpt->nextlock)
-        if (lockpt->delta == pt)
-          {
-            RERR ("can't remove locked revision %s", pt->num);
-            return true;
-          }
+      for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
+        {
+          struct rcslock const *rl = ls->entry;
+
+          if (pt == rl->delta)
+            {
+              RERR ("can't remove locked revision %s", pt->num);
+              return true;
+            }
+        }
       pt->selector = false;
       diagnose ("deleting revision %s", pt->num);
     }
@@ -821,7 +832,11 @@ dolocks (void)
                 {
                 case 0:
                   /* Remove most recent lock.  */
-                  changed |= breaklock (ADMIN (locks)->delta);
+                  {
+                    struct rcslock *rl = ADMIN (locks)->entry;
+
+                    changed |= breaklock (rl->delta);
+                  }
                   break;
                 case 1:
                   diagnose ("%s unlocked", target->num);

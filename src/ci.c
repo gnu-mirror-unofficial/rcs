@@ -139,26 +139,31 @@ removelock (struct hshentry *delta)
    the RCS file.  If caller does not have a lock in this case,
    return 0; return 1 if a lock is actually removed.  */
 {
-  register struct rcslock *next, **trail;
+  struct wlink wfake, *wtp;
   char const *num;
 
   num = delta->num;
-  for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
-    if (next->delta == delta)
-      {
-        if (STR_SAME (getcaller (), next->login))
-          {
-            /* We found a lock on delta by caller; delete it.  */
-            *trail = next->nextlock;
-            delta->lockedby = NULL;
-            return 1;
-          }
-        else
-          {
-            RERR ("revision %s locked by %s", num, next->login);
-            return -1;
-          }
-      }
+  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+    {
+      struct rcslock *rl = wtp->next->entry;
+
+      if (rl->delta == delta)
+        {
+          if (STR_SAME (getcaller (), rl->login))
+            {
+              /* We found a lock on ‘delta’ by caller; delete it.  */
+              wtp->next = wtp->next->next;
+              ADMIN (locks) = wfake.next;
+              delta->lockedby = NULL;
+              return 1;
+            }
+          else
+            {
+              RERR ("revision %s locked by %s", num, rl->login);
+              return -1;
+            }
+        }
+    }
   if (!BE (strictly_locking) && myself (REPO (stat).st_uid))
     return 0;
   RERR ("no lock set by %s for revision %s", getcaller (), num);

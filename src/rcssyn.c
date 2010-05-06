@@ -70,9 +70,7 @@ getadmin (void)
   struct link fake, *tp;
   struct wlink wfake, *wtp;
   register char const *id;
-  struct rcslock *newlock;
   struct hshentry *delta;
-  struct rcslock **LastLock;
   struct cbuf cb;
 
   REPO (ndelt) = 0;
@@ -133,18 +131,20 @@ getadmin (void)
   getsemi (&TINY (symbols));
 
   getkey (&TINY (locks));
-  LastLock = &ADMIN (locks);
+  wfake.next = ADMIN (locks);
+  wtp = &wfake;
   while ((id = getid ()))
     {
+      struct rcslock *rl;
+
       delta = must_get_colon_delta_num ("lock");
       /* Add new pair to lock list.  */
-      newlock = FALLOC (struct rcslock);
-      newlock->login = id;
-      newlock->delta = delta;
-      *LastLock = newlock;
-      LastLock = &newlock->nextlock;
+      rl = FALLOC (struct rcslock);
+      rl->login = id;
+      rl->delta = delta;
+      wtp = wextend (wtp, rl, SINGLE);
     }
-  *LastLock = NULL;
+  ADMIN (locks) = wfake.next;
   getsemi (&TINY (locks));
 
   if ((BE (strictly_locking) = getkeyopt (&TINY (strict))))
@@ -259,15 +259,13 @@ gettree (void)
 /* Read in the delta tree with ‘getdelta’,
    then update the ‘lockedby’ fields.  */
 {
-  struct rcslock const *currlock;
-
   while (getdelta ())
     continue;
-  currlock = ADMIN (locks);
-  while (currlock)
+  for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
     {
-      currlock->delta->lockedby = currlock->login;
-      currlock = currlock->nextlock;
+      struct rcslock *rl = ls->entry;
+
+      rl->delta->lockedby = rl->login;
     }
 }
 

@@ -304,7 +304,6 @@ struct rcslock
 {
   char const *login;
   struct hshentry *delta;
-  struct rcslock *nextlock;
 };
 
 /* List element for symbolic names.  */
@@ -644,8 +643,8 @@ struct repository
     /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
        -- [rcs]main InitAdmin getadmin  */
 
-    struct rcslock *locks;
-    /* List of locks.
+    struct wlink *locks;
+    /* List of ‘struct rcslock’ (locks).
        -- rmlock addlock InitAdmin  */
 
     char const *defbr;

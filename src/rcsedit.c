@@ -995,32 +995,36 @@ setmtime (char const *file, time_t mtime)
 int
 findlock (bool delete, struct hshentry **target)
 /* Find the first lock held by caller and return a pointer
-   to the locked delta; also removes the lock if ‘delete’.
+   to the locked delta; also, remove the lock if ‘delete’.
    If one lock, put it into ‘*target’.
    Return 0 for no locks, 1 for one, 2 for two or more.  */
 {
-  register struct rcslock *next, **trail, **found;
+  struct rcslock *rl;
+  struct wlink wfake, *wtp, *found = NULL;
 
-  found = 0;
-  for (trail = &ADMIN (locks); (next = *trail); trail = &next->nextlock)
-    if (STR_SAME (getcaller (), next->login))
-      {
-        if (found)
-          {
-            RERR ("multiple revisions locked by %s; please specify one",
-                  getcaller ());
-            return 2;
-          }
-        found = trail;
-      }
+  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+    {
+      rl = wtp->next->entry;
+      if (STR_SAME (getcaller (), rl->login))
+        {
+          if (found)
+            {
+              RERR ("multiple revisions locked by %s; please specify one",
+                    getcaller ());
+              return 2;
+            }
+          found = wtp;
+        }
+    }
   if (!found)
     return 0;
-  next = *found;
-  *target = next->delta;
+  rl = found->next->entry;
+  *target = rl->delta;
   if (delete)
     {
-      next->delta->lockedby = NULL;
-      *found = next->nextlock;
+      found->next = found->next->next;
+      ADMIN (locks) = wfake.next;
+      rl->delta->lockedby = NULL;
     }
   return 1;
 }
@@ -1032,26 +1036,29 @@ addlock (struct hshentry *delta, bool verbose)
    added because ‘delta’ is locked by somebody other than caller.
    Return 0 if the caller already holds the lock.   */
 {
-  register struct rcslock *next;
+  register struct rcslock *rl;
+  struct wlink *ls;
 
-  for (next = ADMIN (locks); next; next = next->nextlock)
-    if (cmpnum (delta->num, next->delta->num) == 0)
-      {
-        if (STR_SAME (getcaller (), next->login))
-          return 0;
-        else
-          {
-            if (verbose)
-              RERR ("Revision %s is already locked by %s.",
-                    delta->num, next->login);
-            return -1;
-          }
-      }
-  next = FALLOC (struct rcslock);
-  delta->lockedby = next->login = getcaller ();
-  next->delta = delta;
-  next->nextlock = ADMIN (locks);
-  ADMIN (locks) = next;
+  for (ls = ADMIN (locks); ls; ls = ls->next)
+    {
+      rl = ls->entry;
+      if (cmpnum (delta->num, rl->delta->num) == 0)
+        {
+          if (STR_SAME (getcaller (), rl->login))
+            return 0;
+          else
+            {
+              if (verbose)
+                RERR ("Revision %s is already locked by %s.",
+                      delta->num, rl->login);
+              return -1;
+            }
+        }
+    }
+  rl = FALLOC (struct rcslock);
+  delta->lockedby = rl->login = getcaller ();
+  rl->delta = delta;
+  ADMIN (locks) = wprepend (rl, ADMIN (locks), SINGLE);
   return 1;
 }
 

@@ -1,5 +1,25 @@
 2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘struct wlink’ for ‘ADMIN (locks)’ list.
+
+	Here, "U" means "Update to walk ‘struct wlink’ list".
+	* base.h (struct rcslock): Delete member ‘nextlock’.
+	(struct repository): In sub-‘struct admin’,
+	change type of member ‘locks’ to ‘struct wlink *’.
+	* ci.c (removelock): U.
+	* co.c (rmlock): U.
+	* rcs.c (breaklock, branchpoint): U.
+	(dolocks): Update access to ‘ADMIN (locks)’.
+	* rcsclean.c (unlock): U.
+	* rcsedit.c (findlock): U.
+	(addlock): U; use ‘wprepend’.
+	* rcsgen.c (putadmin): U.
+	* rcssyn.c (getadmin): U; use ‘wextend’.
+	(gettree): U.
+	* rlog.c (extractdelta, trunclocks, main): U.
+
+2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: wprepend
 
 	* b-esds.h (wprepend): New func decl.

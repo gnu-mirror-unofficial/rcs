@@ -121,36 +121,33 @@ rmlock (struct hshentry const *delta)
   someone else holds the lock, 0 if there is no lock on delta,
   and 1 if a lock was found and removed.  */
 {
-  register struct rcslock *next, *trail;
+  struct wlink wfake, *wtp;
+  struct rcslock *rl = NULL;
   char const *num;
-  struct rcslock dummy;
   bool whomatch, nummatch;
 
   num = delta->num;
-  dummy.nextlock = next = ADMIN (locks);
-  trail = &dummy;
-  while (next)
+  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
     {
-      whomatch = STR_SAME (getcaller (), next->login);
-      nummatch = STR_SAME (num, next->delta->num);
+      rl = wtp->next->entry;
+      whomatch = STR_SAME (getcaller (), rl->login);
+      nummatch = STR_SAME (num, rl->delta->num);
       if (whomatch && nummatch)
         break;
       /* Found a lock on delta by caller.  */
       if (!whomatch && nummatch)
         {
           RERR ("revision %s locked by %s; use co -r or rcs -u",
-                num, next->login);
+                num, rl->login);
           return -1;
         }
-      trail = next;
-      next = next->nextlock;
     }
-  if (next)
+  if (wtp->next)
     {
       /* Found one; delete it.  */
-      trail->nextlock = next->nextlock;
-      ADMIN (locks) = dummy.nextlock;
-      next->delta->lockedby = NULL;
+      wtp->next = wtp->next->next;
+      ADMIN (locks) = wfake.next;
+      rl->delta->lockedby = NULL;
       /* Success.  */
       return 1;
     }
