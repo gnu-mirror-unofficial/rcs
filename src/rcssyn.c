@@ -206,7 +206,7 @@ getdelta (void)
    current block does not start with a number.  */
 {
   register struct hshentry *Delta, *num;
-  struct branchhead **LastBranch, *NewBranch;
+  struct wlink wfake, *wtp;
 
   if (!(Delta = getdnum ()))
     return false;
@@ -222,15 +222,11 @@ getdelta (void)
   Delta->state = getkeyval (&TINY (state), ID, true);
 
   getkey (&TINY (branches));
-  LastBranch = &Delta->branches;
+  wfake.next = Delta->branches;
+  wtp = &wfake;
   while ((num = getdnum ()))
-    {
-      NewBranch = FALLOC (struct branchhead);
-      NewBranch->hsh = num;
-      *LastBranch = NewBranch;
-      LastBranch = &NewBranch->nextbranch;
-    }
-  *LastBranch = NULL;
+    wtp = wextend (wtp, num, SINGLE);
+  Delta->branches = wfake.next;
   getsemi (&TINY (branches));
 
   getkey (&TINY (next));

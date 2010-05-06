@@ -321,7 +321,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
 {
   int field;
   register struct hshentry *next, *trail;
-  register struct branchhead const *bhead;
+  register struct wlink const *bhead;
   int result;
   char datebuf[datesize + zonelenmax];
 
@@ -337,9 +337,10 @@ genbranch (struct hshentry const *bpoint, char const *revno,
         }
 
       /* Find branch head.  Branches are arranged in increasing order.  */
-      while (0 < (result = cmpnumfld (revno, bhead->hsh->num, field)))
+      while (next = bhead->entry,
+             0 < (result = cmpnumfld (revno, next->num, field)))
         {
-          bhead = bhead->nextbranch;
+          bhead = bhead->next;
           if (!bhead)
             {
               RERR ("branch number %s too high", TAKE (field, revno));
@@ -353,10 +354,10 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           return NULL;
         }
 
-      next = bhead->hsh;
+      next = bhead->entry;
       if (length == field)
         {
-          /* pick latest one on that branch */
+          /* Pick latest one on that branch.  */
           trail = NULL;
           do
             {
@@ -376,7 +377,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
           else
             {
               /* Print up to last one suitable.  */
-              next = bhead->hsh;
+              next = bhead->entry;
               while (next != trail)
                 {
                   store1 (&store, next);
@@ -430,7 +431,6 @@ genbranch (struct hshentry const *bpoint, char const *revno,
             }
         }
       bhead = trail->branches;
-
     }
   while ((field += 2) <= length);
   *store = NULL;

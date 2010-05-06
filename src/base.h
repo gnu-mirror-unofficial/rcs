@@ -267,8 +267,8 @@ struct hshentry
   /* Log message requested at checkin.  */
   struct cbuf log;
 
-  /* List of first revisions on branches.  */
-  struct branchhead *branches;
+  /* List of ‘struct hshentry’ (first revisions) on branches.  */
+  struct wlink *branches;
 
   /* The ‘commitid’ added by CVS; only used for reading.  */
   char const *commitid;
@@ -290,13 +290,6 @@ struct hshentries
 {
   struct hshentries *rest;
   struct hshentry *first;
-};
-
-/* List element for branch lists.  */
-struct branchhead
-{
-  struct hshentry *hsh;
-  struct branchhead *nextbranch;
 };
 
 /* List element for locks.  */

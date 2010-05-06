@@ -170,7 +170,9 @@ removelock (struct hshentry *delta)
   return -1;
 }
 
-static struct branchhead newbranch;   /* new branch to be inserted */
+static struct wlink newbranch;          /* new branch to be inserted */
+
+#define BHDELTA(x)  ((struct hshentry *)(x)->entry)
 
 static int
 addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
@@ -182,7 +184,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
    If ‘removedlock’, a lock was already removed.  */
 {
-  struct branchhead *bhead, **btrail;
+  struct wlink **btrail;
   int result;
   int field, numlength;
 
@@ -199,19 +201,20 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
         }
       else if (numlength & 1)
         ADD (num, ".1");
-      newbranch.nextbranch = NULL;
+      newbranch.next = NULL;
 
     }
   else if (numlength == 0)
     {
+      struct wlink *bhead = branchpoint->branches;
+
       /* Append new branch to the end.  */
-      bhead = branchpoint->branches;
-      while (bhead->nextbranch)
-        bhead = bhead->nextbranch;
-      bhead->nextbranch = &newbranch;
-      incnum (BRANCHNO (bhead->hsh->num), num);
+      while (bhead->next)
+        bhead = bhead->next;
+      bhead->next = &newbranch;
+      incnum (BRANCHNO (BHDELTA (bhead)->num), num);
       ADD (num, ".1");
-      newbranch.nextbranch = NULL;
+      newbranch.next = NULL;
     }
   else
     {
@@ -219,10 +222,10 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
       field = numlength - ((numlength & 1) ^ 1);
       /* Field of branch number.  */
       btrail = &branchpoint->branches;
-      while (0 < (result = cmpnumfld (num->string, (*btrail)->hsh->num,
+      while (0 < (result = cmpnumfld (num->string, BHDELTA (*btrail)->num,
                                       field)))
         {
-          btrail = &(*btrail)->nextbranch;
+          btrail = &(*btrail)->next;
           if (!*btrail)
             {
               result = -1;
@@ -232,7 +235,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
       if (result < 0)
         {
           /* Insert/append new branchhead.  */
-          newbranch.nextbranch = *btrail;
+          newbranch.next = *btrail;
           *btrail = &newbranch;
           if (numlength & 1)
             ADD (num, ".1");
@@ -260,7 +263,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
           /* Don't do anything to newbranch.  */
         }
     }
-  newbranch.hsh = &newdelta;
+  newbranch.entry = &newdelta;
   newdelta.next = NULL;
   if (branchpoint->lockedby)
     if (STR_SAME (branchpoint->lockedby, getcaller ()))

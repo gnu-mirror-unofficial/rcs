@@ -134,7 +134,6 @@ putadelta (register struct hshentry const *node,
   register FILE *out;
   char const *s;
   size_t n;
-  struct branchhead const *newbranch;
   char datebuf[datesize + zonelenmax];
   bool pre5 = BE (version) < VERSION (5);
 
@@ -160,14 +159,14 @@ putadelta (register struct hshentry const *node,
                  editscript->insertlns, editscript->deletelns);
     }
 
-  newbranch = node->branches;
-  if (newbranch)
+  if (node->branches)
     {
       aputs ("\nbranches:", out);
-      while (newbranch)
+      for (struct wlink *ls = node->branches; ls; ls = ls->next)
         {
-          aprintf (out, "  %s;", BRANCHNO (newbranch->hsh->num));
-          newbranch = newbranch->nextbranch;
+          struct hshentry *delta = ls->entry;
+
+          aprintf (out, "  %s;", BRANCHNO (delta->num));
         }
     }
 
@@ -196,7 +195,7 @@ putrunk (void)
     putadelta (ptr, ptr->next, true);
 }
 
-static void putforest (struct branchhead const *);
+static void putforest (struct wlink const *);
 
 static void
 putree (struct hshentry const *root)
@@ -220,14 +219,14 @@ putabranch (struct hshentry const *root)
 }
 
 static void
-putforest (struct branchhead const *branchroot)
+putforest (struct wlink const *branchroot)
 /* Print branches that have the same direct ancestor ‘branchroot’.  */
 {
   if (!branchroot)
     return;
-  putforest (branchroot->nextbranch);
-  putabranch (branchroot->hsh);
-  putree (branchroot->hsh);
+  putforest (branchroot->next);
+  putabranch (branchroot->entry);
+  putree (branchroot->entry);
 }
 
 static void
@@ -355,8 +354,6 @@ static void
 exttree (struct hshentry *root)
 /* Select revisions, starting with ‘root’.  */
 {
-  struct branchhead const *newbranch;
-
   if (!root)
     return;
 
@@ -364,12 +361,8 @@ exttree (struct hshentry *root)
   root->log.string = NULL;
   exttree (root->next);
 
-  newbranch = root->branches;
-  while (newbranch)
-    {
-      exttree (newbranch->hsh);
-      newbranch = newbranch->nextbranch;
-    }
+  for (struct wlink *ls = root->branches; ls; ls = ls->next)
+    exttree (ls->entry);
 }
 
 static void
@@ -484,8 +477,6 @@ recentdate (struct hshentry const *root, struct daterange *r)
    interval given by ‘pd’, and set the ‘strtdate’ of ‘pd’ to the date
    of the selected delta.  */
 {
-  struct branchhead const *newbranch;
-
   if (!root)
     return;
   if (root->selector)
@@ -499,12 +490,8 @@ recentdate (struct hshentry const *root, struct daterange *r)
     }
 
   recentdate (root->next, r);
-  newbranch = root->branches;
-  while (newbranch)
-    {
-      recentdate (newbranch->hsh, r);
-      newbranch = newbranch->nextbranch;
-    }
+  for (struct wlink *ls = root->branches; ls; ls = ls->next)
+    recentdate (ls->entry, r);
 }
 
 static int
@@ -513,7 +500,6 @@ extdate (struct hshentry *root)
    and ‘datelist’, starting at ‘root’.  Return number of revisions
    selected, including those already selected.  */
 {
-  struct branchhead const *newbranch;
   int revno;
 
   if (!root)
@@ -549,12 +535,8 @@ extdate (struct hshentry *root)
     }
   revno = root->selector + extdate (root->next);
 
-  newbranch = root->branches;
-  while (newbranch)
-    {
-      revno += extdate (newbranch->hsh);
-      newbranch = newbranch->nextbranch;
-    }
+  for (struct wlink *ls = root->branches; ls; ls = ls->next)
+    revno += extdate (ls->entry);
   return revno;
 }
 

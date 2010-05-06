@@ -404,19 +404,17 @@ static void
 putdelta (register struct hshentry const *node, register FILE *fout)
 /* Output the delta ‘node’ to ‘fout’.  */
 {
-  struct branchhead const *nextbranch;
-
   if (!node)
     return;
 
   aprintf (fout, "\n%s\n%s\t%s;\t%s %s;\t%s %s;\nbranches",
            node->num, TINYKS (date), node->date, TINYKS (author), node->author,
            TINYKS (state), node->state ? node->state : "");
-  nextbranch = node->branches;
-  while (nextbranch)
+  for (struct wlink *ls = node->branches; ls; ls = ls->next)
     {
-      aprintf (fout, "\n\t%s", nextbranch->hsh->num);
-      nextbranch = nextbranch->nextbranch;
+      struct hshentry *delta = ls->entry;
+
+      aprintf (fout, "\n\t%s", delta->num);
     }
 
   aprintf (fout, ";\n%s\t%s;\n", TINYKS (next), node->next ? node->next->num : "");
@@ -428,8 +426,6 @@ void
 puttree (struct hshentry const *root, register FILE *fout)
 /* Output the delta tree with base ‘root’ in preorder to ‘fout’.  */
 {
-  struct branchhead const *nextbranch;
-
   if (!root)
     return;
 
@@ -438,12 +434,8 @@ puttree (struct hshentry const *root, register FILE *fout)
 
   puttree (root->next, fout);
 
-  nextbranch = root->branches;
-  while (nextbranch)
-    {
-      puttree (nextbranch->hsh, fout);
-      nextbranch = nextbranch->nextbranch;
-    }
+  for (struct wlink *ls = root->branches; ls; ls = ls->next)
+    puttree (ls->entry, fout);
 }
 
 bool

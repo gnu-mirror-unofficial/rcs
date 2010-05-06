@@ -1,5 +1,21 @@
 2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘struct branchhead’ with ‘struct wlink’.
+
+	Here, "U" means "Update to walk ‘struct wlink’ list".
+	* base.h (struct branchhead): Delete.
+	(struct hshentry): Change type of member ‘branches’ to ‘struct wlink *’.
+	* ci.c (newbranch): Change type to ‘struct wlink’.
+	(BHDELTA): New macro.
+	(addbranch): U; use ‘BHDELTA’.
+	* rcs.c (buildtree): U.
+	* rcsgen.c (putdelta, puttree): U.
+	* rcsrev.c (genbranch): U.
+	* rcssyn.c (getdelta): U.
+	* rlog.c (putadelta, putforest, exttree, recentdate, extdate): U.
+
+2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘struct wlink’ for ‘ADMIN (locks)’ list.
 
 	Here, "U" means "Update to walk ‘struct wlink’ list".

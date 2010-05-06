@@ -1002,25 +1002,25 @@ buildtree (void)
    Ask for reconfirmation if deleting last revision.  */
 {
   struct hshentry *Delta;
-  struct branchhead *pt, *pre;
 
   if (cuthead)
     if (cuthead->next == delstrt)
       cuthead->next = cuttail;
     else
       {
-        pre = pt = cuthead->branches;
-        while (pt && pt->hsh != delstrt)
+        struct wlink *pt = cuthead->branches, *pre = pt;
+
+        while (pt && pt->entry != delstrt)
           {
             pre = pt;
-            pt = pt->nextbranch;
+            pt = pt->next;
           }
         if (cuttail)
-          pt->hsh = cuttail;
+          pt->entry = cuttail;
         else if (pt == pre)
-          cuthead->branches = pt->nextbranch;
+          cuthead->branches = pt->next;
         else
-          pre->nextbranch = pt->nextbranch;
+          pre->next = pt->next;
       }
   else
     {
