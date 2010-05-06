@@ -1,5 +1,17 @@
 2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘struct Status’ with ‘struct link’ + ‘struct u_state’.
+
+	* rcs.c (struct u_state): New.
+	(struct Status): Delete.
+	(statelst): Change type to ‘struct link’.
+	(nextstate): Delete var.
+	(getstates): Take ‘struct link **’; use ‘extend’.
+	(main): Update call to ‘getstates’; update
+	‘statelst’ access to walk ‘struct link’ list.
+
+2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘struct Datepairs’ with ‘struct link’ + ‘struct daterange’.
 
 	* rlog.c (struct daterange): New.

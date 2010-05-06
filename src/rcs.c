@@ -39,11 +39,10 @@ struct u_log
   struct cbuf message;
 };
 
-struct Status
+struct u_state
 {
   char const *revno;
   char const *status;
-  struct Status *nextstatus;
 };
 
 enum changeaccess
@@ -67,7 +66,7 @@ static bool chgheadstate, lockhead, unlockcaller, suppress_mail;
 static int exitstatus;
 static struct link *newlocklst, *rmvlocklst;
 static struct link messagelst;
-static struct Status *statelst, **nextstate;
+static struct link statelst;
 static struct link assoclst;
 static struct link chaccess;
 static struct delrevpair delrev;
@@ -207,11 +206,11 @@ getmessage (struct link **tp, char *option)
 }
 
 static void
-getstates (char *sp)
+getstates (struct link **tp, char *sp)
 /* Get one state attribute and the corresponding rev; store in ‘statelst’.  */
 {
   char const *temp;
-  struct Status *pt;
+  struct u_state *us;
   register int c;
 
   while ((c = *++sp) == ' ' || c == '\t' || c == '\n')
@@ -239,12 +238,10 @@ getstates (char *sp)
 
   while ((c = *++sp) == ' ' || c == '\t' || c == '\n')
     continue;
-  pt = ZLLOC (1, struct Status);
-  pt->status = temp;
-  pt->revno = sp;
-  pt->nextstatus = NULL;
-  *nextstate = pt;
-  nextstate = &pt->nextstatus;
+  us = ZLLOC (1, struct u_state);
+  us->status = temp;
+  us->revno = sp;
+  *tp = extend (*tp, us, SHARED);
 }
 
 static void
@@ -1095,8 +1092,7 @@ main (int argc, char **argv)
   struct cbuf branchnum;
   struct link fakelock, *tplock;
   struct link fakerm, *tprm;
-  struct Status *curstate;
-  struct link *tp_assoc, *tp_chacc, *tp_log;
+  struct link *tp_assoc, *tp_chacc, *tp_log, *tp_state;
 
   CHECK_HV ();
   gnurcs_init ();
@@ -1106,7 +1102,7 @@ main (int argc, char **argv)
   tp_assoc = &assoclst;
   tp_chacc = &chaccess;
   tp_log = &messagelst;
-  nextstate = &statelst;
+  tp_state = &statelst;
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
   commsymlen = 0;
@@ -1267,7 +1263,7 @@ main (int argc, char **argv)
               PERR ("state missing after -s");
               break;
             }
-          getstates ((*argv) + 1);
+          getstates (&tp_state, (*argv) + 1);
           break;
 
         case 't':
@@ -1450,8 +1446,12 @@ main (int argc, char **argv)
             else
               changed |= rcs_setstate (ADMIN (defbr), headstate);
           }
-        for (curstate = statelst; curstate; curstate = curstate->nextstatus)
-          changed |= rcs_setstate (curstate->revno, curstate->status);
+        for (struct link *ls = statelst.next; ls; ls = ls->next)
+          {
+            struct u_state const *us = ls->entry;
+
+            changed |= rcs_setstate (us->revno, us->status);
+          }
 
         cuthead = cuttail = NULL;
         if (delrev.strt && removerevs ())
