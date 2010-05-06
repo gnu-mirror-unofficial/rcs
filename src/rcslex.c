@@ -30,6 +30,7 @@
 #include "unistd-safer.h"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-fb.h"
 #include "b-fro.h"
 #include "b-isr.h"
@@ -52,7 +53,7 @@ lookup (char const *str)
 {
   register unsigned ihash;      /* index into hashtable */
   register char const *sp;
-  register struct hshentry *n, **p;
+  register struct hshentry *n;
 
   /* Calculate hash code.  */
   sp = str;
@@ -61,19 +62,17 @@ lookup (char const *str)
     ihash = (ihash << 2) + *sp++;
   ihash %= hshsize;
 
-  for (p = &LEX (hshtab)[ihash];; p = &n->nexthsh)
-    if (!(n = *p))
+  for (struct wlink *ls = LEX (hshtab)[ihash]; ; ls = ls->next)
+    if (!ls)
       {
         /* Empty slot found.  */
-        *p = n = FALLOC (struct hshentry);
+        n = FALLOC (struct hshentry);
         n->num = intern (SINGLE, str, sp - str);
-        n->nexthsh = NULL;
-#ifdef LEXDB
-        printf ("\nEntered: %s at %u ", str, ihash);
-#endif
+        LEX (hshtab)[ihash] = wprepend (n, LEX (hshtab)[ihash], SINGLE);
         break;
       }
-    else if (STR_SAME (str, n->num))
+    else if (n = ls->entry,
+             STR_SAME (str, n->num))
       /* Match found.  */
       break;
   NEXT (hsh) = n;

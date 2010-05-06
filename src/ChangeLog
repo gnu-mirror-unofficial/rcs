@@ -1,5 +1,15 @@
 2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘struct wlink’ for hash table buckets.
+
+	* base.h (struct hshentry): Delete member ‘nexthsh’.
+	(struct parse_state): Change type of ‘hshtab’ to ‘struct wlink **’.
+	* rcslex.c: #include "b-esds.h".
+	(lookup): Update to walk ‘struct wlink’ list; for new
+	entries, push -- use ‘wprepend’ -- instead of appending.
+
+2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘struct branchhead’ with ‘struct wlink’.
 
 	Here, "U" means "Update to walk ‘struct wlink’ list".

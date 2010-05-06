@@ -273,9 +273,8 @@ struct hshentry
   /* The ‘commitid’ added by CVS; only used for reading.  */
   char const *commitid;
 
-  /* Next revision on same branch, with same hash value.  */
+  /* Next revision on same branch.  */
   struct hshentry *next;
-  struct hshentry *nexthsh;
 
   /* Lines inserted and deleted (computed by rlog).  */
   long insertlns;
@@ -595,7 +594,7 @@ struct parse_state
        -- lookup  */
   } next;
 
-  struct hshentry **hshtab;
+  struct wlink **hshtab;
   /* Hash table.
      -- Lexinit lookup  */
 
