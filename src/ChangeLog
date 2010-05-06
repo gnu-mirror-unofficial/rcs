@@ -1,5 +1,14 @@
 2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: wprepend
+
+	* b-esds.h (wprepend): New func decl.
+	* b-esds.c (PREPEND_BODY): New macro.
+	(prepend): Use ‘PREPEND_BODY’.
+	(wprepend): New func.
+
+2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘struct Status’ with ‘struct link’ + ‘struct u_state’.
 
 	* rcs.c (struct u_state): New.
