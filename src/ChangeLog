@@ -1,3 +1,17 @@
+2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Replace ‘struct Datepairs’ with ‘struct link’ + ‘struct daterange’.
+
+	* rlog.c (struct daterange): New.
+	(struct Datepairs): Delete.
+	(datelist, duelst): Change type to ‘struct link *’.
+	(recentdate): Take ‘struct daterange *’.
+	(extdate): Update to walk ‘struct link’ list.
+	(PUSH): Move prior to ‘getdatepair’; nfc.
+	(getdatepair): Use ‘struct daterange’ object; use ‘PUSH’.
+	(main): Update to walk ‘struct link’ list; also, discard
+	incomplete ‘duelst’ entry, substituting it with a new object.
+
 2010-05-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Incorporate ‘xpandstring’ into unique caller.

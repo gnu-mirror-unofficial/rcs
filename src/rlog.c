@@ -38,12 +38,11 @@ struct revrange
   int nfield;
 };
 
-struct Datepairs
+struct daterange
 {
-  struct Datepairs *dnext;
-  char strtdate[datesize];
-  char enddate[datesize];
-  char ne_date;                         /* distinguish < from <= */
+  char beg[datesize];
+  char end[datesize];
+  bool oep;                             /* open end? */
 };
 
 /* A version-specific format string.  */
@@ -54,7 +53,7 @@ static bool branchflag;
 static bool lockflag;
 
 /* Date range in ‘-d’ option.  */
-static struct Datepairs *datelist, *duelst;
+static struct link *datelist, *duelst;
 
 /* Revision or branch range in ‘-r’ option.
    On the first pass (option processing), push onto ‘revlist’.
@@ -470,7 +469,7 @@ trunclocks (void)
 }
 
 static void
-recentdate (struct hshentry const *root, struct Datepairs *pd)
+recentdate (struct hshentry const *root, struct daterange *r)
 /* Find the delta that is closest to the cutoff date ‘pd’ among the
    revisions selected by ‘exttree’.  Successively narrow down the
    interval given by ‘pd’, and set the ‘strtdate’ of ‘pd’ to the date
@@ -482,19 +481,19 @@ recentdate (struct hshentry const *root, struct Datepairs *pd)
     return;
   if (root->selector)
     {
-      if (cmpdate (root->date, pd->strtdate) >= 0
-          && cmpdate (root->date, pd->enddate) <= 0)
+      if (0 <= cmpdate (root->date, r->beg)
+          && 0 >= cmpdate (root->date, r->end))
         {
-          strncpy (pd->strtdate, root->date, datesize);
-          pd->strtdate[datesize - 1] = '\0';
+          strncpy (r->beg, root->date, datesize);
+          r->beg[datesize - 1] = '\0';
         }
     }
 
-  recentdate (root->next, pd);
+  recentdate (root->next, r);
   newbranch = root->branches;
   while (newbranch)
     {
-      recentdate (newbranch->hsh, pd);
+      recentdate (newbranch->hsh, r);
       newbranch = newbranch->nextbranch;
     }
 }
@@ -506,40 +505,37 @@ extdate (struct hshentry *root)
    selected, including those already selected.  */
 {
   struct branchhead const *newbranch;
-  struct Datepairs const *pdate;
-  int revno, ne;
+  int revno;
 
   if (!root)
     return 0;
 
   if (datelist || duelst)
     {
-      pdate = datelist;
-      while (pdate)
+      struct daterange const *r;
+      bool oep, sel = false;
+
+      for (struct link *ls = datelist; ls; ls = ls->next)
         {
-          ne = pdate->ne_date;
-          if ((!pdate->strtdate[0]
-               || ne <= cmpdate (root->date, pdate->strtdate))
-              &&
-              (!pdate->enddate[0]
-               || ne <= cmpdate (pdate->enddate, root->date)))
+          r = ls->entry;
+          oep = r->oep;
+          if ((sel = ((!r->beg[0]
+                       || oep <= cmpdate (root->date, r->beg))
+                      &&
+                      (!r->end[0]
+                       || oep <= cmpdate (r->end, root->date)))))
             break;
-          pdate = pdate->dnext;
         }
-      if (!pdate)
+      if (!sel)
         {
-          pdate = duelst;
-          for (;;)
+          for (struct link *ls = duelst; ls; ls = ls->next)
             {
-              if (!pdate)
-                {
-                  root->selector = false;
-                  break;
-                }
-              if (cmpdate (root->date, pdate->strtdate) == 0)
+              r = ls->entry;
+              if ((sel = !cmpdate (root->date, r->beg)))
                 break;
-              pdate = pdate->dnext;
             }
+          if (!sel)
+            root->selector = false;
         }
     }
   revno = root->selector + extdate (root->next);
@@ -553,13 +549,15 @@ extdate (struct hshentry *root)
   return revno;
 }
 
+#define PUSH(x,ls)  ls = prepend (x, ls, SHARED)
+
 static void
 getdatepair (char *argv)
 /* Get time range from command line and store in ‘datelist’ if
  a time range specified or in ‘duelst’ if a time spot specified.  */
 {
   register char c;
-  struct Datepairs *nextdate;
+  struct daterange *r;
   char const *rawdate;
   bool switchflag;
 
@@ -576,20 +574,20 @@ getdatepair (char *argv)
   while (c != '\0')
     {
       switchflag = false;
-      nextdate = ZLLOC (1, struct Datepairs);
+      r = ZLLOC (1, struct daterange);
       if (c == '<')                     /* <DATE */
         {
           c = *++argv;
-          if (!(nextdate->ne_date = c != '='))
+          if (!(r->oep = c != '='))
             c = *++argv;
-          (nextdate->strtdate)[0] = '\0';
+          r->beg[0] = '\0';
         }
       else if (c == '>')                /* >DATE */
         {
           c = *++argv;
-          if (!(nextdate->ne_date = c != '='))
+          if (!(r->oep = c != '='))
             c = *++argv;
-          (nextdate->enddate)[0] = '\0';
+          r->end[0] = '\0';
           switchflag = true;
         }
       else
@@ -600,32 +598,26 @@ getdatepair (char *argv)
           *argv = '\0';
           if (c == '>')
             switchflag = true;
-          str2date (rawdate,
-                    switchflag ? nextdate->enddate : nextdate->strtdate);
+          str2date (rawdate, switchflag ? r->end : r->beg);
           if (c == ';' || c == '\0')    /* DATE */
             {
-              strncpy (nextdate->enddate, nextdate->strtdate, datesize);
-              nextdate->dnext = duelst;
-              duelst = nextdate;
+              strncpy (r->end, r->beg, datesize);
+              PUSH (r, duelst);
               goto end;
             }
           else                   /* DATE< or DATE> (see ‘switchflag’) */
             {
               bool eq = argv[1] == '=';
 
-              nextdate->ne_date = !eq;
+              r->oep = !eq;
               argv += eq;
               while ((c = *++argv) == ' ' || c == '\t' || c == '\n')
                 continue;
               if (c == ';' || c == '\0')
                 {
                   /* Second date missing.  */
-                  if (switchflag)
-                    *nextdate->strtdate = '\0';
-                  else
-                    *nextdate->enddate = '\0';
-                  nextdate->dnext = datelist;
-                  datelist = nextdate;
+                  (switchflag ? r->beg : r->end)[0] = '\0';
+                  PUSH (r, datelist);
                   goto end;
                 }
             }
@@ -634,12 +626,11 @@ getdatepair (char *argv)
       while (c != '>' && c != '<' && c != ';' && c != '\0')
         c = *++argv;
       *argv = '\0';
-      str2date (rawdate, switchflag ? nextdate->strtdate : nextdate->enddate);
-      nextdate->dnext = datelist;
-      datelist = nextdate;
+      str2date (rawdate, switchflag ? r->beg : r->end);
+      PUSH (r, datelist);
     end:
       if (BE (version) < VERSION (5))
-        nextdate->ne_date = 0;
+        r->oep = false;
       if (c == '\0')
         return;
       while ((c = *++argv) == ';' || c == ' ' || c == '\t' || c == '\n')
@@ -665,8 +656,6 @@ checkrevpair (char const *num1, char const *num2)
 }
 
 #define KSTRCPY(to,kstr)  strncpy (to, kstr, sizeof kstr)
-
-#define PUSH(x,ls)  ls = prepend (x, ls, SHARED)
 
 static bool
 getnumericrev (void)
@@ -830,7 +819,6 @@ main (int argc, char **argv)
 {
   FILE *out;
   char *a, **newargv;
-  struct Datepairs *currdate;
   char const *accessListString, *accessFormat;
   char const *headFormat, *symbolFormat;
   struct link const *curaccess;
@@ -1043,16 +1031,19 @@ main (int argc, char **argv)
 
         if (ADMIN (head) && selectflag & descflag)
           {
-
             exttree (ADMIN (head));
 
             /* Get most recently date of the dates pointed by ‘duelst’.  */
-            currdate = duelst;
-            while (currdate)
+            for (struct link *ls = duelst; ls; ls = ls->next)
               {
-                KSTRCPY (currdate->strtdate, "0.0.0.0.0.0");
-                recentdate (ADMIN (head), currdate);
-                currdate = currdate->dnext;
+                struct daterange const *incomplete = ls->entry;
+                struct daterange *r = ZLLOC (1, struct daterange);
+
+                /* Couldn't this have been done before?  --ttn  */
+                *r = *incomplete;
+                KSTRCPY (r->beg, "0.0.0.0.0.0");
+                ls->entry = r;
+                recentdate (ADMIN (head), r);
               }
 
             revno = extdate (ADMIN (head));
