@@ -744,7 +744,8 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
               OK ();
               if (!(bp = branchtip (ans->string)))
                 goto sorry;
-              ACCF ("%s%s", ans->string, bp);
+              /* Append only the non-branch part of the tip revision.  */
+              ACCF ("%s%s", ans->string, bp + ans->size);
               goto success;
             }
           ++dots;

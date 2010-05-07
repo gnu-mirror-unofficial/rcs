@@ -1,3 +1,11 @@
+2010-05-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Resolve ‘BRNUM.’ correctly.
+
+	Regression introduced 2010-04-21, "Add abstraction: fully_numeric".
+	* t001.test: Add a test to compare the output of "co -pX",
+	where X is ‘BRNUM’ in one case and ‘BRNUM.’ in another.
+
 2010-05-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	rcs: Fix bug: Correctly erase/append access-list entries.

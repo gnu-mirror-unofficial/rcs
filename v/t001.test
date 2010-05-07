@@ -25,6 +25,12 @@ do_and_show 'rcs -nWONDERFUL $w' ; do_rlog | tee $wd/last-rlog
 grep '	WONDERFUL: 4.20' $wd/last-rlog \
     && exit 1
 
+# Check that both ‘BRNUM’ and ‘BRNUM.’ resolve to the branch tip.
+co -p4  $v >$wd/DOT-0 || exit 1
+co -p4. $v >$wd/DOT-1 || exit 1
+test '' = $(diff $wd/DOT-0 $wd/DOT-1) \
+    && exit 1
+
 # This function is for the subsequent access-list tests.
 getaccesslist ()
 {
