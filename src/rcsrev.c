@@ -309,15 +309,18 @@ store1 (struct hshentries ***store, struct hshentry *next)
   *store = &p->rest;
 }
 
+#define STORE_MAYBE(x)  if (store) store1 (&store, x)
+#define CLEAR_MAYBE()   if (store) *store = NULL
+
 static struct hshentry *
 genbranch (struct hshentry const *bpoint, char const *revno,
            int length, char const *date, char const *author,
            char const *state, struct hshentries **store)
 /* Given a branchpoint, a revision number, date, author, and state, find the
    deltas necessary to reconstruct the given revision from the branch point
-   on.  Pointers to the found deltas are stored in a list beginning with
-   ‘store’.  ‘revno’ must be on a side branch.  Return NULL on error.
- */
+   on.  If ‘store’ is non-NULL, pointers to the found deltas are stored
+   in a list beginning with ‘store’.  ‘revno’ must be on a side branch.
+   Return NULL on error.  */
 {
   int field;
   register struct hshentry *d, *trail;
@@ -380,12 +383,12 @@ genbranch (struct hshentry const *bpoint, char const *revno,
               d = bhead->entry;
               while (d != trail)
                 {
-                  store1 (&store, d);
+                  STORE_MAYBE (d);
                   d = d->next;
                 }
-              store1 (&store, d);
+              STORE_MAYBE (d);
             }
-          *store = NULL;
+          CLEAR_MAYBE ();
           return d;
         }
 
@@ -397,7 +400,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
         }
       do
         {
-          store1 (&store, d);
+          STORE_MAYBE (d);
           trail = d;
           d = d->next;
         }
@@ -433,7 +436,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
       bhead = trail->branches;
     }
   while ((field += 2) <= length);
-  *store = NULL;
+  CLEAR_MAYBE ();
   return trail;
 }
 
@@ -441,9 +444,10 @@ struct hshentry *
 genrevs (char const *revno, char const *date, char const *author,
          char const *state, struct hshentries **store)
 /* Find the deltas needed for reconstructing the revision given by ‘revno’,
-   ‘date’, ‘author’, and ‘state’, and stores pointers to these deltas into a
-   list whose starting address is given by ‘store’.  Return the last delta
-   (target delta).  If the proper delta could not be found, return NULL.  */
+   ‘date’, ‘author’, and ‘state’, and stores pointers to these deltas into
+   a list whose starting address is given by ‘store’ (if non-NULL).
+   Return the last delta (target delta).
+   If the proper delta could not be found, return NULL.  */
 {
   int length;
   register struct hshentry *d;
@@ -464,7 +468,7 @@ genrevs (char const *revno, char const *date, char const *author,
       /* At least one field; find branch exactly.  */
       while ((result = cmpnumfld (revno, d->num, 1)) < 0)
         {
-          store1 (&store, d);
+          STORE_MAYBE (d);
           d = d->next;
           if (!d)
             {
@@ -489,7 +493,7 @@ genrevs (char const *revno, char const *date, char const *author,
                  || (author && STR_DIFF (author, d->author))
                  || (state && STR_DIFF (state, d->state))))
         {
-          store1 (&store, d);
+          STORE_MAYBE (d);
           d = d->next;
         }
       if (!d || (cmpnumfld (branchnum, d->num, 1) != 0)) /* overshot */
@@ -500,9 +504,9 @@ genrevs (char const *revno, char const *date, char const *author,
         }
       else
         {
-          store1 (&store, d);
+          STORE_MAYBE (d);
         }
-      *store = NULL;
+      CLEAR_MAYBE ();
       return d;
     }
 
@@ -510,7 +514,7 @@ genrevs (char const *revno, char const *date, char const *author,
   while ((result = cmpnumfld (revno, d->num, 2)) < 0
          && (cmpnumfld (revno, d->num, 1) == 0))
     {
-      store1 (&store, d);
+      STORE_MAYBE (d);
       d = d->next;
       if (!d)
         break;
@@ -528,7 +532,7 @@ genrevs (char const *revno, char const *date, char const *author,
     }
 
   /* Print last one.  */
-  store1 (&store, d);
+  STORE_MAYBE (d);
 
   if (length > 2)
     return genbranch (d, revno, length, date, author, state, store);
@@ -551,13 +555,16 @@ genrevs (char const *revno, char const *date, char const *author,
                 d->num, d->state ? d->state : "<empty>");
           return NULL;
         }
-      *store = NULL;
+      CLEAR_MAYBE ();
       return d;
     }
 
 norev:
   return NULL;
 }
+
+#undef CLEAR_MAYBE
+#undef STORE_MAYBE
 
 struct hshentry *
 gr_revno (char const *revno, struct hshentries **store)
@@ -602,9 +609,8 @@ static char const *
 branchtip (char const *branch)
 {
   struct hshentry *h;
-  struct hshentries *hs;
 
-  h = gr_revno (branch, &hs);
+  h = gr_revno (branch, NULL);
   return h ? h->num : NULL;
 }
 

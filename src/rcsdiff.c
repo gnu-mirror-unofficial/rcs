@@ -161,7 +161,6 @@ main (int argc, char **argv)
   char const **diffv, **diffp, **diffpend;      /* argv for subsidiary diff */
   char const **pp, *diffvstr = NULL;
   struct cbuf commarg;
-  struct hshentries *gendeltas; /* deltas to be generated */
   struct hshentry *target;
   char *a, *dcp, **newargv;
   bool no_diff_means_no_output;
@@ -373,7 +372,7 @@ main (int argc, char **argv)
 
         if (!fully_numeric (&numericrev, rev1, workptr))
           continue;
-        if (! (target = gr_revno (numericrev.string, &gendeltas)))
+        if (! (target = gr_revno (numericrev.string, NULL)))
           continue;
         xrev1 = target->num;
 #if DIFF_L
@@ -390,7 +389,7 @@ main (int argc, char **argv)
                                                 : ADMIN (head)->num),
                                 workptr))
               continue;
-            if (! (target = gr_revno (numericrev.string, &gendeltas)))
+            if (! (target = gr_revno (numericrev.string, NULL)))
               continue;
             xrev2 = target->num;
             if (no_diff_means_no_output && xrev1 == xrev2)

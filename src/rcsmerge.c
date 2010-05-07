@@ -75,7 +75,6 @@ main (int argc, char **argv)
   bool tostdout;
   int status;
   struct fro *workptr;
-  struct hshentries *gendeltas;         /* deltas to be generated */
   struct hshentry *target;
 
   CHECK_HV ();
@@ -179,13 +178,13 @@ main (int argc, char **argv)
           if (!*rev[1])
             rev[1] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
           if (fully_numeric (&numericrev, rev[1], workptr)
-              && (target = gr_revno (numericrev.string, &gendeltas)))
+              && (target = gr_revno (numericrev.string, NULL)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
                 rev[2] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
               if (fully_numeric (&numericrev, rev[2], workptr)
-                  && (target = gr_revno (numericrev.string, &gendeltas)))
+                  && (target = gr_revno (numericrev.string, NULL)))
                 {
                   xrev[2] = target->num;
 

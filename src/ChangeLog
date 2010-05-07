@@ -1,3 +1,14 @@
+2010-05-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Make ‘genrevs’, ‘gr_revno’ able to inhibit storing.
+
+	* rcsrev.c (STORE_MAYBE, CLEAR_MAYBE): New macros.
+	(genbranch, genrevs): Use ‘STORE_MAYBE’, ‘CLEAR_MAYBE’.
+	(branchtip): Update call to ‘gr_revno’ to specify no storage.
+	* co.c (addjoin): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsmerge.c (main): Likewise.
+
 2010-05-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Avoid ‘next’ as a local variable name.

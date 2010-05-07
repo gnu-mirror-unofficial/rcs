@@ -172,7 +172,6 @@ addjoin (char *joinrev)
   register struct hshentry *d;
   char terminator;
   struct cbuf numrev;
-  struct hshentries *joindeltas;
 
   j = joinrev;
   for (;;)
@@ -196,7 +195,7 @@ addjoin (char *joinrev)
   *j = '\0';
   d = NULL;
   if (fully_numeric_no_k (&numrev, joinrev))
-    d = gr_revno (numrev.string, &joindeltas);
+    d = gr_revno (numrev.string, NULL);
   *j = terminator;
   if (d)
     {
