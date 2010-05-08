@@ -835,6 +835,7 @@ struct hshentry *genrevs (char const *revno, char const *date,
                           char const *author, char const *state,
                           struct hshentries **store);
 struct hshentry *gr_revno (char const *revno, struct hshentries **store);
+struct hshentry *delta_from_ref (char const *ref);
 bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
 char const *namedrev (char const *name, struct hshentry *delta);
 char const *tiprev (void);

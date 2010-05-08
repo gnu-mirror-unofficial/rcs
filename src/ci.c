@@ -243,7 +243,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
       else
         {
           /* Branch exists; append to end.  */
-          targetdelta = gr_revno (BRANCHNO (num->string), &gendeltas);
+          targetdelta = delta_from_ref (BRANCHNO (num->string));
           if (!targetdelta)
             return -1;
           if (cmpnum (num->string, targetdelta->num) <= 0)
@@ -1031,7 +1031,7 @@ main (int argc, char **argv)
                     Lexinit ();
                     getadmin ();
                     gettree ();
-                    if (! (workdelta = gr_revno (targetdelta->num, &gendeltas)))
+                    if (! (workdelta = delta_from_ref (targetdelta->num)))
                       continue;
                     workdelta->log = targetdelta->log;
                     if (newdelta.state != default_state)

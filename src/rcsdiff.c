@@ -372,7 +372,7 @@ main (int argc, char **argv)
 
         if (!fully_numeric (&numericrev, rev1, workptr))
           continue;
-        if (! (target = gr_revno (numericrev.string, NULL)))
+        if (! (target = delta_from_ref (numericrev.string)))
           continue;
         xrev1 = target->num;
 #if DIFF_L
@@ -389,7 +389,7 @@ main (int argc, char **argv)
                                                 : ADMIN (head)->num),
                                 workptr))
               continue;
-            if (! (target = gr_revno (numericrev.string, NULL)))
+            if (! (target = delta_from_ref (numericrev.string)))
               continue;
             xrev2 = target->num;
             if (no_diff_means_no_output && xrev1 == xrev2)

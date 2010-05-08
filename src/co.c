@@ -195,7 +195,7 @@ addjoin (char *joinrev)
   *j = '\0';
   d = NULL;
   if (fully_numeric_no_k (&numrev, joinrev))
-    d = gr_revno (numrev.string, NULL);
+    d = delta_from_ref (numrev.string);
   *j = terminator;
   if (d)
     {

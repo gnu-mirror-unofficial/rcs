@@ -781,14 +781,14 @@ doassoc (void)
 static bool
 setlock (char const *rev)
 /* Given a revision or branch number, find the corresponding
-   delta and locks it for caller.  */
+   delta and lock it for caller.  */
 {
   struct hshentry *target;
   int r;
 
   if (fully_numeric_no_k (&numrev, rev))
     {
-      target = gr_revno (numrev.string, &gendeltas);
+      target = delta_from_ref (numrev.string);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -859,7 +859,7 @@ dolocks (void)
   for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->next)
     if (fully_numeric_no_k (&numrev, lockpt->entry))
       {
-        target = gr_revno (numrev.string, &gendeltas);
+        target = delta_from_ref (numrev.string);
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
@@ -900,7 +900,7 @@ domessages (void)
       struct u_log const *um = ls->entry;
 
       if (fully_numeric_no_k (&numrev, um->revno)
-          && (target = gr_revno (numrev.string, &gendeltas)))
+          && (target = delta_from_ref (numrev.string)))
         {
           /* We can't check the old log -- it's much later in the file.
              We pessimistically assume that it changed.  */
@@ -920,7 +920,7 @@ rcs_setstate (char const *rev, char const *status)
 
   if (fully_numeric_no_k (&numrev, rev))
     {
-      target = gr_revno (numrev.string, &gendeltas);
+      target = delta_from_ref (numrev.string);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)

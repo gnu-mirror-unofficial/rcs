@@ -574,6 +574,14 @@ gr_revno (char const *revno, struct hshentries **store)
   return genrevs (revno, NULL, NULL, NULL, store);
 }
 
+struct hshentry *
+delta_from_ref (char const *ref)
+/* Return the hash entry associated with ‘ref’, a fully numeric
+   revision or branch number, or NULL if no such entry exists.  */
+{
+  return genrevs (ref, NULL, NULL, NULL, NULL);
+}
+
 static char const *
 rev_from_symbol (struct cbuf const *id)
 /* Look up ‘id’ in the list of symbolic names starting with pointer
@@ -610,7 +618,7 @@ branchtip (char const *branch)
 {
   struct hshentry *h;
 
-  h = gr_revno (branch, NULL);
+  h = delta_from_ref (branch);
   return h ? h->num : NULL;
 }
 

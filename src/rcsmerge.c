@@ -178,13 +178,13 @@ main (int argc, char **argv)
           if (!*rev[1])
             rev[1] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
           if (fully_numeric (&numericrev, rev[1], workptr)
-              && (target = gr_revno (numericrev.string, NULL)))
+              && (target = delta_from_ref (numericrev.string)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
                 rev[2] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
               if (fully_numeric (&numericrev, rev[2], workptr)
-                  && (target = gr_revno (numericrev.string, NULL)))
+                  && (target = delta_from_ref (numericrev.string)))
                 {
                   xrev[2] = target->num;
 
