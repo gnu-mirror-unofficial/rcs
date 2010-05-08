@@ -71,7 +71,6 @@ static struct link assoclst;
 static struct link chaccess;
 static struct delrevpair delrev;
 static struct hshentry *cuthead, *cuttail, *delstrt;
-static struct hshentries *gendeltas;
 
 static void
 cleanup (void)
@@ -568,12 +567,16 @@ removerevs (void)
    revision in ‘cuttail’ (0 if the last is a leaf).  */
 {
   struct hshentry *target, *target2, *temp;
+  struct hshentries *ls;
   int length;
   int cmp;
 
+#define GENREV(x)    gr_revno (x, &ls)
+#define SEARCH(x,l)  searchcutpt (x, l, ls)
+
   if (!fully_numeric_no_k (&numrev, delrev.strt))
     return false;
-  target = gr_revno (numrev.string, &gendeltas);
+  target = GENREV (numrev.string);
   if (!target)
     return false;
   cmp = cmpnum (target->num, numrev.string);
@@ -582,14 +585,14 @@ removerevs (void)
   if (delrev.code == 0)
     {                           /* -o rev or -o branch */
       if (length & 1)
-        temp = searchcutpt (target->num, length + 1, gendeltas);
+        temp = SEARCH (target->num, length + 1);
       else if (cmp)
         {
           RERR ("Revision %s doesn't exist.", numrev.string);
           return false;
         }
       else
-        temp = searchcutpt (numrev.string, length, gendeltas);
+        temp = SEARCH (numrev.string, length);
       cuttail = target->next;
       if (branchpoint (temp, cuttail))
         {
@@ -610,12 +613,12 @@ removerevs (void)
     {                           /* -o -rev */
       if (length > 2)
         {
-          temp = searchcutpt (target->num, length - 1, gendeltas);
+          temp = SEARCH (target->num, length - 1);
           cuttail = target->next;
         }
       else
         {
-          temp = searchcutpt (target->num, length, gendeltas);
+          temp = SEARCH (target->num, length);
           cuttail = target;
           while (cuttail && !cmpnumfld (target->num, cuttail->num, 1))
             cuttail = cuttail->next;
@@ -633,7 +636,7 @@ removerevs (void)
     {                           /* -o rev- */
       if (length == 2)
         {
-          temp = searchcutpt (target->num, 1, gendeltas);
+          temp = SEARCH (target->num, 1);
           if (cmp)
             cuttail = target;
           else
@@ -648,8 +651,8 @@ removerevs (void)
                 return false;
             }
           else
-            temp = searchcutpt (target->num, length, gendeltas);
-          gr_revno (BRANCHNO (temp->num), &gendeltas);
+            temp = SEARCH (target->num, length);
+          GENREV (BRANCHNO (temp->num));
         }
       if (branchpoint (temp, cuttail))
         {
@@ -670,7 +673,7 @@ removerevs (void)
       return false;
     }
 
-  target2 = gr_revno (numrev.string, &gendeltas);
+  target2 = GENREV (numrev.string);
   if (!target2)
     return false;
 
@@ -694,7 +697,7 @@ removerevs (void)
           temp = target->next;
         }
       else
-        temp = searchcutpt (target->num, length, gendeltas);
+        temp = SEARCH (target->num, length);
       cuttail = target2->next;
     }
   else
@@ -718,7 +721,7 @@ removerevs (void)
         }
       else
         cuttail = target2->next;
-      temp = searchcutpt (target->num, length, gendeltas);
+      temp = SEARCH (target->num, length);
     }
   if (branchpoint (temp, cuttail))
     {
@@ -727,6 +730,9 @@ removerevs (void)
     }
   delstrt = temp;
   return true;
+
+#undef SEARCH
+#undef GENREV
 }
 
 static bool
@@ -1108,6 +1114,7 @@ main (int argc, char **argv)
   struct link fakelock, *tplock;
   struct link fakerm, *tprm;
   struct link *tp_assoc, *tp_chacc, *tp_log, *tp_state;
+  struct hshentries *deltas;
 
   CHECK_HV ();
   gnurcs_init ();
@@ -1473,7 +1480,7 @@ main (int argc, char **argv)
           {
             /* Rebuild delta tree if some deltas are deleted.  */
             if (cuttail)
-              gr_revno (cuttail->num, &gendeltas);
+              gr_revno (cuttail->num, &deltas);
             buildtree ();
             changed = true;
             keepRCStime = false;
@@ -1498,7 +1505,7 @@ main (int argc, char **argv)
               {
                 struct editstuff *es = make_editstuff ();
 
-                if (!cuttail || buildeltatext (es, gendeltas))
+                if (!cuttail || buildeltatext (es, deltas))
                   {
                     fro_trundling (true, FLOW (from));
                     scanlogtext (es, NULL, false);

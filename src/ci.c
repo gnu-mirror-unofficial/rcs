@@ -58,8 +58,6 @@ static int exitstatus;
 /* Forces check-in.  */
 static bool forceciflag;
 static bool keepflag, keepworkingfile, rcsinitflag;
-/* Deltas to be generated.  */
-static struct hshentries *gendeltas;
 /* Old delta to be generated.  */
 static struct hshentry *targetdelta;
 /* New delta to be inserted.  */
@@ -272,7 +270,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
 }
 
 static int
-addelta (void)
+addelta (struct hshentries **tp_deltas)
 /* Append a delta to the delta tree, whose number is given by
    ‘newdelnum’.  Update ‘ADMIN (head)’, ‘newdelnum’, ‘newdelnumlength’,
    and the links in newdelta.
@@ -321,7 +319,7 @@ addelta (void)
 
         case 1:
           /* Found an old lock.  Check whether locked revision exists.  */
-          if (!gr_revno (targetdelta->num, &gendeltas))
+          if (!gr_revno (targetdelta->num, tp_deltas))
             return -1;
           if (targetdelta == ADMIN (head))
             {
@@ -382,7 +380,7 @@ addelta (void)
       targetdelta = ADMIN (head);
       if (0 <= (removedlock = removelock (ADMIN (head))))
         {
-          if (!gr_revno (ADMIN (head)->num, &gendeltas))
+          if (!gr_revno (ADMIN (head)->num, tp_deltas))
             return -1;
           newdelta.next = ADMIN (head);
           ADMIN (head) = &newdelta;
@@ -401,7 +399,7 @@ addelta (void)
       /* Ignore rest to get old delta.  */
       accumulate_range (SHARED, old.string, tp - 1);
       old.string = finish_string (SHARED, &old.size);
-      if (! (targetdelta = gr_revno (old.string, &gendeltas)))
+      if (! (targetdelta = gr_revno (old.string, tp_deltas)))
         return -1;
       if (cmpnum (targetdelta->num, old.string) != 0)
         {
@@ -639,6 +637,7 @@ main (int argc, char **argv)
   time_t mtime, wtime;
   struct hshentry *workdelta;
   struct link *tp_assoc = &assoclst;
+  struct hshentries *deltas;            /* Deltas to be generated.  */
 
   CHECK_HV ();
   gnurcs_init ();
@@ -905,7 +904,7 @@ main (int argc, char **argv)
           continue;
 
         /* Splice new delta into tree.  */
-        if ((removedlock = addelta ()) < 0)
+        if (0 > (removedlock = addelta (&deltas)))
           continue;
 
         newdelta.num = newdelnum.string;
@@ -997,8 +996,7 @@ main (int argc, char **argv)
             newhead = ADMIN (head) == &newdelta;
             if (!newhead)
               FLOW (to) = FLOW (rewr);
-            expname =
-              buildrevision (gendeltas, targetdelta, NULL, false);
+            expname = buildrevision (deltas, targetdelta, NULL, false);
             if (!forceciflag
                 && STR_SAME (newdelta.state, targetdelta->state)
                 && ((changework = rcsfcmp (workptr, &workstat, expname,

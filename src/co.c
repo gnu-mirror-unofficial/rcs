@@ -58,8 +58,6 @@ static struct jstuff jstuff;
 /* -1 -> unlock, 0 -> do nothing, 1 -> lock.  */
 static int lockflag;
 static bool mtimeflag;
-/* Deltas to be generated.  */
-static struct hshentries *gendeltas;
 /* Final delta to be generated.  */
 static struct hshentry *targetdelta;
 static struct stat workstat;
@@ -459,6 +457,7 @@ main (int argc, char **argv)
 #if OPEN_O_BINARY
   int stdout_mode = 0;
 #endif
+ struct hshentries *deltas;             /* Deltas to be generated.  */
 
   CHECK_HV ();
   gnurcs_init ();
@@ -693,9 +692,9 @@ main (int argc, char **argv)
                     break;
                   }
               }
-            /* Get numbers of deltas to be generated. */
+            /* Get numbers of deltas to be generated.  */
             if (! (targetdelta = genrevs (numericrev.string, date, author,
-                                          state, &gendeltas)))
+                                          state, &deltas)))
               continue;
             /* Check reservations.  */
             changelock = lockflag < 0
@@ -732,12 +731,12 @@ main (int argc, char **argv)
 
             BE (inclusive_of_Locker_in_Id_val) = 0 < lockflag;
             targetdelta->name = namedrev (rev, targetdelta);
-            joinname = buildrevision (gendeltas, targetdelta,
+            joinname = buildrevision (deltas, targetdelta,
                                       joinflag && tostdout ? NULL : neworkptr,
                                       BE (kws) < MIN_UNEXPAND);
             if (FLOW (res) == neworkptr)
               FLOW (res) = NULL;             /* Don't close it twice.  */
-            if (changelock && gendeltas->first != targetdelta)
+            if (changelock && deltas->first != targetdelta)
               fro_trundling (true, FLOW (from));
 
             if (donerewrite (changelock, Ttimeflag

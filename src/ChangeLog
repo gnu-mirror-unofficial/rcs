@@ -1,5 +1,17 @@
 2010-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] For collecting deltas, replace file-static var w/ local var.
+
+	* ci.c (gendeltas): Delete var.
+	(addelta): Take ‘struct hshentries **’; pass it to ‘gr_revno’.
+	(main): Use local var for collecting deltas; update call to ‘addelta’.
+	* co.c (gendeltas): Delete var.
+	(main): Use local var for collecting deltas.
+	* rcs.c (gendeltas): Delete var.
+	(removerevs, main): Use local var for collecting deltas.
+
+2010-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: delta_from_ref
 
 	* base.h (delta_from_ref): New func decl.
