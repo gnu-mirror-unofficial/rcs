@@ -31,8 +31,8 @@
 #include "b-feph.h"
 #include "b-fro.h"
 
-static const char const rcsdir[] = "RCS";
-#define rcslen  (sizeof rcsdir - 1)
+#define rcsdir     "RCS"
+#define rcsdirlen  (sizeof rcsdir - 1)
 
 struct compair
 {
@@ -168,10 +168,10 @@ rcssuffix (char const *name)
             return p;
         }
       else
-        for (p = name; p < nz - rcslen; p++)
-          if (isSLASH (p[rcslen])
+        for (p = name; p < nz - rcsdirlen; p++)
+          if (isSLASH (p[rcsdirlen])
               && (p == name || isSLASH (p[-1]))
-              && memcmp (p, rcsdir, rcslen) == 0)
+              && memcmp (p, rcsdir, rcsdirlen) == 0)
             return nz;
       x += xl;
     }
@@ -226,8 +226,6 @@ fin2open (char const *d, size_t dlen,
    that fails and x is nonempty, try "dbasex".  Put these potential
    names in ‘m->tentative’ for ‘finopen’ to wrangle.  */
 {
-  size_t rcsdirlen = rcslen;            /* FIXME */
-
 #define ACC(start)  accumulate_range (m->space, start, start + start ## len)
 #define OK()  m->tentative.string = finish_string (m->space, &m->tentative.size)
 

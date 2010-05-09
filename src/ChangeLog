@@ -1,3 +1,12 @@
+2010-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use #define for ‘rcsdir’; rename its -len var conventionally.
+
+	* rcsfnms.c (rcsdir): Convert string var to #define.
+	(rcsdirlen): Rename from ‘rcslen’.
+	(rcssuffix): Use ‘rcsdirlen’.
+	(fin2open): Use ‘rcsdirlen’ directly.
+
 2010-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] For collecting deltas, replace file-static var w/ local var.
