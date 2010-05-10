@@ -68,7 +68,7 @@ scram (void)
 #ifdef TEST_STR2TIME
 #include "maketime.h"
 
-const struct program program = { .name = "str2time" };
+const struct program program = { .name = "y-STR2TIME" };
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -80,6 +80,7 @@ yarrrr (int argc, char *argv[argc])
   while (fgets (buf, 1000, stdin))
     {
       time_t t = str2time (buf, default_time, default_zone);
+
       printf ("%s", asctime (gmtime (&t)));
     }
   return 0;
@@ -95,7 +96,7 @@ yarrrr (int argc, char *argv[argc])
 /* The test program prints out whether two files are identical,
    except for keywords.  */
 
-const struct program program = { .name = "rcsfcmp" };
+const struct program program = { .name = "y-FCMP" };
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -127,7 +128,7 @@ yarrrr (int argc, char *argv[argc])
 
 const struct program program =
   {
-    .name = "pairtest",
+    .name = "y-PAIRS",
     .exiterr = bow_out
   };
 
@@ -140,49 +141,41 @@ yarrrr (int argc, char *argv[argc])
   BE (quiet) = initflag = false;
 
   while (--argc, ++argv, argc >= 1 && ((*argv)[0] == '-'))
-    {
-      switch ((*argv)[1])
-        {
-
-        case 'p':
-          MANI (standard_output) = stdout;
-          break;
-        case 'i':
-          initflag = true;
-          break;
-        case 'q':
-          BE (quiet) = true;
-          break;
-        default:
-          bad_option (*argv);
-          break;
-        }
-    }
+    switch ((*argv)[1])
+      {
+      case 'p':
+        MANI (standard_output) = stdout;
+        break;
+      case 'i':
+        initflag = true;
+        break;
+      case 'q':
+        BE (quiet) = true;
+        break;
+      default:
+        bad_option (*argv);
+        break;
+      }
 
   do
     {
       REPO (filename) = MANI (filename) = NULL;
       result = pairnames (argc, argv, rcsreadopen, !initflag, BE (quiet));
       if (result != 0)
-        {
-          diagnose
-            ("RCS filename: %s; working filename: %s\nFull RCS filename: %s",
-             REPO (filename), MANI (filename), getfullRCSname ());
-        }
+        diagnose
+          ("RCS filename: %s; working filename: %s\nFull RCS filename: %s",
+           REPO (filename), MANI (filename), getfullRCSname ());
+
       switch (result)
         {
         case 0:
-          continue;             /* already paired file */
+          continue;                     /* already paired file */
 
         case 1:
           if (initflag)
-            {
-              RERR ("already exists");
-            }
+            RERR ("already exists");
           else
-            {
-              diagnose ("RCS file %s exists", REPO (filename));
-            }
+            diagnose ("RCS file %s exists", REPO (filename));
           fro_close (FLOW (from));
           break;
 
@@ -190,7 +183,6 @@ yarrrr (int argc, char *argv[argc])
           diagnose ("RCS file doesn't exist");
           break;
         }
-
     }
   while (++argv, --argc >= 1);
 
@@ -203,9 +195,21 @@ yarrrr (int argc, char *argv[argc])
 /* ‘getoldkeys’ */
 
 #ifdef TEST_KEEP
+#include <string.h>
 /* Print the keyword values found.  */
 
-const struct program program = { .name = "keeptest" };
+const struct program program = { .name = "y-KEEP" };
+
+void
+spew (char const *what, char *s)
+{
+  printf ("%8s: ", what);
+  if (s)
+    printf ("%2d \"%s\"", strlen (s), s);
+  else
+    printf ("   (NULL)");
+  printf ("\n");
+}
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -214,9 +218,13 @@ yarrrr (int argc, char *argv[argc])
     {
       MANI (filename) = *argv;
       getoldkeys (NULL);
-      printf ("%s:  revision: %s, date: %s, author: %s, name: %s, state: %s\n",
-              *argv, PREV (rev), PREV (date), PREV (author),
-              PREV (name), PREV (state));
+      spew ("filename", *argv);
+      spew ("revno", PREV (rev));
+      spew ("date", PREV (date));
+      spew ("author", PREV (author));
+      spew ("name", PREV (name));
+      spew ("state", PREV (state));
+      printf ("\n");
     }
   return EXIT_SUCCESS;
 }
@@ -232,7 +240,7 @@ yarrrr (int argc, char *argv[argc])
 
 const struct program program =
   {
-    .name = "lextest",
+    .name = "y-LEX",
     .exiterr = scram
   };
 
@@ -244,24 +252,22 @@ yarrrr (int argc, char *argv[argc])
       complain ("No input file\n");
       return EXIT_FAILURE;
     }
+
   if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
-    {
-      PFATAL ("can't open input file %s", argv[1]);
-    }
+    PFATAL ("can't open input file %s", argv[1]);
+
   Lexinit ();
   while (!eoflex ())
     {
       switch (NEXT (tok))
         {
-
         case ID:
           printf ("ID: %s", NEXT (str));
           break;
 
         case NUM:
           if (BE (receptive_to_next_hash_key))
-            printf ("NUM: %s, index: %d", NEXT (hsh)->num,
-                    NEXT (hsh) - LEX (hshtab)[0]);
+            printf ("NUM: %s", NEXT (hsh)->num);
           else
             printf ("NUM, unentered: %s", NEXT (str));
           /* Alternate between dates and numbers.  */
@@ -302,11 +308,11 @@ yarrrr (int argc, char *argv[argc])
 
 #ifdef TEST_REV
 /* Test the routines that generate a sequence of delta numbers
-  needed to regenerate a given delta.  */
+   needed to regenerate a given delta.  */
 
 const struct program program =
   {
-    .name = "revtest",
+    .name = "y-REV",
     .exiterr = scram
   };
 
@@ -326,10 +332,10 @@ yarrrr (int argc, char *argv[argc])
       complain ("No input file\n");
       return EXIT_FAILURE;
     }
+
   if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
-    {
-      PFATAL ("can't open input file %s", argv[1]);
-    }
+    PFATAL ("can't open input file %s", argv[1]);
+
   Lexinit ();
   getadmin ();
 
@@ -352,7 +358,7 @@ yarrrr (int argc, char *argv[argc])
       complain ("expanded number: %s\n",
                 (fully_numeric_no_k (&numricrevno, symrevno)
                  ? numricrevno.string
-                 " <INVALID>"));
+                 : " <INVALID>"));
       prompt ("Date: ");
       more (date);
       prompt ("%s; ", date);
@@ -362,18 +368,17 @@ yarrrr (int argc, char *argv[argc])
       prompt ("State: ");
       more (state);
       prompt ("%s;\n", state);
-      target =
-        genrevs (numricrevno.string, *date ? date : NULL,
-                 *author ? author : NULL, *state ? state : NULL,
-                 &gendeltas);
+      target = genrevs (numricrevno.string,
+                        *date ? date : NULL,
+                        *author ? author : NULL,
+                        *state ? state : NULL,
+                        &gendeltas);
       if (target)
-        {
-          while (gendeltas)
-            {
-              complain ("%s\n", gendeltas->first->num);
-              gendeltas = gendeltas->rest;
-            }
-        }
+        while (gendeltas)
+          {
+            complain ("%s\n", gendeltas->first->num);
+            gendeltas = gendeltas->rest;
+          }
 #undef more
 #undef prompt
     }
@@ -394,7 +399,7 @@ yarrrr (int argc, char *argv[argc])
 
 const struct program program =
   {
-    .name = "syntest",
+    .name = "y-SYN",
     .exiterr = scram
   };
 
@@ -407,9 +412,8 @@ yarrrr (int argc, char *argv[argc])
       return EXIT_FAILURE;
     }
   if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
-    {
-      PFATAL ("can't open input file %s", argv[1]);
-    }
+    PFATAL ("can't open input file %s", argv[1]);
+
   Lexinit ();
   getadmin ();
   REPO (fd_lock) = STDOUT_FILENO;
@@ -422,9 +426,8 @@ yarrrr (int argc, char *argv[argc])
   nextlex ();
 
   if (!eoflex ())
-    {
-      fatal_syntax ("expecting EOF");
-    }
+    fatal_syntax ("expecting EOF");
+
   return EXIT_SUCCESS;
 }
 
