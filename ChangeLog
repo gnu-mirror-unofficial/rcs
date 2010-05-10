@@ -1,3 +1,9 @@
+2010-05-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘hash-pjw’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘hash-pjw’.
+
 2010-04-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use gnulib module ‘obstack-printf’.
