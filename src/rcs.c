@@ -416,7 +416,6 @@ sendmail (char const *Delta, char const *who)
    user decides not to break the lock.  */
 {
 #ifdef SENDMAIL
-  char const *messagefile;
   int old1, old2, c, status;
   FILE *mailmess;
 #endif
@@ -429,11 +428,8 @@ sendmail (char const *Delta, char const *who)
 
   /* Go ahead with breaking.  */
 #ifdef SENDMAIL
-  messagefile = maketemp (0);
-  if (!(mailmess = fopen_safer (messagefile, "w+")))
-    {
-      fatal_sys (messagefile);
-    }
+  if (! (mailmess = tmpfile ()))
+    fatal_sys ("tmpfile");
 
   aprintf (mailmess,
            "Subject: Broken lock on %s\n\nYour lock on revision %s of file %s\nhas been broken by %s for the following reason:\n",
@@ -948,18 +944,14 @@ buildeltatext (struct editstuff *es, struct hshentries const *deltas)
    change to delta text.  */
 {
   FILE *fcut;                       /* temporary file to rebuild delta tree */
-  char const *cutname;
 
   fcut = NULL;
   cuttail->selector = false;
   scanlogtext (es, deltas->first, false);
   if (cuthead)
     {
-      cutname = maketemp (3);
-      if (!(fcut = fopen_safer (cutname, FOPEN_WPLUS_WORK)))
-        {
-          fatal_sys (cutname);
-        }
+      if (! (fcut = tmpfile ()))
+        fatal_sys ("tmpfile");
 
       while (deltas->first != cuthead)
         {
