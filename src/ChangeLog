@@ -1,3 +1,10 @@
+2010-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	rcs: Fix syntax error when ‘--with-mailer=MAILER’.
+
+	Regression introduced 2010-03-30, "Abstract writes to stderr".
+	* rcs.c (sendmail): Add missing semicolon.
+
 2010-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use #define for ‘rcsdir’; rename its -len var conventionally.

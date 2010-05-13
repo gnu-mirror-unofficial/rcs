@@ -440,7 +440,7 @@ sendmail (char const *Delta, char const *who)
            basefilename (REPO (filename)), Delta, getfullRCSname (), getcaller ());
   complain ("%s\n%s\n>> ",
             "State the reason for breaking the lock:",
-            "(terminate with single '.' or end of file)")
+            "(terminate with single '.' or end of file)");
 
   old1 = '\n';
   old2 = ' ';
