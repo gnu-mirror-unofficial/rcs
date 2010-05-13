@@ -28,10 +28,6 @@
 #include "b-esds.h"
 #include "b-fro.h"
 
-#if COMPAT2
-static TINY_DECL (suffix);
-#endif
-
 static void
 getsemi (struct tinysym const *key)
 /* Get a semicolon to finish off a phrase started by ‘key’.  */

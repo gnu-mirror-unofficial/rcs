@@ -1,5 +1,13 @@
 2010-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Centralize ‘COMPAT2’ support.
+
+	* b-anchor.c [COMPAT2] (tiny_suffix): New ‘struct tinysym’.
+	* base.h [COMPAT2] (tiny_suffix): New ‘struct tinysym’ decl.
+	* rcssyn.c [COMPAT2] (tiny_suffix): Delete.
+
+2010-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘tmpfile’.
 
 	* rcs.c (sendmail, buildeltatext): Use ‘tmpfile’.

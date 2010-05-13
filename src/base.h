@@ -719,6 +719,9 @@ extern TINY_DECL (log);
 extern TINY_DECL (next);
 extern TINY_DECL (state);
 extern TINY_DECL (strict);
+#if COMPAT2
+extern TINY_DECL (suffix);
+#endif
 extern TINY_DECL (symbols);
 extern TINY_DECL (text);
 bool looking_at (struct tinysym const *sym, char const *start);
