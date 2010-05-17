@@ -140,17 +140,11 @@ un_link (char const *s)
   return rv;
 }
 
-static void
-editEndsPrematurely (void)
-{
-  fatal_syntax ("edit script ends prematurely");
-}
+#define EDIT_SCRIPT_SHORT()  \
+  fatal_syntax ("edit script ends prematurely")
 
-static void
-editLineNumberOverflow (void)
-{
-  fatal_syntax ("edit script refers to line past end of file");
-}
+#define EDIT_SCRIPT_OVERFLOW()  \
+  fatal_syntax ("edit script refers to line past end of file")
 
 #define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (char *))
 
@@ -159,7 +153,7 @@ insertline (struct editstuff *es, unsigned long n, char *l)
 /* Before line ‘n’, insert line ‘l’.  */
 {
   if (es->lim - es->gapsize < n)
-    editLineNumberOverflow ();
+    EDIT_SCRIPT_OVERFLOW ();
   if (!es->gapsize)
     es->line = !es->lim
       ? testalloc (sizeof (char *) * (es->lim = es->gapsize = 1024))
@@ -186,7 +180,7 @@ deletelines (struct editstuff *es, unsigned long n, unsigned long nlines)
   unsigned long l = n + nlines;
 
   if (es->lim - es->gapsize < l || l < n)
-    editLineNumberOverflow ();
+    EDIT_SCRIPT_OVERFLOW ();
   if (l < es->gap)
     movelines (es->line + l + es->gapsize,
                es->line + l,
@@ -399,7 +393,7 @@ copylines (struct editstuff *es, register long upto, struct hshentry const *delt
             do
               {
                 if (expandline (&ctx) <= 1)
-                  editLineNumberOverflow ();
+                  EDIT_SCRIPT_OVERFLOW ();
               }
             while (++es->lcount < upto);
           else
@@ -408,7 +402,7 @@ copylines (struct editstuff *es, register long upto, struct hshentry const *delt
                 {
                   do
                     {
-                      GETCHAR_OR (c, fe, editLineNumberOverflow ());
+                      GETCHAR_OR (c, fe, EDIT_SCRIPT_OVERFLOW ());
                       aputc (c, fc);
                     }
                   while (c != '\n');
@@ -563,7 +557,7 @@ editstring (struct editstuff *es, struct hshentry const *delta)
   while (0 <= (ed = getdiffcmd (fin, true, frew, &dc)))
     if (STDIO_P (fin)
         && line_lim <= dc.line1)
-      editLineNumberOverflow ();
+      EDIT_SCRIPT_OVERFLOW ();
     else if (!ed)
       {
         copylines (es, dc.line1 - 1, delta);
@@ -582,7 +576,7 @@ editstring (struct editstuff *es, struct hshentry const *delta)
                 do GETCHAR_OR (c, fe,
                                {
                                  if (i != 1)
-                                   editLineNumberOverflow ();
+                                   EDIT_SCRIPT_OVERFLOW ();
                                  line_lim = dc.dafter;
                                  goto done;
                                });
@@ -617,7 +611,7 @@ editstring (struct editstuff *es, struct hshentry const *delta)
                       return;
                     /* fall into */
                   case -1:
-                    editEndsPrematurely ();
+                    EDIT_SCRIPT_SHORT ();
                   }
               }
             while (--i);
@@ -637,7 +631,7 @@ editstring (struct editstuff *es, struct hshentry const *delta)
                         if (c != SDELIM)
                           {
                             if (--i)
-                              editEndsPrematurely ();
+                              EDIT_SCRIPT_SHORT ();
                             NEXT (c) = c;
                             return;
                           }

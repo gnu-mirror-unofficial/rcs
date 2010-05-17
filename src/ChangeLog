@@ -1,5 +1,14 @@
 2010-05-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: EDIT_SCRIPT_SHORT, EDIT_SCRIPT_OVERFLOW
+
+	* rcsedit.c (EDIT_SCRIPT_SHORT, EDIT_SCRIPT_OVERFLOW): New macros.
+	(editEndsPrematurely, editLineNumberOverflow): Delete funcs.
+	(insertline, deletelines, copylines): Use ‘EDIT_SCRIPT_OVERFLOW’.
+	(editstring): Likewise; also, use ‘EDIT_SCRIPT_SHORT’.
+
+2010-05-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Make ‘take’ handle branch number.
 
 	Regression introduced 2010-04-21,
