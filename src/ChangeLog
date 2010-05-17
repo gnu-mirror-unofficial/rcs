@@ -1,3 +1,13 @@
+2010-05-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Make ‘take’ handle branch number.
+
+	Regression introduced 2010-04-21,
+	"Use ‘TAKE’, not ‘partialno’; zonk the latter".
+	* rcsrev.c (take): Stop looping at terminating NUL;
+	in that case, accumulate up to the NUL as well.
+	* base.h (take): Update var name in func decl.
+
 2010-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Centralize ‘COMPAT2’ support.

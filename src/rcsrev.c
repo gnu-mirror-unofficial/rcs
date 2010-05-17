@@ -84,21 +84,22 @@ accumulate_branchno (struct divvy *space, char const *revno)
 }
 
 struct cbuf
-take (size_t count, char const *rev)
-/* Copy ‘count’ (must be non-zero) fields of revision
-   ‘rev’ into ‘SINGLE’.  Return the new string.  */
+take (size_t count, char const *ref)
+/* Copy ‘count’ fields of ‘ref’ (branch or revision number) into ‘SINGLE’.
+   If ‘count’ is zero, take it to be the number of fields required to
+   return the branch number of ‘ref’.  Return the new string.  */
 {
   struct cbuf rv;
-  char const *end = rev;
+  char const *end = ref;
 
   if (!count)
-    count = -2 + (1U | (1 + countnumflds (rev)));
+    count = -2 + (1U | (1 + countnumflds (ref)));
 
   while (count--)
-    while ('.' != *end++)
+    while (*end && '.' != *end++)
       continue;
 
-  accumulate_range (SINGLE, rev, end - 1);
+  accumulate_range (SINGLE, ref, *end ? end - 1 : end);
   rv.string = finish_string (SINGLE, &rv.size);
   return rv;
 }

@@ -829,7 +829,7 @@ extern const enum tokens const ctab[];
 
 /* rcsrev */
 int countnumflds (char const *s);
-struct cbuf take (size_t count, char const *rev);
+struct cbuf take (size_t count, char const *ref);
 int cmpnum (char const *num1, char const *num2);
 int cmpnumfld (char const *num1, char const *num2, int fld);
 int cmpdate (char const *d1, char const *d2);
