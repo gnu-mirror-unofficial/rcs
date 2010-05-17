@@ -134,11 +134,7 @@ nextlex (void)
           fatal_syntax ("unknown character `%c'", c);
         case NEWLN:
           ++LEX (lno);
-#ifdef LEXDB
-          afputc ('\n', stdout);
-#endif
-          /* Note: falls into next case */
-
+          /* fall into */
         case SPACE:
           TEECHAR ();
           continue;
