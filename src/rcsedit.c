@@ -141,10 +141,10 @@ un_link (char const *s)
 }
 
 #define EDIT_SCRIPT_SHORT()  \
-  fatal_syntax ("edit script ends prematurely")
+  SYNTAX_ERROR ("edit script ends prematurely")
 
 #define EDIT_SCRIPT_OVERFLOW()  \
-  fatal_syntax ("edit script refers to line past end of file")
+  SYNTAX_ERROR ("edit script refers to line past end of file")
 
 #define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (char *))
 

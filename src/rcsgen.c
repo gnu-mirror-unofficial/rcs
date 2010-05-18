@@ -50,7 +50,7 @@ scandeltatext (struct editstuff *es, struct hshentry *delta,
   for (;;)
     {
       if (eoflex ())
-        fatal_syntax ("can't find delta for revision %s", delta->num);
+        SYNTAX_ERROR ("can't find delta for revision %s", delta->num);
       nextdelta = must_get_delta_num ();
       getkeystring (&TINY (log));
       if (needlog && delta == nextdelta)

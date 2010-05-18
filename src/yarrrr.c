@@ -426,7 +426,7 @@ yarrrr (int argc, char *argv[argc])
   nextlex ();
 
   if (!eoflex ())
-    fatal_syntax ("expecting EOF");
+    SYNTAX_ERROR ("expecting EOF");
 
   return EXIT_SUCCESS;
 }

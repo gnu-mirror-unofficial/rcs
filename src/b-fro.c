@@ -274,7 +274,7 @@ fro_must_getbyte (int *c, struct fro *f)
 /* Try to get another byte from ‘f’ and set ‘*c’ to it.
    If at EOF, signal "unexpected end of file".  */
 {
-#define DONE()  fatal_syntax ("unexpected end of file")
+#define DONE()  SYNTAX_ERROR ("unexpected end of file")
   GETBYTE_BODY ();
 #undef DONE
 }

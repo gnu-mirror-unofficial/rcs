@@ -34,7 +34,7 @@ getsemi (struct tinysym const *key)
 /* Get a semicolon to finish off a phrase started by ‘key’.  */
 {
   if (!getlex (SEMI))
-    fatal_syntax ("missing ';' after '%s'", TINYS (key));
+    SYNTAX_ERROR ("missing ';' after '%s'", TINYS (key));
 }
 
 static struct hshentry *
@@ -44,7 +44,7 @@ getdnum (void)
   register struct hshentry *delta = getnum ();
 
   if (delta && countnumflds (delta->num) & 1)
-    fatal_syntax ("%s isn't a delta number", delta->num);
+    SYNTAX_ERROR ("%s isn't a delta number", delta->num);
   return delta;
 }
 
@@ -54,9 +54,9 @@ must_get_colon_delta_num (char const *role)
   struct hshentry *rv;
 
   if (!getlex (COLON))
-    fatal_syntax ("missing ':' in %s", role);
+    SYNTAX_ERROR ("missing ':' in %s", role);
   if (!(rv = getnum ()))
-    fatal_syntax ("missing number in %s", role);
+    SYNTAX_ERROR ("missing number in %s", role);
   return rv;
 }
 
@@ -165,7 +165,7 @@ getadmin (void)
         {
           cb = savestring ();
           if (0 > (BE (kws) = recognize_kwsub (&cb)))
-            fatal_syntax ("unknown expand mode %.*s", (int) cb.size, cb.string);
+            SYNTAX_ERROR ("unknown expand mode %.*s", (int) cb.size, cb.string);
           nextlex ();
         }
       getsemi (&TINY (expand));
@@ -191,7 +191,7 @@ getkeyval (struct tinysym const *keyword, enum tokens token, bool optional)
   else
     {
       if (!optional)
-        fatal_syntax ("missing %s", TINYS (keyword));
+        SYNTAX_ERROR ("missing %s", TINYS (keyword));
     }
   getsemi (keyword);
   return (val);

@@ -288,11 +288,11 @@ readdeltalog (void)
   register struct hshentry *Delta;
 
   if (eoflex ())
-    fatal_syntax ("missing delta log");
+    SYNTAX_ERROR ("missing delta log");
   Delta = must_get_delta_num ();
   getkeystring (&TINY (log));
   if (Delta->log.string)
-    fatal_syntax ("duplicate delta log");
+    SYNTAX_ERROR ("duplicate delta log");
   Delta->log = savestring ();
 
   nextlex ();

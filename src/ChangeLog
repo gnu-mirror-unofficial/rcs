@@ -1,5 +1,20 @@
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: SYNTAX_ERROR
+
+	* b-complain.c (fatal_syntax): Take line number as first arg.
+	* b-complain.h (fatal_syntax): Update func decl.
+	(SYNTAX_ERROR): New macro.
+	* b-fro.c: Do g/fatal_syntax/SYNTAX_ERROR/g.
+	* rcsedit.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcssyn.c: Likewise.
+	* rlog.c: Likewise.
+	* yarrrr.c: Likewise.
+
+2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move ‘LEX (erroneousp)’ to ‘FLOW (erroneousp)’.
 
 	* base.h (struct parse_state): Move member ‘erroneousp’ from here...

@@ -31,8 +31,8 @@ extern void generic_error (char const *who, char const *fmt, ...)
   printf_string (2, 3);
 extern void generic_fatal (char const *who, char const *fmt, ...)
   printf_string (2, 3) exiting;
-extern void fatal_syntax (char const *fmt, ...)
-  printf_string (1, 2) exiting;
+extern void fatal_syntax (size_t lno, char const *fmt, ...)
+  printf_string (2, 3) exiting;
 extern void fatal_sys (char const *who)
   exiting;
 
@@ -51,5 +51,7 @@ extern void fatal_sys (char const *who)
 
 #define PFATAL(...)    generic_fatal (NULL, __VA_ARGS__)
 #define RFATAL(...)    generic_fatal (REPO (filename), __VA_ARGS__)
+
+#define SYNTAX_ERROR(...)  fatal_syntax (LEX (lno), __VA_ARGS__)
 
 /* b-complain.h ends here */

@@ -131,7 +131,7 @@ nextlex (void)
       switch ((d = ctab[c]))
         {
         default:
-          fatal_syntax ("unknown character `%c'", c);
+          SYNTAX_ERROR ("unknown character `%c'", c);
         case NEWLN:
           ++LEX (lno);
           /* fall into */
@@ -271,7 +271,7 @@ getkey (struct tinysym const *key)
    and advance the input by calling ‘nextlex’.  */
 {
   if (!getkeyopt (key))
-    fatal_syntax ("missing '%s' keyword", TINYS (key));
+    SYNTAX_ERROR ("missing '%s' keyword", TINYS (key));
 }
 
 void
@@ -282,7 +282,7 @@ getkeystring (struct tinysym const *key)
 {
   getkey (key);
   if (NEXT (tok) != STRING)
-    fatal_syntax ("missing string after '%s' keyword", TINYS (key));
+    SYNTAX_ERROR ("missing string after '%s' keyword", TINYS (key));
 }
 
 char const *
@@ -328,7 +328,7 @@ must_get_delta_num (void)
 
   nextlex ();
   if (!(rv = getnum ()))
-    fatal_syntax ("delta number corrupted");
+    SYNTAX_ERROR ("delta number corrupted");
 
   return rv;
 }
