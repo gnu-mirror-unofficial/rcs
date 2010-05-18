@@ -100,16 +100,17 @@ getassoclst (struct link **tp, char *sp)
   char option = *sp++;
   struct u_symdef *ud;
   char const *name;
+  size_t len;
   int c = *sp;
 
 #define SKIPWS()  while (c == ' ' || c == '\t' || c == '\n') c = *++sp
 
   SKIPWS ();
-  name = sp;
   /* Check for invalid symbolic name.  */
-  sp = checksym (sp, ':');
+  accumulate_range (SHARED, sp, checksym (sp, ':'));
+  name = finish_string (SHARED, &len);
+  sp += len;
   c = *sp;
-  *sp = '\0';
   SKIPWS ();
 
   if (c != ':' && c != '\0')
@@ -170,10 +171,12 @@ getaccessor (struct link **tp, char *opt, enum changeaccess command)
 
   while (c != '\0')
     {
-      getchaccess (tp, sp, command);
-      sp = checkid (sp, ',');
+      size_t len;
+
+      accumulate_range (SHARED, sp, checkid (sp, ','));
+      getchaccess (tp, finish_string (SHARED, &len), command);
+      sp += len;
       c = *sp;
-      *sp = '\0';
       while (c == ' ' || c == '\n' || c == '\t' || c == ',')
         c = (*++sp);
     }
@@ -211,14 +214,16 @@ getstates (struct link **tp, char *sp)
   char const *temp;
   struct u_state *us;
   register int c;
+  size_t len;
 
   while ((c = *++sp) == ' ' || c == '\t' || c == '\n')
     continue;
-  temp = sp;
   /* Check for invalid state attribute.  */
-  sp = checkid (sp, ':');
+  temp = checkid (sp, ':');
+  accumulate_range (SHARED, sp, temp);
+  temp = finish_string (SHARED, &len);
+  sp += len;
   c = *sp;
-  *sp = '\0';
   while (c == ' ' || c == '\t' || c == '\n')
     c = *++sp;
 
