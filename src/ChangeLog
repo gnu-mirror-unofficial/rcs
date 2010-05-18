@@ -1,5 +1,13 @@
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int org] Move ‘redefined’ from rcslex.c to rcsutil.c.
+
+	* base.h (redefined): Move func decl; nfc.
+	* rcslex.c (redefined): Move func from here...
+	* rcsutil.c (redefined): ...to here.
+
+2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move some funcs out of rcslex.c to b-fb.[hc].
 
 	* b-fb.c (Ozclose, Orewind, aflush, oflush, afputc, aputs)

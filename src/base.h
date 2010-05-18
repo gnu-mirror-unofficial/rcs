@@ -814,7 +814,6 @@ char *checkid (char *id, int delimiter);
 char *checksym (char *sym, int delimiter);
 void checksid (char *id);
 void checkssym (char *sym);
-void redefined (int c);
 
 /* rcsmap */
 extern const enum tokens const ctab[];
@@ -856,6 +855,7 @@ char const *date2str (char const date[datesize],
 /* rcsutil */
 void gnurcs_init (void);
 void bad_option (char const *option);
+void redefined (int c);
 struct cbuf minus_p (char const *xrev, char const *rev);
 void parse_revpairs (char option, char *arg,
                      void (*put) (char const *b, char const *e, bool sawsep));

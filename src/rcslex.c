@@ -514,10 +514,4 @@ checkssym (char *sym)
   checksym (sym, 0);
 }
 
-void
-redefined (int c)
-{
-  PWARN ("redefinition of -%c option", c);
-}
-
 /* rcslex.c ends here */

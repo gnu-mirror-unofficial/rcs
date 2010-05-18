@@ -59,6 +59,12 @@ bad_option (char const *option)
   PERR ("unknown option: %s", option);
 }
 
+void
+redefined (int c)
+{
+  PWARN ("redefinition of -%c option", c);
+}
+
 struct cbuf
 minus_p (char const *xrev, char const *rev)
 {
