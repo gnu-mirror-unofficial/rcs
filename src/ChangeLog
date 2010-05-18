@@ -1,5 +1,15 @@
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int org] Move some funcs out of rcslex.c to rcsmap.c.
+
+	* rcslex.c (checkidentifier, checkid, checksym, checksid)
+	(checkssym): Move funcs from here...
+	* rcsmap.c (checkidentifier, checkid, checksym, checksid)
+	(checkssym): ...to here.
+	* base.h: Reorder func decls; nfc.
+
+2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Dose some funcs with ‘const’.
 
 	* rcslex.c (checkidentifier, checkid, checksym):

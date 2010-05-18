@@ -810,13 +810,13 @@ struct hshentry *must_get_delta_num (void);
 void readstring (void);
 void printstring (void);
 struct cbuf savestring (void);
+
+/* rcsmap */
+extern const enum tokens const ctab[];
 char const *checkid (char const *id, int delimiter);
 char const *checksym (char const *sym, int delimiter);
 void checksid (char const *id);
 void checkssym (char const *sym);
-
-/* rcsmap */
-extern const enum tokens const ctab[];
 
 /* rcsrev */
 int countnumflds (char const *s);
