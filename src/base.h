@@ -814,15 +814,7 @@ char *checkid (char *id, int delimiter);
 char *checksym (char *sym, int delimiter);
 void checksid (char *id);
 void checkssym (char *sym);
-void Ozclose (FILE **p);
-void Orewind (FILE *f);
-void aflush (FILE *f);
-void oflush (void);
 void redefined (int c);
-void afputc (int c, FILE *f);
-void aputs (char const *s, FILE *iop);
-void aprintf (FILE *iop, char const *fmt, ...)
-  printf_string (2, 3);
 
 /* rcsmap */
 extern const enum tokens const ctab[];

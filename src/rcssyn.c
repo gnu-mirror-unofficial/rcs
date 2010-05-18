@@ -26,6 +26,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-esds.h"
+#include "b-fb.h"
 #include "b-fro.h"
 
 static void

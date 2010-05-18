@@ -1,5 +1,21 @@
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int org] Move some funcs out of rcslex.c to b-fb.[hc].
+
+	* b-fb.c (Ozclose, Orewind, aflush, oflush, afputc, aputs)
+	(aprintf): Move funcs from rcslex.c to here.
+	* b-fb.h (Ozclose, Orewind, aflush, oflush, afputc, aputs)
+	(aprintf): Move func decls from base.h to here; add ‘extern’.
+	* rcsclean.c: #include "b-fb.h".
+	* rcssyn.c: Likewise.
+	* rlog.c: Likewise.
+	* base.h (Ozclose, Orewind, aflush, oflush, afputc, aputs)
+	(aprintf): Delete func decls.
+	* rcslex.c (Ozclose, Orewind, aflush, oflush, afputc, aputs)
+	(aprintf): Delete funcs.
+
+2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Mutate strings in rcs(1) ‘argv’ less.
 
 	* rcs.c (getassoclst, getaccessor, getstates):

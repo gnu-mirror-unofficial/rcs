@@ -515,69 +515,9 @@ checkssym (char *sym)
 }
 
 void
-Ozclose (FILE **p)
-{
-  if (*p && EOF == fclose (*p))
-    Oerror ();
-  *p = NULL;
-}
-
-void
-Orewind (FILE *f)
-{
-  if (0 > fseeko (f, 0L, SEEK_SET))
-    Oerror ();
-}
-
-void
-aflush (FILE *f)
-{
-  if (fflush (f) != 0)
-    Oerror ();
-}
-
-void
-oflush (void)
-{
-  if (fflush (MANI (standard_output)
-              ? MANI (standard_output)
-              : stdout)
-      != 0 && !BE (Oerrloop))
-    Oerror ();
-}
-
-void
 redefined (int c)
 {
   PWARN ("redefinition of -%c option", c);
-}
-
-void
-afputc (int c, register FILE *f)
-/* ‘afputc (c, f)’ acts like ‘aputc (c, f)’ but is smaller and slower.  */
-{
-  aputc (c, f);
-}
-
-void
-aputs (char const *s, FILE *iop)
-/* Put string ‘s’ on file ‘iop’, abort on error.  */
-{
-  if (fputs (s, iop) < 0)
-    Oerror ();
-}
-
-void
-aprintf (FILE * iop, char const *fmt, ...)
-/* Formatted output.  Same as ‘fprintf’ in <stdio.h>,
-   but abort program on error.  */
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  if (0 > vfprintf (iop, fmt, ap))
-    Oerror ();
-  va_end (ap);
 }
 
 /* rcslex.c ends here */
