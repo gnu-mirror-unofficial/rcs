@@ -1,5 +1,15 @@
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Dose some funcs with ‘const’.
+
+	* rcslex.c (checkidentifier, checkid, checksym):
+	Return/take ‘char const *’.
+	(checksid, checkssym): Take ‘char const *’.
+	* base.h (checkidentifier, checkid, checksym)
+	(checksid, checkssym): Update func decls.
+
+2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Don't mutate string in ‘checkidentifier’.
 
 	* rcslex.c (checkidentifier): Don't NUL-terminate arg to

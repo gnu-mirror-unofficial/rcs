@@ -436,8 +436,8 @@ savestring (void)
     }
 }
 
-static char *
-checkidentifier (register char *id, int delimiter, register bool dotok)
+static char const *
+checkidentifier (char const *id, int delimiter, register bool dotok)
 /* Check whether the string starting at ‘id’ is an identifier and return
    a pointer to the delimiter after the identifier.  White space,
    ‘delimiter’ and 0 are legal delimiters.  Abort the program if not a
@@ -445,7 +445,7 @@ checkidentifier (register char *id, int delimiter, register bool dotok)
    the only delimiter is 0.  Allow '.' in identifier only if ‘dotok’ is
    set.  */
 {
-  register char *temp;
+  register char const *temp;
   register char c;
   register char delim = delimiter;
   bool isid = false;
@@ -488,27 +488,27 @@ checkidentifier (register char *id, int delimiter, register bool dotok)
   return id;
 }
 
-char *
-checkid (char *id, int delimiter)
+char const *
+checkid (char const *id, int delimiter)
 {
   return checkidentifier (id, delimiter, true);
 }
 
-char *
-checksym (char *sym, int delimiter)
+char const *
+checksym (char const *sym, int delimiter)
 {
   return checkidentifier (sym, delimiter, false);
 }
 
 void
-checksid (char *id)
+checksid (char const *id)
 /* Check whether the string ‘id’ is an identifier.  */
 {
   checkid (id, 0);
 }
 
 void
-checkssym (char *sym)
+checkssym (char const *sym)
 {
   checksym (sym, 0);
 }
