@@ -479,12 +479,11 @@ checkidentifier (register char *id, int delimiter, register bool dotok)
                                  && c != '\t'
                                  && c != '\n'))))
     {
-      /* Append '\0' to end of ‘id’ before error message.  */
       while ((c = *id) && c != ' ' && c != '\t' && c != '\n'
              && c != delim)
         id++;
-      *id = '\0';
-      PFATAL ("invalid %s `%s'", dotok ? "identifier" : "symbol", temp);
+      PFATAL ("invalid %s `%.*s'", dotok ? "identifier" : "symbol",
+              id - temp, temp);
     }
   return id;
 }

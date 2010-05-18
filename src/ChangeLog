@@ -1,5 +1,12 @@
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Don't mutate string in ‘checkidentifier’.
+
+	* rcslex.c (checkidentifier): Don't NUL-terminate arg to
+	error message; instead, use ‘%.*s’ in error message format string.
+
+2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move ‘redefined’ from rcslex.c to rcsutil.c.
 
 	* base.h (redefined): Move func decl; nfc.
