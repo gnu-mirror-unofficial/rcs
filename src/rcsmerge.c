@@ -153,7 +153,7 @@ main (int argc, char **argv)
     PFATAL ("no base revision number given");
 
   /* Now handle all filenames.  */
-  if (!LEX (erroneousp))
+  if (!FLOW (erroneousp))
     {
       if (argc < 1)
         PFATAL ("no input file");
@@ -227,7 +227,7 @@ main (int argc, char **argv)
         }
     }
   tempunlink ();
-  return LEX (erroneousp) ? DIFF_TROUBLE : status;
+  return FLOW (erroneousp) ? DIFF_TROUBLE : status;
 }
 
 /* rcsmerge.c ends here */

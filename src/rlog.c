@@ -75,7 +75,7 @@ static int exitstatus;
 static void
 cleanup (void)
 {
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
 }
@@ -939,7 +939,7 @@ main (int argc, char **argv)
     }
 
   /* Now handle all filenames.  */
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     cleanup ();
   else if (argc < 1)
     PFATAL ("no input file");

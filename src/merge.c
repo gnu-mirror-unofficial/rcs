@@ -116,7 +116,7 @@ main (int argc, char **argv)
   for (; labels < 3; labels++)
     label[labels] = arg[labels];
 
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     exiterr ();
   return merge (tostdout, edarg, label, arg);
 }

@@ -65,7 +65,7 @@ static struct stat workstat;
 static void
 cleanup (void)
 {
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
   ORCSclose ();
@@ -395,7 +395,7 @@ buildjoin (char const *initialfile)
   return true;
 
 badmerge:
-  LEX (erroneousp) = true;
+  FLOW (erroneousp) = true;
   return false;
 }
 
@@ -595,7 +595,7 @@ main (int argc, char **argv)
   /* (End of option processing.)  */
 
   /* Now handle all filenames.  */
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     cleanup ();
   else if (argc < 1)
     PFATAL ("no input file");

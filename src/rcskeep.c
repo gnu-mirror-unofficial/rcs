@@ -116,7 +116,7 @@ keepid (int c, struct fro *fp)
   if (!(maybe = get0val (c, fp, true, false)))
     return NULL;
   checksid (maybe);
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     {
       brush_off (SINGLE, maybe);
       maybe = NULL;
@@ -317,7 +317,7 @@ getoldkeys (register struct fro *fp)
               /* Skip either ``who'' (new form) or ``Locker: who'' (old).  */
               if (getval (fp, false, true) && getval (fp, false, true))
                 c = 0;
-              else if (LEX (erroneousp))
+              else if (FLOW (erroneousp))
                 goto badness;
               else
                 c = KDELIM;

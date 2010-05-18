@@ -563,10 +563,6 @@ struct manifestation
 /* The parse state is used when reading the RCS file.  */
 struct parse_state
 {
-  bool erroneousp;
-  /* True means lexing encountered an error.
-     -- buildjoin Lexinit syserror generic_error generic_fatal  */
-
   void *tokbuf;
   /* Space for buffering tokens.
      -- Lexinit nextlex  */
@@ -676,6 +672,11 @@ struct flow
   char const *result;
   /* The result file name.
      -- openfcopy swapeditfiles  */
+
+  bool erroneousp;
+  /* True means some (parsing/merging) error was encountered.
+     The program should clean up temporary files and exit.
+     -- buildjoin Lexinit syserror generic_error generic_fatal  */
 };
 
 /* The top of the structure tree (NB: does not include ‘program’).  */

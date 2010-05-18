@@ -89,7 +89,7 @@ Lexinit (void)
   for (int i = 0; i < hshsize; i++)
     LEX (hshtab)[i] = NULL;
 
-  LEX (erroneousp) = false;
+  FLOW (erroneousp) = false;
   BE (Oerrloop) = false;
   if (FLOW (from))
     {

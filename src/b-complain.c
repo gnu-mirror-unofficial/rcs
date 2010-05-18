@@ -77,7 +77,7 @@ whoami (char const *who)
     complain ("%s: ", who);
 }
 
-#define ERRONEOUS_X()  LEX (erroneousp) = true
+#define ERRONEOUS_X()  FLOW (erroneousp) = true
 
 void
 syserror (int e, char const *who)

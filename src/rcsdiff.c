@@ -85,7 +85,7 @@ longopt_maybe_p (const char *arg, const s_unique const *u)
 static void
 cleanup (void)
 {
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     exitstatus = DIFF_TROUBLE;
   fro_zclose (&FLOW (from));
   fro_zclose (&workptr);
@@ -335,7 +335,7 @@ main (int argc, char **argv)
 #endif
 
   /* Now handle all filenames.  */
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     cleanup ();
   else if (argc < 1)
     PFATAL ("no input file");

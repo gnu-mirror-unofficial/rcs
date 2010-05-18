@@ -75,7 +75,7 @@ static struct hshentry *cuthead, *cuttail, *delstrt;
 static void
 cleanup (void)
 {
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
   Ozclose (&FLOW (res));
@@ -1340,7 +1340,7 @@ main (int argc, char **argv)
   /* (End processing of options.)  */
 
   /* Now handle all filenames.  */
-  if (LEX (erroneousp))
+  if (FLOW (erroneousp))
     cleanup ();
   else if (argc < 1)
     PFATAL ("no input file");
@@ -1483,7 +1483,7 @@ main (int argc, char **argv)
             keepRCStime = false;
           }
 
-        if (LEX (erroneousp))
+        if (FLOW (erroneousp))
           continue;
 
         putadmin ();

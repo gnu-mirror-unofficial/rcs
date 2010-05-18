@@ -1,5 +1,24 @@
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int org] Move ‘LEX (erroneousp)’ to ‘FLOW (erroneousp)’.
+
+	* base.h (struct parse_state): Move member ‘erroneousp’ from here...
+	(struct flow): ...to here.
+	* b-complain.c: Do s/LEX (erroneousp)/FLOW (erroneousp)/g.
+	* ci.c: Likewise.
+	* co.c: Likewise.
+	* merge.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcslex.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+
+2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move some funcs out of rcslex.c to rcsmap.c.
 
 	* rcslex.c (checkidentifier, checkid, checksym, checksid)
