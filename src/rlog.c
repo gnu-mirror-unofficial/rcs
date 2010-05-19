@@ -152,12 +152,11 @@ putadelta (register struct hshentry const *node,
 
   if (editscript)
     {
-      if (trunk)
-        aprintf (out, insDelFormat,
-                 editscript->deletelns, editscript->insertlns);
-      else
-        aprintf (out, insDelFormat,
-                 editscript->insertlns, editscript->deletelns);
+      long a, d;
+
+      a = trunk ? editscript->deletelns : editscript->insertlns;
+      d = trunk ? editscript->insertlns : editscript->deletelns;
+      aprintf (out, insDelFormat, a, d);
     }
 
   if (node->branches)

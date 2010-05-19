@@ -1,3 +1,9 @@
+2010-05-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘?:’ more.
+
+	* rlog.c (putadelta): Use ‘?:’ instead of ‘if’ statement.
+
 2010-05-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstraction: SYNTAX_ERROR
