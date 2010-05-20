@@ -137,21 +137,21 @@ removelock (struct hshentry *delta)
    the RCS file.  If caller does not have a lock in this case,
    return 0; return 1 if a lock is actually removed.  */
 {
-  struct wlink wfake, *wtp;
+  struct link fake, *tp;
   char const *num;
 
   num = delta->num;
-  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
     {
-      struct rcslock *rl = wtp->next->entry;
+      struct rcslock const *rl = tp->next->entry;
 
       if (rl->delta == delta)
         {
           if (STR_SAME (getcaller (), rl->login))
             {
               /* We found a lock on ‘delta’ by caller; delete it.  */
-              wtp->next = wtp->next->next;
-              ADMIN (locks) = wfake.next;
+              tp->next = tp->next->next;
+              ADMIN (locks) = fake.next;
               delta->lockedby = NULL;
               return 1;
             }

@@ -119,15 +119,15 @@ rmlock (struct hshentry const *delta)
   someone else holds the lock, 0 if there is no lock on delta,
   and 1 if a lock was found and removed.  */
 {
-  struct wlink wfake, *wtp;
-  struct rcslock *rl = NULL;
+  struct link fake, *tp;
+  struct rcslock const *rl = NULL;
   char const *num;
   bool whomatch, nummatch;
 
   num = delta->num;
-  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
     {
-      rl = wtp->next->entry;
+      rl = tp->next->entry;
       whomatch = STR_SAME (getcaller (), rl->login);
       nummatch = STR_SAME (num, rl->delta->num);
       if (whomatch && nummatch)
@@ -140,11 +140,11 @@ rmlock (struct hshentry const *delta)
           return -1;
         }
     }
-  if (wtp->next)
+  if (tp->next)
     {
       /* Found one; delete it.  */
-      wtp->next = wtp->next->next;
-      ADMIN (locks) = wfake.next;
+      tp->next = tp->next->next;
+      ADMIN (locks) = fake.next;
       rl->delta->lockedby = NULL;
       /* Success.  */
       return 1;

@@ -62,18 +62,18 @@ exiterr (void)
 static bool
 unlock (struct hshentry *delta)
 {
-  struct wlink wfake, *wtp;
+  struct link fake, *tp;
 
   if (delta && delta->lockedby
       && STR_SAME (getcaller (), delta->lockedby))
-    for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+    for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
       {
-        struct rcslock *rl = wtp->next->entry;
+        struct rcslock const *rl = tp->next->entry;
 
         if (rl->delta == delta)
           {
-            wtp->next = wtp->next->next;
-            ADMIN (locks) = wfake.next;
+            tp->next = tp->next->next;
+            ADMIN (locks) = fake.next;
             delta->lockedby = NULL;
             return true;
           }

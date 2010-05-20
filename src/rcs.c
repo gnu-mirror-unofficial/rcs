@@ -483,13 +483,13 @@ breaklock (struct hshentry const *delta)
    Send mail if a lock different from the caller's is broken.
    Print an error message if there is no such lock or error.  */
 {
-  struct wlink wfake, *wtp;
+  struct link fake, *tp;
   char const *num;
 
   num = delta->num;
-  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
     {
-      struct rcslock *rl = wtp->next->entry;
+      struct rcslock const *rl = tp->next->entry;
       struct hshentry *d = rl->delta;
 
       if (STR_SAME (num, d->num))
@@ -503,8 +503,8 @@ breaklock (struct hshentry const *delta)
               return false;
             }
           diagnose ("%s unlocked", num);
-          wtp->next = wtp->next->next;
-          ADMIN (locks) = wfake.next;
+          tp->next = tp->next->next;
+          ADMIN (locks) = fake.next;
           d->lockedby = NULL;
           return true;
         }
@@ -544,7 +544,7 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
           RERR ("can't remove branch point %s", pt->num);
           return true;
         }
-      for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
+      for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
         {
           struct rcslock const *rl = ls->entry;
 
@@ -840,7 +840,7 @@ dolocks (void)
                 case 0:
                   /* Remove most recent lock.  */
                   {
-                    struct rcslock *rl = ADMIN (locks)->entry;
+                    struct rcslock const *rl = ADMIN (locks)->entry;
 
                     changed |= breaklock (rl->delta);
                   }

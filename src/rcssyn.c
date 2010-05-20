@@ -65,7 +65,6 @@ getadmin (void)
 /* Read an <admin> and initialize the appropriate global variables.  */
 {
   struct link fake, *tp;
-  struct wlink wfake, *wtp;
   register char const *id;
   struct hshentry *delta;
   struct cbuf cb;
@@ -128,8 +127,8 @@ getadmin (void)
   getsemi (&TINY (symbols));
 
   getkey (&TINY (locks));
-  wfake.next = ADMIN (locks);
-  wtp = &wfake;
+  fake.next = ADMIN (locks);
+  tp = &fake;
   while ((id = getid ()))
     {
       struct rcslock *rl;
@@ -139,9 +138,9 @@ getadmin (void)
       rl = FALLOC (struct rcslock);
       rl->login = id;
       rl->delta = delta;
-      wtp = wextend (wtp, rl, SINGLE);
+      tp = extend (tp, rl, SINGLE);
     }
-  ADMIN (locks) = wfake.next;
+  ADMIN (locks) = fake.next;
   getsemi (&TINY (locks));
 
   if ((BE (strictly_locking) = getkeyopt (&TINY (strict))))
@@ -254,9 +253,9 @@ gettree (void)
 {
   while (getdelta ())
     continue;
-  for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
+  for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
     {
-      struct rcslock *rl = ls->entry;
+      struct rcslock const *rl = ls->entry;
 
       rl->delta->lockedby = rl->login;
     }

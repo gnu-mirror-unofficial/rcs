@@ -631,7 +631,7 @@ struct repository
     /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
        -- [rcs]main InitAdmin getadmin  */
 
-    struct wlink *locks;
+    struct link *locks;
     /* List of ‘struct rcslock’ (locks).
        -- rmlock addlock InitAdmin  */
 

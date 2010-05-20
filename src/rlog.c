@@ -324,9 +324,9 @@ extractdelta (struct hshentry const *pdelta)
         return false;
   /* Only locked revisions wanted.  */
   if (lockflag)
-    for (struct wlink *ls = ADMIN (locks);; ls = ls->next)
+    for (struct link *ls = ADMIN (locks);; ls = ls->next)
       {
-        struct rcslock *rl;
+        struct rcslock const *rl;
 
         if (!ls)
           return false;
@@ -445,26 +445,26 @@ trunclocks (void)
    id's on ‘lockerlist’.  Do not truncate if ‘lockerlist’ empty.  */
 {
   struct link const *plocker;
-  struct wlink wfake, *wtp;
+  struct link fake, *tp;
 
   if (!lockerlist)
     return;
 
   /* Shorten locks to those contained in ‘lockerlist’.  */
-  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next;)
+  for (fake.next = ADMIN (locks), tp = &fake; tp->next;)
     {
-      struct rcslock *rl = wtp->next->entry;
+      struct rcslock const *rl = tp->next->entry;
 
       for (plocker = lockerlist;;)
         if (STR_SAME (plocker->entry, rl->login))
           {
-            wtp = wtp->next;
+            tp = tp->next;
             break;
           }
         else if (!(plocker = plocker->next))
           {
-            wtp->next = wtp->next->next;
-            ADMIN (locks) = wfake.next;
+            tp->next = tp->next->next;
+            ADMIN (locks) = fake.next;
             break;
           }
     }
@@ -981,9 +981,9 @@ main (int argc, char **argv)
                  ADMIN (head) ? ADMIN (head)->num : "",
                  ADMIN (defbr) ? " " : "", ADMIN (defbr) ? ADMIN (defbr) : "",
                  BE (strictly_locking) ? " strict" : "");
-        for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
+        for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
           {
-            struct rcslock *rl = ls->entry;
+            struct rcslock const *rl = ls->entry;
 
             aprintf (out, symbolFormat, rl->login, rl->delta->num);
           }

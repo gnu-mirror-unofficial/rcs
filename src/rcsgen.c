@@ -380,9 +380,9 @@ putadmin (void)
   aprintf (fout, ";\n%s", TINYKS (symbols));
   format_assocs (fout, "\n\t%s:%s");
   aprintf (fout, ";\n%s", TINYKS (locks));
-  for (struct wlink *ls = ADMIN (locks); ls; ls = ls->next)
+  for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
     {
-      struct rcslock *rl = ls->entry;
+      struct rcslock const *rl = ls->entry;
 
       aprintf (fout, "\n\t%s:%s", rl->login, rl->delta->num);
     }

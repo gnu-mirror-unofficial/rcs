@@ -994,12 +994,12 @@ findlock (bool delete, struct hshentry **target)
    If one lock, put it into ‘*target’.
    Return 0 for no locks, 1 for one, 2 for two or more.  */
 {
-  struct rcslock *rl;
-  struct wlink wfake, *wtp, *found = NULL;
+  struct rcslock const *rl;
+  struct link fake, *tp, *found = NULL;
 
-  for (wfake.next = ADMIN (locks), wtp = &wfake; wtp->next; wtp = wtp->next)
+  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
     {
-      rl = wtp->next->entry;
+      rl = tp->next->entry;
       if (STR_SAME (getcaller (), rl->login))
         {
           if (found)
@@ -1008,7 +1008,7 @@ findlock (bool delete, struct hshentry **target)
                     getcaller ());
               return 2;
             }
-          found = wtp;
+          found = tp;
         }
     }
   if (!found)
@@ -1018,7 +1018,7 @@ findlock (bool delete, struct hshentry **target)
   if (delete)
     {
       found->next = found->next->next;
-      ADMIN (locks) = wfake.next;
+      ADMIN (locks) = fake.next;
       rl->delta->lockedby = NULL;
     }
   return 1;
@@ -1032,20 +1032,20 @@ addlock (struct hshentry *delta, bool verbose)
    Return 0 if the caller already holds the lock.   */
 {
   register struct rcslock *rl;
-  struct wlink *ls;
 
-  for (ls = ADMIN (locks); ls; ls = ls->next)
+  for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
     {
-      rl = ls->entry;
-      if (cmpnum (delta->num, rl->delta->num) == 0)
+      struct rcslock const *rlk = ls->entry;
+
+      if (cmpnum (delta->num, rlk->delta->num) == 0)
         {
-          if (STR_SAME (getcaller (), rl->login))
+          if (STR_SAME (getcaller (), rlk->login))
             return 0;
           else
             {
               if (verbose)
                 RERR ("Revision %s is already locked by %s.",
-                      delta->num, rl->login);
+                      delta->num, rlk->login);
               return -1;
             }
         }
@@ -1053,7 +1053,7 @@ addlock (struct hshentry *delta, bool verbose)
   rl = FALLOC (struct rcslock);
   delta->lockedby = rl->login = getcaller ();
   rl->delta = delta;
-  ADMIN (locks) = wprepend (rl, ADMIN (locks), SINGLE);
+  ADMIN (locks) = prepend (rl, ADMIN (locks), SINGLE);
   return 1;
 }
 
