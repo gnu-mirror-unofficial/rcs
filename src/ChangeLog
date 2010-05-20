@@ -1,3 +1,14 @@
+2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int org] Move some funcs out of rcssyn.c to rcsedit.c.
+
+	* rcssyn.c (unexpected_EOF, initdiffcmd, badDiffOutput)
+	(diffLineNumberTooLarge, getdiffcmd): Move funcs from here...
+	* rcsedit.c: #include <ctype.h>.
+	(unexpected_EOF, initdiffcmd, badDiffOutput)
+	(diffLineNumberTooLarge, getdiffcmd): ...to here.
+	* base.h: Reorder func decls; nfc.
+
 2010-05-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘?:’ more.

@@ -760,6 +760,11 @@ int dorewrite (bool lockflag, int changed);
 int donerewrite (int changed, time_t newRCStime);
 void ORCSclose (void);
 void ORCSerror (void);
+void unexpected_EOF (void)
+  exiting;
+void initdiffcmd (struct diffcmd *dc);
+int getdiffcmd (struct fro *finfile, bool delimiter,
+                FILE *foutfile, struct diffcmd *dc);
 
 /* rcsfcmp */
 int rcsfcmp (struct fro *xfp, struct stat const *xstatp,
@@ -839,11 +844,6 @@ char const *tiprev (void);
 void getadmin (void);
 void gettree (void);
 void getdesc (bool);
-void unexpected_EOF (void)
-  exiting;
-void initdiffcmd (struct diffcmd *dc);
-int getdiffcmd (struct fro *finfile, bool delimiter,
-                FILE *foutfile, struct diffcmd *dc);
 
 /* rcstime */
 void time2date (time_t unixtime, char date[datesize]);

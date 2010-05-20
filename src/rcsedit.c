@@ -35,6 +35,7 @@
 #include <utime.h>
 #endif
 #include <fcntl.h>
+#include <ctype.h>
 #include "same-inode.h"
 #include "unistd-safer.h"
 #include "b-complain.h"
@@ -1260,6 +1261,145 @@ ORCSerror (void)
   if (FLOW (rewr))
     /* Avoid ‘fclose’, since stdio may not be reentrant.  */
     close (fileno (FLOW (rewr)));
+}
+
+void
+unexpected_EOF (void)
+{
+  RFATAL ("unexpected EOF in diff output");
+}
+
+void
+initdiffcmd (register struct diffcmd *dc)
+/* Initialize ‘*dc’ suitably for ‘getdiffcmd’.  */
+{
+  dc->adprev = 0;
+  dc->dafter = 0;
+}
+
+static void
+badDiffOutput (char const *buf)
+{
+  RFATAL ("bad diff output line: %s", buf);
+}
+
+static void
+diffLineNumberTooLarge (char const *buf)
+{
+  RFATAL ("diff line number too large: %s", buf);
+}
+
+int
+getdiffcmd (struct fro *finfile, bool delimiter, FILE *foutfile,
+            struct diffcmd *dc)
+/* Get an editing command output by "diff -n" from ‘finfile’.  The input
+   is delimited by ‘SDELIM’ if ‘delimiter’ is set, EOF otherwise.  Copy
+   a clean version of the command to ‘foutfile’ (if non-NULL).  Return 0
+   for 'd', 1 for 'a', and -1 for EOF.  Store the command's line number
+   and length into ‘dc->line1’ and ‘dc->nlines’.  Keep ‘dc->adprev’ and
+   ‘dc->dafter’ up to date.  */
+{
+  int c;
+  register FILE *fout;
+  register char *p;
+  register struct fro *fin;
+  long line1, nlines, t;
+  char buf[BUFSIZ];
+
+  fin = finfile;
+  fout = foutfile;
+  GETCHAR_OR (c, fin,
+              {
+                if (delimiter)
+                  unexpected_EOF ();
+                return -1;
+              });
+  if (delimiter)
+    {
+      if (c == SDELIM)
+        {
+          GETCHAR (c, fin);
+          if (c == SDELIM)
+            {
+              buf[0] = c;
+              buf[1] = 0;
+              badDiffOutput (buf);
+            }
+          NEXT (c) = c;
+          if (fout)
+            aprintf (fout, "%c%c", SDELIM, c);
+          return -1;
+        }
+    }
+  p = buf;
+  do
+    {
+      if (buf + BUFSIZ - 2 <= p)
+        {
+          RFATAL ("diff output command line too long");
+        }
+      *p++ = c;
+      GETCHAR_OR (c, fin, unexpected_EOF ());
+    }
+  while (c != '\n');
+  if (delimiter)
+    ++LEX (lno);
+  *p = '\0';
+  for (p = buf + 1; (c = *p++) == ' ';)
+    continue;
+  line1 = 0;
+  while (isdigit (c))
+    {
+      if (LONG_MAX / 10 < line1
+          || (t = line1 * 10, (line1 = t + (c - '0')) < t))
+        diffLineNumberTooLarge (buf);
+      c = *p++;
+    }
+  while (c == ' ')
+    c = *p++;
+  nlines = 0;
+  while (isdigit (c))
+    {
+      if (LONG_MAX / 10 < nlines
+          || (t = nlines * 10, (nlines = t + (c - '0')) < t))
+        diffLineNumberTooLarge (buf);
+      c = *p++;
+    }
+  if (c == '\r')
+    c = *p++;
+  if (c || !nlines)
+    {
+      badDiffOutput (buf);
+    }
+  if (line1 + nlines < line1)
+    diffLineNumberTooLarge (buf);
+  switch (buf[0])
+    {
+    case 'a':
+      if (line1 < dc->adprev)
+        {
+          RFATAL ("backward insertion in diff output: %s", buf);
+        }
+      dc->adprev = line1 + 1;
+      break;
+    case 'd':
+      if (line1 < dc->adprev || line1 < dc->dafter)
+        {
+          RFATAL ("backward deletion in diff output: %s", buf);
+        }
+      dc->adprev = line1;
+      dc->dafter = line1 + nlines;
+      break;
+    default:
+      badDiffOutput (buf);
+    }
+  if (fout)
+    {
+      aprintf (fout, "%s\n", buf);
+    }
+  dc->line1 = line1;
+  dc->nlines = nlines;
+  return buf[0] == 'a';
 }
 
 /* rcsedit.c ends here */
