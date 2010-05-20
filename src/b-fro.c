@@ -283,23 +283,6 @@ fro_must_getbyte (int *c, struct fro *f)
 #undef DONE
 }
 
-void
-fro_get_prev_byte (int *c, struct fro *f)
-{
-  switch (f->rm)
-    {
-    case RM_MMAP:
-    case RM_MEM:
-      *c = (--(f)->ptr)[-1];
-      break;
-    case RM_STDIO:
-      if (0 > fseeko (f->stream, -2, SEEK_CUR))
-        Ierror ();
-      fro_must_getbyte (c, f);
-      break;
-    }
-}
-
 #ifdef HAVE_MADVISE
 #define USED_IF_HAVE_MADVISE
 #else

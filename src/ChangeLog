@@ -1,5 +1,13 @@
 2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Incorporate ‘fro_get_prev_byte’ into unique caller.
+
+	* b-kwxout.c (keyreplace): Use ‘fro_move’, ‘GETCHAR’.
+	* b-fro.c (fro_get_prev_byte): Delete func.
+	* b-fro.h (fro_get_prev_byte): Delete func decl.
+
+2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: fro_move
 
 	* b-fro.c (fro_bob): Delete func.

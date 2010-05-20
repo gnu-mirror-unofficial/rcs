@@ -181,16 +181,23 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
           cs = 0;
           for (;;)
             {
+#define GET_PREV_BYTE()  do                     \
+                {                               \
+                  fro_move (infile, -2);        \
+                  GETCHAR (c, infile);          \
+                }                               \
+              while (0)
+
               if (!--chars_read)
                 goto done_backing_up;
-              fro_get_prev_byte (&c, infile);
+              GET_PREV_BYTE ();
               if (c == '\n')
                 break;
               if (c == SDELIM && delimstuffed)
                 {
                   if (!--chars_read)
                     break;
-                  fro_get_prev_byte (&c, infile);
+                  GET_PREV_BYTE ();
                   if (c != SDELIM)
                     {
                       GETCHAR (c, infile);
@@ -199,6 +206,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
                 }
               cs += kdelim_found;
               kdelim_found |= c == KDELIM;
+#undef GET_PREV_BYTE
             }
           GETCHAR (c, infile);
         done_backing_up:
