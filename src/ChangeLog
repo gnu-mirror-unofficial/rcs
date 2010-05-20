@@ -1,5 +1,18 @@
 2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘struct link’ for ‘ADMIN (assocs)’ list.
+
+	* base.h (struct repository): Change
+	type of member ‘admin.assocs’ to ‘struct link *’.
+	* rcsedit.c (addsymbol): To rebind, cons a new ‘struct symdef’
+	and splice it into the list position of the original association.
+	* rcs.c (doassoc): Use ‘struct link’ for list-walk local vars.
+	* rcsgen.c (format_assocs): Likewise.
+	* rcsrev.c (rev_from_symbol): Likewise.
+	* rcssyn.c (getadmin): Likewise.
+
+2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Incorporate ‘fro_get_prev_byte’ into unique caller.
 
 	* b-kwxout.c (keyreplace): Use ‘fro_move’, ‘GETCHAR’.

@@ -111,8 +111,8 @@ getadmin (void)
   getsemi (&TINY (access));
 
   getkey (&TINY (symbols));
-  wfake.next = ADMIN (assocs);
-  wtp = &wfake;
+  fake.next = ADMIN (assocs);
+  tp = &fake;
   while ((id = getid ()))
     {
       struct symdef *d;
@@ -122,9 +122,9 @@ getadmin (void)
       d = FALLOC (struct symdef);
       d->meaningful = id;
       d->underlying = delta->num;
-      wtp = wextend (wtp, d, SINGLE);
+      tp = extend (tp, d, SINGLE);
     }
-  ADMIN (assocs) = wfake.next;
+  ADMIN (assocs) = fake.next;
   getsemi (&TINY (symbols));
 
   getkey (&TINY (locks));

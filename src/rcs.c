@@ -752,8 +752,8 @@ doassoc (void)
       if (!under)
         /* Delete symbol.  */
         {
-          struct wlink box, *tp;
-          struct symdef *d = NULL;
+          struct link box, *tp;
+          struct symdef const *d = NULL;
 
           for (box.next = ADMIN (assocs), tp = &box; tp->next; tp = tp->next)
             {

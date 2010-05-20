@@ -623,7 +623,7 @@ struct repository
     /* List of usernames who may modify the repo.
        -- InitAdmin doaccess [rcs]main  */
 
-    struct wlink *assocs;
+    struct link *assocs;
     /* List of ‘struct symdef’ (symbolic names).
        -- addsymbol InitAdmin  */
 

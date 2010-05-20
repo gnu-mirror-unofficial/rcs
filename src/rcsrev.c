@@ -589,9 +589,9 @@ rev_from_symbol (struct cbuf const *id)
    ‘ADMIN (assocs)’, and return a pointer to the corresponding
    revision number.  Return NULL if not present.  */
 {
-  for (struct wlink *ls = ADMIN (assocs); ls; ls = ls->next)
+  for (struct link *ls = ADMIN (assocs); ls; ls = ls->next)
     {
-      struct symdef *d = ls->entry;
+      struct symdef const *d = ls->entry;
 
       if (!strncmp (d->meaningful, id->string, id->size))
         return d->underlying;

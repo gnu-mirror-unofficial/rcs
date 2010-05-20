@@ -1064,34 +1064,40 @@ addsymbol (char const *num, char const *name, bool rebind)
    with ‘num’; otherwise, print an error message and return false;
    Return -1 if unsuccessful, 0 if no change, 1 if change.  */
 {
-  struct wlink fake, *tp;
+  struct link fake, *tp;
   struct symdef *d;
+
+#define MAKEDEF()                               \
+  d = FALLOC (struct symdef);                   \
+  d->meaningful = name;                         \
+  d->underlying = num
 
   fake.next = ADMIN (assocs);
   for (tp = &fake; tp->next; tp = tp->next)
     {
-      d = tp->next->entry;
-      if (STR_SAME (name, d->meaningful))
+      struct symdef const *dk = tp->next->entry;
+
+      if (STR_SAME (name, dk->meaningful))
         {
-          if (STR_SAME (d->underlying, num))
+          if (STR_SAME (dk->underlying, num))
             return 0;
           else if (rebind)
             {
-              d->underlying = num;
-              return 1;
+              MAKEDEF ();
+              tp->next = prepend (d, tp->next->next, SINGLE);
+              goto ok;
             }
           else
             {
               RERR ("symbolic name %s already bound to %s",
-                    name, d->underlying);
+                    name, dk->underlying);
               return -1;
             }
         }
     }
-  d = FALLOC (struct symdef);
-  d->meaningful = name;
-  d->underlying = num;
-  wextend (tp, d, SINGLE);
+  MAKEDEF ();
+  extend (tp, d, SINGLE);
+ ok:
   ADMIN (assocs) = fake.next;
   return 1;
 }

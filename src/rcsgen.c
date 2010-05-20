@@ -334,9 +334,9 @@ getsstdin (char const *option, char const *name, char const *note)
 void
 format_assocs (FILE *out, char const *fmt)
 {
-  for (struct wlink *ls = ADMIN (assocs); ls; ls = ls->next)
+  for (struct link *ls = ADMIN (assocs); ls; ls = ls->next)
     {
-      struct symdef *d = ls->entry;
+      struct symdef const *d = ls->entry;
 
       aprintf (out, fmt, d->meaningful, d->underlying);
     }
