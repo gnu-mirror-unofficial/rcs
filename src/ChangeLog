@@ -1,5 +1,14 @@
 2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: fro_move
+
+	* b-fro.c (fro_bob): Delete func.
+	(fro_move): New func.
+	* b-fro.h (fro_bob): Convert from func decl to macro.
+	(fro_move): New func decl.
+
+2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move some funcs out of rcssyn.c to rcsedit.c.
 
 	* rcssyn.c (unexpected_EOF, initdiffcmd, badDiffOutput)

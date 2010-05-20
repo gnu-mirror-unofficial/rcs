@@ -48,7 +48,7 @@ extern struct fro *fro_open (char const *filename, char const *type,
 extern void fro_zclose (struct fro **p);
 extern void fro_close (struct fro *f);
 extern off_t fro_tello (struct fro *f);
-extern void fro_bob (struct fro *f);
+extern void fro_move (struct fro *f, off_t change);
 extern bool fro_try_getbyte (int *c, struct fro *f);
 extern void fro_must_getbyte (int *c, struct fro *f);
 extern void fro_get_prev_byte (int *c, struct fro *f);
@@ -57,6 +57,8 @@ extern void fro_spew_partial (FILE *to, struct fro *f, struct range *r);
 extern void fro_spew (struct fro *f, FILE *to);
 
 /* Idioms.  */
+
+#define fro_bob(f)  fro_move (f, 0)
 
 #define STDIO_P(f)  (RM_STDIO == (f)->rm)
 

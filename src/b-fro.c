@@ -219,16 +219,20 @@ fro_tello (struct fro *f)
 }
 
 void
-fro_bob (struct fro *f)
+fro_move (struct fro *f, off_t change)
+/* If ‘change’ is less than 0, seek relative to the current position.
+   Otherwise, seek to the absolute position.  */
 {
   switch (f->rm)
     {
     case RM_MMAP:
     case RM_MEM:
-      f->ptr = f->base;
+      f->ptr = change + (0 > change
+                         ? f->ptr
+                         : f->base);
       break;
     case RM_STDIO:
-      if (0 > fseeko (f->stream, 0, SEEK_SET))
+      if (0 > fseeko (f->stream, change, 0 > change ? SEEK_CUR : SEEK_SET))
         Ierror ();
       break;
     }
