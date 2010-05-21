@@ -174,8 +174,8 @@ putadelta (register struct hshentry const *node,
     aprintf (out, "%s commitid: %s", editscript ? ";" : "", node->commitid);
 
   afputc ('\n', out);
-  s = node->log.string;
-  if (!(n = node->log.size))
+  s = node->pretty_log.string;
+  if (!(n = node->pretty_log.size))
     {
       s = EMPTYLOG;
       n = sizeof (EMPTYLOG) - 1;
@@ -290,9 +290,9 @@ readdeltalog (void)
     SYNTAX_ERROR ("missing delta log");
   Delta = must_get_delta_num ();
   getkeystring (&TINY (log));
-  if (Delta->log.string)
+  if (Delta->pretty_log.string)
     SYNTAX_ERROR ("duplicate delta log");
-  Delta->log = savestring ();
+  Delta->pretty_log = savestring ();
 
   nextlex ();
   getkeystring (&TINY (text));
@@ -358,7 +358,7 @@ exttree (struct hshentry *root)
     return;
 
   root->selector = extractdelta (root);
-  root->log.string = NULL;
+  root->pretty_log.string = NULL;
   exttree (root->next);
 
   for (struct wlink *ls = root->branches; ls; ls = ls->next)

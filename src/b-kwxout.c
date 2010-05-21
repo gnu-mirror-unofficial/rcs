@@ -160,9 +160,9 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
     {
       char *leader = NULL;
 
-      sp = delta->log.string;
-      ls = delta->log.size;
-      if (looking_at (&TINY (ciklog), delta->log.string))
+      sp = delta->pretty_log.string;
+      ls = delta->pretty_log.size;
+      if (looking_at (&TINY (ciklog), delta->pretty_log.string))
         return;
       if (BE (version) < VERSION (5))
         {

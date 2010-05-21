@@ -265,7 +265,7 @@ struct hshentry
   char const *name;
 
   /* Log message requested at checkin.  */
-  struct cbuf log;
+  struct cbuf pretty_log;
 
   /* List of ‘struct hshentry’ (first revisions) on branches.  */
   struct wlink *branches;

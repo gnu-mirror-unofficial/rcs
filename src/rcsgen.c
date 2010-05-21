@@ -56,7 +56,7 @@ scandeltatext (struct editstuff *es, struct hshentry *delta,
       if (needlog && delta == nextdelta)
         {
           cb = savestring ();
-          delta->log = cleanlogmsg (cb.string, cb.size);
+          delta->pretty_log = cleanlogmsg (cb.string, cb.size);
         }
       else
         readstring ();
@@ -442,7 +442,7 @@ bool
 putdtext (struct hshentry const *delta, char const *srcname,
           FILE *fout, bool diffmt)
 /* Output a deltatext node with delta number ‘delta->num’, log message
-   ‘delta->log’, and text ‘srcname’ to ‘fout’.  Double up all ‘SDELIM’s
+   ‘delta->pretty_log’, and text ‘srcname’ to ‘fout’.  Double up all ‘SDELIM’s
    in both the log and the text.  Make sure the log message ends in '\n'.
    Return false on error.  If ‘diffmt’, also check that the text is valid
    "diff -n" output.  */
@@ -497,7 +497,7 @@ putdftext (struct hshentry const *delta, struct fro *finfile,
   aprintf (fout, DELNUMFORM, delta->num, TINYKS (log));
 
   /* Put log.  */
-  putstring (fout, true, delta->log, true);
+  putstring (fout, true, delta->pretty_log, true);
   aputc ('\n', fout);
   /* Put text.  */
   aprintf (fout, "%s\n%c", TINYKS (text), SDELIM);

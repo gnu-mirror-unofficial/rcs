@@ -1,3 +1,17 @@
+2010-05-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] In ‘struct hshentry’, rename member ‘log’ to ‘pretty_log’.
+
+	* base.h (struct hshentry): Rename member ‘log’ to ‘pretty_log’.
+	* b-kwxout.c (keyreplace): Update.
+	* ci.c (main): Likewise.
+	* rcs.c (scanlogtext, domessages): Likewise.
+	* rcsfcmp.c (rcsfcmp): Likewise.
+	* rcsgen.c (scandeltatext, putdtext, putdftext): Likewise.
+	* rcssyn.c (getdelta): Likewise.
+	* rlog.c (putadelta, readdeltalog, exttree): Likewise.
+	* yarrrr.c [TEST_FCMP] (yarrrr): Likewise.
+
 2010-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘struct link’ for ‘ADMIN (locks)’ list.

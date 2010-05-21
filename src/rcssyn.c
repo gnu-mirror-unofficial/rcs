@@ -229,7 +229,7 @@ getdelta (void)
   Delta->next = num = getdnum ();
   getsemi (&TINY (next));
   Delta->lockedby = NULL;
-  Delta->log.string = NULL;
+  Delta->pretty_log.string = NULL;
   Delta->selector = true;
   /* CVS adds ‘commitid’; roll with it.  */
   Delta->commitid = NULL;

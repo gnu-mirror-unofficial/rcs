@@ -984,7 +984,7 @@ main (int argc, char **argv)
           {
             diagnose ("initial revision: %s", newdelta.num);
             /* Get logmessage.  */
-            newdelta.log = getlogmsg ();
+            newdelta.pretty_log = getlogmsg ();
             putdftext (&newdelta, workptr, FLOW (rewr), false);
             REPO (stat).st_mode = workstat.st_mode;
             REPO (stat).st_nlink = 0;
@@ -1031,7 +1031,7 @@ main (int argc, char **argv)
                     gettree ();
                     if (! (workdelta = delta_from_ref (targetdelta->num)))
                       continue;
-                    workdelta->log = targetdelta->log;
+                    workdelta->pretty_log = targetdelta->pretty_log;
                     if (newdelta.state != default_state)
                       workdelta->state = newdelta.state;
                     if (lockthis < removedlock && removelock (workdelta) < 0)
@@ -1057,7 +1057,7 @@ main (int argc, char **argv)
 
                 diagnose ("new revision: %s; previous revision: %s",
                           newdelta.num, targetdelta->num);
-                newdelta.log = getlogmsg ();
+                newdelta.pretty_log = getlogmsg ();
                 if (STDIO_P (workptr))
                   {
                     bool badness = false;

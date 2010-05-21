@@ -317,17 +317,17 @@ scanlogtext (struct editstuff *es, struct hshentry *delta, bool edit)
       if (nextdelta == cuttail)
         {
           cb = savestring ();
-          if (!delta->log.string)
-            delta->log = cleanlogmsg (cb.string, cb.size);
+          if (!delta->pretty_log.string)
+            delta->pretty_log = cleanlogmsg (cb.string, cb.size);
         }
       else
         {
-          if (nextdelta->log.string && nextdelta->selector)
+          if (nextdelta->pretty_log.string && nextdelta->selector)
             {
               FLOW (to) = NULL;
               readstring ();
               FLOW (to) = FLOW (rewr);
-              putstring (FLOW (to), false, nextdelta->log, true);
+              putstring (FLOW (to), false, nextdelta->pretty_log, true);
               afputc (NEXT (c), FLOW (to));
             }
           else
@@ -911,7 +911,7 @@ domessages (void)
         {
           /* We can't check the old log -- it's much later in the file.
              We pessimistically assume that it changed.  */
-          target->log = um->message;
+          target->pretty_log = um->message;
           changed = true;
         }
     }

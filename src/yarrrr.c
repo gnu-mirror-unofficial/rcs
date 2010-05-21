@@ -111,8 +111,8 @@ yarrrr (int argc, char *argv[argc])
 
   ADMIN (log_lead).string = argv[1];
   ADMIN (log_lead).size = strlen (argv[1]);
-  delta.log.string = argv[2];
-  delta.log.size = strlen (argv[2]);
+  delta.pretty_log.string = argv[2];
+  delta.pretty_log.size = strlen (argv[2]);
   if (rcsfcmp (fro_open (argv[3], FOPEN_R_WORK, &st), &st, argv[4], &delta))
     printf ("files are the same\n");
   else

@@ -189,9 +189,9 @@ rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
                           int lncnt;
                           size_t ls, ccnt;
 
-                          sp = delta->log.string;
-                          ls = delta->log.size;
-                          if (!looking_at (&TINY (ciklog), delta->log.string))
+                          sp = delta->pretty_log.string;
+                          ls = delta->pretty_log.size;
+                          if (!looking_at (&TINY (ciklog), delta->pretty_log.string))
                             {
                               /* This log message was inserted.  Skip
                                  its header.  The number of newlines to
