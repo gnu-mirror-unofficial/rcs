@@ -638,11 +638,11 @@ struct repository
     char const *defbr;
     /* The default branch, or NULL.
        -- [rcs]main InitAdmin getadmin  */
-
-    struct hshentry *head;
-    /* The revision on the tip of the default branch.
-       -- addelta buildtree [rcs]main InitAdmin getadmin  */
   } admin;
+
+  struct hshentry *tip;
+  /* The revision on the tip of the default branch.
+     -- addelta buildtree [rcs]main InitAdmin getadmin  */
 
   int ndelt;
   /* Counter for deltas.

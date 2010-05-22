@@ -89,7 +89,7 @@ InitAdmin (void)
 {
   register char const *ext;
 
-  ADMIN (head) = NULL;
+  REPO (tip) = NULL;
   ADMIN (defbr) = NULL;
   ADMIN (allowed) = NULL;
   ADMIN (assocs) = NULL;

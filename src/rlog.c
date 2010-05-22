@@ -191,7 +191,7 @@ putrunk (void)
 {
   register struct hshentry const *ptr;
 
-  for (ptr = ADMIN (head); ptr; ptr = ptr->next)
+  for (ptr = REPO (tip); ptr; ptr = ptr->next)
     putadelta (ptr, ptr->next, true);
 }
 
@@ -297,7 +297,7 @@ readdeltalog (void)
   nextlex ();
   getkeystring (&TINY (text));
   Delta->insertlns = Delta->deletelns = 0;
-  if (Delta != ADMIN (head))
+  if (Delta != REPO (tip))
     getscript (Delta);
   else
     readstring ();
@@ -734,12 +734,12 @@ getnumericrev (void)
         }
     }
   /* Now take care of ‘branchflag’.  */
-  if (branchflag && (ADMIN (defbr) || ADMIN (head)))
+  if (branchflag && (ADMIN (defbr) || REPO (tip)))
     {
       rr = FALLOC (struct revrange);
       rr->beg = rr->end = ADMIN (defbr)
         ? ADMIN (defbr)
-        : TAKE (1, ADMIN (head)->num);
+        : TAKE (1, REPO (tip)->num);
       rr->nfield = countnumflds (rr->beg);
       PUSH (rr, Revlst);
     }
@@ -977,8 +977,8 @@ main (int argc, char **argv)
            administrative information.  Could use ‘getfullRCSname’
            here, but that is very slow.  */
         aprintf (out, headFormat, REPO (filename), MANI (filename),
-                 ADMIN (head) ? " " : "",
-                 ADMIN (head) ? ADMIN (head)->num : "",
+                 REPO (tip) ? " " : "",
+                 REPO (tip) ? REPO (tip)->num : "",
                  ADMIN (defbr) ? " " : "", ADMIN (defbr) ? ADMIN (defbr) : "",
                  BE (strictly_locking) ? " strict" : "");
         for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
@@ -1018,9 +1018,9 @@ main (int argc, char **argv)
 
         revno = 0;
 
-        if (ADMIN (head) && selectflag & descflag)
+        if (REPO (tip) && selectflag & descflag)
           {
-            exttree (ADMIN (head));
+            exttree (REPO (tip));
 
             /* Get most recently date of the dates pointed by ‘duelst’.  */
             for (struct link *ls = duelst; ls; ls = ls->next)
@@ -1032,10 +1032,10 @@ main (int argc, char **argv)
                 *r = *incomplete;
                 KSTRCPY (r->beg, "0.0.0.0.0.0");
                 ls->entry = r;
-                recentdate (ADMIN (head), r);
+                recentdate (REPO (tip), r);
               }
 
-            revno = extdate (ADMIN (head));
+            revno = extdate (REPO (tip));
 
             aprintf (out, ";\tselected revisions: %d", revno);
           }
@@ -1055,7 +1055,7 @@ main (int argc, char **argv)
               while (readdeltalog () != delta->next)
                 continue;
             putrunk ();
-            putree (ADMIN (head));
+            putree (REPO (tip));
           }
         aputs (equal_line, out);
       }

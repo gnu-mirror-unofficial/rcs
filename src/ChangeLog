@@ -1,3 +1,21 @@
+2010-05-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Rename ‘ADMIN (head)’ to ‘REPO (tip)’.
+
+	* base.h (struct repository): Add member ‘tip’;
+	in sub-‘struct admin’, delete member ‘head’.
+	* ci.c (addelta, main): Update refs.
+	* rcs.c (getstates, breaklock, dolocks, buildtree, main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsedit.c (dorewrite): Likewise.
+	* rcsfnms.c (InitAdmin): Likewise.
+	* rcsgen.c (putadmin): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rcsrev.c (genrevs, fully_numeric, tiprev): Likewise.
+	* rcssyn.c (getadmin): Likewise.
+	* rlog.c (putrunk, readdeltalog, getnumericrev, main): Likewise.
+
 2010-05-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] In ‘struct hshentry’, rename member ‘log’ to ‘pretty_log’.

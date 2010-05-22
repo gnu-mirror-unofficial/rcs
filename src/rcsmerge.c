@@ -172,17 +172,17 @@ main (int argc, char **argv)
           /* Read in the delta tree.  */
           gettree ();
 
-          if (!ADMIN (head))
+          if (!REPO (tip))
             RFATAL ("no revisions present");
 
           if (!*rev[1])
-            rev[1] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
+            rev[1] = ADMIN (defbr) ? ADMIN (defbr) : REPO (tip)->num;
           if (fully_numeric (&numericrev, rev[1], workptr)
               && (target = delta_from_ref (numericrev.string)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
-                rev[2] = ADMIN (defbr) ? ADMIN (defbr) : ADMIN (head)->num;
+                rev[2] = ADMIN (defbr) ? ADMIN (defbr) : REPO (tip)->num;
               if (fully_numeric (&numericrev, rev[2], workptr)
                   && (target = delta_from_ref (numericrev.string)))
                 {

@@ -229,7 +229,7 @@ getstates (struct link **tp, char *sp)
 
   if (c == '\0')
     {
-      /* Change state of default branch or ‘ADMIN (head)’.  */
+      /* Change state of default branch or ‘REPO (tip)’.  */
       chgheadstate = true;
       headstate = temp;
       return;
@@ -516,7 +516,7 @@ breaklock (struct hshentry const *delta)
 static struct hshentry *
 searchcutpt (char const *object, int length, struct hshentries *store)
 /* Search store and return entry with number being ‘object’.
-   ‘cuttail’ is 0, if the entry is ‘ADMIN (head)’; otherwise, it
+   ‘cuttail’ is 0, if the entry is ‘REPO (tip)’; otherwise, it
    is the entry point to the one with number being ‘object’.  */
 {
   cuthead = NULL;
@@ -822,7 +822,7 @@ dolocks (void)
 /* Remove lock for caller or first lock if ‘unlockcaller’ is set;
    remove locks which are stored in ‘rmvlocklst’,
    add new locks which are stored in ‘newlocklst’,
-   add lock for ‘ADMIN (defbr)’ or ‘ADMIN (head)’ if ‘lockhead’ is set.  */
+   add lock for ‘ADMIN (defbr)’ or ‘REPO (tip)’ if ‘lockhead’ is set.  */
 {
   struct link const *lockpt;
   struct hshentry *target;
@@ -831,7 +831,7 @@ dolocks (void)
   if (unlockcaller)
     {
       /* Find lock for caller.  */
-      if (ADMIN (head))
+      if (REPO (tip))
         {
           if (ADMIN (locks))
             {
@@ -888,8 +888,8 @@ dolocks (void)
       /* Lock default branch or head.  */
       if (ADMIN (defbr))
         changed |= setlock (ADMIN (defbr));
-      else if (ADMIN (head))
-        changed |= setlock (ADMIN (head)->num);
+      else if (REPO (tip))
+        changed |= setlock (REPO (tip)->num);
       else
         RWARN ("can't lock an empty tree");
     }
@@ -1043,7 +1043,7 @@ buildtree (void)
               return;
             }
         }
-      ADMIN (head) = cuttail;
+      REPO (tip) = cuttail;
     }
   return;
 }
@@ -1454,11 +1454,11 @@ main (int argc, char **argv)
             /* Change state of default branch or head.  */
             if (!ADMIN (defbr))
               {
-                if (!ADMIN (head))
+                if (!REPO (tip))
                   RWARN ("can't change states in an empty tree");
-                else if (STR_DIFF (ADMIN (head)->state, headstate))
+                else if (STR_DIFF (REPO (tip)->state, headstate))
                   {
-                    ADMIN (head)->state = headstate;
+                    REPO (tip)->state = headstate;
                     changed = true;
                   }
               }
@@ -1487,11 +1487,11 @@ main (int argc, char **argv)
           continue;
 
         putadmin ();
-        if (ADMIN (head))
-          puttree (ADMIN (head), FLOW (rewr));
+        if (REPO (tip))
+          puttree (REPO (tip), FLOW (rewr));
         putdesc (&newdesc, textflag, textfile);
 
-        /* Don't conditionalize on non-NULL ‘ADMIN (head)’; that prevents
+        /* Don't conditionalize on non-NULL ‘REPO (tip)’; that prevents
            ‘scanlogtext’ from advancing the input pointer to EOF, in
            the process "marking" the intervening log messages to be
            discarded later.  The result is bogus log messages.  See

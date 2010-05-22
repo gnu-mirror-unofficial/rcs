@@ -366,7 +366,7 @@ putadmin (void)
     }
 
   aprintf (fout, "%s\t%s;\n", TINYKS (head),
-           ADMIN (head) ? ADMIN (head)->num : "");
+           REPO (tip) ? REPO (tip)->num : "");
   if (ADMIN (defbr) && VERSION (4) <= BE (version))
     aprintf (fout, "%s\t%s;\n", TINYKS (branch), ADMIN (defbr));
 

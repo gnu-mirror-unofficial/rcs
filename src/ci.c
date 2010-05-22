@@ -272,7 +272,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
 static int
 addelta (struct hshentries **tp_deltas)
 /* Append a delta to the delta tree, whose number is given by
-   ‘newdelnum’.  Update ‘ADMIN (head)’, ‘newdelnum’, ‘newdelnumlength’,
+   ‘newdelnum’.  Update ‘REPO (tip)’, ‘newdelnum’, ‘newdelnumlength’,
    and the links in newdelta.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.  */
 {
@@ -303,7 +303,7 @@ addelta (struct hshentries **tp_deltas)
           return -1;
         }
       /* (‘newdnumlength’ == 2 is OK.)  */
-      ADMIN (head) = &newdelta;
+      REPO (tip) = &newdelta;
       newdelta.next = NULL;
       return 0;
     }
@@ -321,11 +321,11 @@ addelta (struct hshentries **tp_deltas)
           /* Found an old lock.  Check whether locked revision exists.  */
           if (!gr_revno (targetdelta->num, tp_deltas))
             return -1;
-          if (targetdelta == ADMIN (head))
+          if (targetdelta == REPO (tip))
             {
               /* Make new head.  */
-              newdelta.next = ADMIN (head);
-              ADMIN (head) = &newdelta;
+              newdelta.next = REPO (tip);
+              REPO (tip) = &newdelta;
             }
           else if (!targetdelta->next && countnumflds (targetdelta->num) > 2)
             {
@@ -354,7 +354,7 @@ addelta (struct hshentries **tp_deltas)
             JAM (&newdelnum, ADMIN (defbr));
           else
             {
-              incnum (ADMIN (head)->num, &newdelnum);
+              incnum (REPO (tip)->num, &newdelnum);
             }
           newdnumlength = countnumflds (newdelnum.string);
           /* Now fall into next statement.  */
@@ -366,24 +366,24 @@ addelta (struct hshentries **tp_deltas)
       if (newdnumlength == 1)
         {
           /* Make a two-field number out of it.  */
-          if (cmpnumfld (newdelnum.string, ADMIN (head)->num, 1) == 0)
-            incnum (ADMIN (head)->num, &newdelnum);
+          if (cmpnumfld (newdelnum.string, REPO (tip)->num, 1) == 0)
+            incnum (REPO (tip)->num, &newdelnum);
           else
             ADD (&newdelnum, ".1");
         }
-      if (cmpnum (newdelnum.string, ADMIN (head)->num) <= 0)
+      if (cmpnum (newdelnum.string, REPO (tip)->num) <= 0)
         {
           RERR ("revision %s too low; must be higher than %s",
-                newdelnum.string, ADMIN (head)->num);
+                newdelnum.string, REPO (tip)->num);
           return -1;
         }
-      targetdelta = ADMIN (head);
-      if (0 <= (removedlock = removelock (ADMIN (head))))
+      targetdelta = REPO (tip);
+      if (0 <= (removedlock = removelock (REPO (tip))))
         {
-          if (!gr_revno (ADMIN (head)->num, tp_deltas))
+          if (!gr_revno (REPO (tip)->num, tp_deltas))
             return -1;
-          newdelta.next = ADMIN (head);
-          ADMIN (head) = &newdelta;
+          newdelta.next = REPO (tip);
+          REPO (tip) = &newdelta;
         }
       return removedlock;
     }
@@ -846,7 +846,7 @@ main (int argc, char **argv)
                 RERR ("already exists");
                 continue;
               }
-            rcsinitflag = !ADMIN (head);
+            rcsinitflag = !REPO (tip);
           }
 
         /* ‘REPO (filename)’ contains the name of the RCS file,
@@ -971,7 +971,7 @@ main (int argc, char **argv)
           continue;
 
         putadmin ();
-        puttree (ADMIN (head), FLOW (rewr));
+        puttree (REPO (tip), FLOW (rewr));
         putdesc (&newdesc, false, textfile);
 
         changework = BE (kws) < MIN_UNCHANGED_EXPAND;
@@ -993,7 +993,7 @@ main (int argc, char **argv)
         else
           {
             diffname = maketemp (0);
-            newhead = ADMIN (head) == &newdelta;
+            newhead = REPO (tip) == &newdelta;
             if (!newhead)
               FLOW (to) = FLOW (rewr);
             expname = buildrevision (deltas, targetdelta, NULL, false);

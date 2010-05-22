@@ -653,7 +653,7 @@ main (int argc, char **argv)
         /* Read in the delta tree.  */
         gettree ();
 
-        if (!ADMIN (head))
+        if (!REPO (tip))
           {
             /* No revisions; create empty file.  */
             diagnose ("no revisions present; generating empty revision 0.0");

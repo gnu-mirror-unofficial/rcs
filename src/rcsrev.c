@@ -456,7 +456,7 @@ genrevs (char const *revno, char const *date, char const *author,
   char const *branchnum;
   char datebuf[datesize + zonelenmax];
 
-  if (!(d = ADMIN (head)))
+  if (!(d = REPO (tip)))
     {
       RERR ("RCS file empty");
       goto norev;
@@ -730,8 +730,8 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
 
                   if (ADMIN (defbr))
                     b = ADMIN (defbr);
-                  else if (ADMIN (head))
-                    b = ADMIN (head)->num;
+                  else if (REPO (tip))
+                    b = REPO (tip)->num;
                   else
                     break;
                   OK (); FRESH ();
@@ -820,7 +820,7 @@ tiprev (void)
 {
   return ADMIN (defbr)
     ? branchtip (ADMIN (defbr))
-    : ADMIN (head) ? ADMIN (head)->num : NULL;
+    : REPO (tip) ? REPO (tip)->num : NULL;
 }
 
 /* rcsrev.c ends here */

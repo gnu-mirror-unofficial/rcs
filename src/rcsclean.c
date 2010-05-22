@@ -268,7 +268,7 @@ main (int argc, char **argv)
               continue;
             p = numeric.string;
           }
-        else if (ADMIN (head))
+        else if (REPO (tip))
           switch (unlockflag ? findlock (false, &delta) : 0)
             {
             default:

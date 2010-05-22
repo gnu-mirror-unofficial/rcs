@@ -72,7 +72,7 @@ getadmin (void)
   REPO (ndelt) = 0;
 
   getkey (&TINY (head));
-  ADMIN (head) = getdnum ();
+  REPO (tip) = getdnum ();
   getsemi (&TINY (head));
 
   ADMIN (defbr) = NULL;
