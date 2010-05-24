@@ -261,6 +261,9 @@ struct hshentry
   /* State of revision (see ‘DEFAULTSTATE’).  */
   char const *state;
 
+  /* The ‘log’ and ‘text’ fields.  */
+  struct atat *log, *text;
+
   /* Name (if any) by which retrieved.  */
   char const *name;
 
@@ -275,10 +278,6 @@ struct hshentry
 
   /* Next revision on same branch.  */
   struct hshentry *next;
-
-  /* Lines inserted and deleted (computed by rlog).  */
-  long insertlns;
-  long deletelns;
 
   /* True if selected, false if deleted.  */
   bool selector;
@@ -445,10 +444,6 @@ struct behavior
   bool inclusive_of_Locker_in_Id_val;
   /* If set, append locker val when expanding ‘Id’ and locking.  */
 
-  bool receptive_to_next_hash_key;
-  /* If set, next suitable lexeme will be entered into the
-     symbol table -- nextlex.  Handle with care.  */
-
   bool strictly_locking;
   /* When set:
      - don't inhibit error when removing self-lock -- removelock
@@ -483,7 +478,7 @@ struct behavior
   int kws;
   /* The keyword substitution (aka "expansion") mode, or -1 (mu).
      FIXME: Unify with ‘enum kwsub’.
-     -- [co]main [rcs]main [rcsclean]main InitAdmin getadmin  */
+     -- [co]main [rcs]main [rcsclean]main InitAdmin  */
 
   char const *pe;
   /* Possible endings, a slash-separated list of filename-end
@@ -520,7 +515,7 @@ struct behavior
 
   bool Oerrloop;
   /* True means ‘Oerror’ was called already.
-     -- Oerror Lexinit  */
+     -- Oerror  */
 
   char *cwd;
   /* The current working directory.
@@ -560,49 +555,61 @@ struct manifestation
   } prev;
 };
 
-/* The parse state is used when reading the RCS file.  */
-struct parse_state
+/* The RCS file is the repository of revisions, plus metadata.
+   This is represented by two structures: ‘repo’ is allocated and
+   populated by the parser, while ‘repository’ is library-wide.
+   (It remains to be seen which will swallow the other, if ever.)
+   All lists may be NULL, which means empty.  */
+struct repo
 {
-  void *tokbuf;
-  /* Space for buffering tokens.
-     -- Lexinit nextlex  */
+  char const *head;
+  /* Revision number of the tip of the default branch, or NULL.  */
 
-  struct next
-  {
-    enum tokens tok;
-    /* Character class and/or token code.
-       -- nextlex getphrases  */
+  char const *branch;
+  /* Default branch number, or NULL.  */
 
-    int c;
-    /* Next input character, parallel with ‘tok’.
-       -- copystring enterstring editstring expandline
-       -- nextlex eoflex getphrases readstring printstring savestring
-       -- getdiffcmd
-       -- getscript
-       (all to restore stream at end-of-string).  */
+  size_t access_count;
+  struct link *access;
+  /* List of usernames who may write the RCS file.  */
 
-    char const *str;
-    /* Hold the next ID or NUM value.
-       -- lookup nextlex getphrases  */
+  size_t symbols_count;
+  struct link *symbols;
+  /* List of symbolic name definitions (struct symdef).  */
 
-    struct hshentry *hsh;
-    /* Pointer to next hash entry.
-       -- lookup  */
-  } next;
+  size_t locks_count;
+  struct link *locks;
+  /* List of locks (struct rcslock).  */
 
-  struct wlink **hshtab;
-  /* Hash table.
-     -- Lexinit lookup  */
+  bool strict;
+  /* True if strict locking is to be done.  */
 
-  long lno;
-  /* Current line-number of input.  FIXME: Make unsigned.
-     -- copystring enterstring editstring expandline
-     -- Lexinit nextlex eoflex getphrases readstring printstring savestring
-     -- getdiffcmd
-     -- getscript  */
+  struct atat *comment;
+  /* The pre-v5 "comment leader", or NULL.  */
+
+  int expand;
+  /* The keyword substitution mode (enum kwsub), or -1.  */
+
+  size_t deltas_count;
+  struct wlink *deltas;
+  /* List of deltas (struct hshentry).  */
+
+  struct atat *desc;
+  /* Description of the RCS file.  */
+
+  off_t neck;
+  /* Parser internal; transitional.
+     (The previous parser design did input and output in one pass, with
+     the (input) file position an implicit state.  The current design
+     does a full scan on input, remembering some key file positions (in
+     this case, the position immediately after the ‘desc’ keyword token;
+     see also ‘FIXUP_OLD’) and seeking there during output.  Over time
+     we plan to make the output routines not rely on file position.)  */
+
+  struct lockdef *lockdefs;
+  struct hash *ht;
+  /* Parser internal.  */
 };
 
-/* The RCS file is the repository of revisions, plus metadata.  */
 struct repository
 {
   char const *filename;
@@ -617,36 +624,17 @@ struct repository
   /* Stat info, possibly munged.
      -- [ci]main [rcs]main fro_open (via rcs{read,write}open)  */
 
-  struct admin
-  {
-    struct link *allowed;
-    /* List of usernames who may modify the repo.
-       -- InitAdmin doaccess [rcs]main  */
-
-    struct link *assocs;
-    /* List of ‘struct symdef’ (symbolic names).
-       -- addsymbol InitAdmin  */
-
-    struct link *locks;
-    /* List of ‘struct rcslock’ (locks).
-       -- rmlock addlock InitAdmin  */
-
-    char const *defbr;
-    /* The default branch, or NULL.
-       -- [rcs]main InitAdmin getadmin  */
-  } admin;
+  struct repo *r;
+  /* The result of parsing ‘filename’.
+     -- pairnames  */
 
   struct hshentry *tip;
   /* The revision on the tip of the default branch.
-     -- addelta buildtree [rcs]main InitAdmin getadmin  */
+     -- addelta buildtree [rcs]main InitAdmin  */
 
   struct cbuf log_lead;
   /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
-     -- [rcs]main InitAdmin getadmin  */
-
-  int ndelt;
-  /* Counter for deltas.
-     -- getadmin  */
+     -- [rcs]main InitAdmin  */
 };
 
 /* Various data streams flow in and out of RCS programs.  */
@@ -676,7 +664,7 @@ struct flow
   bool erroneousp;
   /* True means some (parsing/merging) error was encountered.
      The program should clean up temporary files and exit.
-     -- buildjoin Lexinit syserror generic_error generic_fatal  */
+     -- buildjoin syserror generic_error generic_fatal  */
 };
 
 /* The top of the structure tree (NB: does not include ‘program’).  */
@@ -684,7 +672,6 @@ struct top
 {
   struct behavior behavior;
   struct manifestation manifestation;
-  struct parse_state parse_state;
   struct repository repository;
   struct flow flow;
 };
@@ -697,10 +684,8 @@ extern struct top *top;
 #define BE(quality)   (top->behavior. quality)
 #define MANI(member)  (top->manifestation. member)
 #define PREV(which)   (MANI (prev). which)
-#define LEX(member)   (top->parse_state. member)
-#define NEXT(which)   (LEX (next). which)
 #define REPO(member)  (top->repository. member)
-#define ADMIN(part)   (REPO (admin). part)
+#define GROK(member)  (REPO (r)-> member)
 #define FLOW(member)  (top->flow. member)
 
 /* b-anchor */
@@ -744,9 +729,10 @@ void openfcopy (FILE *f);
 void finishedit (struct editstuff *es, struct hshentry const * delta,
                  FILE *outfile, bool done);
 void snapshotedit (struct editstuff *es, FILE *f);
-void copystring (struct editstuff *es);
-void enterstring (struct editstuff *es);
-void editstring (struct editstuff *es, struct hshentry const *delta);
+void copystring (struct editstuff *es, struct atat *atat);
+void enterstring (struct editstuff *es, struct atat *atat);
+void editstring (struct editstuff *es, struct atat const *script,
+                 struct hshentry const *delta);
 struct fro *rcswriteopen (struct maybe *m);
 int chnamemod (FILE **fromp, char const *from, char const *to,
                int set_mode, mode_t mode, time_t mtime);
@@ -788,6 +774,7 @@ bool ttystdin (void);
 int getcstdin (void);
 bool yesorno (bool default_answer, char const *question, ...)
   printf_string (2, 3);
+void write_desc_maybe (FILE *to);
 void putdesc (struct cbuf *cb, bool textflag, char *textfile);
 struct cbuf getsstdin (char const *option, char const *name, char const *note);
 void format_assocs (FILE *out, char const *fmt);
@@ -801,21 +788,6 @@ void putdftext (struct hshentry const *delta, struct fro *finfile,
 
 /* rcskeep */
 bool getoldkeys (struct fro *);
-
-/* rcslex */
-void Lexinit (void);
-void nextlex (void);
-bool eoflex (void);
-bool getlex (enum tokens token);
-bool getkeyopt (struct tinysym const *key);
-void getkey (struct tinysym const *key);
-void getkeystring (struct tinysym const *key);
-char const *getid (void);
-struct hshentry *getnum (void);
-struct hshentry *must_get_delta_num (void);
-void readstring (void);
-void printstring (void);
-struct cbuf savestring (void);
 
 /* rcsmap */
 extern const enum tokens const ctab[];
@@ -840,11 +812,6 @@ bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
 char const *namedrev (char const *name, struct hshentry *delta);
 char const *tiprev (void);
 
-/* rcssyn */
-void getadmin (void);
-void gettree (void);
-void getdesc (bool);
-
 /* rcstime */
 void time2date (time_t unixtime, char date[datesize]);
 void str2date (char const *source, char target[datesize]);
@@ -861,7 +828,6 @@ struct cbuf minus_p (char const *xrev, char const *rev);
 void parse_revpairs (char option, char *arg,
                      void (*put) (char const *b, char const *e, bool sawsep));
 void ffree (void);
-void free_NEXT_str (void);
 char *str_save (char const *s);
 char *cgetenv (char const *name);
 char const *getusername (bool suspicious);

@@ -23,6 +23,7 @@
 #include "base.h"
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>                     /* strchr */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -357,6 +358,86 @@ fro_spew (struct fro *f, FILE *to)
     };
 
   fro_spew_partial (to, f, &finish);
+}
+
+struct cbuf
+string_from_atat (struct divvy *space, struct atat const *atat)
+{
+  struct fro *f = atat->from;
+  size_t count = atat->count;
+  struct range r[count];
+  struct cbuf cb;
+  size_t i;
+
+  for (size_t i = 0; i < count; i++)
+    {
+      r[i].beg = 1 + (i ? atat->holes[i - 1] : atat->beg);
+      r[i].end = atat->holes[i];
+    }
+  switch (f->rm)
+    {
+    case RM_MMAP:
+    case RM_MEM:
+      for (i = 0; i < count; i++)
+        {
+          char const *beg = f->base + r[i].beg;
+          off_t len = r[i].end - r[i].beg;
+
+          while (SIZE_MAX < len)
+            {
+              accumulate_range (space, beg, beg + SIZE_MAX);
+              len -= SIZE_MAX;
+              beg += SIZE_MAX;
+            }
+          accumulate_range (space, beg, beg + len);
+        }
+      break;
+    case RM_STDIO:
+      {
+        FILE *stream = f->stream;
+        off_t was = ftello (stream);
+
+        for (i = 0; i < count; i++)
+          {
+            off_t pos = r[i].beg;
+
+            fseeko (stream, pos, SEEK_SET);
+            while (pos++ < r[i].end)
+              accumulate_byte (space, getc (f->stream));
+          }
+        fseeko (stream, was, SEEK_SET);
+      }
+      break;
+    }
+  cb.string = finish_string (space, &cb.size);
+  return cb;
+}
+
+void
+atat_put (FILE *to, struct atat const *atat)
+{
+  struct range range =
+    {
+      .beg = atat->beg,
+      .end = ATAT_TEXT_END (atat)
+    };
+
+  fro_spew_partial (to, atat->from, &range);
+}
+
+void
+atat_display (FILE *to, struct atat const *atat)
+{
+  for (size_t i = 0; i < atat->count; i++)
+    {
+      struct range range =
+        {
+          .beg = 1 + (i ? atat->holes[i - 1] : atat->beg),
+          .end = atat->holes[i]
+        };
+
+      fro_spew_partial (to, atat->from, &range);
+    }
 }
 
 /* b-fro.c ends here */

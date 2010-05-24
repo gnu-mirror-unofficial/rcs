@@ -53,6 +53,9 @@ struct editstuff
   char const *filename;
   /* Edit file stream and filename.  */
 
+  size_t script_lno;
+  /* Line number of the current edit script (for error reporting).  */
+
   long lcount;
   /* Edit line counter; #lines before cursor.  */
   long corr;
@@ -141,6 +144,9 @@ un_link (char const *s)
   return rv;
 }
 
+#undef SYNTAX_ERROR
+#define SYNTAX_ERROR(...)  fatal_syntax (es->script_lno, __VA_ARGS__)
+
 #define EDIT_SCRIPT_SHORT()  \
   SYNTAX_ERROR ("edit script ends prematurely")
 
@@ -220,12 +226,21 @@ snapshotedit_fast (struct editstuff *es, FILE *f)
     snapshotline (f, *p++);
 }
 
-static void
-finisheditline (struct expctx *ctx, char *l)
+struct finctx
 {
+  struct expctx ctx;
+  size_t script_lno;
+};
+
+static void
+finisheditline (struct finctx *finctx, char *l)
+{
+  struct expctx *ctx = &finctx->ctx;
+
   ctx->from->ptr = l;
   if (expandline (ctx) < 0)
-    PFATAL ("finisheditline internal error");
+    PFATAL ("%s:%u: error expanding keywords while applying delta %s",
+            REPO (filename), finctx->script_lno, ctx->delta->num);
 }
 
 static void
@@ -246,12 +261,16 @@ finishedit_fast (struct editstuff *es, struct hshentry const *delta,
           register char **p, **lim, **l = es->line;
           register struct fro *fin = FLOW (from);
           char *here = fin->ptr;
-          struct expctx ctx = EXPCTX_1OUT (outfile, fin, true, true);
+          struct finctx finctx =
+            {
+              .ctx = EXPCTX_1OUT (outfile, fin, true, true),
+              .script_lno = es->script_lno
+            };
 
           for (p = l, lim = l + es->gap; p < lim;)
-            finisheditline (&ctx, *p++);
+            finisheditline (&finctx, *p++);
           for (p += es->gapsize, lim = l + es->lim; p < lim;)
-            finisheditline (&ctx, *p++);
+            finisheditline (&finctx, *p++);
           fin->ptr = here;
         }
     }
@@ -415,52 +434,22 @@ copylines (struct editstuff *es, register long upto, struct hshentry const *delt
 }
 
 void
-copystring (struct editstuff *es)
+copystring (struct editstuff *es, struct atat *atat)
 /* Copy a string terminated with a single ‘SDELIM’ from ‘FLOW (from)’ to
    ‘FLOW (res)’, replacing all double ‘SDELIM’ with a single ‘SDELIM’.  If
    ‘FLOW (to)’ is non-NULL, the string also copied unchanged to ‘FLOW (to)’.
    ‘es->lcount’ is incremented by the number of lines copied.  Assumption:
    next character read is first string character.  */
 {
-  int c;
-  register FILE *frew, *fcop;
-  register bool amidline;
-  register struct fro *fin;
-
-  fin = FLOW (from);
-  frew = FLOW (to);
-  fcop = FLOW (res);
-  amidline = false;
-  for (;;)
-    {
-      TEECHAR ();
-      switch (c)
-        {
-        case '\n':
-          ++es->lcount;
-          ++LEX (lno);
-          amidline = false;
-          break;
-        case SDELIM:
-          TEECHAR ();
-          if (c != SDELIM)
-            {
-              /* End of string.  */
-              NEXT (c) = c;
-              es->lcount += amidline;
-              return;
-            }
-          /* fall into */
-        default:
-          amidline = true;
-          break;
-        }
-      aputc (c, fcop);
-    }
+  atat_display (FLOW (res), atat);
+  if (FLOW (to))
+    atat_put (FLOW (to), atat);
+  es->lcount += atat->line_count;
+  FIXUP_OLD (atat);
 }
 
 void
-enterstring (struct editstuff *es)
+enterstring (struct editstuff *es, struct atat *atat)
 /* Like ‘copystring’, except the string is
    put into the ‘edit’ data structure.  */
 {
@@ -472,7 +461,7 @@ enterstring (struct editstuff *es)
       FLOW (result) = maketemp (1);
       if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
         fatal_sys (FLOW (result));
-      copystring (es);
+      copystring (es, atat);
     }
   else
     {
@@ -489,6 +478,9 @@ enterstring (struct editstuff *es)
       fin = FLOW (from);
       fro_trundling (false, fin);
       frew = FLOW (to);
+      GETCHAR (c, fin);
+      if (frew)
+        afputc (c, frew);
       amidline = false;
       for (;;)
         {
@@ -500,7 +492,6 @@ enterstring (struct editstuff *es)
             {
             case '\n':
               ++e;
-              ++LEX (lno);
               amidline = false;
               break;
             case SDELIM:
@@ -508,7 +499,6 @@ enterstring (struct editstuff *es)
               if (c != SDELIM)
                 {
                   /* End of string.  */
-                  NEXT (c) = c;
                   es->lcount = e + amidline;
                   es->corr = 0;
                   return;
@@ -525,8 +515,9 @@ enterstring (struct editstuff *es)
 }
 
 void
-editstring (struct editstuff *es, struct hshentry const *delta)
-/* Read an edit script from ‘FLOW (from)’ and applies it to the edit file.
+editstring (struct editstuff *es, struct atat const *script,
+            struct hshentry const *delta)
+/* Read an edit script from ‘FLOW (from)’ and apply it to the edit file.
    | -- ‘(STDIO_P (FLOW (from)))’ --
    | The result is written to ‘FLOW (res)’.
    | If ‘delta’, keyword expansion is performed simultaneously.
@@ -537,7 +528,7 @@ editstring (struct editstuff *es, struct hshentry const *delta)
    to ‘FLOW (to)’.  Assumes that all these files are open.
    ‘FLOW (result)’ is the name of the file that goes with ‘FLOW (res)’.
    Assumes the next input character from ‘FLOW (from)’ is the first
-   character of the edit script.  Resets ‘NEXT (c)’ on exit.  */
+   character of the edit script.  */
 {
   int ed;                               /* editor command */
   int c;
@@ -550,10 +541,14 @@ editstring (struct editstuff *es, struct hshentry const *delta)
   register long j = 0;
   struct diffcmd dc;
 
+  es->script_lno = script->lno;
   es->lcount += es->corr;
   es->corr = 0;                         /* correct line number */
   frew = FLOW (to);
   fin = FLOW (from);
+  GETCHAR (c, fin);
+  if (frew)
+    afputc (c, frew);
   initdiffcmd (&dc);
   while (0 <= (ed = getdiffcmd (fin, true, frew, &dc)))
     if (STDIO_P (fin)
@@ -587,6 +582,7 @@ editstring (struct editstuff *es, struct hshentry const *delta)
               }
             while (--i);
           }
+        es->script_lno++;
       }
     else
       {
@@ -633,7 +629,6 @@ editstring (struct editstuff *es, struct hshentry const *delta)
                           {
                             if (--i)
                               EDIT_SCRIPT_SHORT ();
-                            NEXT (c) = c;
                             return;
                           }
                       }
@@ -642,10 +637,10 @@ editstring (struct editstuff *es, struct hshentry const *delta)
                     if (c == '\n')
                       break;
                   }
-                ++LEX (lno);
               }
             while (--i);
           }
+        es->script_lno += 1 + dc.nlines;
       }
 }
 
@@ -997,7 +992,7 @@ findlock (bool delete, struct hshentry **target)
   struct rcslock const *rl;
   struct link fake, *tp, *found = NULL;
 
-  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
+  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
     {
       rl = tp->next->entry;
       if (STR_SAME (getcaller (), rl->login))
@@ -1018,7 +1013,7 @@ findlock (bool delete, struct hshentry **target)
   if (delete)
     {
       found->next = found->next->next;
-      ADMIN (locks) = fake.next;
+      GROK (locks) = fake.next;
       rl->delta->lockedby = NULL;
     }
   return 1;
@@ -1033,7 +1028,7 @@ addlock (struct hshentry *delta, bool verbose)
 {
   register struct rcslock *rl;
 
-  for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
+  for (struct link *ls = GROK (locks); ls; ls = ls->next)
     {
       struct rcslock const *rlk = ls->entry;
 
@@ -1053,7 +1048,7 @@ addlock (struct hshentry *delta, bool verbose)
   rl = FALLOC (struct rcslock);
   delta->lockedby = rl->login = getcaller ();
   rl->delta = delta;
-  ADMIN (locks) = prepend (rl, ADMIN (locks), SINGLE);
+  GROK (locks) = prepend (rl, GROK (locks), SINGLE);
   return 1;
 }
 
@@ -1072,7 +1067,7 @@ addsymbol (char const *num, char const *name, bool rebind)
   d->meaningful = name;                         \
   d->underlying = num
 
-  fake.next = ADMIN (assocs);
+  fake.next = GROK (symbols);
   for (tp = &fake; tp->next; tp = tp->next)
     {
       struct symdef const *dk = tp->next->entry;
@@ -1098,7 +1093,7 @@ addsymbol (char const *num, char const *name, bool rebind)
   MAKEDEF ();
   extend (tp, d, SINGLE);
  ok:
-  ADMIN (assocs) = fake.next;
+  GROK (symbols) = fake.next;
   return 1;
 }
 
@@ -1119,11 +1114,11 @@ checkaccesslist (void)
    file, the access list is empty, or caller is on the access list.
    Otherwise, print an error message and return false.  */
 {
-  if (!ADMIN (allowed) || myself (REPO (stat).st_uid)
+  if (!GROK (access) || myself (REPO (stat).st_uid)
       || STR_SAME (getcaller (), "root"))
     return true;
 
-  for (struct link *ls = ADMIN (allowed); ls; ls = ls->next)
+  for (struct link *ls = GROK (access); ls; ls = ls->next)
     if (STR_SAME (getcaller (), ls->entry))
       return true;
 
@@ -1149,7 +1144,7 @@ dorewrite (bool lockflag, int changed)
             return -1;
           putadmin ();
           puttree (REPO (tip), FLOW (rewr));
-          aprintf (FLOW (rewr), "\n\n%s%c", TINYKS (desc), NEXT (c));
+          aprintf (FLOW (rewr), "\n\n%s\n", TINYKS (desc));
           FLOW (to) = FLOW (rewr);
         }
       else
@@ -1331,7 +1326,6 @@ getdiffcmd (struct fro *finfile, bool delimiter, FILE *foutfile,
               buf[1] = 0;
               badDiffOutput (buf);
             }
-          NEXT (c) = c;
           if (fout)
             aprintf (fout, "%c%c", SDELIM, c);
           return -1;
@@ -1348,8 +1342,6 @@ getdiffcmd (struct fro *finfile, bool delimiter, FILE *foutfile,
       GETCHAR_OR (c, fin, unexpected_EOF ());
     }
   while (c != '\n');
-  if (delimiter)
-    ++LEX (lno);
   *p = '\0';
   for (p = buf + 1; (c = *p++) == ' ';)
     continue;

@@ -36,45 +36,52 @@ enum stringwork
 { enter, copy, edit, expand, edit_expand };
 
 static void
-scandeltatext (struct editstuff *es, struct hshentry *delta,
+scandeltatext (struct editstuff *es, struct wlink **ls,
+               struct hshentry *delta,
                enum stringwork func, bool needlog)
 /* Scan delta text nodes up to and including the one given by ‘delta’.
    For the one given by ‘delta’, the log message is saved into
    ‘delta->log’ if ‘needlog’ is set; ‘func’ specifies how to handle the
-   text.  Assume the initial lexeme must be read in first.  Does not
-   advance ‘NEXT (tok)’ after it is finished.  */
+   text.  Does not advance input after finished.  */
 {
   struct hshentry const *nextdelta;
-  struct cbuf cb;
+  struct fro *from = FLOW (from);
+  FILE *to = FLOW (to);
+  struct atat *log, *text;
+  struct range range;
 
-  for (;;)
+  for (;; *ls = (*ls)->next)
     {
-      if (eoflex ())
-        SYNTAX_ERROR ("can't find delta for revision %s", delta->num);
-      nextdelta = must_get_delta_num ();
-      getkeystring (&TINY (log));
+      nextdelta = (*ls)->entry;
+      log = nextdelta->log;
+      text = nextdelta->text;
+      range.beg = fro_tello (from);
+      range.end = text->beg;
       if (needlog && delta == nextdelta)
         {
-          cb = savestring ();
-          delta->pretty_log = cleanlogmsg (cb.string, cb.size);
+          /* TODO: Make ‘needlog’ a ‘struct cbuf *’ and stash there.  */
+          delta->pretty_log = string_from_atat (SINGLE, log);
+          delta->pretty_log = cleanlogmsg (delta->pretty_log.string,
+                                           delta->pretty_log.size);
         }
-      else
-        readstring ();
-      nextlex ();
-      getkeystring (&TINY (text));
-
+      /* Skip over it.  */
+      if (to)
+        fro_spew_partial (to, from, &range);
+      fro_move (from, range.end);
       if (delta == nextdelta)
         break;
       /* Skip over it.  */
-      readstring ();
+      if (to)
+        atat_put (to, text);
+      FIXUP_OLD (text);
     }
   switch (func)
     {
     case enter:
-      enterstring (es);
+      enterstring (es, text);
       break;
     case copy:
-      copystring (es);
+      copystring (es, text);
       break;
     case expand:
       /* Read a string terminated by ‘SDELIM’ from ‘FLOW (from)’ and
@@ -83,18 +90,22 @@ scandeltatext (struct editstuff *es, struct hshentry *delta,
          from ‘delta’.  If ‘FLOW (to)’ is non-NULL, the string is
          also copied unchanged to ‘FLOW (to)’.  */
       {
+        int c;
         struct expctx ctx = EXPCTX (FLOW (res), FLOW (to),
                                     FLOW (from), true, true);
 
+        GETCHAR (c, FLOW (from));
+        if (to)
+          afputc (c, to);
         while (1 < expandline (&ctx))
           continue;
       }
       break;
     case edit:
-      editstring (es, NULL);
+      editstring (es, text, NULL);
       break;
     case edit_expand:
-      editstring (es, delta);
+      editstring (es, text, delta);
       break;
     }
 }
@@ -117,29 +128,31 @@ buildrevision (struct hshentries const *deltas, struct hshentry *target,
    or no keyword expansion is necessary, or if output goes to stdout.  */
 {
   struct editstuff *es = make_editstuff ();
+  struct wlink *ls = GROK (deltas);
 
   if (deltas->first == target)
     {
       /* Only latest revision to generate.  */
       openfcopy (outfile);
-      scandeltatext (es, target, expandflag ? expand : copy, true);
+      scandeltatext (es, &ls, target, expandflag ? expand : copy, true);
     }
   else
     {
       /* Several revisions to generate.
          Get initial revision without keyword expansion.  */
-      scandeltatext (es, deltas->first, enter, false);
-      while ((deltas = deltas->rest)->rest)
+      scandeltatext (es, &ls, deltas->first, enter, false);
+      while (ls = ls->next,
+             (deltas = deltas->rest)->rest)
         {
           /* Do all deltas except last one.  */
-          scandeltatext (es, deltas->first, edit, false);
+          scandeltatext (es, &ls, deltas->first, edit, false);
         }
       if (expandflag || outfile)
         {
           /* First, get to beginning of file.  */
           finishedit (es, NULL, outfile, false);
         }
-      scandeltatext (es, target, expandflag ? edit_expand : edit, true);
+      scandeltatext (es, &ls, target, expandflag ? edit_expand : edit, true);
       finishedit (es, expandflag ? target : NULL, outfile, true);
     }
   unmake_editstuff (es);
@@ -221,6 +234,16 @@ yesorno (bool default_answer, char const *question, ...)
 }
 
 void
+write_desc_maybe (FILE *to)
+{
+  struct atat *desc = GROK (desc);
+
+  if (to)
+    atat_put (to, desc);
+  FIXUP_OLD (desc);
+}
+
+void
 putdesc (struct cbuf *cb, bool textflag, char *textfile)
 /* Put the descriptive text into file ‘FLOW (rewr)’.
    Also, save the description text into ‘cb’.
@@ -240,20 +263,16 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
   if (FLOW (from) && !textflag)
     {
       /* Copy old description.  */
-      aprintf (frew, "\n\n%s%c", TINYKS (desc), NEXT (c));
-      FLOW (to) = FLOW (rewr);
-      getdesc (false);
-      FLOW (to) = NULL;
+      aprintf (frew, "\n\n%s\n", TINYKS (desc));
+      write_desc_maybe (FLOW (rewr));
     }
   else
     {
       FLOW (to) = NULL;
       /* Get new description.  */
       if (FLOW (from))
-        {
-          /* Skip old description.  */
-          getdesc (false);
-        }
+        /* Skip old description.  */
+        FIXUP_OLD (GROK (desc));
       aprintf (frew, "\n\n%s\n%c", TINYKS (desc), SDELIM);
       if (!textfile)
         *cb = getsstdin ("t-", "description",
@@ -334,7 +353,9 @@ getsstdin (char const *option, char const *name, char const *note)
 void
 format_assocs (FILE *out, char const *fmt)
 {
-  for (struct link *ls = ADMIN (assocs); ls; ls = ls->next)
+  if (! REPO (r))
+    return;
+  for (struct link *ls = GROK (symbols); ls; ls = ls->next)
     {
       struct symdef const *d = ls->entry;
 
@@ -367,11 +388,11 @@ putadmin (void)
 
   aprintf (fout, "%s\t%s;\n", TINYKS (head),
            REPO (tip) ? REPO (tip)->num : "");
-  if (ADMIN (defbr) && VERSION (4) <= BE (version))
-    aprintf (fout, "%s\t%s;\n", TINYKS (branch), ADMIN (defbr));
+  if (REPO (r) && GROK (branch) && VERSION (4) <= BE (version))
+    aprintf (fout, "%s\t%s;\n", TINYKS (branch), GROK (branch));
 
   aputs (TINYKS (access), fout);
-  curaccess = ADMIN (allowed);
+  curaccess = REPO (r) ? GROK (access) : NULL;
   while (curaccess)
     {
       aprintf (fout, "\n\t%s", (char const *)curaccess->entry);
@@ -380,7 +401,7 @@ putadmin (void)
   aprintf (fout, ";\n%s", TINYKS (symbols));
   format_assocs (fout, "\n\t%s:%s");
   aprintf (fout, ";\n%s", TINYKS (locks));
-  for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
+  for (struct link *ls = REPO (r) ? GROK (locks) : NULL; ls; ls = ls->next)
     {
       struct rcslock const *rl = ls->entry;
 

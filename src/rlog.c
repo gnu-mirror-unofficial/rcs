@@ -23,6 +23,8 @@
 #include "base.h"
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>           /* temporary, to support ‘read_positive_integer’,
+                                before it and ‘compute_a_d’ move to grok.  */
 #include "rlog.help"
 #include "b-complain.h"
 #include "b-divvy.h"
@@ -58,7 +60,7 @@ static struct link *datelist, *duelst;
 
 /* Revision or branch range in ‘-r’ option.
    On the first pass (option processing), push onto ‘revlist’.
-   After ‘gettree’, walk ‘revlist’ and push onto ‘Revlst’.  */
+   After grokking, walk ‘revlist’ and push onto ‘Revlst’.  */
 static struct link *revlist, *Revlst;
 
 /* Login names in author option.  */
@@ -124,6 +126,53 @@ getlocker (char *argv)
     }
 }
 
+/* TODO: Move into b-fro.c, since counting lines is not sensitive to
+   "@@" presence (we can work in-place, avoiding ‘string_from_atat’).  */
+
+static long
+read_positive_integer (char const **p)
+{
+  long rv;
+  char *end;
+
+  errno = 0;
+  if (1 > (rv = strtol (*p, &end, 10)))
+    RFATAL ("non-positive integer");
+  if (ERANGE == errno)
+    RFATAL ("bad integer");
+  *p = end;
+  return rv;
+}
+
+static void
+count_a_d (long *a, long *d, struct atat *edits)
+{
+  struct cbuf s = string_from_atat (SINGLE, edits);
+  long *totals = zlloc (SINGLE, __func__, 2 * sizeof (long));
+
+  for (char const *p = s.string; p < s.string + s.size; p++)
+    {
+      bool addp = ('a' == *p++);
+      long count;
+
+      /* Skip the line number.  */
+      p = strchr (p, ' ');
+      count = read_positive_integer (&p);
+
+      totals[addp] += count;
+      if (addp)
+        /* Ignore the actual lines.  */
+        while (count--)
+          if (! (p = strchr (++p, '\n')))
+            /* No final newline; skip out.  */
+            goto done;
+    }
+ done:
+  *a = totals[1];
+  *d = totals[0];
+  brush_off (SINGLE, totals);
+}
+
 static void
 putadelta (register struct hshentry const *node,
            register struct hshentry const *editscript,
@@ -133,10 +182,9 @@ putadelta (register struct hshentry const *node,
    ‘trunk’ !false indicates this node is in trunk.  */
 {
   register FILE *out;
-  char const *s;
-  size_t n;
   char datebuf[datesize + zonelenmax];
   bool pre5 = BE (version) < VERSION (5);
+  struct atat *log;
 
   if (!node->selector)
     return;
@@ -150,12 +198,13 @@ putadelta (register struct hshentry const *node,
   aprintf (out, "\ndate: %s;  author: %s;  state: %s;",
            date2str (node->date, datebuf), node->author, node->state);
 
-  if (editscript)
+  if (editscript && editscript != REPO (tip))
     {
       long a, d;
 
-      a = trunk ? editscript->deletelns : editscript->insertlns;
-      d = trunk ? editscript->insertlns : editscript->deletelns;
+      count_a_d (trunk ? &d : &a,
+                 trunk ? &a : &d,
+                 editscript->text);
       aprintf (out, insDelFormat, a, d);
     }
 
@@ -174,15 +223,11 @@ putadelta (register struct hshentry const *node,
     aprintf (out, "%s commitid: %s", editscript ? ";" : "", node->commitid);
 
   afputc ('\n', out);
-  s = node->pretty_log.string;
-  if (!(n = node->pretty_log.size))
-    {
-      s = EMPTYLOG;
-      n = sizeof (EMPTYLOG) - 1;
-    }
-  awrite (s, n, out);
-  if (s[n - 1] != '\n')
-    afputc ('\n', out);
+  if ((log = node->log)
+      && log->beg + 1 < ATAT_END (log))
+    atat_display (out, log);
+  else
+    awrite (EMPTYLOG "\n", sizeof (EMPTYLOG), out);
 }
 
 static void
@@ -229,81 +274,6 @@ putforest (struct wlink const *branchroot)
   putree (branchroot->entry);
 }
 
-static void
-getscript (struct hshentry *Delta)
-/* Read edit script of ‘Delta’ and count
-   how many lines added and deleted in the script.  */
-{
-  int ed;                               /* editor command */
-  register struct fro *fin;
-  int c;
-  register long i;
-  struct diffcmd dc;
-
-  fin = FLOW (from);
-  initdiffcmd (&dc);
-  while (0 <= (ed = getdiffcmd (fin, true, NULL, &dc)))
-    if (!ed)
-      Delta->deletelns += dc.nlines;
-    else
-      {
-        /* Skip scripted lines.  */
-        i = dc.nlines;
-        Delta->insertlns += i;
-        do
-          {
-            for (;;)
-              {
-                GETCHAR (c, fin);
-                switch (c)
-                  {
-                  default:
-                    continue;
-                  case SDELIM:
-                    GETCHAR (c, fin);
-                    if (c == SDELIM)
-                      continue;
-                    if (--i)
-                      unexpected_EOF ();
-                    NEXT (c) = c;
-                    return;
-                  case '\n':
-                    break;
-                  }
-                break;
-              }
-            ++LEX (lno);
-          }
-        while (--i);
-      }
-}
-
-static struct hshentry const *
-readdeltalog (void)
-/* Get the log message and skip the text of a deltatext node.
-   Return the delta found.  Assume the current lexeme is not
-   yet in ‘NEXT (tok)’; do not advance ‘NEXT (tok)’.  */
-{
-  register struct hshentry *Delta;
-
-  if (eoflex ())
-    SYNTAX_ERROR ("missing delta log");
-  Delta = must_get_delta_num ();
-  getkeystring (&TINY (log));
-  if (Delta->pretty_log.string)
-    SYNTAX_ERROR ("duplicate delta log");
-  Delta->pretty_log = savestring ();
-
-  nextlex ();
-  getkeystring (&TINY (text));
-  Delta->insertlns = Delta->deletelns = 0;
-  if (Delta != REPO (tip))
-    getscript (Delta);
-  else
-    readstring ();
-  return Delta;
-}
-
 static char
 extractdelta (struct hshentry const *pdelta)
 /* Return true if ‘pdelta’ matches the selection critera.  */
@@ -324,7 +294,7 @@ extractdelta (struct hshentry const *pdelta)
         return false;
   /* Only locked revisions wanted.  */
   if (lockflag)
-    for (struct link *ls = ADMIN (locks);; ls = ls->next)
+    for (struct link *ls = GROK (locks);; ls = ls->next)
       {
         struct rcslock const *rl;
 
@@ -451,7 +421,7 @@ trunclocks (void)
     return;
 
   /* Shorten locks to those contained in ‘lockerlist’.  */
-  for (fake.next = ADMIN (locks), tp = &fake; tp->next;)
+  for (fake.next = GROK (locks), tp = &fake; tp->next;)
     {
       struct rcslock const *rl = tp->next->entry;
 
@@ -464,7 +434,7 @@ trunclocks (void)
         else if (!(plocker = plocker->next))
           {
             tp->next = tp->next->next;
-            ADMIN (locks) = fake.next;
+            GROK (locks) = fake.next;
             break;
           }
     }
@@ -734,11 +704,11 @@ getnumericrev (void)
         }
     }
   /* Now take care of ‘branchflag’.  */
-  if (branchflag && (ADMIN (defbr) || REPO (tip)))
+  if (branchflag && (GROK (branch) || REPO (tip)))
     {
       rr = FALLOC (struct revrange);
-      rr->beg = rr->end = ADMIN (defbr)
-        ? ADMIN (defbr)
+      rr->beg = rr->end = GROK (branch)
+        ? GROK (branch)
         : TAKE (1, REPO (tip)->num);
       rr->nfield = countnumflds (rr->beg);
       PUSH (rr, Revlst);
@@ -813,7 +783,6 @@ main (int argc, char **argv)
   char const *accessListString, *accessFormat;
   char const *headFormat, *symbolFormat;
   struct link const *curaccess;
-  struct hshentry const *delta;
   bool descflag, selectflag;
   bool onlylockflag;                   /* print only files with locks */
   bool onlyRCSflag;                    /* print only RCS filename */
@@ -959,7 +928,7 @@ main (int argc, char **argv)
           trunclocks ();
 
         /* Do nothing if ‘-L’ is given and there are no locks.  */
-        if (onlylockflag && !ADMIN (locks))
+        if (onlylockflag && !GROK (locks))
           continue;
 
         if (onlyRCSflag)
@@ -967,8 +936,6 @@ main (int argc, char **argv)
             aprintf (out, "%s\n", REPO (filename));
             continue;
           }
-
-        gettree ();
 
         if (!getnumericrev ())
           continue;
@@ -979,20 +946,20 @@ main (int argc, char **argv)
         aprintf (out, headFormat, REPO (filename), MANI (filename),
                  REPO (tip) ? " " : "",
                  REPO (tip) ? REPO (tip)->num : "",
-                 ADMIN (defbr) ? " " : "", ADMIN (defbr) ? ADMIN (defbr) : "",
+                 GROK (branch) ? " " : "", GROK (branch) ? GROK (branch) : "",
                  BE (strictly_locking) ? " strict" : "");
-        for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
+        for (struct link *ls = GROK (locks); ls; ls = ls->next)
           {
             struct rcslock const *rl = ls->entry;
 
             aprintf (out, symbolFormat, rl->login, rl->delta->num);
           }
         if (BE (strictly_locking) && pre5)
-          aputs ("  ;  strict" + (ADMIN (locks) ? 3 : 0), out);
+          aputs ("  ;  strict" + (GROK (locks) ? 3 : 0), out);
 
         /* Print access list.  */
         aputs (accessListString, out);
-        curaccess = ADMIN (allowed);
+        curaccess = GROK (access);
         while (curaccess)
           {
             aprintf (out, accessFormat, curaccess->entry);
@@ -1014,7 +981,7 @@ main (int argc, char **argv)
         if (!pre5 || BE (kws) != kwsub_kv)
           aprintf (out, "\nkeyword substitution: %s", kwsub_string (BE (kws)));
 
-        aprintf (out, "\ntotal revisions: %d", REPO (ndelt));
+        aprintf (out, "\ntotal revisions: %d", GROK (deltas_count));
 
         revno = 0;
 
@@ -1043,17 +1010,14 @@ main (int argc, char **argv)
         afputc ('\n', out);
         if (descflag)
           {
+            struct atat *desc = GROK (desc);
+
             aputs ("description:\n", out);
-            getdesc (true);
+            atat_display (out, desc);
+            FIXUP_OLD (desc);
           }
         if (revno)
           {
-            while (!(delta = readdeltalog ())->selector || --revno)
-              continue;
-            if (delta->next && countnumflds (delta->num) == 2)
-              /* Read through ‘delta->next’ to get its ‘insertlns’.  */
-              while (readdeltalog () != delta->next)
-                continue;
             putrunk ();
             putree (REPO (tip));
           }

@@ -287,65 +287,70 @@ putdelrev (char const *b, char const *e, bool sawsep)
 }
 
 static void
-scanlogtext (struct editstuff *es, struct hshentry *delta, bool edit)
+scanlogtext (struct editstuff *es, struct wlink **ls,
+             struct hshentry *delta, bool edit)
 /* Scan delta text nodes up to and including the one given by ‘delta’,
    or up to last one present, if ‘!delta’.  For the one given by
-   ‘delta’ (if ‘delta’), the log message is saved into ‘delta->log’ if
-   ‘delta == cuttail’; the text is edited if ‘edit’ is set, else
-   copied.  Assume the initial lexeme must be read in first.  Do not
-   advance ‘NEXT (tok)’ after it is finished, except if ‘!delta’.  */
+   ‘delta’ (if ‘delta’), the log message is saved into ‘delta->pretty_log’ if
+   ‘delta == cuttail’; the text is edited if ‘edit’ is set, else copied.
+   Do not advance input after finished, except if ‘!delta’.  */
 {
   struct hshentry const *nextdelta;
-  struct cbuf cb;
+  struct fro *from = FLOW (from);
+  FILE *to;
+  struct atat *log, *text;
+  struct range range;
 
-  for (;;)
+  for (;; *ls = (*ls)->next)
     {
-      FLOW (to) = NULL;
-      if (eoflex ())
-        {
-          if (delta)
-            RFATAL ("can't find delta for revision %s", delta->num);
-          return;               /* no more delta text nodes */
-        }
-      nextdelta = must_get_delta_num ();
+      if (! *ls)
+        /* No more.  */
+        return;
+      to = FLOW (to) = NULL;
+      nextdelta = (*ls)->entry;
+      log = nextdelta->log;
+      text = nextdelta->text;
+      range.beg = fro_tello (from);
       if (nextdelta->selector)
         {
-          FLOW (to) = FLOW (rewr);
-          aprintf (FLOW (rewr), DELNUMFORM, nextdelta->num, TINYKS (log));
+          to = FLOW (to) = FLOW (rewr);
+          range.end = log->beg;
+          fro_spew_partial (to, from, &range);
         }
-      getkeystring (&TINY (log));
       if (nextdelta == cuttail)
         {
-          cb = savestring ();
           if (!delta->pretty_log.string)
-            delta->pretty_log = cleanlogmsg (cb.string, cb.size);
-        }
-      else
-        {
-          if (nextdelta->pretty_log.string && nextdelta->selector)
             {
-              FLOW (to) = NULL;
-              readstring ();
-              FLOW (to) = FLOW (rewr);
-              putstring (FLOW (to), false, nextdelta->pretty_log, true);
-              afputc (NEXT (c), FLOW (to));
+              delta->pretty_log = string_from_atat (SINGLE, log);
+              delta->pretty_log = cleanlogmsg (delta->pretty_log.string,
+                                               delta->pretty_log.size);
             }
-          else
-            readstring ();
         }
-      nextlex ();
-      getkeystring (&TINY (text));
+      else if (nextdelta->pretty_log.string && nextdelta->selector)
+        {
+          putstring (to, false, nextdelta->pretty_log, true);
+          afputc ('\n', to);
+        }
+      else if (to)
+        atat_put (to, log);
+      range.beg = ATAT_TEXT_END (log);
+      range.end = text->beg;
+      if (to)
+        fro_spew_partial (to, from, &range);
+      fro_move (from, range.end);
 
       if (delta == nextdelta)
         break;
-      readstring ();            /* skip over it */
-
+      /* Skip over it.  */
+      if (to)
+        atat_put (to, text);
+      FIXUP_OLD (text);
     }
   /* got the one we're looking for */
   if (edit)
-    editstring (es, NULL);
+    editstring (es, text, NULL);
   else
-    enterstring (es);
+    enterstring (es, text);
 }
 
 static struct link *
@@ -379,25 +384,25 @@ doaccess (void)
         case erase:
           if (!login)
             {
-              if (ADMIN (allowed))
+              if (GROK (access))
                 {
-                  ADMIN (allowed) = NULL;
+                  GROK (access) = NULL;
                   changed = true;
                 }
             }
           else
-            for (box.next = ADMIN (allowed), tp = &box;
+            for (box.next = GROK (access), tp = &box;
                  tp->next; tp = tp->next)
               if (STR_SAME (login, tp->next->entry))
                 {
                   tp->next = tp->next->next;
                   changed = true;
-                  ADMIN (allowed) = box.next;
+                  GROK (access) = box.next;
                   break;
                 }
           break;
         case append:
-          for (box.next = ADMIN (allowed), tp = &box;
+          for (box.next = GROK (access), tp = &box;
                tp->next; tp = tp->next)
             if (STR_SAME (login, tp->next->entry))
               /* Do nothing; already present.  */
@@ -406,7 +411,7 @@ doaccess (void)
             {
               extend (tp, login, SINGLE);
               changed = true;
-              ADMIN (allowed) = box.next;
+              GROK (access) = box.next;
             }
           break;
         }
@@ -487,7 +492,7 @@ breaklock (struct hshentry const *delta)
   char const *num;
 
   num = delta->num;
-  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
+  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
     {
       struct rcslock const *rl = tp->next->entry;
       struct hshentry *d = rl->delta;
@@ -504,7 +509,7 @@ breaklock (struct hshentry const *delta)
             }
           diagnose ("%s unlocked", num);
           tp->next = tp->next->next;
-          ADMIN (locks) = fake.next;
+          GROK (locks) = fake.next;
           d->lockedby = NULL;
           return true;
         }
@@ -544,7 +549,7 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
           RERR ("can't remove branch point %s", pt->num);
           return true;
         }
-      for (struct link *ls = ADMIN (locks); ls; ls = ls->next)
+      for (struct link *ls = GROK (locks); ls; ls = ls->next)
         {
           struct rcslock const *rl = ls->entry;
 
@@ -755,7 +760,7 @@ doassoc (void)
           struct link box, *tp;
           struct symdef const *d = NULL;
 
-          for (box.next = ADMIN (assocs), tp = &box; tp->next; tp = tp->next)
+          for (box.next = GROK (symbols), tp = &box; tp->next; tp = tp->next)
             {
               d = tp->next->entry;
               if (STR_SAME (ssymbol, d->meaningful))
@@ -765,7 +770,7 @@ doassoc (void)
                   break;
                 }
             }
-          ADMIN (assocs) = box.next;
+          GROK (symbols) = box.next;
           if (!d)
             RWARN ("can't delete nonexisting symbol %s", ssymbol);
         }
@@ -822,7 +827,7 @@ dolocks (void)
 /* Remove lock for caller or first lock if ‘unlockcaller’ is set;
    remove locks which are stored in ‘rmvlocklst’,
    add new locks which are stored in ‘newlocklst’,
-   add lock for ‘ADMIN (defbr)’ or ‘REPO (tip)’ if ‘lockhead’ is set.  */
+   add lock for ‘GROK (branch)’ or ‘REPO (tip)’ if ‘lockhead’ is set.  */
 {
   struct link const *lockpt;
   struct hshentry *target;
@@ -833,14 +838,14 @@ dolocks (void)
       /* Find lock for caller.  */
       if (REPO (tip))
         {
-          if (ADMIN (locks))
+          if (GROK (locks))
             {
               switch (findlock (true, &target))
                 {
                 case 0:
                   /* Remove most recent lock.  */
                   {
-                    struct rcslock const *rl = ADMIN (locks)->entry;
+                    struct rcslock const *rl = GROK (locks)->entry;
 
                     changed |= breaklock (rl->delta);
                   }
@@ -886,8 +891,8 @@ dolocks (void)
   if (lockhead)
     {
       /* Lock default branch or head.  */
-      if (ADMIN (defbr))
-        changed |= setlock (ADMIN (defbr));
+      if (GROK (branch))
+        changed |= setlock (GROK (branch));
       else if (REPO (tip))
         changed |= setlock (REPO (tip)->num);
       else
@@ -944,7 +949,8 @@ rcs_setstate (char const *rev, char const *status)
 }
 
 static bool
-buildeltatext (struct editstuff *es, struct hshentries const *deltas)
+buildeltatext (struct editstuff *es, struct wlink **ls,
+               struct hshentries const *deltas)
 /* Put the delta text on ‘FLOW (rewr)’ and make necessary
    change to delta text.  */
 {
@@ -952,7 +958,7 @@ buildeltatext (struct editstuff *es, struct hshentries const *deltas)
 
   fcut = NULL;
   cuttail->selector = false;
-  scanlogtext (es, deltas->first, false);
+  scanlogtext (es, ls, deltas->first, false);
   if (cuthead)
     {
       if (! (fcut = tmpfile ()))
@@ -960,8 +966,9 @@ buildeltatext (struct editstuff *es, struct hshentries const *deltas)
 
       while (deltas->first != cuthead)
         {
+          *ls = (*ls)->next;
           deltas = deltas->rest;
-          scanlogtext (es, deltas->first, true);
+          scanlogtext (es, ls, deltas->first, true);
         }
 
       snapshotedit (es, fcut);
@@ -970,7 +977,11 @@ buildeltatext (struct editstuff *es, struct hshentries const *deltas)
     }
 
   while (deltas->first != cuttail)
-    scanlogtext (es, (deltas = deltas->rest)->first, true);
+    {
+      *ls = (*ls)->next;
+      deltas = deltas->rest;
+      scanlogtext (es, ls, deltas->first, true);
+    }
   finishedit (es, NULL, NULL, true);
   Ozclose (&FLOW (res));
 
@@ -1182,11 +1193,11 @@ main (int argc, char **argv)
           *argv = a;
           if (0 < pairnames (1, argv, rcsreadopen, true, false))
             {
-              while (ADMIN (allowed))
+              while (GROK (access))
                 {
-                  getchaccess (&tp_chacc, str_save (ADMIN (allowed)->entry),
+                  getchaccess (&tp_chacc, str_save (GROK (access)->entry),
                                append);
-                  ADMIN (allowed) = ADMIN (allowed)->next;
+                  GROK (access) = GROK (access)->next;
                 }
               fro_zclose (&FLOW (from));
             }
@@ -1394,8 +1405,6 @@ main (int argc, char **argv)
           {
             if (!checkaccesslist ())
               continue;
-            /* Read the delta tree.  */
-            gettree ();
           }
 
         /* Update admin. node.  */
@@ -1423,15 +1432,15 @@ main (int argc, char **argv)
           {
             if (countnumflds (branchnum.string))
               {
-                if (cmpnum (ADMIN (defbr), branchnum.string) != 0)
+                if (cmpnum (GROK (branch), branchnum.string) != 0)
                   {
-                    ADMIN (defbr) = branchnum.string;
+                    GROK (branch) = branchnum.string;
                     changed = true;
                   }
               }
-            else if (ADMIN (defbr))
+            else if (GROK (branch))
               {
-                ADMIN (defbr) = NULL;
+                GROK (branch) = NULL;
                 changed = true;
               }
           }
@@ -1452,7 +1461,7 @@ main (int argc, char **argv)
         if (chgheadstate)
           {
             /* Change state of default branch or head.  */
-            if (!ADMIN (defbr))
+            if (!GROK (branch))
               {
                 if (!REPO (tip))
                   RWARN ("can't change states in an empty tree");
@@ -1463,7 +1472,7 @@ main (int argc, char **argv)
                   }
               }
             else
-              changed |= rcs_setstate (ADMIN (defbr), headstate);
+              changed |= rcs_setstate (GROK (branch), headstate);
           }
         for (struct link *ls = statelst.next; ls; ls = ls->next)
           {
@@ -1501,11 +1510,14 @@ main (int argc, char **argv)
             if (delrev.strt || messagelst.next)
               {
                 struct editstuff *es = make_editstuff ();
+                struct wlink *ls = GROK (deltas);
 
-                if (!cuttail || buildeltatext (es, deltas))
+                if (!cuttail || buildeltatext (es, &ls, deltas))
                   {
                     fro_trundling (true, FLOW (from));
-                    scanlogtext (es, NULL, false);
+                    if (cuttail)
+                      ls = ls->next;
+                    scanlogtext (es, &ls, NULL, false);
                     /* Copy rest of delta text nodes that are not deleted.  */
                     changed = true;
                   }

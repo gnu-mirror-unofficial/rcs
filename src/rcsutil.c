@@ -154,12 +154,6 @@ ffree (void)
   forget (SINGLE);
 }
 
-void
-free_NEXT_str (void)
-{
-  brush_off (SINGLE, (void *) NEXT (str));
-}
-
 char *
 str_save (char const *s)
 /* Save ‘s’ in permanently allocated storage.  */

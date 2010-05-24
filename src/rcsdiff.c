@@ -359,16 +359,13 @@ main (int argc, char **argv)
               }
           }
 
-        /* Read in the delta tree.  */
-        gettree ();
-
         if (!REPO (tip))
           {
             RERR ("no revisions present");
             continue;
           }
         if (revnums == 0 || !*rev1)
-          rev1 = ADMIN (defbr) ? ADMIN (defbr) : REPO (tip)->num;
+          rev1 = GROK (branch) ? GROK (branch) : REPO (tip)->num;
 
         if (!fully_numeric (&numericrev, rev1, workptr))
           continue;
@@ -384,8 +381,8 @@ main (int argc, char **argv)
         if (revnums == 2)
           {
             if (!fully_numeric (&numericrev,
-                                *rev2 ? rev2 : (ADMIN (defbr)
-                                                ? ADMIN (defbr)
+                                *rev2 ? rev2 : (GROK (branch)
+                                                ? GROK (branch)
                                                 : REPO (tip)->num),
                                 workptr))
               continue;

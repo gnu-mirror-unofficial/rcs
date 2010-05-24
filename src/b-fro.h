@@ -43,6 +43,26 @@ struct fro
   FILE *stream;
 };
 
+struct atat
+{
+  size_t count;
+  size_t needexp_count;
+  size_t lno;
+  size_t line_count;
+  struct fro *from;
+  bool (*ineedexp) (struct atat *atat, size_t i);
+  /* NB: All of the preceding members should have an aggregate size
+     that is a multiple of 8, so that ‘beg’ is properly aligned.
+     This also requires allocation to be aligned.  */
+  off_t beg;
+  union needexp
+  {
+    uint64_t  direct;
+    uint64_t *bitset;
+  } needexp;
+  off_t holes[];
+};
+
 extern struct fro *fro_open (char const *filename, char const *type,
                              struct stat *status);
 extern void fro_zclose (struct fro **p);
@@ -54,6 +74,9 @@ extern void fro_must_getbyte (int *c, struct fro *f);
 extern void fro_trundling (bool sequentialp, struct fro *f);
 extern void fro_spew_partial (FILE *to, struct fro *f, struct range *r);
 extern void fro_spew (struct fro *f, FILE *to);
+extern struct cbuf string_from_atat (struct divvy *space, struct atat const *atat);
+extern void atat_put (FILE *to, struct atat const *atat);
+extern void atat_display (FILE *to, struct atat const *atat);
 
 /* Idioms.  */
 
@@ -69,5 +92,13 @@ extern void fro_spew (struct fro *f, FILE *to);
 
 /* Like ‘GETCHAR_OR’, except EOF is an error.  */
 #define GETCHAR(c,f)  fro_must_getbyte (&(c), (f))
+
+/* The (+2) is for "@\n" (or "@;" for ‘comment’ and ‘expand’).  */
+#define ATAT_END(atat)       ((atat)->holes[(atat)->count - 1])
+#define ATAT_TEXT_END(atat)  (ATAT_END (atat) + 2)
+
+/* Fixup file position (transitional; see comments in base.h).  */
+#define FIXUP_OLD(atat)                         \
+  fro_move (atat->from, ATAT_TEXT_END (atat))
 
 /* b-fro.h ends here */

@@ -586,10 +586,10 @@ delta_from_ref (char const *ref)
 static char const *
 rev_from_symbol (struct cbuf const *id)
 /* Look up ‘id’ in the list of symbolic names starting with pointer
-   ‘ADMIN (assocs)’, and return a pointer to the corresponding
+   ‘GROK (symbols)’, and return a pointer to the corresponding
    revision number.  Return NULL if not present.  */
 {
-  for (struct link *ls = ADMIN (assocs); ls; ls = ls->next)
+  for (struct link *ls = GROK (symbols); ls; ls = ls->next)
     {
       struct symdef const *d = ls->entry;
 
@@ -602,7 +602,7 @@ rev_from_symbol (struct cbuf const *id)
 static char const *
 lookupsym (char const *id)
 /* Look up ‘id’ in the list of symbolic names starting with pointer
-   ‘ADMIN (assocs)’, and return a pointer to the corresponding
+   ‘GROK (symbols)’, and return a pointer to the corresponding
    revision number.  Return NULL if not present.  */
 {
   struct cbuf identifier =
@@ -728,8 +728,8 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
                   /* Insert default branch before initial ‘.’.  */
                   char const *b;
 
-                  if (ADMIN (defbr))
-                    b = ADMIN (defbr);
+                  if (GROK (branch))
+                    b = GROK (branch);
                   else if (REPO (tip))
                     b = REPO (tip)->num;
                   else
@@ -818,8 +818,8 @@ namedrev (char const *name, struct hshentry *delta)
 char const *
 tiprev (void)
 {
-  return ADMIN (defbr)
-    ? branchtip (ADMIN (defbr))
+  return GROK (branch)
+    ? branchtip (GROK (branch))
     : REPO (tip) ? REPO (tip)->num : NULL;
 }
 

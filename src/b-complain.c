@@ -126,7 +126,10 @@ generic_fatal (char const *who, char const *fmt, ...)
 void
 fatal_syntax (size_t lno, char const *fmt, ...)
 {
-  complain ("%s: %s:%ld: ", PROGRAM (name), REPO (filename), lno);
+  complain ("%s: %s:", PROGRAM (name), REPO (filename));
+  if (lno)
+    complain ("%ld:", lno);
+  complain (" ");
   COMPLAIN_PLUS_NEWLINE ();
   die ();
 }

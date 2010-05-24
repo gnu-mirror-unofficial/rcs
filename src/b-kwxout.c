@@ -343,11 +343,8 @@ expandline (struct expctx *ctx)
                 {
                   TEECHAR ();
                   if (c != SDELIM)
-                    {
-                      /* End of string.  */
-                      NEXT (c) = c;
-                      goto done;
-                    }
+                    /* End of string.  */
+                    goto done;
                 }
               /* fall into */
             default:
@@ -356,7 +353,6 @@ expandline (struct expctx *ctx)
               break;
 
             case '\n':
-              LEX (lno) += delimstuffed;
               aputc (c, out);
               r = 2;
               goto done;
@@ -412,12 +408,9 @@ expandline (struct expctx *ctx)
                           /* Skip next ‘SDELIM’.  */
                           TEECHAR ();
                           if (c != SDELIM)
-                            {
-                              /* End of string before closing
-                                 ‘KDELIM’ or newline.  */
-                              NEXT (c) = c;
-                              goto keystring_eof;
-                            }
+                            /* End of string before closing
+                               ‘KDELIM’ or newline.  */
+                            goto keystring_eof;
                         }
                     }
                   if (c != KDELIM)

@@ -125,7 +125,7 @@ rmlock (struct hshentry const *delta)
   bool whomatch, nummatch;
 
   num = delta->num;
-  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
+  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
     {
       rl = tp->next->entry;
       whomatch = STR_SAME (getcaller (), rl->login);
@@ -144,7 +144,7 @@ rmlock (struct hshentry const *delta)
     {
       /* Found one; delete it.  */
       tp->next = tp->next->next;
-      ADMIN (locks) = fake.next;
+      GROK (locks) = fake.next;
       rl->delta->lockedby = NULL;
       /* Success.  */
       return 1;
@@ -650,9 +650,6 @@ main (int argc, char **argv)
               }
           }
 
-        /* Read in the delta tree.  */
-        gettree ();
-
         if (!REPO (tip))
           {
             /* No revisions; create empty file.  */
@@ -685,7 +682,7 @@ main (int argc, char **argv)
                   default:
                     continue;
                   case 0:
-                    numericrev.string = ADMIN (defbr) ? ADMIN (defbr) : "";
+                    numericrev.string = GROK (branch) ? GROK (branch) : "";
                     break;
                   case 1:
                     numericrev.string = intern0 (SHARED, targetdelta->num);
@@ -727,7 +724,7 @@ main (int argc, char **argv)
                 continue;
 
             /* Skip description (don't echo).  */
-            getdesc (false);
+            write_desc_maybe (FLOW (to));
 
             BE (inclusive_of_Locker_in_Id_val) = 0 < lockflag;
             targetdelta->name = namedrev (rev, targetdelta);

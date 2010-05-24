@@ -34,9 +34,8 @@
    - TEST_FCMP
    - TEST_PAIRS
    - TEST_KEEP
-   - TEST_LEX
+   - TEST_GROK
    - TEST_REV
-   - TEST_SYN
    If none of these are defined, the program will not compile.
 
    NB: This code is not well-maintained.  In particular, there is
@@ -231,82 +230,200 @@ yarrrr (int argc, char *argv[argc])
 #endif  /* TEST_KEEP */
 
 
-/* parsing (low level) */
+/* grokking */
 
-#ifdef TEST_LEX
-/* The test program reads a stream of lexemes, enters the revision numbers
-   into the hashtable, and prints the recognized tokens.  Keywords are
-   recognized as identifiers.  */
+#ifdef TEST_GROK
+#include "b-divvy.h"
+#include "b-esds.h"
+#include "b-grok.h"
 
-const struct program program =
-  {
-    .name = "y-LEX",
-    .exiterr = scram
-  };
+void
+spew_atat (char const *who, struct fro *f, struct atat *atat)
+{
+  size_t special = 0;
+
+  if (who)
+    printf ("%s:", who);
+  printf (" +%llu [%u]", atat->beg, atat->count);
+  if (who)
+    printf ("<<");
+  for (size_t i = 0; i < atat->count; i++)
+    {
+      bool needexp = atat->ineedexp (atat, i);
+      struct range r =
+        {
+          .beg = 1 + (i ? atat->holes[i - 1] : atat->beg),
+          .end = atat->holes[i]
+        };
+
+      printf ("\n\t[%u]: %c\"", i, needexp ? KDELIM : ' ');
+      special += needexp;
+      fro_spew_partial (stdout, f, &r);
+      printf ("\"");
+    }
+  if (who)
+    printf (">> %10u %10u  %8.2f%%\n", special, atat->count,
+            100.0 * special / atat->count);
+}
+
+/* These are copies from b-grok.c (maintain us!).  */
+struct hash
+{
+  size_t sz;
+  struct wlink **a;
+};
+
+struct lockdef
+{
+  char const *login;
+  char const *revno;
+};
+
+static void
+dump_hash_table (struct repo *r)
+{
+  for (size_t i = 0; i < r->ht->sz; i++)
+    {
+      struct wlink *p = r->ht->a[i];
+      size_t len = 0;
+
+      if (p)
+        {
+          printf ("\t[%u]", i);
+          while (p)
+            {
+              /* This relies on ‘struct notyet’ having
+                 the first member ‘char const *revno’.  */
+              char const **revno = p->entry;
+
+              printf ("(%s)", *revno);
+              p = p->next;
+              len++;
+            }
+          printf (" %u\n", len);
+        }
+    }
+}
+
+static exiting void
+exiterr (void)
+{
+  _Exit (1);
+}
+
+const struct program program = { .name = "y-GROK", .exiterr = exiterr };
 
 int
 yarrrr (int argc, char *argv[argc])
 {
-  if (argc < 2)
+  struct fro *f;
+  struct divvy *stash;
+  struct repo *r;
+  struct link *pair;
+  struct wlink *wpair;
+  size_t i;
+
+  gnurcs_init ();
+  REPO (filename) = argv[1];            /* FIXME: for ‘fatal_syntax’ */
+  stash = SINGLE;
+  f = fro_open (argv[1], "r", NULL);
+  r = grok_all (stash, f);
+
+  if (r->ht)
+    dump_hash_table (r);
+
+#define SPEW_ATAT(who,atat)  spew_atat (who, f, atat)
+
+  printf ("%s: %s;\n", TINYKS (head), r->head);
+  printf ("%s: %s;\n", TINYKS (branch), r->branch);
+  printf ("%s:", TINYKS (access));
+  for (i = 0, pair = r->access; i < r->access_count; i++, pair = pair->next)
+    printf (" [%u] %s", i, (char *) pair->entry);
+  if (pair)
+    printf ("\nWTF: pair: %p\n", (void *)pair);
+  printf (" [%u];\n", r->access_count);
+
+  printf ("%s:", TINYKS (symbols));
+  for (i = 0, pair = r->symbols; i < r->symbols_count; i++, pair = pair->next)
     {
-      complain ("No input file\n");
-      return EXIT_FAILURE;
+      struct symdef const *sym = pair->entry;
+
+      printf (" [%u] %s:%s", i, sym->meaningful, sym->underlying);
     }
+  if (pair)
+    printf ("\nWTF: pair: %p\n", (void *)pair);
+  printf (" [%u];\n", r->symbols_count);
 
-  if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
-    PFATAL ("can't open input file %s", argv[1]);
-
-  Lexinit ();
-  while (!eoflex ())
+  printf ("%s:", TINYKS (locks));
+  for (i = 0, pair = r->locks; i < r->locks_count; i++, pair = pair->next)
     {
-      switch (NEXT (tok))
+      struct lockdef const *lock = pair->entry;
+
+      printf (" [%u] %s:%s", i, lock->login, lock->revno);
+    }
+  if (pair)
+    printf ("\nWTF: pair: %p\n", (void *)pair);
+  printf (" [%u];\n", r->locks_count);
+
+  if (r->strict)
+    printf ("%s;\n", TINYKS (strict));
+
+  printf ("%s", TINYKS (comment));
+  if (r->comment)
+    SPEW_ATAT (NULL, r->comment);
+  printf (";\n");
+
+  printf ("%s", TINYKS (expand));
+  if (-1 < r->expand)
+    printf (": %s", kwsub_string (r->expand));
+  printf (";\n");
+
+  for (i = 0, wpair = r->deltas; i < r->deltas_count; i++, wpair = wpair->next)
+    {
+      struct hshentry *d = wpair->entry, *br;
+      struct wlink *ls;
+
+      if (d->lockedby)
+        printf ("|%s| ", d->lockedby);
+      printf ("<%s> <%s> <%s> <%s>", d->num, d->date, d->author, d->state);
+      for (ls = d->branches; ls; ls = ls->next)
         {
-        case ID:
-          printf ("ID: %s", NEXT (str));
-          break;
-
-        case NUM:
-          if (BE (receptive_to_next_hash_key))
-            printf ("NUM: %s", NEXT (hsh)->num);
-          else
-            printf ("NUM, unentered: %s", NEXT (str));
-          /* Alternate between dates and numbers.  */
-          BE (receptive_to_next_hash_key) = !BE (receptive_to_next_hash_key);
-          break;
-
-        case COLON:
-          printf ("COLON");
-          break;
-
-        case SEMI:
-          printf ("SEMI");
-          break;
-
-        case STRING:
-          readstring ();
-          printf ("STRING");
-          break;
-
-        case UNKN:
-          printf ("UNKN");
-          break;
-
-        default:
-          printf ("DEFAULT");
-          break;
+          br = ls->entry;
+          printf (" [b %s]", br->num);
         }
-      printf (" | ");
-      nextlex ();
+      br = d->next;
+      printf (" [n %s]", br ? br->num : "-");
+      if (d->commitid)
+        printf (" |%s|", d->commitid);
+      printf ("\n");
     }
-  return EXIT_SUCCESS;
+  printf ("# revisions: %u\n", r->deltas_count);
+
+  SPEW_ATAT (TINYKS (desc), r->desc);
+
+  for (wpair = r->deltas; wpair; wpair = wpair->next)
+    {
+      struct hshentry *d = wpair->entry;
+
+      printf ("revno: %s\n", d->num);
+      SPEW_ATAT (TINYKS (log), d->log);
+      SPEW_ATAT (TINYKS (text), d->text);
+    }
+
+  return 0;
+
+#undef SPEW_ATAT
 }
 
-#endif  /* TEST_LEX */
+#endif  /* TEST_GROK */
 
 
 /* ‘genrevs’ et al */
 
 #ifdef TEST_REV
+#include "b-divvy.h"
+#include "b-grok.h"
+
 /* Test the routines that generate a sequence of delta numbers
    needed to regenerate a given delta.  */
 
@@ -335,13 +452,9 @@ yarrrr (int argc, char *argv[argc])
 
   if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
     PFATAL ("can't open input file %s", argv[1]);
-
-  Lexinit ();
-  getadmin ();
-
-  gettree ();
-
-  getdesc (false);
+  REPO (filename) = argv[1];
+  REPO (r) = grok_all (SINGLE, FLOW (from));
+  FIXUP_OLD (GROK (desc));
 
   do
     {
@@ -388,50 +501,6 @@ yarrrr (int argc, char *argv[argc])
 }
 
 #endif  /* TEST_REV */
-
-
-/* parsing (high level) */
-
-#ifdef TEST_SYN
-#include <unistd.h>
-
-/* Input an RCS file and print its internal data structures.  */
-
-const struct program program =
-  {
-    .name = "y-SYN",
-    .exiterr = scram
-  };
-
-int
-yarrrr (int argc, char *argv[argc])
-{
-  if (argc < 2)
-    {
-      complain ("No input file\n");
-      return EXIT_FAILURE;
-    }
-  if (!(FLOW (from) = fro_open (argv[1], FOPEN_R, NULL)))
-    PFATAL ("can't open input file %s", argv[1]);
-
-  Lexinit ();
-  getadmin ();
-  REPO (fd_lock) = STDOUT_FILENO;
-  putadmin ();
-
-  gettree ();
-
-  getdesc (true);
-
-  nextlex ();
-
-  if (!eoflex ())
-    SYNTAX_ERROR ("expecting EOF");
-
-  return EXIT_SUCCESS;
-}
-
-#endif  /* TEST_SYN */
 
 
 int

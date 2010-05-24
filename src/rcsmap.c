@@ -106,7 +106,7 @@ checkidentifier (char const *id, int delimiter, register bool dotok)
       while ((c = *id) && c != ' ' && c != '\t' && c != '\n'
              && c != delim)
         id++;
-      PFATAL ("Zinvalid %s `%.*s'", dotok ? "identifier" : "symbol",
+      PFATAL ("invalid %s `%.*s'", dotok ? "identifier" : "symbol",
               id - temp, temp);
     }
   return id;

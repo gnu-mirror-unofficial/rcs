@@ -34,6 +34,7 @@
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
+#include "b-grok.h"
 #include "b-isr.h"
 #include "b-kwxout.h"
 
@@ -141,7 +142,7 @@ removelock (struct hshentry *delta)
   char const *num;
 
   num = delta->num;
-  for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
+  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
     {
       struct rcslock const *rl = tp->next->entry;
 
@@ -151,7 +152,7 @@ removelock (struct hshentry *delta)
             {
               /* We found a lock on ‘delta’ by caller; delete it.  */
               tp->next = tp->next->next;
-              ADMIN (locks) = fake.next;
+              GROK (locks) = fake.next;
               delta->lockedby = NULL;
               return 1;
             }
@@ -287,10 +288,10 @@ addelta (struct hshentries **tp_deltas)
     {
       /* This covers non-existing RCS file,
          and a file initialized with ‘rcs -i’.  */
-      if (newdnumlength == 0 && ADMIN (defbr))
+      if (newdnumlength == 0 && REPO (r) && GROK (branch))
         {
-          JAM (&newdelnum, ADMIN (defbr));
-          newdnumlength = countnumflds (ADMIN (defbr));
+          JAM (&newdelnum, GROK (branch));
+          newdnumlength = countnumflds (GROK (branch));
         }
       if (newdnumlength == 0)
         JAM (&newdelnum, "1.1");
@@ -344,14 +345,14 @@ addelta (struct hshentries **tp_deltas)
           return 1;
 
         case 0:
-          /* No existing lock; try ‘ADMIN (defbr)’.  Update ‘newdelnum’.  */
+          /* No existing lock; try ‘GROK (branch)’.  Update ‘newdelnum’.  */
           if (BE (strictly_locking) || !myself (REPO (stat).st_uid))
             {
               RERR ("no lock set by %s", getcaller ());
               return -1;
             }
-          if (ADMIN (defbr))
-            JAM (&newdelnum, ADMIN (defbr));
+          if (GROK (branch))
+            JAM (&newdelnum, GROK (branch));
           else
             {
               incnum (REPO (tip)->num, &newdelnum);
@@ -895,10 +896,6 @@ main (int argc, char **argv)
           }
         /* (End processing keepflag.)  */
 
-        /* Read the delta tree.  */
-        if (FLOW (from))
-          gettree ();
-
         /* Expand symbolic revision number.  */
         if (!fully_numeric (&newdelnum, krev, workptr))
           continue;
@@ -1026,9 +1023,7 @@ main (int argc, char **argv)
                     bad_truncate = 0 > ftruncate (fileno (FLOW (rewr)), (off_t) 0);
 
                     fro_bob (FLOW (from));
-                    Lexinit ();
-                    getadmin ();
-                    gettree ();
+                    grok_resynch (REPO (r), FLOW (from));
                     if (! (workdelta = delta_from_ref (targetdelta->num)))
                       continue;
                     workdelta->pretty_log = targetdelta->pretty_log;

@@ -52,6 +52,6 @@ extern void fatal_sys (char const *who)
 #define PFATAL(...)    generic_fatal (NULL, __VA_ARGS__)
 #define RFATAL(...)    generic_fatal (REPO (filename), __VA_ARGS__)
 
-#define SYNTAX_ERROR(...)  fatal_syntax (LEX (lno), __VA_ARGS__)
+#define SYNTAX_ERROR(...)  fatal_syntax (0, __VA_ARGS__)
 
 /* b-complain.h ends here */

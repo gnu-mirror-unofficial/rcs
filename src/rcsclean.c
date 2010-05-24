@@ -66,14 +66,14 @@ unlock (struct hshentry *delta)
 
   if (delta && delta->lockedby
       && STR_SAME (getcaller (), delta->lockedby))
-    for (fake.next = ADMIN (locks), tp = &fake; tp->next; tp = tp->next)
+    for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
       {
         struct rcslock const *rl = tp->next->entry;
 
         if (rl->delta == delta)
           {
             tp->next = tp->next->next;
-            ADMIN (locks) = fake.next;
+            GROK (locks) = fake.next;
             delta->lockedby = NULL;
             return true;
           }
@@ -257,8 +257,6 @@ main (int argc, char **argv)
             continue;
           }
 
-        gettree ();
-
         p = NULL;
         if (rev)
           {
@@ -274,7 +272,7 @@ main (int argc, char **argv)
             default:
               continue;
             case 0:
-              p = ADMIN (defbr) ? ADMIN (defbr) : "";
+              p = GROK (branch) ? GROK (branch) : "";
               break;
             case 1:
               p = delta->num;
@@ -305,7 +303,7 @@ main (int argc, char **argv)
                  && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
           BE (kws) = kwsub_kvl;
 
-        getdesc (false);
+        write_desc_maybe (FLOW (to));
 
         if (!delta
             ? workstat.st_size != 0

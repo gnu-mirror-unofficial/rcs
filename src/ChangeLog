@@ -1,5 +1,110 @@
 2010-05-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Rewrite parsing.
+
+	* b-grok.h: New file.
+	* b-grok.c: New file.
+	* b-complain.c (fatal_syntax): Don't output line number if 0.
+	* b-complain.h (SYNTAX_ERROR): Specify 0 for line number.
+	* b-fro.h (struct atat): New.
+	(string_from_atat, atat_put, atat_display): New func decls.
+	(ATAT_END, ATAT_TEXT_END, FIXUP_OLD): New macros.
+	* b-fro.c: #include <string.h>.
+	(string_from_atat, atat_put, atat_display): New funcs.
+	* b-kwxout.c (expandline): Don't assign to ‘NEXT (c)’, ‘LEX (lno)’.
+	* base.h (struct hshentry): Add members ‘log’, ‘text’;
+	delete members ‘insertlns’, ‘deletelns’.
+	(struct behavior): Delete member ‘receptive_to_next_hash_key’.
+	(struct parse_state): Delete.
+	(struct repo): New.
+	(struct repository): Add member ‘r’; delete members ‘admin’, ‘ndelt’.
+	(struct top): Delete member ‘parse_state’.
+	(LEX, NEXT, ADMIN): Delete macros.
+	(GROK): New macro.
+	(copystring, enterstring, editstring): Update func decls.
+	(write_desc_maybe): New func decl.
+	(Lexinit, nextlex, eoflex, getlex, getkeyopt, getkey, getkeystring)
+	(getid, getnum, must_get_delta_num, readstring, printstring, savestring)
+	(getadmin, gettree, getdesc, free_NEXT_str): Delete func decls.
+	* ci.c: #include "b-grok.h".
+	(removelock): Use ‘GROK (locks)’.
+	(addelta): Use ‘REPO (r)’, ‘GROK (branch)’.
+	(main): No longer call ‘gettree’, ‘Lexinit’, ‘getadmin’.
+	Instead, use ‘grok_resynch’.
+	* co.c (rmlock): Use ‘GROK (locks)’.
+	(main): No longer call ‘gettree’, ‘getdesc’;
+	use ‘GROK (branch)’, ‘write_desc_maybe’.
+	* rcs.c (scanlogtext): Take pointer to list of deltas;
+	rewrite to walk list of deltas instead of scanning input;
+	update calls to ‘editstring’, ‘enterstring’.
+	(doaccess): Use ‘GROK (access)’.
+	(breaklock, branchpoint): Use ‘GROK (locks)’.
+	(doassoc): Use ‘GROK (symbols)’.
+	(dolocks): Use ‘GROK (locks)’, ‘GROK (branch)’.
+	(buildeltatext): Take pointer to list of deltas;
+	update calls to ‘scanlogtext’.
+	(main): Use ‘GROK (access)’, ‘GROK (branch)’, GROK (deltas);
+	no longer call ‘gettree’; update call to ‘buildeltatext’.
+	* rcsclean.c (unlock): Use ‘GROK (locks)’.
+	(main): No longer call ‘gettree’, ‘getdesc’;
+	use ‘GROK (branch)’, ‘write_desc_maybe’.
+	* rcsdiff.c (main): No longer call ‘gettree’; use ‘GROK (branch)’.
+	* rcsedit.c (struct editstuff): Add member ‘script_lno’.
+	(SYNTAX_ERROR): Re-#define macro.
+	(struct finctx): New.
+	(finisheditline): Take ‘struct finctx *’; on error,
+	describe the failed action precisely, with line number.
+	(finishedit_fast): Construct finctx; update calls to ‘finisheditline’.
+	(copystring): Rewrite.
+	(enterstring): Take ‘struct atat *’; update call to ‘copystring’;
+	don't assign to ‘LEX (lno)’, ‘NEXT (c)’.
+	(editstring): Take ‘struct atat *’; keep track of edit
+	script line number; don't assign to ‘LEX (lno)’, ‘NEXT (c)’.
+	(findlock, addlock): Use ‘GROK (locks)’.
+	(addsymbol): Use ‘GROK (symbols)’.
+	(checkaccesslist): Use ‘GROK (access)’.
+	(dorewrite): Use '\n' directly instead of getting it from ‘NEXT (c)’.
+	(getdiffcmd): Don't assign to ‘LEX (lno)’, ‘NEXT (c)’.
+	* rcsfnms.c: #include "b-grok.h".
+	(InitAdmin): Don't init ‘ADMIN (defbr)’, ‘ADMIN (allowed)’,
+	‘ADMIN (assocs)’, ‘ADMIN (locks)’; don't call ‘Lexinit’.
+	(pairnames): Init ‘FLOW (erroneousp)’, ‘BE (Oerrloop)’;
+	don't call ‘Lexinit’, ‘getadmin’; grok on successful open.
+	* rcsgen.c (scandeltatext): Take pointer to list of deltas;
+	rewrite to walk list of deltas instead of scanning input;
+	update calls to ‘enterstring’, ‘copystring’, ‘editstring’.
+	(buildrevision): Use ‘GROK (deltas)’; update calls to ‘scandeltatext’.
+	(write_desc_maybe): New func.
+	(putdesc): Use ‘write_desc_maybe’, ‘FIXUP_OLD’.
+	(format_assocs): Don't do anything if ‘!REPO (r)’; use ‘GROK (symbols)’.
+	(putadmin); Use ‘REPO (r)’, ‘GROK (branch)’,
+	‘GROK (access)’, ‘GROK (locks)’.
+	* rcsmap.c (checkidentifier): Fix typo introduced 2010-05-18,
+	"Move some funcs out of rcslex.c to rcsmap.c".
+	* rcsmerge.c (main): No longer call ‘gettree’; use ‘GROK (branch)’.
+	* rcsrev.c (rev_from_symbol): Use ‘GROK (symbols)’.
+	(fully_numeric, tiprev): Use ‘GROK (branch)’.
+	* rcsutil.c (free_NEXT_str): Delete func.
+	* rlog.c: #incude <errno.h>.
+	(read_positive_integer, count_a_d): New static funcs.
+	(putadelta): Use ‘count_a_d’, ‘atat_display’.
+	(getscript, readdeltalog): Delete funcs.
+	(extractdelta, trunclocks): Use ‘GROK (locks)’.
+	(getnumericrev): Use ‘GROK (branch)’.
+	(main): Use ‘GROK (locks)’, ‘GROK (branch)’, ‘GROK (access)’,
+	‘GROK (deltas_count)’, ‘GROK (desc)’, ‘atat_display’, ‘FIXUP_OLD’;
+	no longer call ‘gettree’.
+	* rcslex.c: Delete file.
+	* rcssyn.c: Delete file.
+	* yarrrr.c [TEST_GROK]: New section.
+	[TEST_LEX]: Delete section.
+	[TEST_SYN]: Delete section.
+	* Makefile.am (libparts_a_SOURCES):
+	Add b-grok.h, b-grok.c;	delete rcslex.c, rcssyn.c.
+	(YALL): Add GROK; delete LEX, SYN.
+
+2010-05-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Rename ‘ADMIN (log_lead)’ to ‘REPO (log_lead)’.
 
 	* base.h (struct repository): Add member ‘log_lead’;

@@ -30,6 +30,7 @@
 #include "b-divvy.h"
 #include "b-feph.h"
 #include "b-fro.h"
+#include "b-grok.h"
 
 #define rcsdir     "RCS"
 #define rcsdirlen  (sizeof rcsdir - 1)
@@ -90,10 +91,6 @@ InitAdmin (void)
   register char const *ext;
 
   REPO (tip) = NULL;
-  ADMIN (defbr) = NULL;
-  ADMIN (allowed) = NULL;
-  ADMIN (assocs) = NULL;
-  ADMIN (locks) = NULL;
   BE (strictly_locking) = STRICT_LOCKING;
 
   /* Guess the comment leader from the suffix.  */
@@ -109,8 +106,6 @@ InitAdmin (void)
         break;
       }
   BE (kws) = kwsub_kv;
-  /* Note: If ‘!FLOW (from)’, read nothing; only initialize.  */
-  Lexinit ();
 }
 
 char const *
@@ -373,6 +368,8 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
     }
   REPO (filename) = p = intern (SINGLE, maybe.bestfit.string,
                                 maybe.bestfit.size);
+  FLOW (erroneousp) = false;
+  BE (Oerrloop) = false;
   if (FLOW (from))
     {
       if (!S_ISREG (REPO (stat).st_mode))
@@ -380,8 +377,10 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
           PERR ("%s isn't a regular file -- ignored", p);
           return 0;
         }
-      Lexinit ();
-      getadmin ();
+      /* TODO: Allocate on ‘SINGLE’.  */
+      REPO (r) = grok_all (SHARED, FLOW (from));
+      fro_bob (FLOW (from));
+      FLOW (to) = NULL;
     }
   else
     {
