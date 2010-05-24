@@ -201,8 +201,8 @@ rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
                                  of newlines in the log string.  */
                               int c1 = 1;
 
-                              for (ccnt = ADMIN (log_lead).size; ccnt--;)
-                                c1 += ADMIN (log_lead).string[ccnt] == '\n';
+                              for (ccnt = REPO (log_lead).size; ccnt--;)
+                                c1 += REPO (log_lead).string[ccnt] == '\n';
                               lncnt = 2 * c1 + 1;
                               while (ls--)
                                 if (*sp++ == '\n')
@@ -219,7 +219,7 @@ rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
                                  may be additional characters on the
                                  line (after the Log....$).  */
                               ccnt = BE (version) < VERSION (5)
-                                ? ADMIN (log_lead).size
+                                ? REPO (log_lead).size
                                 : leaderlen;
                               do
                                 {

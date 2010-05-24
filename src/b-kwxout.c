@@ -166,8 +166,8 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
         return;
       if (BE (version) < VERSION (5))
         {
-          cp = ADMIN (log_lead).string;
-          cs = ADMIN (log_lead).size;
+          cp = REPO (log_lead).string;
+          cs = REPO (log_lead).size;
         }
       else
         {

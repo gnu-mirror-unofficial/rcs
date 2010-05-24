@@ -627,10 +627,6 @@ struct repository
     /* List of ‘struct symdef’ (symbolic names).
        -- addsymbol InitAdmin  */
 
-    struct cbuf log_lead;
-    /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
-       -- [rcs]main InitAdmin getadmin  */
-
     struct link *locks;
     /* List of ‘struct rcslock’ (locks).
        -- rmlock addlock InitAdmin  */
@@ -643,6 +639,10 @@ struct repository
   struct hshentry *tip;
   /* The revision on the tip of the default branch.
      -- addelta buildtree [rcs]main InitAdmin getadmin  */
+
+  struct cbuf log_lead;
+  /* The string to use to start lines expanded for ‘Log’.  FIXME:ZONK.
+     -- [rcs]main InitAdmin getadmin  */
 
   int ndelt;
   /* Counter for deltas.

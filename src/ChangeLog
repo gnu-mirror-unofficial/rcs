@@ -1,3 +1,18 @@
+2010-05-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Rename ‘ADMIN (log_lead)’ to ‘REPO (log_lead)’.
+
+	* base.h (struct repository): Add member ‘log_lead’;
+	in sub-‘struct admin’, delete member ‘log_lead’.
+	* b-kwxout.c (keyreplace): Update refs.
+	* rcs.c (main): Likewise.
+	* rcsfcmp.c (rcsfcmp): Likewise.
+	* rcsfnms.c (InitAdmin): Likewise.
+	* rcsgen.c (putadmin): Likewise.
+	* rcssyn.c (getadmin): Likewise.
+	* rlog.c (main): Likewise.
+	* yarrrr.c [TEST_FCMP] (yarrrr): Likewise.
+
 2010-05-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Rename ‘ADMIN (head)’ to ‘REPO (tip)’.

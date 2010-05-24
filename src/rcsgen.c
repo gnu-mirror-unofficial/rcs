@@ -389,10 +389,10 @@ putadmin (void)
   if (BE (strictly_locking))
     aprintf (fout, "; %s", TINYKS (strict));
   aprintf (fout, ";\n");
-  if (ADMIN (log_lead).size)
+  if (REPO (log_lead).size)
     {
       aprintf (fout, "%s\t", TINYKS (comment));
-      putstring (fout, true, ADMIN (log_lead), false);
+      putstring (fout, true, REPO (log_lead), false);
       aprintf (fout, ";\n");
     }
   if (BE (kws) != kwsub_kv)

@@ -1405,11 +1405,11 @@ main (int argc, char **argv)
             BE (strictly_locking) = strictlock;
           }
         if (commsyml &&
-            (commsymlen != ADMIN (log_lead).size ||
-             memcmp (commsyml, ADMIN (log_lead).string, commsymlen) != 0))
+            (commsymlen != REPO (log_lead).size ||
+             memcmp (commsyml, REPO (log_lead).string, commsymlen) != 0))
           {
-            ADMIN (log_lead).string = commsyml;
-            ADMIN (log_lead).size = commsymlen;
+            REPO (log_lead).string = commsyml;
+            REPO (log_lead).size = commsymlen;
             changed = true;
           }
         if (0 <= expmode && BE (kws) != expmode)

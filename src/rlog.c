@@ -1008,7 +1008,7 @@ main (int argc, char **argv)
         if (pre5)
           {
             aputs ("\ncomment leader:  \"", out);
-            awrite (ADMIN (log_lead).string, ADMIN (log_lead).size, out);
+            awrite (REPO (log_lead).string, REPO (log_lead).size, out);
             afputc ('\"', out);
           }
         if (!pre5 || BE (kws) != kwsub_kv)

@@ -104,8 +104,8 @@ InitAdmin (void)
   for (struct compair const *ent = comtable; ; ent++)
     if (!ent->suffix || !strcasecmp (ent->suffix, ext))
       {
-        ADMIN (log_lead).string = ent->comlead;
-        ADMIN (log_lead).size = strlen (ent->comlead);
+        REPO (log_lead).string = ent->comlead;
+        REPO (log_lead).size = strlen (ent->comlead);
         break;
       }
   BE (kws) = kwsub_kv;

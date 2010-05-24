@@ -146,12 +146,12 @@ getadmin (void)
   if ((BE (strictly_locking) = getkeyopt (&TINY (strict))))
     getsemi (&TINY (strict));
 
-  clear_buf (&ADMIN (log_lead));
+  clear_buf (&REPO (log_lead));
   if (getkeyopt (&TINY (comment)))
     {
       if (NEXT (tok) == STRING)
         {
-          ADMIN (log_lead) = savestring ();
+          REPO (log_lead) = savestring ();
           nextlex ();
         }
       getsemi (&TINY (comment));
