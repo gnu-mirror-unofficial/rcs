@@ -333,7 +333,7 @@ fro_spew_partial (FILE *to, struct fro *f, struct range *r)
             if (!(count = fread (buf, sizeof (*buf),
                                  (pos < r->end - sizeof (buf)
                                   ? sizeof (buf)
-                                  : r->beg - pos),
+                                  : r->end - pos),
                                  f->stream)))
               {
                 testIerror (f->stream);

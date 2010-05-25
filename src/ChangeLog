@@ -1,5 +1,13 @@
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Output proper range for ‘RM_STDIO’ fro.
+
+	Regression introduced 2010-04-27, "Add abstraction: fro_spew_partial".
+	* b-fro.c (fro_spew_partial): In the case of ‘RM_STDIO’,
+	compute remaining size using range end, not range beginning.
+
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Bump mmap limit down to 256 kilobytes.
 
 	* b-fro.c (REASONABLE_MMAP_SIZE): Bump down to 262144.
