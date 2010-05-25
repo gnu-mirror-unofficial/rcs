@@ -263,20 +263,8 @@ B12:	triangle_down("1.2")
 .PE
 .\}
 .PP
-.SH IDENTIFICATION
-.de VL
-\\$2
-..
-Author: Walter F. Tichy,
-Purdue University, West Lafayette, IN, 47907.
-.br
-Manual Page Revision: \*(Rv; Release Date: \*(Dt.
-.br
-Copyright \(co 2010 Thien-Thi Nguyen.
-.br
-Copyright \(co 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert.
-.br
-Copyright \(co 1982, 1988, 1989 Walter F. Tichy.
+.ds EY 1990, 1991, 1992, 1993, 1994, 1995
+.so b-identification
 .SH "SEE ALSO"
 .BR rcsintro (1),
 .BR ci (1),

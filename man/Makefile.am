@@ -23,6 +23,7 @@ dist_man_MANS = ci.1 co.1 ident.1 merge.1 rcs.1 rcsclean.1 \
 BUILT_SOURCES = REL
 
 bits = b-environment \
+  b-identification \
   b-tichy-cite
 
 EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES) $(bits)
