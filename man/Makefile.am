@@ -26,11 +26,14 @@ bits = b-environment
 
 EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES) $(bits)
 
-rcsfile.5: rcsfile.5in REL
-	{ cat REL ; $(PIC) $(PICFLAGS) $< ; } > $@
+soelim = soelim -I -I'$(srcdir)'
+nolf = sed '/^\.lf /d'
+
+rcsfile.5: rcsfile.5in REL $(bits)
+	$(soelim) $< | $(PIC) $(PICFLAGS) | $(nolf) > $@
 
 .1in.1: REL $(bits)
-	soelim -I. -I'$(srcdir)' $< | sed '/^\.lf /d' > $@
+	$(soelim) $< | $(nolf) > $@
 
 REL: $(top_srcdir)/configure
 	@{ echo '.ds Rv $(PACKAGE_VERSION)' ;		\

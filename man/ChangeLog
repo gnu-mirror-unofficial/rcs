@@ -1,5 +1,15 @@
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[man] Use soelim(1) for rcsfile.5 generation.
+
+	* Makefile.am (soelim, nolf): New vars.
+	(rcsfile.5): Add to prerequisites list REL, $(bits);
+	use $(soelim), $(nolf).
+	(.1in.1): Use $(soelim), $(nolf).
+	* rcsfile.5in: Add ‘.so REL’.
+
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Break out ENVIRONMENT section.
 
 	* b-environment: New file.

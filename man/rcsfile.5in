@@ -1,3 +1,4 @@
+.so REL
 .\" Set p to 1 if your formatter can handle pic output.
 .if t .nr p 1
 .ds r \s-1RCS\s0
