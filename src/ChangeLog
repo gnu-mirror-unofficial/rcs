@@ -1,5 +1,14 @@
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Consult env var RCS_MEM_LIMIT to set the memory limit.
+
+	* base.h (struct behavior): Add member ‘mem_limit’.
+	* rcsutil.c (gnurcs_init): Set ‘BE (mem_limit)’.
+	* b-fro.c (REASONABLE_MMAP_SIZE): Delete #define.
+	(fro_open): Use ‘BE (mem_limit)’ to determine read method.
+
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Output proper range for ‘RM_STDIO’ fro.
 
 	Regression introduced 2010-04-27, "Add abstraction: fro_spew_partial".

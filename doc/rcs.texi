@@ -633,6 +633,19 @@ Another way to set common options is with the @samp{RCSINIT}
 environment variable.  This is a space-separated list of options.
 @TODO Write more.
 
+@cindex memory limit
+Normally, for speed, commands either memory map or copy into memory
+the RCS file if its size is less than the @dfn{memory limit}, currently
+defaulting to 256 kilobytes.  Otherwise the commands fall back to using
+standard i/o routines.
+
+@cindex RCS_MEM_LIMIT environment variable
+@cindex environment variable, RCS_MEM_LIMIT
+
+You can adjust the memory limit by setting the @samp{RCS_MEM_LIMIT}
+environment variable to a numeric value (measured in kilobytes).
+An empty value is silently ignored.
+
 @node ci
 @section @rcscommand{ci}
 

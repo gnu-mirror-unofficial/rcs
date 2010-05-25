@@ -1,5 +1,11 @@
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Consult env var RCS_MEM_LIMIT to set the memory limit.
+
+	* b-environment: Add blurb on ‘RCS_MEM_LIMIT’.
+
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Break out IDENTIFICATION section.
 
 	* b-identification: New file.

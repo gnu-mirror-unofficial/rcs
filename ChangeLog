@@ -1,3 +1,9 @@
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Consult env var RCS_MEM_LIMIT to set the memory limit.
+
+	* doc/rcs.texi (Environment): Document ‘RCS_MEM_LIMIT’.
+
 2010-05-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use gnulib module ‘hash-pjw’.

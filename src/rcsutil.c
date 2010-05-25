@@ -51,6 +51,24 @@ gnurcs_init (void)
   ISR_SCRATCH = isr_init (&BE (quiet));
   init_ephemstuff ();
   BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
+
+  /* Set ‘BE (mem_limit)’.  */
+  {
+    char *v;
+    long lim;
+
+    BE (mem_limit) = (((v = getenv ("RCS_MEM_LIMIT"))
+                       /* Silently ignore empty value.  */
+                       && v[0])
+                      ? v
+                      : NULL)
+      /* Clamp user-specified value to [0,LONG_MAX].  */
+      ? (0 > (lim = atol (v))
+         ? 0
+         : lim)
+      /* Default value.  */
+      : 256;
+  }
 }
 
 void
