@@ -1,3 +1,9 @@
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Bump mmap limit down to 256 kilobytes.
+
+	* b-fro.c (REASONABLE_MMAP_SIZE): Bump down to 262144.
+
 2010-05-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Rewrite parsing.

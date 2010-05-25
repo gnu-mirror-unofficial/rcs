@@ -41,7 +41,7 @@
 
 /* Size in bytes up to which we will mmap (if mmap is available).  */
 #ifndef REASONABLE_MMAP_SIZE
-#define REASONABLE_MMAP_SIZE  (16 * 1024 * 1024)
+#define REASONABLE_MMAP_SIZE  (256 * 1024)
 #endif
 
 #if MMAP_SIGNAL
