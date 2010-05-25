@@ -1,3 +1,21 @@
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[man] Use soelim(1) for foo.1 generation.
+
+	* Makefile.am (bits): New var.
+	(EXTRA_DIST): Add $(bits).
+	(.1in.1): Add prerequisites REL, $(bits); use soelim(1), sed(1).
+	* ci.1in: Add ‘.so REL’.
+	* co.1in: Likewise.
+	* ident.1in: Likewise.
+	* merge.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsclean.1in: Likewise.
+	* rcsdiff.1in: Likewise.
+	* rcsintro.1in: Likewise.
+	* rcsmerge.1in: Likewise.
+	* rlog.1in: Likewise.
+
 2010-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Freeze RCS file syntax; drop ‘newphrase’ support.

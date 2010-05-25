@@ -22,13 +22,15 @@ dist_man_MANS = ci.1 co.1 ident.1 merge.1 rcs.1 rcsclean.1 \
 
 BUILT_SOURCES = REL
 
-EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES)
+bits =
+
+EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES) $(bits)
 
 rcsfile.5: rcsfile.5in REL
 	{ cat REL ; $(PIC) $(PICFLAGS) $< ; } > $@
 
-.1in.1:
-	cat REL $< > $@
+.1in.1: REL $(bits)
+	soelim -I. -I'$(srcdir)' $< | sed '/^\.lf /d' > $@
 
 REL: $(top_srcdir)/configure
 	@{ echo '.ds Rv $(PACKAGE_VERSION)' ;		\
