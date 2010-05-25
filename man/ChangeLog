@@ -1,5 +1,23 @@
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[man] Break out Tichy paper citation.
+
+	* b-tichy-cite: New file.
+	* Makefile.am (bits): Add b-tichy-cite.
+	* rcsfreeze.1in: Add ‘.so b-tichy-cite’.
+	* ci.1in: Replace Tichy paper citation with ‘.so b-tichy-cite’.
+	* co.1in: Likewise.
+	* ident.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsclean.1in: Likewise.
+	* rcsdiff.1in: Likewise.
+	* rcsfile.5in: Likewise.
+	* rcsintro.1in: Likewise.
+	* rcsmerge.1in: Likewise.
+	* rlog.1in: Likewise.
+
+2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Use soelim(1) for rcsfile.5 generation.
 
 	* Makefile.am (soelim, nolf): New vars.
