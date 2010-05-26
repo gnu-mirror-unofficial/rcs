@@ -489,34 +489,30 @@ breaklock (struct hshentry const *delta)
    Send mail if a lock different from the caller's is broken.
    Print an error message if there is no such lock or error.  */
 {
+  struct rcslock const *rl;
   struct link fake, *tp;
-  char const *num;
+  char const *num, *before;
 
   num = delta->num;
-  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
+  fake.next = GROK (locks);
+  if (! (tp = lock_delta_memq (&fake, delta)))
     {
-      struct rcslock const *rl = tp->next->entry;
-      struct hshentry *d = rl->delta;
-
-      if (delta == d)
-        {
-          char const *before = rl->login;
-
-          if (!caller_login_p (before)
-              && !sendmail (num, before))
-            {
-              RERR ("revision %s still locked by %s", num, before);
-              return false;
-            }
-          diagnose ("%s unlocked", num);
-          tp->next = tp->next->next;
-          GROK (locks) = fake.next;
-          d->lockedby = NULL;
-          return true;
-        }
+      RERR ("no lock set on revision %s", num);
+      return false;
     }
-  RERR ("no lock set on revision %s", num);
-  return false;
+  rl = tp->next->entry;
+  before = rl->login;
+  if (!caller_login_p (before)
+      && !sendmail (num, before))
+    {
+      RERR ("revision %s still locked by %s", num, before);
+      return false;
+    }
+  diagnose ("%s unlocked", num);
+  tp->next = tp->next->next;
+  GROK (locks) = fake.next;
+  rl->delta->lockedby = NULL;
+  return true;
 }
 
 static struct hshentry *
@@ -537,11 +533,13 @@ searchcutpt (char const *object, int length, struct hshentries *store)
 static bool
 branchpoint (struct hshentry *strt, struct hshentry *tail)
 /* Check whether the deltas between ‘strt’ and ‘tail’ are locked or
-   branch point, return 1 if any is locked or branch point; otherwise,
-   return 0 and mark deleted.  */
+   branch point, return true if any is locked or branch point; otherwise,
+   return false and mark deleted.  */
 {
   struct hshentry *pt;
+  struct link fake;
 
+  fake.next = GROK (locks);
   for (pt = strt; pt != tail; pt = pt->next)
     {
       if (pt->branches)
@@ -550,15 +548,10 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
           RERR ("can't remove branch point %s", pt->num);
           return true;
         }
-      for (struct link *ls = GROK (locks); ls; ls = ls->next)
+      if (lock_delta_memq (&fake, pt))
         {
-          struct rcslock const *rl = ls->entry;
-
-          if (pt == rl->delta)
-            {
-              RERR ("can't remove locked revision %s", pt->num);
-              return true;
-            }
+          RERR ("can't remove locked revision %s", pt->num);
+          return true;
         }
       pt->selector = false;
       diagnose ("deleting revision %s", pt->num);

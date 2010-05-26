@@ -140,34 +140,29 @@ removelock (struct hshentry *delta)
    return 0; return 1 if a lock is actually removed.  */
 {
   struct link fake, *tp;
+  struct rcslock const *rl;
   char const *num;
 
   num = delta->num;
-  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
+  fake.next = GROK (locks);
+  if (! (tp = lock_delta_memq (&fake, delta)))
     {
-      struct rcslock const *rl = tp->next->entry;
-
-      if (rl->delta == delta)
-        {
-          if (caller_login_p (rl->login))
-            {
-              /* We found a lock on ‘delta’ by caller; delete it.  */
-              tp->next = tp->next->next;
-              GROK (locks) = fake.next;
-              delta->lockedby = NULL;
-              return 1;
-            }
-          else
-            {
-              RERR ("revision %s locked by %s", num, rl->login);
-              return -1;
-            }
-        }
+      if (!BE (strictly_locking) && myself (REPO (stat).st_uid))
+        return 0;
+      RERR ("no lock set by %s for revision %s", getcaller (), num);
+      return -1;
     }
-  if (!BE (strictly_locking) && myself (REPO (stat).st_uid))
-    return 0;
-  RERR ("no lock set by %s for revision %s", getcaller (), num);
-  return -1;
+  rl = tp->next->entry;
+  if (! caller_login_p (rl->login))
+    {
+      RERR ("revision %s locked by %s", num, rl->login);
+      return -1;
+    }
+  /* We tp a lock on ‘delta’ by caller; delete it.  */
+  tp->next = tp->next->next;
+  GROK (locks) = fake.next;
+  delta->lockedby = NULL;
+  return 1;
 }
 
 static struct wlink newbranch;          /* new branch to be inserted */

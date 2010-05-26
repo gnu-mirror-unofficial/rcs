@@ -991,24 +991,17 @@ findlock (bool delete, struct hshentry **target)
    Return 0 for no locks, 1 for one, 2 for two or more.  */
 {
   struct rcslock const *rl;
-  struct link fake, *tp, *found = NULL;
+  struct link fake, *found;
+  char const *me = getcaller ();
 
-  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
-    {
-      rl = tp->next->entry;
-      if (caller_login_p (rl->login))
-        {
-          if (found)
-            {
-              RERR ("multiple revisions locked by %s; please specify one",
-                    getcaller ());
-              return 2;
-            }
-          found = tp;
-        }
-    }
-  if (!found)
+  if (! (fake.next = GROK (locks))
+      || ! (found = lock_login_memq (&fake, me)))
     return 0;
+  if (lock_login_memq (found->next, me))
+    {
+      RERR ("multiple revisions locked by %s; please specify one", me);
+      return 2;
+    }
   rl = found->next->entry;
   *target = rl->delta;
   if (delete)

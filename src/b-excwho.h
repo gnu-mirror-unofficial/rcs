@@ -20,5 +20,11 @@
 
 extern bool caller_login_p (char const *login);
 extern bool currently_setuid_p (void);
+extern struct link *lock_memq (struct link *ls, bool loginp, void const *x);
+
+/* Idioms.  */
+
+#define lock_login_memq(ls,login)  lock_memq (ls,  true, login)
+#define lock_delta_memq(ls,delta)  lock_memq (ls, false, delta)
 
 /* b-excwho.c ends here */

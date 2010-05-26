@@ -1,5 +1,19 @@
 2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: lock_memq, lock_login_memq, lock_delta_memq
+
+	* b-excwho.c: #include "b-esds.h".
+	(lock_memq): New func.
+	* b-excwho.h (lock_memq): New func decl.
+	(lock_login_memq, lock_delta_memq): New macros.
+	* ci.c (removelock): Use ‘lock_delta_memq’.
+	* co.c (rmlock): Likewise.
+	* rcs.c (breaklock, branchpoint): Likewise.
+	* rcsclean.c (unlock): Likewise.
+	* rcsedit.c (findlock): Use ‘lock_login_memq’.
+
+2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: currently_setuid_p
 
 	* b-excwho.c (currently_setuid_p): New func.

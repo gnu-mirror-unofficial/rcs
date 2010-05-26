@@ -20,6 +20,7 @@
 
 #include "base.h"
 #include <string.h>
+#include "b-esds.h"
 
 bool
 caller_login_p (char const *login)
@@ -35,6 +36,26 @@ currently_setuid_p (void)
 #else
   return false;
 #endif
+}
+
+struct link *
+lock_memq (struct link *ls, bool loginp, void const *x)
+/* Search ‘ls’, which should be initialized by caller to have its ‘.next’
+   pointing to ‘GROK (locks)’, for a lock that matches ‘x’ and return the
+   link whose cadr is the match, else NULL.  If ‘loginp’, ‘x’ is a login
+   (string), else it is a delta.  */
+{
+  struct rcslock const *rl;
+
+  for (; ls->next; ls = ls->next)
+    {
+      rl = ls->next->entry;
+      if (loginp
+          ? STR_SAME (x, rl->login)
+          : x == rl->delta)
+        return ls;
+    }
+  return NULL;
 }
 
 /* b-excwho.c ends here */

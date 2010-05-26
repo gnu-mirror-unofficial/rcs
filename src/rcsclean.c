@@ -66,19 +66,15 @@ unlock (struct hshentry *delta)
   struct link fake, *tp;
 
   if (delta && delta->lockedby
-      && caller_login_p (delta->lockedby))
-    for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
-      {
-        struct rcslock const *rl = tp->next->entry;
-
-        if (rl->delta == delta)
-          {
-            tp->next = tp->next->next;
-            GROK (locks) = fake.next;
-            delta->lockedby = NULL;
-            return true;
-          }
-      }
+      && caller_login_p (delta->lockedby)
+      && (fake.next = GROK (locks))
+      && (tp = lock_delta_memq (&fake, delta)))
+    {
+      tp->next = tp->next->next;
+      GROK (locks) = fake.next;
+      delta->lockedby = NULL;
+      return true;
+    }
   return false;
 }
 

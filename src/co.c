@@ -121,36 +121,25 @@ rmlock (struct hshentry const *delta)
   and 1 if a lock was found and removed.  */
 {
   struct link fake, *tp;
-  struct rcslock const *rl = NULL;
-  bool whomatch, nummatch;
+  struct rcslock const *rl;
 
-  for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
-    {
-      rl = tp->next->entry;
-      whomatch = caller_login_p (rl->login);
-      nummatch = (delta == rl->delta);
-      if (whomatch && nummatch)
-        break;
-      /* Found a lock on delta by caller.  */
-      if (!whomatch && nummatch)
-        {
-          RERR ("revision %s locked by %s; use co -r or rcs -u",
-                delta->num, rl->login);
-          return -1;
-        }
-    }
-  if (tp->next)
-    {
-      /* Found one; delete it.  */
-      tp->next = tp->next->next;
-      GROK (locks) = fake.next;
-      rl->delta->lockedby = NULL;
-      /* Success.  */
-      return 1;
-    }
-  else
+  fake.next = GROK (locks);
+  if (! (tp = lock_delta_memq (&fake, delta)))
     /* No lock on ‘delta’.  */
     return 0;
+  rl = tp->next->entry;
+  if (!caller_login_p (rl->login))
+    /* Found a lock on ‘delta’ by someone else.  */
+    {
+      RERR ("revision %s locked by %s; use co -r or rcs -u",
+            delta->num, rl->login);
+      return -1;
+    }
+  /* Found a lock on ‘delta’ by caller; delete it.  */
+  tp->next = tp->next->next;
+  GROK (locks) = fake.next;
+  rl->delta->lockedby = NULL;
+  return 1;
 }
 
 static void
