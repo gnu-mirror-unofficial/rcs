@@ -599,13 +599,6 @@ If REV is omitted, compute it from the last lock (co -l), perhaps
 starting a new branch.  If there is no lock, use DEFBR.(L+1).
 */
 
-const struct program program =
-  {
-    .name = "ci",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 /* Use a variable instead of simple #define for fast identity compare.  */
 static char const default_state[] = DEFAULTSTATE;
 
@@ -633,9 +626,15 @@ main (int argc, char **argv)
   struct hshentry *workdelta;
   struct link *tp_assoc = &assoclst;
   struct hshentries *deltas;            /* Deltas to be generated.  */
+  const struct program program =
+    {
+      .name = "ci",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   setrid ();
 

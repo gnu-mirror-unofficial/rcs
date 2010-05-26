@@ -55,13 +55,6 @@ If only one is specified, use the latest revision on the default
 branch to be the second revision.
 */
 
-const struct program program =
-  {
-    .name = "rcsmerge",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 #define quietarg  "-q"
 
 int
@@ -76,9 +69,15 @@ main (int argc, char **argv)
   int status;
   struct fro *workptr;
   struct hshentry *target;
+  const struct program program =
+    {
+      .name = "rcsmerge",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   edarg = rev[1] = rev[2] = NULL;
   status = 0;                           /* Keep lint happy.  */

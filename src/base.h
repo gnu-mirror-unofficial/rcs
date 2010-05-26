@@ -400,7 +400,6 @@ struct program
   /* Exit errorfully.  */
   void (*exiterr) (void) exiting;
 };
-extern const struct program program;
 
 /* (Somewhat) fleeting files.  */
 enum maker { notmade, real, effective };
@@ -674,9 +673,10 @@ struct flow
      -- buildjoin syserror generic_error generic_fatal  */
 };
 
-/* The top of the structure tree (NB: does not include ‘program’).  */
+/* The top of the structure tree.  */
 struct top
 {
+  struct program const *program;
   struct behavior behavior;
   struct manifestation manifestation;
   struct repository repository;
@@ -687,7 +687,7 @@ extern struct top *top;
 
 /* In the future we might move ‘top’ into another structure.
    These abstractions keep the invasiveness to a minimum.  */
-#define PROGRAM(x)    (program. x)
+#define PROGRAM(x)    (top->program-> x)
 #define BE(quality)   (top->behavior. quality)
 #define MANI(member)  (top->manifestation. member)
 #define PREV(which)   (MANI (prev). which)
@@ -828,7 +828,7 @@ char const *date2str (char const date[datesize],
                       char datebuf[datesize + zonelenmax]);
 
 /* rcsutil */
-void gnurcs_init (void);
+void gnurcs_init (struct program const *program);
 void bad_option (char const *option);
 void redefined (int c);
 struct cbuf minus_p (char const *xrev, char const *rev);

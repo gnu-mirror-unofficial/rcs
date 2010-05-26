@@ -1,5 +1,40 @@
 2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move ‘program’ references from global scope into ‘top’.
+
+	* gnu-h-v.c (display_version, check_hv): Take additional arg
+	‘struct program *prog’; use it instead of ‘PROGRM (foo)’.
+	* gnu-h-v.h (display_version, check_hv): Update func decls.
+	(CHECK_HV): Update macro.
+	* rcsutil.c (gnurcs_init): Take ‘struct program *’; save into ‘top’.
+	(setRCSversion): Update call to ‘display_version’.
+	* base.h (program): Delete var decl.
+	(struct top): Add member ‘program’.
+	(PROGRAM): Update to look in ‘top->program’.
+	(gnurcs_init): Update func decl.
+	* ci.c (program): Delete var.
+	(main): Add local var ‘struct program *program’;
+	update call to ‘gnurcs_init’.
+	* co.c (program, main): Likewise.
+	* ident.c (program, main): Likewise;
+	also update call to ‘display_version’.
+	* merge.c (program, main): Likewise;
+	also update call to ‘display_version’.
+	* rcs.c (program, main): Likewise.
+	* rcsclean.c (program, main): Likewise.
+	* rcsdiff.c (program, main): Likewise.
+	* rcsmerge.c (program, main): Likewise.
+	* rlog.c (program, main): Likewise.
+	* yarrrr.c [TEST_STR2TIME] (program): Make var static.
+	[TEST_FCMP] (program): Likewise.
+	[TEST_PAIRS] (program): Likewise.
+	[TEST_KEEP] (program): Likewise.
+	[TEST_GROK] (program): Likewise.
+	[TEST_REV] (program): Likewise.
+	(main): Update call to ‘gnurcs_init’.
+
+2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: lock_drop
 
 	* b-excwho.c (lock_drop): New func.

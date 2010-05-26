@@ -46,13 +46,6 @@ Options:
   -V            Like --version.
 */
 
-const struct program program =
-  {
-    .name = "merge",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 int
 main (int argc, char **argv)
 {
@@ -60,9 +53,15 @@ main (int argc, char **argv)
   char const *arg[3], *label[3], *edarg = NULL;
   int labels;
   bool tostdout = false;
+  const struct program program =
+    {
+      .name = "merge",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   labels = 0;
 
@@ -94,7 +93,7 @@ main (int argc, char **argv)
           break;
 
         case 'V':
-          display_version ();
+          display_version (&program);
           return 0;
 
         default:

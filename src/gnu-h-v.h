@@ -21,20 +21,20 @@
 /* Display the version blurb to stdout, starting with:
    | NAME (GNU RCS) PACKAGE_VERSION
    | ...
-   and ending with newline.  NAME is the value of ‘PROGRAM (name)’.  */
+   and ending with newline.  NAME is the value of ‘prog->name’.  */
 extern void
-display_version (void);
+display_version (struct program const *prog);
 
 /* If ARGC is less than 2, do nothing.
    If ARGV[1] is "--version", use ‘display_version’ and exit successfully.
    If ARGV[1] is "--help", display the help blurb, starting with:
    | NAME HELP
-   and exit successfully.  NAME is the value of ‘PROGRAM (name)’,
-   while HELP is the value of ‘PROGRAM (help)’.  */
+   and exit successfully.  NAME is the value of ‘prog->name’,
+   while HELP is the value of ‘prog->help’.  */
 extern void
-check_hv (int argc, char **argv);
+check_hv (int argc, char **argv, struct program const *prog);
 
 /* Idiom.  */
-#define CHECK_HV()  check_hv (argc, argv)
+#define CHECK_HV()  check_hv (argc, argv, &program)
 
 /* gnu-h-v.h ends here */

@@ -142,22 +142,21 @@ Options:
 If no FILE is specified, scan standard input.
 */
 
-const struct program program =
-  {
-    .name = "ident",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 int
 main (int argc, char **argv)
 {
   FILE *fp;
   int status = EXIT_SUCCESS;
   char const *a;
+  const struct program program =
+    {
+      .name = "ident",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   while ((a = *++argv) && *a == '-')
     while (*++a)
@@ -168,7 +167,7 @@ main (int argc, char **argv)
           break;
 
         case 'V':
-          display_version ();
+          display_version (&program);
           return EXIT_SUCCESS;
 
         default:

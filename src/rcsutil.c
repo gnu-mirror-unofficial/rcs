@@ -43,12 +43,13 @@
 #include "maketime.h"
 
 void
-gnurcs_init (void)
+gnurcs_init (struct program const *program)
 {
   SHARED = make_space ("shared");
   SINGLE = make_space ("single");
   top = ZLLOC (1, struct top);
   unbuffer_standard_error ();
+  top->program = program;
   ISR_SCRATCH = isr_init (&BE (quiet));
   init_ephemstuff ();
   BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
@@ -442,7 +443,7 @@ setRCSversion (char const *str)
     }
   else
     {
-      display_version ();
+      display_version (top->program);   /* TODO:ZONK */
       exit (0);
     }
 }

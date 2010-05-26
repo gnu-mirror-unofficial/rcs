@@ -40,26 +40,26 @@
                         && !strncmp (k, s, sizeof (k) - 1))
 
 void
-display_version (void)
+display_version (struct program const *prog)
 {
-  printf ("%s%s", PROGRAM (name), COMMAND_VERSION);
+  printf ("%s%s", prog->name, COMMAND_VERSION);
 }
 
 void
-check_hv (int argc, char **argv)
+check_hv (int argc, char **argv, struct program const *prog)
 {
   if (1 >= argc)
     return;
 
   if (EXACTLY ("--help", argv[1]))
     {
-      printf ("Usage: %s %s%s", PROGRAM (name), PROGRAM (help), BUGME);
+      printf ("Usage: %s %s%s", prog->name, prog->help, BUGME);
       exit (EXIT_SUCCESS);
     }
 
   if (EXACTLY ("--version", argv[1]))
     {
-      display_version ();
+      display_version (prog);
       exit (EXIT_SUCCESS);
     }
 }

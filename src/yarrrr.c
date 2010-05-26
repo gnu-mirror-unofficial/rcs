@@ -67,7 +67,7 @@ scram (void)
 #ifdef TEST_STR2TIME
 #include "maketime.h"
 
-const struct program program = { .name = "y-STR2TIME" };
+static const struct program program = { .name = "y-STR2TIME" };
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -95,7 +95,7 @@ yarrrr (int argc, char *argv[argc])
 /* The test program prints out whether two files are identical,
    except for keywords.  */
 
-const struct program program = { .name = "y-FCMP" };
+static const struct program program = { .name = "y-FCMP" };
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -125,7 +125,7 @@ yarrrr (int argc, char *argv[argc])
 
 #ifdef TEST_PAIRS
 
-const struct program program =
+static const struct program program =
   {
     .name = "y-PAIRS",
     .exiterr = bow_out
@@ -197,7 +197,7 @@ yarrrr (int argc, char *argv[argc])
 #include <string.h>
 /* Print the keyword values found.  */
 
-const struct program program = { .name = "y-KEEP" };
+static const struct program program = { .name = "y-KEEP" };
 
 void
 spew (char const *what, char *s)
@@ -311,7 +311,7 @@ exiterr (void)
   _Exit (1);
 }
 
-const struct program program = { .name = "y-GROK", .exiterr = exiterr };
+static const struct program program = { .name = "y-GROK", .exiterr = exiterr };
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -323,7 +323,6 @@ yarrrr (int argc, char *argv[argc])
   struct wlink *wpair;
   size_t i;
 
-  gnurcs_init ();
   REPO (filename) = argv[1];            /* FIXME: for ‘fatal_syntax’ */
   stash = SINGLE;
   f = fro_open (argv[1], "r", NULL);
@@ -427,7 +426,7 @@ yarrrr (int argc, char *argv[argc])
 /* Test the routines that generate a sequence of delta numbers
    needed to regenerate a given delta.  */
 
-const struct program program =
+static const struct program program =
   {
     .name = "y-REV",
     .exiterr = scram
@@ -506,7 +505,7 @@ yarrrr (int argc, char *argv[argc])
 int
 main (int argc, char *argv[argc])
 {
-  gnurcs_init ();
+  gnurcs_init (&program);
   return yarrrr (argc, argv);
 }
 

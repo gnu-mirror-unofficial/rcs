@@ -768,13 +768,6 @@ Options:
   -q            No effect, included for consistency with other commands.
 */
 
-const struct program program =
-  {
-    .name = "rlog",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 int
 main (int argc, char **argv)
 {
@@ -789,9 +782,15 @@ main (int argc, char **argv)
   bool pre5;
   bool shownames;
   int revno;
+  const struct program program =
+    {
+      .name = "rlog",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   descflag = selectflag = shownames = true;
   onlylockflag = onlyRCSflag = false;

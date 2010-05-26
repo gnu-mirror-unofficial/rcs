@@ -1093,13 +1093,6 @@ Options:
 REV defaults to the latest revision on the default branch.
 */
 
-const struct program program =
-  {
-    .name = "rcs",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 int
 main (int argc, char **argv)
 {
@@ -1115,9 +1108,15 @@ main (int argc, char **argv)
   struct link fakerm, *tprm;
   struct link *tp_assoc, *tp_chacc, *tp_log, *tp_state;
   struct hshentries *deltas;
+  const struct program program =
+    {
+      .name = "rcs",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   nosetid ();
 

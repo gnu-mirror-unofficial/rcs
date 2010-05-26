@@ -138,13 +138,6 @@ passed to the underlying diff(1) command:
 (Not all of these options are meaningful.)
 */
 
-const struct program program =
-  {
-    .name = "rcsdiff",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 int
 main (int argc, char **argv)
 {
@@ -165,9 +158,15 @@ main (int argc, char **argv)
   char *a, *dcp, **newargv;
   bool no_diff_means_no_output;
   register int c;
+  const struct program program =
+    {
+      .name = "rcsdiff",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   exitstatus = DIFF_SUCCESS;
 

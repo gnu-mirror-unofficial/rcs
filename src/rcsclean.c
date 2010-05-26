@@ -133,13 +133,6 @@ Options:
 REV defaults to the latest revision on the default branch.
 */
 
-const struct program program =
-  {
-    .name = "rcsclean",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 int
 main (int argc, char **argv)
 {
@@ -150,9 +143,15 @@ main (int argc, char **argv)
   struct hshentries *deltas;
   struct hshentry *delta;
   struct stat workstat;
+  const struct program program =
+    {
+      .name = "rcsclean",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   setrid ();
 

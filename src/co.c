@@ -422,13 +422,6 @@ mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
 If REV is omitted, take it to be the latest on the default branch.
 */
 
-const struct program program =
-  {
-    .name = "co",
-    .help = help,
-    .exiterr = exiterr
-  };
-
 int
 main (int argc, char **argv)
 {
@@ -443,10 +436,16 @@ main (int argc, char **argv)
 #if OPEN_O_BINARY
   int stdout_mode = 0;
 #endif
- struct hshentries *deltas;             /* Deltas to be generated.  */
+  struct hshentries *deltas;            /* Deltas to be generated.  */
+  struct program program =
+    {
+      .name = "co",
+      .help = help,
+      .exiterr = exiterr
+    };
 
   CHECK_HV ();
-  gnurcs_init ();
+  gnurcs_init (&program);
 
   setrid ();
   author = date = rev = state = NULL;
