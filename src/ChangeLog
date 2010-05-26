@@ -1,5 +1,12 @@
 2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Compare delta objects instead of their revision numbers.
+
+	* co.c (rmlock): Dont ‘STR_SAME’; instead compare objects (with ‘==’).
+	* rcs.c (breaklock): Likewise.
+
+2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: caller_login_p
 
 	Here, "I" means "#include "b-excwho.h";

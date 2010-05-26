@@ -122,22 +122,20 @@ rmlock (struct hshentry const *delta)
 {
   struct link fake, *tp;
   struct rcslock const *rl = NULL;
-  char const *num;
   bool whomatch, nummatch;
 
-  num = delta->num;
   for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
     {
       rl = tp->next->entry;
       whomatch = caller_login_p (rl->login);
-      nummatch = STR_SAME (num, rl->delta->num);
+      nummatch = (delta == rl->delta);
       if (whomatch && nummatch)
         break;
       /* Found a lock on delta by caller.  */
       if (!whomatch && nummatch)
         {
           RERR ("revision %s locked by %s; use co -r or rcs -u",
-                num, rl->login);
+                delta->num, rl->login);
           return -1;
         }
     }

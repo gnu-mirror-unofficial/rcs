@@ -498,7 +498,7 @@ breaklock (struct hshentry const *delta)
       struct rcslock const *rl = tp->next->entry;
       struct hshentry *d = rl->delta;
 
-      if (STR_SAME (num, d->num))
+      if (delta == d)
         {
           char const *before = rl->login;
 
