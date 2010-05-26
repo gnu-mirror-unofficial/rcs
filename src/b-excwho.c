@@ -27,4 +27,14 @@ caller_login_p (char const *login)
   return STR_SAME (getcaller (), login);
 }
 
+bool
+currently_setuid_p (void)
+{
+#if defined HAVE_SETUID && defined HAVE_GETUID
+  return euid () != ruid ();
+#else
+  return false;
+#endif
+}
+
 /* b-excwho.c ends here */

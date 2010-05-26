@@ -826,14 +826,12 @@ main (int argc, char **argv)
 
           case -1:
             /* New RCS file.  */
-#if defined HAVE_SETUID && defined HAVE_GETUID
-            if (euid () != ruid ())
+            if (currently_setuid_p ())
               {
                 MERR
                   ("setuid initial checkin prohibited; use `rcs -i -a' first");
                 continue;
               }
-#endif
             rcsinitflag = true;
             break;
 

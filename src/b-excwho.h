@@ -19,5 +19,6 @@
 */
 
 extern bool caller_login_p (char const *login);
+extern bool currently_setuid_p (void);
 
 /* b-excwho.c ends here */

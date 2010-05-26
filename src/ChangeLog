@@ -1,5 +1,18 @@
 2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: currently_setuid_p
+
+	* b-excwho.c (currently_setuid_p): New func.
+	* b-excwho.h (currently_setuid_p): New func decl.
+	* ci.c (main): Use ‘currently_setuid_p’; remove surrounding
+	preproc cond ‘defined HAVE_SETUID && defined HAVE_GETUID’.
+	* rcsedit.c (getcaller): Use ‘currently_setuid_p’; remove
+	preproc cond ‘defined HAVE_SETUID’ and its #else branch.
+	* rcsutil.c: #include "b-excwho.h".
+	(set_uid_to): Use ‘currently_setuid_p’.
+
+2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Compare delta objects instead of their revision numbers.
 
 	* co.c (rmlock): Dont ‘STR_SAME’; instead compare objects (with ‘==’).

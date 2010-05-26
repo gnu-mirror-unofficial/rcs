@@ -35,6 +35,7 @@
 #endif
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-excwho.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-isr.h"
@@ -594,7 +595,7 @@ static void
 set_uid_to (uid_t u)
 /* Become user ‘u’.  */
 {
-  if (euid () == ruid ())
+  if (! currently_setuid_p ())
     return;
 #if defined HAVE_WORKING_FORK
 #if has_setreuid
