@@ -1,3 +1,23 @@
+2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Add abstraction: caller_login_p
+
+	Here, "I" means "#include "b-excwho.h";
+	"U" means "Use ‘caller_login_p’".
+	* b-excwho.h: New file.
+	* b-excwho.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-excwho.h, b-excwho.c.
+	* ci.c: I.
+	(removelock, addbranch): U.
+	* co.c: I.
+	(rmlock): U.
+	* rcs.c: I.
+	(breaklock): U.
+	* rcsclean.c: I.
+	(unlock): U.
+	* rcsedit.c: I.
+	(findlock, addlock, checkaccesslist): U.
+
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Consult env var RCS_MEM_LIMIT to set the memory limit.

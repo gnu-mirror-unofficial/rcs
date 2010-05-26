@@ -31,6 +31,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-esds.h"
+#include "b-excwho.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -148,7 +149,7 @@ removelock (struct hshentry *delta)
 
       if (rl->delta == delta)
         {
-          if (STR_SAME (getcaller (), rl->login))
+          if (caller_login_p (rl->login))
             {
               /* We found a lock on ‘delta’ by caller; delete it.  */
               tp->next = tp->next->next;
@@ -265,7 +266,7 @@ addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
   newbranch.entry = &newdelta;
   newdelta.next = NULL;
   if (branchpoint->lockedby)
-    if (STR_SAME (branchpoint->lockedby, getcaller ()))
+    if (caller_login_p (branchpoint->lockedby))
       return removelock (branchpoint);  /* This returns 1.  */
   return removedlock;
 }

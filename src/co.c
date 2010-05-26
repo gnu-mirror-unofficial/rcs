@@ -29,6 +29,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-esds.h"
+#include "b-excwho.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -128,7 +129,7 @@ rmlock (struct hshentry const *delta)
   for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
     {
       rl = tp->next->entry;
-      whomatch = STR_SAME (getcaller (), rl->login);
+      whomatch = caller_login_p (rl->login);
       nummatch = STR_SAME (num, rl->delta->num);
       if (whomatch && nummatch)
         break;

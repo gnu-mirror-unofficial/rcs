@@ -41,6 +41,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-esds.h"
+#include "b-excwho.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -995,7 +996,7 @@ findlock (bool delete, struct hshentry **target)
   for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
     {
       rl = tp->next->entry;
-      if (STR_SAME (getcaller (), rl->login))
+      if (caller_login_p (rl->login))
         {
           if (found)
             {
@@ -1034,7 +1035,7 @@ addlock (struct hshentry *delta, bool verbose)
 
       if (cmpnum (delta->num, rlk->delta->num) == 0)
         {
-          if (STR_SAME (getcaller (), rlk->login))
+          if (caller_login_p (rlk->login))
             return 0;
           else
             {
@@ -1115,11 +1116,11 @@ checkaccesslist (void)
    Otherwise, print an error message and return false.  */
 {
   if (!GROK (access) || myself (REPO (stat).st_uid)
-      || STR_SAME (getcaller (), "root"))
+      || caller_login_p ("root"))
     return true;
 
   for (struct link *ls = GROK (access); ls; ls = ls->next)
-    if (STR_SAME (getcaller (), ls->entry))
+    if (caller_login_p (ls->entry))
       return true;
 
   RERR ("user %s not on the access list", getcaller ());

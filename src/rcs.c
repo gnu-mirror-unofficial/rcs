@@ -27,6 +27,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-esds.h"
+#include "b-excwho.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -501,7 +502,7 @@ breaklock (struct hshentry const *delta)
         {
           char const *before = rl->login;
 
-          if (STR_DIFF (getcaller (), before)
+          if (!caller_login_p (before)
               && !sendmail (num, before))
             {
               RERR ("revision %s still locked by %s", num, before);

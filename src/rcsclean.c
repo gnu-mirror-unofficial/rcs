@@ -29,6 +29,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-esds.h"
+#include "b-excwho.h"
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
@@ -65,7 +66,7 @@ unlock (struct hshentry *delta)
   struct link fake, *tp;
 
   if (delta && delta->lockedby
-      && STR_SAME (getcaller (), delta->lockedby))
+      && caller_login_p (delta->lockedby))
     for (fake.next = GROK (locks), tp = &fake; tp->next; tp = tp->next)
       {
         struct rcslock const *rl = tp->next->entry;
