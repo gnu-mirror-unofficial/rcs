@@ -21,6 +21,7 @@
 extern bool caller_login_p (char const *login);
 extern bool currently_setuid_p (void);
 extern struct link *lock_memq (struct link *ls, bool loginp, void const *x);
+extern void lock_drop (struct link *fake, struct link *tp);
 
 /* Idioms.  */
 

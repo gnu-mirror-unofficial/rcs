@@ -58,4 +58,14 @@ lock_memq (struct link *ls, bool loginp, void const *x)
   return NULL;
 }
 
+void
+lock_drop (struct link *fake, struct link *tp)
+{
+  struct rcslock const *rl = tp->next->entry;
+
+  rl->delta->lockedby = NULL;
+  tp->next = tp->next->next;
+  GROK (locks) = fake->next;
+}
+
 /* b-excwho.c ends here */

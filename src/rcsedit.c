@@ -1005,11 +1005,7 @@ findlock (bool delete, struct hshentry **target)
   rl = found->next->entry;
   *target = rl->delta;
   if (delete)
-    {
-      found->next = found->next->next;
-      GROK (locks) = fake.next;
-      rl->delta->lockedby = NULL;
-    }
+    lock_drop (&fake, found);
   return 1;
 }
 

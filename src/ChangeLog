@@ -1,5 +1,17 @@
 2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: lock_drop
+
+	* b-excwho.c (lock_drop): New func.
+	* b-excwho.h (lock_drop): New func decl.
+	* ci.c (removelock): Use ‘lock_drop’.
+	* co.c (rmlock): Likewise.
+	* rcs.c (breaklock): Likewise.
+	* rcsclean.c (unlock): Likewise.
+	* rcsedit.c (findlock): Likewise.
+
+2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstractions: lock_memq, lock_login_memq, lock_delta_memq
 
 	* b-excwho.c: #include "b-esds.h".

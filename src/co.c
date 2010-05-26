@@ -136,9 +136,7 @@ rmlock (struct hshentry const *delta)
       return -1;
     }
   /* Found a lock on ‘delta’ by caller; delete it.  */
-  tp->next = tp->next->next;
-  GROK (locks) = fake.next;
-  rl->delta->lockedby = NULL;
+  lock_drop (&fake, tp);
   return 1;
 }
 

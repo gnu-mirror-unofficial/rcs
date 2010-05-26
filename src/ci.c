@@ -158,10 +158,8 @@ removelock (struct hshentry *delta)
       RERR ("revision %s locked by %s", num, rl->login);
       return -1;
     }
-  /* We tp a lock on ‘delta’ by caller; delete it.  */
-  tp->next = tp->next->next;
-  GROK (locks) = fake.next;
-  delta->lockedby = NULL;
+  /* We found a lock on ‘delta’ by caller; delete it.  */
+  lock_drop (&fake, tp);
   return 1;
 }
 

@@ -509,9 +509,7 @@ breaklock (struct hshentry const *delta)
       return false;
     }
   diagnose ("%s unlocked", num);
-  tp->next = tp->next->next;
-  GROK (locks) = fake.next;
-  rl->delta->lockedby = NULL;
+  lock_drop (&fake, tp);
   return true;
 }
 

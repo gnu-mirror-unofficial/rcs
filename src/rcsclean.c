@@ -70,9 +70,7 @@ unlock (struct hshentry *delta)
       && (fake.next = GROK (locks))
       && (tp = lock_delta_memq (&fake, delta)))
     {
-      tp->next = tp->next->next;
-      GROK (locks) = fake.next;
-      delta->lockedby = NULL;
+      lock_drop (&fake, tp);
       return true;
     }
   return false;
