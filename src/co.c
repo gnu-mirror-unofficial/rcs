@@ -433,7 +433,7 @@ main (int argc, char **argv)
 #if OPEN_O_BINARY
   int stdout_mode = 0;
 #endif
-  struct hshentries *deltas;            /* Deltas to be generated.  */
+  struct wlink *deltas;                 /* Deltas to be generated.  */
   struct program program =
     {
       .name = "co",
@@ -715,7 +715,7 @@ main (int argc, char **argv)
                                       BE (kws) < MIN_UNEXPAND);
             if (FLOW (res) == neworkptr)
               FLOW (res) = NULL;             /* Don't close it twice.  */
-            if (changelock && deltas->first != targetdelta)
+            if (changelock && deltas->entry != targetdelta)
               fro_trundling (true, FLOW (from));
 
             if (donerewrite (changelock, Ttimeflag

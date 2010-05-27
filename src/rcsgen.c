@@ -110,7 +110,7 @@ scandeltatext (struct editstuff *es, struct wlink **ls,
 }
 
 char const *
-buildrevision (struct hshentries const *deltas, struct delta *target,
+buildrevision (struct wlink const *deltas, struct delta *target,
                FILE *outfile, bool expandflag)
 /* Generate the revision given by ‘target’ by retrieving all deltas given
    by parameter ‘deltas’ and combining them.  If ‘outfile’ is set, the
@@ -129,7 +129,7 @@ buildrevision (struct hshentries const *deltas, struct delta *target,
   struct editstuff *es = make_editstuff ();
   struct wlink *ls = GROK (deltas);
 
-  if (deltas->first == target)
+  if (deltas->entry == target)
     {
       /* Only latest revision to generate.  */
       openfcopy (outfile);
@@ -139,12 +139,12 @@ buildrevision (struct hshentries const *deltas, struct delta *target,
     {
       /* Several revisions to generate.
          Get initial revision without keyword expansion.  */
-      scandeltatext (es, &ls, deltas->first, enter, false);
+      scandeltatext (es, &ls, deltas->entry, enter, false);
       while (ls = ls->next,
-             (deltas = deltas->rest)->rest)
+             (deltas = deltas->next)->next)
         {
           /* Do all deltas except last one.  */
-          scandeltatext (es, &ls, deltas->first, edit, false);
+          scandeltatext (es, &ls, deltas->entry, edit, false);
         }
       if (expandflag || outfile)
         {

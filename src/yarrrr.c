@@ -421,6 +421,7 @@ yarrrr (int argc, char *argv[argc])
 
 #ifdef TEST_REV
 #include "b-divvy.h"
+#include "b-esds.h"
 #include "b-grok.h"
 
 /* Test the routines that generate a sequence of delta numbers
@@ -440,7 +441,7 @@ yarrrr (int argc, char *argv[argc])
   char author[20];
   char state[20];
   char date[20];
-  struct hshentries *gendeltas;
+  struct wlink *gendeltas;
   struct delta *target;
 
   if (argc < 2)
@@ -488,8 +489,9 @@ yarrrr (int argc, char *argv[argc])
       if (target)
         while (gendeltas)
           {
-            complain ("%s\n", gendeltas->first->num);
-            gendeltas = gendeltas->rest;
+            target = gendeltas->entry;
+            complain ("%s\n", target->num);
+            gendeltas = gendeltas->next;
           }
 #undef more
 #undef prompt

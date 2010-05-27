@@ -298,16 +298,16 @@ compartial (char const *num1, char const *num2, int length)
 }
 
 static void
-store1 (struct hshentries ***store, struct delta *next)
+store1 (struct wlink ***store, struct delta *next)
 /* Allocate a new list node that addresses ‘next’.
    Append it to the list that ‘**store’ is the end pointer of.  */
 {
-  register struct hshentries *p;
+  register struct wlink *p;
 
-  p = FALLOC (struct hshentries);
-  p->first = next;
+  p = FALLOC (struct wlink);
+  p->entry = next;
   **store = p;
-  *store = &p->rest;
+  *store = &p->next;
 }
 
 #define STORE_MAYBE(x)  if (store) store1 (&store, x)
@@ -316,7 +316,7 @@ store1 (struct hshentries ***store, struct delta *next)
 static struct delta *
 genbranch (struct delta const *bpoint, char const *revno,
            int length, char const *date, char const *author,
-           char const *state, struct hshentries **store)
+           char const *state, struct wlink **store)
 /* Given a branchpoint, a revision number, date, author, and state, find the
    deltas necessary to reconstruct the given revision from the branch point
    on.  If ‘store’ is non-NULL, pointers to the found deltas are stored
@@ -443,7 +443,7 @@ genbranch (struct delta const *bpoint, char const *revno,
 
 struct delta *
 genrevs (char const *revno, char const *date, char const *author,
-         char const *state, struct hshentries **store)
+         char const *state, struct wlink **store)
 /* Find the deltas needed for reconstructing the revision given by ‘revno’,
    ‘date’, ‘author’, and ‘state’, and stores pointers to these deltas into
    a list whose starting address is given by ‘store’ (if non-NULL).
@@ -568,7 +568,7 @@ norev:
 #undef STORE_MAYBE
 
 struct delta *
-gr_revno (char const *revno, struct hshentries **store)
+gr_revno (char const *revno, struct wlink **store)
 /* An abbreviated form of ‘genrevs’, when you don't care
    about the date, author, or state.  */
 {

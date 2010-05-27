@@ -140,7 +140,7 @@ main (int argc, char **argv)
   char const *rev, *p;
   bool dounlock, perform, unlocked, unlockflag, waslocked, Ttimeflag;
   int expmode;
-  struct hshentries *deltas;
+  struct wlink *deltas;
   struct delta *delta;
   struct stat workstat;
   const struct program program =
@@ -311,7 +311,7 @@ main (int argc, char **argv)
 
         if (perform & unlocked)
           {
-            if (deltas->first != delta)
+            if (deltas->entry != delta)
               fro_trundling (true, FLOW (from));
             if (donerewrite (true, Ttimeflag
                              ? REPO (stat).st_mtime

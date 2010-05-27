@@ -283,13 +283,6 @@ struct delta
   bool selector;
 };
 
-/* List of hash entries.  */
-struct hshentries
-{
-  struct hshentries *rest;
-  struct delta *first;
-};
-
 /* List element for locks.  */
 struct rcslock
 {
@@ -773,7 +766,7 @@ char const *getfullRCSname (void);
 bool isSLASH (int c);
 
 /* rcsgen */
-char const *buildrevision (struct hshentries const *deltas,
+char const *buildrevision (struct wlink const *deltas,
                            struct delta *target,
                            FILE *outfile, bool expandflag);
 struct cbuf cleanlogmsg (char const *m, size_t s);
@@ -812,8 +805,8 @@ int cmpdate (char const *d1, char const *d2);
 int compartial (char const *num1, char const *num2, int length);
 struct delta *genrevs (char const *revno, char const *date,
                        char const *author, char const *state,
-                       struct hshentries **store);
-struct delta *gr_revno (char const *revno, struct hshentries **store);
+                       struct wlink **store);
+struct delta *gr_revno (char const *revno, struct wlink **store);
 struct delta *delta_from_ref (char const *ref);
 bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
 char const *namedrev (char const *name, struct delta *delta);

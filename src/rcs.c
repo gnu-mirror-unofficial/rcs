@@ -514,18 +514,21 @@ breaklock (struct delta const *delta)
 }
 
 static struct delta *
-searchcutpt (char const *object, int length, struct hshentries *store)
+searchcutpt (char const *object, int length, struct wlink *store)
 /* Search store and return entry with number being ‘object’.
    ‘cuttail’ is 0, if the entry is ‘REPO (tip)’; otherwise, it
    is the entry point to the one with number being ‘object’.  */
 {
+  struct delta *delta;
+
   cuthead = NULL;
-  while (compartial (store->first->num, object, length))
+  while (delta = store->entry,
+         compartial (delta->num, object, length))
     {
-      cuthead = store->first;
-      store = store->rest;
+      cuthead = delta;
+      store = store->next;
     }
-  return store->first;
+  return delta;
 }
 
 static bool
@@ -565,7 +568,7 @@ removerevs (void)
    revision in ‘cuttail’ (0 if the last is a leaf).  */
 {
   struct delta *target, *target2, *temp;
-  struct hshentries *ls;
+  struct wlink *ls;
   int length;
   int cmp;
 
@@ -942,7 +945,7 @@ rcs_setstate (char const *rev, char const *status)
 
 static bool
 buildeltatext (struct editstuff *es, struct wlink **ls,
-               struct hshentries const *deltas)
+               struct wlink const *deltas)
 /* Put the delta text on ‘FLOW (rewr)’ and make necessary
    change to delta text.  */
 {
@@ -950,17 +953,17 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
 
   fcut = NULL;
   cuttail->selector = false;
-  scanlogtext (es, ls, deltas->first, false);
+  scanlogtext (es, ls, deltas->entry, false);
   if (cuthead)
     {
       if (! (fcut = tmpfile ()))
         fatal_sys ("tmpfile");
 
-      while (deltas->first != cuthead)
+      while (deltas->entry != cuthead)
         {
           *ls = (*ls)->next;
-          deltas = deltas->rest;
-          scanlogtext (es, ls, deltas->first, true);
+          deltas = deltas->next;
+          scanlogtext (es, ls, deltas->entry, true);
         }
 
       snapshotedit (es, fcut);
@@ -968,11 +971,11 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
       aflush (fcut);
     }
 
-  while (deltas->first != cuttail)
+  while (deltas->entry != cuttail)
     {
       *ls = (*ls)->next;
-      deltas = deltas->rest;
-      scanlogtext (es, ls, deltas->first, true);
+      deltas = deltas->next;
+      scanlogtext (es, ls, deltas->entry, true);
     }
   finishedit (es, NULL, NULL, true);
   Ozclose (&FLOW (res));
@@ -1107,7 +1110,7 @@ main (int argc, char **argv)
   struct link boxlock, *tplock;
   struct link boxrm, *tprm;
   struct link *tp_assoc, *tp_chacc, *tp_log, *tp_state;
-  struct hshentries *deltas;
+  struct wlink *deltas;
   const struct program program =
     {
       .name = "rcs",

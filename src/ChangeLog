@@ -1,5 +1,22 @@
 2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘struct wlink’ more.
+
+	* ci.c (addelta, main): Do s/struct hshentries/struct wlink/g;
+	use ->entry, ->next instead of ->first, ->rest, respectively; use
+	local var of type ‘struct delta *’ to deref ->entry where necessary.
+	* co.c (main): Likewise.
+	* rcs.c (searchcutpt, removerevs, buildeltatext, main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsgen.c (buildrevision): Likewise.
+	* rcsrev.c (store1, genbranch, genrevs, gr_revno): Likewise.
+	* yarrrr.c [TEST_REV]: #include "b-esds.h".
+	[TEST_REV] (yarrrr): Likewise.
+	* base.h (struct hshentries): Delete.
+	(buildrevision, genrevs, gr_revno): Update func decls.
+
+2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Rename ‘struct hshentry’ to ‘struct delta’.
 
 	* b-grok.c: Do s/struct hshentry/struct delta/g.

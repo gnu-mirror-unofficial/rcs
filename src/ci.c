@@ -265,7 +265,7 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
 }
 
 static int
-addelta (struct hshentries **tp_deltas)
+addelta (struct wlink **tp_deltas)
 /* Append a delta to the delta tree, whose number is given by
    ‘newdelnum’.  Update ‘REPO (tip)’, ‘newdelnum’, ‘newdelnumlength’,
    and the links in newdelta.
@@ -625,7 +625,7 @@ main (int argc, char **argv)
   time_t mtime, wtime;
   struct delta *workdelta;
   struct link *tp_assoc = &assoclst;
-  struct hshentries *deltas;            /* Deltas to be generated.  */
+  struct wlink *deltas;                 /* Deltas to be generated.  */
   const struct program program =
     {
       .name = "ci",
