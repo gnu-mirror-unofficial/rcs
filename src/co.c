@@ -199,13 +199,12 @@ getancestor (char const *r1, char const *r2)
   int l1, l2, l3;
   char const *r;
 
+  /* TODO: Don't bother saving in ‘SHARED’.  */
+
   l1 = countnumflds (r1);
   l2 = countnumflds (r2);
   if ((2 < l1 || 2 < l2) && cmpnum (r1, r2) != 0)
     {
-  /* TODO: Don't bother saving in ‘SHARED’.  */
-#define SAFE(s)  intern0 (SHARED, s)
-
       /* Not on main trunk or identical.  */
       l3 = 0;
       while (cmpnumfld (r1, r2, l3 + 1) == 0
@@ -220,12 +219,10 @@ getancestor (char const *r1, char const *r2)
           t2 = TAKE (l2 > 2 ? 2 : l2, r2);
           r = cmpnum (t1, t2) < 0 ? t1 : t2;
           if (cmpnum (r, r1) != 0 && cmpnum (r, r2) != 0)
-            return SAFE (r);
+            return str_save (r);
         }
       else if (cmpnumfld (r1, r2, l3 + 1) != 0)
-        return SAFE (TAKE (l3, r1));
-
-#undef SAFE
+        return str_save (TAKE (l3, r1));
     }
   RERR ("common ancestor of %s and %s undefined", r1, r2);
   return NULL;
@@ -670,7 +667,7 @@ main (int argc, char **argv)
                     numericrev.string = GROK (branch) ? GROK (branch) : "";
                     break;
                   case 1:
-                    numericrev.string = intern0 (SHARED, targetdelta->num);
+                    numericrev.string = str_save (targetdelta->num);
                     break;
                   }
               }

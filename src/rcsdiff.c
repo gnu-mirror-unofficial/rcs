@@ -442,7 +442,7 @@ main (int argc, char **argv)
             if (*MANI (filename) == '-')
               {
                 accf (SHARED, ".%c", SLASH);
-                diffp[1] = intern0 (SHARED, MANI (filename));
+                diffp[1] = str_save (MANI (filename));
               }
           }
         else

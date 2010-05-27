@@ -35,7 +35,7 @@ normalize_arg (char const *s)
   if (*s == '-')
     {
       accf (SHARED, ".%c", SLASH);
-      return intern0 (SHARED, s);
+      return str_save (s);
     }
   else
     return s;

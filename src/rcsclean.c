@@ -102,7 +102,7 @@ get_directory (char const *dirname, char ***aargv)
         continue;
       if (rcssuffix (en))
         continue;
-      tp = wextend (tp, intern0 (SHARED, en), justme);
+      tp = wextend (tp, str_save (en), justme);
       entries++;
     }
   if (errno || closedir (d) != 0)

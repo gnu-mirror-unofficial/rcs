@@ -1,5 +1,14 @@
 2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘str_save’ more.
+
+	* co.c (getancestor, main): Use ‘str_save’.
+	* merger.c (normalize_arg): Likewise.
+	* rcsclean.c (get_directory): Likewise.
+	* rcsdiff.c (main): Likewise.
+
+2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘SINGLE’ et al more (instead of ‘SHARED’).
 
 	* b-divvy.h (FZLLOC): New macro.
