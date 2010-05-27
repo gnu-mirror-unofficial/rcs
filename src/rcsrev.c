@@ -298,7 +298,7 @@ compartial (char const *num1, char const *num2, int length)
 }
 
 static void
-store1 (struct hshentries ***store, struct hshentry *next)
+store1 (struct hshentries ***store, struct delta *next)
 /* Allocate a new list node that addresses ‘next’.
    Append it to the list that ‘**store’ is the end pointer of.  */
 {
@@ -313,8 +313,8 @@ store1 (struct hshentries ***store, struct hshentry *next)
 #define STORE_MAYBE(x)  if (store) store1 (&store, x)
 #define CLEAR_MAYBE()   if (store) *store = NULL
 
-static struct hshentry *
-genbranch (struct hshentry const *bpoint, char const *revno,
+static struct delta *
+genbranch (struct delta const *bpoint, char const *revno,
            int length, char const *date, char const *author,
            char const *state, struct hshentries **store)
 /* Given a branchpoint, a revision number, date, author, and state, find the
@@ -324,7 +324,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
    Return NULL on error.  */
 {
   int field;
-  register struct hshentry *d, *trail;
+  register struct delta *d, *trail;
   register struct wlink const *bhead;
   int result;
   char datebuf[datesize + zonelenmax];
@@ -441,7 +441,7 @@ genbranch (struct hshentry const *bpoint, char const *revno,
   return trail;
 }
 
-struct hshentry *
+struct delta *
 genrevs (char const *revno, char const *date, char const *author,
          char const *state, struct hshentries **store)
 /* Find the deltas needed for reconstructing the revision given by ‘revno’,
@@ -451,7 +451,7 @@ genrevs (char const *revno, char const *date, char const *author,
    If the proper delta could not be found, return NULL.  */
 {
   int length;
-  register struct hshentry *d;
+  register struct delta *d;
   int result;
   char const *branchnum;
   char datebuf[datesize + zonelenmax];
@@ -567,7 +567,7 @@ norev:
 #undef CLEAR_MAYBE
 #undef STORE_MAYBE
 
-struct hshentry *
+struct delta *
 gr_revno (char const *revno, struct hshentries **store)
 /* An abbreviated form of ‘genrevs’, when you don't care
    about the date, author, or state.  */
@@ -575,7 +575,7 @@ gr_revno (char const *revno, struct hshentries **store)
   return genrevs (revno, NULL, NULL, NULL, store);
 }
 
-struct hshentry *
+struct delta *
 delta_from_ref (char const *ref)
 /* Return the hash entry associated with ‘ref’, a fully numeric
    revision or branch number, or NULL if no such entry exists.  */
@@ -617,7 +617,7 @@ lookupsym (char const *id)
 static char const *
 branchtip (char const *branch)
 {
-  struct hshentry *h;
+  struct delta *h;
 
   h = delta_from_ref (branch);
   return h ? h->num : NULL;
@@ -781,7 +781,7 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
 }
 
 char const *
-namedrev (char const *name, struct hshentry *delta)
+namedrev (char const *name, struct delta *delta)
 /* Return ‘name’ if it names ‘delta’, NULL otherwise.  */
 {
   if (name)

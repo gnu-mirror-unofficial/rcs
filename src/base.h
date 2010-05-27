@@ -247,8 +247,8 @@ struct cbuf                             /* immutable */
   size_t size;
 };
 
-/* Hash table entry.  */
-struct hshentry
+/* A revision.  */
+struct delta
 {
   /* Pointer to revision number (ASCIZ).  */
   char const *num;
@@ -270,14 +270,14 @@ struct hshentry
   /* Log message requested at checkin.  */
   struct cbuf pretty_log;
 
-  /* List of ‘struct hshentry’ (first revisions) on branches.  */
+  /* List of ‘struct delta’ (first revisions) on branches.  */
   struct wlink *branches;
 
   /* The ‘commitid’ added by CVS; only used for reading.  */
   char const *commitid;
 
   /* Next revision on same branch.  */
-  struct hshentry *next;
+  struct delta *next;
 
   /* True if selected, false if deleted.  */
   bool selector;
@@ -287,14 +287,14 @@ struct hshentry
 struct hshentries
 {
   struct hshentries *rest;
-  struct hshentry *first;
+  struct delta *first;
 };
 
 /* List element for locks.  */
 struct rcslock
 {
   char const *login;
-  struct hshentry *delta;
+  struct delta *delta;
 };
 
 /* List element for symbolic names.  */
@@ -597,7 +597,7 @@ struct repo
 
   size_t deltas_count;
   struct wlink *deltas;
-  /* List of deltas (struct hshentry).  */
+  /* List of deltas (struct delta).  */
 
   struct atat *desc;
   /* Description of the RCS file.  */
@@ -634,7 +634,7 @@ struct repository
   /* The result of parsing ‘filename’.
      -- pairnames  */
 
-  struct hshentry *tip;
+  struct delta *tip;
   /* The revision on the tip of the default branch.
      -- addelta buildtree [rcs]main InitAdmin  */
 
@@ -733,19 +733,19 @@ struct editstuff *make_editstuff (void);
 void unmake_editstuff (struct editstuff *es);
 int un_link (char const *s);
 void openfcopy (FILE *f);
-void finishedit (struct editstuff *es, struct hshentry const * delta,
+void finishedit (struct editstuff *es, struct delta const * delta,
                  FILE *outfile, bool done);
 void snapshotedit (struct editstuff *es, FILE *f);
 void copystring (struct editstuff *es, struct atat *atat);
 void enterstring (struct editstuff *es, struct atat *atat);
 void editstring (struct editstuff *es, struct atat const *script,
-                 struct hshentry const *delta);
+                 struct delta const *delta);
 struct fro *rcswriteopen (struct maybe *m);
 int chnamemod (FILE **fromp, char const *from, char const *to,
                int set_mode, mode_t mode, time_t mtime);
 int setmtime (char const *file, time_t mtime);
-int findlock (bool delete, struct hshentry **target);
-int addlock (struct hshentry *delta, bool verbose);
+int findlock (bool delete, struct delta **target);
+int addlock (struct delta *delta, bool verbose);
 int addsymbol (char const *num, char const *name, bool rebind);
 char const *getcaller (void);
 bool checkaccesslist (void);
@@ -761,7 +761,7 @@ int getdiffcmd (struct fro *finfile, bool delimiter,
 
 /* rcsfcmp */
 int rcsfcmp (struct fro *xfp, struct stat const *xstatp,
-             char const *uname, struct hshentry const *delta);
+             char const *uname, struct delta const *delta);
 
 /* rcsfnms */
 char const *basefilename (char const *p);
@@ -774,7 +774,7 @@ bool isSLASH (int c);
 
 /* rcsgen */
 char const *buildrevision (struct hshentries const *deltas,
-                           struct hshentry *target,
+                           struct delta *target,
                            FILE *outfile, bool expandflag);
 struct cbuf cleanlogmsg (char const *m, size_t s);
 bool ttystdin (void);
@@ -786,11 +786,11 @@ void putdesc (struct cbuf *cb, bool textflag, char *textfile);
 struct cbuf getsstdin (char const *option, char const *name, char const *note);
 void format_assocs (FILE *out, char const *fmt);
 void putadmin (void);
-void puttree (struct hshentry const *root, FILE *fout);
-bool putdtext (struct hshentry const *delta, char const *srcname,
+void puttree (struct delta const *root, FILE *fout);
+bool putdtext (struct delta const *delta, char const *srcname,
                FILE *fout, bool diffmt);
 void putstring (FILE *out, bool delim, struct cbuf s, bool log);
-void putdftext (struct hshentry const *delta, struct fro *finfile,
+void putdftext (struct delta const *delta, struct fro *finfile,
                 FILE *foutfile, bool diffmt);
 
 /* rcskeep */
@@ -810,13 +810,13 @@ int cmpnum (char const *num1, char const *num2);
 int cmpnumfld (char const *num1, char const *num2, int fld);
 int cmpdate (char const *d1, char const *d2);
 int compartial (char const *num1, char const *num2, int length);
-struct hshentry *genrevs (char const *revno, char const *date,
-                          char const *author, char const *state,
-                          struct hshentries **store);
-struct hshentry *gr_revno (char const *revno, struct hshentries **store);
-struct hshentry *delta_from_ref (char const *ref);
+struct delta *genrevs (char const *revno, char const *date,
+                       char const *author, char const *state,
+                       struct hshentries **store);
+struct delta *gr_revno (char const *revno, struct hshentries **store);
+struct delta *delta_from_ref (char const *ref);
 bool fully_numeric (struct cbuf *ans, char const *source, struct fro *fp);
-char const *namedrev (char const *name, struct hshentry *delta);
+char const *namedrev (char const *name, struct delta *delta);
 char const *tiprev (void);
 
 /* rcstime */

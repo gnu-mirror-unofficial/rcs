@@ -23,7 +23,7 @@ struct expctx
 {
   FILE *to, *rewr;
   struct fro *from;
-  struct hshentry const *delta;
+  struct delta const *delta;
   const bool delimstuffed, dolog;
 
   /* Some space to (temporarily) hold key/value/line fragments

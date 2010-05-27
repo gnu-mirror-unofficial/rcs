@@ -105,7 +105,7 @@ yarrrr (int argc, char *argv[argc])
    3rd: expanded file
    4th: unexpanded file  */
 {
-  struct hshentry delta;
+  struct delta delta;
   struct stat st;
 
   REPO (log_lead).string = argv[1];
@@ -379,7 +379,7 @@ yarrrr (int argc, char *argv[argc])
 
   for (i = 0, wpair = r->deltas; i < r->deltas_count; i++, wpair = wpair->next)
     {
-      struct hshentry *d = wpair->entry, *br;
+      struct delta *d = wpair->entry, *br;
       struct wlink *ls;
 
       if (d->lockedby)
@@ -402,7 +402,7 @@ yarrrr (int argc, char *argv[argc])
 
   for (wpair = r->deltas; wpair; wpair = wpair->next)
     {
-      struct hshentry *d = wpair->entry;
+      struct delta *d = wpair->entry;
 
       printf ("revno: %s\n", d->num);
       SPEW_ATAT (TINYKS (log), d->log);
@@ -441,7 +441,7 @@ yarrrr (int argc, char *argv[argc])
   char state[20];
   char date[20];
   struct hshentries *gendeltas;
-  struct hshentry *target;
+  struct delta *target;
 
   if (argc < 2)
     {

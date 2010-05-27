@@ -174,8 +174,8 @@ count_a_d (long *a, long *d, struct atat *edits)
 }
 
 static void
-putadelta (register struct hshentry const *node,
-           register struct hshentry const *editscript,
+putadelta (register struct delta const *node,
+           register struct delta const *editscript,
            bool trunk)
 /* Print delta ‘node’ if ‘node->selector’ is set.
    ‘editscript’ indicates where the editscript is stored;
@@ -213,7 +213,7 @@ putadelta (register struct hshentry const *node,
       aputs ("\nbranches:", out);
       for (struct wlink *ls = node->branches; ls; ls = ls->next)
         {
-          struct hshentry *delta = ls->entry;
+          struct delta *delta = ls->entry;
 
           aprintf (out, "  %s;", BRANCHNO (delta->num));
         }
@@ -234,7 +234,7 @@ static void
 putrunk (void)
 /* Print revisions chosen, which are in trunk.  */
 {
-  register struct hshentry const *ptr;
+  register struct delta const *ptr;
 
   for (ptr = REPO (tip); ptr; ptr = ptr->next)
     putadelta (ptr, ptr->next, true);
@@ -243,7 +243,7 @@ putrunk (void)
 static void putforest (struct wlink const *);
 
 static void
-putree (struct hshentry const *root)
+putree (struct delta const *root)
 /* Print delta tree from ‘root’ (not including trunk)
    in reverse order on each branch.  */
 {
@@ -254,7 +254,7 @@ putree (struct hshentry const *root)
 }
 
 static void
-putabranch (struct hshentry const *root)
+putabranch (struct delta const *root)
 /* Print one branch from ‘root’.  */
 {
   if (!root)
@@ -275,7 +275,7 @@ putforest (struct wlink const *branchroot)
 }
 
 static char
-extractdelta (struct hshentry const *pdelta)
+extractdelta (struct delta const *pdelta)
 /* Return true if ‘pdelta’ matches the selection critera.  */
 {
   struct link const *pstate;
@@ -321,7 +321,7 @@ extractdelta (struct hshentry const *pdelta)
 }
 
 static void
-exttree (struct hshentry *root)
+exttree (struct delta *root)
 /* Select revisions, starting with ‘root’.  */
 {
   if (!root)
@@ -441,7 +441,7 @@ trunclocks (void)
 }
 
 static void
-recentdate (struct hshentry const *root, struct daterange *r)
+recentdate (struct delta const *root, struct daterange *r)
 /* Find the delta that is closest to the cutoff date ‘pd’ among the
    revisions selected by ‘exttree’.  Successively narrow down the
    interval given by ‘pd’, and set the ‘strtdate’ of ‘pd’ to the date
@@ -465,7 +465,7 @@ recentdate (struct hshentry const *root, struct daterange *r)
 }
 
 static int
-extdate (struct hshentry *root)
+extdate (struct delta *root)
 /* Select revisions which are in the date range specified in ‘duelst’
    and ‘datelist’, starting at ‘root’.  Return number of revisions
    selected, including those already selected.  */

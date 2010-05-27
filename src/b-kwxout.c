@@ -72,7 +72,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
 {
   struct fro *infile = ctx->from;
   register FILE *out = ctx->to;
-  register struct hshentry const *delta = ctx->delta;
+  register struct delta const *delta = ctx->delta;
   bool dolog = ctx->dolog, delimstuffed = ctx->delimstuffed;
   register char const *sp, *cp, *date;
   int c;

@@ -245,7 +245,7 @@ finisheditline (struct finctx *finctx, char *l)
 }
 
 static void
-finishedit_fast (struct editstuff *es, struct hshentry const *delta,
+finishedit_fast (struct editstuff *es, struct delta const *delta,
                  FILE *outfile, bool done)
 /* Do expansion if ‘delta’ is set, output the state of the edits to
    ‘outfile’.  But do nothing unless ‘done’ is set (which means we are
@@ -328,7 +328,7 @@ swapeditfiles (struct editstuff *es, FILE *outfile)
 }
 
 static void
-finishedit_slow (struct editstuff *es, struct hshentry const *delta,
+finishedit_slow (struct editstuff *es, struct delta const *delta,
                  FILE *outfile, bool done)
 /* Copy the rest of the edit file and close it (if it exists).
    If ‘delta’, perform keyword substitution at the same time.
@@ -368,7 +368,7 @@ snapshotedit_slow (struct editstuff *es, FILE *f)
 }
 
 void
-finishedit (struct editstuff *es, struct hshentry const *delta,
+finishedit (struct editstuff *es, struct delta const *delta,
             FILE *outfile, bool done)
 {
   (!STDIO_P (FLOW (from))
@@ -385,7 +385,7 @@ snapshotedit (struct editstuff *es, FILE *f)
 }
 
 static void
-copylines (struct editstuff *es, register long upto, struct hshentry const *delta)
+copylines (struct editstuff *es, register long upto, struct delta const *delta)
 /* Copy input lines ‘es->lcount+1..upto’ from ‘es->fedit’ to ‘FLOW (res)’.
    If ‘delta’, keyword expansion is done simultaneously.
    ‘es->lcount’ is updated.  Rewinds a file only if necessary.  */
@@ -517,7 +517,7 @@ enterstring (struct editstuff *es, struct atat *atat)
 
 void
 editstring (struct editstuff *es, struct atat const *script,
-            struct hshentry const *delta)
+            struct delta const *delta)
 /* Read an edit script from ‘FLOW (from)’ and apply it to the edit file.
    | -- ‘(STDIO_P (FLOW (from)))’ --
    | The result is written to ‘FLOW (res)’.
@@ -984,7 +984,7 @@ setmtime (char const *file, time_t mtime)
 }
 
 int
-findlock (bool delete, struct hshentry **target)
+findlock (bool delete, struct delta **target)
 /* Find the first lock held by caller and return a pointer
    to the locked delta; also, remove the lock if ‘delete’.
    If one lock, put it into ‘*target’.
@@ -1010,7 +1010,7 @@ findlock (bool delete, struct hshentry **target)
 }
 
 int
-addlock (struct hshentry *delta, bool verbose)
+addlock (struct delta *delta, bool verbose)
 /* Add a lock held by caller to ‘delta’ and return 1 if successful.
    Print an error message if ‘verbose’ and return -1 if no lock is
    added because ‘delta’ is locked by somebody other than caller.

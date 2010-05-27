@@ -61,7 +61,7 @@ exiterr (void)
 }
 
 static bool
-unlock (struct hshentry *delta)
+unlock (struct delta *delta)
 {
   struct link box, *tp;
 
@@ -141,7 +141,7 @@ main (int argc, char **argv)
   bool dounlock, perform, unlocked, unlockflag, waslocked, Ttimeflag;
   int expmode;
   struct hshentries *deltas;
-  struct hshentry *delta;
+  struct delta *delta;
   struct stat workstat;
   const struct program program =
     {

@@ -42,7 +42,7 @@ discardkeyval (int c, register struct fro *f)
 
 int
 rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
-         char const *uname, struct hshentry const *delta)
+         char const *uname, struct delta const *delta)
 /* Compare the files ‘xfp’ and ‘uname’.  Return zero if ‘xfp’ has the
    same contents as ‘uname’ and neither has keywords, otherwise -1 if
    they are the same ignoring keyword values, and 1 if they differ even

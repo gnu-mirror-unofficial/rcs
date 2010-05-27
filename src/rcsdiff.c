@@ -154,7 +154,7 @@ main (int argc, char **argv)
   char const **diffv, **diffp, **diffpend;      /* argv for subsidiary diff */
   char const **pp, *diffvstr = NULL;
   struct cbuf commarg;
-  struct hshentry *target;
+  struct delta *target;
   char *a, *dcp, **newargv;
   bool no_diff_means_no_output;
   register int c;

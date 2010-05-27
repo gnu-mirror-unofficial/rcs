@@ -37,14 +37,13 @@ enum stringwork
 
 static void
 scandeltatext (struct editstuff *es, struct wlink **ls,
-               struct hshentry *delta,
-               enum stringwork func, bool needlog)
+               struct delta *delta, enum stringwork func, bool needlog)
 /* Scan delta text nodes up to and including the one given by ‘delta’.
    For the one given by ‘delta’, the log message is saved into
    ‘delta->log’ if ‘needlog’ is set; ‘func’ specifies how to handle the
    text.  Does not advance input after finished.  */
 {
-  struct hshentry const *nextdelta;
+  struct delta const *nextdelta;
   struct fro *from = FLOW (from);
   FILE *to = FLOW (to);
   struct atat *log, *text;
@@ -111,7 +110,7 @@ scandeltatext (struct editstuff *es, struct wlink **ls,
 }
 
 char const *
-buildrevision (struct hshentries const *deltas, struct hshentry *target,
+buildrevision (struct hshentries const *deltas, struct delta *target,
                FILE *outfile, bool expandflag)
 /* Generate the revision given by ‘target’ by retrieving all deltas given
    by parameter ‘deltas’ and combining them.  If ‘outfile’ is set, the
@@ -422,7 +421,7 @@ putadmin (void)
 }
 
 static void
-putdelta (register struct hshentry const *node, register FILE *fout)
+putdelta (register struct delta const *node, register FILE *fout)
 /* Output the delta ‘node’ to ‘fout’.  */
 {
   if (!node)
@@ -433,7 +432,7 @@ putdelta (register struct hshentry const *node, register FILE *fout)
            TINYKS (state), node->state ? node->state : "");
   for (struct wlink *ls = node->branches; ls; ls = ls->next)
     {
-      struct hshentry *delta = ls->entry;
+      struct delta *delta = ls->entry;
 
       aprintf (fout, "\n\t%s", delta->num);
     }
@@ -444,7 +443,7 @@ putdelta (register struct hshentry const *node, register FILE *fout)
 }
 
 void
-puttree (struct hshentry const *root, register FILE *fout)
+puttree (struct delta const *root, register FILE *fout)
 /* Output the delta tree with base ‘root’ in preorder to ‘fout’.  */
 {
   if (!root)
@@ -460,7 +459,7 @@ puttree (struct hshentry const *root, register FILE *fout)
 }
 
 bool
-putdtext (struct hshentry const *delta, char const *srcname,
+putdtext (struct delta const *delta, char const *srcname,
           FILE *fout, bool diffmt)
 /* Output a deltatext node with delta number ‘delta->num’, log message
    ‘delta->pretty_log’, and text ‘srcname’ to ‘fout’.  Double up all ‘SDELIM’s
@@ -504,7 +503,7 @@ putstring (register FILE *out, bool delim, struct cbuf s, bool log)
 }
 
 void
-putdftext (struct hshentry const *delta, struct fro *finfile,
+putdftext (struct delta const *delta, struct fro *finfile,
            FILE *foutfile, bool diffmt)
 /* Like ‘putdtext’, except the source file is already open.  */
 {

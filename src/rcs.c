@@ -71,7 +71,7 @@ static struct link statelst;
 static struct link assoclst;
 static struct link chaccess;
 static struct delrevpair delrev;
-static struct hshentry *cuthead, *cuttail, *delstrt;
+static struct delta *cuthead, *cuttail, *delstrt;
 
 static void
 cleanup (void)
@@ -289,14 +289,14 @@ putdelrev (char const *b, char const *e, bool sawsep)
 
 static void
 scanlogtext (struct editstuff *es, struct wlink **ls,
-             struct hshentry *delta, bool edit)
+             struct delta *delta, bool edit)
 /* Scan delta text nodes up to and including the one given by ‘delta’,
    or up to last one present, if ‘!delta’.  For the one given by
    ‘delta’ (if ‘delta’), the log message is saved into ‘delta->pretty_log’ if
    ‘delta == cuttail’; the text is edited if ‘edit’ is set, else copied.
    Do not advance input after finished, except if ‘!delta’.  */
 {
-  struct hshentry const *nextdelta;
+  struct delta const *nextdelta;
   struct fro *from = FLOW (from);
   FILE *to;
   struct atat *log, *text;
@@ -484,7 +484,7 @@ sendmail (char const *Delta, char const *who)
 }
 
 static bool
-breaklock (struct hshentry const *delta)
+breaklock (struct delta const *delta)
 /* Find the lock held by caller on ‘delta’, and remove it.
    Send mail if a lock different from the caller's is broken.
    Print an error message if there is no such lock or error.  */
@@ -513,7 +513,7 @@ breaklock (struct hshentry const *delta)
   return true;
 }
 
-static struct hshentry *
+static struct delta *
 searchcutpt (char const *object, int length, struct hshentries *store)
 /* Search store and return entry with number being ‘object’.
    ‘cuttail’ is 0, if the entry is ‘REPO (tip)’; otherwise, it
@@ -529,12 +529,12 @@ searchcutpt (char const *object, int length, struct hshentries *store)
 }
 
 static bool
-branchpoint (struct hshentry *strt, struct hshentry *tail)
+branchpoint (struct delta *strt, struct delta *tail)
 /* Check whether the deltas between ‘strt’ and ‘tail’ are locked or
    branch point, return true if any is locked or branch point; otherwise,
    return false and mark deleted.  */
 {
-  struct hshentry *pt;
+  struct delta *pt;
   struct link box;
 
   box.next = GROK (locks);
@@ -564,7 +564,7 @@ removerevs (void)
    (0, if ‘delstrt’ is head), and the revision after the last removed
    revision in ‘cuttail’ (0 if the last is a leaf).  */
 {
-  struct hshentry *target, *target2, *temp;
+  struct delta *target, *target2, *temp;
   struct hshentries *ls;
   int length;
   int cmp;
@@ -787,7 +787,7 @@ setlock (char const *rev)
 /* Given a revision or branch number, find the corresponding
    delta and lock it for caller.  */
 {
-  struct hshentry *target;
+  struct delta *target;
   int r;
 
   if (fully_numeric_no_k (&numrev, rev))
@@ -822,7 +822,7 @@ dolocks (void)
    add lock for ‘GROK (branch)’ or ‘REPO (tip)’ if ‘lockhead’ is set.  */
 {
   struct link const *lockpt;
-  struct hshentry *target;
+  struct delta *target;
   bool changed = false;
 
   if (unlockcaller)
@@ -896,7 +896,7 @@ dolocks (void)
 static bool
 domessages (void)
 {
-  struct hshentry *target;
+  struct delta *target;
   bool changed = false;
 
   for (struct link *ls = messagelst.next; ls; ls = ls->next)
@@ -920,7 +920,7 @@ rcs_setstate (char const *rev, char const *status)
 /* Given a revision or branch number, find the corresponding delta
    and sets its state to ‘status’.  */
 {
-  struct hshentry *target;
+  struct delta *target;
 
   if (fully_numeric_no_k (&numrev, rev))
     {
@@ -1007,7 +1007,7 @@ buildtree (void)
    is false, and rebuild the linkage of deltas.
    Ask for reconfirmation if deleting last revision.  */
 {
-  struct hshentry *Delta;
+  struct delta *Delta;
 
   if (cuthead)
     if (cuthead->next == delstrt)

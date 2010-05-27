@@ -68,7 +68,7 @@ main (int argc, char **argv)
   bool tostdout;
   int status;
   struct fro *workptr;
-  struct hshentry *target;
+  struct delta *target;
   const struct program program =
     {
       .name = "rcsmerge",

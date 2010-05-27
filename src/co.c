@@ -60,7 +60,7 @@ static struct jstuff jstuff;
 static int lockflag;
 static bool mtimeflag;
 /* Final delta to be generated.  */
-static struct hshentry *targetdelta;
+static struct delta *targetdelta;
 static struct stat workstat;
 
 static void
@@ -115,7 +115,7 @@ rmworkfile (void)
 }
 
 static int
-rmlock (struct hshentry const *delta)
+rmlock (struct delta const *delta)
 /* Remove the lock held by caller on ‘delta’.  Return -1 if
   someone else holds the lock, 0 if there is no lock on delta,
   and 1 if a lock was found and removed.  */
@@ -153,7 +153,7 @@ addjoin (char *joinrev)
    of char past ‘joinrev’, or NULL if no such revision exists.  */
 {
   register char *j;
-  register struct hshentry *d;
+  register struct delta *d;
   char terminator;
   struct cbuf numrev;
 

@@ -61,9 +61,9 @@ static int exitstatus;
 static bool forceciflag;
 static bool keepflag, keepworkingfile, rcsinitflag;
 /* Old delta to be generated.  */
-static struct hshentry *targetdelta;
+static struct delta *targetdelta;
 /* New delta to be inserted.  */
-static struct hshentry newdelta;
+static struct delta newdelta;
 static struct stat workstat;
 static struct link assoclst;
 
@@ -131,7 +131,7 @@ incnum (char const *onum, struct cbuf *nnum)
 }
 
 static int
-removelock (struct hshentry *delta)
+removelock (struct delta *delta)
 /* Find the lock held by caller on ‘delta’,
    remove it, and return nonzero if successful.
    Print an error message and return -1 if there is no such lock.
@@ -165,10 +165,10 @@ removelock (struct hshentry *delta)
 
 static struct wlink newbranch;          /* new branch to be inserted */
 
-#define BHDELTA(x)  ((struct hshentry *)(x)->entry)
+#define BHDELTA(x)  ((struct delta *)(x)->entry)
 
 static int
-addbranch (struct hshentry *branchpoint, struct cbuf *num, bool removedlock)
+addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
 /* Add a new branch and branch delta at ‘branchpoint’.
    If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
@@ -448,7 +448,7 @@ fixwork (mode_t newworkmode, time_t mtime)
 }
 
 static int
-xpandfile (struct fro *unexfile, struct hshentry const *delta,
+xpandfile (struct fro *unexfile, struct delta const *delta,
            char const **exname, bool dolog)
 /* Read ‘unexfile’ and copy it to a file, performing keyword
    substitution with data from ‘delta’.
@@ -623,7 +623,7 @@ main (int argc, char **argv)
   bool usestatdate;             /* Use mod time of file for -d.  */
   mode_t newworkmode;           /* mode for working file */
   time_t mtime, wtime;
-  struct hshentry *workdelta;
+  struct delta *workdelta;
   struct link *tp_assoc = &assoclst;
   struct hshentries *deltas;            /* Deltas to be generated.  */
   const struct program program =

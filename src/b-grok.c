@@ -44,7 +44,7 @@ struct notyet
   char const *revno;
   char const *next;
   struct link *branches;                /* list of ‘char const *’ */
-  struct hshentry *d;
+  struct delta *d;
 };
 
 struct grok
@@ -624,7 +624,7 @@ full (struct divvy *to, struct fro *f)
          count++)
       {
         struct notyet *ny = STRUCTALLOC (g->tranquil, struct notyet);
-        struct hshentry *d = ny->d = STRUCTALLOC (to, struct hshentry);
+        struct delta *d = ny->d = STRUCTALLOC (to, struct delta);
 
         STASH (d->num);
         d->branches = NULL;             /* see ‘grok_all’ */
@@ -706,7 +706,7 @@ full (struct divvy *to, struct fro *f)
           RWARN ("user `%s' holds a lock for %s `%s'",
                  lock->login, ks_ner, lock->revno);
           ny = zlloc (to, "dummy ny", sizeof (struct notyet));
-          ny->d = zlloc (to, "dummy hshentry", sizeof (struct hshentry));
+          ny->d = zlloc (to, "dummy delta", sizeof (struct delta));
           ny->revno = ny->d->num = lock->revno;
           puthash (to, ny, repo->ht);
         }
@@ -717,7 +717,7 @@ full (struct divvy *to, struct fro *f)
     {
       char const *revno;
       struct notyet *ny;
-      struct hshentry *d;
+      struct delta *d;
 
       MUST_REVNO (g);
       revno = XREP (g).string;
@@ -763,7 +763,7 @@ full (struct divvy *to, struct fro *f)
   for (struct wlink *ls = repo->deltas; ls; ls = ls->next)
     {
       struct notyet *ny = ls->entry, *deref;
-      struct hshentry *d = ny->d;
+      struct delta *d = ny->d;
 
 #define FIND_D(revno)   ((deref = FIND_NY (revno))->d)
 
@@ -815,7 +815,7 @@ grok_resynch (struct repo *repo, struct fro *from)
   for (struct lockdef const *orig = repo->lockdefs + repo->locks_count;
        repo->lockdefs < orig-- && (ny = FIND_NY (orig->revno));)
     {
-      struct hshentry *d = ny->d;
+      struct delta *d = ny->d;
       struct rcslock *rl = FALLOC (struct rcslock);
 
       rl->login = d->lockedby = orig->login;

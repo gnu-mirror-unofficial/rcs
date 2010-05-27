@@ -1,5 +1,26 @@
 2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Rename ‘struct hshentry’ to ‘struct delta’.
+
+	* b-grok.c: Do s/struct hshentry/struct delta/g.
+	* b-kwxout.c: Likewise.
+	* b-kwxout.h: Likewise.
+	* base.h: Likewise.
+	* ci.c: Likewise.
+	* co.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rlog.c: Likewise.
+	* yarrrr.c: Likewise.
+
+2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘str_save’ more.
 
 	* co.c (getancestor, main): Use ‘str_save’.
