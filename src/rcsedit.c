@@ -1087,13 +1087,6 @@ addsymbol (char const *num, char const *name, bool rebind)
   return 1;
 }
 
-char const *
-getcaller (void)
-/* Get the caller's login name.  */
-{
-  return getusername (currently_setuid_p ());
-}
-
 bool
 checkaccesslist (void)
 /* Return true if caller is the superuser, the owner of the

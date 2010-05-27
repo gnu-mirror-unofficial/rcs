@@ -1,6 +1,8 @@
 /* b-excwho.c --- exclusivity / identity
 
    Copyright (C) 2010 Thien-Thi Nguyen
+   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
+   Copyright (C) 1982, 1988, 1989 Walter Tichy
 
    This file is part of GNU RCS.
 
@@ -18,8 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern bool caller_login_p (char const *login);
 extern bool currently_setuid_p (void);
+extern char const *getcaller (void);
+extern bool caller_login_p (char const *login);
 extern struct link *lock_memq (struct link *ls, bool loginp, void const *x);
 extern void lock_drop (struct link *box, struct link *tp);
 

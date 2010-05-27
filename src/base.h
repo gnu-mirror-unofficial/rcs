@@ -740,7 +740,6 @@ int setmtime (char const *file, time_t mtime);
 int findlock (bool delete, struct delta **target);
 int addlock (struct delta *delta, bool verbose);
 int addsymbol (char const *num, char const *name, bool rebind);
-char const *getcaller (void);
 bool checkaccesslist (void);
 int dorewrite (bool lockflag, int changed);
 int donerewrite (int changed, time_t newRCStime);

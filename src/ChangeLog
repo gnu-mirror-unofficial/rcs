@@ -1,5 +1,16 @@
 2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int org] Move ‘getcaller’ to b-excwho.[hc].
+
+	* rcsedit.c (getcaller): Move func from here...
+	* b-excwho.c: Update copyright notice.
+	(getcaller): ...to here.
+	* base.h (getcaller): Move func decl from here...
+	* b-excwho.h: Update copyright notice.
+	(getcaller): ...to here.
+
+2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘struct wlink’ more.
 
 	* ci.c (addelta, main): Do s/struct hshentries/struct wlink/g;

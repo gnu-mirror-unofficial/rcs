@@ -1,6 +1,8 @@
 /* b-excwho.c --- exclusivity / identity
 
    Copyright (C) 2010 Thien-Thi Nguyen
+   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
+   Copyright (C) 1982, 1988, 1989 Walter Tichy
 
    This file is part of GNU RCS.
 
@@ -23,12 +25,6 @@
 #include "b-esds.h"
 
 bool
-caller_login_p (char const *login)
-{
-  return STR_SAME (getcaller (), login);
-}
-
-bool
 currently_setuid_p (void)
 {
 #if defined HAVE_SETUID && defined HAVE_GETUID
@@ -36,6 +32,19 @@ currently_setuid_p (void)
 #else
   return false;
 #endif
+}
+
+char const *
+getcaller (void)
+/* Get the caller's login name.  */
+{
+  return getusername (currently_setuid_p ());
+}
+
+bool
+caller_login_p (char const *login)
+{
+  return STR_SAME (getcaller (), login);
 }
 
 struct link *
