@@ -77,7 +77,7 @@ fro_open (char const *name, char const *type, struct stat *status)
     }
   s = status->st_size;
 
-  f = ZLLOC (1, struct fro);
+  f = FZLLOC (struct fro);
   f->end = s;
 
   /* Determine the read method.  */
@@ -124,8 +124,7 @@ fro_open (char const *name, char const *type, struct stat *status)
           char *bufptr;
           size_t bufsiz = s;
 
-          /* As ‘f’ is in ‘SHARED’, so must this go.  */
-          f->base = alloc (SHARED, name, s);
+          f->base = alloc (SINGLE, name, s);
           bufptr = f->base;
           do
             {

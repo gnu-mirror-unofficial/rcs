@@ -501,7 +501,7 @@ full (struct divvy *to, struct fro *f)
 {
   size_t count;
   struct link fake, *tp;
-  struct grok *g = ZLLOC (1, struct grok);
+  struct grok *g = FZLLOC (struct grok);
   struct repo *repo = zlloc (to, "repo", sizeof (struct repo));
 
   repo->ht = make_hash_table (to, NSLOTS);

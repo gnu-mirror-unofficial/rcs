@@ -625,7 +625,7 @@ branchtip (char const *branch)
 
 bool
 fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
-/* Expand ‘source’, pointing ‘ans’ at a new string in ‘SHARED’,
+/* Expand ‘source’, pointing ‘ans’ at a new string in ‘SINGLE’,
    with all symbolic fields replaced with their numeric values.
    Expand a branch followed by ‘.’ to the latest revision on that branch.
    Ignore ‘.’ after a revision.  Remove leading zeros.
@@ -637,15 +637,13 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
   bool have_branch = false;
   char *ugh = NULL;
 
-  /* TODO: Allocate on ‘SINGLE’ (pending ‘free_NEXT_str’ fixup).  */
+#define ACCF(...)  accf (SINGLE, __VA_ARGS__)
 
-#define ACCF(...)  accf (SHARED, __VA_ARGS__)
-
-#define FRESH()    if (ugh) brush_off (SHARED, ugh)
-#define ACCB(b)    accumulate_byte (SHARED, b)
-#define ACCS(s)    accs (SHARED, s)
-#define ACCR(b,e)  accumulate_range (SHARED, b, e)
-#define OK()       ugh = finish_string (SHARED, &ans->size), ans->string = ugh
+#define FRESH()    if (ugh) brush_off (SINGLE, ugh)
+#define ACCB(b)    accumulate_byte (SINGLE, b)
+#define ACCS(s)    accs (SINGLE, s)
+#define ACCR(b,e)  accumulate_range (SINGLE, b, e)
+#define OK()       ugh = finish_string (SINGLE, &ans->size), ans->string = ugh
 
   sp = source;
   if (!sp || !*sp)
@@ -735,7 +733,7 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
                   else
                     break;
                   OK (); FRESH ();
-                  accumulate_branchno (SHARED, b);
+                  accumulate_branchno (SINGLE, b);
                 }
             }
         }

@@ -1,3 +1,16 @@
+2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘SINGLE’ et al more (instead of ‘SHARED’).
+
+	* b-divvy.h (FZLLOC): New macro.
+	* b-fro.c (fro_open): Use ‘FZLLOC’, ‘SINGLE’.
+	* b-grok.c (full): Use ‘FZLLOC’.
+	* b-kwxout.c (keyreplace): Use ‘SINGLE’.
+	* rcsedit.c (swapeditfiles): Use ‘FZLLOC’.
+	* rcsfnms.c (InitAdmin): Clear ‘REPO (r)’.
+	(pairnames): Use ‘SINGLE’.
+	* rcsrev.c (fully_numeric): Use ‘SINGLE’.
+
 2010-05-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Move ‘program’ references from global scope into ‘top’.

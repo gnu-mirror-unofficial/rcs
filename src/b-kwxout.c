@@ -213,7 +213,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
           ;
 
           /* Copy characters before ‘$Log’ into ‘leader’.  */
-          leader = alloc (SHARED, "leader", 1 + cs);
+          leader = alloc (SINGLE, "leader", 1 + cs);
           cp = leader;
           for (cw = 0; cw < cs; cw++)
             {
@@ -292,7 +292,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
             }
         }
       if (leader)
-        brush_off (SHARED, leader);
+        brush_off (SINGLE, leader);
     }
 }
 

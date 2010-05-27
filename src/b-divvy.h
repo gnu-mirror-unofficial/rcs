@@ -50,6 +50,7 @@ extern void close_space (struct divvy *divvy);
 
 #define ZLLOC(n,type)          (zlloc (SHARED, #type, sizeof (type) * n))
 #define FALLOC(type)           (alloc (SINGLE, #type, sizeof (type)))
+#define FZLLOC(type)           (zlloc (SINGLE, #type, sizeof (type)))
 #define intern0(divvy,string)  (intern (divvy, string, strlen (string)))
 #define accs(divvy,string)     accf (divvy, "%s", string)
 

@@ -313,7 +313,7 @@ swapeditfiles (struct editstuff *es, FILE *outfile)
    opened for reading and writing.  */
 {
   char const *tmpptr;
-  struct fro *newrile = ZLLOC (1, struct fro);
+  struct fro *newrile = FZLLOC (struct fro);
 
   es->lcount = 0;
   es->corr = 0;

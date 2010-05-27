@@ -92,6 +92,7 @@ InitAdmin (void)
 
   REPO (tip) = NULL;
   BE (strictly_locking) = STRICT_LOCKING;
+  REPO (r) = NULL;
 
   /* Guess the comment leader from the suffix.  */
   ext = (ext = strrchr (MANI (filename), '.'))
@@ -377,8 +378,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
           PERR ("%s isn't a regular file -- ignored", p);
           return 0;
         }
-      /* TODO: Allocate on ‘SINGLE’.  */
-      REPO (r) = grok_all (SHARED, FLOW (from));
+      REPO (r) = grok_all (SINGLE, FLOW (from));
       fro_bob (FLOW (from));
       FLOW (to) = NULL;
     }
