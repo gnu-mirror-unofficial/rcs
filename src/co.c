@@ -120,11 +120,11 @@ rmlock (struct hshentry const *delta)
   someone else holds the lock, 0 if there is no lock on delta,
   and 1 if a lock was found and removed.  */
 {
-  struct link fake, *tp;
+  struct link box, *tp;
   struct rcslock const *rl;
 
-  fake.next = GROK (locks);
-  if (! (tp = lock_delta_memq (&fake, delta)))
+  box.next = GROK (locks);
+  if (! (tp = lock_delta_memq (&box, delta)))
     /* No lock on ‘delta’.  */
     return 0;
   rl = tp->next->entry;
@@ -136,7 +136,7 @@ rmlock (struct hshentry const *delta)
       return -1;
     }
   /* Found a lock on ‘delta’ by caller; delete it.  */
-  lock_drop (&fake, tp);
+  lock_drop (&box, tp);
   return 1;
 }
 

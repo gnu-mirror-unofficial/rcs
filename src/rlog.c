@@ -94,7 +94,7 @@ getlocker (char *argv)
    and store in ‘lockerlist’.  */
 {
   register char c;
-  struct link fake, *tp;
+  struct link box, *tp;
 
   argv--;
   while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -106,8 +106,8 @@ getlocker (char *argv)
       return;
     }
 
-  fake.next = lockerlist;
-  tp = &fake;
+  box.next = lockerlist;
+  tp = &box;
   while (c != '\0')
     {
       tp = extend (tp, argv, SHARED);
@@ -117,7 +117,7 @@ getlocker (char *argv)
       *argv = '\0';
       if (c == '\0')
         {
-          lockerlist = fake.next;
+          lockerlist = box.next;
           return;
         }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -340,14 +340,14 @@ getauthor (char *argv)
 /* Get the author's name from command line and store in ‘authorlist’.  */
 {
   register int c;
-  struct link fake, *tp;
+  struct link box, *tp;
 
   argv--;
   while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
          || c == ';')
     continue;
-  fake.next = authorlist;
-  tp = &fake;
+  box.next = authorlist;
+  tp = &box;
   if (c == '\0')
     {
       tp = extend (tp, getusername (false), SHARED);
@@ -363,7 +363,7 @@ getauthor (char *argv)
       *argv = '\0';
       if (c == '\0')
         {
-          authorlist = fake.next;
+          authorlist = box.next;
           return;
         }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -377,7 +377,7 @@ getstate (char *argv)
 /* Get the states of revisions from command line and store in ‘statelist’.  */
 {
   register char c;
-  struct link fake, *tp;
+  struct link box, *tp;
 
   argv--;
   while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -389,8 +389,8 @@ getstate (char *argv)
       return;
     }
 
-  fake.next = statelist;
-  tp = &fake;
+  box.next = statelist;
+  tp = &box;
   while (c != '\0')
     {
       tp = extend (tp, argv, SHARED);
@@ -400,7 +400,7 @@ getstate (char *argv)
       *argv = '\0';
       if (c == '\0')
         {
-          statelist = fake.next;
+          statelist = box.next;
           return;
         }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -415,13 +415,13 @@ trunclocks (void)
    id's on ‘lockerlist’.  Do not truncate if ‘lockerlist’ empty.  */
 {
   struct link const *plocker;
-  struct link fake, *tp;
+  struct link box, *tp;
 
   if (!lockerlist)
     return;
 
   /* Shorten locks to those contained in ‘lockerlist’.  */
-  for (fake.next = GROK (locks), tp = &fake; tp->next;)
+  for (box.next = GROK (locks), tp = &box; tp->next;)
     {
       struct rcslock const *rl = tp->next->entry;
 
@@ -434,7 +434,7 @@ trunclocks (void)
         else if (!(plocker = plocker->next))
           {
             tp->next = tp->next->next;
-            GROK (locks) = fake.next;
+            GROK (locks) = box.next;
             break;
           }
     }

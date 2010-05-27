@@ -490,12 +490,12 @@ breaklock (struct hshentry const *delta)
    Print an error message if there is no such lock or error.  */
 {
   struct rcslock const *rl;
-  struct link fake, *tp;
+  struct link box, *tp;
   char const *num, *before;
 
   num = delta->num;
-  fake.next = GROK (locks);
-  if (! (tp = lock_delta_memq (&fake, delta)))
+  box.next = GROK (locks);
+  if (! (tp = lock_delta_memq (&box, delta)))
     {
       RERR ("no lock set on revision %s", num);
       return false;
@@ -509,7 +509,7 @@ breaklock (struct hshentry const *delta)
       return false;
     }
   diagnose ("%s unlocked", num);
-  lock_drop (&fake, tp);
+  lock_drop (&box, tp);
   return true;
 }
 
@@ -535,9 +535,9 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
    return false and mark deleted.  */
 {
   struct hshentry *pt;
-  struct link fake;
+  struct link box;
 
-  fake.next = GROK (locks);
+  box.next = GROK (locks);
   for (pt = strt; pt != tail; pt = pt->next)
     {
       if (pt->branches)
@@ -546,7 +546,7 @@ branchpoint (struct hshentry *strt, struct hshentry *tail)
           RERR ("can't remove branch point %s", pt->num);
           return true;
         }
-      if (lock_delta_memq (&fake, pt))
+      if (lock_delta_memq (&box, pt))
         {
           RERR ("can't remove locked revision %s", pt->num);
           return true;
@@ -1104,8 +1104,8 @@ main (int argc, char **argv)
   bool keepRCStime;
   size_t commsymlen;
   struct cbuf branchnum;
-  struct link fakelock, *tplock;
-  struct link fakerm, *tprm;
+  struct link boxlock, *tplock;
+  struct link boxrm, *tprm;
   struct link *tp_assoc, *tp_chacc, *tp_log, *tp_state;
   struct hshentries *deltas;
   const struct program program =
@@ -1127,10 +1127,10 @@ main (int argc, char **argv)
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
   commsymlen = 0;
-  fakelock.next = newlocklst;
-  tplock = &fakelock;
-  fakerm.next = rmvlocklst;
-  tprm = &fakerm;
+  boxlock.next = newlocklst;
+  tplock = &boxlock;
+  boxrm.next = rmvlocklst;
+  tprm = &boxrm;
   expmode = -1;
   BE (pe) = X_DEFAULT;
   initflag = textflag = false;
@@ -1218,7 +1218,7 @@ main (int argc, char **argv)
               break;
             }
           tprm = extend (tprm, a, SHARED);
-          newlocklst = fakelock.next;
+          newlocklst = boxlock.next;
           tplock = rmnewlocklst (a);
           break;
 
@@ -1337,8 +1337,8 @@ main (int argc, char **argv)
           bad_option (*argv);
         };
     }
-  newlocklst = fakelock.next;
-  rmvlocklst = fakerm.next;
+  newlocklst = boxlock.next;
+  rmvlocklst = boxrm.next;
   /* (End processing of options.)  */
 
   /* Now handle all filenames.  */

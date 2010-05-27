@@ -139,13 +139,13 @@ removelock (struct hshentry *delta)
    the RCS file.  If caller does not have a lock in this case,
    return 0; return 1 if a lock is actually removed.  */
 {
-  struct link fake, *tp;
+  struct link box, *tp;
   struct rcslock const *rl;
   char const *num;
 
   num = delta->num;
-  fake.next = GROK (locks);
-  if (! (tp = lock_delta_memq (&fake, delta)))
+  box.next = GROK (locks);
+  if (! (tp = lock_delta_memq (&box, delta)))
     {
       if (!BE (strictly_locking) && myself (REPO (stat).st_uid))
         return 0;
@@ -159,7 +159,7 @@ removelock (struct hshentry *delta)
       return -1;
     }
   /* We found a lock on ‘delta’ by caller; delete it.  */
-  lock_drop (&fake, tp);
+  lock_drop (&box, tp);
   return 1;
 }
 

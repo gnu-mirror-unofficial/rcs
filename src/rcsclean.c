@@ -63,14 +63,14 @@ exiterr (void)
 static bool
 unlock (struct hshentry *delta)
 {
-  struct link fake, *tp;
+  struct link box, *tp;
 
   if (delta && delta->lockedby
       && caller_login_p (delta->lockedby)
-      && (fake.next = GROK (locks))
-      && (tp = lock_delta_memq (&fake, delta)))
+      && (box.next = GROK (locks))
+      && (tp = lock_delta_memq (&box, delta)))
     {
-      lock_drop (&fake, tp);
+      lock_drop (&box, tp);
       return true;
     }
   return false;

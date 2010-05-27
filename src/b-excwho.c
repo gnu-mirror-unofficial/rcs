@@ -59,13 +59,13 @@ lock_memq (struct link *ls, bool loginp, void const *x)
 }
 
 void
-lock_drop (struct link *fake, struct link *tp)
+lock_drop (struct link *box, struct link *tp)
 {
   struct rcslock const *rl = tp->next->entry;
 
   rl->delta->lockedby = NULL;
   tp->next = tp->next->next;
-  GROK (locks) = fake->next;
+  GROK (locks) = box->next;
 }
 
 /* b-excwho.c ends here */

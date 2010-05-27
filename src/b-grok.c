@@ -454,10 +454,10 @@ static void
 puthash (struct divvy *to, struct notyet *ny, struct hash *ht)
 {
   size_t slot = hash (ny->revno, ht);
-  struct wlink fake, *tp, *cur;
+  struct wlink box, *tp, *cur;
 
-  fake.next = ht->a[slot];
-  tp = &fake;
+  box.next = ht->a[slot];
+  tp = &box;
   while ((cur = tp->next))
     {
       struct notyet *maybe = cur->entry;
@@ -470,7 +470,7 @@ puthash (struct divvy *to, struct notyet *ny, struct hash *ht)
       tp = tp->next;
     }
   tp = wextend (tp, ny, to);
-  ht->a[slot] = fake.next;
+  ht->a[slot] = box.next;
 }
 
 static void *
@@ -500,7 +500,7 @@ static struct repo *
 full (struct divvy *to, struct fro *f)
 {
   size_t count;
-  struct link fake, *tp;
+  struct link box, *tp;
   struct grok *g = FZLLOC (struct grok);
   struct repo *repo = zlloc (to, "repo", sizeof (struct repo));
 
@@ -514,9 +514,9 @@ full (struct divvy *to, struct fro *f)
   MORE (g);
 
 #define STASH(cvar)  cvar = XREP (g).string
-#define PREP(field)  count = 0, fake.next = repo->field, tp = &fake
+#define PREP(field)  count = 0, box.next = repo->field, tp = &box
 #define HANG(x)      tp = extend (tp, x, to)
-#define DONE(field)  repo->field = fake.next, repo->field ## _count = count
+#define DONE(field)  repo->field = box.next, repo->field ## _count = count
 
   CBEG ("admin node");
 
@@ -617,9 +617,9 @@ full (struct divvy *to, struct fro *f)
 
   CBEG ("revisions");
   {
-    struct wlink wfake, *wtp;
+    struct wlink wbox, *wtp;
 
-    for (count = 0, wfake.next = repo->deltas, wtp = &wfake;
+    for (count = 0, wbox.next = repo->deltas, wtp = &wbox;
          MAYBE_REVNO (g);
          count++)
       {
@@ -653,10 +653,10 @@ full (struct divvy *to, struct fro *f)
         SEMI (g, state);
 
         SYNCH (g, branches);
-        fake.next = ny->branches, tp = &fake;
+        box.next = ny->branches, tp = &box;
         while (MAYBE_REVNO (g))
           HANG (XREP (g).string);
-        ny->branches = fake.next;
+        ny->branches = box.next;
         SEMI (g, branches);
 
         SYNCH (g, next);
@@ -676,7 +676,7 @@ full (struct divvy *to, struct fro *f)
         wtp = wextend (wtp, ny, to);
         puthash (to, ny, repo->ht);
       }
-    repo->deltas = wfake.next;
+    repo->deltas = wbox.next;
     repo->deltas_count = count;
   }
   CEND ();
@@ -772,13 +772,13 @@ full (struct divvy *to, struct fro *f)
       if (ny->branches)
         {
           struct link *bls;
-          struct wlink wfake, *wtp;
+          struct wlink wbox, *wtp;
 
-          for (bls = ny->branches, wfake.next = d->branches, wtp = &wfake;
+          for (bls = ny->branches, wbox.next = d->branches, wtp = &wbox;
                bls;
                bls = bls->next)
             wtp = wextend (wtp, FIND_D (bls->entry), to);
-          d->branches = wfake.next;
+          d->branches = wbox.next;
         }
       ls->entry = d;
 

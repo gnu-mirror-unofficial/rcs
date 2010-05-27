@@ -991,11 +991,11 @@ findlock (bool delete, struct hshentry **target)
    Return 0 for no locks, 1 for one, 2 for two or more.  */
 {
   struct rcslock const *rl;
-  struct link fake, *found;
+  struct link box, *found;
   char const *me = getcaller ();
 
-  if (! (fake.next = GROK (locks))
-      || ! (found = lock_login_memq (&fake, me)))
+  if (! (box.next = GROK (locks))
+      || ! (found = lock_login_memq (&box, me)))
     return 0;
   if (lock_login_memq (found->next, me))
     {
@@ -1005,7 +1005,7 @@ findlock (bool delete, struct hshentry **target)
   rl = found->next->entry;
   *target = rl->delta;
   if (delete)
-    lock_drop (&fake, found);
+    lock_drop (&box, found);
   return 1;
 }
 
@@ -1049,7 +1049,7 @@ addsymbol (char const *num, char const *name, bool rebind)
    with ‘num’; otherwise, print an error message and return false;
    Return -1 if unsuccessful, 0 if no change, 1 if change.  */
 {
-  struct link fake, *tp;
+  struct link box, *tp;
   struct symdef *d;
 
 #define MAKEDEF()                               \
@@ -1057,8 +1057,8 @@ addsymbol (char const *num, char const *name, bool rebind)
   d->meaningful = name;                         \
   d->underlying = num
 
-  fake.next = GROK (symbols);
-  for (tp = &fake; tp->next; tp = tp->next)
+  box.next = GROK (symbols);
+  for (tp = &box; tp->next; tp = tp->next)
     {
       struct symdef const *dk = tp->next->entry;
 
@@ -1083,7 +1083,7 @@ addsymbol (char const *num, char const *name, bool rebind)
   MAKEDEF ();
   extend (tp, d, SINGLE);
  ok:
-  GROK (symbols) = fake.next;
+  GROK (symbols) = box.next;
   return 1;
 }
 
