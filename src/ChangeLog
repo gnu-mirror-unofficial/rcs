@@ -1,5 +1,15 @@
 2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Make b-grok.c macro ‘BUMMER’ variadic.
+
+	* b-grok.c (ignoble): Don't accept args ‘blurb’, ‘precisely’;
+	don't do initial ‘accf’.
+	(BUMMER): Make macro variadic; call ‘accf’ here.
+	(eof_too_soon): Update call to ‘BUMMER’.
+	(full): Use ‘BUMMER’ more.
+
+2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use local variables more.
 
 	* b-complain.c (vcomplain): Use local variables more; reduce

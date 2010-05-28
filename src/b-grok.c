@@ -95,11 +95,10 @@ pop_context (struct grok *g)
 #endif
 
 static void
-ignoble (struct grok *g, char const *blurb, char const *precisely)
+ignoble (struct grok *g)
 {
   struct cbuf msg;
 
-  accf (g->systolic, blurb, precisely);
 #if CONTEXTUAL
   while (g->context)
     {
@@ -112,12 +111,17 @@ ignoble (struct grok *g, char const *blurb, char const *precisely)
   fatal_syntax (g->lno, "%s", msg.string);
 }
 
-#define BUMMER(blurb,precisely)  ignoble (g, blurb, precisely)
+#define BUMMER(...)  do                         \
+    {                                           \
+      accf (g->systolic, __VA_ARGS__);          \
+      ignoble (g);                              \
+    }                                           \
+  while (0)
 
 static void
 eof_too_soon (struct grok *g)
 {
-  BUMMER ("%s", "unexpected end of file");
+  BUMMER ("unexpected end of file");
 }
 
 #define MORE(g)  GETCHAR_OR (g->c, g->from, eof_too_soon (g))
@@ -723,7 +727,7 @@ full (struct divvy *to, struct fro *f)
       revno = XREP (g).string;
       CBEG (revno);
       if (!(ny = FIND_NY (revno)))
-        fatal_syntax (g->lno, "found edits for %s `%s'", ks_ner, revno);
+        BUMMER ("found edits for %s `%s'", ks_ner, revno);
       d = ny->d;
       SYNCH (g, log);
       MUST_ATAT (g, &d->log, log);
@@ -750,7 +754,7 @@ full (struct divvy *to, struct fro *f)
         g->lno++;
       GETCHAR_OR (g->c, g->from, goto ok);
     }
-  fatal_syntax (g->lno, "junk at end of file: '%c'", g->c);
+  BUMMER ("junk at end of file: '%c'", g->c);
  ok:
   CEND ();
 
