@@ -20,7 +20,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+extern bool myself (uid_t u);
 extern bool currently_setuid_p (void);
+extern void nosetid (void);
+extern void seteid (void);
+extern void setrid (void);
 extern char const *getusername (bool suspicious);
 extern char const *getcaller (void);
 extern bool caller_login_p (char const *login);

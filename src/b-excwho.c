@@ -30,6 +30,60 @@
 #include "b-complain.h"
 #include "b-esds.h"
 
+#if defined HAVE_SETUID && !defined HAVE_SETEUID
+#undef seteuid
+#define seteuid setuid
+#endif
+
+/* Programmer error: We used to conditionally define the
+   func (only when ‘enable’ is defined), so it makes no sense
+   to call it otherwise.  */
+#ifdef DEBUG
+#define PEBKAC(enable)  PFATAL ("%s:%d: PEBKAC (%s, %s)",       \
+                                __FILE__, __LINE__,             \
+                                __func__, #enable)
+#else
+#define PEBKAC(enable)  abort ()
+#endif
+
+#define cacheid(V,E)                            \
+  if (!BE (V ## _cached))                       \
+    {                                           \
+      BE (V) = E;                               \
+      BE (V ## _cached) = true;                 \
+    }                                           \
+  return BE (V)
+
+static uid_t
+ruid (void)
+{
+#ifndef HAVE_GETUID
+  PEBKAC (HAVE_GETUID);
+#endif
+  cacheid (ruid, getuid ());
+}
+
+bool
+myself (uid_t u)
+{
+#ifndef HAVE_GETUID
+  return true;
+#else
+  return u == ruid ();
+#endif
+}
+
+#if defined HAVE_SETUID
+static uid_t
+euid (void)
+{
+#ifndef HAVE_GETUID
+  PEBKAC (HAVE_GETUID);
+#endif
+  cacheid (euid, geteuid ());
+}
+#endif  /* defined HAVE_SETUID */
+
 bool
 currently_setuid_p (void)
 {
@@ -37,6 +91,68 @@ currently_setuid_p (void)
   return euid () != ruid ();
 #else
   return false;
+#endif
+}
+
+#if defined HAVE_SETUID
+static void
+set_uid_to (uid_t u)
+/* Become user ‘u’.  */
+{
+  /* Setuid execution really works only with POSIX 1003.1a Draft 5
+     ‘seteuid’, because it lets us switch back and forth between
+     arbitrary users.  If ‘seteuid’ doesn't work, we fall back on
+     ‘setuid’, which works if saved setuid is supported, unless
+     the real or effective user is root.  This area is such a mess
+     that we always check switches at runtime.  */
+
+  if (! currently_setuid_p ())
+    return;
+#if defined HAVE_WORKING_FORK
+#if has_setreuid
+  if (setreuid (u == euid ()? ruid () : euid (), u) != 0)
+    fatal_sys ("setuid");
+#else  /* !has_setreuid */
+  if (seteuid (u) != 0)
+    fatal_sys ("setuid");
+#endif  /* !has_setreuid */
+#endif  /* defined HAVE_WORKING_FORK */
+  if (geteuid () != u)
+    {
+      if (BE (already_setuid))
+        return;
+      BE (already_setuid) = true;
+      PFATAL ("root setuid not supported" + (u ? 5 : 0));
+    }
+}
+#endif  /* defined HAVE_SETUID */
+
+void
+nosetid (void)
+/* Ignore all calls to ‘seteid’ and ‘setrid’.  */
+{
+#ifdef HAVE_SETUID
+  BE (stick_with_euid) = true;
+#endif
+}
+
+void
+seteid (void)
+/* Become effective user.  */
+{
+#ifdef HAVE_SETUID
+  if (!BE (stick_with_euid))
+    set_uid_to (euid ());
+#endif
+}
+
+void
+setrid (void)
+/* Become real user.  */
+{
+#ifdef HAVE_SETUID
+  if (!BE (stick_with_euid))
+    set_uid_to (ruid ());
 #endif
 }
 

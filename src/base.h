@@ -140,11 +140,6 @@ enum kwsub
 #define vfork fork
 #endif
 
-#if defined HAVE_SETUID && !defined HAVE_SETEUID
-#undef seteuid
-#define seteuid setuid
-#endif
-
 /* end cruft formerly from from conf.h */
 
 #ifdef _POSIX_PATH_MAX
@@ -834,18 +829,6 @@ int runv (int infd, char const *outname, char const **args);
 int run (int infd, char const *outname, ...);
 void setRCSversion (char const *str);
 int getRCSINIT (int argc, char **argv, char ***newargv);
-uid_t ruid (void);
-bool myself (uid_t);
-#if defined HAVE_SETUID
-uid_t euid (void);
-void nosetid (void);
-void seteid (void);
-void setrid (void);
-#else
-#define nosetid()
-#define seteid()
-#define setrid()
-#endif
 time_t now (void);
 
 /* Indexes into ‘BE (sff)’.  */

@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-excwho.h"
 #include "b-feph.h"
 
 #define SFF_COUNT  (SFFI_NEWDIR + 2)

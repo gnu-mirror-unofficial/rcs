@@ -1,5 +1,33 @@
 2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int org] Move some funcs/macros to b-excwho.c, a subset to b-excwho.h.
+
+	* b-feph.c: #include "b-excwho.h".
+	* b-isr.c: #include "b-excwho.h".
+	* rcsutil.c (cacheid): Move macro from here...
+	(ruid, myself, euid): Move funcs from here...
+	[HAVE_SETUID] (set_uid_to, nosetid, seteid, setrid):
+	Move funcs from here...
+	* b-excwho.c [HAVE_SETUID && !HAVE_SETEUID] (seteuid):
+	Move #define to here...
+	(PEBKAC): New macro.
+	(cacheid): ...to here.
+	(ruid): ...to here; make static.
+	(myself): ...to here.
+	[HAVE_SETUID] (euid): to here; make static.
+	[HAVE_SETUID] (set_uid_to): ...to here.
+	(nosetid, seteid, setrid): ...to here;
+	surround func body with #if ‘HAVE_SETUID’.
+	* base.h [HAVE_SETUID && !HAVE_SETEUID] (seteuid): ...from here.
+	(ruid): Delete func decl.
+	(myself): Move func decl from here...
+	[HAVE_SETUID] (euid): Delete func decl.
+	[HAVE_SETUID] (nosetid, seteid, setrid): Move func decl from here...
+	[!HAVE_SETUID] (nosetid, seteid, setrid): Delete macros.
+	* b-excwho.h (myself, nosetid, seteid, setrid): ...to here.
+
+2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move ‘getusername’ to b-excwho.[hc].
 
 	* rlog.c: #include "b-excwho.h".

@@ -32,6 +32,7 @@
 #include "sig2str.h"
 #include "b-complain.h"
 #include "b-divvy.h"
+#include "b-excwho.h"
 #include "b-isr.h"
 
 /* Avoid calling ‘sprintf’ etc., in case they're not reentrant.  */
