@@ -21,6 +21,7 @@
 */
 
 extern bool currently_setuid_p (void);
+extern char const *getusername (bool suspicious);
 extern char const *getcaller (void);
 extern bool caller_login_p (char const *login);
 extern struct link *lock_memq (struct link *ls, bool loginp, void const *x);

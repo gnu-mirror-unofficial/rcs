@@ -22,6 +22,12 @@
 
 #include "base.h"
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
+#include "b-complain.h"
 #include "b-esds.h"
 
 bool
@@ -32,6 +38,49 @@ currently_setuid_p (void)
 #else
   return false;
 #endif
+}
+
+char const *
+getusername (bool suspicious)
+/* Get the caller's login name.  Trust only ‘getwpuid’ if ‘suspicious’.  */
+{
+  if (!BE (username))
+    {
+#define JAM(x)  (BE (username) = x)
+      if (
+          /* Prefer ‘getenv’ unless ‘suspicious’; it's much faster.  */
+#if getlogin_is_secure
+          (suspicious
+           || (!JAM (cgetenv ("LOGNAME"))
+               && !JAM (cgetenv ("USER")))
+           && !JAM (getlogin ()))
+#else
+          suspicious
+          || (!JAM (cgetenv ("LOGNAME"))
+              && !JAM (getenv ("USER"))
+              && !JAM (getlogin ()))
+#endif
+          )
+        {
+#if defined HAVE_GETUID && defined HAVE_GETPWUID
+          struct passwd const *pw = getpwuid (ruid ());
+
+          if (!pw)
+            PFATAL ("no password entry for userid %lu",
+                    (unsigned long) ruid ());
+          JAM (pw->pw_name);
+#else  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
+#if defined HAVE_SETUID
+          PFATAL ("setuid not supported");
+#else
+          PFATAL ("Who are you?  Please setenv LOGNAME.");
+#endif
+#endif  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
+        }
+      checksid (BE (username));
+#undef JAM
+    }
+  return BE (username);
 }
 
 char const *

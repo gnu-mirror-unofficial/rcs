@@ -829,7 +829,6 @@ void parse_revpairs (char option, char *arg,
 void ffree (void);
 char *str_save (char const *s);
 char *cgetenv (char const *name);
-char const *getusername (bool suspicious);
 void awrite (char const *buf, size_t chars, FILE *f);
 int runv (int infd, char const *outname, char const **args);
 int run (int infd, char const *outname, ...);

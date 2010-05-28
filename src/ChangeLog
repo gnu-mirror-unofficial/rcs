@@ -1,3 +1,16 @@
+2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int org] Move ‘getusername’ to b-excwho.[hc].
+
+	* rlog.c: #include "b-excwho.h".
+	* rcsutil.c [HAVE_PWD_H]: Don't #include <pwd.h>.
+	(getusername): Move func from here...
+	* b-excwho.c: #include <stdlib.h>, <unistd.h>, "b-complain.h".
+	[HAVE_PWD_H]: #include <pwd.h>.
+	(getusername): ...to here.
+	* base.h (getusername): Move func decl from here...
+	* b-excwho.h (getusername): ...to here.
+
 2010-05-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int org] Move ‘getcaller’ to b-excwho.[hc].
