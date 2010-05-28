@@ -100,7 +100,7 @@ rmworkfile (void)
     {
       /* File is writable.  */
       if (!yesorno (false, "writable %s exists%s; remove it? [ny](n): ",
-                    MANI (filename), (myself (workstat.st_uid)
+                    MANI (filename), (stat_mine_p (&workstat)
                                       ? ""
                                       : ", and you do not own it")))
         {

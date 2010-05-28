@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern bool myself (uid_t u);
+extern bool stat_mine_p (struct stat *st);
 extern bool currently_setuid_p (void);
 extern void nosetid (void);
 extern void seteid (void);

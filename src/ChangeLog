@@ -1,5 +1,17 @@
 2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Replace ‘myself’ with new abstraction ‘stat_mine_p’.
+
+	* b-excwho.c (stat_mine_p): New func.
+	(myself): Delete func.
+	* b-excwho.h (stat_mine_p): New func decl.
+	(myself): Delete func decl.
+	* ci.c (removelock, addelta, fixwork): Use ‘stat_mine_p’.
+	* co.c (rmworkfile): Likewise.
+	* rcsedit.c (checkaccesslist): Likewise.
+
+2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move some funcs/macros to b-excwho.c, a subset to b-excwho.h.
 
 	* b-feph.c: #include "b-excwho.h".

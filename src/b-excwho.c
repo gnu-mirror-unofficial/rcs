@@ -64,12 +64,12 @@ ruid (void)
 }
 
 bool
-myself (uid_t u)
+stat_mine_p (struct stat *st)
 {
 #ifndef HAVE_GETUID
   return true;
 #else
-  return u == ruid ();
+  return ruid () == st->st_uid;
 #endif
 }
 

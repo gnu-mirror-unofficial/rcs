@@ -147,7 +147,7 @@ removelock (struct delta *delta)
   box.next = GROK (locks);
   if (! (tp = lock_delta_memq (&box, delta)))
     {
-      if (!BE (strictly_locking) && myself (REPO (stat).st_uid))
+      if (!BE (strictly_locking) && stat_mine_p (&REPO (stat)))
         return 0;
       RERR ("no lock set by %s for revision %s", getcaller (), num);
       return -1;
@@ -340,7 +340,7 @@ addelta (struct wlink **tp_deltas)
 
         case 0:
           /* No existing lock; try ‘GROK (branch)’.  Update ‘newdelnum’.  */
-          if (BE (strictly_locking) || !myself (REPO (stat).st_uid))
+          if (BE (strictly_locking) || !stat_mine_p (&REPO (stat)))
             {
               RERR ("no lock set by %s", getcaller ());
               return -1;
@@ -437,7 +437,7 @@ fixwork (mode_t newworkmode, time_t mtime)
 {
   return
     1 < workstat.st_nlink
-    || (newworkmode & S_IWUSR && !myself (workstat.st_uid))
+    || (newworkmode & S_IWUSR && !stat_mine_p (&workstat))
     || setmtime (MANI (filename), mtime) != 0
     ? -1 : workstat.st_mode == newworkmode ? 0
 #ifdef HAVE_FCHMOD

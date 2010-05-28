@@ -1093,7 +1093,7 @@ checkaccesslist (void)
    file, the access list is empty, or caller is on the access list.
    Otherwise, print an error message and return false.  */
 {
-  if (!GROK (access) || myself (REPO (stat).st_uid)
+  if (!GROK (access) || stat_mine_p (&REPO (stat))
       || caller_login_p ("root"))
     return true;
 
