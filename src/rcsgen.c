@@ -90,10 +90,9 @@ scandeltatext (struct editstuff *es, struct wlink **ls,
          also copied unchanged to ‘FLOW (to)’.  */
       {
         int c;
-        struct expctx ctx = EXPCTX (FLOW (res), FLOW (to),
-                                    FLOW (from), true, true);
+        struct expctx ctx = EXPCTX (FLOW (res), to, from, true, true);
 
-        GETCHAR (c, FLOW (from));
+        GETCHAR (c, from);
         if (to)
           afputc (c, to);
         while (1 < expandline (&ctx))
@@ -257,19 +256,20 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
   register FILE *frew;
   register char *p;
   size_t s;
+  struct fro *from = FLOW (from);
 
   frew = FLOW (rewr);
-  if (FLOW (from) && !textflag)
+  if (from && !textflag)
     {
       /* Copy old description.  */
       aprintf (frew, "\n\n%s\n", TINYKS (desc));
-      write_desc_maybe (FLOW (rewr));
+      write_desc_maybe (frew);
     }
   else
     {
       FLOW (to) = NULL;
       /* Get new description.  */
-      if (FLOW (from))
+      if (from)
         /* Skip old description.  */
         FIXUP_OLD (GROK (desc));
       aprintf (frew, "\n\n%s\n%c", TINYKS (desc), SDELIM);
@@ -367,7 +367,10 @@ putadmin (void)
 /* Output the admin node.  */
 {
   register FILE *fout;
-  struct link const *curaccess;
+  struct repo *r = REPO (r);
+  struct delta *tip = REPO (tip);
+  char const *defbr = r ? GROK (branch) : NULL;
+  int kws = BE (kws);
 
   if (!(fout = FLOW (rewr)))
     {
@@ -386,21 +389,17 @@ putadmin (void)
     }
 
   aprintf (fout, "%s\t%s;\n", TINYKS (head),
-           REPO (tip) ? REPO (tip)->num : "");
-  if (REPO (r) && GROK (branch) && VERSION (4) <= BE (version))
-    aprintf (fout, "%s\t%s;\n", TINYKS (branch), GROK (branch));
+           tip ? tip->num : "");
+  if (defbr && VERSION (4) <= BE (version))
+    aprintf (fout, "%s\t%s;\n", TINYKS (branch), defbr);
 
   aputs (TINYKS (access), fout);
-  curaccess = REPO (r) ? GROK (access) : NULL;
-  while (curaccess)
-    {
-      aprintf (fout, "\n\t%s", (char const *)curaccess->entry);
-      curaccess = curaccess->next;
-    }
+  for (struct link *ls = r ? GROK (access) : NULL; ls; ls = ls->next)
+    aprintf (fout, "\n\t%s", (char *) ls->entry);
   aprintf (fout, ";\n%s", TINYKS (symbols));
   format_assocs (fout, "\n\t%s:%s");
   aprintf (fout, ";\n%s", TINYKS (locks));
-  for (struct link *ls = REPO (r) ? GROK (locks) : NULL; ls; ls = ls->next)
+  for (struct link *ls = r ? GROK (locks) : NULL; ls; ls = ls->next)
     {
       struct rcslock const *rl = ls->entry;
 
@@ -415,9 +414,9 @@ putadmin (void)
       putstring (fout, true, REPO (log_lead), false);
       aprintf (fout, ";\n");
     }
-  if (BE (kws) != kwsub_kv)
+  if (kws != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
-             TINYKS (expand), SDELIM, kwsub_string (BE (kws)), SDELIM);
+             TINYKS (expand), SDELIM, kwsub_string (kws), SDELIM);
 }
 
 static void

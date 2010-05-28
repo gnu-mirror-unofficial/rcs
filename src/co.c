@@ -66,6 +66,8 @@ static struct stat workstat;
 static void
 cleanup (void)
 {
+  FILE *mstdout = MANI (standard_output);
+
   if (FLOW (erroneousp))
     exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
@@ -73,9 +75,9 @@ cleanup (void)
   if (FLOW (from)
       && STDIO_P (FLOW (from))
       && FLOW (res)
-      && FLOW (res) != MANI (standard_output))
+      && FLOW (res) != mstdout)
     Ozclose (&FLOW (res));
-  if (neworkptr != MANI (standard_output))
+  if (neworkptr != mstdout)
     Ozclose (&neworkptr);
   dirtempunlink ();
 }
@@ -98,15 +100,17 @@ rmworkfile (void)
 {
   if (workstat.st_mode & (S_IWUSR | S_IWGRP | S_IWOTH) && !forceflag)
     {
+      char const *mani_filename = MANI (filename);
+
       /* File is writable.  */
       if (!yesorno (false, "writable %s exists%s; remove it? [ny](n): ",
-                    MANI (filename), (stat_mine_p (&workstat)
-                                      ? ""
-                                      : ", and you do not own it")))
+                    mani_filename, (stat_mine_p (&workstat)
+                                    ? ""
+                                    : ", and you do not own it")))
         {
           PERR (!BE (quiet) && ttystdin ()
                 ? "checkout aborted"
-                : "writable %s exists; checkout aborted", MANI (filename));
+                : "writable %s exists; checkout aborted", mani_filename);
           return false;
         }
     }
@@ -584,6 +588,10 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        struct stat *repo_stat;
+        char const *mani_filename;
+        int kws;
+
         ffree ();
 
         if (pairnames
@@ -594,14 +602,17 @@ main (int argc, char **argv)
         /* ‘REPO (filename)’ contains the name of the RCS file, and
            ‘FLOW (from)’ points at it.  ‘MANI (filename)’ contains the
            name of the working file.  Also, ‘REPO (stat)’ has been set.  */
+        repo_stat = &REPO (stat);
+        mani_filename = MANI (filename);
+        kws = BE (kws);
         diagnose ("%s  -->  %s", REPO (filename),
-                  tostdout ? "standard output" : MANI (filename));
+                  tostdout ? "standard output" : mani_filename);
 
         workstatstat = -1;
         if (tostdout)
           {
 #if OPEN_O_BINARY
-            int newmode = BE (kws) == kwsub_b ? OPEN_O_BINARY : 0;
+            int newmode = kws == kwsub_b ? OPEN_O_BINARY : 0;
             if (stdout_mode != newmode)
               {
                 stdout_mode = newmode;
@@ -614,11 +625,11 @@ main (int argc, char **argv)
           }
         else
           {
-            workstatstat = stat (MANI (filename), &workstat);
+            workstatstat = stat (mani_filename, &workstat);
             if (workstatstat == 0 && SAME_INODE (REPO (stat), workstat))
               {
                 RERR ("RCS file is the same as working file %s.",
-                      MANI (filename));
+                      mani_filename);
                 continue;
               }
             neworkname = makedirtemp (true);
@@ -686,8 +697,8 @@ main (int argc, char **argv)
               continue;
 
             if (0 <= expmode)
-              BE (kws) = expmode;
-            if (0 < lockflag && BE (kws) == kwsub_v)
+              kws = BE (kws) = expmode;
+            if (0 < lockflag && kws == kwsub_v)
               {
                 RERR ("cannot combine -kv and -l");
                 continue;
@@ -712,14 +723,14 @@ main (int argc, char **argv)
             targetdelta->name = namedrev (rev, targetdelta);
             joinname = buildrevision (deltas, targetdelta,
                                       joinflag && tostdout ? NULL : neworkptr,
-                                      BE (kws) < MIN_UNEXPAND);
+                                      kws < MIN_UNEXPAND);
             if (FLOW (res) == neworkptr)
               FLOW (res) = NULL;             /* Don't close it twice.  */
             if (changelock && deltas->entry != targetdelta)
               fro_trundling (true, FLOW (from));
 
             if (donerewrite (changelock, Ttimeflag
-                             ? REPO (stat).st_mtime
+                             ? repo_stat->st_mtime
                              : (time_t) - 1)
                 != 0)
               continue;
@@ -740,7 +751,7 @@ main (int argc, char **argv)
                     aflush (neworkptr);
                     joinname = neworkname;
                   }
-                if (BE (kws) == kwsub_b)
+                if (kws == kwsub_b)
                   MERR ("merging binary files");
                 if (!buildjoin (joinname))
                   continue;
@@ -748,19 +759,19 @@ main (int argc, char **argv)
           }
         if (!tostdout)
           {
-            mode_t m = WORKMODE (REPO (stat).st_mode,
-                                 !(BE (kws) == kwsub_v
+            mode_t m = WORKMODE (repo_stat->st_mode,
+                                 !(kws == kwsub_v
                                    || (lockflag <= 0 && BE (strictly_locking))));
             time_t t = mtimeflag
               && newdate ? date2time (newdate) : (time_t) - 1;
             aflush (neworkptr);
             IGNOREINTS ();
-            r = chnamemod (&neworkptr, neworkname, MANI (filename), 1, m, t);
+            r = chnamemod (&neworkptr, neworkname, mani_filename, 1, m, t);
             keepdirtemp (neworkname);
             RESTOREINTS ();
             if (r != 0)
               {
-                syserror_errno (MANI (filename));
+                syserror_errno (mani_filename);
                 PERR ("see %s", neworkname);
                 continue;
               }

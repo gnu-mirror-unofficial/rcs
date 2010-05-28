@@ -158,12 +158,14 @@ yarrrr (int argc, char *argv[argc])
 
   do
     {
-      REPO (filename) = MANI (filename) = NULL;
+      char const *repo_filename;
+
       result = pairnames (argc, argv, rcsreadopen, !initflag, BE (quiet));
+      repo_filename = REPO (filename);
       if (result != 0)
         diagnose
           ("RCS filename: %s; working filename: %s\nFull RCS filename: %s",
-           REPO (filename), MANI (filename), getfullRCSname ());
+           repo_filename, MANI (filename), getfullRCSname ());
 
       switch (result)
         {
@@ -174,7 +176,7 @@ yarrrr (int argc, char *argv[argc])
           if (initflag)
             RERR ("already exists");
           else
-            diagnose ("RCS file %s exists", REPO (filename));
+            diagnose ("RCS file %s exists", repo_filename);
           fro_close (FLOW (from));
           break;
 

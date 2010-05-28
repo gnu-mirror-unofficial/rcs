@@ -630,6 +630,8 @@ getnumericrev (void)
   struct cbuf s, e;
   char const *lrev;
   struct cbuf const *rstart, *rend;
+  struct delta *tip = REPO (tip);
+  char const *defbr = GROK (branch);
 
   Revlst = NULL;
   for (ls = revlist; ls; ls = ls->next)
@@ -705,12 +707,12 @@ getnumericrev (void)
         }
     }
   /* Now take care of ‘branchflag’.  */
-  if (branchflag && (GROK (branch) || REPO (tip)))
+  if (branchflag && (defbr || tip))
     {
       rr = FALLOC (struct revrange);
-      rr->beg = rr->end = GROK (branch)
-        ? GROK (branch)
-        : TAKE (1, REPO (tip)->num);
+      rr->beg = rr->end = defbr
+        ? defbr
+        : TAKE (1, tip->num);
       rr->nfield = countnumflds (rr->beg);
       PUSH (rr, Revlst);
     }
@@ -776,7 +778,6 @@ main (int argc, char **argv)
   char *a, **newargv;
   char const *accessListString, *accessFormat;
   char const *headFormat, *symbolFormat;
-  struct link const *curaccess;
   bool descflag, selectflag;
   bool onlylockflag;                   /* print only files with locks */
   bool onlyRCSflag;                    /* print only RCS filename */
@@ -914,6 +915,13 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        char const *repo_filename;
+        struct delta *tip;
+        char const *defbr;
+        bool strictly_locking;
+        int kws;
+        struct link *locks;
+
         ffree ();
 
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
@@ -922,18 +930,24 @@ main (int argc, char **argv)
         /* ‘REPO (filename)’ contains the name of the RCS file,
            and ‘FLOW (from)’ the file descriptor;
            ‘MANI (filename)’ contains the name of the working file.  */
+        repo_filename = REPO (filename);
+        tip = REPO (tip);
+        defbr = GROK (branch);
+        locks = GROK (locks);
+        strictly_locking = BE (strictly_locking);
+        kws = BE (kws);
 
         /* Keep only those locks given by ‘-l’.  */
         if (lockflag)
           trunclocks ();
 
         /* Do nothing if ‘-L’ is given and there are no locks.  */
-        if (onlylockflag && !GROK (locks))
+        if (onlylockflag && !locks)
           continue;
 
         if (onlyRCSflag)
           {
-            aprintf (out, "%s\n", REPO (filename));
+            aprintf (out, "%s\n", repo_filename);
             continue;
           }
 
@@ -943,28 +957,24 @@ main (int argc, char **argv)
         /* Print RCS filename, working filename and optional
            administrative information.  Could use ‘getfullRCSname’
            here, but that is very slow.  */
-        aprintf (out, headFormat, REPO (filename), MANI (filename),
-                 REPO (tip) ? " " : "",
-                 REPO (tip) ? REPO (tip)->num : "",
-                 GROK (branch) ? " " : "", GROK (branch) ? GROK (branch) : "",
-                 BE (strictly_locking) ? " strict" : "");
-        for (struct link *ls = GROK (locks); ls; ls = ls->next)
+        aprintf (out, headFormat, repo_filename, MANI (filename),
+                 tip ? " " : "",
+                 tip ? tip->num : "",
+                 defbr ? " " : "", defbr ? defbr : "",
+                 strictly_locking ? " strict" : "");
+        for (struct link *ls = locks; ls; ls = ls->next)
           {
             struct rcslock const *rl = ls->entry;
 
             aprintf (out, symbolFormat, rl->login, rl->delta->num);
           }
-        if (BE (strictly_locking) && pre5)
-          aputs ("  ;  strict" + (GROK (locks) ? 3 : 0), out);
+        if (strictly_locking && pre5)
+          aputs ("  ;  strict" + (locks ? 3 : 0), out);
 
         /* Print access list.  */
         aputs (accessListString, out);
-        curaccess = GROK (access);
-        while (curaccess)
-          {
-            aprintf (out, accessFormat, curaccess->entry);
-            curaccess = curaccess->next;
-          }
+        for (struct link *ls = GROK (access); ls; ls = ls->next)
+          aprintf (out, accessFormat, ls->entry);
 
         if (shownames)
           {
@@ -978,16 +988,16 @@ main (int argc, char **argv)
             awrite (REPO (log_lead).string, REPO (log_lead).size, out);
             afputc ('\"', out);
           }
-        if (!pre5 || BE (kws) != kwsub_kv)
-          aprintf (out, "\nkeyword substitution: %s", kwsub_string (BE (kws)));
+        if (!pre5 || kws != kwsub_kv)
+          aprintf (out, "\nkeyword substitution: %s", kwsub_string (kws));
 
         aprintf (out, "\ntotal revisions: %d", GROK (deltas_count));
 
         revno = 0;
 
-        if (REPO (tip) && selectflag & descflag)
+        if (tip && selectflag & descflag)
           {
-            exttree (REPO (tip));
+            exttree (tip);
 
             /* Get most recently date of the dates pointed by ‘duelst’.  */
             for (struct link *ls = duelst; ls; ls = ls->next)
@@ -999,10 +1009,10 @@ main (int argc, char **argv)
                 *r = *incomplete;
                 KSTRCPY (r->beg, "0.0.0.0.0.0");
                 ls->entry = r;
-                recentdate (REPO (tip), r);
+                recentdate (tip, r);
               }
 
-            revno = extdate (REPO (tip));
+            revno = extdate (tip);
 
             aprintf (out, ";\tselected revisions: %d", revno);
           }
@@ -1019,7 +1029,7 @@ main (int argc, char **argv)
         if (revno)
           {
             putrunk ();
-            putree (REPO (tip));
+            putree (tip);
           }
         aputs (equal_line, out);
       }

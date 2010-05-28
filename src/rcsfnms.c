@@ -269,8 +269,10 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
 {
   register char *p, *arg, *RCS1;
   char const *base, *RCSbase, *x;
+  char *mani_filename;
   bool paired;
   size_t arglen, dlen, baselen, xlen;
+  struct fro *from;
   struct maybe maybe =
     {
       /* ‘.filename’ initialized by ‘fin2open’.  */
@@ -300,9 +302,9 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
       RCSbase = base;
       baselen = x - base;
       if (1 < argc
-          && !rcssuffix (MANI (filename) = p = argv[1])
+          && !rcssuffix (mani_filename = p = argv[1])
           && baselen <= (arglen = (size_t) strlen (p))
-          && ((p += arglen - baselen) == MANI (filename) || isSLASH (p[-1]))
+          && ((p += arglen - baselen) == mani_filename || isSLASH (p[-1]))
           && memcmp (base, p, baselen) == 0)
         {
           argv[1] = NULL;
@@ -310,14 +312,14 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
         }
       else
         {
-          MANI (filename) = intern (SINGLE, base, baselen + 1);
-          MANI (filename)[baselen] = '\0';
+          mani_filename = intern (SINGLE, base, baselen + 1);
+          mani_filename[baselen] = '\0';
         }
     }
   else
     {
       /* Working file given; now try to find RCS file.  */
-      MANI (filename) = arg;
+      mani_filename = arg;
       baselen = strlen (base);
       /* Derive RCS filename.  */
       if (1 < argc
@@ -332,6 +334,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
       else
         RCSbase = RCS1 = NULL;
     }
+  MANI (filename) = mani_filename;
   /* Now we have a (tentative) RCS filename in ‘RCS1’ and ‘MANI (filename)’.
      Next, try to find the right RCS file.  */
   maybe.space = make_space (__func__);
@@ -371,15 +374,15 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
                                 maybe.bestfit.size);
   FLOW (erroneousp) = false;
   BE (Oerrloop) = false;
-  if (FLOW (from))
+  if ((from = FLOW (from)))
     {
-      if (!S_ISREG (REPO (stat).st_mode))
+      if (!S_ISREG (maybe.status->st_mode))
         {
           PERR ("%s isn't a regular file -- ignored", p);
           return 0;
         }
-      REPO (r) = grok_all (SINGLE, FLOW (from));
-      fro_bob (FLOW (from));
+      REPO (r) = grok_all (SINGLE, from);
+      fro_bob (from);
       FLOW (to) = NULL;
     }
   else
@@ -400,7 +403,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
 
   PREV (valid) = false;
   close_space (maybe.space);
-  return FLOW (from) ? 1 : -1;
+  return from ? 1 : -1;
 }
 
 #ifndef DOUBLE_SLASH_IS_DISTINCT_ROOT
@@ -431,23 +434,23 @@ getfullRCSname (void)
 /* Return a pointer to the full filename of the RCS file.
    Remove leading ‘./’.  */
 {
-  if (ABSFNAME (REPO (filename)))
-    {
-      return REPO (filename);
-    }
+  char const *r = REPO (filename);
+
+  if (ABSFNAME (r))
+    return r;
   else
     {
-      register char const *r;
+      char *cwd;
       char *rv;
       size_t len;
 
-      if (!BE (cwd))
+      if (!(cwd = BE (cwd)))
         {
           /* Get working directory for the first time.  */
           char *PWD = cgetenv ("PWD");
           struct stat PWDstat, dotstat;
 
-          if (!((BE (cwd) = PWD)
+          if (!((cwd = PWD)
                 && ABSFNAME (PWD)
                 && stat (PWD, &PWDstat) == 0
                 && stat (".", &dotstat) == 0
@@ -455,29 +458,30 @@ getfullRCSname (void)
             {
               size_t sz = 64;
 
-              while (!(BE (cwd) = alloc (SHARED, __func__, sz),
-                       getcwd (BE (cwd), sz)))
+              while (!(cwd = alloc (SHARED, __func__, sz),
+                       getcwd (cwd, sz)))
                 {
-                  brush_off (SHARED, BE (cwd));
+                  brush_off (SHARED, cwd);
                   if (errno == ERANGE)
                     sz <<= 1;
-                  else if ((BE (cwd) = PWD))
+                  else if ((cwd = PWD))
                     break;
                   else
                     fatal_sys ("getcwd");
                 }
             }
-          BE (cwd)[dir_useful_len (BE (cwd))] = '\0';
+          cwd[dir_useful_len (cwd)] = '\0';
+          BE (cwd) = cwd;
         }
       /* Remove leading ‘./’s from ‘REPO (filename)’.
          Do not try to handle ‘../’, since removing it may result
          in the wrong answer in the presence of symbolic links.  */
-      for (r = REPO (filename); r[0] == '.' && isSLASH (r[1]); r += 2)
+      for (; r[0] == '.' && isSLASH (r[1]); r += 2)
         /* ‘.////’ is equivalent to ‘./’.  */
         while (isSLASH (r[2]))
           r++;
       /* Build full filename.  */
-      accf (SINGLE, "%s%c%s", BE (cwd), SLASH, r);
+      accf (SINGLE, "%s%c%s", cwd, SLASH, r);
       rv = finish_string (SINGLE, &len);
       return rv;
     }

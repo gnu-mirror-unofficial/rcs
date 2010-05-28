@@ -180,12 +180,13 @@ makedirtemp (bool isworkfile)
    If ‘isworkfile’, put it into the working file's directory;
    otherwise, put the unique file in RCSfile's directory.  */
 {
+  struct sff *sff = BE (sff);
   int slot = SFFI_NEWDIR + isworkfile;
 
-  JAM_SFF (BE (sff)[slot], isworkfile
+  JAM_SFF (sff[slot], isworkfile
            ? MANI (filename)
            : REPO (filename));
-  return BE (sff)[slot].filename;
+  return sff[slot].filename;
 }
 
 void
@@ -193,10 +194,12 @@ keepdirtemp (char const *name)
 /* Do not unlink ‘name’, either because it's not there any more,
    or because it has already been unlinked.  */
 {
+  struct sff *sff = BE (sff);
+
   for (int i = 0; i < SFF_COUNT; i++)
-    if (name == BE (sff)[i].filename)
+    if (name == sff[i].filename)
       {
-        BE (sff)[i].disposition = notmade;
+        sff[i].disposition = notmade;
         return;
       }
   PFATAL ("keepdirtemp");

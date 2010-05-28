@@ -725,11 +725,12 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
                 {
                   /* Insert default branch before initial ‘.’.  */
                   char const *b;
+                  struct delta *tip;
 
                   if (GROK (branch))
                     b = GROK (branch);
-                  else if (REPO (tip))
-                    b = REPO (tip)->num;
+                  else if ((tip = REPO (tip)))
+                    b = tip->num;
                   else
                     break;
                   OK (); FRESH ();
@@ -816,9 +817,12 @@ namedrev (char const *name, struct delta *delta)
 char const *
 tiprev (void)
 {
-  return GROK (branch)
-    ? branchtip (GROK (branch))
-    : REPO (tip) ? REPO (tip)->num : NULL;
+  struct delta *tip;
+  char const *defbr = GROK (branch);
+
+  return defbr
+    ? branchtip (defbr)
+    : (tip = REPO (tip)) ? tip->num : NULL;
 }
 
 /* rcsrev.c ends here */

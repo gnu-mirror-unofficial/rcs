@@ -31,9 +31,11 @@ unbuffer_standard_error (void)
 void
 vcomplain (char const *fmt, va_list args)
 {
+  FILE *mstdout = MANI (standard_output);
+
   if (top)
-    fflush (MANI (standard_output)
-            ? MANI (standard_output)
+    fflush (mstdout
+            ? mstdout
             : stdout);
   vfprintf (stderr, fmt, args);
   if (top)

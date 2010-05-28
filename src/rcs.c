@@ -825,22 +825,24 @@ dolocks (void)
    add lock for ‘GROK (branch)’ or ‘REPO (tip)’ if ‘lockhead’ is set.  */
 {
   struct link const *lockpt;
-  struct delta *target;
+  struct delta *target, *tip = REPO (tip);
   bool changed = false;
 
   if (unlockcaller)
     {
       /* Find lock for caller.  */
-      if (REPO (tip))
+      if (tip)
         {
-          if (GROK (locks))
+          struct link *locks = GROK (locks);
+
+          if (locks)
             {
               switch (findlock (true, &target))
                 {
                 case 0:
                   /* Remove most recent lock.  */
                   {
-                    struct rcslock const *rl = GROK (locks)->entry;
+                    struct rcslock const *rl = locks->entry;
 
                     changed |= breaklock (rl->delta);
                   }
@@ -885,11 +887,13 @@ dolocks (void)
 
   if (lockhead)
     {
+      char const *defbr = GROK (branch);
+
       /* Lock default branch or head.  */
-      if (GROK (branch))
-        changed |= setlock (GROK (branch));
-      else if (REPO (tip))
-        changed |= setlock (REPO (tip)->num);
+      if (defbr)
+        changed |= setlock (defbr);
+      else if (tip)
+        changed |= setlock (tip->num);
       else
         RWARN ("can't lock an empty tree");
     }
@@ -950,6 +954,7 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
    change to delta text.  */
 {
   FILE *fcut;                       /* temporary file to rebuild delta tree */
+  FILE *frew = FLOW (rewr);
 
   fcut = NULL;
   cuttail->selector = false;
@@ -998,10 +1003,10 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
       if (DIFF_TROUBLE == runv (fileno (fcut), diffname, diffv))
         RFATAL ("diff failed");
       Ozclose (&fcut);
-      return putdtext (cuttail, diffname, FLOW (rewr), true);
+      return putdtext (cuttail, diffname, frew, true);
     }
   else
-    return putdtext (cuttail, FLOW (result), FLOW (rewr), false);
+    return putdtext (cuttail, FLOW (result), frew, false);
 }
 
 static void
@@ -1187,12 +1192,8 @@ main (int argc, char **argv)
           *argv = a;
           if (0 < pairnames (1, argv, rcsreadopen, true, false))
             {
-              while (GROK (access))
-                {
-                  getchaccess (&tp_chacc, str_save (GROK (access)->entry),
-                               append);
-                  GROK (access) = GROK (access)->next;
-                }
+              for (struct link *ls = GROK (access); ls; ls = ls->next)
+                getchaccess (&tp_chacc, str_save (ls->entry), append);
               fro_zclose (&FLOW (from));
             }
           break;
@@ -1352,6 +1353,9 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        struct delta *tip;
+        char const *defbr;
+        struct stat *repo_stat;
         struct cbuf newdesc =
           {
             .string = NULL,
@@ -1390,7 +1394,9 @@ main (int argc, char **argv)
            ‘MANI (filename)’ contains the name of the working file.
            If ‘!initflag’, ‘FLOW (from)’ contains the file descriptor
            for the RCS file.  The admin node is initialized.  */
-
+        repo_stat = &REPO (stat);
+        tip = REPO (tip);
+        defbr = REPO (r) ? GROK (branch) : NULL;
         diagnose ("RCS file: %s", REPO (filename));
 
         changed = initflag | textflag;
@@ -1426,15 +1432,15 @@ main (int argc, char **argv)
           {
             if (countnumflds (branchnum.string))
               {
-                if (cmpnum (GROK (branch), branchnum.string) != 0)
+                if (cmpnum (defbr, branchnum.string) != 0)
                   {
-                    GROK (branch) = branchnum.string;
+                    defbr = GROK (branch) = branchnum.string;
                     changed = true;
                   }
               }
-            else if (GROK (branch))
+            else if (defbr)
               {
-                GROK (branch) = NULL;
+                defbr = GROK (branch) = NULL;
                 changed = true;
               }
           }
@@ -1455,18 +1461,18 @@ main (int argc, char **argv)
         if (chgheadstate)
           {
             /* Change state of default branch or head.  */
-            if (!GROK (branch))
+            if (!defbr)
               {
-                if (!REPO (tip))
+                if (!tip)
                   RWARN ("can't change states in an empty tree");
-                else if (STR_DIFF (REPO (tip)->state, headstate))
+                else if (STR_DIFF (tip->state, headstate))
                   {
-                    REPO (tip)->state = headstate;
+                    tip->state = headstate;
                     changed = true;
                   }
               }
             else
-              changed |= rcs_setstate (GROK (branch), headstate);
+              changed |= rcs_setstate (defbr, headstate);
           }
         for (struct link *ls = statelst.next; ls; ls = ls->next)
           {
@@ -1482,6 +1488,7 @@ main (int argc, char **argv)
             if (cuttail)
               gr_revno (cuttail->num, &deltas);
             buildtree ();
+            tip = REPO (tip);
             changed = true;
             keepRCStime = false;
           }
@@ -1490,8 +1497,8 @@ main (int argc, char **argv)
           continue;
 
         putadmin ();
-        if (REPO (tip))
-          puttree (REPO (tip), FLOW (rewr));
+        if (tip)
+          puttree (tip, FLOW (rewr));
         putdesc (&newdesc, textflag, textfile);
 
         /* Don't conditionalize on non-NULL ‘REPO (tip)’; that prevents
@@ -1522,21 +1529,21 @@ main (int argc, char **argv)
         if (initflag)
           {
             /* Adjust things for donerewrite's sake.  */
-            if (stat (MANI (filename), &REPO (stat)) != 0)
+            if (stat (MANI (filename), repo_stat) != 0)
               {
 #if BAD_CREAT0
                 mode_t m = umask (0);
                 umask (m);
-                REPO (stat).st_mode = (S_IRUSR | S_IRGRP | S_IROTH) & ~m;
+                repo_stat->st_mode = (S_IRUSR | S_IRGRP | S_IROTH) & ~m;
 #else
                 changed = -1;
 #endif
               }
-            REPO (stat).st_nlink = 0;
+            repo_stat->st_nlink = 0;
             keepRCStime = false;
           }
         if (donerewrite (changed, keepRCStime
-                         ? REPO (stat).st_mtime
+                         ? repo_stat->st_mtime
                          : (time_t) - 1) != 0)
           break;
 

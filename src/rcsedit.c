@@ -456,12 +456,14 @@ enterstring (struct editstuff *es, struct atat *atat)
 {
   if (STDIO_P (FLOW (from)))
     {
+      char const *filename;
+
       es->filename = NULL;
       es->fedit = NULL;
       es->lcount = es->corr = 0;
-      FLOW (result) = maketemp (1);
-      if (!(FLOW (res) = fopen_update_truncate (FLOW (result))))
-        fatal_sys (FLOW (result));
+      FLOW (result) = filename = maketemp (1);
+      if (!(FLOW (res) = fopen_update_truncate (filename)))
+        fatal_sys (filename);
       copystring (es, atat);
     }
   else
@@ -725,6 +727,7 @@ rcswriteopen (struct maybe *m)
   struct stat statbuf;
   bool symbolicp = false;
   char *lfn;                            /* lock filename */
+  struct sff *sff = BE (sff);
 
   waslocked = 0 <= REPO (fd_lock);
   exists = naturalize (m, &symbolicp);
@@ -783,7 +786,7 @@ rcswriteopen (struct maybe *m)
       *tp = '_';
     }
 
-  BE (sff)[waslocked].filename = intern (SINGLE, lfn, len);
+  sff[waslocked].filename = intern (SINGLE, lfn, len);
 
   f = NULL;
 
@@ -852,7 +855,7 @@ rcswriteopen (struct maybe *m)
   setrid ();
 
   if (0 <= fdesc)
-    BE (sff)[SFFI_LOCKDIR].disposition = effective;
+    sff[SFFI_LOCKDIR].disposition = effective;
 
   if (fdescSafer < 0)
     {
@@ -878,7 +881,7 @@ rcswriteopen (struct maybe *m)
               errno = e;
               if (r != 0)
                 fatal_sys (lockname);
-              BE (sff)[SFFI_LOCKDIR].filename = lfn;
+              sff[SFFI_LOCKDIR].filename = lfn;
             }
         }
       REPO (fd_lock) = fdescSafer;
@@ -1093,11 +1096,12 @@ checkaccesslist (void)
    file, the access list is empty, or caller is on the access list.
    Otherwise, print an error message and return false.  */
 {
-  if (!GROK (access) || stat_mine_p (&REPO (stat))
-      || caller_login_p ("root"))
+  struct link *ls = GROK (access);
+
+  if (!ls || stat_mine_p (&REPO (stat)) || caller_login_p ("root"))
     return true;
 
-  for (struct link *ls = GROK (access); ls; ls = ls->next)
+  for (; ls; ls = ls->next)
     if (caller_login_p (ls->entry))
       return true;
 
@@ -1119,12 +1123,15 @@ dorewrite (bool lockflag, int changed)
     {
       if (changed)
         {
+          FILE *frew;
+
           if (changed < 0)
             return -1;
           putadmin ();
-          puttree (REPO (tip), FLOW (rewr));
-          aprintf (FLOW (rewr), "\n\n%s\n", TINYKS (desc));
-          FLOW (to) = FLOW (rewr);
+          frew = FLOW (rewr);
+          puttree (REPO (tip), frew);
+          aprintf (frew, "\n\n%s\n", TINYKS (desc));
+          FLOW (to) = frew;
         }
       else
         {
@@ -1175,19 +1182,25 @@ donerewrite (int changed, time_t newRCStime)
 
   if (changed && !FLOW (erroneousp))
     {
-      if (FLOW (from))
+      struct stat *repo_stat = &REPO (stat);
+      char const *repo_filename = REPO (filename);
+      struct fro *from = FLOW (from);
+      FILE *frew = FLOW (rewr);
+
+      if (from)
         {
-          fro_spew (FLOW (from), FLOW (rewr));
+          fro_spew (from, frew);
           fro_zclose (&FLOW (from));
         }
-      if (1 < REPO (stat).st_nlink)
+      if (1 < repo_stat->st_nlink)
         RWARN ("breaking hard link");
-      aflush (FLOW (rewr));
+      aflush (frew);
       seteid ();
       IGNOREINTS ();
-      r = chnamemod (&FLOW (rewr), newRCSname, REPO (filename), changed,
-                     REPO (stat).st_mode & (mode_t) ~(S_IWUSR | S_IWGRP | S_IWOTH),
+      r = chnamemod (&FLOW (rewr), newRCSname, repo_filename, changed,
+                     repo_stat->st_mode & (mode_t) ~(S_IWUSR | S_IWGRP | S_IWOTH),
                      newRCStime);
+      frew = FLOW (rewr);
       e = errno;
       keepdirtemp (newRCSname);
 #if BAD_CREAT0
@@ -1199,7 +1212,7 @@ donerewrite (int changed, time_t newRCStime)
       setrid ();
       if (r != 0)
         {
-          syserror (e, REPO (filename));
+          syserror (e, repo_filename);
           PERR ("saved in %s", newRCSname);
         }
 #if BAD_CREAT0
@@ -1216,9 +1229,11 @@ donerewrite (int changed, time_t newRCStime)
 void
 ORCSclose (void)
 {
-  if (0 <= REPO (fd_lock))
+  int repo_fd_lock = REPO (fd_lock);
+
+  if (0 <= repo_fd_lock)
     {
-      if (close (REPO (fd_lock)) != 0)
+      if (close (repo_fd_lock) != 0)
         fatal_sys (lockname);
       REPO (fd_lock) = -1;
     }
@@ -1236,8 +1251,10 @@ ORCSerror (void)
    between actual file opening and setting ‘FLOW (rewr)’ etc., but it's
    better than nothing.  */
 {
-  if (0 <= REPO (fd_lock))
-    close (REPO (fd_lock));
+  int repo_fd_lock = REPO (fd_lock);
+
+  if (0 <= repo_fd_lock)
+    close (repo_fd_lock);
   if (FLOW (rewr))
     /* Avoid ‘fclose’, since stdio may not be reentrant.  */
     close (fileno (FLOW (rewr)));

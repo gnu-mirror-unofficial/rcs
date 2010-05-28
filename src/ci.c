@@ -275,6 +275,8 @@ addelta (struct wlink **tp_deltas)
   register int i;
   int removedlock;
   int newdnumlength;            /* actual length of new rev. num. */
+  struct delta *tip = REPO (tip);
+  char const *defbr = REPO (r) ? GROK (branch) : NULL;
 
   newdnumlength = countnumflds (newdelnum.string);
 
@@ -282,10 +284,10 @@ addelta (struct wlink **tp_deltas)
     {
       /* This covers non-existing RCS file,
          and a file initialized with ‘rcs -i’.  */
-      if (newdnumlength == 0 && REPO (r) && GROK (branch))
+      if (newdnumlength == 0 && defbr)
         {
-          JAM (&newdelnum, GROK (branch));
-          newdnumlength = countnumflds (GROK (branch));
+          JAM (&newdelnum, defbr);
+          newdnumlength = countnumflds (defbr);
         }
       if (newdnumlength == 0)
         JAM (&newdelnum, "1.1");
@@ -298,7 +300,7 @@ addelta (struct wlink **tp_deltas)
           return -1;
         }
       /* (‘newdnumlength’ == 2 is OK.)  */
-      REPO (tip) = &newdelta;
+      tip = REPO (tip) = &newdelta;
       newdelta.next = NULL;
       return 0;
     }
@@ -316,11 +318,11 @@ addelta (struct wlink **tp_deltas)
           /* Found an old lock.  Check whether locked revision exists.  */
           if (!gr_revno (targetdelta->num, tp_deltas))
             return -1;
-          if (targetdelta == REPO (tip))
+          if (targetdelta == tip)
             {
               /* Make new head.  */
-              newdelta.next = REPO (tip);
-              REPO (tip) = &newdelta;
+              newdelta.next = tip;
+              tip = REPO (tip) = &newdelta;
             }
           else if (!targetdelta->next && countnumflds (targetdelta->num) > 2)
             {
@@ -339,17 +341,17 @@ addelta (struct wlink **tp_deltas)
           return 1;
 
         case 0:
-          /* No existing lock; try ‘GROK (branch)’.  Update ‘newdelnum’.  */
+          /* No existing lock; try ‘defbr’.  Update ‘newdelnum’.  */
           if (BE (strictly_locking) || !stat_mine_p (&REPO (stat)))
             {
               RERR ("no lock set by %s", getcaller ());
               return -1;
             }
-          if (GROK (branch))
-            JAM (&newdelnum, GROK (branch));
+          if (defbr)
+            JAM (&newdelnum, defbr);
           else
             {
-              incnum (REPO (tip)->num, &newdelnum);
+              incnum (tip->num, &newdelnum);
             }
           newdnumlength = countnumflds (newdelnum.string);
           /* Now fall into next statement.  */
@@ -361,24 +363,24 @@ addelta (struct wlink **tp_deltas)
       if (newdnumlength == 1)
         {
           /* Make a two-field number out of it.  */
-          if (cmpnumfld (newdelnum.string, REPO (tip)->num, 1) == 0)
-            incnum (REPO (tip)->num, &newdelnum);
+          if (cmpnumfld (newdelnum.string, tip->num, 1) == 0)
+            incnum (tip->num, &newdelnum);
           else
             ADD (&newdelnum, ".1");
         }
-      if (cmpnum (newdelnum.string, REPO (tip)->num) <= 0)
+      if (cmpnum (newdelnum.string, tip->num) <= 0)
         {
           RERR ("revision %s too low; must be higher than %s",
-                newdelnum.string, REPO (tip)->num);
+                newdelnum.string, tip->num);
           return -1;
         }
-      targetdelta = REPO (tip);
-      if (0 <= (removedlock = removelock (REPO (tip))))
+      targetdelta = tip;
+      if (0 <= (removedlock = removelock (tip)))
         {
-          if (!gr_revno (REPO (tip)->num, tp_deltas))
+          if (!gr_revno (tip->num, tp_deltas))
             return -1;
-          newdelta.next = REPO (tip);
-          REPO (tip) = &newdelta;
+          newdelta.next = tip;
+          tip = REPO (tip) = &newdelta;
         }
       return removedlock;
     }
@@ -435,15 +437,17 @@ getcurdate (void)
 static int
 fixwork (mode_t newworkmode, time_t mtime)
 {
+  char const *mani_filename = MANI (filename);
+
   return
     1 < workstat.st_nlink
     || (newworkmode & S_IWUSR && !stat_mine_p (&workstat))
-    || setmtime (MANI (filename), mtime) != 0
+    || setmtime (mani_filename, mtime) != 0
     ? -1 : workstat.st_mode == newworkmode ? 0
 #ifdef HAVE_FCHMOD
     : fchmod (workptr->fd, newworkmode) == 0 ? 0
 #endif
-    : chmod (MANI (filename), newworkmode)
+    : chmod (mani_filename, newworkmode)
     ;
 }
 
@@ -804,6 +808,12 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        char const *mani_filename, *pv;
+        struct fro *from;
+        struct stat *repo_stat;
+        FILE *frew;
+        struct delta *tip;
+        int kws;
         struct cbuf newdesc =
           {
             .string = NULL,
@@ -838,7 +848,7 @@ main (int argc, char **argv)
                 RERR ("already exists");
                 continue;
               }
-            rcsinitflag = !REPO (tip);
+            rcsinitflag = !(tip = REPO (tip));
           }
 
         /* ‘REPO (filename)’ contains the name of the RCS file,
@@ -846,21 +856,25 @@ main (int argc, char **argv)
            If the RCS file exists, ‘FLOW (from)’ contains the file
            descriptor for the RCS file, and ‘REPO (stat)’ is set.
            The admin node is initialized.  */
+        mani_filename = MANI (filename);
+        from = FLOW (from);
+        repo_stat = &REPO (stat);
+        kws = BE (kws);
 
-        diagnose ("%s  <--  %s", REPO (filename), MANI (filename));
+        diagnose ("%s  <--  %s", REPO (filename), mani_filename);
 
-        if (!(workptr = fro_open (MANI (filename), FOPEN_R_WORK, &workstat)))
+        if (!(workptr = fro_open (mani_filename, FOPEN_R_WORK, &workstat)))
           {
-            syserror_errno (MANI (filename));
+            syserror_errno (mani_filename);
             continue;
           }
 
-        if (FLOW (from))
+        if (from)
           {
             if (SAME_INODE (REPO (stat), workstat))
               {
                 RERR ("RCS file is the same as working file %s.",
-                      MANI (filename));
+                      mani_filename);
                 continue;
               }
             if (!checkaccesslist ())
@@ -894,6 +908,7 @@ main (int argc, char **argv)
         /* Splice new delta into tree.  */
         if (0 > (removedlock = addelta (&deltas)))
           continue;
+        tip = REPO (tip);
 
         newdelta.num = newdelnum.string;
         newdelta.branches = NULL;
@@ -906,9 +921,9 @@ main (int argc, char **argv)
         if (author)
           /* Given by ‘-w’.  */
           newdelta.author = author;
-        else if (keepflag && PREV (author))
+        else if (keepflag && (pv = PREV (author)))
             /* Preserve old author if possible.  */
-          newdelta.author = PREV (author);
+          newdelta.author = pv;
         else
           /* Otherwise use caller's id.  */
           newdelta.author = getcaller ();
@@ -918,9 +933,9 @@ main (int argc, char **argv)
         if (state)
           /* Given by ‘-s’.  */
           newdelta.state = state;
-        else if (keepflag && PREV (state))
+        else if (keepflag && (pv = PREV (state)))
           /* Preserve old state if possible.  */
-          newdelta.state = PREV (state);
+          newdelta.state = pv;
 
         /* Compute date.  */
         if (usestatdate)
@@ -930,10 +945,10 @@ main (int argc, char **argv)
         if (*altdate != '\0')
           /* Given by ‘-d’.  */
           newdelta.date = altdate;
-        else if (keepflag && PREV (date))
+        else if (keepflag && (pv = PREV (date)))
           {
             /* Preserve old date if possible.  */
-            str2date (PREV (date), olddate);
+            str2date (pv, olddate);
             newdelta.date = olddate;
           }
         else
@@ -952,17 +967,18 @@ main (int argc, char **argv)
         if (lockflag && addlock (&newdelta, true) < 0)
           continue;
 
-        if (keepflag && PREV (name))
-          if (addsymbol (newdelta.num, PREV (name), false) < 0)
+        if (keepflag && (pv = PREV (name)))
+          if (addsymbol (newdelta.num, pv, false) < 0)
             continue;
         if (!addsyms (newdelta.num))
           continue;
 
         putadmin ();
-        puttree (REPO (tip), FLOW (rewr));
+        frew = FLOW (rewr);
+        puttree (tip, frew);
         putdesc (&newdesc, false, textfile);
 
-        changework = BE (kws) < MIN_UNCHANGED_EXPAND;
+        changework = kws < MIN_UNCHANGED_EXPAND;
         dolog = true;
         lockthis = lockflag;
         workdelta = &newdelta;
@@ -973,17 +989,17 @@ main (int argc, char **argv)
             diagnose ("initial revision: %s", newdelta.num);
             /* Get logmessage.  */
             newdelta.pretty_log = getlogmsg ();
-            putdftext (&newdelta, workptr, FLOW (rewr), false);
-            REPO (stat).st_mode = workstat.st_mode;
-            REPO (stat).st_nlink = 0;
+            putdftext (&newdelta, workptr, frew, false);
+            repo_stat->st_mode = workstat.st_mode;
+            repo_stat->st_nlink = 0;
             changedRCS = true;
           }
         else
           {
             diffname = maketemp (0);
-            newhead = REPO (tip) == &newdelta;
+            newhead = tip == &newdelta;
             if (!newhead)
-              FLOW (to) = FLOW (rewr);
+              FLOW (to) = frew;
             expname = buildrevision (deltas, targetdelta, NULL, false);
             if (!forceciflag
                 && STR_SAME (newdelta.state, targetdelta->state)
@@ -1007,14 +1023,14 @@ main (int argc, char **argv)
                   /* We have started to build the wrong new RCS file.
                      Start over from the beginning.  */
                   {
-                    off_t hwm = ftello (FLOW (rewr));
+                    off_t hwm = ftello (frew);
                     bool bad_truncate;
 
-                    Orewind (FLOW (rewr));
-                    bad_truncate = 0 > ftruncate (fileno (FLOW (rewr)), (off_t) 0);
+                    Orewind (frew);
+                    bad_truncate = 0 > ftruncate (fileno (frew), (off_t) 0);
 
-                    fro_bob (FLOW (from));
-                    grok_resynch (REPO (r), FLOW (from));
+                    fro_bob (from);
+                    grok_resynch (REPO (r), from);
                     if (! (workdelta = delta_from_ref (targetdelta->num)))
                       continue;
                     workdelta->pretty_log = targetdelta->pretty_log;
@@ -1026,12 +1042,12 @@ main (int argc, char **argv)
                       continue;
                     if (dorewrite (true, true) != 0)
                       continue;
-                    fro_spew (FLOW (from), FLOW (rewr));
+                    fro_spew (from, frew);
                     if (bad_truncate)
-                      while (ftello (FLOW (rewr)) < hwm)
+                      while (ftello (frew) < hwm)
                         /* White out any earlier mistake with '\n's.
                            This is unlikely.  */
-                        afputc ('\n', FLOW (rewr));
+                        afputc ('\n', frew);
                   }
               }
             else
@@ -1064,7 +1080,7 @@ main (int argc, char **argv)
                 *++diffp = prog_diff;
                 *++diffp = diff_flags;
 #if OPEN_O_BINARY
-                if (BE (kws) == kwsub_b)
+                if (kws == kwsub_b)
                   *++diffp = "--binary";
 #endif
                 *++diffp = newhead ? "-" : expname;
@@ -1079,11 +1095,11 @@ main (int argc, char **argv)
                 if (newhead)
                   {
                     fro_bob (workptr);
-                    putdftext (&newdelta, workptr, FLOW (rewr), false);
-                    if (!putdtext (targetdelta, diffname, FLOW (rewr), true))
+                    putdftext (&newdelta, workptr, frew, false);
+                    if (!putdtext (targetdelta, diffname, frew, true))
                       continue;
                   }
-                else if (!putdtext (&newdelta, diffname, FLOW (rewr), true))
+                else if (!putdtext (&newdelta, diffname, frew, true))
                   continue;
 
                 /* Check whether the working file changed during checkin,
@@ -1107,9 +1123,9 @@ main (int argc, char **argv)
 
         if (donerewrite (changedRCS, !Ttimeflag
                          ? (time_t) - 1
-                         : FLOW (from) && wtime < (REPO (stat).st_mtime
-                                                   ? REPO (stat).st_mtime
-                                                   : wtime))
+                         : from && wtime < (repo_stat->st_mtime
+                                            ? repo_stat->st_mtime
+                                            : wtime))
             != 0)
           continue;
 
@@ -1117,12 +1133,12 @@ main (int argc, char **argv)
           {
             fro_zclose (&workptr);
             /* Get rid of old file.  */
-            r = un_link (MANI (filename));
+            r = un_link (mani_filename);
           }
         else
           {
-            newworkmode = WORKMODE (REPO (stat).st_mode,
-                                    !(BE (kws) == kwsub_v
+            newworkmode = WORKMODE (repo_stat->st_mode,
+                                    !(kws == kwsub_v
                                       || lockthis < BE (strictly_locking)));
             mtime = mtimeflag ? wtime : (time_t) - 1;
 
@@ -1135,8 +1151,8 @@ main (int argc, char **argv)
                 workdelta->name =
                   namedrev (assoclst.next
                             ? first_meaningful_symbolic_name ()
-                            : (keepflag && PREV (name)
-                               ? PREV (name)
+                            : (keepflag && (pv = PREV (name))
+                               ? pv
                                : rev),
                             workdelta);
                 switch (xpandfile (workptr, workdelta, &newworkname, dolog))
@@ -1155,7 +1171,7 @@ main (int argc, char **argv)
                     fro_zclose (&workptr);
                     aflush (exfile);
                     IGNOREINTS ();
-                    r = chnamemod (&exfile, newworkname, MANI (filename),
+                    r = chnamemod (&exfile, newworkname, mani_filename,
                                    1, newworkmode, mtime);
                     keepdirtemp (newworkname);
                     RESTOREINTS ();
@@ -1164,7 +1180,7 @@ main (int argc, char **argv)
           }
         if (r != 0)
           {
-            syserror_errno (MANI (filename));
+            syserror_errno (mani_filename);
             continue;
           }
         diagnose ("done");

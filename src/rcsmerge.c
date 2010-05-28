@@ -159,26 +159,30 @@ main (int argc, char **argv)
       if (0 < pairnames (argc, argv, rcsreadopen, true, false))
         {
           struct cbuf numericrev;
+          char const *repo_filename = REPO (filename);
+          char const *mani_filename = MANI (filename);
+          char const *defbr = REPO (r) ? GROK (branch) : NULL;
+          struct delta *tip = REPO (tip);
 
           if (argc > 2 || (argc == 2 && argv[1]))
             PWARN ("excess arguments ignored");
           if (BE (kws) == kwsub_b)
             MERR ("merging binary files");
-          diagnose ("RCS file: %s", REPO (filename));
-          if (!(workptr = fro_open (MANI (filename), FOPEN_R_WORK, NULL)))
-            fatal_sys (MANI (filename));
+          diagnose ("RCS file: %s", repo_filename);
+          if (!(workptr = fro_open (mani_filename, FOPEN_R_WORK, NULL)))
+            fatal_sys (mani_filename);
 
-          if (!REPO (tip))
+          if (!tip)
             RFATAL ("no revisions present");
 
           if (!*rev[1])
-            rev[1] = GROK (branch) ? GROK (branch) : REPO (tip)->num;
+            rev[1] = defbr ? defbr : tip->num;
           if (fully_numeric (&numericrev, rev[1], workptr)
               && (target = delta_from_ref (numericrev.string)))
             {
               xrev[1] = target->num;
               if (!rev[2] || !*rev[2])
-                rev[2] = GROK (branch) ? GROK (branch) : REPO (tip)->num;
+                rev[2] = defbr ? defbr : tip->num;
               if (fully_numeric (&numericrev, rev[2], workptr)
                   && (target = delta_from_ref (numericrev.string)))
                 {
@@ -205,15 +209,15 @@ main (int argc, char **argv)
                                    arg[i] = maketemp (i + 2),
                                    prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
-                                   REPO (filename), NULL))
+                                   repo_filename, NULL))
                             RFATAL ("co failed");
                         }
                       diagnose
                         ("Merging differences between %s and %s into %s%s",
-                         xrev[1], xrev[2], MANI (filename),
+                         xrev[1], xrev[2], mani_filename,
                          tostdout ? "; result to stdout" : "");
 
-                      arg[0] = xrev[0] = MANI (filename);
+                      arg[0] = xrev[0] = mani_filename;
                       status = merge (tostdout, edarg, xrev, arg);
                     }
                 }

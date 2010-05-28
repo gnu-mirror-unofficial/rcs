@@ -236,18 +236,22 @@ main (int argc, char **argv)
   else
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
+        struct stat *repo_stat;
+        char const *mani_filename;
 
         ffree ();
 
         if (!(0 < pairnames (argc, argv,
                              dounlock ? rcswriteopen : rcsreadopen,
                              true, true)
-              && (workptr = fro_open (MANI (filename), FOPEN_R_WORK, &workstat))))
+              && (mani_filename = MANI (filename))
+              && (workptr = fro_open (mani_filename, FOPEN_R_WORK, &workstat))))
           continue;
+        repo_stat = &REPO (stat);
 
         if (SAME_INODE (REPO (stat), workstat))
           {
-            RERR ("RCS file is the same as working file %s.", MANI (filename));
+            RERR ("RCS file is the same as working file %s.", mani_filename);
             continue;
           }
 
@@ -294,7 +298,7 @@ main (int argc, char **argv)
           BE (kws) = expmode;
         else if (waslocked
                  && BE (kws) == kwsub_kv
-                 && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
+                 && WORKMODE (repo_stat->st_mode, true) == workstat.st_mode)
           BE (kws) = kwsub_kvl;
 
         write_desc_maybe (FLOW (to));
@@ -314,17 +318,17 @@ main (int argc, char **argv)
             if (deltas->entry != delta)
               fro_trundling (true, FLOW (from));
             if (donerewrite (true, Ttimeflag
-                             ? REPO (stat).st_mtime
+                             ? repo_stat->st_mtime
                              : (time_t) - 1)
                 != 0)
               continue;
           }
 
         if (!BE (quiet))
-          aprintf (stdout, "rm -f %s\n", MANI (filename));
+          aprintf (stdout, "rm -f %s\n", mani_filename);
         fro_zclose (&workptr);
-        if (perform && un_link (MANI (filename)) != 0)
-          syserror_errno (MANI (filename));
+        if (perform && un_link (mani_filename) != 0)
+          syserror_errno (mani_filename);
       }
 
   tempunlink ();

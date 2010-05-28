@@ -234,6 +234,7 @@ getoldkeys (register struct fro *fp)
   register char *tp;
   bool needs_closing;
   struct pool_found match;
+  char const *mani_filename = MANI (filename);
 
   if (PREV (valid))
     return true;
@@ -241,9 +242,9 @@ getoldkeys (register struct fro *fp)
   needs_closing = false;
   if (!fp)
     {
-      if (!(fp = fro_open (MANI (filename), FOPEN_R_WORK, NULL)))
+      if (!(fp = fro_open (mani_filename, FOPEN_R_WORK, NULL)))
         {
-          syserror_errno (MANI (filename));
+          syserror_errno (mani_filename);
           return false;
         }
       needs_closing = true;

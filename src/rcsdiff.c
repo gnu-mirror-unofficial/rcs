@@ -342,29 +342,36 @@ main (int argc, char **argv)
     for (; 0 < argc; cleanup (), ++argv, --argc)
       {
         struct cbuf numericrev;
+        struct delta *tip;
+        char const *mani_filename, *defbr;
+        int kws;
 
         ffree ();
 
         if (pairnames (argc, argv, rcsreadopen, true, false) <= 0)
           continue;
+        tip = REPO (tip);
+        mani_filename = MANI (filename);
+        kws = BE (kws);
+        defbr = GROK (branch);
         diagnose ("%sRCS file: %s", equal_line + 10, REPO (filename));
         if (!rev2)
           {
             /* Make sure work file is readable, and get its status.  */
-            if (!(workptr = fro_open (MANI (filename), FOPEN_R_WORK, &workstat)))
+            if (!(workptr = fro_open (mani_filename, FOPEN_R_WORK, &workstat)))
               {
-                syserror_errno (MANI (filename));
+                syserror_errno (mani_filename);
                 continue;
               }
           }
 
-        if (!REPO (tip))
+        if (!tip)
           {
             RERR ("no revisions present");
             continue;
           }
         if (revnums == 0 || !*rev1)
-          rev1 = GROK (branch) ? GROK (branch) : REPO (tip)->num;
+          rev1 = defbr ? defbr : tip->num;
 
         if (!fully_numeric (&numericrev, rev1, workptr))
           continue;
@@ -380,9 +387,9 @@ main (int argc, char **argv)
         if (revnums == 2)
           {
             if (!fully_numeric (&numericrev,
-                                *rev2 ? rev2 : (GROK (branch)
-                                                ? GROK (branch)
-                                                : REPO (tip)->num),
+                                *rev2 ? rev2 : (defbr
+                                                ? defbr
+                                                : tip->num),
                                 workptr))
               continue;
             if (! (target = delta_from_ref (numericrev.string)))
@@ -393,7 +400,7 @@ main (int argc, char **argv)
           }
         else if (target->lockedby
                  && !lexpandarg
-                 && BE (kws) == kwsub_kv
+                 && kws == kwsub_kv
                  && WORKMODE (REPO (stat).st_mode, true) == workstat.st_mode)
           lexpandarg = "-kkvl";
         fro_zclose (&workptr);
@@ -427,7 +434,7 @@ main (int argc, char **argv)
 
         diffp = diffpend;
 #if OPEN_O_BINARY
-        if (BE (kws) == kwsub_b)
+        if (kws == kwsub_b)
           *diffp++ = "--binary";
 #endif
         diffp[0] = maketemp (0);
@@ -438,11 +445,11 @@ main (int argc, char **argv)
           }
         if (!rev2)
           {
-            diffp[1] = MANI (filename);
-            if (*MANI (filename) == '-')
+            diffp[1] = mani_filename;
+            if (*mani_filename == '-')
               {
                 accf (SHARED, ".%c", SLASH);
-                diffp[1] = str_save (MANI (filename));
+                diffp[1] = str_save (mani_filename);
               }
           }
         else
@@ -457,7 +464,7 @@ main (int argc, char **argv)
               }
           }
         if (!rev2)
-          diagnose ("diff%s -r%s %s", diffvstr, xrev1, MANI (filename));
+          diagnose ("diff%s -r%s %s", diffvstr, xrev1, mani_filename);
         else
           diagnose ("diff%s -r%s -r%s", diffvstr, xrev1, xrev2);
 

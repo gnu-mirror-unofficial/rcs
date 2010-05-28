@@ -81,6 +81,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
   char datebuf[datesize + zonelenmax];
   int RCSv;
   int exp;
+  bool include_locker = BE (inclusive_of_Locker_in_Id_val);
 
   exp = BE (kws);
   date = delta->date;
@@ -117,7 +118,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
             {
               if (VERSION (5) <= RCSv)
                 {
-                  if (BE (inclusive_of_Locker_in_Id_val) || exp == kwsub_kvl)
+                  if (include_locker || exp == kwsub_kvl)
                     aprintf (out, " %s", delta->lockedby);
                 }
               else if (RCSv == VERSION (4))
@@ -126,8 +127,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
           break;
         case Locker:
           if (delta->lockedby)
-            if (BE (inclusive_of_Locker_in_Id_val)
-                || exp == kwsub_kvl || RCSv <= VERSION (4))
+            if (include_locker || exp == kwsub_kvl || RCSv <= VERSION (4))
               aputs (delta->lockedby, out);
           break;
         case Log:
@@ -164,7 +164,7 @@ keyreplace (struct pool_found *marker, struct expctx *ctx)
       ls = delta->pretty_log.size;
       if (looking_at (&TINY (ciklog), delta->pretty_log.string))
         return;
-      if (BE (version) < VERSION (5))
+      if (RCSv < VERSION (5))
         {
           cp = REPO (log_lead).string;
           cs = REPO (log_lead).size;

@@ -116,8 +116,10 @@ aflush (FILE *f)
 void
 oflush (void)
 {
-  if (fflush (MANI (standard_output)
-              ? MANI (standard_output)
+  FILE *mstdout = MANI (standard_output);
+
+  if (fflush (mstdout
+              ? mstdout
               : stdout)
       != 0 && !BE (Oerrloop))
     Oerror ();

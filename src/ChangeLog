@@ -1,5 +1,30 @@
 2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use local variables more.
+
+	* b-complain.c (vcomplain): Use local variables more; reduce
+	access via ‘PROGRAM’, ‘BE’, ‘MANI’, ‘PREV’, ‘REPO’, ‘GROK’, ‘FLOW’.
+	* b-fb.c (oflush): Likewise.
+	* b-feph.c (makedirtemp, keepdirtemp): Likewise.
+	* b-kwxout.c (keyreplace): Likewise.
+	* ci.c (addelta, getcurdate, main): Likewise.
+	* co.c (cleanup, rmworkfile, main): Likewise.
+	* merger.c (merge): Likewise.
+	* rcs.c (dolocks, buildeltatext, main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsedit.c (enterstring, rcswriteopen, checkaccesslist)
+	(dorewrite, donerewrite, ORCSerror): Likewise.
+	* rcsfnms.c (pairnames, getfullRCSname): Likewise.
+	* rcsgen.c (scandeltatext, putdesc, putadmin): Likewise.
+	* rcskeep.c (getoldkeys): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rcsrev.c (fully_numeric, tiprev): Likewise.
+	* rlog.c (getnumericrev, main): Likewise.
+	* yarrrr.c [TEST_PAIRS] (yarrrr): Likewise.
+
+2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Replace ‘myself’ with new abstraction ‘stat_mine_p’.
 
 	* b-excwho.c (stat_mine_p): New func.

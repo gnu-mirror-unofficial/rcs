@@ -57,6 +57,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
 #if !DIFF3_BIN
   char const *d[2];
 #endif
+  void (*exiterr) (void) = PROGRAM (exiterr);
 
   for (i = 3; 0 <= --i;)
     a[i] = normalize_arg (argv[i]);
@@ -72,7 +73,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
            "-L", label[0], "-L", label[1], "-L", label[2],
            a[0], a[1], a[2], NULL);
   if (DIFF_TROUBLE == s)
-    PROGRAM (exiterr) ();
+    exiterr ();
   if (DIFF_FAILURE == s)
     PWARN ("conflicts during merge");
   if (t)
@@ -105,7 +106,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   Orewind (f);
   aflush (f);
   if (run (fileno (f), NULL, ED, "-", a[0], NULL))
-    PROGRAM (exiterr) ();
+    exiterr ();
   Ozclose (&f);
 #endif  /* !DIFF3_BIN */
 
