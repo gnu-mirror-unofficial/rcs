@@ -1,5 +1,14 @@
 2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: format_locks
+
+	* base.h (format_locks): New func decl.
+	* rcsgen.c (format_locks): New func.
+	(putadmin): Use ‘format_locks’.
+	* rlog.c (main): Likewise.
+
+2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int org] Move ‘addlock’ to b-excwho.[hc].
 
 	* rcsedit.c (addlock): Move func from here...

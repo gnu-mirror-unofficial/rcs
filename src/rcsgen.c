@@ -363,6 +363,17 @@ format_assocs (FILE *out, char const *fmt)
 }
 
 void
+format_locks (FILE *out, char const *fmt)
+{
+  for (struct link *ls = GROK (locks); ls; ls = ls->next)
+    {
+      struct rcslock const *rl = ls->entry;
+
+      aprintf (out, fmt, rl->login, rl->delta->num);
+    }
+}
+
+void
 putadmin (void)
 /* Output the admin node.  */
 {
@@ -399,12 +410,8 @@ putadmin (void)
   aprintf (fout, ";\n%s", TINYKS (symbols));
   format_assocs (fout, "\n\t%s:%s");
   aprintf (fout, ";\n%s", TINYKS (locks));
-  for (struct link *ls = r ? GROK (locks) : NULL; ls; ls = ls->next)
-    {
-      struct rcslock const *rl = ls->entry;
-
-      aprintf (fout, "\n\t%s:%s", rl->login, rl->delta->num);
-    }
+  if (r)
+    format_locks (fout, "\n\t%s:%s");
   if (BE (strictly_locking))
     aprintf (fout, "; %s", TINYKS (strict));
   aprintf (fout, ";\n");

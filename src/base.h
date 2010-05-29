@@ -772,6 +772,7 @@ void write_desc_maybe (FILE *to);
 void putdesc (struct cbuf *cb, bool textflag, char *textfile);
 struct cbuf getsstdin (char const *option, char const *name, char const *note);
 void format_assocs (FILE *out, char const *fmt);
+void format_locks (FILE *out, char const *fmt);
 void putadmin (void);
 void puttree (struct delta const *root, FILE *fout);
 bool putdtext (struct delta const *delta, char const *srcname,

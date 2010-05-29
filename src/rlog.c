@@ -953,12 +953,7 @@ main (int argc, char **argv)
                  tip ? tip->num : "",
                  defbr ? " " : "", defbr ? defbr : "",
                  strictly_locking ? " strict" : "");
-        for (struct link *ls = locks; ls; ls = ls->next)
-          {
-            struct rcslock const *rl = ls->entry;
-
-            aprintf (out, symbolFormat, rl->login, rl->delta->num);
-          }
+        format_locks (out, symbolFormat);
         if (strictly_locking && pre5)
           aputs ("  ;  strict" + (locks ? 3 : 0), out);
 
