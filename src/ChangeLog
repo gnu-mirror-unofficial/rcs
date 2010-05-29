@@ -1,5 +1,15 @@
 2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int org] Move ‘addlock’ to b-excwho.[hc].
+
+	* rcsedit.c (addlock): Move func from here...
+	* b-excwho.c: #include "b-divvy.h".
+	(addlock): ...to here.
+	* base.h (addlock): Move func decl from here...
+	* b-excwho.h (addlock): ...to here.
+
+2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: lock_on
 
 	* b-excwho.c (lock_on): New func.

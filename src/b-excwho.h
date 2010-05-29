@@ -31,6 +31,7 @@ extern bool caller_login_p (char const *login);
 extern struct link *lock_memq (struct link *ls, bool loginp, void const *x);
 extern struct rcslock const *lock_on (struct delta const *delta);
 extern void lock_drop (struct link *box, struct link *tp);
+extern int addlock (struct delta *delta, bool verbose);
 
 /* Idioms.  */
 

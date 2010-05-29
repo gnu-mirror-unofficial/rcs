@@ -1013,31 +1013,6 @@ findlock (bool delete, struct delta **target)
 }
 
 int
-addlock (struct delta *delta, bool verbose)
-/* Add a lock held by caller to ‘delta’ and return 1 if successful.
-   Print an error message if ‘verbose’ and return -1 if no lock is
-   added because ‘delta’ is locked by somebody other than caller.
-   Return 0 if the caller already holds the lock.   */
-{
-  register struct rcslock *rl;
-  struct rcslock const *was = lock_on (delta);
-
-  if (was)
-    {
-      if (caller_login_p (was->login))
-        return 0;
-      if (verbose)
-        RERR ("Revision %s is already locked by %s.", delta->num, was->login);
-      return -1;
-    }
-  rl = FALLOC (struct rcslock);
-  delta->lockedby = rl->login = getcaller ();
-  rl->delta = delta;
-  GROK (locks) = prepend (rl, GROK (locks), SINGLE);
-  return 1;
-}
-
-int
 addsymbol (char const *num, char const *name, bool rebind)
 /* Associate with revision ‘num’ the new symbolic ‘name’.
    If ‘name’ already exists and ‘rebind’ is set, associate ‘name’

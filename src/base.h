@@ -734,7 +734,6 @@ int chnamemod (FILE **fromp, char const *from, char const *to,
                int set_mode, mode_t mode, time_t mtime);
 int setmtime (char const *file, time_t mtime);
 int findlock (bool delete, struct delta **target);
-int addlock (struct delta *delta, bool verbose);
 int addsymbol (char const *num, char const *name, bool rebind);
 bool checkaccesslist (void);
 int dorewrite (bool lockflag, int changed);

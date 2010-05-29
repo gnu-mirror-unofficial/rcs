@@ -28,6 +28,7 @@
 #include <pwd.h>
 #endif
 #include "b-complain.h"
+#include "b-divvy.h"
 #include "b-esds.h"
 
 #if defined HAVE_SETUID && !defined HAVE_SETEUID
@@ -254,6 +255,31 @@ lock_drop (struct link *box, struct link *tp)
   rl->delta->lockedby = NULL;
   tp->next = tp->next->next;
   GROK (locks) = box->next;
+}
+
+int
+addlock (struct delta *delta, bool verbose)
+/* Add a lock held by caller to ‘delta’ and return 1 if successful.
+   Print an error message if ‘verbose’ and return -1 if no lock is
+   added because ‘delta’ is locked by somebody other than caller.
+   Return 0 if the caller already holds the lock.   */
+{
+  register struct rcslock *rl;
+  struct rcslock const *was = lock_on (delta);
+
+  if (was)
+    {
+      if (caller_login_p (was->login))
+        return 0;
+      if (verbose)
+        RERR ("Revision %s is already locked by %s.", delta->num, was->login);
+      return -1;
+    }
+  rl = FALLOC (struct rcslock);
+  rl->login = delta->lockedby = getcaller ();
+  rl->delta = delta;
+  GROK (locks) = prepend (rl, GROK (locks), SINGLE);
+  return 1;
 }
 
 /* b-excwho.c ends here */
