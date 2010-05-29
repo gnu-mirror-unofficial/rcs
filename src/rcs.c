@@ -538,9 +538,7 @@ branchpoint (struct delta *strt, struct delta *tail)
    return false and mark deleted.  */
 {
   struct delta *pt;
-  struct link box;
 
-  box.next = GROK (locks);
   for (pt = strt; pt != tail; pt = pt->next)
     {
       if (pt->branches)
@@ -549,7 +547,7 @@ branchpoint (struct delta *strt, struct delta *tail)
           RERR ("can't remove branch point %s", pt->num);
           return true;
         }
-      if (lock_delta_memq (&box, pt))
+      if (lock_on (pt))
         {
           RERR ("can't remove locked revision %s", pt->num);
           return true;

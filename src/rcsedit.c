@@ -1020,23 +1020,15 @@ addlock (struct delta *delta, bool verbose)
    Return 0 if the caller already holds the lock.   */
 {
   register struct rcslock *rl;
+  struct rcslock const *was = lock_on (delta);
 
-  for (struct link *ls = GROK (locks); ls; ls = ls->next)
+  if (was)
     {
-      struct rcslock const *rlk = ls->entry;
-
-      if (cmpnum (delta->num, rlk->delta->num) == 0)
-        {
-          if (caller_login_p (rlk->login))
-            return 0;
-          else
-            {
-              if (verbose)
-                RERR ("Revision %s is already locked by %s.",
-                      delta->num, rlk->login);
-              return -1;
-            }
-        }
+      if (caller_login_p (was->login))
+        return 0;
+      if (verbose)
+        RERR ("Revision %s is already locked by %s.", delta->num, was->login);
+      return -1;
     }
   rl = FALLOC (struct rcslock);
   delta->lockedby = rl->login = getcaller ();

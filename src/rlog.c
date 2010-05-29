@@ -294,17 +294,8 @@ extractdelta (struct delta const *pdelta)
       if (!(pstate = pstate->next))
         return false;
   /* Only locked revisions wanted.  */
-  if (lockflag)
-    for (struct link *ls = GROK (locks);; ls = ls->next)
-      {
-        struct rcslock const *rl;
-
-        if (!ls)
-          return false;
-        rl = ls->entry;
-        if (rl->delta == pdelta)
-          break;
-      }
+  if (lockflag && !lock_on (pdelta))
+    return false;
   /* Only certain revs or branches wanted.  */
   for (struct link *ls = Revlst; ls;)
     {

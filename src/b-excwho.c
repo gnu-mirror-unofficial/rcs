@@ -232,6 +232,20 @@ lock_memq (struct link *ls, bool loginp, void const *x)
   return NULL;
 }
 
+struct rcslock const *
+lock_on (struct delta const *delta)
+/* Return the first lock found on ‘delta’, or NULL if no such lock exists.  */
+{
+  for (struct link *ls = GROK (locks); ls; ls = ls->next)
+    {
+      struct rcslock const *rl = ls->entry;
+
+      if (delta == rl->delta)
+        return rl;
+    }
+  return NULL;
+}
+
 void
 lock_drop (struct link *box, struct link *tp)
 {

@@ -1,5 +1,15 @@
 2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: lock_on
+
+	* b-excwho.c (lock_on): New func.
+	* b-excwho.h (lock_on): New func decl.
+	* rcs.c (branchpoint): Use ‘lock_on’.
+	* rcsedit.c (addlock): Likewise.
+	* rlog.c (extractdelta): Likewise.
+
+2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Delete abstraction: now
 
 	* ci.c (getcurdate): Use ‘BE (now)’ directly.
