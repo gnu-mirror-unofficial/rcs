@@ -830,7 +830,6 @@ int runv (int infd, char const *outname, char const **args);
 int run (int infd, char const *outname, ...);
 void setRCSversion (char const *str);
 int getRCSINIT (int argc, char **argv, char ***newargv);
-time_t now (void);
 
 /* Indexes into ‘BE (sff)’.  */
 #define SFFI_LOCKDIR  0

@@ -50,6 +50,8 @@ gnurcs_init (struct program const *program)
   ISR_SCRATCH = isr_init (&BE (quiet));
   init_ephemstuff ();
   BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
+  if (0 > time (&BE (now)))
+    fatal_sys ("time");
 
   /* Set ‘BE (mem_limit)’.  */
   {
@@ -497,14 +499,6 @@ getRCSINIT (int argc, char **argv, char ***newargv)
         continue;
     }
   return argc;
-}
-
-time_t
-now (void)
-{
-  if (!BE (now) && time (&BE (now)) == -1)
-    fatal_sys ("time");
-  return BE (now);
 }
 
 /* rcsutil.c ends here */

@@ -57,7 +57,7 @@ str2date (char const *source, char target[datesize])
 /* Parse a free-format date in ‘source’, convert it into
    RCS internal format, and store the result into ‘target’.  */
 {
-  time2date (str2time_checked (source, now (),
+  time2date (str2time_checked (source, BE (now),
                                BE (zone_offset.valid)
                                ? BE (zone_offset.seconds)
                                : (BE (version) < VERSION (5)

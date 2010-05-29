@@ -981,7 +981,7 @@ setmtime (char const *file, time_t mtime)
 
   if (mtime == -1)
     return 0;
-  amtime.actime = now ();
+  amtime.actime = BE (now);
   amtime.modtime = mtime;
   return utime (file, &amtime);
 }

@@ -430,7 +430,7 @@ getcurdate (void)
 /* Return a pointer to the current date.  */
 {
   if (!getcurdate_buffer[0])
-    time2date (now (), getcurdate_buffer);
+    time2date (BE (now), getcurdate_buffer);
   return getcurdate_buffer;
 }
 

@@ -1,5 +1,16 @@
 2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Delete abstraction: now
+
+	* ci.c (getcurdate): Use ‘BE (now)’ directly.
+	* rcsedit.c (setmtime): Likewise.
+	* rcstime.c (str2date): Likewise.
+	* rcsutil.c (gnurcs_init): Init ‘BE (now)’.
+	(now): Delete func.
+	* base.h (now): Delete func decl.
+
+2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Factor constant string "revision number".
 
 	* b-anchor.c (ks_revno): New var.
