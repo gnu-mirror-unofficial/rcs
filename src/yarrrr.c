@@ -464,7 +464,7 @@ yarrrr (int argc, char *argv[argc])
          errors in sequence.  */
 #define prompt complain
 #define more(buf)  fgets (buf, sizeof buf, stdin)
-      prompt ("\nEnter revision number or <return> or '.': ");
+      prompt ("\nEnter %s or <return> or '.': ", ks_revno);
       if (!more (symrevno))
         break;
       if (*symrevno == '.')

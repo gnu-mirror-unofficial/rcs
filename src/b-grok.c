@@ -61,6 +61,7 @@ struct grok
   struct cbuf xrep;
   size_t lno;
   size_t head_lno;
+  struct cbuf bor_no;                   /* branch or revision */
 };
 
 #define STRUCTALLOC(to,type)  alloc (to, #type, sizeof (type))
@@ -195,8 +196,6 @@ accb (struct grok *g)
   MORE (g);
 }
 
-static const char ks_revision_number[] = "revision number";
-
 static bool
 maybe_read_num (struct grok *g, bool must_be_delta_p)
 /* Return true and save to ‘to’ if a number was read,
@@ -229,7 +228,7 @@ maybe_read_num (struct grok *g, bool must_be_delta_p)
       if (trailing_garbage
           || (must_be_delta_p
               && !(1 & dots)))
-        BUMMER ("invalid revision number: %s", p);
+        BUMMER ("invalid %s: %s", ks_revno, p);
       XREP (g).string = p;
       return true;
     }
@@ -241,11 +240,11 @@ maybe_read_num (struct grok *g, bool must_be_delta_p)
 static void
 must_read_num (struct grok *g, char const *role)
 {
-  if (! maybe_read_num (g, ks_revision_number == role))
+  if (! maybe_read_num (g, ks_revno == role))
     BUMMER ("missing %s", role);
 }
 
-#define MUST_REVNO(g)   must_read_num (g, ks_revision_number)
+#define MUST_REVNO(g)   must_read_num (g, ks_revno)
 #define MAYBE_REVNO(g)  maybe_read_num (g, true)
 
 static bool
@@ -413,7 +412,7 @@ must_colon_revno (struct grok *g, char const *role)
     BUMMER ("missing ':' in %s", role);
   MORE (g);
   CEND ();
-  must_read_num (g, "branch or revision number");
+  must_read_num (g, g->bor_no.string);
   CEND ();
 }
 
@@ -515,6 +514,8 @@ full (struct divvy *to, struct fro *f)
   g->systolic = make_space ("systolic");
   g->tranquil = make_space ("tranquil");
   g->lno = 1;
+  accf (g->tranquil, "branch or %s", ks_revno);
+  g->bor_no.string = finish_string (g->tranquil, &g->bor_no.size);
   MORE (g);
 
 #define STASH(cvar)  cvar = XREP (g).string

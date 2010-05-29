@@ -1,3 +1,24 @@
+2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Factor constant string "revision number".
+
+	* b-anchor.c (ks_revno): New var.
+	* b-grok.c (struct grok): Add member ‘bor_no’.
+	(ks_revision_number): Delete var.
+	(maybe_read_num, must_read_num, MUST_REVNO): Use ‘ks_revno’.
+	(must_colon_revno): Use ‘g->bor_no’.
+	(full): Init ‘g->bor_no’.
+	* base.h (ks_revno): New var decl.
+	* ci.c (main): Use ‘ks_revno’.
+	* co.c (main): Likewise.
+	* rcs.c (getmessage): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcskeep.c (keeprev): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rcsrev.c (genbranch, genrevs, fully_numeric): Likewise.
+	* yarrrr.c [TEST_REV] (yarrrr): Likewise.
+
 2010-05-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Make b-grok.c macro ‘BUMMER’ variadic.

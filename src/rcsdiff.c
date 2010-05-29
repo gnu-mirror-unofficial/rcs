@@ -205,7 +205,7 @@ main (int argc, char **argv)
                 rev2 = a;
                 break;
               default:
-                PERR ("too many revision numbers");
+                PERR ("too many %ss", ks_revno);
               }
             goto option_handled;
           case '-':

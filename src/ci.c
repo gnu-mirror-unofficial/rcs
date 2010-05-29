@@ -669,7 +669,7 @@ main (int argc, char **argv)
           if (*a)
             {
               if (rev)
-                PWARN ("redefinition of revision number");
+                PWARN ("redefinition of %s", ks_revno);
               rev = a;
             }
           break;
@@ -889,7 +889,7 @@ main (int argc, char **argv)
               continue;
             if (!rev && !(krev = PREV (rev)))
               {
-                MERR ("can't find a revision number");
+                MERR ("can't find a %s", ks_revno);
                 continue;
               }
             if (!PREV (date) && *altdate == '\0' && usestatdate == false)

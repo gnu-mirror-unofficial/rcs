@@ -21,6 +21,8 @@
 #include "base.h"
 #include <string.h>
 
+const char const ks_revno[] = "revision number";
+
 const char const prog_diff[] = DIFF;
 const char const prog_diff3[] = DIFF3;
 const char const diff_flags[] = DIFFFLAGS;

@@ -107,7 +107,7 @@ main (int argc, char **argv)
           else if (!rev[2])
             rev[2] = a;
           else
-            PERR ("too many revision numbers");
+            PERR ("too many %ss", ks_revno);
           break;
 
         case 'A':
@@ -149,7 +149,7 @@ main (int argc, char **argv)
   /* (End of option processing.)  */
 
   if (!rev[1])
-    PFATAL ("no base revision number given");
+    PFATAL ("no base %s given", ks_revno);
 
   /* Now handle all filenames.  */
   if (!FLOW (erroneousp))

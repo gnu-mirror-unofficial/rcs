@@ -192,7 +192,7 @@ getmessage (struct link **tp, char *option)
 
   if (!(m = strchr (option, ':')))
     {
-      PERR ("-m option lacks revision number");
+      PERR ("-m option lacks %s", ks_revno);
       return;
     }
   *m++ = '\0';

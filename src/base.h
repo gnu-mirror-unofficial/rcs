@@ -684,6 +684,7 @@ extern struct top *top;
 #define FLOW(member)  (top->flow. member)
 
 /* b-anchor */
+extern const char const ks_revno[];
 extern TINY_DECL (ciklog);
 extern TINY_DECL (access);
 extern TINY_DECL (author);

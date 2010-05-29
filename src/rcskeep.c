@@ -211,7 +211,7 @@ keeprev (struct fro *fp)
             }
           break;
         }
-      MERR ("%s is not a revision number", s);
+      MERR ("%s is not a %s", s, ks_revno);
       brush_off (SINGLE, s);
       s = NULL;
     }

@@ -468,7 +468,7 @@ main (int argc, char **argv)
           if (*a)
             {
               if (rev)
-                PWARN ("redefinition of revision number");
+                PWARN ("redefinition of %s", ks_revno);
               rev = a;
             }
           break;

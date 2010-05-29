@@ -396,7 +396,7 @@ genbranch (struct delta const *bpoint, char const *revno,
       /* Length > field.  Find revision.  Check low.  */
       if (cmpnumfld (revno, d->num, field + 1) < 0)
         {
-          RERR ("revision number %s too low", TAKE (field + 1, revno));
+          RERR ("%s %s too low", ks_revno, TAKE (field + 1, revno));
           return NULL;
         }
       do
@@ -523,7 +523,7 @@ genrevs (char const *revno, char const *date, char const *author,
 
   if (!d || cmpnumfld (revno, d->num, 1) != 0)
     {
-      RERR ("revision number %s too low", TAKE (2, revno));
+      RERR ("%s %s too low", ks_revno, TAKE (2, revno));
       goto norev;
     }
   if ((length > 2) && (result != 0))
@@ -655,7 +655,7 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
         goto sorry;
       if (!PREV (rev))
         {
-          MERR ("working file lacks revision number");
+          MERR ("working file lacks %s", ks_revno);
           goto sorry;
         }
       ACCS (PREV (rev));
@@ -763,7 +763,7 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
       break;
     }
 
-  RERR ("improper revision number: %s", source);
+  RERR ("improper %s: %s", ks_revno, source);
 
  sorry:
   OK ();
