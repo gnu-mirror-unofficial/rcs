@@ -46,20 +46,22 @@ struct fro
 struct atat
 {
   size_t count;
-  size_t needexp_count;
   size_t lno;
   size_t line_count;
   struct fro *from;
+#if WITH_NEEDEXP
+  size_t needexp_count;
   bool (*ineedexp) (struct atat *atat, size_t i);
-  /* NB: All of the preceding members should have an aggregate size
-     that is a multiple of 8, so that ‘beg’ is properly aligned.
-     This also requires allocation to be aligned.  */
-  off_t beg;
   union needexp
   {
     uint64_t  direct;
     uint64_t *bitset;
   } needexp;
+#endif  /* WITH_NEEDEXP */
+  /* NB: All of the preceding members should have an aggregate size
+     that is a multiple of 8, so that ‘beg’ is properly aligned.
+     This also requires allocation to be aligned.  */
+  off_t beg;
   off_t holes[];
 };
 

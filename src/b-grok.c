@@ -299,6 +299,8 @@ alloc_atat (struct grok *g, size_t count)
 
 #define BITPOSMOD64(i)  (1ULL << (i % 64))
 
+#if WITH_NEEDEXP
+
 static bool
 atat_ineedexp_many (struct atat *atat, size_t i)
 {
@@ -310,6 +312,8 @@ atat_ineedexp_few (struct atat *atat, size_t i)
 {
   return BITPOSMOD64 (i) & atat->needexp.direct;
 }
+
+#endif  /* WITH_NEEDEXP */
 
 #define SETBIT(i,word)  word |= BITPOSMOD64 (i)
 
@@ -339,7 +343,7 @@ maybe_read_atat (struct grok *g, struct atat **res)
       MORE (g);
       while (SDELIM != g->c)
         {
-          if (KDELIM == g->c)
+          if (WITH_NEEDEXP && KDELIM == g->c)
             needexp = true;
           else if ((newlinep = ('\n' == g->c)))
             g->lno++;
@@ -355,25 +359,29 @@ maybe_read_atat (struct grok *g, struct atat **res)
   if (count)
     {
       struct atat *atat = alloc_atat (g, count);
-      bool many = MANYP (atat, count);
+#if WITH_NEEDEXP
+      bool many;
 
-      atat->lno = lno_start;
-      atat->line_count = g->lno - atat->lno + !newlinep;
-      atat->beg = beg;
-      atat->count = count;
       atat->needexp_count = 0;
-      atat->from = g->from;
-      if (many)
+      if ((many = MANYP (atat, count)))
         atat->needexp.bitset =
           zlloc (g->to, "needexp.bitset",
                  (1 + count / 64) * sizeof (*atat->needexp.bitset));
       atat->ineedexp = many
         ? atat_ineedexp_many
         : atat_ineedexp_few;
+#endif  /* WITH_NEEDEXP */
+
+      atat->lno = lno_start;
+      atat->line_count = g->lno - atat->lno + !newlinep;
+      atat->beg = beg;
+      atat->count = count;
+      atat->from = g->from;
       for (int i = count - 1; -1 < i; i--)
         {
           off_t hole = *(off_t *)(ls->entry); /* sigh */
 
+#if WITH_NEEDEXP
           if (MASK_OFFMSB & hole)
             {
               if (many)
@@ -382,6 +390,7 @@ maybe_read_atat (struct grok *g, struct atat **res)
                 SETBIT (i, atat->needexp.direct);
               atat->needexp_count++;
             }
+#endif
 
           atat->holes[i] = ~MASK_OFFMSB & hole;
           ls = ls->next;

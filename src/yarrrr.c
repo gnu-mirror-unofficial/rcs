@@ -251,13 +251,16 @@ spew_atat (char const *who, struct fro *f, struct atat *atat)
     printf ("<<");
   for (size_t i = 0; i < atat->count; i++)
     {
-      bool needexp = atat->ineedexp (atat, i);
+      bool needexp = false;
       struct range r =
         {
           .beg = 1 + (i ? atat->holes[i - 1] : atat->beg),
           .end = atat->holes[i]
         };
 
+#if WITH_NEEDEXP
+      needexp = atat->ineedexp (atat, i);
+#endif
       printf ("\n\t[%u]: %c\"", i, needexp ? KDELIM : ' ');
       special += needexp;
       fro_spew_partial (stdout, f, &r);

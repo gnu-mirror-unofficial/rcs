@@ -188,6 +188,10 @@ enum kwsub
 /* The minimum value guaranteed to yield an identical file.  */
 #define MIN_UNCHANGED_EXPAND  (OPEN_O_BINARY ? kwsub_b : kwsub_o)
 
+/* Define to 1 to enable the "need expansion" handling
+   (support for a future rewrite of b-kwxout).  */
+#define WITH_NEEDEXP 0
+
 struct diffcmd
 {
   /* Number of first line.  */

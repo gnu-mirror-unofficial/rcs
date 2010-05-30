@@ -1,3 +1,16 @@
+2010-05-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Make "need expansion" support compile-time optional, default off.
+
+	* base.h (WITH_NEEDEXP): New #define.
+	* b-fro.h (struct atat): Include members only if
+	‘WITH_NEEDEXP’: ‘needexp_count’, ‘ineedexp’, ‘needexp’.
+	* b-grok.c (atat_ineedexp_many, atat_ineedexp_few):
+	Surround with ‘#if WITH_NEEDEXP’.
+	(maybe_read_atat): Conditionalize "need
+	expansion" support with ‘#if WITH_NEEDEXP’.
+	* yarrrr.c [TEST_GROK] (spew_atat): Likewise.
+
 2010-05-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstraction: format_locks
