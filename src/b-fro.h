@@ -41,6 +41,7 @@ struct fro
   char *ptr, *lim, *base;
   void (*deallocate) (struct fro *);
   FILE *stream;
+  off_t verbatim;
 };
 
 struct atat
@@ -99,8 +100,9 @@ extern void atat_display (FILE *to, struct atat const *atat);
 #define ATAT_END(atat)       ((atat)->holes[(atat)->count - 1])
 #define ATAT_TEXT_END(atat)  (ATAT_END (atat) + 2)
 
-/* Fixup file position (transitional; see comments in base.h).  */
-#define FIXUP_OLD(atat)                         \
-  fro_move (atat->from, ATAT_TEXT_END (atat))
+/* Arrange for ‘fro_spew (f, ...)’ to (later) start at ‘pos’.  */
+#define VERBATIM(f,pos)     (f)->verbatim = (pos)
+#define IGNORE_REST(f)      VERBATIM ((f), (f)->end)
+#define SAME_AFTER(f,atat)  VERBATIM ((f), ATAT_TEXT_END (atat))
 
 /* b-fro.h ends here */

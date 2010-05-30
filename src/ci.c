@@ -993,6 +993,8 @@ main (int argc, char **argv)
             repo_stat->st_mode = workstat.st_mode;
             repo_stat->st_nlink = 0;
             changedRCS = true;
+            if (from)
+              IGNORE_REST (from);
           }
         else
           {
@@ -1018,7 +1020,10 @@ main (int argc, char **argv)
                   }
                 dolog = false;
                 if (!(changedRCS = lockflag < removedlock || assoclst.next))
-                  workdelta = targetdelta;
+                  {
+                    workdelta = targetdelta;
+                    SAME_AFTER (from, targetdelta->text);
+                  }
                 else
                   /* We have started to build the wrong new RCS file.
                      Start over from the beginning.  */
@@ -1042,6 +1047,7 @@ main (int argc, char **argv)
                       continue;
                     if (dorewrite (true, true) != 0)
                       continue;
+                    VERBATIM (from, GROK (neck));
                     fro_spew (from, frew);
                     if (bad_truncate)
                       while (ftello (frew) < hwm)
@@ -1059,6 +1065,7 @@ main (int argc, char **argv)
 
                 diagnose ("new revision: %s; previous revision: %s",
                           newdelta.num, targetdelta->num);
+                SAME_AFTER (from, targetdelta->text);
                 newdelta.pretty_log = getlogmsg ();
                 if (STDIO_P (workptr))
                   {

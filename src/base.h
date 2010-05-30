@@ -606,10 +606,10 @@ struct repo
   /* Parser internal; transitional.
      (The previous parser design did input and output in one pass, with
      the (input) file position an implicit state.  The current design
-     does a full scan on input, remembering some key file positions (in
-     this case, the position immediately after the ‘desc’ keyword token;
-     see also ‘FIXUP_OLD’) and seeking there during output.  Over time
-     we plan to make the output routines not rely on file position.)  */
+     does a full scan on input, remembering some key file positions
+     (in this case, the position immediately after the ‘desc’ keyword)
+     and re-synching during output.  Over time we plan to make the
+     output routines not rely on file position.)  */
 
   struct lockdef *lockdefs;
   struct hash *ht;

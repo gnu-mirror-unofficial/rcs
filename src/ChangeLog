@@ -1,5 +1,25 @@
 2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Mark verbatim region; reduce transitional tell/seek.
+
+	* b-fro.h (struct fro): Add member ‘verbatim’.
+	(FIXUP_OLD): Delete macro.
+	(VERBATIM, IGNORE_REST, SAME_AFTER): New macros.
+	* b-fro.c (fro_spew): Use ‘->verbatim’ for region
+	beginning; afterwards, set it to the end position.
+	* base.h: Comment munging; nfc.
+	* ci.c (main): Use ‘IGNORE_REST’, ‘SAME_AFTER’, ‘VERBATIM’.
+	* co.c (main): Use ‘SAME_AFTER’.
+	* rcs.c (scanlogtext): Don't call ‘FIXUP_OLD’.
+	(main): Use ‘IGNORE_REST’, ‘SAME_AFTER’.
+	* rcsclean.c (main): Use ‘SAME_AFTER’.
+	* rcsedit.c (copystring): Don't call ‘FIXUP_OLD’.
+	* rcsgen.c (scandeltatext, write_desc_maybe, putdesc): Likewise.
+	* rlog.c (main): Likewise.
+	* yarrrr.c [TEST_REV] (yarrrr): Likewise.
+
+2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Rename ‘struct delta’ member ‘next’ to ‘ilk’.
 
 	* base.h (struct delta): Rename member ‘next’ to ‘ilk’.

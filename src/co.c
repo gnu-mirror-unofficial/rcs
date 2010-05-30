@@ -661,6 +661,7 @@ main (int argc, char **argv)
           {
             struct cbuf numericrev;
             int locks = lockflag ? findlock (false, &targetdelta) : 0;
+            struct fro *from = FLOW (from);
 
             if (rev)
               {
@@ -710,6 +711,7 @@ main (int argc, char **argv)
             diagnose ("revision %s%s", targetdelta->num,
                       0 < lockflag ? " (locked)" :
                       lockflag < 0 ? " (unlocked)" : "");
+            SAME_AFTER (from, targetdelta->text);
 
             /* Prepare to remove old working file if necessary.  */
             if (workstatstat == 0)
@@ -727,7 +729,7 @@ main (int argc, char **argv)
             if (FLOW (res) == neworkptr)
               FLOW (res) = NULL;             /* Don't close it twice.  */
             if (changelock && deltas->entry != targetdelta)
-              fro_trundling (true, FLOW (from));
+              fro_trundling (true, from);
 
             if (donerewrite (changelock, Ttimeflag
                              ? repo_stat->st_mtime

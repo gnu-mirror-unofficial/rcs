@@ -345,7 +345,6 @@ scanlogtext (struct editstuff *es, struct wlink **ls,
       /* Skip over it.  */
       if (to)
         atat_put (to, text);
-      FIXUP_OLD (text);
     }
   /* got the one we're looking for */
   if (edit)
@@ -1508,12 +1507,13 @@ main (int argc, char **argv)
           {
             if (delrev.strt || messagelst.next)
               {
+                struct fro *from = FLOW (from);
                 struct editstuff *es = make_editstuff ();
                 struct wlink *ls = GROK (deltas);
 
                 if (!cuttail || buildeltatext (es, &ls, deltas))
                   {
-                    fro_trundling (true, FLOW (from));
+                    fro_trundling (true, from);
                     if (cuttail)
                       ls = ls->next;
                     scanlogtext (es, &ls, NULL, false);
@@ -1521,7 +1521,10 @@ main (int argc, char **argv)
                     changed = true;
                   }
                 unmake_editstuff (es);
+                IGNORE_REST (from);
               }
+            else if (REPO (r))
+              SAME_AFTER (FLOW (from), GROK (desc));
           }
 
         if (initflag)

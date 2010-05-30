@@ -1010,7 +1010,6 @@ main (int argc, char **argv)
 
             aputs ("description:\n", out);
             atat_display (out, desc);
-            FIXUP_OLD (desc);
           }
         if (revno)
           {

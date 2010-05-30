@@ -446,7 +446,6 @@ copystring (struct editstuff *es, struct atat *atat)
   if (FLOW (to))
     atat_put (FLOW (to), atat);
   es->lcount += atat->line_count;
-  FIXUP_OLD (atat);
 }
 
 void

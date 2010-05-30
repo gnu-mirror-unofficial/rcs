@@ -453,7 +453,6 @@ yarrrr (int argc, char *argv[argc])
     PFATAL ("can't open input file %s", argv[1]);
   REPO (filename) = argv[1];
   REPO (r) = grok_all (SINGLE, FLOW (from));
-  FIXUP_OLD (GROK (desc));
 
   do
     {

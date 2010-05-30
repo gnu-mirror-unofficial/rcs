@@ -72,7 +72,6 @@ scandeltatext (struct editstuff *es, struct wlink **ls,
       /* Skip over it.  */
       if (to)
         atat_put (to, text);
-      FIXUP_OLD (text);
     }
   switch (func)
     {
@@ -238,7 +237,6 @@ write_desc_maybe (FILE *to)
 
   if (to)
     atat_put (to, desc);
-  FIXUP_OLD (desc);
 }
 
 void
@@ -269,9 +267,6 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
     {
       FLOW (to) = NULL;
       /* Get new description.  */
-      if (from)
-        /* Skip old description.  */
-        FIXUP_OLD (GROK (desc));
       aprintf (frew, "\n\n%s\n%c", TINYKS (desc), SDELIM);
       if (!textfile)
         *cb = getsstdin ("t-", "description",

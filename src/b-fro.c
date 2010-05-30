@@ -347,11 +347,12 @@ fro_spew (struct fro *f, FILE *to)
 {
   struct range finish =
     {
-      .beg = fro_tello (f),
+      .beg = f->verbatim,
       .end = f->end
     };
 
   fro_spew_partial (to, f, &finish);
+  f->verbatim = f->end;
 }
 
 struct cbuf

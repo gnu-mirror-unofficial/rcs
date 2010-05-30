@@ -315,8 +315,11 @@ main (int argc, char **argv)
 
         if (perform & unlocked)
           {
+            struct fro *from = FLOW (from);
+
+            SAME_AFTER (from, delta->text);
             if (deltas->entry != delta)
-              fro_trundling (true, FLOW (from));
+              fro_trundling (true, from);
             if (donerewrite (true, Ttimeflag
                              ? repo_stat->st_mtime
                              : (time_t) - 1)
