@@ -1,5 +1,13 @@
 2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int y-GROK] Fix bug: Deref repo ‘locks’ entry correctly.
+
+	Regression introduced 2010-05-24, "Rewrite parsing".
+	* yarrrr.c [TEST_GROK] (struct lockdef): Delete.
+	[TEST_GROK] (yarrrr): Deref repo ‘locks’ entry as ‘struct rcslock *’.
+
+2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Note each delta body's file position.
 
 	* base.h (struct delta): Add member ‘neck’.

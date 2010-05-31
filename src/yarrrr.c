@@ -278,12 +278,6 @@ struct hash
   struct wlink **a;
 };
 
-struct lockdef
-{
-  char const *login;
-  char const *revno;
-};
-
 static void
 dump_hash_table (struct repo *r)
 {
@@ -361,9 +355,9 @@ yarrrr (int argc, char *argv[argc])
   printf ("%s:", TINYKS (locks));
   for (i = 0, pair = r->locks; i < r->locks_count; i++, pair = pair->next)
     {
-      struct lockdef const *lock = pair->entry;
+      struct rcslock const *lock = pair->entry;
 
-      printf (" [%u] %s:%s", i, lock->login, lock->revno);
+      printf (" [%u] %s:%s", i, lock->login, lock->delta->num);
     }
   if (pair)
     printf ("\nWTF: pair: %p\n", (void *)pair);
