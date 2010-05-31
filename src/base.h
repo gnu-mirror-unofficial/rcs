@@ -280,6 +280,13 @@ struct delta
 
   /* True if selected, false if deleted.  */
   bool selector;
+
+  /* Position in ‘FLOW (from)’ of the start of the delta body,
+     including the leading whitespace, starting at the ‘ATAT_TEXT_END’
+     of the preceding description (desc) or delta body (text) atat.
+     Thus, the full backing store range of delta ‘d’ is ‘d.prologue’
+     up to ‘ATAT_TEXT_END (d.text)’.  */
+  off_t neck;
 };
 
 /* List element for locks.  */

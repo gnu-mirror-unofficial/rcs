@@ -511,6 +511,7 @@ static const char ks_ner[] = "non-existent revision";
 static struct repo *
 full (struct divvy *to, struct fro *f)
 {
+  off_t neck;
   size_t count;
   struct link box, *tp;
   struct grok *g = FZLLOC (struct grok);
@@ -727,7 +728,9 @@ full (struct divvy *to, struct fro *f)
     }
 
   CBEG ("edits");
-  for (size_t count = 0; count < repo->deltas_count; count++)
+  for (size_t count = 0;
+       (neck = fro_tello (g->from)) && count < repo->deltas_count;
+       count++)
     {
       char const *revno;
       struct notyet *ny;
@@ -739,6 +742,7 @@ full (struct divvy *to, struct fro *f)
       if (!(ny = FIND_NY (revno)))
         BUMMER ("found edits for %s `%s'", ks_ner, revno);
       d = ny->d;
+      d->neck = neck;
       SYNCH (g, log);
       MUST_ATAT (g, &d->log, log);
       SYNCH (g, text);

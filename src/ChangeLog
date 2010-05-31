@@ -1,3 +1,12 @@
+2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Note each delta body's file position.
+
+	* base.h (struct delta): Add member ‘neck’.
+	* b-grok.c (full): For each delta, note its body's file position.
+	* rcs.c (scanlogtext): Avoid ‘fro_tello’; use saved file position.
+	* rcsgen.c (scandeltatext): Likewise.
+
 2010-05-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Make "need expansion" support compile-time optional, default off.

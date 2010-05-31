@@ -311,7 +311,7 @@ scanlogtext (struct editstuff *es, struct wlink **ls,
       nextdelta = (*ls)->entry;
       log = nextdelta->log;
       text = nextdelta->text;
-      range.beg = fro_tello (from);
+      range.beg = nextdelta->neck;
       if (nextdelta->selector)
         {
           to = FLOW (to) = FLOW (rewr);
