@@ -249,15 +249,15 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
             {
               if (numlength & 1)
                 incnum (targetdelta->num, num);
-              targetdelta->next = &newdelta;
-              newdelta.next = NULL;
+              targetdelta->ilk = &newdelta;
+              newdelta.ilk = NULL;
             }
           return removedlock;
           /* Don't do anything to newbranch.  */
         }
     }
   newbranch.entry = &newdelta;
-  newdelta.next = NULL;
+  newdelta.ilk = NULL;
   if (branchpoint->lockedby)
     if (caller_login_p (branchpoint->lockedby))
       return removelock (branchpoint);  /* This returns 1.  */
@@ -301,7 +301,7 @@ addelta (struct wlink **tp_deltas)
         }
       /* (‘newdnumlength’ == 2 is OK.)  */
       tip = REPO (tip) = &newdelta;
-      newdelta.next = NULL;
+      newdelta.ilk = NULL;
       return 0;
     }
   if (newdnumlength == 0)
@@ -321,14 +321,14 @@ addelta (struct wlink **tp_deltas)
           if (targetdelta == tip)
             {
               /* Make new head.  */
-              newdelta.next = tip;
+              newdelta.ilk = tip;
               tip = REPO (tip) = &newdelta;
             }
-          else if (!targetdelta->next && countnumflds (targetdelta->num) > 2)
+          else if (!targetdelta->ilk && countnumflds (targetdelta->num) > 2)
             {
               /* New tip revision on side branch.  */
-              targetdelta->next = &newdelta;
-              newdelta.next = NULL;
+              targetdelta->ilk = &newdelta;
+              newdelta.ilk = NULL;
             }
           else
             {
@@ -379,7 +379,7 @@ addelta (struct wlink **tp_deltas)
         {
           if (!gr_revno (tip->num, tp_deltas))
             return -1;
-          newdelta.next = tip;
+          newdelta.ilk = tip;
           tip = REPO (tip) = &newdelta;
         }
       return removedlock;

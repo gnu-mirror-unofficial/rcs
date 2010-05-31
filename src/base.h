@@ -275,8 +275,9 @@ struct delta
   /* The ‘commitid’ added by CVS; only used for reading.  */
   char const *commitid;
 
-  /* Next revision on same branch.  */
-  struct delta *next;
+  /* Another revision on same branch.
+     This used to be named ‘next’, but that's confusing to me.  */
+  struct delta *ilk;
 
   /* True if selected, false if deleted.  */
   bool selector;

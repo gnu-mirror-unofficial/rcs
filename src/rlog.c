@@ -237,8 +237,8 @@ putrunk (void)
 {
   register struct delta const *ptr;
 
-  for (ptr = REPO (tip); ptr; ptr = ptr->next)
-    putadelta (ptr, ptr->next, true);
+  for (ptr = REPO (tip); ptr; ptr = ptr->ilk)
+    putadelta (ptr, ptr->ilk, true);
 }
 
 static void putforest (struct wlink const *);
@@ -250,7 +250,7 @@ putree (struct delta const *root)
 {
   if (!root)
     return;
-  putree (root->next);
+  putree (root->ilk);
   putforest (root->branches);
 }
 
@@ -260,7 +260,7 @@ putabranch (struct delta const *root)
 {
   if (!root)
     return;
-  putabranch (root->next);
+  putabranch (root->ilk);
   putadelta (root, root, false);
 }
 
@@ -321,7 +321,7 @@ exttree (struct delta *root)
 
   root->selector = extractdelta (root);
   root->pretty_log.string = NULL;
-  exttree (root->next);
+  exttree (root->ilk);
 
   for (struct wlink *ls = root->branches; ls; ls = ls->next)
     exttree (ls->entry);
@@ -451,7 +451,7 @@ recentdate (struct delta const *root, struct daterange *r)
         }
     }
 
-  recentdate (root->next, r);
+  recentdate (root->ilk, r);
   for (struct wlink *ls = root->branches; ls; ls = ls->next)
     recentdate (ls->entry, r);
 }
@@ -495,7 +495,7 @@ extdate (struct delta *root)
             root->selector = false;
         }
     }
-  revno = root->selector + extdate (root->next);
+  revno = root->selector + extdate (root->ilk);
 
   for (struct wlink *ls = root->branches; ls; ls = ls->next)
     revno += extdate (ls->entry);

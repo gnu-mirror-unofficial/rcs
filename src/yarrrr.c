@@ -389,7 +389,7 @@ yarrrr (int argc, char *argv[argc])
           br = ls->entry;
           printf (" [b %s]", br->num);
         }
-      br = d->next;
+      br = d->ilk;
       printf (" [n %s]", br ? br->num : "-");
       if (d->commitid)
         printf (" |%s|", d->commitid);

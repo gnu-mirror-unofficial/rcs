@@ -1,5 +1,19 @@
 2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Rename ‘struct delta’ member ‘next’ to ‘ilk’.
+
+	* base.h (struct delta): Rename member ‘next’ to ‘ilk’.
+	* b-grok.c (full): Update references.
+	* ci.c (addbranch, addelta): Likewise.
+	* rcs.c (branchpoint, removerevs, buildtree): Likewise.
+	* rcsgen.c (putdelta, puttree): Likewise.
+	* rcsrev.c (genbranch, genrevs): Likewise.
+	* rlog.c (putrunk, putree, putabranch)
+	(exttree, recentdate, extdate): Likewise.
+	* yarrrr.c [TEST_GROK] (yarrrr): Likewise.
+
+2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int y-GROK] Fix bug: Deref repo ‘locks’ entry correctly.
 
 	Regression introduced 2010-05-24, "Rewrite parsing".

@@ -443,7 +443,7 @@ putdelta (register struct delta const *node, register FILE *fout)
       aprintf (fout, "\n\t%s", delta->num);
     }
 
-  aprintf (fout, ";\n%s\t%s;\n", TINYKS (next), node->next ? node->next->num : "");
+  aprintf (fout, ";\n%s\t%s;\n", TINYKS (next), node->ilk ? node->ilk->num : "");
   if (node->commitid)
     aprintf (fout, "%s\t%s;\n", TINYKS (commitid), node->commitid);
 }
@@ -458,7 +458,7 @@ puttree (struct delta const *root, register FILE *fout)
   if (root->selector)
     putdelta (root, fout);
 
-  puttree (root->next, fout);
+  puttree (root->ilk, fout);
 
   for (struct wlink *ls = root->branches; ls; ls = ls->next)
     puttree (ls->entry, fout);

@@ -643,7 +643,7 @@ full (struct divvy *to, struct fro *f)
 
         STASH (d->num);
         d->branches = NULL;             /* see ‘grok_all’ */
-        d->next = NULL;                 /* see ‘grok_all’ */
+        d->ilk = NULL;                  /* see ‘grok_all’ */
         d->lockedby = NULL;             /* see ‘grok_resynch’ */
         d->pretty_log.string = NULL;
         d->pretty_log.size = 0;
@@ -786,7 +786,7 @@ full (struct divvy *to, struct fro *f)
 #define FIND_D(revno)   ((deref = FIND_NY (revno))->d)
 
       if (ny->next)
-        d->next = FIND_D (ny->next);
+        d->ilk = FIND_D (ny->next);
       if (ny->branches)
         {
           struct link *bls;

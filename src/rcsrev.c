@@ -369,7 +369,7 @@ genbranch (struct delta const *bpoint, char const *revno,
                   && (!author || STR_SAME (author, d->author))
                   && (!state || STR_SAME (state, d->state)))
                 trail = d;
-              d = d->next;
+              d = d->ilk;
             }
           while (d);
 
@@ -385,7 +385,7 @@ genbranch (struct delta const *bpoint, char const *revno,
               while (d != trail)
                 {
                   STORE_MAYBE (d);
-                  d = d->next;
+                  d = d->ilk;
                 }
               STORE_MAYBE (d);
             }
@@ -403,7 +403,7 @@ genbranch (struct delta const *bpoint, char const *revno,
         {
           STORE_MAYBE (d);
           trail = d;
-          d = d->next;
+          d = d->ilk;
         }
       while (d && cmpnumfld (revno, d->num, field + 1) >= 0);
 
@@ -470,7 +470,7 @@ genrevs (char const *revno, char const *date, char const *author,
       while ((result = cmpnumfld (revno, d->num, 1)) < 0)
         {
           STORE_MAYBE (d);
-          d = d->next;
+          d = d->ilk;
           if (!d)
             {
               RERR ("branch number %s too low", TAKE (1, revno));
@@ -495,7 +495,7 @@ genrevs (char const *revno, char const *date, char const *author,
                  || (state && STR_DIFF (state, d->state))))
         {
           STORE_MAYBE (d);
-          d = d->next;
+          d = d->ilk;
         }
       if (!d || (cmpnumfld (branchnum, d->num, 1) != 0)) /* overshot */
         {
@@ -516,7 +516,7 @@ genrevs (char const *revno, char const *date, char const *author,
          && (cmpnumfld (revno, d->num, 1) == 0))
     {
       STORE_MAYBE (d);
-      d = d->next;
+      d = d->ilk;
       if (!d)
         break;
     }

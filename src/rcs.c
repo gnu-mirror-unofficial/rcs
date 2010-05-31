@@ -539,7 +539,7 @@ branchpoint (struct delta *strt, struct delta *tail)
 {
   struct delta *pt;
 
-  for (pt = strt; pt != tail; pt = pt->next)
+  for (pt = strt; pt != tail; pt = pt->ilk)
     {
       if (pt->branches)
         {
@@ -592,7 +592,7 @@ removerevs (void)
         }
       else
         temp = SEARCH (numrev.string, length);
-      cuttail = target->next;
+      cuttail = target->ilk;
       if (branchpoint (temp, cuttail))
         {
           cuttail = NULL;
@@ -613,14 +613,14 @@ removerevs (void)
       if (length > 2)
         {
           temp = SEARCH (target->num, length - 1);
-          cuttail = target->next;
+          cuttail = target->ilk;
         }
       else
         {
           temp = SEARCH (target->num, length);
           cuttail = target;
           while (cuttail && !cmpnumfld (target->num, cuttail->num, 1))
-            cuttail = cuttail->next;
+            cuttail = cuttail->ilk;
         }
       if (branchpoint (temp, cuttail))
         {
@@ -639,14 +639,14 @@ removerevs (void)
           if (cmp)
             cuttail = target;
           else
-            cuttail = target->next;
+            cuttail = target->ilk;
         }
       else
         {
           if (cmp)
             {
               cuthead = target;
-              if (!(temp = target->next))
+              if (!(temp = target->ilk))
                 return false;
             }
           else
@@ -693,11 +693,11 @@ removerevs (void)
               return false;
             }
           cuthead = target;
-          temp = target->next;
+          temp = target->ilk;
         }
       else
         temp = SEARCH (target->num, length);
-      cuttail = target2->next;
+      cuttail = target2->ilk;
     }
   else
     {                           /* delete revisions on trunk */
@@ -719,7 +719,7 @@ removerevs (void)
           cuttail = target2;
         }
       else
-        cuttail = target2->next;
+        cuttail = target2->ilk;
       temp = SEARCH (target->num, length);
     }
   if (branchpoint (temp, cuttail))
@@ -1016,8 +1016,8 @@ buildtree (void)
   struct delta *Delta;
 
   if (cuthead)
-    if (cuthead->next == delstrt)
-      cuthead->next = cuttail;
+    if (cuthead->ilk == delstrt)
+      cuthead->ilk = cuttail;
     else
       {
         struct wlink *pt = cuthead->branches, *pre = pt;
@@ -1047,7 +1047,7 @@ buildtree (void)
               while (Delta)
                 {
                   Delta->selector = true;
-                  Delta = Delta->next;
+                  Delta = Delta->ilk;
                 }
               return;
             }
