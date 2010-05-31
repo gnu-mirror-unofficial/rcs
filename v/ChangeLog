@@ -1,3 +1,11 @@
+2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Fix bug: Do a ‘co -l’ before modifying the working file.
+
+	Improper methodology introduced 2010-03-10,
+	"Fix bug: Remove all log messages when removing all revisions".
+	* t000.test: Do ‘co -l’ before composing the first revision.
+
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: Output proper range for ‘RM_STDIO’ fro.

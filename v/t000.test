@@ -21,6 +21,7 @@ grep 'total revisions: 0' $wd/last-rlog \
     || exit 1
 
 # Add a revision.
+co -l $w
 echo nonempty > $w
 do_and_show 'ci -u -r4.20 -mHELLO $w'
 # Add another
