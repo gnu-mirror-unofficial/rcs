@@ -19,6 +19,6 @@
 */
 
 extern struct repo *grok_all (struct divvy *to, struct fro *f);
-extern void grok_resynch (struct repo *repo, struct fro *f);
+extern void grok_resynch (struct repo *repo);
 
 /* b-grok.h ends here */

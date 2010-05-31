@@ -815,12 +815,12 @@ grok_all (struct divvy *to, struct fro *f)
 {
   struct repo *repo = full (to, f);
 
-  grok_resynch (repo, f);
+  grok_resynch (repo);
   return repo;
 }
 
 void
-grok_resynch (struct repo *repo, struct fro *from)
+grok_resynch (struct repo *repo)
 /* (Re-)initialize the appropriate global variables.  */
 {
   struct notyet *ny;
@@ -851,9 +851,6 @@ grok_resynch (struct repo *repo, struct fro *from)
   BE (kws) = 0 > repo->expand
     ? kwsub_kv
     : repo->expand;
-
-  /* Reposition.  */
-  fro_move (from, repo->neck);
 }
 
 /* b-grok.c ends here */

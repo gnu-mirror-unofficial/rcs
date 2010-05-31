@@ -338,15 +338,14 @@ scanlogtext (struct editstuff *es, struct wlink **ls,
       range.end = text->beg;
       if (to)
         fro_spew_partial (to, from, &range);
-      fro_move (from, range.end);
-
       if (delta == nextdelta)
         break;
       /* Skip over it.  */
       if (to)
         atat_put (to, text);
     }
-  /* got the one we're looking for */
+  /* Got the one we're looking for.  */
+  fro_move (from, range.end);
   if (edit)
     editstring (es, text, NULL);
   else

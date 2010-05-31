@@ -382,7 +382,6 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
           return 0;
         }
       REPO (r) = grok_all (SINGLE, from);
-      fro_bob (from);
       FLOW (to) = NULL;
     }
   else

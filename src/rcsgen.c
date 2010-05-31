@@ -66,13 +66,13 @@ scandeltatext (struct editstuff *es, struct wlink **ls,
       /* Skip over it.  */
       if (to)
         fro_spew_partial (to, from, &range);
-      fro_move (from, range.end);
       if (delta == nextdelta)
         break;
       /* Skip over it.  */
       if (to)
         atat_put (to, text);
     }
+  fro_move (from, range.end);
   switch (func)
     {
     case enter:

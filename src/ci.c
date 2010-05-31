@@ -1033,9 +1033,7 @@ main (int argc, char **argv)
 
                     Orewind (frew);
                     bad_truncate = 0 > ftruncate (fileno (frew), (off_t) 0);
-
-                    fro_bob (from);
-                    grok_resynch (REPO (r), from);
+                    grok_resynch (REPO (r));
                     if (! (workdelta = delta_from_ref (targetdelta->num)))
                       continue;
                     workdelta->pretty_log = targetdelta->pretty_log;

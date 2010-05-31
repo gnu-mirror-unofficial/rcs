@@ -1,5 +1,19 @@
 2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Reposition less, and also less frequently.
+
+	* b-grok.c (grok_resynch): Don't
+	take ‘struct fro *f’; don't reposition.
+	(grok_all): Update call to ‘grok_resynch’.
+	* b-grok.h (grok_resynch): Update func decl.
+	* ci.c (main): Don't reposition prior to
+	resync; update call to ‘grok_resynch’.
+	* rcs.c (scanlogtext): Do reposition after looping.
+	* rcsfnms.c (pairnames): Don't reposition after grok.
+	* rcsgen.c (scandeltatext): Do reposition after looping.
+
+2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Mark verbatim region; reduce transitional tell/seek.
 
 	* b-fro.h (struct fro): Add member ‘verbatim’.
