@@ -239,7 +239,7 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
           targetdelta = delta_from_ref (BRANCHNO (num->string));
           if (!targetdelta)
             return -1;
-          if (cmpnum (num->string, targetdelta->num) <= 0)
+          if (!NUM_GT (num->string, targetdelta->num))
             {
               RERR ("revision %s too low; must be higher than %s",
                     num->string, targetdelta->num);
@@ -363,12 +363,12 @@ addelta (struct wlink **tp_deltas)
       if (newdnumlength == 1)
         {
           /* Make a two-field number out of it.  */
-          if (cmpnumfld (newdelnum.string, tip->num, 1) == 0)
+          if (NUMF_EQ (1, newdelnum.string, tip->num))
             incnum (tip->num, &newdelnum);
           else
             ADD (&newdelnum, ".1");
         }
-      if (cmpnum (newdelnum.string, tip->num) <= 0)
+      if (!NUM_GT (newdelnum.string, tip->num))
         {
           RERR ("revision %s too low; must be higher than %s",
                 newdelnum.string, tip->num);
@@ -397,7 +397,7 @@ addelta (struct wlink **tp_deltas)
       old.string = SHSNIP (&old.size, old.string, tp - 1);
       if (! (targetdelta = gr_revno (old.string, tp_deltas)))
         return -1;
-      if (cmpnum (targetdelta->num, old.string) != 0)
+      if (!NUM_EQ (targetdelta->num, old.string))
         {
           RERR ("can't find branch point %s", old.string);
           return -1;
@@ -519,8 +519,8 @@ getlogmsg (void)
       return logmsg;
     }
 
-  if (!targetdelta && (cmpnum (newdelnum.string, "1.1") == 0
-                       || cmpnum (newdelnum.string, "1.0") == 0))
+  if (!targetdelta && (NUM_EQ (newdelnum.string, "1.1")
+                       || NUM_EQ (newdelnum.string, "1.0")))
     {
       struct cbuf const initiallog =
         {
@@ -954,7 +954,7 @@ main (int argc, char **argv)
           /* Use current date.  */
           newdelta.date = getcurdate ();
         /* Now check validity of date -- needed because of ‘-d’ and ‘-k’.  */
-        if (targetdelta && cmpdate (newdelta.date, targetdelta->date) < 0)
+        if (targetdelta && DATE_LT (newdelta.date, targetdelta->date))
           {
             RERR ("Date %s precedes %s in revision %s.",
                   date2str (newdelta.date, newdatebuf),

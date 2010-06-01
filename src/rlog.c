@@ -443,8 +443,8 @@ recentdate (struct delta const *root, struct daterange *r)
     return;
   if (root->selector)
     {
-      if (0 <= cmpdate (root->date, r->beg)
-          && 0 >= cmpdate (root->date, r->end))
+      if (!DATE_LT (root->date, r->beg)
+          && !DATE_GT (root->date, r->end))
         {
           strncpy (r->beg, root->date, datesize);
           r->beg[datesize - 1] = '\0';
@@ -476,19 +476,28 @@ extdate (struct delta *root)
         {
           r = ls->entry;
           oep = r->oep;
+          complain ("HEY: %d [%s] [%s] [%s] => ", oep, r->beg, root->date, r->end);
           if ((sel = ((!r->beg[0]
-                       || oep <= cmpdate (root->date, r->beg))
+                       || (oep
+                           ? DATE_LT (r->beg, root->date)
+                           : !DATE_GT (r->beg, root->date)))
                       &&
                       (!r->end[0]
-                       || oep <= cmpdate (r->end, root->date)))))
-            break;
+                       || (oep
+                           ? DATE_LT (root->date, r->end)
+                           : !DATE_GT (root->date, r->end))))))
+            {
+              complain ("yes!\n");
+              break;
+            }
+          complain ("no\n");
         }
       if (!sel)
         {
           for (struct link *ls = duelst; ls; ls = ls->next)
             {
               r = ls->entry;
-              if ((sel = !cmpdate (root->date, r->beg)))
+              if ((sel = DATE_EQ (root->date, r->beg)))
                 break;
             }
           if (!sel)

@@ -876,4 +876,20 @@ int getRCSINIT (int argc, char **argv, char ***newargv);
 
 #define TINYKS(x)  TINYS (&TINY (x))
 
+#define GENERIC_COMPARE(fn,...)  (cmp ## fn (__VA_ARGS__))
+#define GENERIC_LT(fn,...)       (0 >  GENERIC_COMPARE (fn, __VA_ARGS__))
+#define GENERIC_EQ(fn,...)       (0 == GENERIC_COMPARE (fn, __VA_ARGS__))
+#define GENERIC_GT(fn,...)       (0 <  GENERIC_COMPARE (fn, __VA_ARGS__))
+
+#define NUM_LT(a,b)  GENERIC_LT (num, a, b)
+#define NUM_EQ(a,b)  GENERIC_EQ (num, a, b)
+#define NUM_GT(a,b)  GENERIC_GT (num, a, b)
+
+#define DATE_LT(a,b)  GENERIC_LT (date, a, b)
+#define DATE_EQ(a,b)  GENERIC_EQ (date, a, b)
+#define DATE_GT(a,b)  GENERIC_GT (date, a, b)
+
+#define NUMF_LT(nf,a,b)  GENERIC_LT (numfld, a, b, nf)
+#define NUMF_EQ(nf,a,b)  GENERIC_EQ (numfld, a, b, nf)
+
 /* base.h ends here */

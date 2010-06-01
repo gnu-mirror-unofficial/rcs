@@ -614,7 +614,7 @@ removerevs (void)
         {
           temp = SEARCH (target->num, length);
           cuttail = target;
-          while (cuttail && !cmpnumfld (target->num, cuttail->num, 1))
+          while (cuttail && NUMF_EQ (1, target->num, cuttail->num))
             cuttail = cuttail->ilk;
         }
       if (branchpoint (temp, cuttail))
@@ -673,7 +673,7 @@ removerevs (void)
 
   if (length > 2)
     {                           /* delete revisions on branches */
-      if (cmpnum (target->num, target2->num) > 0)
+      if (NUM_GT (target->num, target2->num))
         {
           cmp = cmpnum (target2->num, numrev.string);
           temp = target;
@@ -682,7 +682,7 @@ removerevs (void)
         }
       if (cmp)
         {
-          if (!cmpnum (target->num, target2->num))
+          if (NUM_EQ (target->num, target2->num))
             {
               RERR ("Revisions %s-%s don't exist.", delrev.strt, delrev.end);
               return false;
@@ -696,7 +696,7 @@ removerevs (void)
     }
   else
     {                           /* delete revisions on trunk */
-      if (cmpnum (target->num, target2->num) < 0)
+      if (NUM_LT (target->num, target2->num))
         {
           temp = target;
           target = target2;
@@ -706,7 +706,7 @@ removerevs (void)
         cmp = cmpnum (target2->num, numrev.string);
       if (cmp)
         {
-          if (!cmpnum (target->num, target2->num))
+          if (NUM_EQ (target->num, target2->num))
             {
               RERR ("Revisions %s-%s don't exist.", delrev.strt, delrev.end);
               return false;
@@ -792,7 +792,7 @@ setlock (char const *rev)
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
-              && cmpnum (target->num, numrev.string))
+              && !NUM_EQ (target->num, numrev.string))
             RERR ("can't lock nonexisting revision %s", numrev.string);
           else
             {
@@ -865,7 +865,7 @@ dolocks (void)
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
-                && cmpnum (target->num, numrev.string))
+                && !NUM_EQ (target->num, numrev.string))
               RERR ("can't unlock nonexisting revision %s",
                     (char const *) lockpt->entry);
             else
@@ -928,7 +928,7 @@ rcs_setstate (char const *rev, char const *status)
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
-              && cmpnum (target->num, numrev.string))
+              && !NUM_EQ (target->num, numrev.string))
             RERR ("can't set state of nonexisting revision %s", numrev.string);
           else if (STR_DIFF (target->state, status))
             {
@@ -1425,7 +1425,7 @@ main (int argc, char **argv)
           {
             if (countnumflds (branchnum.string))
               {
-                if (cmpnum (defbr, branchnum.string) != 0)
+                if (!NUM_EQ (defbr, branchnum.string))
                   {
                     defbr = GROK (branch) = branchnum.string;
                     changed = true;

@@ -365,7 +365,7 @@ genbranch (struct delta const *bpoint, char const *revno,
           trail = NULL;
           do
             {
-              if ((!date || cmpdate (date, d->date) >= 0)
+              if ((!date || !DATE_LT (date, d->date))
                   && (!author || STR_SAME (author, d->author))
                   && (!state || STR_SAME (state, d->state)))
                 trail = d;
@@ -394,7 +394,7 @@ genbranch (struct delta const *bpoint, char const *revno,
         }
 
       /* Length > field.  Find revision.  Check low.  */
-      if (cmpnumfld (revno, d->num, field + 1) < 0)
+      if (NUMF_LT (1 + field, revno, d->num))
         {
           RERR ("%s %s too low", ks_revno, TAKE (field + 1, revno));
           return NULL;
@@ -405,18 +405,18 @@ genbranch (struct delta const *bpoint, char const *revno,
           trail = d;
           d = d->ilk;
         }
-      while (d && cmpnumfld (revno, d->num, field + 1) >= 0);
+      while (d && !NUMF_LT (1 + field, revno, d->num));
 
       if ((length > field + 1)
           /* Need exact hit.  */
-          && (cmpnumfld (revno, trail->num, field + 1) != 0))
+          && !NUMF_EQ (1 + field, revno, trail->num))
         {
           absent (revno, field + 1);
           return NULL;
         }
       if (length == field + 1)
         {
-          if (date && cmpdate (date, trail->date) < 0)
+          if (date && DATE_LT (date, trail->date))
             {
               RERR ("Revision %s has date %s.",
                     trail->num, date2str (trail->date, datebuf));
@@ -489,15 +489,15 @@ genrevs (char const *revno, char const *date, char const *author,
       /* Pick latest one on given branch.  */
       branchnum = d->num;               /* works even for empty revno */
       while (d
-             && cmpnumfld (branchnum, d->num, 1) == 0
-             && ((date && cmpdate (date, d->date) < 0)
+             && NUMF_EQ (1, branchnum, d->num)
+             && ((date && DATE_LT (date, d->date))
                  || (author && STR_DIFF (author, d->author))
                  || (state && STR_DIFF (state, d->state))))
         {
           STORE_MAYBE (d);
           d = d->ilk;
         }
-      if (!d || (cmpnumfld (branchnum, d->num, 1) != 0)) /* overshot */
+      if (!d || !NUMF_EQ (1, branchnum, d->num)) /* overshot */
         {
           cantfindbranch (length ? revno : TAKE (1, branchnum),
                           date, author, state);
@@ -513,7 +513,7 @@ genrevs (char const *revno, char const *date, char const *author,
 
   /* Length >= 2.  Find revision; may go low if ‘length == 2’.  */
   while ((result = cmpnumfld (revno, d->num, 2)) < 0
-         && (cmpnumfld (revno, d->num, 1) == 0))
+         && (NUMF_EQ (1, revno, d->num)))
     {
       STORE_MAYBE (d);
       d = d->ilk;
@@ -521,7 +521,7 @@ genrevs (char const *revno, char const *date, char const *author,
         break;
     }
 
-  if (!d || cmpnumfld (revno, d->num, 1) != 0)
+  if (!d || !NUMF_EQ (1, revno, d->num))
     {
       RERR ("%s %s too low", ks_revno, TAKE (2, revno));
       goto norev;
@@ -539,7 +539,7 @@ genrevs (char const *revno, char const *date, char const *author,
     return genbranch (d, revno, length, date, author, state, store);
   else
     {                                   /* length == 2 */
-      if (date && cmpdate (date, d->date) < 0)
+      if (date && DATE_LT (date, d->date))
         {
           RERR ("Revision %s has date %s.",
                 d->num, date2str (d->date, datebuf));

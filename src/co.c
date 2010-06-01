@@ -207,12 +207,12 @@ getancestor (char const *r1, char const *r2)
 
   l1 = countnumflds (r1);
   l2 = countnumflds (r2);
-  if ((2 < l1 || 2 < l2) && cmpnum (r1, r2) != 0)
+  if ((2 < l1 || 2 < l2) && !NUM_EQ (r1, r2))
     {
       /* Not on main trunk or identical.  */
       l3 = 0;
-      while (cmpnumfld (r1, r2, l3 + 1) == 0
-             && cmpnumfld (r1, r2, l3 + 2) == 0)
+      while (NUMF_EQ (1 + l3, r1, r2)
+             && NUMF_EQ (2 + l3, r1, r2))
         l3 += 2;
       /* This will terminate since ‘r1’ and ‘r2’ are not the
          same; see above.  */
@@ -221,11 +221,11 @@ getancestor (char const *r1, char const *r2)
           /* No common prefix; common ancestor on main trunk.  */
           t1 = TAKE (l1 > 2 ? 2 : l1, r1);
           t2 = TAKE (l2 > 2 ? 2 : l2, r2);
-          r = cmpnum (t1, t2) < 0 ? t1 : t2;
-          if (cmpnum (r, r1) != 0 && cmpnum (r, r2) != 0)
+          r = NUM_LT (t1, t2) ? t1 : t2;
+          if (!NUM_EQ (r, r1) && !NUM_EQ (r, r2))
             return str_save (r);
         }
-      else if (cmpnumfld (r1, r2, l3 + 1) != 0)
+      else if (!NUMF_EQ (1 + l3, r1, r2))
         return str_save (TAKE (l3, r1));
     }
   RERR ("common ancestor of %s and %s undefined", r1, r2);
