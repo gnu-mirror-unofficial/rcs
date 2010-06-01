@@ -1,5 +1,15 @@
 2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: MEM_SAME, MEM_DIFF
+
+	* base.h (MEM_SAME, MEM_DIFF): New macros.
+	* b-anchor.c (looking_at): Use ‘MEM_SAME’.
+	* rcs.c (main): Use ‘MEM_DIFF’.
+	* rcsfcmp.c (rcsfcmp): Likewise.
+	* rcsfnms.c (rcssuffix, pairnames): Use ‘MEM_SAME’.
+
+2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstractions: {NUM,DATE}_{LT,EQ,GT}, NUMF_{LT,EQ}
 
 	* base.h (GENERIC_COMPARE, GENERIC_LT, GENERIC_EQ)

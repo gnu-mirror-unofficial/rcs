@@ -160,14 +160,14 @@ rcssuffix (char const *name)
     {
       if ((xl = suffixlen (x)))
         {
-          if (xl <= nl && memcmp (p = nz - xl, x, xl) == 0)
+          if (xl <= nl && MEM_SAME (xl, (p = nz - xl), x))
             return p;
         }
       else
         for (p = name; p < nz - rcsdirlen; p++)
           if (isSLASH (p[rcsdirlen])
               && (p == name || isSLASH (p[-1]))
-              && memcmp (p, rcsdir, rcsdirlen) == 0)
+              && MEM_SAME (rcsdirlen, p, rcsdir))
             return nz;
       x += xl;
     }
@@ -305,7 +305,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
           && !rcssuffix (mani_filename = p = argv[1])
           && baselen <= (arglen = (size_t) strlen (p))
           && ((p += arglen - baselen) == mani_filename || isSLASH (p[-1]))
-          && memcmp (base, p, baselen) == 0)
+          && MEM_SAME (baselen, base, p))
         {
           argv[1] = NULL;
           paired = true;
@@ -326,7 +326,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
           && (x = rcssuffix (RCS1 = argv[1]))
           && RCS1 + baselen <= x
           && ((RCSbase = x - baselen) == RCS1 || isSLASH (RCSbase[-1]))
-          && memcmp (base, RCSbase, baselen) == 0)
+          && MEM_SAME (baselen, base, RCSbase))
         {
           argv[1] = NULL;
           paired = true;

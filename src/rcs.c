@@ -1407,8 +1407,8 @@ main (int argc, char **argv)
             BE (strictly_locking) = strictlock;
           }
         if (commsyml &&
-            (commsymlen != REPO (log_lead).size ||
-             memcmp (commsyml, REPO (log_lead).string, commsymlen) != 0))
+            (commsymlen != REPO (log_lead).size
+             || MEM_DIFF (commsymlen, commsyml, REPO (log_lead).string)))
           {
             REPO (log_lead).string = commsyml;
             REPO (log_lead).size = commsymlen;

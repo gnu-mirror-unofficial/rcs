@@ -80,7 +80,7 @@ rcsfcmp (register struct fro *xfp, struct stat const *xstatp,
           /* The fast path is possible only if neither file uses stdio.  */
           if (RM_STDIO != xfp->rm
               && RM_STDIO != ufp->rm)
-            result = !!memcmp (xfp->base, ufp->base, (size_t) xstatp->st_size);
+            result = MEM_DIFF (xstatp->st_size, xfp->base, ufp->base);
           else
             for (;;)
               {

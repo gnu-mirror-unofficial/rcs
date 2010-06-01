@@ -892,4 +892,7 @@ int getRCSINIT (int argc, char **argv, char ***newargv);
 #define NUMF_LT(nf,a,b)  GENERIC_LT (numfld, a, b, nf)
 #define NUMF_EQ(nf,a,b)  GENERIC_EQ (numfld, a, b, nf)
 
+#define MEM_SAME(n,a,b)  (0 == memcmp ((a), (b), (n)))
+#define MEM_DIFF(n,a,b)  (0 != memcmp ((a), (b), (n)))
+
 /* base.h ends here */

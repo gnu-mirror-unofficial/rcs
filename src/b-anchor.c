@@ -59,7 +59,7 @@ TINYK (text);
 bool
 looking_at (struct tinysym const *sym, char const *start)
 {
-  return 0 == memcmp (start, sym->bytes, sym->len);
+  return MEM_SAME (sym->len, start, sym->bytes);
 }
 
 static const uint8_t kwsub_pool[22] =
