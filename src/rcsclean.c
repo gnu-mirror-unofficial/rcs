@@ -105,7 +105,7 @@ get_directory (char const *dirname, char ***aargv)
       tp = wextend (tp, str_save (en), justme);
       entries++;
     }
-  if (errno || closedir (d) != 0)
+  if (errno || PROB (closedir (d)))
     fatal_sys (dirname);
   *aargv = pointer_array (SHARED, entries);
   for (tp = head.next, i = 0; i < entries; tp = tp->next, i++)
@@ -180,7 +180,7 @@ main (int argc, char **argv)
         case 'k':
           if (0 <= expmode)
             redefined ('k');
-          if ((expmode = str2expmode (a)) < 0)
+          if (PROB (expmode = str2expmode (a)))
             goto unknown;
           break;
 
@@ -291,7 +291,7 @@ main (int argc, char **argv)
         if (unlocked && !checkaccesslist ())
           continue;
 
-        if (dorewrite (dounlock, unlocked) != 0)
+        if (PROB (dorewrite (dounlock, unlocked)))
           continue;
 
         if (0 <= expmode)
@@ -320,17 +320,16 @@ main (int argc, char **argv)
             SAME_AFTER (from, delta->text);
             if (deltas->entry != delta)
               fro_trundling (true, from);
-            if (donerewrite (true, Ttimeflag
-                             ? repo_stat->st_mtime
-                             : (time_t) - 1)
-                != 0)
+            if (PROB (donerewrite (true, Ttimeflag
+                                   ? repo_stat->st_mtime
+                                   : (time_t) - 1)))
               continue;
           }
 
         if (!BE (quiet))
           aprintf (stdout, "rm -f %s\n", mani_filename);
         fro_zclose (&workptr);
-        if (perform && un_link (mani_filename) != 0)
+        if (perform && PROB (un_link (mani_filename)))
           syserror_errno (mani_filename);
       }
 

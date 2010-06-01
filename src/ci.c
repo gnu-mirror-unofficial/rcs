@@ -441,10 +441,10 @@ fixwork (mode_t newworkmode, time_t mtime)
   return
     1 < workstat.st_nlink
     || (newworkmode & S_IWUSR && !stat_mine_p (&workstat))
-    || setmtime (mani_filename, mtime) != 0
+    || PROB (setmtime (mani_filename, mtime))
     ? -1 : workstat.st_mode == newworkmode ? 0
 #ifdef HAVE_FCHMOD
-    : fchmod (workptr->fd, newworkmode) == 0 ? 0
+    : !PROB (fchmod (workptr->fd, newworkmode)) ? 0
 #endif
     : chmod (mani_filename, newworkmode)
     ;
@@ -905,7 +905,7 @@ main (int argc, char **argv)
           continue;
 
         /* Splice new delta into tree.  */
-        if (0 > (removedlock = addelta (&deltas)))
+        if (PROB (removedlock = addelta (&deltas)))
           continue;
         tip = REPO (tip);
 
@@ -1031,7 +1031,7 @@ main (int argc, char **argv)
                     bool bad_truncate;
 
                     Orewind (frew);
-                    bad_truncate = 0 > ftruncate (fileno (frew), (off_t) 0);
+                    bad_truncate = PROB (ftruncate (fileno (frew), (off_t) 0));
                     grok_resynch (REPO (r));
                     if (! (workdelta = delta_from_ref (targetdelta->num)))
                       continue;
@@ -1042,7 +1042,7 @@ main (int argc, char **argv)
                       continue;
                     if (!addsyms (workdelta->num))
                       continue;
-                    if (dorewrite (true, true) != 0)
+                    if (PROB (dorewrite (true, true)))
                       continue;
                     VERBATIM (from, GROK (neck));
                     fro_spew (from, frew);
@@ -1070,12 +1070,12 @@ main (int argc, char **argv)
 
                     fro_bob (workptr);
                     if (CAN_FFLUSH_IN)
-                      badness = (0 > fflush (workptr->stream));
+                      badness = PROB (fflush (workptr->stream));
                     else
                       {
                         wo = lseek (wfd, 0, SEEK_CUR);
                         badness = (-1 == wo
-                                   || (wo && 0 > lseek (wfd, 0, SEEK_SET)));
+                                   || (wo && PROB (lseek (wfd, 0, SEEK_SET))));
                       }
                     if (badness)
                       Ierror ();
@@ -1094,7 +1094,7 @@ main (int argc, char **argv)
                   RFATAL ("diff failed");
                 if (STDIO_P (workptr)
                     && !CAN_FFLUSH_IN
-                    && 0 > lseek (wfd, wo, SEEK_CUR))
+                    && PROB (lseek (wfd, wo, SEEK_CUR)))
                   Ierror ();
                 if (newhead)
                   {
@@ -1108,7 +1108,7 @@ main (int argc, char **argv)
 
                 /* Check whether the working file changed during checkin,
                    to avoid producing an inconsistent RCS file.  */
-                if (fstat (wfd, &checkworkstat) != 0
+                if (PROB (fstat (wfd, &checkworkstat))
                     || workstat.st_mtime != checkworkstat.st_mtime
                     || workstat.st_size != checkworkstat.st_size)
                   {
@@ -1125,12 +1125,11 @@ main (int argc, char **argv)
         if (mtimeflag | Ttimeflag)
           wtime = date2time (workdelta->date);
 
-        if (donerewrite (changedRCS, !Ttimeflag
-                         ? (time_t) - 1
-                         : from && wtime < (repo_stat->st_mtime
-                                            ? repo_stat->st_mtime
-                                            : wtime))
-            != 0)
+        if (PROB (donerewrite (changedRCS, !Ttimeflag
+                               ? (time_t) - 1
+                               : from && wtime < (repo_stat->st_mtime
+                                                  ? repo_stat->st_mtime
+                                                  : wtime))))
           continue;
 
         if (!keepworkingfile)
@@ -1147,7 +1146,7 @@ main (int argc, char **argv)
             mtime = mtimeflag ? wtime : (time_t) - 1;
 
             /* Expand if it might change or if we can't fix mode, time.  */
-            if (changework || (r = fixwork (newworkmode, mtime)) != 0)
+            if (changework || PROB (r = fixwork (newworkmode, mtime)))
               {
                 fro_bob (workptr);
                 /* Expand keywords in file.  */
@@ -1182,7 +1181,7 @@ main (int argc, char **argv)
                   }
               }
           }
-        if (r != 0)
+        if (PROB (r))
           {
             syserror_errno (mani_filename);
             continue;

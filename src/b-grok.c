@@ -624,7 +624,7 @@ full (struct divvy *to, struct fro *f)
         {
           struct cbuf cb = string_from_atat (g->systolic, expand);
 
-          if (0 > (repo->expand = recognize_kwsub (&cb)))
+          if (PROB (repo->expand = recognize_kwsub (&cb)))
             BUMMER ("invalid expand mode: %s", cb.string);
         }
       SEMI (g, expand);
@@ -848,7 +848,7 @@ grok_resynch (struct repo *repo)
   else
     clear_buf (&REPO (log_lead));
 
-  BE (kws) = 0 > repo->expand
+  BE (kws) = PROB (repo->expand)
     ? kwsub_kv
     : repo->expand;
 }

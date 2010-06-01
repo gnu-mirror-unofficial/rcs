@@ -43,7 +43,7 @@
 static void
 mmap_deallocate (struct fro *f)
 {
-  if (0 > munmap (f->base, f->lim - f->base))
+  if (PROB (munmap (f->base, f->lim - f->base)))
     fatal_sys ("munmap");
 }
 #endif  /* MMAP_SIGNAL */
@@ -62,11 +62,11 @@ fro_open (char const *name, char const *type, struct stat *status)
 #endif
                            ));
 
-  if (0 > fd)
+  if (PROB (fd))
     return NULL;
   if (!status)
     status = &st;
-  if (0 > fstat (fd, status))
+  if (PROB (fstat (fd, status)))
     fatal_sys (name);
   if (!S_ISREG (status->st_mode))
     {
@@ -128,7 +128,7 @@ fro_open (char const *name, char const *type, struct stat *status)
           bufptr = f->base;
           do
             {
-              if (0 > (r = read (fd, bufptr, bufsiz)))
+              if (PROB (r = read (fd, bufptr, bufsiz)))
                 fatal_sys (name);
 
               if (!r)
@@ -144,7 +144,7 @@ fro_open (char const *name, char const *type, struct stat *status)
                 }
             }
           while (bufsiz);
-          if (0 > lseek (fd, 0, SEEK_SET))
+          if (PROB (lseek (fd, 0, SEEK_SET)))
             fatal_sys (name);
         }
       f->ptr = f->base;
@@ -182,7 +182,7 @@ fro_close (struct fro *f)
       res = fclose (f->stream);
       break;
     }
-  /* Don't use ‘0 > res’ here; ‘fclose’ may return EOF.  */
+  /* Don't use ‘PROB (res)’ here; ‘fclose’ may return EOF.  */
   if (res)
     Ierror ();
   f->fd = -1;
@@ -227,7 +227,7 @@ fro_move (struct fro *f, off_t change)
                          : f->base);
       break;
     case RM_STDIO:
-      if (0 > fseeko (f->stream, change, 0 > change ? SEEK_CUR : SEEK_SET))
+      if (PROB (fseeko (f->stream, change, 0 > change ? SEEK_CUR : SEEK_SET)))
         Ierror ();
       break;
     }

@@ -626,7 +626,7 @@ main (int argc, char **argv)
         else
           {
             workstatstat = stat (mani_filename, &workstat);
-            if (workstatstat == 0 && SAME_INODE (REPO (stat), workstat))
+            if (!PROB (workstatstat) && SAME_INODE (REPO (stat), workstat))
               {
                 RERR ("RCS file is the same as working file %s.",
                       mani_filename);
@@ -651,7 +651,7 @@ main (int argc, char **argv)
               PWARN ("no revisions, so nothing can be %slocked",
                      lockflag < 0 ? "un" : "");
             Ozclose (&FLOW (res));
-            if (workstatstat == 0)
+            if (!PROB (workstatstat))
               if (!rmworkfile ())
                 continue;
             changelock = 0;
@@ -694,7 +694,7 @@ main (int argc, char **argv)
 
             if (changelock < 0
                 || (changelock && !checkaccesslist ())
-                || dorewrite (lockflag, changelock) != 0)
+                || PROB (dorewrite (lockflag, changelock)))
               continue;
 
             if (0 <= expmode)
@@ -714,7 +714,7 @@ main (int argc, char **argv)
             SAME_AFTER (from, targetdelta->text);
 
             /* Prepare to remove old working file if necessary.  */
-            if (workstatstat == 0)
+            if (!PROB (workstatstat))
               if (!rmworkfile ())
                 continue;
 
@@ -731,10 +731,9 @@ main (int argc, char **argv)
             if (changelock && deltas->entry != targetdelta)
               fro_trundling (true, from);
 
-            if (donerewrite (changelock, Ttimeflag
-                             ? repo_stat->st_mtime
-                             : (time_t) - 1)
-                != 0)
+            if (PROB (donerewrite (changelock, Ttimeflag
+                                   ? repo_stat->st_mtime
+                                   : (time_t) - 1)))
               continue;
 
             if (changelock)
@@ -771,7 +770,7 @@ main (int argc, char **argv)
             r = chnamemod (&neworkptr, neworkname, mani_filename, 1, m, t);
             keepdirtemp (neworkname);
             RESTOREINTS ();
-            if (r != 0)
+            if (PROB (r))
               {
                 syserror_errno (mani_filename);
                 PERR ("see %s", neworkname);

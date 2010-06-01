@@ -111,10 +111,10 @@ set_uid_to (uid_t u)
     return;
 #if defined HAVE_WORKING_FORK
 #if has_setreuid
-  if (setreuid (u == euid ()? ruid () : euid (), u) != 0)
+  if (PROB (setreuid (u == euid () ? ruid () : euid (), u)))
     fatal_sys ("setuid");
 #else  /* !has_setreuid */
-  if (seteuid (u) != 0)
+  if (PROB (seteuid (u)))
     fatal_sys ("setuid");
 #endif  /* !has_setreuid */
 #endif  /* defined HAVE_WORKING_FORK */

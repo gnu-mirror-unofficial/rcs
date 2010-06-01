@@ -1526,7 +1526,7 @@ main (int argc, char **argv)
         if (initflag)
           {
             /* Adjust things for donerewrite's sake.  */
-            if (stat (MANI (filename), repo_stat) != 0)
+            if (PROB (stat (MANI (filename), repo_stat)))
               {
 #if BAD_CREAT0
                 mode_t m = umask (0);
@@ -1539,9 +1539,9 @@ main (int argc, char **argv)
             repo_stat->st_nlink = 0;
             keepRCStime = false;
           }
-        if (donerewrite (changed, keepRCStime
-                         ? repo_stat->st_mtime
-                         : (time_t) - 1) != 0)
+        if (PROB (donerewrite (changed, keepRCStime
+                               ? repo_stat->st_mtime
+                               : (time_t) - 1)))
           break;
 
         diagnose ("done");

@@ -1,5 +1,32 @@
 2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: PROB
+
+	* base.h (PROB): New macro.
+	* b-excwho.c (set_uid_to): Use ‘PROB’.
+	* b-fb.c (fopen_safer, Orewind, aflush)
+	(oflush, aputs, aprintf): Likewise.
+	* b-feph.c [!HAVE_MKSTEMP] (homegrown_mkstemp): Likewise.
+	(jam_sff): Likewise.
+	* b-fro.c [MMAP_SIGNAL] (mmap_deallocate): Likewise.
+	(fro_open, fro_move): Likewise.
+	* b-grok.c (full, grok_resynch): Likewise.
+	* b-isr.c (complain_signal, MUST, setup_catchsig, isr_init): Likewise.
+	* ci.c (fixwork, main): Likewise.
+	* co.c (main): Likewise.
+	* ident.c (scanfile, main): Likewise.
+	* partime.c (partime): Likewise.
+	* rcs.c (main): Likewise.
+	* rcsclean.c (get_directory, main): Likewise.
+	* rcsedit.c (un_link, fopen_update_truncate, rcswriteopen)
+	(chnamemod, dorewrite, donerewrite, ORCSclose): Likewise.
+	* rcsfnms.c (pairnames, getfullRCSname): Likewise.
+	[!HAVE_GETCWD] (getcwd): Likewise.
+	* rcsgen.c (putdesc): Likewise.
+	* rcsutil.c (gnurcs_init, awrite, runv): Likewise.
+
+2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstractions: SHACCR, SHSTR, SHSNIP
 
 	* b-divvy.h (SHACCR, SHSTR, SHSNIP): New macros.

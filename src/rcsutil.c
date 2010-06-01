@@ -50,7 +50,7 @@ gnurcs_init (struct program const *program)
   ISR_SCRATCH = isr_init (&BE (quiet));
   init_ephemstuff ();
   BE (maketimestuff) = ZLLOC (1, struct maketimestuff);
-  if (0 > time (&BE (now)))
+  if (PROB (time (&BE (now))))
     fatal_sys ("time");
 
   /* Set ‘BE (mem_limit)’.  */
@@ -216,10 +216,10 @@ awrite (char const *buf, size_t chars, FILE *f)
 static int
 movefd (int old, int new)
 {
-  if (old < 0 || old == new)
+  if (PROB (old) || old == new)
     return old;
   new = fcntl (old, F_DUPFD, new);
-  return close (old) == 0 ? new : -1;
+  return !PROB (close (old)) ? new : -1;
 }
 
 static int
@@ -287,8 +287,8 @@ runv (int infd, char const *outname, char const **args)
           }
 
         if (outname)
-          if (fdreopen (STDOUT_FILENO, outname,
-                        O_CREAT | O_TRUNC | O_WRONLY) < 0)
+          if (PROB (fdreopen (STDOUT_FILENO, outname,
+                              O_CREAT | O_TRUNC | O_WRONLY)))
             {
               /* Avoid ‘perror’ since it may misuse buffers.  */
               complain ("%s: %s: cannot create\n", args[1], outname);
@@ -308,10 +308,10 @@ runv (int infd, char const *outname, char const **args)
         complain ("%s: not found\n", notfound);
         _Exit (DIFF_TROUBLE);
       }
-    if (pid < 0)
+    if (PROB (pid))
       fatal_sys ("fork");
 #if defined HAVE_WAITPID
-    if (waitpid (pid, &wstatus, 0) < 0)
+    if (PROB (waitpid (pid, &wstatus, 0)))
       fatal_sys ("waitpid");
 #else  /* !defined HAVE_WAITPID */
     {
@@ -319,7 +319,7 @@ runv (int infd, char const *outname, char const **args)
 
       do
         {
-          if ((w = wait (&wstatus)) < 0)
+          if (PROB (w = wait (&wstatus)))
             fatal_sys ("wait");
         }
       while (w != pid);

@@ -121,7 +121,7 @@ un_link (char const *s)
 {
   int rv = unlink (s);
 
-  if (0 == rv)
+  if (!PROB (rv))
     /* Good news, don't do anything.  */
     ;
   else
@@ -133,7 +133,7 @@ un_link (char const *s)
           /* Forge ahead even if ‘errno == ENOENT’;
              some completely brain-damaged hosts (e.g. PCTCP 2.2)
              return ‘ENOENT’ even for existing unwritable files.  */
-          if (chmod (s, S_IWUSR) != 0)
+          if (PROB (chmod (s, S_IWUSR)))
             {
               errno = e;
               rv = -1;
@@ -285,7 +285,7 @@ fopen_update_truncate (char const *name)
     return fopen_safer (name, FOPEN_W_WORK);
   else
     {
-      if (BAD_FOPEN_WPLUS && un_link (name) != 0)
+      if (BAD_FOPEN_WPLUS && PROB (un_link (name)))
         fatal_sys (name);
       return fopen_safer (name, FOPEN_WPLUS_WORK);
     }
@@ -856,9 +856,9 @@ rcswriteopen (struct maybe *m)
   if (0 <= fdesc)
     sff[SFFI_LOCKDIR].disposition = effective;
 
-  if (fdescSafer < 0)
+  if (PROB (fdescSafer))
     {
-      if (e == EACCES && stat (lfn, &statbuf) == 0)
+      if (e == EACCES && !PROB (stat (lfn, &statbuf)))
         /* The RCS file is busy.  */
         e = EEXIST;
     }
@@ -878,7 +878,7 @@ rcswriteopen (struct maybe *m)
               e = errno;
               setrid ();
               errno = e;
-              if (r != 0)
+              if (PROB (r))
                 fatal_sys (lockname);
               sff[SFFI_LOCKDIR].filename = lfn;
             }
@@ -910,7 +910,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
   struct stat st;
   if (bad_NFS_rename || (BAD_A_RENAME && set_mode <= 0))
     {
-      if (fstat (fileno (*fromp), &st) != 0)
+      if (PROB (fstat (fileno (*fromp), &st)))
         return -1;
       if (BAD_A_RENAME && set_mode <= 0)
         mode = st.st_mode;
@@ -926,25 +926,25 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 #endif  /* BAD_A_RENAME */
 
 #ifdef HAVE_FCHMOD
-  if (0 < set_mode && fchmod (fileno (*fromp), mode_while_renaming) == 0)
+  if (0 < set_mode && !PROB (fchmod (fileno (*fromp), mode_while_renaming)))
     fchmod_set_mode = set_mode;
 #endif
   /* On some systems, we must close before chmod.  */
   Ozclose (fromp);
-  if (fchmod_set_mode < set_mode && chmod (from, mode_while_renaming) != 0)
+  if (fchmod_set_mode < set_mode && PROB (chmod (from, mode_while_renaming)))
     return -1;
 
-  if (setmtime (from, mtime) != 0)
+  if (PROB (setmtime (from, mtime)))
     return -1;
 
 #if BAD_B_RENAME
   /* There's a short window of inconsistency
      during which ‘to’ does not exist.  */
-  if (un_link (to) != 0 && errno != ENOENT)
+  if (PROB (un_link (to)) && errno != ENOENT)
     return -1;
 #endif  /* BAD_B_RENAME */
 
-  if (rename (from, to) != 0 && !(has_NFS && errno == ENOENT))
+  if (PROB (rename (from, to)) && !(has_NFS && errno == ENOENT))
     return -1;
 
 #if bad_NFS_rename
@@ -953,7 +953,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
        A race condition can occur between the rename and the stat.  */
     struct stat tostat;
 
-    if (stat (to, &tostat) != 0)
+    if (PROB (stat (to, &tostat)))
       return -1;
     if (!SAME_INODE (st, tostat))
       {
@@ -964,7 +964,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 #endif  /* bad_NFS_rename */
 
 #if BAD_A_RENAME
-  if (0 < set_mode && chmod (to, mode) != 0)
+  if (0 < set_mode && PROB (chmod (to, mode)))
     return -1;
 #endif
 
@@ -973,8 +973,8 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
 
 int
 setmtime (char const *file, time_t mtime)
-/* Set ‘file’ last modified time to ‘mtime’,
-   but do nothing if ‘mtime’ is -1.  */
+/* Set ‘file’ last modified time to ‘mtime’ (return utime(2) rv),
+   but do nothing (return 0) if ‘mtime’ is -1.  */
 {
   struct utimbuf amtime;
 
@@ -1120,10 +1120,10 @@ dorewrite (bool lockflag, int changed)
           keepdirtemp (lockname);
           RESTOREINTS ();
           setrid ();
-          if (r != 0)
+          if (PROB (r))
             syserror (e, lockname);
 #if BAD_CREAT0
-          if (nr != 0)
+          if (nr != 0)                  /* avoid ‘PROB’; ‘nr’ may be >0 */
             {
               syserror (ne, newRCSname);
               r = -1;
@@ -1176,13 +1176,13 @@ donerewrite (int changed, time_t newRCStime)
 #endif
       RESTOREINTS ();
       setrid ();
-      if (r != 0)
+      if (PROB (r))
         {
           syserror (e, repo_filename);
           PERR ("saved in %s", newRCSname);
         }
 #if BAD_CREAT0
-      if (lr != 0)
+      if (PROB (lr))
         {
           syserror (le, lockname);
           r = -1;
@@ -1199,7 +1199,7 @@ ORCSclose (void)
 
   if (0 <= repo_fd_lock)
     {
-      if (close (repo_fd_lock) != 0)
+      if (PROB (close (repo_fd_lock)))
         fatal_sys (lockname);
       REPO (fd_lock) = -1;
     }

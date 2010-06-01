@@ -119,7 +119,7 @@ scanfile (register FILE *file, char const *name)
         }
       c = getc (file);
     }
-  if (ferror (file) || fclose (file) != 0)
+  if (ferror (file) || PROB (fclose (file)))
     {
       syserror_errno (name);
       /* The following is equivalent to ‘exit (EXIT_FAILURE)’, but we
@@ -186,13 +186,13 @@ main (int argc, char **argv)
             syserror_errno (a);
             status = EXIT_FAILURE;
           }
-        else if (scanfile (fp, a) != 0
+        else if (PROB (scanfile (fp, a))
                  || (argv[1] && putchar ('\n') == EOF))
           break;
       }
     while ((a = *++argv));
 
-  if (ferror (stdout) || fclose (stdout) != 0)
+  if (ferror (stdout) || PROB (fclose (stdout)))
     {
       syserror_errno ("standard output");
       status = EXIT_FAILURE;

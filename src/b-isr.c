@@ -53,7 +53,7 @@ complain_signal (char const *msg, int signo)
   {
     char buf[SIG2STR_MAX + 1];
 
-    if (0 > sig2str (signo, buf))
+    if (PROB (sig2str (signo, buf)))
       {
         char *w = buf + SIG2STR_MAX;
 
@@ -216,7 +216,7 @@ setup_catchsig (size_t count, const int const set[count])
 
   sigset_t blocked;
 
-#define MUST(x)  if (0 > x) goto fail
+#define MUST(x)  if (PROB (x)) goto fail
 
   sigemptyset (&blocked);
   for (size_t i = 0; i < count; i++)
@@ -233,7 +233,7 @@ setup_catchsig (size_t count, const int const set[count])
           act.sa_sigaction = catchsigaction;
           act.sa_flags |= SA_SIGINFO | SA_ONSTACK;
           act.sa_mask = blocked;
-          if (0 > sigaction (sig, &act, NULL))
+          if (PROB (sigaction (sig, &act, NULL)))
             {
             fail:
               fatal_sys ("signal handling");
@@ -303,7 +303,7 @@ isr_init (bool *be_quiet)
       .ss_flags = 0
     };
 
-  if (0 > sigaltstack (&ss, NULL))
+  if (PROB (sigaltstack (&ss, NULL)))
     fatal_sys ("sigaltstack");
 #endif
 

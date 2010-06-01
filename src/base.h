@@ -849,6 +849,9 @@ int getRCSINIT (int argc, char **argv, char ***newargv);
 
 /* Idioms.  */
 
+/* Murphy was an optimist...  */
+#define PROB(x)  (0 > (x))
+
 #define clear_buf(b)  (((b)->string = NULL, (b)->size = 0))
 
 #define STR_DIFF(a,b)  (strcmp ((a), (b)))

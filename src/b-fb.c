@@ -69,7 +69,7 @@ fopen_safer (char const *filename, char const *type)
         {
           int f = dup_safer (fd);
 
-          if (f < 0)
+          if (PROB (f))
             {
               int e = errno;
 
@@ -77,7 +77,7 @@ fopen_safer (char const *filename, char const *type)
               errno = e;
               return NULL;
             }
-          if (fclose (stream) != 0)
+          if (PROB (fclose (stream)))
             {
               int e = errno;
 
@@ -102,14 +102,14 @@ Ozclose (FILE **p)
 void
 Orewind (FILE *f)
 {
-  if (0 > fseeko (f, 0L, SEEK_SET))
+  if (PROB (fseeko (f, 0L, SEEK_SET)))
     Oerror ();
 }
 
 void
 aflush (FILE *f)
 {
-  if (fflush (f) != 0)
+  if (PROB (fflush (f)))
     Oerror ();
 }
 
@@ -118,10 +118,10 @@ oflush (void)
 {
   FILE *mstdout = MANI (standard_output);
 
-  if (fflush (mstdout
-              ? mstdout
-              : stdout)
-      != 0 && !BE (Oerrloop))
+  if (PROB (fflush (mstdout
+                    ? mstdout
+                    : stdout))
+      && !BE (Oerrloop))
     Oerror ();
 }
 
@@ -136,7 +136,7 @@ void
 aputs (char const *s, FILE *iop)
 /* Put string ‘s’ on file ‘iop’, abort on error.  */
 {
-  if (fputs (s, iop) < 0)
+  if (PROB (fputs (s, iop)))
     Oerror ();
 }
 
@@ -148,7 +148,7 @@ aprintf (FILE * iop, char const *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
-  if (0 > vfprintf (iop, fmt, ap))
+  if (PROB (vfprintf (iop, fmt, ap)))
     Oerror ();
   va_end (ap);
 }

@@ -292,7 +292,7 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
                     }
                   accumulate_byte (SHARED, c);
                 }
-              if (fclose (txt) != 0)
+              if (PROB (fclose (txt)))
                 Ierror ();
               p = finish_string (SHARED, &s);
             }

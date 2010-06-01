@@ -61,10 +61,10 @@ homegrown_mkstemp (char *template)
   int fd = -1;
 
   for (int patience = 42 * 42;
-       0 > fd && patience;
+       PROB (fd) && patience;
        patience--)
     {
-      if (0 > gettimeofday (&tv, NULL))
+      if (PROB (gettimeofday (&tv, NULL)))
         return -1;
       /* Cast to ensure 64-bit shift.  */
       n = pid | (uint64_t)(tv.tv_sec ^ tv.tv_usec) << 32;
@@ -75,7 +75,7 @@ homegrown_mkstemp (char *template)
         }
       fd = open (template, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     }
-  if (0 > fd)
+  if (PROB (fd))
     errno = EEXIST;
   return fd;
 }
@@ -149,7 +149,7 @@ jam_sff (struct sff *sff, const char *prefix)
         *dot = '0' + getpid () % 10;
     }
 
-  if (0 > (fd = mkstemp (fn)))
+  if (PROB (fd = mkstemp (fn)))
     PFATAL ("could not make temporary file name (template \"%s\")", fn);
 
   close (fd);

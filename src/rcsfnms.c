@@ -386,7 +386,7 @@ pairnames (int argc, char **argv, open_rcsfile_fn *rcsopen,
     }
   else
     {
-      if (maybe.eno != ENOENT || mustread || REPO (fd_lock) < 0)
+      if (maybe.eno != ENOENT || mustread || PROB (REPO (fd_lock)))
         {
           if (maybe.eno == EEXIST)
             PERR ("RCS file %s is in use", p);
@@ -451,8 +451,8 @@ getfullRCSname (void)
 
           if (!((cwd = PWD)
                 && ABSFNAME (PWD)
-                && stat (PWD, &PWDstat) == 0
-                && stat (".", &dotstat) == 0
+                && !PROB (stat (PWD, &PWDstat))
+                && !PROB (stat (".", &dotstat))
                 && SAME_INODE (PWDstat, dotstat)))
             {
               size_t sz = 64;
@@ -521,7 +521,7 @@ getcwd (char *buf, size_t size)
       errno = EINVAL;
       return NULL;
     }
-  if (pipe (fd) != 0)
+  if (PROB (pipe (fd)))
     return NULL;
 #if BAD_WAIT_IF_SIGCHLD_IGNORED
 #ifndef SIGCHLD
@@ -531,11 +531,11 @@ getcwd (char *buf, size_t size)
 #endif  /* BAD_WAIT_IF_SIGCHLD_IGNORED */
   if (!(child = vfork ()))
     {
-      if (close (fd[0]) == 0
+      if (!PROB (close (fd[0]))
           && (STDOUT_FILENO == fd[1]
               || (STDOUT_FILENO == (close (STDOUT_FILENO),
                                     fcntl (fd[1], F_DUPFD, STDOUT_FILENO))
-                  && close (fd[1]) == 0)))
+                  && !PROB (close (fd[1])))))
         {
           close (STDERR_FILENO);
           execl (binpwd, binpwd, NULL);
@@ -559,7 +559,7 @@ getcwd (char *buf, size_t size)
           lim = p + size;
           for (p = buf;; *p++ = c)
             {
-              if ((c = getc (fp)) < 0)
+              if (PROB (c = getc (fp)))
                 {
                   if (feof (fp))
                     break;
@@ -578,7 +578,7 @@ getcwd (char *buf, size_t size)
             }
         }
 #if defined HAVE_WAITPID
-      if (waitpid (child, &wstatus, 0) < 0)
+      if (PROB (waitpid (child, &wstatus, 0)))
         wstatus = 1;
 #else  /* !defined HAVE_WAITPID */
       {
@@ -586,7 +586,7 @@ getcwd (char *buf, size_t size)
 
         do
           {
-            if ((w = wait (&wstatus)) < 0)
+            if (PROB (w = wait (&wstatus)))
               {
                 wstatus = 1;
                 break;
@@ -602,7 +602,7 @@ getcwd (char *buf, size_t size)
       errno = e;
       return NULL;
     }
-  if (fclose (fp) != 0)
+  if (PROB (fclose (fp)))
     return NULL;
   if (readerror)
     {

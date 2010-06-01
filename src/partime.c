@@ -675,7 +675,7 @@ partime (char const *s, struct partime *t)
           if (!(s1 = parse_prefix (s, &p, &i)))
             return s;
         }
-      while (merge_partime (t, &p) != 0);
+      while (PROB (merge_partime (t, &p)));
       s = s1;
     }
   return s;
