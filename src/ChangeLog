@@ -1,5 +1,14 @@
 2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: SHACCR, SHSTR, SHSNIP
+
+	* b-divvy.h (SHACCR, SHSTR, SHSNIP): New macros.
+	* ci.c (addelta): Use ‘SHSNIP’.
+	* rcs.c (getassoclst, getaccessor, getstates): Likewise.
+	* rlog.c (getnumericrev): Use ‘SHACCR’, ‘SHSTR’, ‘SHSNIP’.
+
+2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Delete abstraction: intern0
 
 	* co.c (buildjoin): Don't bother re-saving the revno into ‘SINGLE’.

@@ -394,8 +394,7 @@ addelta (struct wlink **tp_deltas)
         while (*tp++ != '.')
           continue;
       /* Ignore rest to get old delta.  */
-      accumulate_range (SHARED, old.string, tp - 1);
-      old.string = finish_string (SHARED, &old.size);
+      old.string = SHSNIP (&old.size, old.string, tp - 1);
       if (! (targetdelta = gr_revno (old.string, tp_deltas)))
         return -1;
       if (cmpnum (targetdelta->num, old.string) != 0)

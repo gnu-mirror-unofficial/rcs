@@ -53,4 +53,8 @@ extern void close_space (struct divvy *divvy);
 #define FZLLOC(type)           (zlloc (SINGLE, #type, sizeof (type)))
 #define accs(divvy,string)     accf (divvy, "%s", string)
 
+#define SHACCR(b,e)      accumulate_range (SHARED, b, e)
+#define SHSTR(szp)       finish_string (SHARED, szp)
+#define SHSNIP(szp,b,e)  (SHACCR (b, e), SHSTR (szp))
+
 /* b-divvy.h ends here */

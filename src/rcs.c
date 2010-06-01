@@ -108,8 +108,7 @@ getassoclst (struct link **tp, char *sp)
 
   SKIPWS ();
   /* Check for invalid symbolic name.  */
-  accumulate_range (SHARED, sp, checksym (sp, ':'));
-  name = finish_string (SHARED, &len);
+  name = SHSNIP (&len, sp, checksym (sp, ':'));
   sp += len;
   c = *sp;
   SKIPWS ();
@@ -174,8 +173,7 @@ getaccessor (struct link **tp, char *opt, enum changeaccess command)
     {
       size_t len;
 
-      accumulate_range (SHARED, sp, checkid (sp, ','));
-      getchaccess (tp, finish_string (SHARED, &len), command);
+      getchaccess (tp, SHSNIP (&len, sp, checkid (sp, ',')), command);
       sp += len;
       c = *sp;
       while (c == ' ' || c == '\n' || c == '\t' || c == ',')
@@ -221,8 +219,7 @@ getstates (struct link **tp, char *sp)
     continue;
   /* Check for invalid state attribute.  */
   temp = checkid (sp, ':');
-  accumulate_range (SHARED, sp, temp);
-  temp = finish_string (SHARED, &len);
+  temp = SHSNIP (&len, sp, temp);
   sp += len;
   c = *sp;
   while (c == ' ' || c == '\t' || c == '\n')

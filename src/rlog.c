@@ -654,10 +654,7 @@ getnumericrev (void)
           if (2 > (n = countnumflds (s.string)))
             e.string = "";
           else
-            {
-              accumulate_range (SHARED, s.string, strrchr (s.string, '.'));
-              e.string = finish_string (SHARED, &e.size);
-            }
+            e.string = SHSNIP (&e.size, s.string, strrchr (s.string, '.'));
           break;
 
         case 3:                         /* -r:REV */
@@ -667,9 +664,9 @@ getnumericrev (void)
             s.string = ".0";
           else
             {
-              accumulate_range (SHARED, e.string, strrchr (e.string, '.'));
+              SHACCR (e.string, strrchr (e.string, '.'));
               accf (SHARED, ".0");
-              s.string = finish_string (SHARED, &s.size);
+              s.string = SHSTR (&s.size);
             }
           break;
 
