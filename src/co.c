@@ -316,7 +316,7 @@ buildjoin (char const *initialfile)
   char const *cov[10], *mergev[11];
   char const **p;
   size_t len;
-  char *subs = NULL;
+  char const *subs = NULL;
 
   rev2 = maketemp (0);
   rev3 = maketemp (3);      /* ‘buildrevision’ may use 1 and 2 */
@@ -346,7 +346,7 @@ buildjoin (char const *initialfile)
 #define ACCF(...)  accf (SINGLE, __VA_ARGS__)
       /* Prepare marker for merge.  */
       if (i == 0)
-        subs = intern0 (SINGLE, targetdelta->num);
+        subs = targetdelta->num;
       else
         {
           ACCF ("%s,%s:%s", subs, joinlist[i - 2], joinlist[i - 1]);

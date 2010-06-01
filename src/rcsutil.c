@@ -177,7 +177,7 @@ char *
 str_save (char const *s)
 /* Save ‘s’ in permanently allocated storage.  */
 {
-  return intern0 (SHARED, s);
+  return intern (SHARED, s, strlen (s));
 }
 
 char *

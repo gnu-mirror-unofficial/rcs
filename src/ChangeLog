@@ -1,3 +1,11 @@
+2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Delete abstraction: intern0
+
+	* co.c (buildjoin): Don't bother re-saving the revno into ‘SINGLE’.
+	* rcsutil.c (str_save): Use ‘intern’ directly.
+	* b-divvy.h (intern0): Delete macro.
+
 2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Reposition less, and also less frequently.
