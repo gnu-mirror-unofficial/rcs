@@ -1,3 +1,10 @@
+2010-06-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Say "repository", not "RCS file"; expand chapter "Concepts".
+
+	* doc/rcs.texi: Throughout, say "repository" instead of "RCS file".
+	(Concepts): Expand; add quick tour; reorg a bit.
+
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Consult env var RCS_MEM_LIMIT to set the memory limit.
