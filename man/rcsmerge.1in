@@ -11,9 +11,9 @@ rcsmerge \- merge RCS revisions
 .SH DESCRIPTION
 .B rcsmerge
 incorporates the changes between two revisions
-of an \*r file into the corresponding working file.
+of a repository into the corresponding working file.
 .PP
-Filenames matching an \*r suffix denote \*r files;
+Filenames matching an \*r suffix denote repositories;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
@@ -112,7 +112,7 @@ for details.
 .BI \-x "suffixes"
 Use
 .I suffixes
-to characterize \*r files.
+to characterize repositories.
 See
 .BR ci (1)
 for details.
@@ -137,7 +137,7 @@ put the updates to 2.8 into file f.c and execute
 .PP
 Then examine
 .BR f.merged.c .
-Alternatively, if you want to save the updates to 2.8 in the \*r file,
+Alternatively, if you want to save the updates to 2.8 in the repository,
 check them in as revision 2.8.1.1 and execute
 .BR "co \-j":
 .LP

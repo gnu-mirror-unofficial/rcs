@@ -12,15 +12,15 @@ co \- check out RCS revisions
 .RI [ options ] " file " .\|.\|.
 .SH DESCRIPTION
 .B co
-retrieves a revision from each \*r file and stores it into
+retrieves a revision from each repository and stores it into
 the corresponding working file.
 .PP
-Filenames matching an \*r suffix denote \*r files;
+Filenames matching an \*r suffix denote repositories;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
 .PP
-Revisions of an \*r file can be checked out locked or unlocked.  Locking a
+Revisions of a repository can be checked out locked or unlocked.  Locking a
 revision prevents overlapping updates.  A revision checked out for reading or
 processing (e.g., compiling) need not be locked.  A revision checked out
 for editing and later checkin must normally be locked.  Checkout with locking
@@ -28,7 +28,7 @@ fails if the revision to be checked out is currently locked by another user.
 (A lock can be broken with
 .BR rcs "(1).)\ \&"
 Checkout with locking also requires the caller to be on the access list of
-the \*r file, unless he is the owner of the
+the repository, unless he is the owner of the
 file or the superuser, or the access list is empty.
 Checkout without locking is not subject to accesslist restrictions, and is
 not affected by the presence of locks.
@@ -77,8 +77,8 @@ or the default branch.
 .PP
 A
 .B co
-command applied to an \*r
-file with no revisions creates a zero-length working file.
+command applied to a repository
+with no revisions creates a zero-length working file.
 .B co
 always performs keyword substitution (see below).
 .SH OPTIONS
@@ -214,7 +214,7 @@ except it performs all working file input and output in binary mode.
 This makes little difference on Posix and Unix hosts,
 but on DOS-like hosts one should use
 .B "rcs\ \-i\ \-kb"
-to initialize an \*r file intended to be used for binary files.
+to initialize a repository intended to be used for binary files.
 Also, on all hosts,
 .BR rcsmerge (1)
 normally refuses to merge files when
@@ -321,11 +321,11 @@ retrieves the latest revision on the selected branch whose state is set to
 .IR state .
 .TP
 .B \-T
-Preserve the modification time on the \*r file
-even if the \*r file changes because a lock is added or removed.
+Preserve the modification time on the repository
+even if the repository changes because a lock is added or removed.
 This option can suppress extensive recompilation caused by a
 .BR make (1)
-dependency of some other copy of the working file on the \*r file.
+dependency of some other copy of the working file on the repository.
 Use this option with care; it can suppress recompilation even when it is needed,
 i.e. when the change of lock
 would mean a change to keyword strings in the other working file.
@@ -439,20 +439,20 @@ can be
 .BR 4 ,
 or
 .BR 5 .
-This can be useful when interchanging \*r files with others who are
+This can be useful when interchanging repositories with others who are
 running older versions of \*r.
 To see which version of \*r your correspondents are running, have them invoke
 .BR "rcs \-V" ;
 this works with newer versions of \*r.
 If it doesn't work, have them invoke
 .B rlog
-on an \*r file;
+on a repository;
 if none of the first few lines of output contain the string
 .B branch:
 it is version 3;
 if the dates' years have just two digits, it is version 4;
 otherwise, it is version 5.
-An \*r file generated while emulating version 3 loses its default branch.
+A repository generated while emulating version 3 loses its default branch.
 An \*r revision generated while emulating version 4 or earlier has
 a time stamp that is off by up to 13 hours.
 A revision extracted while emulating version 4 or earlier contains
@@ -465,7 +465,7 @@ in the substitution for
 .BI \-x "suffixes"
 Use
 .I suffixes
-to characterize \*r files.
+to characterize repositories.
 See
 .BR ci (1)
 for details.
@@ -506,7 +506,7 @@ then the time is output as follows:
 .LP
 The
 .B \-z
-option does not affect dates stored in \*r files,
+option does not affect dates stored in repositories,
 which are always \*u.
 .RE
 .SH "KEYWORD SUBSTITUTION"
@@ -552,7 +552,7 @@ With
 a numeric time zone offset is appended; otherwise, the date is \*u.
 .TP
 .B $\&Header$
-A standard header containing the full file name of the \*r file, the
+A standard header containing the full file name of the repository, the
 revision number, the date and time, the author, the state,
 and the locker (if locked).
 With
@@ -562,14 +562,14 @@ a numeric time zone offset is appended to the date; otherwise, the date is \*u.
 .B $\&Id$
 Same as
 .BR $\&Header$ ,
-except that the \*r file name is without the directory components.
+except that the repository name is without the directory components.
 .TP
 .B $\&Locker$
 The login name of the user who locked the revision (empty if not locked).
 .TP
 .B $\&Log$
 The log message supplied during checkin, preceded by a header
-containing the \*r file name, the revision number, the author, and the date
+containing the repository name, the revision number, the author, and the date
 and time.
 With
 .BI \-z zone
@@ -635,13 +635,13 @@ generates just
 .BR "$\&Name:\ \ $" .
 .TP
 .B $\&RCSfile$
-The name of the \*r file without directory components.
+The name of the repository without directory components.
 .TP
 .B $\&Revision$
 The revision number assigned to the revision.
 .TP
 .B $\&Source$
-The full file name of the \*r file.
+The full file name of the repository.
 .TP
 .B $\&State$
 The state assigned to the revision with the
@@ -693,7 +693,7 @@ unless a revision number of
 is specified.
 .so b-environment
 .SH DIAGNOSTICS
-The \*r file name, the working file name,
+The repository name, the working file name,
 and the revision number retrieved are
 written to the diagnostic output.
 The exit status is zero if and only if all operations were successful.

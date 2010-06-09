@@ -1,3 +1,19 @@
+2010-06-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[man] Say "repository", not "RCS file".
+
+	* ci.1in: Say "repository", not "RCS file".
+	* co.1in: Likewise.
+	* ident.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsclean.1in: Likewise.
+	* rcsdiff.1in: Likewise.
+	* rcsfile.5in: Likewise.
+	* rcsfreeze.1in: Likewise.
+	* rcsintro.1in: Likewise.
+	* rcsmerge.1in: Likewise.
+	* rlog.1in: Likewise.
+
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Consult env var RCS_MEM_LIMIT to set the memory limit.

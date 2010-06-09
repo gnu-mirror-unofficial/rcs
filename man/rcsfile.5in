@@ -6,9 +6,9 @@
 .if t .ds - \(em
 .TH RCSFILE 5 "\*(Dt" "GNU RCS \*(Rv"
 .SH NAME
-rcsfile \- format of RCS file
+rcsfile \- repository file format
 .SH DESCRIPTION
-An \*r file's
+A repository's
 contents are described by the grammar
 below.
 .PP
@@ -17,7 +17,7 @@ tab, form feed, and carriage return (collectively,
 .IR "white space")
 have no significance except in strings.
 However, white space cannot appear within an id, num, or sym,
-and an \*r file must end with a newline.
+and a repository must end with a newline.
 .PP
 Strings are enclosed by
 .BR @ .
@@ -163,7 +163,7 @@ field of a node contains a list of the
 numbers of the first nodes of all sequences for which it is a branchpoint.
 This list is ordered in increasing numbers.
 .LP
-The following diagram shows an example of an \*r file's organization.
+The following diagram shows an example of a repository's organization.
 .if !\np \{\
 .nf
 .vs 12

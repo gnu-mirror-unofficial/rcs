@@ -8,7 +8,7 @@ rcsfreeze \- freeze a configuration of sources checked in under RCS
 .SH DESCRIPTION
 .B rcsfreeze
 assigns a symbolic revision
-number to a set of \*r files that form a valid configuration.
+number to a set of repositories that form a valid configuration.
 .PP
 The idea is to run
 .B rcsfreeze
@@ -20,7 +20,7 @@ where
 is increased each time
 .B rcsfreeze
 is run) is then assigned to the most
-recent revision of each \*r file of the main trunk.
+recent revision of each repository of the main trunk.
 .PP
 An optional
 .I name
@@ -29,11 +29,11 @@ argument to
 gives a symbolic name to the configuration.
 The unique identifier is still generated
 and is listed in the log file but it will not appear as
-part of the symbolic revision name in the actual \*r files.
+part of the symbolic revision name in the actual repositories.
 .PP
 A log message is requested from the user for future reference.
 .PP
-The shell script works only on all \*r files at one time.
+The shell script works only on all repositories at one time.
 All changed files must be checked in already.
 Run
 .IR rcsclean (1)
@@ -58,7 +58,7 @@ Stephan v. Bechtolsheim
 .B rcsfreeze
 does not check whether any sources are checked out and modified.
 .PP
-Although both source file names and RCS file names are accepted,
+Although both working and repository file names are accepted,
 they are not paired as usual with RCS commands.
 .PP
 Error checking is rudimentary.

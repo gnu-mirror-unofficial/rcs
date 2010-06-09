@@ -20,7 +20,7 @@ For each
 given,
 .B rcsclean
 compares the working file and a revision in the corresponding
-\*r file.  If it finds a difference, it does nothing.
+repository.  If it finds a difference, it does nothing.
 Otherwise, it first unlocks the revision if the
 .B \-u
 option is given,
@@ -37,7 +37,7 @@ Files are paired as explained in
 If no
 .I file
 is given, all working files in the current directory are cleaned.
-Filenames matching an \*r suffix denote \*r files;
+Filenames matching an \*r suffix denote repositories;
 all others denote working files.
 .PP
 The number of the revision to which the working file is compared
@@ -90,11 +90,11 @@ Do not log the actions taken on standard output.
 This option has no effect other than specifying the revision for comparison.
 .TP
 .B \-T
-Preserve the modification time on the \*r file
-even if the \*r file changes because a lock is removed.
+Preserve the modification time on the repository
+even if the repository changes because a lock is removed.
 This option can suppress extensive recompilation caused by a
 .BR make (1)
-dependency of some other copy of the working file on the \*r file.
+dependency of some other copy of the working file on the repository.
 Use this option with care; it can suppress recompilation even when it is needed,
 i.e. when the lock removal
 would mean a change to keyword strings in the other working file.
@@ -115,7 +115,7 @@ for details.
 .BI \-x "suffixes"
 Use
 .I suffixes
-to characterize \*r files.
+to characterize repositories.
 See
 .BR ci (1)
 for details.
@@ -158,7 +158,7 @@ does.
 .so b-environment
 .SH DIAGNOSTICS
 The exit status is zero if and only if all operations were successful.
-Missing working files and \*r files are silently ignored.
+Missing working files and repositories are silently ignored.
 .ds EY 1990, 1991, 1992, 1993
 .so b-identification
 .SH "SEE ALSO"

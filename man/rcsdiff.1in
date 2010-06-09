@@ -31,9 +31,9 @@ rcsdiff \- compare RCS revisions
 .B rcsdiff
 runs
 .BR diff (1)
-to compare two revisions of each \*r file given.
+to compare two revisions of each repository given.
 .PP
-Filenames matching an \*r suffix denote \*r files;
+Filenames matching an \*r suffix denote repositories;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
@@ -97,7 +97,7 @@ is omitted,
 .B rcsdiff
 compares revision
 .I rev1
-of the \*r file with
+of the repository with
 the contents of the corresponding working file.
 .PP
 If both
@@ -110,7 +110,7 @@ compares revisions
 .I rev1
 and
 .I rev2
-of the \*r file.
+of the repository.
 .PP
 Both
 .I rev1
@@ -122,7 +122,7 @@ The command
 .LP
 .B "        rcsdiff  f.c"
 .LP
-compares the latest revision on the default branch of the \*r file
+compares the latest revision on the default branch of the repository
 to the contents of the working file
 .BR f.c .
 .so b-environment
