@@ -20,7 +20,7 @@ It lives in the repo but is not included in the distribution.
 ***** DONE don't say "path" when referring to file names
 *** features
 ***** DONE recognize keyword ‘commitid’ (debian #352527)
-***** ident accept numbers as well as letters (debian #157891)
+***** DONE ident accept numbers as well as letters (debian #157891)
 
 * coding standards
 *** indent -gnu -nut (sounds enticing, no?)
