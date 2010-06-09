@@ -20,8 +20,8 @@ An integer
 .IR lim ,
 measured in kilobytes, specifying the threshold under
 which commands will try to use memory-based operations for
-processing the RCS file.
-(For RCS files of size
+processing the repository.
+(For repositories of size
 .I lim
 kilobytes or greater,
 RCS will use the slower standard input/output routines.)

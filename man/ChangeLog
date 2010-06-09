@@ -19,6 +19,7 @@
 	* rcsintro.1in: Likewise.
 	* rcsmerge.1in: Likewise.
 	* rlog.1in: Likewise.
+	* b-environment: Likewise.
 
 2010-05-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
