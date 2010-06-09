@@ -193,8 +193,8 @@ co -l $q a.c &&
 sed 's/@/$/g' >a.kv <<EOF
 @Author: w @
 @Date: $date @
-@Header: $PWD$SLASH$RCSfile 2.1 $date w s @
-@Id: a.c 2.1 $date w s @
+@Header: $PWD$SLASH$RCSfile 2.1 $date w 42 @
+@Id: a.c 2.1 $date w 42 @
 @Locker:  @
  * @Log: a.c @
  * Revision 2.1  $date  w
@@ -204,17 +204,17 @@ sed 's/@/$/g' >a.kv <<EOF
 @RCSfile: a.c @
 @Revision: 2.1 @
 @Source: $PWD$SLASH$RCSfile @
-@State: s @
+@State: 42 @
 EOF
 test $? = 0 &&
 sed 's/:.*\$/$/' a.kv >a.k &&
-sed -e 's/w s [$]/w s '"$me"' $/' -e 's/[$]Locker: /&'"$me/" a.kv >a.kvl &&
+sed -e 's/w 42 [$]/w 42 '"$me"' $/' -e 's/[$]Locker: /&'"$me/" a.kv >a.kvl &&
 sed s/Oz//g a.kv >a.e &&
 sed s/Oz/N/g a.kv >a.N &&
 sed -e '/\$/!d' -e 's/\$$/: old $/' a.k >a.o &&
 sed -e 's/\$[^ ]*: //' -e 's/ \$//' a.kv >a.v &&
 cp a.o a.c &&
-ci -d"$date" -nOz -ss -ww -u2.1 -mm $q a.c &&
+ci -d"$date" -nOz -s42 -ww -u2.1 -mm $q a.c &&
 $diff a.kv a.c || { echo "#keyword expansion failed"; exit 1; }
 co -pOz -ko $q a.c >a.oo &&
 $diff a.o a.oo || { echo "#co -p -ko failed"; exit 1; }
@@ -432,7 +432,7 @@ description:
 1.1
 ----------------------------
 revision 2.1
-date: $date;  author: w;  state: s;  lines: +14 -1
+date: $date;  author: w;  state: 42;  lines: +14 -1
 =============================================================================
 EOF
 test $? = 0 || { echo "#rlog failed"; exit 1; }

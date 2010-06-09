@@ -74,9 +74,9 @@ nonterminal symbols are in
 .LP
 \f2digit\fP	::=	\f30\fP | \f31\fP | \f32\fP | \f33\fP | \f34\fP | \f35\fP | \f36\fP | \f37\fP | \f38\fP | \f39\fP
 .LP
-\f2id\fP	::=	{\f2num\fP}* \f2idchar\fP {\f2idchar\fP | \f2num\fP}*
+\f2id\fP	::=	{\f2idchar\fP | \f3.\fP}+
 .LP
-\f2sym\fP	::=	{\f2digit\fP}* \f2idchar\fP {\f2idchar\fP | \f2digit\fP}*
+\f2sym\fP	::=	{\f2idchar\fP}+
 .LP
 \f2idchar\fP	::=	any visible graphic character except \f2special\fP
 .LP

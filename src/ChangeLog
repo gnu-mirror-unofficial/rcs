@@ -1,3 +1,10 @@
+2010-06-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Relax syntax of id, sym to accept string of all digits.
+
+	* rcsmap.c (checkidentifier): Flag ‘DIGIT’ as identifier, as well.
+	* alive.test: Update to test using state "42".
+
 2010-06-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstractions: MEM_SAME, MEM_DIFF

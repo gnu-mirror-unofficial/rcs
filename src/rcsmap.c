@@ -79,13 +79,11 @@ checkidentifier (char const *id, int delimiter, register bool dotok)
     {
       switch (ctab[(unsigned char) (c = *id)])
         {
+        case DIGIT:
         case IDCHAR:
         case LETTER:
         case Letter:
           isid = true;
-          continue;
-
-        case DIGIT:
           continue;
 
         case PERIOD:

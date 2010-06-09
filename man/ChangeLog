@@ -1,5 +1,11 @@
 2010-06-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Relax syntax of id, sym to accept string of all digits.
+
+	* rcsfile.5in (id, sym): Rewrite productions.
+
+2010-06-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[man] Say "repository", not "RCS file".
 
 	* ci.1in: Say "repository", not "RCS file".
