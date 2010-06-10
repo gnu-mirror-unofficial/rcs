@@ -1,3 +1,10 @@
+2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Expand on ‘-I’, ‘-q’, ‘RCSINIT’.
+
+	* doc/rcs.texi (Misc common options): Expand on ‘-I’, ‘-q’.
+	(Environment): Expand on ‘RCSINIT’.
+
 2010-06-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Say "repository", not "RCS file"; expand chapter "Concepts".

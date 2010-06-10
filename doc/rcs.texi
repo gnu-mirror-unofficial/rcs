@@ -922,15 +922,20 @@ Other common options are @option{-I}, @option{-q}, @option{-s},
 @item -I
 @cindex interactive mode
 This option enables @dfn{interactive mode}.
-@TODO Mention behavior in presence of @option{-q} (who wins? how?),
-and also effect on warnings.
+More precisely, it @strong{forces} interactive mode, whereby RCS
+commands believe that their standard input is a terminal, normally a
+precondition for displaying a prompt to receive input (such as a log
+message on checkin).
+The intention of @option{-I} is for scripting situations where standard
+input is actually not a terminal but you know beforehand (without
+prompting) that input is needed and you are ready to provide it on
+standard input anyway.
 
 @item -q
 @cindex quiet mode
 This option enables @dfn{quiet mode}.
-Commands work silently (unless there is an error condition).
-@TODO Mention behavior in presence of @option{-I} (who wins? how?),
-and also effect on warnings.
+Commands work silently (unless there is an error condition),
+and suppress warnings and prompts.
 
 @item -s@var{state}
 @cindex specifying a state
@@ -966,7 +971,21 @@ is, first try with @samp{,v} then try with an empty suffix.
 
 Another way to set common options is with the @samp{RCSINIT}
 environment variable.  This is a space-separated list of options.
-@TODO Write more.
+Use @samp{\} (backslash) to escape significant space.  For example:
+
+@example
+# Set the value; make it available to subsequent commands.
+RCSINIT="-q -x/,v -zLT"
+export RCSINIT
+# Use it (implicitly).
+rlog -L foo
+@end example
+
+@noindent
+This example, in Bourne shell syntax, arranges for RCS commands to
+operate as if each command-line had prepended @samp{-q -x/,v -zLT} to
+the rest of the command-line.  The effective command-line that
+@rcscommand{rlog} sees is thus @samp{-q -x/,v -zLT -L foo}.
 
 @cindex memory limit
 Normally, for speed, commands either memory map or copy into memory
