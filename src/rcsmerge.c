@@ -47,7 +47,7 @@ Options:
   -V            Like --version.
   -VN           Emulate RCS version N.
   -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
+                used to identify repository names.
   -zZONE        Specify date output format in keyword-substitution.
 
 One or two revisions must be specified (using -p, -q, or -r).

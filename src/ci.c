@@ -563,8 +563,8 @@ first_meaningful_symbolic_name (void)
 Options:
   -f[REV]       Force new entry, even if no content changed.
   -I[REV]       Interactive.
-  -i[REV]       Initial checkin; error if RCS file already exists.
-  -j[REV]       Just checkin, don't initialize; error if RCS file does not exist.
+  -i[REV]       Initial checkin; error if repository already exists.
+  -j[REV]       Just checkin, don't initialize; error if repository does not exist.
   -k[REV]       Compute revision from working file keywords.
   -q[REV]       Quiet mode.
   -r[REV]       Do normal checkin, if REV is specified;
@@ -579,14 +579,14 @@ Options:
   -sSTATE       Set state to STATE.
   -t-TEXT       Set description to TEXT.
   -tFILENAME    Set description from text read from FILENAME.
-  -T            Set the RCS file's modification time to the new revision's
+  -T            Set the repository's modification time to the new revision's
                 time if the former precedes the latter and there is a new
-                revision; preserve the RCS file's modification time otherwise.
+                revision; preserve the repository's modification time otherwise.
   -V            Like --version.
   -VN           Emulate RCS version N.
   -wWHO         Use WHO as the author.
   -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
+                used to identify repository names.
   -zZONE        Specify date output format in keyword-substitution
                 and also the default timezone for -dDATE.
 

@@ -23,18 +23,18 @@
 #       The idea is to run rcsfreeze each time a new version is checked
 #       in. A unique symbolic revision number (C_[number], where number
 #       is increased each time rcsfreeze is run) is then assigned to the most
-#       recent revision of each RCS file of the main trunk.
+#       recent revision of each repository of the main trunk.
 #
 #       If the command is invoked with an argument, then this
 #       argument is used as the symbolic name to freeze a configuration.
 #       The unique identifier is still generated
 #       and is listed in the log file but it will not appear as
-#       part of the symbolic revision name in the actual RCS file.
+#       part of the symbolic revision name in the actual repository.
 #
 #       A log message is requested from the user which is saved for future
 #       references.
 #
-#       The shell script works only on all RCS files at one time.
+#       The shell script works only on all repositories at one time.
 #       It is important that all changed files are checked in (there are
 #       no precautions against any error in this respect).
 #       file names:

@@ -122,12 +122,12 @@ Options:
   -n[REV]       Dry run (no act, don't operate).
   -q[REV]       Quiet mode.
   -kSUBST       Substitute using mode SUBST (see co(1)).
-  -T            Preserve the modification time on the RCS file even
-                if the RCS file changes because a lock is removed.
+  -T            Preserve the modification time on the repository even
+                if the repository changes because a lock is removed.
   -V            Like --version.
   -VN           Emulate RCS version N.
   -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
+                used to identify repository names.
   -zZONE        Specify date output format in keyword-substitution.
 
 REV defaults to the latest revision on the default branch.

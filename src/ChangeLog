@@ -1,3 +1,16 @@
+2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Make ‘--help’ output say "repository", not "RCS file".
+
+	* ci.c: In ‘--help’ comment, say "repository", not "RCS file".
+	* co.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsfreeze.sh: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+
 2010-06-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Relax syntax of id, sym to accept string of all digits.

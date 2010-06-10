@@ -739,8 +739,8 @@ putrevpairs (char const *b, char const *e, bool sawsep)
 /*:help
 [options] file ...
 Options:
-  -L            Ignore RCS files with no locks set.
-  -R            Print only the name of the RCS file.
+  -L            Ignore repositories with no locks set.
+  -R            Print only the name of the repository.
   -h            Print only the "header" information.
   -t            Like -h, but also include the description.
   -N            Omit symbolic names.
@@ -763,7 +763,7 @@ Options:
   -V            Like --version.
   -VN           Emulate RCS version N.
   -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
+                used to identify repository names.
   -zZONE        Specify date output format in keyword-substitution.
   -q            No effect, included for consistency with other commands.
 */
