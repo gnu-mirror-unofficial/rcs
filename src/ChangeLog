@@ -1,5 +1,11 @@
 2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Build rcsfreeze with substituted ‘PACKAGE_VERSION’.
+
+	* Makefile.am (rcsfreeze): New target.
+
+2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Make ‘--help’ output say "repository", not "RCS file".
 
 	* ci.c: In ‘--help’ comment, say "repository", not "RCS file".

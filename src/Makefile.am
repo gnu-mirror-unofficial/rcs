@@ -47,6 +47,10 @@ TESTS = alive.test
 
 EXTRA_DIST = TAGS rcsfreeze.sh $(TESTS) yarrrr.c
 
+# We don't install rcsfreeze (or its manpage).
+rcsfreeze: rcsfreeze.sh
+	sed 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/g' $< > $@
+
 dist-hook:
 	rm -f $(distdir)/bother.c
 
