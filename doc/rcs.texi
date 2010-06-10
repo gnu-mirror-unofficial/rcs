@@ -73,6 +73,7 @@ Texts.  A copy of the license is included in the appendix entitled
 * Overview::            General purpose and information.
 * Usage::               How to use RCS.
 
+* Still missing::       What RCS lacks, perhaps perpetually.
 * Reporting bugs::      Sending bug reports and feature suggestions.
 * GNU FDL::             Copying and sharing this documentation.
 * Index::
@@ -84,10 +85,9 @@ Overview
 * Credits::             Who did what, and when.
 * Concepts::            What is a revision?  How can RCS help?
 * Quick tour::          A hands-on introduction to using RCS.
-* Still missing::       What RCS lacks, perhaps perpetually.
 
 Usage
-* Common options::
+* Common elements::
 * ci::
 * co::
 * ident::
@@ -98,7 +98,7 @@ Usage
 * rcsmerge::
 * rlog::
 
-Common options
+Common elements
 * Revision options::
 * Date option::
 * Description option::
@@ -140,7 +140,6 @@ GNU @uref{http://www.gnu.org/software/cvs/, CVS}.
 * Credits::             Who did what, and when.
 * Concepts::            What is a revision?  How can RCS help?
 * Quick tour::          A hands-on introduction to using RCS.
-* Still missing::       What RCS lacks, perhaps perpetually.
 @end menu
 
 @node Credits
@@ -233,8 +232,11 @@ revision a unique revision number along with the remembered particulars
 of the checkin that produced it.  It also contains a @dfn{description}
 of the working file and various other metadata, described below.
 
-The repository is also known as the ``RCS file'', or
-(colloquially) the ``comma-v file'', due to its name often
+The repository is also known as the ``RCS file''@footnote{
+For continuity with previous RCS releases, the diagnostic and error
+messages use this term.
+[Question for pretesters: OK to also change messages?]},
+or (colloquially) the ``comma-v file'', due to its name often
 ending in @file{,v} (e.g., @file{a.c,v}).
 
 @cindex revision number
@@ -416,7 +418,7 @@ presenting a handful of RCS commands in quick succession.  For
 details on individual RCS commands, @xref{Usage}.
 
 Suppose you have a file @file{f.c} that you wish to put under
-control of RCS.  If you have not already done so, make an RCS
+control of RCS.  If you have not already done so, make an @file{RCS}
 directory with the command:
 
 @example
@@ -424,21 +426,21 @@ mkdir RCS
 @end example
 
 @noindent
-Then invoke the check-in command:
+Then invoke the checkin command:
 
 @example
 ci f.c
 @end example
 
 @noindent
-This command creates a repository in the RCS directory, stores
+This command creates a repository in directory @file{RCS}, stores
 @file{f.c} into it as revision 1.1, and deletes @file{f.c}.  It
 also asks you for a description.  The description should be a
 synopsis of the contents of the file.  All later checkin
 commands will ask you for a log entry, which should summarize
 the changes that you made.
 
-Files in the RCS directory are called repositories; the others
+Files in directory @file{RCS} are called repositories; the others
 are called working files.  To get back the working file
 @file{f.c} in the previous example, use the checkout command:
 
@@ -449,14 +451,14 @@ co f.c
 @noindent
 This command extracts the latest revision from the repository
 and writes it into @file{f.c}.  If you want to edit @file{f.c},
-you must lock it as you check it out with the command:
+you must lock it as you check it out, with the command:
 
 @example
 co -l f.c
 @end example
 
 @noindent
-You can now edit f.c.  Suppose after some editing you want to
+You can now edit @file{f.c}.  Suppose after some editing you want to
 know what changes that you have made.  The command:
 
 @example
@@ -514,11 +516,11 @@ rcs -L f.c    # enable strict locking
 @end example
 
 If you don't want to clutter your working directory with
-repositories, create a subdirectory called RCS in your working
+repositories, create a subdirectory called @file{RCS} in your working
 directory, and move all your repositories there.  RCS commands
 will look first into that directory to find needed files.  All
 the commands discussed above will still work, without any
-modification.  @xref{Common options}.
+modification.  @xref{Common elements}.
 
 To avoid the deletion of the working file during checkin (in
 case you want to continue editing or compiling), invoke one of:
@@ -529,7 +531,7 @@ ci -u f.c     # checkin + unlocked checkout
 @end example
 
 @noindent
-These commands check in @file{f.c} as usual, but perform an
+These commands check in @file{f.c} as usual, then perform an
 implicit checkout.  The first form also locks the checked in
 revision, the second one doesn't.  Thus, these options save you
 one checkout operation.  The first form is useful if you want
@@ -571,115 +573,17 @@ ci -r1.3.1 f.c
 
 @noindent
 This command starts a branch numbered 1 at revision 1.3, and
-assigns the number 1.3.1.1 to the new revision.  For more
-information about branches, @xref{Concepts}.
+assigns the number 1.3.1.1 to the new revision.  Here is a diagram
+showing the new revision in relation to its branch and the trunk.
 
-@node Still missing
-@section Still missing
-@cindex features, still missing
+@example
+1.1  --  1.2  --  1.3  --  1.4  --  1.5
+                   |
+                [1.3.1]  --  1.3.1.1
+@end example
 
-RCS is still missing some features.  The following is an unordered list
-of ``to-do musings'' kept by the RCS maintainers.  We include it here to
-give you an idea of RCS's functionality contour.
-
-@itemize
-
-@item Add an option to @rcscommand{rcsmerge} so that it can use an arbitrary
-program to do the 3-way merge, instead of the default @rcscommand{merge}.
-Likewise for @rcscommand{rcsdiff} and @rcscommand{diff}.  It should be
-possible to pass arbitrary options to these programs, and to the subsidiary
-@rcscommand{co} invocations.
-
-@item Add format options for finer control over the output of
-@rcscommand{ident} and @rcscommand{rlog}.  E.g. there should be an easy way
-for rlog to output lines like @samp{src/main.c 2.4 wft}, one for each locked
-revision.  @rcscommand{rlog} options should have three orthogonal types:
-selecting files, selecting revisions, and selecting rlog format.
-
-@item Add format options for finer control over the output of keyword
-strings.  E.g. there should be some way to prepend @samp{@@(#)}, and
-there should be some way to change @samp{$} to some other character to
-disable further substitution.  These options should make the resulting
-files uneditable, like @samp{-kv}.
-
-@item Add long options, e.g. @option{--keyword-substitution}.
-Unfortunately RCS's option syntax is incompatible with getopt.  Perhaps
-the best way is to overload @rcscommand{rcs}, e.g., @samp{rcs diff
---keyword-substitution=old file} instead of @samp{rcsdiff -ko file}.
-
-@item @command{rlog -rM:N} should work even if @var{M} and @var{N} have
-different numbers of fields, so long as @var{M} is an ancestor of
-@var{N} or vice versa.
-
-@item @rcscommand{rcs} should evaluate options in order;
-this allows @command{rcs -oS -nS}.
-
-@item Be able to redo your most recent checkin with minor changes.
-
-@item @command{co -u} shouldn't complain about a @samp{+w} working
-file if contents don't change.
-
-@item Add a @samp{-} option to take the list of file names from
-standard input.  Perhaps the file names should be null-terminated, not
-newline-terminated, so that those that contain newlines are handled
-properly.
-
-@item Permit multiple option--filename pairs,
-e.g., @command{co -r1.4 a -r1.5 b}.
-
-@item Add an option to break a symbolic link to a repository,
-instead of breaking the hard link that it points to.
-
-@item Add ways to specify the earliest revision, the most recent
-revision, the earliest or latest revision on a particular branch, and
-the parent or child of some other revision.
-
-@item If a user has multiple locks, perhaps @rcscommand{ci} should fall
-back on the method of @command{ci -k} to figure out which revision to use.
-
-@item Add an option to @rcscommand{rcsclean} to clean directories recursively.
-
-@item Write an @rcscommand{rcsck} program that repairs corrupted repositories,
-much as fsck repairs corrupted file systems.  For example, it should
-remove stale lock files.
-
-@item Update the date parser to use the more modern @file{getdate.y}
-by Bellovin, Salz, and Berets, or the even more modern @code{getdate} by
-Moraes.  None of these getdate implementations are as robust as RCS's
-old warhorse in avoiding problems like arithmetic overflow, so they'll
-have to be fixed first.  (Perhaps we can use gnulib module @code{getdate}.)
-
-@item Break up the code into a library so that it's easier to write
-new programs that manipulate repositories, and so that useless code is removed
-from the existing programs.  For example, the @rcscommand{rcs} command
-contains unnecessary keyword substitution baggage, and the merge command can
-be greatly pruned.
-
-@item Make it easier to use your favorite text editor to edit log
-messages, etc. instead of having to type them in irretrievably at the
-terminal.
-
-@item Let the user specify a search path for default branches,
-e.g. to use @var{L} as the default branch if it works, and @var{M}
-otherwise.  Let the user require that at least one entry in the
-search path works.  Let the user say that later entries in the
-search path are read only, i.e. one cannot check in changes to them.
-This should be an option settable by @samp{RCSINIT}.
-
-@item Add a way for a user to see which revisions affected which lines.
-
-@item Have @command{rlog -nN F} print just the revision number that
-@var{N} translates to.  E.g. @command{rlog -nB. F} would print the highest
-revision on the branch B.  Use this to add an option @option{-bB} to
-rcsbranch, to freeze the named branch.  This should interact well with
-default branches.
-
-@item Add a @rcscommand{co} option that prints the revision number before
-each line, as SCCS's @command{get -m} does.
-[I implemented this for Emacs 22 as a subroutine of @code{vc-annotate}.
-This is pretty high priority, so perhaps RCS 5.8 will see it. ---ttn]
-
-@end itemize
+@noindent
+For more information about branches, @xref{Concepts}.
 
 
 @c ---------------------------------------------------------------------------
@@ -687,10 +591,10 @@ This is pretty high priority, so perhaps RCS 5.8 will see it. ---ttn]
 @chapter Usage
 
 This chapter describes how to invoke RCS commands, including common
-command-line options, as well those specific to each command.
+command-line elements, as well options specific to each command.
 
 @menu
-* Common options::
+* Common elements::
 * ci::
 * co::
 * ident::
@@ -702,8 +606,8 @@ command-line options, as well those specific to each command.
 * rlog::
 @end menu
 
-@node Common options
-@section Common options
+@node Common elements
+@section Common elements
 
 @cindex command help
 @cindex command version
@@ -725,6 +629,7 @@ co -u1.4  foo   # ok
 @end example
 
 @noindent
+@cindex order of options and file names
 Furthermore, options must appear before file names (if any) on the
 command line.
 
@@ -734,6 +639,8 @@ ident -q foo    # ok
 @end example
 
 @noindent
+@cindex pairing repository and working file
+@cindex file names on the command-line
 Lastly, pairs of repository and working files can be specified
 in three ways: (a) both are given, (b) only the working file is
 given, (c) only the repository is given.  For (a), both
@@ -943,7 +850,18 @@ and suppress warnings and prompts.
 Specify the state to be @var{state}.
 
 @item -T
-@TODO Write.
+This option controls how commands timestamp the repository.
+Normally, RCS commands set the repository's timestamp when modifying it
+in the ``natural'' way (without taking any particular care).
+With @option{-T}, on the other hand, the commands either preserve
+the timestamp (for standalone lock/unlock operations), or use the
+timestamp of the working file (for @rcscommand{ci}).
+
+This can be useful if the repository is found in a makefile target's
+list of prerequisites (@pxref{Rule Syntax,,,make,The GNU Make Manual}),
+that is, if some target should be rebuilt if the repository is newer
+than it.  In that case, you can do @samp{rcs -u -T}, for example, to
+unlock a revision in the repository without triggering a recompilation.
 
 @item -V
 Behave like @option{--version}, i.e., display command version
@@ -961,6 +879,23 @@ Valid values for @var{n} are: 3, 4, 5.
 Specify @var{suff} as the slash-separated list of file name suffixes
 used to recognize a repository.  The default value is @samp{,v/}, that
 is, first try with @samp{,v} then try with an empty suffix.
+
+This @dfn{basename search} occurs within (i.e., starting from the
+beginning) the larger @dfn{directory search} loop, which comprises two
+candidates: @file{d/RCS} and @file{d}, where @var{d} is the directory
+component of the working file name.  For example, given the working file
+@file{a.c} in the current directory, RCS tries, in order, these
+candidates:
+
+@example
+./RCS/a.c,v
+./RCS/a.c
+./a.c,v
+./a.c
+@end example
+
+Note that the last candidate is impossible (and is in fact discarded),
+because the working file and repository cannot have the same name.
 @end table
 
 @node Environment
@@ -1519,6 +1454,115 @@ or by the user if @var{who} is omitted.
 @item -q
 No effect, included for consistency with other commands.
 @end table
+
+
+@c ---------------------------------------------------------------------------
+@node Still missing
+@chapter Still missing
+@cindex features, still missing
+
+RCS is still missing some features.  The following is an unordered list
+of ``to-do musings'' kept by the RCS maintainers.  If you would like to
+hack on an item, @xref{Reporting bugs}.
+
+@itemize
+
+@item Add an option to @rcscommand{rcsmerge} so that it can use an arbitrary
+program to do the 3-way merge, instead of the default @rcscommand{merge}.
+Likewise for @rcscommand{rcsdiff} and @rcscommand{diff}.  It should be
+possible to pass arbitrary options to these programs, and to the subsidiary
+@rcscommand{co} invocations.
+
+@item Add format options for finer control over the output of
+@rcscommand{ident} and @rcscommand{rlog}.  E.g. there should be an easy way
+for rlog to output lines like @samp{src/main.c 2.4 wft}, one for each locked
+revision.  @rcscommand{rlog} options should have three orthogonal types:
+selecting files, selecting revisions, and selecting rlog format.
+
+@item Add format options for finer control over the output of keyword
+strings.  E.g. there should be some way to prepend @samp{@@(#)}, and
+there should be some way to change @samp{$} to some other character to
+disable further substitution.  These options should make the resulting
+files uneditable, like @samp{-kv}.
+
+@item Add long options, e.g. @option{--keyword-substitution}.
+Unfortunately RCS's option syntax is incompatible with getopt.  Perhaps
+the best way is to overload @rcscommand{rcs}, e.g., @samp{rcs diff
+--keyword-substitution=old file} instead of @samp{rcsdiff -ko file}.
+
+@item @command{rlog -rM:N} should work even if @var{M} and @var{N} have
+different numbers of fields, so long as @var{M} is an ancestor of
+@var{N} or vice versa.
+
+@item @rcscommand{rcs} should evaluate options in order;
+this allows @command{rcs -oS -nS}.
+
+@item Be able to redo your most recent checkin with minor changes.
+
+@item @command{co -u} shouldn't complain about a @samp{+w} working
+file if contents don't change.
+
+@item Add a @samp{-} option to take the list of file names from
+standard input.  Perhaps the file names should be null-terminated, not
+newline-terminated, so that those that contain newlines are handled
+properly.
+
+@item Permit multiple option--filename pairs,
+e.g., @command{co -r1.4 a -r1.5 b}.
+
+@item Add an option to break a symbolic link to a repository,
+instead of breaking the hard link that it points to.
+
+@item Add ways to specify the earliest revision, the most recent
+revision, the earliest or latest revision on a particular branch, and
+the parent or child of some other revision.
+
+@item If a user has multiple locks, perhaps @rcscommand{ci} should fall
+back on the method of @command{ci -k} to figure out which revision to use.
+
+@item Add an option to @rcscommand{rcsclean} to clean directories recursively.
+
+@item Write an @rcscommand{rcsck} program that repairs corrupted repositories,
+much as fsck repairs corrupted file systems.  For example, it should
+remove stale lock files.
+
+@item Update the date parser to use the more modern @file{getdate.y}
+by Bellovin, Salz, and Berets, or the even more modern @code{getdate} by
+Moraes.  None of these getdate implementations are as robust as RCS's
+old warhorse in avoiding problems like arithmetic overflow, so they'll
+have to be fixed first.  (Perhaps we can use gnulib module @code{getdate}.)
+
+@item Break up the code into a library so that it's easier to write
+new programs that manipulate repositories, and so that useless code is
+removed from the existing programs.  For example, the @rcscommand{rcs}
+command contains unnecessary keyword substitution baggage, and the
+@rcscommand{merge} command can be greatly pruned.
+
+@item Make it easier to use your favorite text editor to edit log
+messages, etc., instead of having to type them in irretrievably at the
+terminal.
+
+@item Let the user specify a search path for default branches,
+e.g., to use @var{L} as the default branch if it works, and @var{M}
+otherwise.  Let the user require that at least one entry in the
+search path works.  Let the user say that later entries in the
+search path are read only, i.e. one cannot check in changes to them.
+This should be an option settable by @samp{RCSINIT}.
+
+@item Add a way for a user to see which revisions affected which lines.
+
+@item Have @command{rlog -nN F} print just the revision number that
+@var{N} translates to.  E.g., @command{rlog -nB. F} would print the highest
+revision on the branch B.  Use this to add an option @option{-bB} to
+rcsbranch, to freeze the named branch.  This should interact well with
+default branches.
+
+@item Add a @rcscommand{co} option that prints the revision number before
+each line, as SCCS's @command{get -m} does.
+[I implemented this for Emacs 22 as a subroutine
+of @code{vc-annotate}, q.v.  ---ttn]
+
+@end itemize
 
 
 @c ---------------------------------------------------------------------------

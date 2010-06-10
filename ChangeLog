@@ -1,5 +1,20 @@
 2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[doc] Expand on ‘-T’, ‘-x’; move "Still missing" up and back.
+
+	* doc/rcs.texi (Top): Move menu item "Still missing" from main menu
+	to detailed-node menu; rename "Common options" to "Common elements".
+	(Overview): Delete menu item "Still missing".
+	(Concepts): Add footnote on use of term "RCS file".
+	(Quick tour): Add @file markup, branch diagram; other small changes.
+	(Usage): Rename menu item "Common options" to "Common elements".
+	(Common elements): Rename from "Common options".
+	Add some @cindex; expand on ‘-T’, ‘-x’; document directory search.
+	(Still missing): Promote to chapter; move prior to "Reporting bugs";
+	futz w/ wording for some entries; other small changes.
+
+2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Expand on ‘-I’, ‘-q’, ‘RCSINIT’.
 
 	* doc/rcs.texi (Misc common options): Expand on ‘-I’, ‘-q’.
