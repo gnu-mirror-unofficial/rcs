@@ -1,25 +1,29 @@
+Welcome!
+========
+
 This directory contains sources and documentation for GNU RCS.
 
 GNU RCS (Revision Control System) manages multiple revisions of files.
 RCS can store, retrieve, log, identify, and merge revisions.
-It is useful for files that are revised frequently,
-e.g. programs, documentation, graphics, and papers.
+It is useful for files that are revised frequently, e.g.,
+programs, documentation, graphics, and papers.
 
 See the following files and directories for more information.
 
  AUTHORS - authorship information
  COPYING - copying conditions
  INSTALL - generic installation instructions
- NEWS - recent changes
- man/ - sources for manual page entries
- src/ - sources for programs
+ NEWS    - recent changes
+ doc/    - documentation in info format, plus source (texinfo)
+ lib/    - portability code, from gnulib
+ m4/     - configure script infrastructure, from gnulib
+ man/    - manual page entries, plus source
+ src/    - source code for programs
 
-If you lack troff, you can get GNU groff to format the documentation.
 
-
-__________
 
 Prerequisites and compatibility issues
+======================================
 
 RCS requires a diff that supports the -n option.
 Get GNU diffutils (version 2.7 or later) if your diff lacks -n.
@@ -28,53 +32,53 @@ RCS works best with a diff that supports -a and -L,
 and a diff3 that supports -A, -E and -m.
 GNU diffutils supports these options.
 
-RCS version 5 reads RCS files written by any RCS version released since 1982.
-It also writes RCS files that these older versions of RCS can read,
-unless you use one of the following new features:
+RCS version 5 reads repositories written by any RCS version released since
+1982.  It also writes repositories that these older versions of RCS can
+read, unless you use one of the following new features:
 
-	checkin dates after 1999-12-31
-	checking in non-text files
-	identifiers containing `.' or non-Ascii bytes, or starting with a digit
-	rcs -bX, where X is nonempty
-	rcs -kX, where X is not `kv'
-	RCS files that exceed hardcoded limits in older RCS versions
+- checkin dates after 1999-12-31
+- checking in non-text files
+- identifiers containing ‘.’ or non-ASCII bytes, or starting with a digit
+- ‘rcs -bX’, where X is nonempty
+- ‘rcs -kX’, where X is not ‘kv’
+- repositories that exceed hardcoded limits in older RCS versions
 
 A working file written by RCS 5.5 or later contains four-digit years in its
-keyword strings.  If you check out a working file with RCS 5.5 or later,
-an older RCS version's `ci -k' may insist on two-digit years.
-Similarly, a working file written with -zZONE contains times
-in its keyword strings that older `ci -k's may not understand.
-Work around this with `co -V4 -z', or edit the working file.
+keyword strings.  If you check out a working file with RCS 5.5 or later, an
+older RCS version's ‘ci -k’ may insist on two-digit years.  Similarly, a
+working file written with ‘-zZONE’ contains times in its keyword strings
+that older ‘ci -k’s may not understand.  Work around this with ‘co -V4 -z’,
+or edit the working file.
 
-RCS should run on any host that conforms to the Posix 1003.1-1990 standard.
-It also runs on a wide variety of non-Posix hosts.
+RCS should run on any host that conforms to the POSIX 1003.1-1990 standard.
+It also runs on a wide variety of non-POSIX hosts.
 
 
-__________
 
 Configuration and installation
+==============================
 
 See INSTALL for general instructions on configuring and building RCS.
-Use `configure --help' to see a list of options for customizing the
+Use ‘configure --help’ to see a list of options for customizing the
 installation directories (.e.g, --prefix).
 
-Another option is `--enable-compat2'.  It enables reading RCS 2.x file
+Another option is ‘--enable-compat2’.  It enables reading RCS 2.x file
 formats.  Most likely you can safely ignore this (that file format became
 obsolete in 1982).  However, if you do indeed find a version 2 file around,
 you can migrate the file to a recent format as follows:
 
-      Suppose the working file was `f.c'; rename the RCS file `f.c.v' to
-      `f.c,v', and the RCS file `f.v' to `f.c,v'.  Thus suffixes are no
-      longer dropped and RCS files end in `,v' rather than `.v'.  After
-      all version 2 RCS files have been updated with new versions of ci
-      or rcs, you can remake RCS with --enable-compat2=no.
+   Suppose the working file was ‘f.c’; rename the repository ‘f.c.v’ to
+   ‘f.c,v’, and the repository ‘f.v’ to ‘f.c,v’.  Thus suffixes are no
+   longer dropped and repositories end in ‘,v’ rather than ‘.v’.  After
+   all version 2 repositories have been updated with new versions of ci
+   or rcs, you can remake RCS with --enable-compat2=no.
 
 !!! NB: This option (and 2.x compatability) will be removed in GNU RCS 6.x.
 
-Another option is `--with-mailer=PROG'.  This specifies that PROG (an
-absolute filename if not findable on PATH) should be used to send mail
-to the original locker when a lock is broken.  PROG will be called with
-one argument, the recipient, and its standard input will be:
+Another option is ‘--with-mailer=PROG’.  This specifies that PROG (an
+absolute filename if not findable on PATH) should be used to send mail to
+the original locker when a lock is broken.  PROG will be called with one
+argument, the recipient, and its standard input will be:
 
   Subject: Broken lock on <FILENAME>
 
@@ -83,45 +87,38 @@ one argument, the recipient, and its standard input will be:
 That is, the first line is the subject, followed by an empty line, followed
 by the message body.  Omitting this option disables sending mail.
 
-If your system type is in the following list,
-look for the corresponding strings in the notes below before configuring.
+If your system type is in the following list, look for the
+corresponding strings in the notes below before configuring.
 
-	system type - identifiers
-	------------------------
-	AIX 3.2 - --prefix=/usr has_seteuid
-	GCC 2.5.8 Intel x86 - CFLAGS
-	HP/Apollo DomainOS - has_vfork
-	HP-UX 8.07 and 9.* - has_mmap
-	Solaris 2.4 - has_mmap
-	SCO Unix V.3.2 - has_rename
-	Ultrix - has_seteuid
+  system type         - identifiers
+  ------------------------------------------------
+  AIX 3.2             - --prefix=/usr HAVE_SETEUID
+  GCC 2.5.8 Intel x86 - CFLAGS
+  HP-UX 8.07 and 9.*  - MMAP_SIGNAL
+  Solaris 2.4         - MMAP_SIGNAL
+  SCO Unix V.3.2      - bad_NFS_rename
+  Ultrix              - HAVE_SETEUID
 
-If building succeeds, make `check' (optional) and make `install'.
-To check the installation, make `installcheck'.
+If building succeeds, do "make check" (optional) and "make install".
+To check the installation, do "make installcheck".
 
-
-----
-
-Configuration note
-
-Do not configure with --prefix=/ or --prefix=/usr in AIX.
-An AIX boot shell script (/etc/rc.boot4 in AIX 3.2) invokes `merge',
+AIX NOTE:
+Do not configure with ‘--prefix=/’ or ‘--prefix=/usr’ in AIX.
+An AIX boot shell script (/etc/rc.boot4 in AIX 3.2) invokes ‘merge’,
 meaning /etc/merge, and fails if RCS merge is installed in /bin or /usr/bin.
 IBM says that installing new programs into /usr/bin is a customer error (!).
 
 
-__________
 
 Configuration environment
+=========================
 
-The configuration procedure normally inspects the current host
-to determine how RCS is to be built.
-The environment variables listed in this section override this default.
-If you configure with the option `--with-diffutils',
-unset environment variables whose names start with `DIFF'
-are assumed to have values appropriate for a GNU diffutils
-installed into the same location as RCS;
-this is a recommended configuration.
+The configuration procedure normally inspects the current host to determine
+how RCS is to be built.  The variables listed in this section override this
+default.  They should be specified on the configure script command-line,
+like so:
+
+$ ./configure [--prefix and other options...] VAR=VALUE VAR=VALUE
 
 CC is the name of your C compiler.
 
@@ -132,13 +129,10 @@ typically options that affect optimization or debugging.
 Omit -O if your compiler's optimizer is not trustworthy (e.g. GCC 2.5.8 x86).
 If your ancient BSD compiler has the -R option, -R can improve performance by
 making all initialized data read-only (not just string literals);
-modern compilers don't need this, since they have `const'.
+modern compilers don't need this, since they have ‘const’.
 
 DIFF is the name of your diff program.
 It's normally best to use GNU diffutils.
-If you change DIFF after starting a build,
-make sure you rebuild conf.h afterwards;
-otherwise you may introduce a security hole.
 On some versions of Unix, the standard diff does not support RCS
 and you must instead use diffutils, or something like /usr/lib/rdiff.
 
@@ -147,52 +141,22 @@ With GNU diffutils, this is simply its user-visible diff3 program.
 But with traditional diff3 it is the name of the undocumented diff3 auxiliary,
 whose name is /usr/lib/diff3 or /usr/5lib/rdiff3prog or something similar.
 
-INSTALL is the command that installs commands, e.g. `../install-sh'.
+INSTALL is the command that installs commands, e.g. ‘../install-sh’.
 INSTALL_DATA installs data, and
 INSTALL_PROGRAM installs programs.
 
 PIC is the name of your pic program, configured to avoid extensions
 so that a portable man page is generated.
-This is typically GNU pic with the `-n' option,
-or traditional pic with `-D'.
-It is used only if you edit the documentation or make `maintainer-clean'.
-
-prefix and exec_prefix establish the binary installation directory;
-they are affected by the --prefix and --exec-prefix option of `configure'.
+This is typically GNU pic with the ‘-n’ option,
+or traditional pic with ‘-D’.
+It is used only if you edit the documentation or make ‘maintainer-clean’.
 
 
-__________
 
-src/Makefile notes
+src/base.h notes
+================
 
-Many of the src/Makefile variables are set by `configure' as described above.
-The notes below describe variables that may need to be edited by hand
-in unusual installations.
-
-ALL_CFLAGS are all the options passed to the C compiler.
-
-DEFS are configuration options for the C preprocessor.
-It should include any extra -D and -I options needed on your system.
-
-LDFLAGS are the loader flags you need, e.g. -i, -n, -s, -x.
-
-LIBOBJS are any other object files you need to link.
-
-LIBS are the loader libraries you need, e.g. -lbsd, -lBSD, -ljobs, -lPW, -lx.
-
-LINK is the command used to link together an executable.
-
-LINT is the name and usual arguments of your lint program.
-
-REMOVE is how to remove a file.
-
-
-__________
-
-src/conf.h notes [WARNING: information most likely out of date --ttn]
-
-See src/conf.sh for details about the definitions in src/conf.h.
-Comments below cover unusual situations requiring hand patches to src/conf.h.
+This section covers unusual situations requiring hand patches to src/base.h.
 
 bad_NFS_rename - Some buggy NFS file servers (e.g. some NAC releases)
 can report that rename(A,B) succeeded even though it failed.
@@ -201,23 +165,21 @@ Warning: the workaround introduces a rare race condition
 that can falsely report I/O errors;
 this is why the workaround is disabled unless you specify otherwise.
 
-const - Some hosts support `const' but complain about it, perhaps because
-system headers are wrong.  If you can't stand the complaints,
-try `#define const /*empty*/'.
+MMAP_SIGNAL - For speed, RCS uses the ‘mmap’ system call if available.
+Unfortunately, many mmap implementations are broken.  For instance, mmap
+does not work properly in HP-UX 8 or 9, or in Solaris 2.4, without
+kernel patches.  We don't know details about the bugs, so we can't test
+for them automatically.  To manually disable mmap, insert
 
-has_mmap - For speed, RCS uses the `mmap' system call
-if it is available and the Mach `map_fd' system call is not.
-Unfortunately, many mmap implementations are broken.
-src/conf.sh guesses based on tests and on mmap bugs reported by RCS users;
-you may want to double-check its results.
-For instance, mmap does not work properly in HP-UX 8 or 9, or in Solaris 2.4,
-without kernel patches; see src/conf.sh for details.
-We don't know details about the bugs, so we can't test for them automatically.
+  #undef MMAP_SIGNAL
+  #define MMAP_SIGNAL 0
+
+early on in src/base.h (TODO: Add a configure script option).
 
 has_NFS - Set this if the target host might use NFS.
 NFS's ``stateless server'' protocol has well-known problems with
-the non-idempotent operations link(), rename(), and unlink().
-For example, unlink() can run twice on the NFS server,
+the non-idempotent operations link(2), rename(2), and unlink(2).
+For example, unlink(2) can run twice on the NFS server,
 causing the client to think that the unlink failed with errno==ENOENT.
 has_NFS enables code that works around these problems.
 However, has_NFS does not work around NFS implementation bugs;
@@ -225,59 +187,45 @@ if your NFS implementation is buggy, get another!
 For example, make sure that your NFS uses UDP checksums, if it uses UDP.
 Modern systems checksum by default; ask your vendor if you're not sure.
 
-has_rename - This should be 0 in SCO Unix V.3.2.  Its NFS rename() is broken,
-but if you run src/conf.sh in a non-NFS filesystem, it thinks rename() works.
+bad_NFS_rename - This should be 1 in SCO Unix V.3.2.  Its NFS rename(2) is broken,
+but if configure runs in a non-NFS filesystem, it thinks rename(2) works.
 
-has_seteuid - You have to worry about this only if you plan to run RCS setuid.
-has_seteuid should be 1 only if your seteuid lets you switch back and
-forth between any pair of users as specified in Posix 1003.1a Draft 5.
-On some older systems (e.g. SunOS 3.5) seteuid doesn't allow this.
-One must be root to test this reliably, so src/conf.sh just guesses.
-If has_seteuid==0, perhaps you can use setreuid instead (see below).
+HAVE_SETEUID - You have to worry about this only if you plan to run RCS setuid.
+HAVE_SETEUID should be defined only if your seteuid lets you switch back and
+forth between any pair of users as specified in POSIX 1003.1a Draft 5.
+On some older systems (e.g. SunOS 3.5) seteuid doesn't allow this.  One must
+be root to test this reliably, so the configure script just checks availability.
+If !defined (HAVE_SETEUID), perhaps you can use setreuid instead (see below).
 Otherwise, the next best thing is saved setuid semantics
-(a Posix 1003.1-1990 option), because this fails only if you run as root.
-You may need to compile with `cc -systype sysv' (some Mips OS variants)
-or `cc -YPOSIX' (some Ultrix variants) for best results here.
+(a POSIX 1003.1-1990 option), because this fails only if you run as root.
+You may need to compile with ‘cc -systype sysv’ (some Mips OS variants)
+or ‘cc -YPOSIX’ (some Ultrix variants) for best results here.
 Don't run RCS setuid under AIX 3.2 if you use NFS, since it's badly broken.
 To see the AIX 3.2 bug, run the following program setuid X where the NFS file
 "abc" already exists, owned by X, permission -rw-r--r--, and where
 the invoker is not X.  The program fails with "fclose: Permission denied".
-	#include <stdio.h>
-	int main() {
-		 FILE *f = fopen("abc", "w");
-		 setuid(getuid());
-		 fputc('\n', f);
-		 if (fclose(f) != 0)
-			 perror("fclose");
-	}
+
+  #include <stdio.h>
+
+  int
+  main ()
+  {
+    FILE *f = fopen ("abc", "w");
+
+    setuid (getuid ());
+    fputc ('\n', f);
+    if (fclose (f) != 0)
+      perror ("fclose");
+  }
 
 has_setreuid - You have to worry about this only if you plan to run RCS setuid
-and if has_seteuid==0.  On some older BSDish systems, the setreuid system
+and HAVE_SETEUID is undefined.  On some older BSDish systems, the setreuid system
 call lets you swap real and effective users even if one of them is root.
-One must be root to test this reliably, so src/conf.sh always guesses that
-it doesn't work.  Set it to 1 by hand if you know that it works.
+One must be root to test this reliably, so we always assume it doesn't work.
+Set it to 1 by hand if you know that it works.
 
-has_vfork - This should be 0 in some variants of HP/Apollo DomainOS.
-(The `uname -a' command reported `10.3.5 sys5.3' on one such variant.)
-Its vfork causes a system crash; you'll have to change src/conf.sh to output
-`#define has_vfork 0' without actually trying vfork.
-
-large_memory - This should be 1 if main memory is large enough to hold entire
-copies of RCS files, perhaps because virtual memory is available.
-
-_POSIX_SOURCE must be #defined in a strict Standard C environment,
-because otherwise <stdio.h> cannot define useful identifiers like fileno.
-Avoid defining _POSIX_SOURCE if possible,
-because it can disable useful non-Posix features in your host.
-Perhaps you can remove the need for _POSIX_SOURCE
-by supplying an option to your compiler to makes it less strict.
-You may also have to pay attention to other symbols, e.g. _XOPEN_SOURCE.
-
-TZ_must_be_set - set this to 1 on hosts where gmtime() yields bogus
+TZ_must_be_set - set this to 1 on hosts where gmtime(3) yields bogus
 values unless the TZ environment variable is set.
-
-volatile - See `const'.  E.g. `volatile sig_atomic_t' is conforming, but some
-buggy hosts complain.  Also, Ultrix 4.0 Mips CC 2.0 has buggy volatile support.
 
 X_DEFAULT - This is normally ",v/" on Unix hosts, and "" on hosts that
 do not allow commas in file names (e.g. DOS).

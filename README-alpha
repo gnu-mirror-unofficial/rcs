@@ -10,7 +10,7 @@ README-alpha for RCS
   misguided finessing and outright source-code thuggery involved, the
   result of which is that there might be breakage for old or extremely
   non-standard platforms.  Testing has been limited to GNU/Linux (Debian
-  4.0 "Etch"), which is by no means cutting edge, but is indeed a far cry
+  5.0 "Lenny"), which is by no means cutting edge, but is indeed a far cry
   from the platforms listed in README, reproduced here:
 
         AIX 3.2
@@ -36,6 +36,7 @@ README-alpha for RCS
   The good news is that gnulib grows and grows...
 
   Confused?  Maybe good/bad is not such an important distinction.
+  Likewise, lucky/unlucky...
 
 
 * The configure script told me that my platform might be desupported in
@@ -61,7 +62,7 @@ README-alpha for RCS
 
   Then, while the RCS is building, please read the rest of this file and
   send feedback to bug-rcs@gnu.org to help us move more quickly towards a
-  real release.
+  real release.  Also, look for "Question forpretesters" in NEWS.
 
 
 * So what's holding up the real release?
@@ -72,8 +73,6 @@ README-alpha for RCS
   have come this far, why wait any longer?
 
   - If you find a functionality or documentation bug, please report it!
-    The only exception is "TODO" items in the manual -- we already know
-    about those, thanks.
 
   - If the (info) documentation is unclear or poorly organized, how would
     you improve it?  Long-term, the manpages will be reduced to pointers

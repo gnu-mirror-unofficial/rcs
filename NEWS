@@ -3,7 +3,177 @@ Copyright (C) 2010 Thien-Thi Nguyen
 See the end for copying conditions.
 
 
-- 5.7.40 (pretest) | NOT YET RELEASED
+- 5.7.40 (pretest for 5.8) | NOT YET RELEASED
+
+  - Changes in terminology
+
+    - from "RCS file" to "repository"
+
+	In the documentation and --help output, we say "repository"
+	instead of "RCS file".  This reduces the incidence of "RCS" a
+	bit.  The working file is still the "working file", however.
+
+	Note that the (substitution) keyword ‘RCSfile’ has not changed.
+	Likewise, diagnostic and error messages still say "RCS file".
+	[Question for pretesters: OK to change messages also?]
+
+    - from "path" to "file name" (or "file-name")
+
+	However, if "path" intends "search path", we say so explicitly.
+
+  - Changes to the RCS package
+
+    - New documentation in Info format
+
+	On "make install", rcs.info is installed in $(infodir), with
+	title "GNU RCS <VERSION>" in dircategory "General Commands".
+	The doc source is texinfo (released under GNU FDL 1.3), so you
+	can easily create output in HTML, PDF, etc.
+
+    - Dropped configure option: --with-diffutils
+
+	To specify non-GNU diffutils programs diff(1) and diff3(1), name
+	them using variables on the configure command-line.  See README.
+
+    - Configuration more strict in some ways, more lax in others.
+
+	Before, part of the configuration was done at compile time.
+	Now, all of it is done by the configure script.  Here are the
+	set of conditions which will cause the configure script to fail
+	(with a "could not find..." message):
+
+	 - for --enable-mailer=PROG, ‘PROG’ not absolute;
+	 - for diff(1), value of env var ‘DIFF’ not absolute;
+	 - diff(1) not GNU diffutils compatible;
+	 - for diff3(1), value of env var ‘DIFF3’ not absolute;
+	 - for ed(1), value of env var ‘ED’ not absolute;
+	 - no C99-capable compiler.
+
+	Here, "absolute" means "specified as an absolute filename".
+	On the flip side, configuration no longer checks for some
+	situations such as ‘sigaction’ yes, but ‘SA_SIGINFO’ no.
+	[Question for pretesters: Is this OK?]
+
+	Most of the portability duties are now handled by gnulib.
+
+    - New configure option: --enable-mailer=PROG
+
+	The feature whereby ci(1) sends mail when breaking a lock is now
+	disabled by default.  To enable, specify ‘--enable-mailer=PROG’
+	to the configure script.  See README.
+
+    - New configure option: --enable-compat2
+
+	This preponderantly unlikely to be used option allows RCS
+	commands to read repositories written by RCS 2.  See README.
+
+    - You can "make check" prior to "make install".
+
+	Doing "make check" automatically does a (small, partial)
+	recompile, installs programs into ${top_builddir}/src/0pre/bin,
+	and arranges for the testing scripts to prepend that directory
+	to the env var ‘PATH’.  This basically encapsulates the manual
+	preparation for "make check" required in previous releases.
+	[Question for pretesters: Is there a more idiomatic way?]
+
+  - Bug fixes
+
+    - Remove all edit info when removing all revisions.
+
+	Previously, "rcs -o" (outdating) all revisions failed to leave
+	the repository in a consistent state; edit info (i.e., log
+	message + diff(1) output) remained for the deleted revisions.
+
+	For example, this sequence of commands:
+	  echo foo > foo
+	  ci -q -i -t-desc -mHELLO foo
+	  rcs -q -o1.1: foo
+	  grep '@H' foo,v
+	used to display "@HELLO" to stdout.
+
+	Now, all revisions are completely removed.
+
+    - Code no longer uses mktemp(3).
+
+	Using mktemp(3) is a security risk.  We use mkstemp(3) now.
+	Likewise, rcsfreeze.sh now uses mktemp(1).
+
+    - Misc manpage tweaks / fixes.
+
+	Document ‘rlog -q’; fix small merge.1 omission; add branch
+	labels in rcsfile.5; say "GNU RCS <VERSION>" in footer.
+
+  - Other changes
+
+    - All commands accept ‘--help’ and ‘--version’.
+
+	The help output includes an email address for bug reports.
+	For continuity, option ‘-V’ is now a synonym for ‘--version’.
+
+	Relatedly, commands no longer display usage info if given
+	a bad or malformed option.  You can use ‘--help’ for that.
+
+    - A string of all digits is now valid for author, state.
+
+	This means you can set the author or state to, for example,
+	"000000" or "42".  Previously, these would have caused a
+	"invalid identifier" or "invalid symbol" error.
+
+    - Env var RCS_MEM_LIMIT controls stdio threshold.
+
+	For speed, RCS uses memory-based routines for files up to
+	256 kilobytes, and stream-based (stdio) routines otherwise.
+	You can change this threshold value by setting the environment
+	variable ‘RCS_MEM_LIMIT’ to a non-negative integer, measured in
+	kilobytes.  An empty ‘RCS_MEM_LIMIT’ value is silently ignored.
+
+    - RCS can now work with files larger than 2 gigabytes.
+
+	RCS now uses large file offsets (#define _FILE_OFFSET_BITS 64).
+
+    - Pass-through for repository ‘commitid SYMBOL’ now builtin.
+
+	Due to GNU CVS (Concurrent Versions System) using a compatible
+	file format as RCS for the repository, you can use RCS commands
+	to view and manipulate its contents.  (Note, however, the next
+	NEWS item.)
+
+	This works well enough except for a small annoyance: CVS adds a
+	per-revision field called the "commitid" with an opaque (to RCS)
+	symbolic value.  Previously, RCS commands would emit a warning
+	"unrecognized phrases" (unless given ‘-q’ on the command-line).
+
+	RCS commands now automatically support pass-through handling of
+	‘commitid SYMBOL’ (so ‘-q’ is no longer necessary).
+
+    - Repository grammar frozen.
+
+	The repository grammar is now frozen for RCS 5.x; RCS no longer
+	supports pass-through operation of "newphrases" (rcsfile(5)).
+
+    - Repository syntax-validated earlier, completely.
+
+	Previously, repository syntax was validated lazily, and trailing
+	garbage was not detected (see bugfix above).  Now, a top-level
+	validation is done on each access.
+
+    - Changes to rcsdiff
+
+      - New handling for option: -U N
+
+	This arranges to output N lines of unified-diff context.
+	Relatedly, the list of possible options passed to the underlying
+	diff(1) appears in both "rcsdiff --help" and in the manual.
+
+      - Refined "same-revision don't call diff" optimization
+
+	Normally, if the two revisions specified are the same, we avoid
+	calling the underlying diff(1) on the theory that it will
+	produce no output.  This does not hold generally for ‘-y’
+	(--side-by-side) and ‘-D’ (--ifdef), such as when the revision
+	specified is by different symbolic names, so for those options
+	the optimization is disabled.
+
 
 
 - 5.7 | 1995-06-16
@@ -11,14 +181,14 @@ See the end for copying conditions.
   Here is a brief summary of user-visible changes since 5.6.
 
     New options:
-      `-kb' supports binary files.
-      `-T' preserves the modification time of RCS files.
-      `-V' prints the version number.
-      `-zLT' causes RCS to use local time in working files and logs.
-      `rcsclean -n' outputs what rcsclean would do, without actually doing it.
-      `rlog -N' omits symbolic names.
-    There is a new keyword `Name'.
-    Inserted log lines now have the same prefix as the preceding `$Log' line.
+      ‘-kb’ supports binary files.
+      ‘-T’ preserves the modification time of RCS files.
+      ‘-V’ prints the version number.
+      ‘-zLT’ causes RCS to use local time in working files and logs.
+      ‘rcsclean -n’ outputs what rcsclean would do, without actually doing it.
+      ‘rlog -N’ omits symbolic names.
+    There is a new keyword ‘Name’.
+    Inserted log lines now have the same prefix as the preceding ‘$Log’ line.
 
   Most changes for RCS version 5.7 are to fix bugs and improve portability.
   RCS now conforms to GNU configuration standards and to Posix 1003.1b-1993.
@@ -26,19 +196,19 @@ See the end for copying conditions.
   Features new to RCS version 5.7, and possibly incompatible
   in minor ways with previous practice, include:
 
-  - Inserted log lines now have the same prefix as the preceding `$Log'
-    line.  E.g. if a $Log line starts with `// $Log', log lines are
-    prefixed with `// '.  RCS still records the (now obsolescent)
+  - Inserted log lines now have the same prefix as the preceding ‘$Log’
+    line.  E.g. if a $Log line starts with ‘// $Log’, log lines are
+    prefixed with ‘// ’.  RCS still records the (now obsolescent)
     comment leader inside RCS files, but it ignores the comment leader
     unless it is emulating older RCS versions.  If you plan to access a
     file with both old and new versions of RCS, make sure its comment
-    leader matches its `$Log' line prefix.  For backwards compatibility
-    with older versions of RCS, if the log prefix is `/*' or `(*'
-    surrounded by optional white space, inserted log lines contain ` *'
-    instead of `/*' or `(*'; however, this usage is obsolescent and
+    leader matches its ‘$Log’ line prefix.  For backwards compatibility
+    with older versions of RCS, if the log prefix is ‘/*’ or ‘(*’
+    surrounded by optional white space, inserted log lines contain ‘ *’
+    instead of ‘/*’ or ‘(*’; however, this usage is obsolescent and
     should not be relied on.
 
-  - $Log string `Revision' times now use the same format as other times.
+  - $Log string ‘Revision’ times now use the same format as other times.
 
   - Log lines are now inserted even if -kk is specified; this simplifies
     merging.
@@ -48,20 +218,20 @@ See the end for copying conditions.
     behavior of releasing a lock and removing the working file.  Now,
     only the bare -r option does this.
 
-  - With an empty extension, any appearance of a directory named `RCS'
+  - With an empty extension, any appearance of a directory named ‘RCS’
     in a pathname identifies the pathname as being that of an RCS file.
-    For example, `a/RCS/b/c' is now an RCS file with an empty extension.
-    Formerly, `RCS' had to be the last directory in the pathname.
+    For example, ‘a/RCS/b/c’ is now an RCS file with an empty extension.
+    Formerly, ‘RCS’ had to be the last directory in the pathname.
 
   - rlog's -d option by default now uses exclusive time ranges.
-    E.g. `rlog -d"<T"' now excludes revisions whose times equal T
-    exactly.  Use `rlog -d"<=T"' to get the old behavior.
+    E.g. ‘rlog -d"<T"’ now excludes revisions whose times equal T
+    exactly.  Use ‘rlog -d"<=T"’ to get the old behavior.
 
   - merge now takes up to three -L options, one for each input file.
     Formerly, it took at most two -L options, for the 1st and 3rd input
     files.
 
-  - `rcs' now requires at least one option; this is for future expansion.
+  - ‘rcs’ now requires at least one option; this is for future expansion.
 
   Other features new to RCS version 5.7 include:
 
@@ -84,9 +254,9 @@ See the end for copying conditions.
       Similarly, -j causes an error if the RCS file does not already
       exist.
 
-  - The new keyword `Name' is supported; its value is the name, if any,
-    used to check out the revision.  E.g. `co -rN foo' causes foo's
-    $Name...$ keyword strings to end in `: N $'.
+  - The new keyword ‘Name’ is supported; its value is the name, if any,
+    used to check out the revision.  E.g. ‘co -rN foo’ causes foo's
+    $Name...$ keyword strings to end in ‘: N $’.
 
   - The new -zZONE option causes RCS to output dates and times using ISO
     8601 format with ZONE as the time zone, and to use ZONE as the
@@ -98,8 +268,8 @@ See the end for copying conditions.
     (e.g. rlog output, keyword expansion, diff -c times) and
     interpretation of options (e.g. the -d option of ci, co, and rlog).
     Bare -z restores the default behavior of UTC with no time zone
-    indication, and the traditional RCS date separator `/' instead of
-    the ISO 8601 `-'.  RCSINIT may contain a -z option.  ci -k parses
+    indication, and the traditional RCS date separator ‘/’ instead of
+    the ISO 8601 ‘-’.  RCSINIT may contain a -z option.  ci -k parses
     UTC offsets.
 
   - The new -T option of ci, co, rcs, and rcsclean preserves the
@@ -107,13 +277,13 @@ See the end for copying conditions.
     removed.  ci -T sets the RCS file's modification time to the new
     revision's time if the former precedes the latter and there is a new
     revision; otherwise, it preserves the RCS file's modification time.
-    Use this option with care, as it can confuse `make'; see ci(1).
+    Use this option with care, as it can confuse ‘make’; see ci(1).
 
   - The new -N option of rlog omits symbolic names from the output.
 
-  - A revision number that starts with `.' is considered to be relative
+  - A revision number that starts with ‘.’ is considered to be relative
     to the default branch (normally the trunk).  A branch number
-    followed by `.'  stands for the last revision on that branch.
+    followed by ‘.’  stands for the last revision on that branch.
 
   - If someone else already holds the lock, rcs -l now asks whether you
     want to break it, instead of immediately reporting an error.
@@ -127,8 +297,8 @@ See the end for copying conditions.
     file name is now represented by \\ in a keyword string.
 
   - Identifiers may now start with a digit and (unless they are symbolic
-    names) may contain `.'.  This permits author names like `john.doe'
-    and `4tran'.
+    names) may contain ‘.’.  This permits author names like ‘john.doe’
+    and ‘4tran’.
 
   - A bare -V option now prints the current version number.
 
@@ -163,9 +333,9 @@ See the end for copying conditions.
   - RCS follows symbolic links to RCS files instead of breaking them,
     and warns when it breaks hard links to RCS files.
 
-  - `$' stands for the revision number taken from working file keyword
-    strings.  E.g. if F contains an Id keyword string, `rcsdiff -r$ F'
-    compares F to its checked-in revision, and `rcs -nL:$ F' gives the
+  - ‘$’ stands for the revision number taken from working file keyword
+    strings.  E.g. if F contains an Id keyword string, ‘rcsdiff -r$ F’
+    compares F to its checked-in revision, and ‘rcs -nL:$ F’ gives the
     symbolic name L to F's revision.
 
   - co and ci's new -M option sets the modification time of the working
@@ -175,23 +345,23 @@ See the end for copying conditions.
 
   - rcs's new -m option changes the log message of an old revision.
 
-  - RCS is portable to hosts that do not permit `,' in filenames.
-    (`,' is not part of the Posix portable filename character set.)
-    A new -x option specifies extensions other than `,v' for RCS files.
-    The Unix default is `-x,v/', so that the working file `w' corresponds
-    to the first file in the list `RCS/w,v', `w,v', `RCS/w' that works.
-    The non-Unix default is `-x', so that only `RCS/w' is tried.
-    Eventually, the Unix default should change to `-x/,v' to encourage
+  - RCS is portable to hosts that do not permit ‘,’ in filenames.
+    (‘,’ is not part of the Posix portable filename character set.)
+    A new -x option specifies extensions other than ‘,v’ for RCS files.
+    The Unix default is ‘-x,v/’, so that the working file ‘w’ corresponds
+    to the first file in the list ‘RCS/w,v’, ‘w,v’, ‘RCS/w’ that works.
+    The non-Unix default is ‘-x’, so that only ‘RCS/w’ is tried.
+    Eventually, the Unix default should change to ‘-x/,v’ to encourage
     interoperability among all Posix hosts.
 
   - A new RCSINIT environment variable specifies defaults for options
     like -x.
 
-  - The separator for revision ranges has been changed from `-' to `:',
-    because the range `A-B' is ambiguous if `A', `B' and `A-B' are all
-    symbolic names.  E.g. the old `rlog -r1.5-1.7' is now `rlog
-    -r1.5:1.7'; ditto for `rcs -o'.  For a while RCS will still support
-    (but warn about) the old `-' separator.
+  - The separator for revision ranges has been changed from ‘-’ to ‘:’,
+    because the range ‘A-B’ is ambiguous if ‘A’, ‘B’ and ‘A-B’ are all
+    symbolic names.  E.g. the old ‘rlog -r1.5-1.7’ is now ‘rlog
+    -r1.5:1.7’; ditto for ‘rcs -o’.  For a while RCS will still support
+    (but warn about) the old ‘-’ separator.
 
   - RCS manipulates its lock files using a method that is more reliable
     under NFS.
@@ -202,7 +372,7 @@ See the end for copying conditions.
   Features new to RCS version 5 include:
 
   - RCS can check in arbitrary files, not just text files, if diff -a
-    works.  RCS can merge lines containing just a single `.' if diff3 -m
+    works.  RCS can merge lines containing just a single ‘.’ if diff3 -m
     works.  GNU diff supports the -a and -m options.
 
   - RCS can now be used as a setuid program.  See ci(1) for how users
@@ -228,9 +398,9 @@ See the end for copying conditions.
   - New options to co, rcsdiff, and rcsmerge give more flexibility to
     keyword substitution.
 
-    - -kkv substitutes the default `$Keyword: value $' for keyword
+    - -kkv substitutes the default ‘$Keyword: value $’ for keyword
       strings.  However, a locker's name is inserted only as a file is
-      being locked, i.e. by `ci -l' and `co -l'.  This is normally the
+      being locked, i.e. by ‘ci -l’ and ‘co -l’.  This is normally the
       default.
 
     - -kkvl acts like -kkv, except that a locker's name is always
@@ -239,13 +409,13 @@ See the end for copying conditions.
       rcsdiff to compare a revision to a working file whose mode is that
       of a file checked out for changes.
 
-    - -kk substitutes just `$Keyword$', which helps to ignore keyword
+    - -kk substitutes just ‘$Keyword$’, which helps to ignore keyword
       values when comparing revisions.
 
     - -ko retrieves the old revision's keyword string, thus bypassing
       keyword substitution.
 
-    - -kv retrieves just `value'.  This can ease the use of keyword
+    - -kv retrieves just ‘value’.  This can ease the use of keyword
       values, but it is dangerous because it causes RCS to lose track of
       where the keywords are, so for safety the owner write permission
       of the working file is turned off when -kv is used; to edit the
@@ -260,10 +430,10 @@ See the end for copying conditions.
 
   - RCS can now be used by development groups that span time zone
     boundaries.  All times are now displayed in UTC, and UTC is the
-    default time zone.  To use local time with co -d, append ` LT' to
+    default time zone.  To use local time with co -d, append ‘ LT’ to
     the time.  When interchanging RCS files with sites running older
     versions of RCS, time stamp discrepancies may prevent checkins; to
-    work around this, use `ci -d' with a time slightly in the future.
+    work around this, use ‘ci -d’ with a time slightly in the future.
 
   - Dates are now displayed using four-digit years, not two-digit years.
     Years given in -d options must now have four digits.  This change is
@@ -271,7 +441,7 @@ See the end for copying conditions.
     dates in version 5 RCS files will not change until 2000/01/01, so in
     the meantime RCS files can still be interchanged with sites running
     older versions of RCS.  To make room for the longer dates, rlog now
-    outputs `lines: +A -D' instead of `lines added/del: A/D'.
+    outputs ‘lines: +A -D’ instead of ‘lines added/del: A/D’.
 
   - To help prevent diff programs that are broken or have run out of
     memory from trashing an RCS file, ci now checks diff output more
@@ -282,12 +452,12 @@ See the end for copying conditions.
 
   - RCS no longer outputs white space at the ends of lines unless the
     original working file had it.  For consistency with other keywords,
-    a space, not a tab, is now output after `$Log:'.  Rlog now puts
+    a space, not a tab, is now output after ‘$Log:’.  Rlog now puts
     lockers and symbolic names on separate lines in the output to avoid
     generating lines that are too long.  A similar fix has been made to
     lists in the RCS files themselves.
 
-  - RCS no longer outputs the string `Locker: ' when expanding Header or
+  - RCS no longer outputs the string ‘Locker: ’ when expanding Header or
     Id keywords.  This saves space and reverts back to version 3
     behavior.
 
@@ -297,13 +467,13 @@ See the end for copying conditions.
     introduced in version 4.  This fixes a compatibility problem
     introduced by version 4.
 
-  - RCS can now emulate older versions of RCS; see `co -V'.  This may be
+  - RCS can now emulate older versions of RCS; see ‘co -V’.  This may be
     useful to overcome compatibility problems due to the above changes.
 
   - Programs like Emacs can now interact with RCS commands via a pipe:
     the new -I option causes ci, co, and rcs to run interactively, even
     if standard input is not a terminal.  These commands now accept
-    multiple inputs from stdin separated by `.' lines.
+    multiple inputs from stdin separated by ‘.’ lines.
 
   - ci now silently ignores the -t option if the RCS file already
     exists.  This simplifies some shell scripts and improves security in
