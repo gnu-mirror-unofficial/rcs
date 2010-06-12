@@ -26,10 +26,14 @@ struct maketimestuff
      Only valid/used if ‘TZ_must_be_set’.
      -- time2tm  */
 
+  struct tm time2tm_stash;
+  /* Keep latest ‘time2tm’ value here.
+     -- time2tm  */
+
   time_t t_cache[2];
   struct tm tm_cache[2];
   /* Cache the most recent ‘t’,‘tm’ pairs;
-     One for ‘gmtime’, one for ‘localtime’.
+     One for ‘gmtime_r’, one for ‘localtime_r’.
      -- tm2time  */
 };
 

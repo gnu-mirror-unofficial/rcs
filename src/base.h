@@ -132,7 +132,7 @@ enum kwsub
 #define X_DEFAULT "\\,v"
 #endif
 
-/* Must TZ be set for gmtime() to work?  */
+/* Must TZ be set for ‘gmtime_r’ to work?  */
 #define TZ_must_be_set 0
 
 #if defined HAVE_WORKING_FORK && !defined HAVE_WORKING_VFORK

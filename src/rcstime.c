@@ -109,6 +109,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
     {
       struct tm t;
       struct tm const *z;
+      struct tm z_stash;
       int non_hour, w;
       long zone;
       char c;
@@ -125,7 +126,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
         {
           time_t u = tm2time (&t, false), d;
 
-          z = localtime (&u);
+          z = localtime_r (&u, &z_stash);
           d = difftm (z, &t);
           zone = (time_t) - 1 < 0 || d < -d ? d : -(long) -d;
         }

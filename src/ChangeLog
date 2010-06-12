@@ -1,3 +1,12 @@
+2010-06-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘gmtime_r’, ‘localtime_r’.
+
+	* base.h: Comment munging; nfc.
+	* maketime.h (struct maketimestuff): Add member ‘time2tm_stash’.
+	* maketime.c (time2tm): Use ‘gmtime_r’, ‘localtime_r’.
+	* rcstime.c (date2str): Use ‘localtime_r’.
+
 2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Build rcsfreeze with substituted ‘PACKAGE_VERSION’.
