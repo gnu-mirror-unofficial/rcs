@@ -1,5 +1,14 @@
 2010-06-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Build atat object incrementally.
+
+	* b-grok.c (alloc_atat): Delete func.
+	(start_atat, finish_atat): New static funcs.
+	(maybe_read_atat): Use ‘start_atat’, ‘finish_atat’; grow atat
+	object onto ‘g->systolic’; copy onto ‘g->to’ when done.
+
+2010-06-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘gmtime_r’, ‘localtime_r’.
 
 	* base.h: Comment munging; nfc.

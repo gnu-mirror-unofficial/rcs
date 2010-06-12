@@ -282,19 +282,31 @@ must_read_snippet (struct grok *g, char const *role)
 
 #define MASK_OFFMSB  (1ULL << (sizeof (off_t) * 8 - 1))
 
-static struct atat *
-alloc_atat (struct grok *g, size_t count)
+static void
+start_atat (struct divvy *to, bool blankp)
 {
-  struct obstack *o = g->to->space;
-  uintptr_t ptr;
+  struct obstack *o = to->space;
+  size_t uncool = 7 & (uintptr_t) obstack_next_free (o);
 
   /* If the next alloc is not 64-bit (8-byte) aligned, do a dummy alloc.
      Perhaps this should better be done, once, in ‘make_space’.  */
-  if (7 & (ptr = (uintptr_t) obstack_next_free (o)))
-    obstack_alloc (o, 8 - (7 & ptr));
+  if (uncool)
+    obstack_alloc (o, 8 - uncool);
 
-  return alloc (g->to, "atat", (sizeof (struct atat)
-                                + count * sizeof (off_t)));
+  if (blankp)
+    obstack_blank (o, sizeof (struct atat));
+}
+
+static struct atat *
+finish_atat (struct divvy *to)
+{
+  struct atat *rv;
+  struct obstack *o = to->space;
+  size_t hsize = obstack_object_size (o) - sizeof (struct atat);
+
+  rv = obstack_finish (o);
+  rv->count = hsize / sizeof (off_t);
+  return rv;
 }
 
 #define BITPOSMOD64(i)  (1ULL << (i % 64))
@@ -322,9 +334,9 @@ atat_ineedexp_few (struct atat *atat, size_t i)
 static bool
 maybe_read_atat (struct grok *g, struct atat **res)
 {
+  struct atat *atat;
   off_t beg;
-  size_t count = 0, lno_start;
-  struct link *ls = NULL;
+  size_t lno_start;
   bool newlinep = false;
 
 #define POS(adjust)  (fro_tello (g->from) + (adjust))
@@ -333,13 +345,12 @@ maybe_read_atat (struct grok *g, struct atat **res)
   skip_whitespace (g);
   lno_start = g->lno;
   beg = POS (-1);
+  start_atat (g->systolic, true);
   while (SDELIM == g->c)
     {
-      struct link *pair = NEWPAIR (g->systolic);
-      void *hole = STRUCTALLOC (g->systolic, off_t);
+      off_t hole;
       bool needexp = false;
 
-      count++;
       MORE (g);
       while (SDELIM != g->c)
         {
@@ -350,15 +361,12 @@ maybe_read_atat (struct grok *g, struct atat **res)
           MORE (g);
         }
       MORE (g);
-      *(off_t *)hole = (needexp ? MASK_OFFMSB : 0)
-        | POS (SDELIM == g->c ? -1 : -2);
-      pair->entry = hole;
-      pair->next = ls;
-      ls = pair;
+      hole = (needexp ? MASK_OFFMSB : 0) | POS (SDELIM == g->c ? -1 : -2);
+      obstack_grow (g->systolic->space, &hole, sizeof (hole));
     }
-  if (count)
+  if ((atat = finish_atat (g->systolic)))
     {
-      struct atat *atat = alloc_atat (g, count);
+      size_t count = atat->count;
 #if WITH_NEEDEXP
       bool many;
 
@@ -367,39 +375,38 @@ maybe_read_atat (struct grok *g, struct atat **res)
         atat->needexp.bitset =
           zlloc (g->to, "needexp.bitset",
                  (1 + count / 64) * sizeof (*atat->needexp.bitset));
+      else
+        atat->needexp.direct = 0;
       atat->ineedexp = many
         ? atat_ineedexp_many
         : atat_ineedexp_few;
+      for (size_t i = 0; i < count; i++)
+        if (MASK_OFFMSB & atat->holes[i])
+          {
+            if (many)
+              SETBIT (i, atat->needexp.bitset[i / 64]);
+            else
+              SETBIT (i, atat->needexp.direct);
+            atat->needexp_count++;
+            atat->holes[i] &= ~MASK_OFFMSB;
+          }
 #endif  /* WITH_NEEDEXP */
 
       atat->lno = lno_start;
       atat->line_count = g->lno - atat->lno + !newlinep;
       atat->beg = beg;
-      atat->count = count;
       atat->from = g->from;
-      for (int i = count - 1; -1 < i; i--)
-        {
-          off_t hole = *(off_t *)(ls->entry); /* sigh */
 
-#if WITH_NEEDEXP
-          if (MASK_OFFMSB & hole)
-            {
-              if (many)
-                SETBIT (i, atat->needexp.bitset[i / 64]);
-              else
-                SETBIT (i, atat->needexp.direct);
-              atat->needexp_count++;
-            }
-#endif
-
-          atat->holes[i] = ~MASK_OFFMSB & hole;
-          ls = ls->next;
-        }
-      *res = atat;
+      /* Allocate a copy.  FIXME: Should not be necessary!
+         (Unfortunately, attempts to save to ‘g->to’ directly resulted in a
+         segfault traced to ‘gmtime_r’ corrupting the hash table!  Weird!)  */
+      start_atat (g->to, false);
+      *res = obstack_copy (g->to->space, atat, (sizeof (struct atat)
+                                                + count * sizeof (off_t)));
     }
 
   CEND ();
-  return 0 < count;
+  return atat;
 }
 
 static void
