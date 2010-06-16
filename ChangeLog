@@ -1055,3 +1055,9 @@ Thu Jan 11 16:32:50 1990  Paul Eggert  <eggert@twinsun.com>
 
 	* rcs.ms: Use GMT, not local time, so people in different
 	timezones can collaborate.
+
+
+Copyright (C) 2010 Thien-Thi Nguyen
+
+Copying and distribution of this file, with or without modification,
+are permitted provided the copyright notice and this notice are preserved.

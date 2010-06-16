@@ -6945,3 +6945,9 @@ Mon Oct 11 19:41:17 1982  Walter F. Tichy  <wft@purdue>
 Thu May  6 11:38:00 1982  Walter F. Tichy  <wft@purdue>
 
 	* maketime.c, partime.c: Initial revision
+
+
+Copyright (C) 2010 Thien-Thi Nguyen
+
+Copying and distribution of this file, with or without modification,
+are permitted provided the copyright notice and this notice are preserved.

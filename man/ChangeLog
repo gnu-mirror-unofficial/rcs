@@ -479,3 +479,9 @@ Wed Aug  2 14:26:46 1989  Paul Eggert  <eggert@twinsun.com>
 
 	* rlog.1, rcsdiff.1, rcs.1, co.1, ci.1:
 	Update DIAGNOSTICS to reflect RCS version 4.
+
+
+Copyright (C) 2010 Thien-Thi Nguyen
+
+Copying and distribution of this file, with or without modification,
+are permitted provided the copyright notice and this notice are preserved.
