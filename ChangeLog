@@ -1,3 +1,9 @@
+2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "repository file", not "repository".
+
+	* doc/rcs.texi (repo): New macro; throughout, use ‘@repo’, ‘@repo{}’.
+
 2010-06-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.90 (pretest for 5.8)

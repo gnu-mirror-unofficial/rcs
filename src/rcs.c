@@ -1055,12 +1055,12 @@ buildtree (void)
 /*:help
 [options] file ...
 Options:
-  -i              Create and initialize a new repository.
+  -i              Create and initialize a new repository file.
   -L              Set strict locking.
   -U              Set non-strict locking.
   -M              Don't send mail when breaking someone else's lock.
   -T              Preserve the modification time on the repository
-                  unless a revision is removed.
+                  file unless a revision is removed.
   -I              Interactive.
   -q              Quiet mode.
   -aLOGINS        Append LOGINS (comma-separated) to access-list.
@@ -1083,12 +1083,12 @@ Options:
                     :REV      -- beginning of branch to REV
                     REV:      -- REV to end of branch
   -sSTATE[:REV]   Set state of REV to STATE.
-  -t-TEXT         Replace description in repository with TEXT.
-  -tFILENAME      Replace description in repository with contents of FILENAME.
+  -t-TEXT         Set description in repository file to TEXT.
+  -tFILENAME      Set description in repository file to contents of FILENAME.
   -V              Like --version.
   -VN             Emulate RCS version N.
   -xSUFF          Specify SUFF as a slash-separated list of suffixes
-                  used to identify repository names.
+                  used to identify repository filenames.
   -zZONE          No effect; included for compatibility with other commands.
 
 REV defaults to the latest revision on the default branch.

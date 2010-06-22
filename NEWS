@@ -7,9 +7,9 @@ See the end for copying conditions.
 
   - Changes in terminology
 
-    - from "RCS file" to "repository"
+    - from "RCS file" to "repository file"
 
-	In the documentation and --help output, we say "repository"
+	In the documentation and --help output, we say "repository file"
 	instead of "RCS file".  This reduces the incidence of "RCS" a
 	bit.  The working file is still the "working file", however.
 
@@ -65,7 +65,7 @@ See the end for copying conditions.
     - New configure option: --enable-compat2
 
 	This preponderantly unlikely to be used option allows RCS
-	commands to read repositories written by RCS 2.  See README.
+	commands to read repository files written by RCS 2.  See README.
 
     - You can "make check" prior to "make install".
 
@@ -81,7 +81,7 @@ See the end for copying conditions.
     - Remove all edit info when removing all revisions.
 
 	Previously, "rcs -o" (outdating) all revisions failed to leave
-	the repository in a consistent state; edit info (i.e., log
+	the repository file in a consistent state; edit info (i.e., log
 	message + diff(1) output) remained for the deleted revisions.
 
 	For example, this sequence of commands:
@@ -131,12 +131,12 @@ See the end for copying conditions.
 
 	RCS now uses large file offsets (#define _FILE_OFFSET_BITS 64).
 
-    - Pass-through for repository ‘commitid SYMBOL’ now builtin.
+    - Pass-through for repository file ‘commitid SYMBOL’ now builtin.
 
 	Due to GNU CVS (Concurrent Versions System) using a compatible
-	file format as RCS for the repository, you can use RCS commands
-	to view and manipulate its contents.  (Note, however, the next
-	NEWS item.)
+	file format as RCS for the repository file, you can use RCS
+	commands to view and manipulate its contents.  (Note, however,
+	the next NEWS item.)
 
 	This works well enough except for a small annoyance: CVS adds a
 	per-revision field called the "commitid" with an opaque (to RCS)
@@ -148,14 +148,14 @@ See the end for copying conditions.
 
     - Repository grammar frozen.
 
-	The repository grammar is now frozen for RCS 5.x; RCS no longer
+	The repository file grammar is now frozen; RCS no longer
 	supports pass-through operation of "newphrases" (rcsfile(5)).
 
     - Repository syntax-validated earlier, completely.
 
-	Previously, repository syntax was validated lazily, and trailing
-	garbage was not detected (see bugfix above).  Now, a top-level
-	validation is done on each access.
+	Previously, repository file syntax was validated lazily, and
+	trailing garbage was not detected (see bugfix above).  Now, a
+	top-level validation is done on each access.
 
     - Changes to rcsdiff
 

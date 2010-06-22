@@ -561,7 +561,7 @@ struct manifestation
   } prev;
 };
 
-/* The RCS file is the repository of revisions, plus metadata.
+/* The repository file contains a tree of revisions, plus metadata.
    This is represented by two structures: ‘repo’ is allocated and
    populated by the parser, while ‘repository’ is library-wide.
    (It remains to be seen which will swallow the other, if ever.)

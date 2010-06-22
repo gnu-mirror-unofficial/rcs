@@ -1,3 +1,18 @@
+2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "repository file", not "repository".
+
+	* b-grok.c (full): Say "repository file" in error message.
+	* base.h: Comment munging; nfc.
+	* ci.c: Say "repository file" in help text.
+	* co.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsfreeze.sh: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+
 2010-06-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Build atat object incrementally.

@@ -402,13 +402,13 @@ Options:
   -jJOINS       Merge using JOINS, a list of REV:REV pairs;
                 this option is obsolete -- see rcsmerge(1).
   -sSTATE       Select matching state STATE.
-  -T            Preserve the modification time on the repository even if
-                the repository changes because a lock is added or removed.
+  -T            Preserve the modification time on the repository file
+                even if it changes because a lock is added or removed.
   -wWHO         Select matching login WHO.
   -V            Like --version.
   -VN           Emulate RCS version N.
   -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify repository names.
+                used to identify repository filenames.
   -zZONE        Specify date output format in keyword-substitution
                 and also the default timezone for -dDATE.
 

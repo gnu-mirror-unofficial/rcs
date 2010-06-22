@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds i \&\s-1ISO\s0
 .ds r \&\s-1RCS\s0
 .ds u \&\s-1UTC\s0
@@ -12,17 +13,17 @@ ci \- check in RCS revisions
 .RI [ options ] " file " .\|.\|.
 .SH DESCRIPTION
 .B ci
-stores new revisions into repositories.
+stores new revisions into \*os.
 Each file name matching an \*r suffix
-is taken to be a repository.
+is taken to be a \*o.
 All others
 are assumed to be working files containing new revisions.
 .B ci
 deposits the contents of each working file
-into the corresponding repository.
+into the corresponding \*o.
 If only a working file is given,
 .B ci
-tries to find the corresponding repository in an \*r subdirectory
+tries to find the corresponding \*o in an \*r subdirectory
 and then in the working file's directory.
 For more details, see
 .SM "FILE NAMING"
@@ -86,7 +87,7 @@ and uses the same log message for all files.
 See also
 .BR \-m .
 .PP
-If the repository does not exist,
+If the \*o does not exist,
 .B ci
 creates it and
 deposits the contents of the working file as the initial revision
@@ -281,12 +282,12 @@ unless
 is given.
 .TP
 .BR \-i [\f2rev\fP]
-initial checkin; report an error if the repository already exists.
+initial checkin; report an error if the \*o already exists.
 This avoids race conditions in certain applications.
 .TP
 .BR \-j [\f2rev\fP]
 just checkin and do not initialize;
-report an error if the repository does not already exist.
+report an error if the \*o does not already exist.
 .TP
 .BR \-I [\f2rev\fP]
 interactive mode;
@@ -363,7 +364,7 @@ The default state is
 .BI \-t file
 writes descriptive text from the contents of the named
 .I file
-into the repository,
+into the \*o,
 deleting the existing text.
 The
 .I file
@@ -373,7 +374,7 @@ cannot begin with
 .BI \-t\- string
 Write descriptive text from the
 .I string
-into the repository, deleting the existing text.
+into the \*o, deleting the existing text.
 .RS
 .PP
 The
@@ -398,39 +399,39 @@ option is ignored.
 .RE
 .TP
 .B \-T
-Set the repository's modification time to the new revision's time
+Set the \*o's modification time to the new revision's time
 if the former precedes the latter and there is a new revision;
-preserve the repository's modification time otherwise.
+preserve the \*o's modification time otherwise.
 If you have locked a revision,
 .B ci
-usually updates the repository's modification time to the current time,
-because the lock is stored in the repository
-and removing the lock requires changing the repository.
-This can create a repository newer than the working file in one of two ways:
+usually updates the \*o's modification time to the current time,
+because the lock is stored in the \*o
+and removing the lock requires changing the \*o.
+This can create a \*o newer than the working file in one of two ways:
 first,
 .B "ci\ \-M"
 can create a working file with a date before the current time;
 second, when reverting to the previous revision
-the repository can change while the working file remains unchanged.
+the \*o can change while the working file remains unchanged.
 These two cases can cause excessive recompilation caused by a
 .BR make (1)
-dependency of the working file on the repository.
+dependency of the working file on the \*o.
 The
 .B \-T
-option inhibits this recompilation by lying about the repository's date.
+option inhibits this recompilation by lying about the \*o's date.
 Use this option with care; it can suppress recompilation even when
 a checkin of one working file should affect
-another working file associated with the same repository.
-For example, suppose the repository's time is 01:00,
+another working file associated with the same \*o.
+For example, suppose the \*o's time is 01:00,
 the (changed) working file's time is 02:00,
 some other copy of the working file has a time of 03:00,
 and the current time is 04:00.
 Then
 .B "ci\ \-d\ \-T"
-sets the repository's time to 02:00 instead of the usual 04:00;
+sets the \*o's time to 02:00 instead of the usual 04:00;
 this causes
 .BR make (1)
-to think (incorrectly) that the other copy is newer than the repository.
+to think (incorrectly) that the other copy is newer than the \*o.
 .TP
 .BI \-w "login"
 uses
@@ -451,7 +452,7 @@ See
 for details.
 .TP
 .BI \-x "suffixes"
-specifies the suffixes for repositories.
+specifies the suffixes for \*os.
 A nonempty suffix matches any file name ending in the suffix.
 An empty suffix matches any file name of the form
 .BI RCS/ frag
@@ -468,11 +469,11 @@ specifies two suffixes:
 .B ,v
 and the empty suffix.
 If two or more suffixes are specified,
-they are tried in order when looking for a repository;
+they are tried in order when looking for a \*o;
 the first one that works is used for that file.
-If no repository is found but a repository can be created,
+If no \*o is found but a \*o can be created,
 the suffixes are tried in order
-to determine the new repository's name.
+to determine the new \*o's name.
 The default for
 .IR suffixes
 is installation-dependent; normally it is
@@ -516,15 +517,15 @@ then the time is output as follows:
 .LP
 The
 .B \-z
-option does not affect dates stored in repositories,
+option does not affect dates stored in \*os,
 which are always \*u.
 .SH "FILE NAMING"
-Pairs of repositories and working files can be specified in three ways
+Pairs of \*os and working files can be specified in three ways
 (see also the
 example section).
 .PP
-1) Both the repository and the working file are given.
-The repository name is of the form
+1) Both the \*o and the working file are given.
+The \*o name is of the form
 .IB frag1 / workfileX
 and the working file name is of the form
 .IB frag2 / workfile
@@ -546,8 +547,9 @@ must start with
 or must contain
 .BR /RCS/ .
 .PP
-2) Only the repository is given.  Then the working file is created in the current
-directory and its name is derived from the name of the repository
+2) Only the \*o is given.
+Then the working file is created in the current
+directory and its name is derived from the \*o name
 by removing
 .IB frag1 /
 and the suffix
@@ -558,23 +560,23 @@ Then
 .B ci
 considers each \*r suffix
 .I X
-in turn, looking for a repository of the form
+in turn, looking for a \*o of the form
 .IB frag2 /RCS/ workfileX
 or (if the former is not found and
 .I X
 is nonempty)
 .IB frag2 / workfileX.
 .PP
-If the repository is specified without a file name in 1) and 2),
+If the \*o is specified without a file name in 1) and 2),
 .B ci
-looks for the repository first in the directory
+looks for the \*o first in the directory
 .B ./RCS
 and then in the current
 directory.
 .PP
 .B ci
-reports an error if an attempt to open a repository fails for an unusual reason,
-even if the repository's name is just one of several possibilities.
+reports an error if an attempt to open a \*o fails for an unusual reason,
+even if the \*o's name is just one of several possibilities.
 For example, to suppress use of \*r commands in a directory
 .IR d ,
 create a regular file named
@@ -589,7 +591,7 @@ Suppose
 .B ,v
 is an \*r suffix and the current directory contains a subdirectory
 .B RCS
-with a repository
+with a \*o
 .BR io.c,v .
 Then each of the following commands check in a copy of
 .B io.c
@@ -611,7 +613,7 @@ ci  RCS/io.c,v  io.c;    ci  io.c,v  io.c;
 Suppose instead that the empty suffix
 is an \*r suffix and the current directory contains a subdirectory
 .B RCS
-with a repository
+with a \*o
 .BR io.c .
 The each of the following commands checks in a new revision.
 .LP
@@ -625,21 +627,21 @@ ci  RCS/io.c  io.c;
 .fi
 .RE
 .SH "FILE MODES"
-A repository created by
+A \*o created by
 .B ci
 inherits the read and execute permissions
-from the working file.  If the repository exists already,
+from the working file.  If the \*o exists already,
 .B ci
 preserves its read and execute permissions.
 .B ci
-always turns off all write permissions of repositories.
+always turns off all write permissions of \*os.
 .SH FILES
 Temporary files are created in the directory containing
 the working file, and also in the temporary directory (see
 .B \s-1TMPDIR\s0
 under
 .BR \s-1ENVIRONMENT\s0 ).
-A semaphore file or files are created in the directory containing the repository.
+A semaphore file or files are created in the directory containing the \*o.
 With a nonempty suffix, the semaphore names begin with
 the first character of the suffix; therefore, do not specify an suffix
 whose first character could be that of a working file name.
@@ -649,20 +651,20 @@ so working file names should not end in
 .BR _ .
 .PP
 .B ci
-never changes a repository or working file.
+never changes a \*o or working file.
 Normally,
 .B ci
 unlinks the file and creates a new one;
-but instead of breaking a chain of one or more symbolic links to a repository,
+but instead of breaking a chain of one or more symbolic links to a \*o,
 it unlinks the destination file instead.
 Therefore,
 .B ci
 breaks any hard or symbolic links to any working file it changes;
-and hard links to repositories are ineffective,
-but symbolic links to repositories are preserved.
+and hard links to \*os are ineffective,
+but symbolic links to \*os are preserved.
 .PP
 The effective user must be able to
-search and write the directory containing the repository.
+search and write the directory containing the \*o.
 Normally, the real user must be able to
 read the \*r and working files
 and to search and write the directory containing the working file;
@@ -677,20 +679,20 @@ and
 have setuid privileges.
 As described in the next section,
 these privileges yield extra security if
-the effective user owns all repositories and directories,
+the effective user owns all \*os and directories,
 and if only the effective user can write \*r directories.
 .PP
-Users can control access to repositories by setting the permissions
+Users can control access to \*os by setting the permissions
 of the directory containing the files; only users with write access
-to the directory can use \*r commands to change its repositories.
+to the directory can use \*r commands to change its \*os.
 For example, in hosts that allow a user to belong to several groups,
 one can make a group's \*r directories writable to that group only.
 This approach suffices for informal projects,
-but it means that any group member can arbitrarily change the group's repositories,
+but it means that any group member can arbitrarily change the group's \*os,
 and can even remove them entirely.
 Hence more formal projects sometimes distinguish between an \*r administrator,
-who can change the repositories at will, and other project members,
-who can check in new revisions but cannot otherwise change the repositories.
+who can change the \*os at will, and other project members,
+who can check in new revisions but cannot otherwise change the \*os.
 .SH "SETUID USE"
 To prevent anybody but their \*r administrator from deleting revisions,
 a set of users can employ setuid privileges as follows.
@@ -721,7 +723,7 @@ Only
 .I A
 can invoke the
 .B rcs
-command on the users' repositories.
+command on the users' \*os.
 .I A
 should not be
 .B root
@@ -783,7 +785,7 @@ as follows:
 .fi
 .RE
 .IP \(bu \nn
-If you want to let only certain users read the repositories,
+If you want to let only certain users read the \*os,
 put the users into a group
 .IR G ,
 and have
@@ -800,15 +802,15 @@ further protect the \*r directory as follows:
 .IP \(bu \nn
 Have
 .I A
-copy old repositories (if any) into
+copy old \*os (if any) into
 .IR R ,
 to ensure that
 .I A
 owns them.
 .IP \(bu \nn
-A repository's access list limits who can check in and lock revisions.
+A \*o's access list limits who can check in and lock revisions.
 The default access list is empty,
-which grants checkin access to anyone who can read the repository.
+which grants checkin access to anyone who can read the \*o.
 If you want limit checkin access,
 have
 .I A
@@ -823,7 +825,7 @@ limits access to just
 .IP \(bu \nn
 Have
 .I A
-initialize any new repositories with
+initialize any new \*os with
 .B "rcs\ \-i"
 before initial checkin, adding the
 .B \-a
@@ -844,7 +846,7 @@ setuid is trickier than you think!
 .SH DIAGNOSTICS
 For each revision,
 .B ci
-prints the repository, the working file, and the number
+prints the \*o, the working file, and the number
 of both the deposited and the preceding revision.
 The exit status is zero if and only if all operations were successful.
 .ds EY 1990, 1991, 1992, 1993, 1994, 1995

@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -14,14 +15,14 @@
 .\}
 .TH RCS 1 "\*(Dt" "GNU RCS \*(Rv"
 .SH NAME
-rcs \- change repository attributes
+rcs \- change \*o attributes
 .SH SYNOPSIS
 .B rcs
 .IR "options file " .\|.\|.
 .SH DESCRIPTION
 .B rcs
-creates new repositories or changes attributes of existing ones.
-A repository contains multiple revisions of text,
+creates new \*os or changes attributes of existing ones.
+A \*o contains multiple revisions of text,
 an access list, a change log,
 descriptive text,
 and some control attributes.
@@ -34,7 +35,7 @@ the
 .B \-i
 option is present.
 .PP
-Filenames matching an \*r suffix denote repositories;
+Filenames matching an \*r suffix denote \*os;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
@@ -43,28 +44,28 @@ Revision numbers use the syntax described in
 .SH OPTIONS
 .TP
 .B \-i
-Create and initialize a new repository, but do not deposit any revision.
-If the repository has no directory component, try to place it
+Create and initialize a new \*o, but do not deposit any revision.
+If the \*o name has no directory component, try to place it
 first into the subdirectory
 .BR ./RCS ,
 and then into the current directory.
-If the repository
+If the \*o
 already exists, print an error message.
 .TP
 .BI \-a "logins"
 Append the login names appearing in the comma-separated list
 .I logins
-to the access list of the repository.
+to the access list of the \*o.
 .TP
 .BI \-A "oldfile"
 Append the access list of
 .I oldfile
-to the access list of the repository.
+to the access list of the \*o.
 .TP
 .BR \-e [\f2logins\fP]
 Erase the login names appearing in the comma-separated list
 .I logins
-from the access list of the repository.
+from the access list of the \*o.
 If
 .I logins
 is omitted, erase the entire access list.
@@ -158,7 +159,7 @@ itself.
 Set locking to
 .IR strict .
 Strict locking means that the owner
-of a repository is not exempt from locking for checkin.
+of a \*o is not exempt from locking for checkin.
 This option should be used for files that are shared.
 .TP
 .B \-U
@@ -215,7 +216,7 @@ For example,
 .BI "rcs\ \-n" name ":\ RCS/*"
 associates
 .I name
-with the current latest revision of all the named repositories;
+with the current latest revision of all the named \*os;
 this contrasts with
 .BI "rcs\ \-n" name ":$\ RCS/*"
 which associates
@@ -293,7 +294,7 @@ sets the state of a revision to
 .BR \-t [\f2file\fP]
 Write descriptive text from the contents of the named
 .I file
-into the repository, deleting the existing text.
+into the \*o, deleting the existing text.
 The
 .IR file
 name cannot begin with
@@ -316,16 +317,16 @@ is not given.
 .BI \-t\- string
 Write descriptive text from the
 .I string
-into the repository, deleting the existing text.
+into the \*o, deleting the existing text.
 .TP
 .B \-T
-Preserve the modification time on the repository
+Preserve the modification time on the \*o
 unless a revision is removed.
 This option can suppress extensive recompilation caused by a
 .BR make (1)
-dependency of some copy of the working file on the repository.
+dependency of some copy of the working file on the \*o.
 Use this option with care; it can suppress recompilation even when it is needed,
-i.e. when a change to the repository
+i.e. when a change to the \*o
 would mean a change to keyword strings in the working file.
 .TP
 .BI \-V
@@ -341,7 +342,7 @@ for details.
 .BI \-x "suffixes"
 Use
 .I suffixes
-to characterize repositories.
+to characterize \*os.
 See
 .BR ci (1)
 for details.
@@ -361,17 +362,17 @@ command.
 .SH COMPATIBILITY
 The
 .BI \-b rev
-option generates a repository that cannot be parsed by \*r version 3 or earlier.
+option generates a \*o that cannot be parsed by \*r version 3 or earlier.
 .PP
 The
 .BI \-k subst
 options (except
 .BR \-kkv )
-generate a repository that cannot be parsed by \*r version 4 or earlier.
+generate a \*o that cannot be parsed by \*r version 4 or earlier.
 .PP
 Use
 .BI "rcs \-V" n
-to make a repository acceptable to \*r version
+to make a \*o acceptable to \*r version
 .I n
 by discarding information that would confuse version
 .IR n .
@@ -380,7 +381,7 @@ by discarding information that would confuse version
 .B \-x
 option, and requires a
 .B ,v
-suffix on a repository name.
+suffix on a \*o name.
 .SH FILES
 .B rcs
 accesses files much as
@@ -393,7 +394,7 @@ and it does not even read the working file unless a revision number of
 is specified.
 .so b-environment
 .SH DIAGNOSTICS
-The repository name and the revisions outdated are written to
+The \*o name and the revisions outdated are written to
 the diagnostic output.
 The exit status is zero if and only if all operations were successful.
 .ds EY 1990, 1991, 1992, 1993, 1994, 1995
@@ -412,7 +413,7 @@ The exit status is zero if and only if all operations were successful.
 .SH BUGS
 A catastrophe (e.g. a system crash) can cause \*r to leave behind
 a semaphore file that causes later invocations of \*r to claim
-that the repository is in use.
+that the \*o is in use.
 To fix this, remove the semaphore file.
 A semaphore file's name typically begins with
 .B ,

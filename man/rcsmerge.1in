@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -13,7 +14,7 @@ rcsmerge \- merge RCS revisions
 incorporates the changes between two revisions
 of a repository into the corresponding working file.
 .PP
-Filenames matching an \*r suffix denote repositories;
+Filenames matching an \*r suffix denote \*os;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
@@ -112,7 +113,7 @@ for details.
 .BI \-x "suffixes"
 Use
 .I suffixes
-to characterize repositories.
+to characterize \*os.
 See
 .BR ci (1)
 for details.
@@ -137,7 +138,7 @@ put the updates to 2.8 into file f.c and execute
 .PP
 Then examine
 .BR f.merged.c .
-Alternatively, if you want to save the updates to 2.8 in the repository,
+Alternatively, if you want to save the updates to 2.8 in the \*o,
 check them in as revision 2.8.1.1 and execute
 .BR "co \-j":
 .LP

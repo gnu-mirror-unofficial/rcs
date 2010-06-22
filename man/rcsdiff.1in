@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -31,9 +32,9 @@ rcsdiff \- compare RCS revisions
 .B rcsdiff
 runs
 .BR diff (1)
-to compare two revisions of each repository given.
+to compare two revisions of each \*o given.
 .PP
-Filenames matching an \*r suffix denote repositories;
+Filenames matching an \*r suffix denote \*os;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
@@ -97,7 +98,7 @@ is omitted,
 .B rcsdiff
 compares revision
 .I rev1
-of the repository with
+of the \*o with
 the contents of the corresponding working file.
 .PP
 If both
@@ -110,7 +111,7 @@ compares revisions
 .I rev1
 and
 .I rev2
-of the repository.
+of the \*o.
 .PP
 Both
 .I rev1
@@ -122,7 +123,7 @@ The command
 .LP
 .B "        rcsdiff  f.c"
 .LP
-compares the latest revision on the default branch of the repository
+compares the latest revision on the default branch of the \*o
 to the contents of the working file
 .BR f.c .
 .so b-environment

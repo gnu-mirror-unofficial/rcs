@@ -1,3 +1,23 @@
+2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "repository file", not "repository".
+
+	* b-base: New file.
+	* Makefile.am (bits): Add b-base.
+	* b-environment: Throughout, use ‘\*o’.
+	* ci.1in: Add ‘.so b-base’; throughout, use ‘\*o’.
+	* co.1in: Likewise.
+	* ident.1in: Likewise.
+	* merge.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsclean.1in: Likewise.
+	* rcsdiff.1in: Likewise.
+	* rcsfile.5in: Likewise.
+	* rcsfreeze.1in: Likewise.
+	* rcsintro.1in: Likewise.
+	* rcsmerge.1in: Likewise.
+	* rlog.1in: Likewise.
+
 2010-06-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[dist] Distribute rcsfreeze.1 and its source.

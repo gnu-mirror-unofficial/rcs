@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds i \&\s-1ISO\s0
 .ds r \&\s-1RCS\s0
 .ds u \&\s-1UTC\s0
@@ -6,22 +7,22 @@
 .if t .ds - \(em
 .TH RLOG 1 "\*(Dt" "GNU RCS \*(Rv"
 .SH NAME
-rlog \- print log messages and other information about repositories
+rlog \- print log messages and other information about \*os
 .SH SYNOPSIS
 .B rlog
 .RI [ " options " ] " file " .\|.\|.
 .SH DESCRIPTION
 .B rlog
-prints information about repositories.
+prints information about \*os.
 .PP
-Filenames matching an \*r suffix denote repositories;
+Filenames matching an \*r suffix denote \*os;
 all others denote working files.
 Names are paired as explained in
 .BR ci (1).
 .PP
 .B rlog
 prints the following information for each
-repository: repository name, working file name, head (i.e., the number
+\*o: \*o name, working file name, head (i.e., the number
 of the latest revision on the trunk), default branch, access list, locks,
 symbolic names, suffix, total number of revisions,
 number of revisions selected for printing, and
@@ -43,7 +44,7 @@ The options below restrict this output.
 .if \n(.g .if r an-tag-sep .ds n \w'\f3\-V\fP\f2n\fP'u+\n[an-tag-sep]u
 .TP \*n
 .B \-L
-Ignore repositories that have no locks set.
+Ignore \*os that have no locks set.
 This is convenient in combination with
 .BR \-h ,
 .BR \-l ,
@@ -51,12 +52,12 @@ and
 .BR \-R .
 .TP
 .B \-R
-Print only the name of the repository.
+Print only the name of the \*o.
 This is convenient for translating a
-working file name into a repository name.
+working file name into a \*o name.
 .TP
 .B \-h
-Print only the repository name, working file name, head,
+Print only the \*o name, working file name, head,
 default branch, access list, locks,
 symbolic names, and suffix.
 .TP
@@ -134,7 +135,7 @@ ignore all locks other than those held by the
 .IR lockers .
 For example,
 .B "rlog\ \-L\ \-R\ \-lwft\ RCS/*"
-prints the name of repositories locked by the user
+prints the name of \*os locked by the user
 .BR wft .
 .TP
 .BR \-r [\f2revisions\fP]
@@ -205,7 +206,7 @@ for more.
 .BI \-x "suffixes"
 Use
 .I suffixes
-to characterize repositories.
+to characterize \*os.
 See
 .BR ci (1)
 for details.
@@ -266,7 +267,7 @@ then the time is output as follows:
 .B "    rlog  RCS/*"
 .fi
 .LP
-The first command prints the names of all repositories in the subdirectory
+The first command prints the names of all \*os in the subdirectory
 .B RCS
 that have locks.  The second command prints the headers of those files,
 and the third prints the headers plus the log messages of the locked revisions.

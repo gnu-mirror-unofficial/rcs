@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds r \s-1RCS\s0
 .TH RCSFREEZE 1 "\*(Dt" "GNU RCS \*(Rv"
 .SH NAME
@@ -9,7 +10,7 @@ rcsfreeze \- freeze a configuration of sources checked in under RCS
 .SH DESCRIPTION
 .B rcsfreeze
 assigns a symbolic revision
-number to a set of repositories that form a valid configuration.
+number to a set of \*os that form a valid configuration.
 .PP
 The idea is to run
 .B rcsfreeze
@@ -21,7 +22,7 @@ where
 is increased each time
 .B rcsfreeze
 is run) is then assigned to the most
-recent revision of each repository of the main trunk.
+recent revision of each \*o of the main trunk.
 .PP
 An optional
 .I name
@@ -30,11 +31,11 @@ argument to
 gives a symbolic name to the configuration.
 The unique identifier is still generated
 and is listed in the log file but it will not appear as
-part of the symbolic revision name in the actual repositories.
+part of the symbolic revision name in the actual \*os.
 .PP
 A log message is requested from the user for future reference.
 .PP
-The shell script works only on all repositories at one time.
+The shell script works only on all \*os at one time.
 All changed files must be checked in already.
 Run
 .IR rcsclean (1)

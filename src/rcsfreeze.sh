@@ -34,7 +34,7 @@
 #       A log message is requested from the user which is saved for future
 #       references.
 #
-#       The shell script works only on all repositories at one time.
+#       The shell script works only on all repository files at one time.
 #       It is important that all changed files are checked in (there are
 #       no precautions against any error in this respect).
 #       file names:

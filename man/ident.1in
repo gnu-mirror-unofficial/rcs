@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds iD 5.4 1993/11/09 17:40:15 eggert Exp
 .ds r \&\s-1RCS\s0
 .ds u \&\s-1UTC\s0
@@ -102,14 +103,14 @@ The login name of the user who checked in the revision.
 The date and time the revision was checked in.
 .TP
 .B $\&Header$
-A standard header containing the full file name of the repository, the
+A standard header containing the full \*o name, the
 revision number, the date and time, the author, the state,
 and the locker (if locked).
 .TP
 .B $\&Id$
 Same as
 .BR $\&Header$ ,
-except that the repository name is without directory components.
+except that the \*o name is without directory components.
 .TP
 .B $\&Locker$
 The login name of the user who locked the revision (empty if not locked).
@@ -125,13 +126,13 @@ purposes, this is equivalent to
 The symbolic name used to check out the revision, if any.
 .TP
 .B $\&RCSfile$
-The name of the repository without directory components.
+The \*o name without directory components.
 .TP
 .B $\&Revision$
 The revision number assigned to the revision.
 .TP
 .B $\&Source$
-The full file name of the repository.
+The full \*o name.
 .TP
 .B $\&State$
 The state assigned to the revision with the

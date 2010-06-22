@@ -1,4 +1,5 @@
 .so REL
+.so b-base
 .ds r \&\s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -31,10 +32,10 @@ and
 .BR co (1).
 .BR ci ,
 short for \*(lqcheck in\*(rq, deposits the contents of a
-file into an archival file called a repository.
-A repository contains all revisions of a particular file.
+file into an archival file called a \*o.
+A \*o contains all revisions of a particular file.
 .BR co ,
-short for \*(lqcheck out\*(rq, retrieves revisions from a repository.
+short for \*(lqcheck out\*(rq, retrieves revisions from a \*o.
 .SS "Functions of \*r"
 .IP \(bu
 Store and retrieve multiple revisions of text.  \*r saves all old
@@ -93,7 +94,7 @@ Then invoke the check-in command
 .IP
 .B "ci  f.c"
 .LP
-This command creates a repository in the
+This command creates a \*o in the
 .B RCS
 directory,
 stores
@@ -106,7 +107,7 @@ should be a synopsis of the contents of the file.  All later check-in
 commands will ask you for a log entry, which should summarize the
 changes that you made.
 .PP
-Files in the \*r directory are called repositories;
+Files in the \*r directory are called \*os;
 the others are called working files.
 To get back the working file
 .B f.c
@@ -115,7 +116,7 @@ command
 .IP
 .B "co  f.c"
 .LP
-This command extracts the latest revision from the repository
+This command extracts the latest revision from the \*o
 and writes
 it into
 .BR f.c .
@@ -167,25 +168,25 @@ prevents is a
 .I "check-in"
 by anybody but the locker.
 .PP
-If your repository is private, i.e., if you are the only person who is going
+If your \*o is private, i.e., if you are the only person who is going
 to deposit revisions into it, strict locking is not needed and you
 can turn it off.
 If strict locking is turned off,
-the owner of the repository need not have a lock for check-in; all others
+the owner of the \*o need not have a lock for check-in; all others
 still do.  Turning strict locking off and on is done with the commands
 .IP
 .BR "rcs  \-U  f.c" "     and     " "rcs  \-L  f.c"
 .LP
-If you don't want to clutter your working directory with repositories, create
+If you don't want to clutter your working directory with \*os, create
 a subdirectory called
 .B RCS
-in your working directory, and move all your repositories there.
+in your working directory, and move all your \*os there.
 \*r commands will look first into that directory to find needed files.
 All the commands discussed above will still work, without any
 modification.
 (Actually, pairs of repository and working files can be specified in three ways:
 (a) both are given, (b) only the working file is given, (c) only the
-repository is given.
+\*o is given.
 Both repository and working files may have arbitrary names;
 \*r commands pair them up intelligently.)
 .PP
