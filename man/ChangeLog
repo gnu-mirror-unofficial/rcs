@@ -1,5 +1,23 @@
 2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[man int] Move some common string definitions to b-base.
+
+	* b-base (i, r, u): New ‘.ds’ (string definitions).
+	* ci.1in (i, r, u): Delete string definitions.
+	* co.1in (i, r, u): Likewise.
+	* ident.1in (r, u): Likewise.
+	* merge.1in (r): Likewise.
+	* rcs.1in (r): Likewise.
+	* rcsclean.1in (r): Likewise.
+	* rcsdiff.1in (r): Likewise.
+	* rcsfile.5in (r): Likewise.
+	* rcsfreeze.1in (r): Likewise.
+	* rcsintro.1in (r): Likewise.
+	* rcsmerge.1in (r): Likewise.
+	* rlog.1in (i, r, u): Likewise.
+
+2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Say "repository file", not "repository".
 
 	* b-base: New file.

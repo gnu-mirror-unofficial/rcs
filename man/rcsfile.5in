@@ -2,7 +2,6 @@
 .so b-base
 .\" Set p to 1 if your formatter can handle pic output.
 .if t .nr p 1
-.ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
 .TH RCSFILE 5 "\*(Dt" "GNU RCS \*(Rv"
