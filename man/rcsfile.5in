@@ -8,7 +8,7 @@
 .SH NAME
 rcsfile \- \*o format
 .SH DESCRIPTION
-A \*o's
+An \*o's
 contents are described by the grammar
 below.
 .PP
@@ -17,7 +17,7 @@ tab, form feed, and carriage return (collectively,
 .IR "white space")
 have no significance except in strings.
 However, white space cannot appear within an id, num, or sym,
-and a \*o must end with a newline.
+and an \*o must end with a newline.
 .PP
 Strings are enclosed by
 .BR @ .
@@ -163,7 +163,7 @@ field of a node contains a list of the
 numbers of the first nodes of all sequences for which it is a branchpoint.
 This list is ordered in increasing numbers.
 .LP
-The following diagram shows an example of a \*o's organization.
+The following diagram shows an example of an \*o's organization.
 .if !\np \{\
 .nf
 .vs 12

@@ -21,7 +21,7 @@ rcs \- change \*o attributes
 .SH DESCRIPTION
 .B rcs
 creates new \*os or changes attributes of existing ones.
-A \*o contains multiple revisions of text,
+An \*o contains multiple revisions of text,
 an access list, a change log,
 descriptive text,
 and some control attributes.
@@ -158,7 +158,7 @@ itself.
 Set locking to
 .IR strict .
 Strict locking means that the owner
-of a \*o is not exempt from locking for checkin.
+of an \*o is not exempt from locking for checkin.
 This option should be used for files that are shared.
 .TP
 .B \-U
@@ -361,17 +361,17 @@ command.
 .SH COMPATIBILITY
 The
 .BI \-b rev
-option generates a \*o that cannot be parsed by \*r version 3 or earlier.
+option generates an \*o that cannot be parsed by \*r version 3 or earlier.
 .PP
 The
 .BI \-k subst
 options (except
 .BR \-kkv )
-generate a \*o that cannot be parsed by \*r version 4 or earlier.
+generate an \*o that cannot be parsed by \*r version 4 or earlier.
 .PP
 Use
 .BI "rcs \-V" n
-to make a \*o acceptable to \*r version
+to make an \*o acceptable to \*r version
 .I n
 by discarding information that would confuse version
 .IR n .
@@ -380,7 +380,7 @@ by discarding information that would confuse version
 .B \-x
 option, and requires a
 .B ,v
-suffix on a \*o name.
+suffix on an \*o name.
 .SH FILES
 .B rcs
 accesses files much as

@@ -12,7 +12,7 @@ ci \- check in RCS revisions
 .B ci
 stores new revisions into \*os.
 Each file name matching an \*r suffix
-is taken to be a \*o.
+is taken to be an \*o.
 All others
 are assumed to be working files containing new revisions.
 .B ci
@@ -404,7 +404,7 @@ If you have locked a revision,
 usually updates the \*o's modification time to the current time,
 because the lock is stored in the \*o
 and removing the lock requires changing the \*o.
-This can create a \*o newer than the working file in one of two ways:
+This can create an \*o newer than the working file in one of two ways:
 first,
 .B "ci\ \-M"
 can create a working file with a date before the current time;
@@ -466,9 +466,9 @@ specifies two suffixes:
 .B ,v
 and the empty suffix.
 If two or more suffixes are specified,
-they are tried in order when looking for a \*o;
+they are tried in order when looking for an \*o;
 the first one that works is used for that file.
-If no \*o is found but a \*o can be created,
+If no \*o is found but an \*o can be created,
 the suffixes are tried in order
 to determine the new \*o's name.
 The default for
@@ -557,7 +557,7 @@ Then
 .B ci
 considers each \*r suffix
 .I X
-in turn, looking for a \*o of the form
+in turn, looking for an \*o of the form
 .IB frag2 /RCS/ workfileX
 or (if the former is not found and
 .I X
@@ -572,7 +572,7 @@ and then in the current
 directory.
 .PP
 .B ci
-reports an error if an attempt to open a \*o fails for an unusual reason,
+reports an error if an attempt to open an \*o fails for an unusual reason,
 even if the \*o's name is just one of several possibilities.
 For example, to suppress use of \*r commands in a directory
 .IR d ,
@@ -588,7 +588,7 @@ Suppose
 .B ,v
 is an \*r suffix and the current directory contains a subdirectory
 .B RCS
-with a \*o
+with an \*o
 .BR io.c,v .
 Then each of the following commands check in a copy of
 .B io.c
@@ -610,7 +610,7 @@ ci  RCS/io.c,v  io.c;    ci  io.c,v  io.c;
 Suppose instead that the empty suffix
 is an \*r suffix and the current directory contains a subdirectory
 .B RCS
-with a \*o
+with an \*o
 .BR io.c .
 The each of the following commands checks in a new revision.
 .LP
@@ -624,7 +624,7 @@ ci  RCS/io.c  io.c;
 .fi
 .RE
 .SH "FILE MODES"
-A \*o created by
+An \*o created by
 .B ci
 inherits the read and execute permissions
 from the working file.  If the \*o exists already,
@@ -648,11 +648,11 @@ so working file names should not end in
 .BR _ .
 .PP
 .B ci
-never changes a \*o or working file.
+never changes an \*o or working file.
 Normally,
 .B ci
 unlinks the file and creates a new one;
-but instead of breaking a chain of one or more symbolic links to a \*o,
+but instead of breaking a chain of one or more symbolic links to an \*o,
 it unlinks the destination file instead.
 Therefore,
 .B ci
@@ -805,7 +805,7 @@ to ensure that
 .I A
 owns them.
 .IP \(bu \nn
-A \*o's access list limits who can check in and lock revisions.
+An \*o's access list limits who can check in and lock revisions.
 The default access list is empty,
 which grants checkin access to anyone who can read the \*o.
 If you want limit checkin access,

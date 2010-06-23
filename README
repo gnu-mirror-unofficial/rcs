@@ -32,8 +32,8 @@ RCS works best with a diff that supports -a and -L,
 and a diff3 that supports -A, -E and -m.
 GNU diffutils supports these options.
 
-RCS version 5 reads repository files written by any RCS version released
-since 1982.  It also writes repository files that these older versions of
+RCS version 5 reads RCS files written by any RCS version released
+since 1982.  It also writes RCS files that these older versions of
 RCS can read, unless you use one of the following new features:
 
 - checkin dates after 1999-12-31
@@ -41,7 +41,7 @@ RCS can read, unless you use one of the following new features:
 - identifiers containing ‘.’ or non-ASCII bytes, or starting with a digit
 - ‘rcs -bX’, where X is nonempty
 - ‘rcs -kX’, where X is not ‘kv’
-- repository files that exceed hardcoded limits in older RCS versions
+- RCS files that exceed hardcoded limits in older RCS versions
 
 A working file written by RCS 5.5 or later contains four-digit years in its
 keyword strings.  If you check out a working file with RCS 5.5 or later, an
@@ -67,10 +67,10 @@ formats.  Most likely you can safely ignore this (that file format became
 obsolete in 1982).  However, if you do indeed find a version 2 file around,
 you can migrate the file to a recent format as follows:
 
-   Suppose the working file was ‘f.c’; rename the repository file ‘f.c.v’ to
-   ‘f.c,v’, and the repository file ‘f.v’ to ‘f.c,v’.  Thus suffixes are no
-   longer dropped and repository files end in ‘,v’ rather than ‘.v’.  After
-   all version 2 repository files have been updated with new versions of ci
+   Suppose the working file was ‘f.c’; rename the RCS file ‘f.c.v’ to
+   ‘f.c,v’, and the RCS file ‘f.v’ to ‘f.c,v’.  Thus suffixes are no
+   longer dropped and RCS files end in ‘,v’ rather than ‘.v’.  After
+   all version 2 RCS files have been updated with new versions of ci
    or rcs, you can remake RCS with --enable-compat2=no.
 
 !!! NB: This option (and 2.x compatability) will be removed in GNU RCS 6.x.

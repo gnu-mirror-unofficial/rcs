@@ -781,7 +781,7 @@ full (struct divvy *to, struct fro *f)
 
   /* Validate ‘GROK (head)’.  */
   if (repo->head && !FIND_NY (repo->head))
-    fatal_syntax (g->head_lno, "repository file head names a %s `%s'",
+    fatal_syntax (g->head_lno, "RCS file head names a %s `%s'",
                   ks_ner, repo->head);
 
   /* Link deltas (via ‘branches’ and ‘next’).  */

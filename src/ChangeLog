@@ -1,3 +1,17 @@
+2010-06-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "RCS file", not "repository file".
+
+	* b-grok.c (full): Say "RCS file" in error message.
+	* ci.c: Say "RCS file" in help text.
+	* co.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsfreeze.sh: Likewise.
+	* rcsmerge.c: Likewise.
+	* rlog.c: Likewise.
+
 2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Say "repository file", not "repository".

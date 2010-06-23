@@ -1,3 +1,11 @@
+2010-06-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "RCS file", not "repository file".
+
+	* doc/rcs.texi (repo): Change expansion to "RCS file";
+	throughout, change "a @repo" to "an @repo".
+	(Concepts): Trim redundant explanation, accompanying footnote.
+
 2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Say "repository file", not "repository".

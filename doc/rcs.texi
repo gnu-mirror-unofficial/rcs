@@ -12,7 +12,7 @@ Walter F.@tie{}Tichy
 @end macro
 
 @macro repo
-repository file
+RCS file
 @end macro
 
 @macro TODO
@@ -224,24 +224,20 @@ Because the working file's contents can be extracted from
 the @repo (called @dfn{instantiating a working file}),
 it can be safely deleted to regain some disk space.
 
-@subsection Repository file
+@subsection RCS file
 
-@cindex repository file
+@cindex RCS file
 @cindex description of working file
 @cindex working file, description
-The @dfn{repository file} is a separate file, conventionally placed in the
+The @dfn{RCS file} is a separate file, conventionally placed in the
 subdirectory @file{RCS}, wherein RCS commands organize the initial and
 subsequent @dfn{revisions} of the working file, associating with each
 revision a unique revision number along with the remembered particulars
 of the checkin that produced it.  It also contains a @dfn{description}
 of the working file and various other metadata, described below.
 
-The @repo is also known as the ``RCS file''@footnote{
-For continuity with previous RCS releases, the diagnostic and error
-messages use this term.
-[Question for pretesters: OK to also change messages?]},
-or (colloquially) the ``comma-v file'', due to its name often
-ending in @file{,v} (e.g., @file{a.c,v}).
+The @repo is also known (colloquially) as the ``comma-v file'',
+due to its name often ending in @file{,v} (e.g., @file{a.c,v}).
 
 @cindex revision number
 @cindex branch number
@@ -310,7 +306,7 @@ next higher revision, or a higher revision number on the same branch as
 @cindex compatability, RCS 2.x
 @cindex @samp{configure --enable-compat2}
 @strong{Compatability Note}:
-Repository files made with RCS 2.x may also contain @dfn{suffix
+@repo{}s made with RCS 2.x may also contain @dfn{suffix
 information}.  If you run into such a file (unlikely, as that file
 format became obsolete in 1982), you will need to rebuild RCS with
 @samp{configure --enable-compat2} to be able to read it.  Note that RCS
@@ -443,7 +439,7 @@ ci f.c
 @end example
 
 @noindent
-This command creates a @repo in directory @file{RCS}, stores
+This command creates an @repo in directory @file{RCS}, stores
 @file{f.c} into it as revision 1.1, and deletes @file{f.c}.  It
 also asks you for a description.  The description should be a
 synopsis of the contents of the file.  All later checkin
@@ -648,12 +644,12 @@ ident -q foo    # ok
 @end example
 
 @noindent
-@cindex pairing repository and working files
+@cindex pairing RCS and working files
 @cindex file names on the command-line
-Lastly, pairs of repository and working files can be specified
+Lastly, pairs of RCS and working files can be specified
 in three ways: (a) both are given, (b) only the working file is
 given, (c) only the @repo is given.  For (a), both
-repository and working files may have arbitrary directory
+RCS and working files may have arbitrary directory
 components; RCS commands pair them up intelligently.  For (b),
 RCS commands will look first into the directory @file{./RCS},
 if it exists, to find the associated @repo{}.
@@ -814,7 +810,7 @@ of keyword strings.
 @cindex binary-old-keyword-value substitution mode
 Like @option{-ko}, but do all file i/o in binary mode.  This makes
 little difference on POSIX and Unix hosts, but on DOS-like hosts one
-should use @command{rcs -i -kb} to initialize a @repo intended to be
+should use @command{rcs -i -kb} to initialize an @repo intended to be
 used for binary files.  Also, on all hosts, @rcscommand{rcsmerge} normally
 refuses to merge files when @option{-kb} is in effect.
 
@@ -886,7 +882,7 @@ Valid values for @var{n} are: 3, 4, 5.
 @cindex specifying a suffix list
 @cindex suffix list, specifying
 Specify @var{suff} as the slash-separated list of file name suffixes
-used to recognize a @repo{}.  The default value is @samp{,v/}, that
+used to recognize an @repo{}.  The default value is @samp{,v/}, that
 is, first try with @samp{,v} then try with an empty suffix.
 
 This @dfn{basename search} occurs within (i.e., starting from the
@@ -904,7 +900,7 @@ candidates:
 @end example
 
 Note that the last candidate is impossible (and is in fact discarded),
-because the working and repository files cannot have the same name.
+because the working and RCS files cannot have the same name.
 @end table
 
 @node Environment
@@ -1302,7 +1298,7 @@ it changes because a lock is removed.
 
 @noindent
 The @rcscommand{rcsdiff} command runs @rcscommand{diff}
-to compare two revisions in a @repo{}.
+to compare two revisions in an @repo{}.
 @xref{Invoking diff,,,diff,The GNU Diffutils Manaual}.
 
 @table @code
@@ -1350,7 +1346,7 @@ long options (that start with "--")
 
 @noindent
 The @rcscommand{rcsmerge} command incorporates the changes between two
-revisions of a @repo into the corresponding working file.
+revisions of an @repo into the corresponding working file.
 
 @table @code
 @item -p[@var{rev}]
@@ -1519,7 +1515,7 @@ properly.
 @item Permit multiple option--filename pairs,
 e.g., @command{co -r1.4 a -r1.5 b}.
 
-@item Add an option to break a symbolic link to a @repo{},
+@item Add an option to break a symbolic link to an @repo{},
 instead of breaking the hard link that it points to.
 
 @item Add ways to specify the earliest revision, the most recent

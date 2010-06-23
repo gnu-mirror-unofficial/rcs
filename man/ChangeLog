@@ -1,3 +1,17 @@
+2010-06-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Say "RCS file", not "repository file".
+
+	* b-base (o): Change expansion to "\*r file".
+	* ci.1in: Throughout, change "a \*o" to "an \*o".
+	* co.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsfile.5in: Likewise.
+	* rcsfreeze.1in: Likewise.
+	* rcsintro.1in: Likewise.
+	* rcsmerge.1in: Likewise.
+	* rlog.1in: Likewise.
+
 2010-06-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[man int] Move some common string definitions to b-base.

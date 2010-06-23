@@ -18,7 +18,7 @@ all others denote working files.
 Names are paired as explained in
 .BR ci (1).
 .PP
-Revisions of a \*o can be checked out locked or unlocked.  Locking a
+Revisions of an \*o can be checked out locked or unlocked.  Locking a
 revision prevents overlapping updates.  A revision checked out for reading or
 processing (e.g., compiling) need not be locked.  A revision checked out
 for editing and later checkin must normally be locked.  Checkout with locking
@@ -75,7 +75,7 @@ or the default branch.
 .PP
 A
 .B co
-command applied to a \*o
+command applied to an \*o
 with no revisions creates a zero-length working file.
 .B co
 always performs keyword substitution (see below).
@@ -212,7 +212,7 @@ except it performs all working file input and output in binary mode.
 This makes little difference on Posix and Unix hosts,
 but on DOS-like hosts one should use
 .B "rcs\ \-i\ \-kb"
-to initialize a \*o intended to be used for binary files.
+to initialize an \*o intended to be used for binary files.
 Also, on all hosts,
 .BR rcsmerge (1)
 normally refuses to merge files when
@@ -444,13 +444,13 @@ To see which version of \*r your correspondents are running, have them invoke
 this works with newer versions of \*r.
 If it doesn't work, have them invoke
 .B rlog
-on a \*o;
+on an \*o;
 if none of the first few lines of output contain the string
 .B branch:
 it is version 3;
 if the dates' years have just two digits, it is version 4;
 otherwise, it is version 5.
-A \*o generated while emulating version 3 loses its default branch.
+An \*o generated while emulating version 3 loses its default branch.
 An \*r revision generated while emulating version 4 or earlier has
 a time stamp that is off by up to 13 hours.
 A revision extracted while emulating version 4 or earlier contains
