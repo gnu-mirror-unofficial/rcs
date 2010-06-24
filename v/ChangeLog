@@ -1,3 +1,10 @@
+2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Update license to GPLv3+.
+
+	* Makefile.am: Update license notice.
+	* common.in: Likewise.
+
 2010-05-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Fix bug: Do a ‘co -l’ before modifying the working file.

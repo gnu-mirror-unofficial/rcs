@@ -1,3 +1,59 @@
+2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Update license to GPLv3+.
+
+	* Makefile.am: Update license notice.
+	* alive.test: Likewise.
+	* b-anchor.c: Likewise.
+	* b-complain.c: Likewise.
+	* b-complain.h: Likewise.
+	* b-divvy.c: Likewise.
+	* b-divvy.h: Likewise.
+	* b-esds.c: Likewise.
+	* b-esds.h: Likewise.
+	* b-excwho.c: Likewise.
+	* b-excwho.h: Likewise.
+	* b-fb.c: Likewise.
+	* b-fb.h: Likewise.
+	* b-feph.c: Likewise.
+	* b-feph.h: Likewise.
+	* b-fro.c: Likewise.
+	* b-fro.h: Likewise.
+	* b-grok.c: Likewise.
+	* b-grok.h: Likewise.
+	* b-isr.c: Likewise.
+	* b-isr.h: Likewise.
+	* b-kwxout.c: Likewise.
+	* b-kwxout.h: Likewise.
+	* base.h: Likewise.
+	* ci.c: Likewise.
+	* co.c: Likewise.
+	* gnu-h-v.c: Likewise.
+	* gnu-h-v.h: Likewise.
+	* ident.c: Likewise.
+	* maketime.c: Likewise.
+	* maketime.h: Likewise.
+	* merge.c: Likewise.
+	* merger.c: Likewise.
+	* partime.c: Likewise.
+	* partime.h: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsedit.c: Likewise.
+	* rcsfcmp.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsfreeze.sh: Likewise.
+	* rcsgen.c: Likewise.
+	* rcskeep.c: Likewise.
+	* rcsmap.c: Likewise.
+	* rcsmerge.c: Likewise.
+	* rcsrev.c: Likewise.
+	* rcstime.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+	* yarrrr.c: Likewise.
+
 2010-06-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Say "RCS file", not "repository file".

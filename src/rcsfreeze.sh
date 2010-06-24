@@ -7,7 +7,7 @@
 #
 # GNU RCS is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # GNU RCS is distributed in the hope that it will be useful,
@@ -44,7 +44,7 @@
 version='rcsfreeze (GNU RCS) PACKAGE_VERSION
 Copyright (C) 2010 Thien-Thi Nguyen
 Copyright (C) 1990-1995 Paul Eggert
-License GPLv2+; GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
+License GPLv2+; GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 

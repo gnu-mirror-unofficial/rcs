@@ -1,3 +1,13 @@
+2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Update license to GPLv3+.
+
+	* COPYING: Update to GPLv3.
+	* Makefile.am: Update license notice.
+	* configure.ac: Likewise.
+	* build-aux/extract-help: Likewise.
+	* doc/Makefile.am: Likewise.
+
 2010-06-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Say "RCS file", not "repository file".
