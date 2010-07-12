@@ -86,7 +86,7 @@ exiterr (void)
   ORCSerror ();
   dirtempunlink ();
   tempunlink ();
-  _Exit (EXIT_FAILURE);
+  exit_failurefully ();
 }
 
 #define ACCF(...)  accf (SHARED, __VA_ARGS__)

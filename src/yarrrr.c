@@ -49,13 +49,13 @@ bow_out (void)
 {
   dirtempunlink ();
   tempunlink ();
-  _Exit (EXIT_FAILURE);
+  exit_failurefully ();
 }
 
 static exiting void
 scram (void)
 {
-  _Exit (EXIT_FAILURE);
+  exit_failurefully ();
 }
 
 /* Removed by eggert 1995-06-01.  */

@@ -31,7 +31,7 @@ struct top *top;
 static exiting void
 exiterr (void)
 {
-  _Exit (EXIT_FAILURE);
+  exit_failurefully ();
 }
 
 static int

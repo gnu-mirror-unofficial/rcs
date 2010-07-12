@@ -30,7 +30,7 @@ static exiting void
 exiterr (void)
 {
   tempunlink ();
-  _Exit (DIFF_TROUBLE);
+  exit_diff_trouble ();
 }
 
 /*:help

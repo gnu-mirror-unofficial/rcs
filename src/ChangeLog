@@ -1,3 +1,22 @@
+2010-07-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Add abstractions: exit_failurefully, exit_diff_trouble
+
+	* rcsutil.c (exit_failurefully, exit_diff_trouble): New funcs.
+	(runv): Use ‘exit_diff_trouble’.
+	* base.h (exit_failurefully, exit_diff_trouble): New func decls.
+	* ci.c (exiterr): Use ‘exit_failurefully’.
+	* co.c (exiterr): Likewise.
+	* ident.c (exiterr): Likewise.
+	* rcs.c (exiterr): Likewise.
+	* rcsclean.c (exiterr): Likewise.
+	* rcsfnms.c (getcwd): Likewise.
+	* rlog.c (exiterr): Likewise.
+	* yarrrr.c (bow_out, scram): Likewise.
+	* merge.c (exiterr): Use ‘exit_diff_trouble’.
+	* rcsdiff.c (exiterr): Likewise.
+	* rcsmerge.c (exiterr): Likewise.
+
 2010-07-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Fix typo: Say "GPLv3+" in --version output.

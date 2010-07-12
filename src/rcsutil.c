@@ -40,6 +40,18 @@
 #include "maketime.h"
 
 void
+exit_failurefully (void)
+{
+  _Exit (EXIT_FAILURE);
+}
+
+void
+exit_diff_trouble (void)
+{
+  _Exit (DIFF_TROUBLE);
+}
+
+void
 gnurcs_init (struct program const *program)
 {
   SHARED = make_space ("shared");
@@ -283,7 +295,7 @@ runv (int infd, char const *outname, char const **args)
           {
             /* Avoid ‘perror’ since it may misuse buffers.  */
             complain ("%s: I/O redirection failed\n", args[1]);
-            _Exit (DIFF_TROUBLE);
+            exit_diff_trouble ();
           }
 
         if (outname)
@@ -292,7 +304,7 @@ runv (int infd, char const *outname, char const **args)
             {
               /* Avoid ‘perror’ since it may misuse buffers.  */
               complain ("%s: %s: cannot create\n", args[1], outname);
-              _Exit (DIFF_TROUBLE);
+              exit_diff_trouble ();
             }
         exec_RCS (args[1], (char **) (args + 1));
         notfound = args[1];
@@ -306,7 +318,7 @@ runv (int infd, char const *outname, char const **args)
 
         /* Avoid ‘perror’ since it may misuse buffers.  */
         complain ("%s: not found\n", notfound);
-        _Exit (DIFF_TROUBLE);
+        exit_diff_trouble ();
       }
     if (PROB (pid))
       fatal_sys ("fork");

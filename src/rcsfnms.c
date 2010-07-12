@@ -541,7 +541,7 @@ getcwd (char *buf, size_t size)
           execl (binpwd, binpwd, NULL);
           execl (usrbinpwd, usrbinpwd, NULL);
         }
-      _Exit (EXIT_FAILURE);
+      exit_failurefully ();
     }
   e = errno;
   closeerror = close (fd[1]);

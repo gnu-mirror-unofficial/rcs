@@ -88,7 +88,7 @@ exiterr (void)
   ORCSerror ();
   dirtempunlink ();
   tempunlink ();
-  _Exit (EXIT_FAILURE);
+  exit_failurefully ();
 }
 
 static bool

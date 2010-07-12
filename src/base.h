@@ -828,6 +828,10 @@ char const *date2str (char const date[datesize],
                       char datebuf[datesize + zonelenmax]);
 
 /* rcsutil */
+void exit_failurefully (void)
+  exiting;
+void exit_diff_trouble (void)
+  exiting;
 void gnurcs_init (struct program const *program);
 void bad_option (char const *option);
 void redefined (int c);
