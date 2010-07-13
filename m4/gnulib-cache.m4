@@ -15,11 +15,12 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --avoid=wchar --no-libtool --macro-prefix=gl --no-vc-files dirent double-slash-root errno extensions fcntl hash-pjw inline obstack obstack-printf readlink same-inode sig2str signal stdarg stdbool stdint stdio stdlib string sys_stat sys_wait time time_r unistd unistd-safer unused-parameter
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --avoid=wchar --no-libtool --macro-prefix=gl --no-vc-files _Exit dirent double-slash-root errno extensions fcntl hash-pjw inline obstack obstack-printf readlink same-inode sig2str signal stdarg stdbool stdint stdio stdlib string sys_stat sys_wait time time_r unistd unistd-safer unused-parameter
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
+  _Exit
   dirent
   double-slash-root
   errno

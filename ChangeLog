@@ -1,3 +1,9 @@
+2010-07-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘_Exit’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘_Exit’.
+
 2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.91 (pretest for 5.8)
