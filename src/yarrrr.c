@@ -307,7 +307,7 @@ dump_hash_table (struct repo *r)
 static exiting void
 exiterr (void)
 {
-  _Exit (1);
+  exit_failurefully ();
 }
 
 static const struct program program = { .name = "y-GROK", .exiterr = exiterr };

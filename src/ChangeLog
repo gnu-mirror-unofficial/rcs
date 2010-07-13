@@ -1,3 +1,9 @@
+2010-07-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int y-GROK] Use ‘exit_failurefully’ more.
+
+	* yarrrr.c [TEST_GROK] (exiterr): Use ‘exit_failurefully’.
+
 2010-07-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstractions: exit_failurefully, exit_diff_trouble
