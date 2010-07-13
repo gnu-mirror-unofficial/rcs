@@ -1,5 +1,11 @@
 2010-07-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.92 (pretest for 5.8)
+
+	* configure.ac (AC_INIT): Bump version to "5.7.92".
+
+2010-07-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘_Exit’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘_Exit’.
