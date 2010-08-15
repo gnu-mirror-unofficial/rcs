@@ -48,6 +48,12 @@
 #include "b-isr.h"
 #include "b-kwxout.h"
 
+/* This is needed for dietlibc, according to Mike Mestnik.
+   Hmm, shouldn't gnulib handle this?  */
+#ifndef _POSIX_SYMLOOP_MAX
+#define _POSIX_SYMLOOP_MAX 8
+#endif
+
 struct editstuff
 {
   struct fro *fedit;

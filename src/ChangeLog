@@ -1,3 +1,11 @@
+2010-08-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] #define _POSIX_SYMLOOP_MAX if necessary.
+
+	* rcsedit.c (_POSIX_SYMLOOP_MAX):
+	If not already defined, #define to 8.
+	Reported by Mike Mestnik <mmestnik@nagios.com>.
+
 2010-07-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int y-GROK] Use ‘exit_failurefully’ more.
