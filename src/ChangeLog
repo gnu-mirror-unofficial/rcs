@@ -1,3 +1,9 @@
+2010-08-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Specify gnulib headers location when srcdir!=builddir.
+
+	* Makefile.am (AM_CPPFLAGS): New var.
+
 2010-08-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] #define _POSIX_SYMLOOP_MAX if necessary.

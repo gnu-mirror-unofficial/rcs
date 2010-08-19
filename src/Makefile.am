@@ -17,6 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# This is for the gnulib headers when srcdir != builddir.
+# Hmmm, shouldn't gnulib or automake handle this automagically?
+AM_CPPFLAGS = -I'$(top_srcdir)/lib'
+
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
   b-complain.h b-divvy.h b-esds.h b-excwho.h b-fb.h b-feph.h b-fro.h \
