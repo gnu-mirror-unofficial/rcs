@@ -30,7 +30,7 @@ bits = b-base \
 EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES) $(bits)
 EXTRA_DIST += rcsfreeze.1 rcsfreeze.1in
 
-soelim = soelim -I -I'$(srcdir)'
+soelim = soelim -I. -I'$(srcdir)'
 nolf = sed '/^\.lf /d'
 
 rcsfile.5: rcsfile.5in REL $(bits)

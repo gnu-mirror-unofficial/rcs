@@ -1,3 +1,11 @@
+2010-08-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int man] Fix omission: Specify directory for ‘soelim -I’.
+
+	Regression introduced 2010-05-25,
+	"[man] Use soelim(1) for rcsfile.5 generation".
+	* Makefile.am (soelim): Say "-I.", not "-I".
+
 2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Update license to GPLv3+.
