@@ -1,5 +1,11 @@
 2010-08-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Don't avoid any gnulib modules.
+
+	* m4/gnulib-cache.m4 (gl_AVOID): Delete ‘wchar’.
+
+2010-08-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Delete redundant texinfo.tex.
 
 	* doc/texinfo.tex: Delete file.
