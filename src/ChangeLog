@@ -1,3 +1,9 @@
+2010-08-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘bad_option’ more.
+
+	* ident.c (main): Use ‘bad_option’.
+
 2010-08-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Specify gnulib headers location when srcdir!=builddir.

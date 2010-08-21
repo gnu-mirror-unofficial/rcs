@@ -171,7 +171,7 @@ main (int argc, char **argv)
           return EXIT_SUCCESS;
 
         default:
-          complain ("ident: usage: ident -{qV} [file...]\n");
+          bad_option (a - 1);
           return EXIT_FAILURE;
           break;
         }
