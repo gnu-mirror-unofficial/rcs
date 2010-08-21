@@ -1,5 +1,11 @@
 2010-08-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Work around x86_64-linux-gnu memory corruption problem.
+
+	* ci.c (main): Call ‘getcurdate’ unconditionally, early on.
+
+2010-08-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘bad_option’ more.
 
 	* ident.c (main): Use ‘bad_option’.
