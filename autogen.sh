@@ -10,10 +10,10 @@
 # remove either lib/ or m4/ before invocation.
 #
 # Tested with:
-# - gnulib-tool (GNU gnulib 2010-03-28 11:28:34)
-# - autoconf (GNU Autoconf) 2.65
-# - automake (GNU automake) 1.11.1
-# - ltmain.sh (GNU libtool) 2.2.6b
+# autoconf (GNU Autoconf) 2.67
+# automake (GNU automake) 1.11.1
+# ltmain.sh (GNU libtool) 2.2.6b
+# gnulib-tool (GNU gnulib 2010-09-16 00:25:57) 0.0.4259-55645
 
 set -ex
 if [ -d lib ] && [ -d m4 ]
