@@ -343,7 +343,7 @@ fro_spew_partial (FILE *to, struct fro *f, struct range *r)
 
 void
 fro_spew (struct fro *f, FILE *to)
-/* Copy the remainder of file ‘f’ to ‘outf’.  */
+/* Copy the remainder of file ‘f’ to ‘to’.  */
 {
   struct range finish =
     {
