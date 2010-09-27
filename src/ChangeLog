@@ -1,5 +1,9 @@
 2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.93
+
+2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Fix bug: Explicitly cast ‘size_t’ to ‘off_t’ for comparing.
 
 	* b-fro.c (fro_spew_partial): Use ‘(off_t) sizeof (buf)’ to compare.
