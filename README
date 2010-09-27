@@ -229,3 +229,9 @@ values unless the TZ environment variable is set.
 
 X_DEFAULT - This is normally ",v/" on Unix hosts, and "" on hosts that
 do not allow commas in file names (e.g. DOS).
+
+
+Copyright (C) 2010 Thien-Thi Nguyen
+
+Copying and distribution of this file, with or without modification,
+are permitted provided the copyright notice and this notice are preserved.

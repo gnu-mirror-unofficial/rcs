@@ -127,3 +127,9 @@ It lives in the repo but is not included in the distribution.
 *** Internationalize messages.
     This requires a change in RCS file format because of the ‘empty log
     message’ and ‘checked in with -k’ hacks inside RCS files.
+
+* etc
+Copyright (C) 2010 Thien-Thi Nguyen
+
+Copying and distribution of this file, with or without modification,
+are permitted provided the copyright notice and this notice are preserved.
