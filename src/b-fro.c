@@ -325,7 +325,7 @@ fro_spew_partial (FILE *to, struct fro *f, struct range *r)
         while (pos < r->end)
           {
             if (!(count = fread (buf, sizeof (*buf),
-                                 (pos < r->end - sizeof (buf)
+                                 (pos < r->end - (off_t) sizeof (buf)
                                   ? sizeof (buf)
                                   : r->end - pos),
                                  f->stream)))
