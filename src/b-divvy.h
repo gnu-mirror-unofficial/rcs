@@ -21,7 +21,7 @@
 struct divvy
 {
   char const *name;
-  void *space;
+  struct obstack *space;
   void *first;
   size_t count;
 };

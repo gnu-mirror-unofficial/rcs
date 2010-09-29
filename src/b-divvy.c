@@ -67,7 +67,7 @@ make_space (const char const name[])
   divvy->space = TCALLOC (struct obstack);
   obstack_alloc_failed_handler = oom;
   obstack_init (divvy->space);
-  divvy->first = obstack_next_free ((struct obstack *) divvy->space);
+  divvy->first = obstack_next_free (divvy->space);
 #ifdef DEBUG
   complain ("%s: %32s %p\n", name, "first", divvy->first);
 #endif

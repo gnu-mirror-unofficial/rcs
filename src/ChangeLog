@@ -1,3 +1,10 @@
+2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Tighten type of struct ‘divvy’ member ‘space’.
+
+	* b-divvy.h (struct divvy): Declare ‘space’ to be ‘struct obstack *’.
+	* b-divvy.c (make_space): Remove now-redundant cast to ‘struct obstack *’.
+
 2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.93
