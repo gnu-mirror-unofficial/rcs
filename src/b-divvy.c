@@ -67,6 +67,17 @@ make_space (const char const name[])
   divvy->space = TCALLOC (struct obstack);
   obstack_alloc_failed_handler = oom;
   obstack_init (divvy->space);
+
+  /* Set alignment to avoid segfault (on some hosts).
+     The downside is wasted space on less-sensitive hosts.  */
+  {
+    int widest = sizeof (off_t);
+
+    if (widest < sizeof (void *))
+      widest = sizeof (void *);
+    obstack_alignment_mask (divvy->space) = widest - 1;
+  }
+
   divvy->first = obstack_next_free (divvy->space);
 #ifdef DEBUG
   complain ("%s: %32s %p\n", name, "first", divvy->first);

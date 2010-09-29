@@ -1,5 +1,12 @@
 2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Align divvy spaces to the "widest" type width.
+
+	* divvy.c (make_space): Initialize the alignment of
+	the newly created divvy space based on the "widest" type.
+
+2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Tighten type of struct ‘divvy’ member ‘space’.
 
 	* b-divvy.h (struct divvy): Declare ‘space’ to be ‘struct obstack *’.
