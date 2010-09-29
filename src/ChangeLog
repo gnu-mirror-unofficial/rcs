@@ -1,5 +1,13 @@
 2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Centralize tests; do complicated test last.
+
+	* Makefile.am (PATHPREFIX, TESTS_ENVIRONMENT, TESTS): Delete vars.
+	(check-TESTS, installcheck): Delete targets.
+	* alive.test: Move to ../tests/t999.test.
+
+2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Don't redundantly align atat divvy spaces.
 
 	* b-grok.c (start_atat): Remove alignment check/enforcement,

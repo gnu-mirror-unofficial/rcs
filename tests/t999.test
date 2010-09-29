@@ -1,5 +1,5 @@
 #! /bin/sh
-# alive.test
+# t999.test
 #
 # Copyright (C) 2010 Thien-Thi Nguyen
 # Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
@@ -30,9 +30,13 @@
 # With the -v option, output more debugging info.
 
 # If diff outputs `No differences encountered' when comparing identical files,
-# then alive.test may also output these noise lines; ignore them.
+# then t999.test may also output these noise lines; ignore them.
 
 # The current directory and ./RCS must be readable, writable, and searchable.
+
+. ./common
+dontsplit
+cd $wd
 
 : ${DIFF=diff}
 
@@ -442,5 +446,9 @@ test $? = 0 || { echo "#rlog with working file repeated failed"; exit 1; }
 
 test ! -f $lockfile || { echo "#lock file not removed"; exit 1; }
 
+test x"$KEEPD" = x1 && exit 0
+
 rm -f a.* $RCSfile $RCS_alt
 $rmdir RCS
+
+# t999.test ends here

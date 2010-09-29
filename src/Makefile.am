@@ -42,13 +42,6 @@ LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
 CLEANFILES = $(BUILT_SOURCES)
 
-# This is for the benefit of "make installcheck".
-# Note that it should end in ":".
-PATHPREFIX =
-
-TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$$(pwd)/0pre/bin:$$PATH" sh
-TESTS = alive.test
-
 EXTRA_DIST = TAGS rcsfreeze.sh $(TESTS) yarrrr.c
 
 # We don't install rcsfreeze (or its manpage).
@@ -60,24 +53,6 @@ dist-hook:
 
 .c.help:
 	$(top_srcdir)/build-aux/extract-help -o $@ $<
-
-check-TESTS: test-prep
-	@overall=true ;				\
-	ls='$(TESTS)' ; if [ "$$ls" ] ; then	\
-	  if [ '.' = '$(srcdir)' ] ; then d= ;	\
-	    else d='$(srcdir)/' ; fi ;		\
-	  for t in "$$ls" ; do			\
-	    if $(TESTS_ENVIRONMENT) "$$d$$t" ;	\
-	    then echo "PASS: $$t" ;		\
-	    else echo "FAIL: $$t" ;		\
-	         overall=false ;		\
-	    fi ;				\
-	  done ;				\
-	fi ; $$overall
-
-# Install RCS and (if applicable) GNU diff before running these tests.
-installcheck: test-prep
-	$(MAKE) check PATHPREFIX='$(DESTDIR)$(bindir):'
 
 clean-local:
 	rm -rf 0pre RCS

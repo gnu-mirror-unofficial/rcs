@@ -1,5 +1,14 @@
 2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Centralize tests; do complicated test last.
+
+	* t999.test: Rename from ../src/alive.test; use ./common for init;
+	change to t999.d/ before starting; combine stdout/stderr; inhibit
+	cleanup if env var ‘KEEPD’ has value ‘1’.
+	* Makefile.am (TESTS): Add t999.test.
+
+2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Fix bug: Specify "./common" to avoid ‘PATH’ search.
 
 	* alive.test: Say ". ./common".
