@@ -1,6 +1,6 @@
 # t001.test                                             -*- shell-script -*-
 
-. common
+. ./common
 
 w=$wd/x
 v=$wd/x,v

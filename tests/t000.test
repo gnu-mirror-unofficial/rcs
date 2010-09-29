@@ -1,6 +1,6 @@
 # t000.test                                             -*- shell-script -*-
 
-. common
+. ./common
 dontsplit
 
 w=$wd/x

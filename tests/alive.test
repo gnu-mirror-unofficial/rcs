@@ -1,5 +1,5 @@
 #!/bin/sh
-. common
+. ./common
 type ci
 type co
 type ident
