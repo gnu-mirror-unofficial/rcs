@@ -556,8 +556,8 @@ AC_CONFIG_FILES([
   doc/Makefile
   man/Makefile
   src/Makefile
-  v/Makefile
-  v/common
+  tests/Makefile
+  tests/common
 ])
 
 AC_OUTPUT

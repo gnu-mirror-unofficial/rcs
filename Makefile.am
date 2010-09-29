@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SUBDIRS = lib doc man src v
+SUBDIRS = lib doc man src tests
 
 EXTRA_DIST = build-aux/extract-help m4/gnulib-cache.m4
 
