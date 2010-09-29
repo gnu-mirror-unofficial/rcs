@@ -1,5 +1,12 @@
 2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Don't redundantly align atat divvy spaces.
+
+	* b-grok.c (start_atat): Remove alignment check/enforcement,
+	obsoleted by "[int] Align divvy spaces to the "widest" type width".
+
+2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Align divvy spaces to the "widest" type width.
 
 	* divvy.c (make_space): Initialize the alignment of

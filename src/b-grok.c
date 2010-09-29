@@ -286,12 +286,9 @@ static void
 start_atat (struct divvy *to, bool blankp)
 {
   struct obstack *o = to->space;
-  size_t uncool = 7 & (uintptr_t) obstack_next_free (o);
 
-  /* If the next alloc is not 64-bit (8-byte) aligned, do a dummy alloc.
-     Perhaps this should better be done, once, in ‘make_space’.  */
-  if (uncool)
-    obstack_alloc (o, 8 - uncool);
+  /* We used to check and ensure ‘off_t’ (8-byte) alignment here,
+     but that is now done in ‘make_space’ directly.  */
 
   if (blankp)
     obstack_blank (o, sizeof (struct atat));
