@@ -18,7 +18,7 @@
 set -ex
 if [ -d lib ] && [ -d m4 ]
 then act=update
-else act=import
+else act=add-import
 fi
 gnulib-tool --${act}
 autoreconf --install --symlink "$@"
