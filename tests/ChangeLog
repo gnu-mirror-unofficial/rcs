@@ -1,3 +1,13 @@
+2010-09-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[maint] Simplify ‘PATHPREFIX’ Makefile-internal protocol.
+
+	* Makefile.am (PATHPREFIX): Init to the absolute name of
+	the 0pre/bin directory under the build-tree src/.
+	(TESTS_ENVIRONMENT): Don't run pwd(1).
+	(installcheck-local): Rename target from ‘installcheck’;
+	omit trailing colon from ‘PATHPREFIX’ specification.
+
 2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Centralize tests; do complicated test last.

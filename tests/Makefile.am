@@ -18,10 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This is for the benefit of "make installcheck".
-# Note that it should end in ":".
-PATHPREFIX =
+# Note that it should NOT end in ":".
+PATHPREFIX = $(abs_top_builddir)/src/0pre/bin
 
-TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$$(pwd)/../src/0pre/bin:$$PATH" sh
+TESTS_ENVIRONMENT = PATH="$(PATHPREFIX):$$PATH" sh
 TESTS = alive.test \
   t000.test \
   t001.test \
@@ -51,8 +51,8 @@ check-TESTS: test-prep
 	  done ;							\
 	fi ; $$overall
 
-installcheck: test-prep
-	$(MAKE) check PATHPREFIX='$(DESTDIR)$(bindir):'
+installcheck-local: test-prep
+	$(MAKE) check PATHPREFIX='$(DESTDIR)$(bindir)'
 
 clean-local:
 	rm -rf *.d
