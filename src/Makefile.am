@@ -24,7 +24,7 @@ AM_CPPFLAGS = -I'$(top_srcdir)/lib'
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
   b-complain.h b-divvy.h b-esds.h b-excwho.h b-fb.h b-feph.h b-fro.h \
-  b-grok.h b-isr.h b-kwxout.h \
+  b-grok.h b-isr.h b-kwxout.h b-merger.h \
   base.h gnu-h-v.h maketime.h partime.h \
   b-anchor.c \
   b-complain.c b-divvy.c b-esds.c b-excwho.c b-fb.c b-feph.c b-fro.c \

@@ -297,7 +297,7 @@ struct rcslock
   struct delta *delta;
 };
 
-/* List element for symbolic names.  */
+/* List element for symbolic names.  Also used for label/filename (merging).  */
 struct symdef
 {
   char const *meaningful;
@@ -726,8 +726,7 @@ bool recognize_keyword (char const *string, struct pool_found *found);
 
 /* merger */
 int merge (bool tostdout, char const *edarg,
-           char const *const label[3],
-           char const *const argv[3]);
+           struct symdef three_manifestations[3]);
 
 /* rcsedit */
 struct editstuff *make_editstuff (void);

@@ -27,6 +27,7 @@
 #include "b-divvy.h"
 #include "b-feph.h"
 #include "b-fro.h"
+#include "b-merger.h"
 
 struct top *top;
 
@@ -62,8 +63,8 @@ main (int argc, char **argv)
 {
   register int i;
   char *a, **newargv;
-  char const *arg[3];
-  char const *rev[3], *xrev[3];         /*revision numbers */
+  struct symdef three_manifestations[3];
+  char const *rev[3];                   /*revision numbers */
   char const *edarg, *expandarg, *suffixarg, *versionarg, *zonearg;
   bool tostdout;
   int status;
@@ -180,15 +181,15 @@ main (int argc, char **argv)
           if (fully_numeric (&numericrev, rev[1], workptr)
               && (target = delta_from_ref (numericrev.string)))
             {
-              xrev[1] = target->num;
+              LABEL (1) = target->num;
               if (!rev[2] || !*rev[2])
                 rev[2] = defbr ? defbr : tip->num;
               if (fully_numeric (&numericrev, rev[2], workptr)
                   && (target = delta_from_ref (numericrev.string)))
                 {
-                  xrev[2] = target->num;
+                  LABEL (2) = target->num;
 
-                  if (STR_SAME (xrev[1], xrev[2]))
+                  if (STR_SAME (LABEL (1), LABEL (2)))
                     {
                       if (tostdout)
                         {
@@ -202,11 +203,11 @@ main (int argc, char **argv)
 
                       for (i = 1; i <= 2; i++)
                         {
-                          struct cbuf commarg = minus_p (xrev[i], rev[i]);
+                          struct cbuf commarg = minus_p (LABEL (i), rev[i]);
 
                           if (run (-1,
                                    /* Don't collide with merger.c ‘maketemp’.  */
-                                   arg[i] = maketemp (i + 2),
+                                   FNAME (i) = maketemp (i + 2),
                                    prog_co, quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
                                    repo_filename, NULL))
@@ -214,11 +215,11 @@ main (int argc, char **argv)
                         }
                       diagnose
                         ("Merging differences between %s and %s into %s%s",
-                         xrev[1], xrev[2], mani_filename,
+                         LABEL (1), LABEL (2), mani_filename,
                          tostdout ? "; result to stdout" : "");
 
-                      arg[0] = xrev[0] = mani_filename;
-                      status = merge (tostdout, edarg, xrev, arg);
+                      FNAME (0) = LABEL (0) = mani_filename;
+                      status = merge (tostdout, edarg, three_manifestations);
                     }
                 }
             }

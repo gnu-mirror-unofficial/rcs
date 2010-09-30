@@ -23,6 +23,7 @@
 #include "merge.help"
 #include "b-complain.h"
 #include "b-feph.h"
+#include "b-merger.h"
 
 struct top *top;
 
@@ -50,7 +51,8 @@ int
 main (int argc, char **argv)
 {
   register char const *a;
-  char const *arg[3], *label[3], *edarg = NULL;
+  struct symdef three_manifestations[3];
+  char const *edarg = NULL;
   int labels;
   bool tostdout = false;
   const struct program program =
@@ -87,7 +89,7 @@ main (int argc, char **argv)
         case 'L':
           if (3 <= labels)
             PFATAL ("too many -L options");
-          if (!(label[labels++] = *++argv))
+          if (!(LABEL (labels++) = *++argv))
             PFATAL ("-L needs following argument");
           --argc;
           break;
@@ -107,17 +109,16 @@ main (int argc, char **argv)
   if (argc != 4)
     PFATAL ("%s arguments", argc < 4 ? "not enough" : "too many");
 
-  /* This copy keeps us ‘const’-clean.  */
-  arg[0] = argv[0];
-  arg[1] = argv[1];
-  arg[2] = argv[2];
-
-  for (; labels < 3; labels++)
-    label[labels] = arg[labels];
+  for (int i = 0; i < 3; i++)
+    {
+      FNAME (i) = argv[i];
+      if (labels <= i)
+        LABEL (i) = FNAME (i);
+    }
 
   if (FLOW (erroneousp))
     exiterr ();
-  return merge (tostdout, edarg, label, arg);
+  return merge (tostdout, edarg, three_manifestations);
 }
 
 /* merge.c ends here */

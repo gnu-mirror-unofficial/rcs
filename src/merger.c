@@ -27,6 +27,7 @@
 #include "b-fb.h"
 #include "b-feph.h"
 #include "b-fro.h"
+#include "b-merger.h"
 
 static char const *
 normalize_arg (char const *s)
@@ -42,12 +43,12 @@ normalize_arg (char const *s)
 }
 
 int
-merge (bool tostdout, char const *edarg, char const *const label[3],
-       char const *const argv[3])
+merge (bool tostdout, char const *edarg, struct symdef three_manifestations[3])
 /* Do ‘merge [-p] EDARG -L l0 -L l1 -L l2 a0 a1 a2’, where ‘tostdout’
    specifies whether ‘-p’ is present, ‘edarg’ gives the editing type
-   (e.g. "-A", or null for the default), ‘label’ gives l0, l1 and l2, and
-   ‘argv’ gives a0, a1 and a2.  Return ‘DIFF_SUCCESS’ or ‘DIFF_FAILURE’.  */
+   (e.g. "-A", or null for the default), and lN and aN are taken from
+   three_manifestations[N].{meaningful,underlying}, respectively.
+   Return ‘DIFF_SUCCESS’ or ‘DIFF_FAILURE’.  */
 {
   register int i;
   FILE *f;
@@ -60,7 +61,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   void (*exiterr) (void) = PROGRAM (exiterr);
 
   for (i = 3; 0 <= --i;)
-    a[i] = normalize_arg (argv[i]);
+    a[i] = normalize_arg (FNAME (i));
 
   if (!edarg)
     edarg = "-E";
@@ -70,7 +71,7 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
   if (!tostdout)
     t = maketemp (0);
   s = run (-1, t, prog_diff3, edarg, "-am",
-           "-L", label[0], "-L", label[1], "-L", label[2],
+           "-L", LABEL (0), "-L", LABEL (1), "-L", LABEL (2),
            a[0], a[1], a[2], NULL);
   if (DIFF_TROUBLE == s)
     exiterr ();
@@ -78,8 +79,8 @@ merge (bool tostdout, char const *edarg, char const *const label[3],
     PWARN ("conflicts during merge");
   if (t)
     {
-      if (!(f = fopen_safer (argv[0], "w")))
-        fatal_sys (argv[0]);
+      if (!(f = fopen_safer (FNAME (0), "w")))
+        fatal_sys (FNAME (0));
       if (!(rt = fro_open (t, "r", NULL)))
         fatal_sys (t);
       fro_spew (rt, f);

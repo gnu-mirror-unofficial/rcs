@@ -1,3 +1,18 @@
+2010-09-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘struct symdef’ array as "three manifestations" ‘merge’ arg.
+
+	* b-merger.h: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-merger.h.
+	* merger.c: #include "b-merger.h".
+	(merge): Don't take LABEL and ARGV; instead, take
+	THREE_MANIFESTATIONS; use ‘LABEL’ and ‘FNAME’.
+	* base.h (merge): Update func decl.
+	* merge.c: #include "b-merger.h".
+	(main): Use ‘LABEL’ and ‘FNAME’; update call to ‘merge’.
+	* rcsmerge.c: #include "b-merger.h".
+	(main): Use ‘LABEL’ and ‘FNAME’; update call to ‘merge’.
+
 2010-09-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Centralize tests; do complicated test last.
