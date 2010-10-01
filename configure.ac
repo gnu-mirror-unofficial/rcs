@@ -560,6 +560,9 @@ AC_CONFIG_FILES([
   tests/common
 ])
 
+# We don't use or install rcsfreeze, so there is no point making it executable.
+AC_CONFIG_FILES([src/rcsfreeze:src/rcsfreeze.sh])
+
 AC_OUTPUT
 
 # configure.ac ends here

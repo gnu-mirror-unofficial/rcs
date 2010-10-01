@@ -41,7 +41,7 @@
 #       {RCS/}.rcsfreeze.ver	version number
 #       {RCS/}.rscfreeze.log	log messages, most recent first
 ##
-version='rcsfreeze (GNU RCS) PACKAGE_VERSION
+version='rcsfreeze (GNU RCS) @PACKAGE_VERSION@
 Copyright (C) 2010 Thien-Thi Nguyen
 Copyright (C) 1990-1995 Paul Eggert
 License GPLv3+; GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>

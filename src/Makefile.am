@@ -42,11 +42,7 @@ LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
 CLEANFILES = $(BUILT_SOURCES)
 
-EXTRA_DIST = TAGS rcsfreeze.sh $(TESTS) yarrrr.c
-
-# We don't install rcsfreeze (or its manpage).
-rcsfreeze: rcsfreeze.sh
-	sed 's/PACKAGE_VERSION/$(PACKAGE_VERSION)/g' $< > $@
+EXTRA_DIST = TAGS $(TESTS) yarrrr.c
 
 dist-hook:
 	rm -f $(distdir)/bother.c

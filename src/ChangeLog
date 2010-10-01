@@ -1,3 +1,11 @@
+2010-10-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[maint] Let the configure script instantiate rcsfreeze.
+
+	* Makefile.am (EXTRA_DIST): Remove rcsfreeze.sh.
+	(rcsfreeze): Delete target.
+	* rcsfreeze.sh: Add '@' around ‘PACKAGE_VERSION’.
+
 2010-09-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘struct symdef’ array as "three manifestations" ‘merge’ arg.

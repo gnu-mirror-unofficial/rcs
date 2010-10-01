@@ -1,3 +1,9 @@
+2010-10-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[maint] Let the configure script instantiate rcsfreeze.
+
+	* configure.ac (AC_CONFIG_FILES): Add src/rcsfreeze.
+
 2010-09-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[maint] Do "gnulib-tool --add-import" for bootstrap.
