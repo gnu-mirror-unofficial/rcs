@@ -1,3 +1,10 @@
+2010-10-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Use Automake for test preparation.
+
+	* Makefile.am (check_SCRIPTS): New var.
+	(check-TESTS): Clear prereq list.
+
 2010-09-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[maint] Simplify ‘PATHPREFIX’ Makefile-internal protocol.

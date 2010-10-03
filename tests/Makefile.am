@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+check_SCRIPTS = test-prep
+
 # This is for the benefit of "make installcheck".
 # Note that it should NOT end in ":".
 PATHPREFIX = $(abs_top_builddir)/src/0pre/bin
@@ -32,7 +34,7 @@ EXTRA_DIST = $(TESTS)
 test-prep:
 	@cd ../src ; $(MAKE) test-prep
 
-check-TESTS: test-prep
+check-TESTS:
 	@overall=true ;							\
 	ls='$(TESTS)' ; if [ "$$ls" ] ; then				\
 	  d='$(srcdir)/' ; test './' = $$d && d= ;			\
