@@ -35,7 +35,7 @@
 # The current directory and ./RCS must be readable, writable, and searchable.
 
 . ./common
-dontsplit
+split_std_out_err no
 cd $wd
 xorlf='../xorlf'
 

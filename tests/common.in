@@ -22,9 +22,13 @@ srcdir='@srcdir@'
 stem=$(basename $0 .test)
 wd=${stem}.d
 
-dontsplit ()
+split_std_out_err ()
 {
-    exec 2>&1
+    exec 1>${wd}/out
+    if [ "x$1" = xno ]
+    then exec 2>&1
+    else exec 2>${wd}/err
+    fi
 }
 
 copyall ()

@@ -1,5 +1,6 @@
 #!/bin/sh
 . ./common
+split_std_out_err no
 type ci
 type co
 type ident

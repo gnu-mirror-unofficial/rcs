@@ -1,7 +1,7 @@
 # t000.test                                             -*- shell-script -*-
 
 . ./common
-dontsplit
+split_std_out_err no
 
 w=$wd/x
 v=$wd/x,v

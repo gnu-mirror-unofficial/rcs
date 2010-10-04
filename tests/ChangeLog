@@ -1,5 +1,17 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Do stdout/stderr split in shell func, not in makefile.
+
+	* Makefile.am (check-TESTS): Don't redirect stdout/stderr.
+	* common.in (split_std_out_err): New func.
+	(dontsplit): Delete func.
+	* alive.test: Use ‘split_std_out_err’.
+	* t000.test: Likewise.
+	* t001.test: Likewise.
+	* t999.test: Likewise.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Use Automake for building xorlf.
 
 	* Makefile.am (check_PROGRAMS): New var.

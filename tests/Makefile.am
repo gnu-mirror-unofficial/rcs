@@ -44,7 +44,7 @@ check-TESTS:
 	  for t in $$ls ; do						\
             test -r "$$d$$t" || { echo "DNE: $$t" ; continue ; } ;	\
 	    b=$$(basename $$t .test) ; rm -rf $$b.d ; mkdir $$b.d ;	\
-	    $(TESTS_ENVIRONMENT) "$$d$$t" >$$b.d/out 2>$$b.d/err ;	\
+	    $(TESTS_ENVIRONMENT) "$$d$$t" ;				\
 	    res=$$? ;							\
 	    if [ 0 = $$res ] ; then					\
 	      echo "PASS: $$t" ; $$zonk $$b.d ;				\
