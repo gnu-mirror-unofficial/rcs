@@ -671,7 +671,7 @@ full (struct divvy *to, struct fro *f)
         SEMI (g, state);
 
         SYNCH (g, branches);
-        box.next = ny->branches, tp = &box;
+        box.next = NULL, tp = &box;
         while (MAYBE_REVNO (g))
           HANG (XREP (g).string);
         ny->branches = box.next;

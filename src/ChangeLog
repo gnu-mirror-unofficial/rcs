@@ -1,5 +1,13 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Initialize notyet ‘.branches’ correctly.
+
+	Original circular-GIGO from 2010-05-24, "Rewrite parsing".
+	* b-grok.c (full): For notyet ‘.branches’, use ‘NULL’ as head
+	of the cdr-copying chain, not the to-be-initialized ‘.branches’!
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Use Automake for building xorlf.
 
 	* Makefile.am (clean-local): Don't delete ‘xorlf*’.
