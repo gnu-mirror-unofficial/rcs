@@ -642,7 +642,7 @@ full (struct divvy *to, struct fro *f)
          MAYBE_REVNO (g);
          count++)
       {
-        struct notyet *ny = STRUCTALLOC (g->tranquil, struct notyet);
+        struct notyet *ny = STRUCTALLOC (to, struct notyet);
         struct delta *d = ny->d = STRUCTALLOC (to, struct delta);
 
         STASH (d->num);

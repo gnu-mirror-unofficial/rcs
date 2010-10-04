@@ -1,5 +1,14 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Save notyet objects in caller space.
+
+	Memory incoherence introduced 2010-05-24, "Rewrite parsing".
+	* b-grok.c (full): Don't save notyet objects in
+	‘g->tranquil’; instead, save in caller specified space.
+	Reported by Paul Eggert.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Avoid identifier ‘SHARED’ (Solaris 8 header conflict).
 
 	* b-divvy.c: Do s/SHARED/PLEXUS/g; do s/shared/plexus/g.
