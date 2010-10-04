@@ -19,8 +19,6 @@
 
 # variables
 
-srcdir='@srcdir@'
-
 stem=$(basename $0 .test)
 wd=${stem}.d
 

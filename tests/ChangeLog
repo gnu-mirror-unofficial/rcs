@@ -1,5 +1,14 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Use Automake for generating top-level test driver.
+
+	* common: Rename from common.in.
+	* Makefile.am (EXTRA_DIST): Add common.
+	(check-TESTS): Delete target.
+	(srcdir): Delete now-redundant var.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Make test wd in common; arrange for cleanup there, too.
 
 	* common.in: Add load-time actions: Make pristine test

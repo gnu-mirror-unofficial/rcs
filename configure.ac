@@ -557,7 +557,6 @@ AC_CONFIG_FILES([
   man/Makefile
   src/Makefile
   tests/Makefile
-  tests/common
 ])
 
 # We don't use or install rcsfreeze, so there is no point making it executable.

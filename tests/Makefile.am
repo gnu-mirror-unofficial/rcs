@@ -31,28 +31,10 @@ TESTS = alive.test \
   t001.test \
   t999.test
 
-EXTRA_DIST = $(TESTS)
+EXTRA_DIST = $(TESTS) common
 
 test-prep:
 	@cd ../src ; $(MAKE) test-prep
-
-check-TESTS:
-	@overall=true ;							\
-	ls='$(TESTS)' ; if [ "$$ls" ] ; then				\
-	  d='$(srcdir)/' ; test './' = $$d && d= ;			\
-          zonk='rm -rf' ; test "$(KEEPD)" && zonk=':' ;			\
-	  for t in $$ls ; do						\
-            test -r "$$d$$t" || { echo "DNE: $$t" ; continue ; } ;	\
-	    $(TESTS_ENVIRONMENT) "$$d$$t" ;				\
-	    res=$$? ;							\
-	    if [ 0 = $$res ] ; then					\
-	      echo "PASS: $$t" ;					\
-	    elif [ 77 = $$res ] ; then					\
-	      echo "SKIP: $$t" ;					\
-	    else echo "FAIL: $$t" ; overall=false ;			\
-	    fi ;							\
-	  done ;							\
-	fi ; $$overall
 
 installcheck-local: test-prep
 	$(MAKE) check PATHPREFIX='$(DESTDIR)$(bindir)'
