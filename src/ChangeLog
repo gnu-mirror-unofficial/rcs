@@ -1,5 +1,11 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Delete unused macro.
+
+	* b-grok.c (NEWPAIR): Delete macro.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Save notyet objects in caller space.
 
 	Memory incoherence introduced 2010-05-24, "Rewrite parsing".

@@ -65,7 +65,6 @@ struct grok
 };
 
 #define STRUCTALLOC(to,type)  alloc (to, #type, sizeof (type))
-#define NEWPAIR(to)  STRUCTALLOC (to, struct link)
 
 #if CONTEXTUAL
 static void
