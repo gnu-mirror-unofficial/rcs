@@ -691,6 +691,8 @@ full (struct divvy *to, struct fro *f)
             checkssym (d->commitid);
             SEMI (g, commitid);
           }
+        else
+          d->commitid = NULL;
 
         CEND ();
         wtp = wextend (wtp, ny, to);

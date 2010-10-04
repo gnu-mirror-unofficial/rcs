@@ -1,5 +1,14 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Fully initialize delta objects.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* b-grok.c (full): If there is no "commitid"
+	field, explicitly clear ‘d->commitid’.
+	Reported by Paul Eggert.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Fully initialize notyet objects.
 
 	Omission from 2010-05-24, "Rewrite parsing".
