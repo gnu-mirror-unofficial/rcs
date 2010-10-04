@@ -680,6 +680,8 @@ full (struct divvy *to, struct fro *f)
         SYNCH (g, next);
         if (MAYBE_REVNO (g))
           STASH (ny->next);
+        else
+          ny->next = NULL;
         SEMI (g, next);
 
         if (probe_keyword (g, &TINY (commitid)))

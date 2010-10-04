@@ -1,5 +1,14 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Fully initialize notyet objects.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* b-grok.c (full): If there are no more revision
+	numbers to parse, explicitly clear ‘ny->next’.
+	Reported by Paul Eggert.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Delete unused macro.
 
 	* b-grok.c (NEWPAIR): Delete macro.
