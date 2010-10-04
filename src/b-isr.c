@@ -291,7 +291,7 @@ isr_init (bool *be_quiet)
 {
   /* Allocate a contiguous range for the scratch space,
      plus (possibly) space for the alternate sig stack.  */
-  struct isr_scratch *scratch = alloc (SHARED, "isr scratch",
+  struct isr_scratch *scratch = alloc (PLEXUS, "isr scratch",
                                        SCRATCH_SIZE + ISR_STACK_SIZE);
 
 #if ISR_STACK_SIZE

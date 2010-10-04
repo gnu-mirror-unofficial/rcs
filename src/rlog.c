@@ -111,7 +111,7 @@ getlocker (char *argv)
   tp = &box;
   while (c != '\0')
     {
-      tp = extend (tp, argv, SHARED);
+      tp = extend (tp, argv, PLEXUS);
       while ((c = *++argv) && c != ',' && c != ' ' && c != '\t' && c != '\n'
              && c != ';')
         continue;
@@ -342,13 +342,13 @@ getauthor (char *argv)
   tp = &box;
   if (c == '\0')
     {
-      tp = extend (tp, getusername (false), SHARED);
+      tp = extend (tp, getusername (false), PLEXUS);
       return;
     }
 
   while (c != '\0')
     {
-      tp = extend (tp, argv, SHARED);
+      tp = extend (tp, argv, PLEXUS);
       while ((c = *++argv) && c != ',' && c != ' ' && c != '\t' && c != '\n'
              && c != ';')
         continue;
@@ -385,7 +385,7 @@ getstate (char *argv)
   tp = &box;
   while (c != '\0')
     {
-      tp = extend (tp, argv, SHARED);
+      tp = extend (tp, argv, PLEXUS);
       while ((c = *++argv) && c != ',' && c != ' ' && c != '\t' && c != '\n'
              && c != ';')
         continue;
@@ -511,7 +511,7 @@ extdate (struct delta *root)
   return revno;
 }
 
-#define PUSH(x,ls)  ls = prepend (x, ls, SHARED)
+#define PUSH(x,ls)  ls = prepend (x, ls, PLEXUS)
 
 static void
 getdatepair (char *argv)
@@ -674,7 +674,7 @@ getnumericrev (void)
           else
             {
               SHACCR (e.string, strrchr (e.string, '.'));
-              accf (SHARED, ".0");
+              accf (PLEXUS, ".0");
               s.string = SHSTR (&s.size);
             }
           break;

@@ -26,7 +26,7 @@ struct divvy
   size_t count;
 };
 
-extern struct divvy *shared;
+extern struct divvy *plexus;
 extern struct divvy *single;
 
 extern struct divvy *make_space (const char const name[]);
@@ -45,16 +45,16 @@ extern void close_space (struct divvy *divvy);
 
 /* Idioms.  */
 
-#define SHARED  shared
+#define PLEXUS  plexus
 #define SINGLE  single
 
-#define ZLLOC(n,type)          (zlloc (SHARED, #type, sizeof (type) * n))
+#define ZLLOC(n,type)          (zlloc (PLEXUS, #type, sizeof (type) * n))
 #define FALLOC(type)           (alloc (SINGLE, #type, sizeof (type)))
 #define FZLLOC(type)           (zlloc (SINGLE, #type, sizeof (type)))
 #define accs(divvy,string)     accf (divvy, "%s", string)
 
-#define SHACCR(b,e)      accumulate_range (SHARED, b, e)
-#define SHSTR(szp)       finish_string (SHARED, szp)
+#define SHACCR(b,e)      accumulate_range (PLEXUS, b, e)
+#define SHSTR(szp)       finish_string (PLEXUS, szp)
 #define SHSNIP(szp,b,e)  (SHACCR (b, e), SHSTR (szp))
 
 /* b-divvy.h ends here */

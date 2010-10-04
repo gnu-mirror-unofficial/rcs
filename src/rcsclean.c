@@ -107,7 +107,7 @@ get_directory (char const *dirname, char ***aargv)
     }
   if (errno || PROB (closedir (d)))
     fatal_sys (dirname);
-  *aargv = pointer_array (SHARED, entries);
+  *aargv = pointer_array (PLEXUS, entries);
   for (tp = head.next, i = 0; i < entries; tp = tp->next, i++)
     (*aargv)[i] = tp->entry;
   close_space (justme);

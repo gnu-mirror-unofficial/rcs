@@ -120,14 +120,14 @@ jam_sff (struct sff *sff, const char *prefix)
           if (! tmpdir)
             tmpdir = P_tmpdir;
 
-          accf (SHARED, "%s%s", tmpdir,
+          accf (PLEXUS, "%s%s", tmpdir,
                 SLASH != tmpdir[strlen (tmpdir) - 1] ? slash : "");
-          tmpdir = finish_string (SHARED, &len);
+          tmpdir = finish_string (PLEXUS, &len);
         }
       prefix = tmpdir;
     }
-  accf (SHARED, "%sXXXXXX", prefix);
-  fn = finish_string (SHARED, &len);
+  accf (PLEXUS, "%sXXXXXX", prefix);
+  fn = finish_string (PLEXUS, &len);
   /* Support the 8.3 MS-DOG restriction, blech.  Truncate the non-directory
      filename component to two bytes so that the maximum non-extension name
      is 2 + 6 (Xs) = 8.  The extension is left empty.  What a waste.  */

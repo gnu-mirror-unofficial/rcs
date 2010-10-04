@@ -25,7 +25,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 
-struct divvy *shared;
+struct divvy *plexus;
 struct divvy *single;
 
 static void

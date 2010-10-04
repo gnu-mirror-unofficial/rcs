@@ -457,10 +457,10 @@ getfullRCSname (void)
             {
               size_t sz = 64;
 
-              while (!(cwd = alloc (SHARED, __func__, sz),
+              while (!(cwd = alloc (PLEXUS, __func__, sz),
                        getcwd (cwd, sz)))
                 {
-                  brush_off (SHARED, cwd);
+                  brush_off (PLEXUS, cwd);
                   if (errno == ERANGE)
                     sz <<= 1;
                   else if ((cwd = PWD))

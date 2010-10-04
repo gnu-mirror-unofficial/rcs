@@ -1,3 +1,23 @@
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Avoid identifier ‘SHARED’ (Solaris 8 header conflict).
+
+	* b-divvy.c: Do s/SHARED/PLEXUS/g; do s/shared/plexus/g.
+	* b-divvy.h: Likewise.
+	* b-feph.c: Likewise.
+	* b-isr.c: Likewise.
+	* ci.c: Likewise.
+	* co.c: Likewise.
+	* merger.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+	* rcsfnms.c: Likewise.
+	* rcsgen.c: Likewise.
+	* rcsutil.c: Likewise.
+	* rlog.c: Likewise.
+	Reported by Paul Eggert.
+
 2010-10-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[maint] Let the configure script instantiate rcsfreeze.

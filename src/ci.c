@@ -89,22 +89,22 @@ exiterr (void)
   exit_failurefully ();
 }
 
-#define ACCF(...)  accf (SHARED, __VA_ARGS__)
+#define ACCF(...)  accf (PLEXUS, __VA_ARGS__)
 
-#define OK(x)     (x)->string = finish_string (SHARED, &((x)->size))
+#define OK(x)     (x)->string = finish_string (PLEXUS, &((x)->size))
 #define JAM(x,s)  do { ACCF ("%s", s); OK (x); } while (0)
 #define ADD(x,s)  do { ACCF ("%s", (x)->string); JAM (x, s); } while (0)
 
 static void
 incnum (char const *onum, struct cbuf *nnum)
 /* Increment the last field of revision number ‘onum’
-   by one into a ‘SHARED’ string and point ‘nnum’ at it.  */
+   by one into a ‘PLEXUS’ string and point ‘nnum’ at it.  */
 {
   register char *tp, *np;
   register size_t l;
 
   ACCF ("%s%c", onum, '\0');
-  np = finish_string (SHARED, &nnum->size);
+  np = finish_string (PLEXUS, &nnum->size);
   nnum->string = np;
   l = nnum->size - 1;
   for (tp = np + l; np != tp;)
@@ -173,7 +173,7 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
    If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
    The new delta and branchhead are in globals ‘newdelta’ and ‘newbranch’, resp.
-   The new number is placed into a ‘SHARED’ string with ‘num’ pointing to it.
+   The new number is placed into a ‘PLEXUS’ string with ‘num’ pointing to it.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
    If ‘removedlock’, a lock was already removed.  */
 {
@@ -731,7 +731,7 @@ main (int argc, char **argv)
             ud = ZLLOC (1, struct u_symdef);
             ud->override = ('N' == option);
             ud->u.meaningful = a;
-            tp_assoc = extend (tp_assoc, ud, SHARED);
+            tp_assoc = extend (tp_assoc, ud, PLEXUS);
           }
           break;
 

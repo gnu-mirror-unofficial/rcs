@@ -132,7 +132,7 @@ getassoclst (struct link **tp, char *sp)
       SKIPWS ();
       ud->u.underlying = sp;
     }
-  *tp = extend (*tp, ud, SHARED);
+  *tp = extend (*tp, ud, PLEXUS);
 
 #undef SKIPWS
 }
@@ -145,7 +145,7 @@ getchaccess (struct link **tp, char const *login, enum changeaccess command)
   ch = ZLLOC (1, struct chaccess);
   ch->login = login;
   ch->command = command;
-  *tp = extend (*tp, ch, SHARED);
+  *tp = extend (*tp, ch, PLEXUS);
 }
 
 static void
@@ -203,7 +203,7 @@ getmessage (struct link **tp, char *option)
   um = ZLLOC (1, struct u_log);
   um->revno = option;
   um->message = cb;
-  *tp = extend (*tp, um, SHARED);
+  *tp = extend (*tp, um, PLEXUS);
 }
 
 static void
@@ -243,7 +243,7 @@ getstates (struct link **tp, char *sp)
   us = ZLLOC (1, struct u_state);
   us->status = temp;
   us->revno = sp;
-  *tp = extend (*tp, us, SHARED);
+  *tp = extend (*tp, us, PLEXUS);
 }
 
 static void
@@ -1204,7 +1204,7 @@ main (int argc, char **argv)
               lockhead = true;
               break;
             }
-          tplock = extend (tplock, a, SHARED);
+          tplock = extend (tplock, a, PLEXUS);
           break;
 
         case 'u':
@@ -1214,7 +1214,7 @@ main (int argc, char **argv)
               unlockcaller = true;
               break;
             }
-          tprm = extend (tprm, a, SHARED);
+          tprm = extend (tprm, a, PLEXUS);
           newlocklst = boxlock.next;
           tplock = rmnewlocklst (a);
           break;

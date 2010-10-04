@@ -290,11 +290,11 @@ putdesc (struct cbuf *cb, bool textflag, char *textfile)
                       if (feof (txt))
                         break;
                     }
-                  accumulate_byte (SHARED, c);
+                  accumulate_byte (PLEXUS, c);
                 }
               if (PROB (fclose (txt)))
                 Ierror ();
-              p = finish_string (SHARED, &s);
+              p = finish_string (PLEXUS, &s);
             }
           *cb = cleanlogmsg (p, s);
         }
@@ -337,9 +337,9 @@ getsstdin (char const *option, char const *name, char const *note)
         }
       else
         column++;
-      accumulate_byte (SHARED, c);
+      accumulate_byte (PLEXUS, c);
     }
-  p = finish_string (SHARED, &len);
+  p = finish_string (PLEXUS, &len);
 #undef prompt
   return cleanlogmsg (p, len - (discardp ? 1 : 0));
 }

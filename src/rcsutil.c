@@ -54,7 +54,7 @@ exit_diff_trouble (void)
 void
 gnurcs_init (struct program const *program)
 {
-  SHARED = make_space ("shared");
+  PLEXUS = make_space ("plexus");
   SINGLE = make_space ("single");
   top = ZLLOC (1, struct top);
   unbuffer_standard_error ();
@@ -189,7 +189,7 @@ char *
 str_save (char const *s)
 /* Save ‘s’ in permanently allocated storage.  */
 {
-  return intern (SHARED, s, strlen (s));
+  return intern (PLEXUS, s, strlen (s));
 }
 
 char *
@@ -344,15 +344,15 @@ runv (int infd, char const *outname, char const **args)
 
     /* Use ‘system’.  On many hosts ‘system’ discards signals.  Yuck!  */
     p = args + 1;
-    accs (SHARED, *p);
+    accs (PLEXUS, *p);
     while (*++p)
-      accumulate_arg_quoted (SHARED, ' ', *p);
+      accumulate_arg_quoted (PLEXUS, ' ', *p);
     if (infd != -1 && infd != STDIN_FILENO)
-      accf (SHARED, "<&%d", infd);
+      accf (PLEXUS, "<&%d", infd);
     if (outname)
-      accumulate_arg_quoted (SHARED, '>', outname);
-    wstatus = system (cmd = finish_string (SHARED, &len));
-    brush_off (SHARED, cmd);
+      accumulate_arg_quoted (PLEXUS, '>', outname);
+    wstatus = system (cmd = finish_string (PLEXUS, &len));
+    brush_off (PLEXUS, cmd);
 #endif  /* !defined HAVE_WORKING_FORK */
   }
   if (!WIFEXITED (wstatus))
@@ -451,7 +451,7 @@ getRCSINIT (int argc, char **argv, char ***newargv)
             }
           break;
         }
-      *newargv = pp = pointer_array (SHARED, n);
+      *newargv = pp = pointer_array (PLEXUS, n);
       /* Copy program name.  */
       *pp++ = *argv++;
       for (p = q;;)

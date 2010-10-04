@@ -106,10 +106,10 @@ setup_label (char const *num, char const date[datesize])
   char datestr[datesize + zonelenmax];
 
   date2str (date, datestr);
-  accf (SHARED, "-L%s\t%s", MANI (filename), datestr);
+  accf (PLEXUS, "-L%s\t%s", MANI (filename), datestr);
   if (num)
-    accf (SHARED, "\t%s", num);
-  return finish_string (SHARED, &len);
+    accf (PLEXUS, "\t%s", num);
+  return finish_string (PLEXUS, &len);
 }
 #endif
 
@@ -181,7 +181,7 @@ main (int argc, char **argv)
 
   /* Room for runv extra + args [+ --binary] [+ 2 labels]
      + 1 file + 1 trailing null.  */
-  diffv = pointer_array (SHARED, (1 + argc
+  diffv = pointer_array (PLEXUS, (1 + argc
                                   + !!OPEN_O_BINARY
                                   + 2 * DIFF_L + 2));
   diffp = diffv + 1;
@@ -312,8 +312,8 @@ main (int argc, char **argv)
       size_t len;
 
       for (pp = diffv + 2; pp < diffp;)
-        accf (SHARED, " %s", *pp++);
-      diffvstr = finish_string (SHARED, &len);
+        accf (PLEXUS, " %s", *pp++);
+      diffvstr = finish_string (PLEXUS, &len);
     }
 
 #if DIFF_L
@@ -448,7 +448,7 @@ main (int argc, char **argv)
             diffp[1] = mani_filename;
             if (*mani_filename == '-')
               {
-                accf (SHARED, ".%c", SLASH);
+                accf (PLEXUS, ".%c", SLASH);
                 diffp[1] = str_save (mani_filename);
               }
           }

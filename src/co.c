@@ -203,7 +203,7 @@ getancestor (char const *r1, char const *r2)
   int l1, l2, l3;
   char const *r;
 
-  /* TODO: Don't bother saving in ‘SHARED’.  */
+  /* TODO: Don't bother saving in ‘PLEXUS’.  */
 
   l1 = countnumflds (r1);
   l2 = countnumflds (r2);
@@ -295,7 +295,7 @@ preparejoin (register char *j)
     RFATAL ("empty join");
  done:
 
-  joinlist = pointer_array (SHARED, 1 + lastjoin);
+  joinlist = pointer_array (PLEXUS, 1 + lastjoin);
   jstuff.tp = jstuff.head.next;
   for (int i = 0; i <= lastjoin; i++, jstuff.tp = jstuff.tp->next)
     joinlist[i] = jstuff.tp->entry;
