@@ -43,13 +43,12 @@ check-TESTS:
           zonk='rm -rf' ; test "$(KEEPD)" && zonk=':' ;			\
 	  for t in $$ls ; do						\
             test -r "$$d$$t" || { echo "DNE: $$t" ; continue ; } ;	\
-	    b=$$(basename $$t .test) ; rm -rf $$b.d ; mkdir $$b.d ;	\
 	    $(TESTS_ENVIRONMENT) "$$d$$t" ;				\
 	    res=$$? ;							\
 	    if [ 0 = $$res ] ; then					\
-	      echo "PASS: $$t" ; $$zonk $$b.d ;				\
+	      echo "PASS: $$t" ;					\
 	    elif [ 77 = $$res ] ; then					\
-	      echo "SKIP: $$t" ; $$zonk $$b.d ;				\
+	      echo "SKIP: $$t" ;					\
 	    else echo "FAIL: $$t" ; overall=false ;			\
 	    fi ;							\
 	  done ;							\

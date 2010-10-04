@@ -1,5 +1,14 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Make test wd in common; arrange for cleanup there, too.
+
+	* common.in: Add load-time actions: Make pristine test
+	working directory and optionally arrange for its removal.
+	* Makefile.am (check-TESTS): No longer do wd setup/cleanup.
+	* t999.test: At end, cd ..; don't delete working files.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Do stdout/stderr split in shell func, not in makefile.
 
 	* Makefile.am (check-TESTS): Don't redirect stdout/stderr.

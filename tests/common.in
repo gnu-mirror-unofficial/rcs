@@ -1,4 +1,4 @@
-# common variables / subroutines
+# common variables / subroutines / load-time actions
 
 # Copyright (C) 2010 Thien-Thi Nguyen
 #
@@ -57,5 +57,11 @@ do_rlog ()
     echo _________________________________________ rlog "$@"
     rlog "$@" $w | sed 's/^/|/'
 }
+
+# load-time actions
+
+rm -rf $wd && mkdir $wd || exit 1
+test x"$KEEPD" = x1 \
+    || trap 'result=$? ; test 0 = $result && rm -rf $wd' 0
 
 # common ends here
