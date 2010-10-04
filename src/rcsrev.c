@@ -305,6 +305,8 @@ store1 (struct wlink ***store, struct delta *next)
   register struct wlink *p;
 
   p = FALLOC (struct wlink);
+  /* Note: We don't clear ‘p->next’ here;
+     ‘CLEAR_MAYBE’ does that (after looping).  */
   p->entry = next;
   **store = p;
   *store = &p->next;
