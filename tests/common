@@ -21,6 +21,8 @@
 
 stem=$(basename $0 .test)
 wd=${stem}.d
+w=$wd/x
+v=$wd/x,v
 
 # subroutines
 

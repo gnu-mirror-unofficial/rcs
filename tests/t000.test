@@ -3,9 +3,6 @@
 . ./common
 split_std_out_err no
 
-w=$wd/x
-v=$wd/x,v
-
 # Initialize empty RCS file.
 do_and_show 'rcs -i -t-t000 $v' ; do_rlog ; cp $v ${v}SAVE
 # Add a revision.

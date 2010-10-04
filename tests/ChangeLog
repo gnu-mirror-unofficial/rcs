@@ -1,5 +1,13 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Centralize shell vars ‘w’, ‘v’.
+
+	* common (w, v): New vars.
+	* t000.test (w, v): Delete vars.
+	* t001.test (w, v): Likewise.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Delete unused shell func.
 
 	* common (copyall): Delete func.
