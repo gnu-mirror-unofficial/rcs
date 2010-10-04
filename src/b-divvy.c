@@ -99,6 +99,8 @@ alloc (struct divvy *divvy, char const *what USED_FOR_DEBUG, size_t len)
   complain ("%s: %6u  %s\n", divvy->name, len, what);
 #endif
   divvy->count++;
+  /* DWR: The returned memory is uninitialized.
+     If you have doubts, use ‘zlloc’ instead.  */
   return obstack_alloc (divvy->space, len);
 }
 
