@@ -1,5 +1,13 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Use Automake for building xorlf.
+
+	* Makefile.am (clean-local): Don't delete ‘xorlf*’.
+	(test-prep): Don't ‘$(MAKE) xorlf’ or move it to 0pre/bin.
+	(xorlf): Delete target.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Fully initialize delta objects.
 
 	Omission from 2010-05-24, "Rewrite parsing".

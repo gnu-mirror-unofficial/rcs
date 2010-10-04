@@ -52,7 +52,7 @@ dist-hook:
 
 clean-local:
 	rm -rf 0pre RCS
-	rm -f a.* xorlf*
+	rm -f a.*
 
 bother.c: FORCE
 	@( echo '/* brooked other (shared mother) */' ; \
@@ -72,23 +72,9 @@ test-prep:
 	  cp -p $(bin_PROGRAMS) *.o *.a bother.c 0pre/stash ;		\
 	  rm -f $(bin_PROGRAMS) ;					\
 	  $(MAKE) all bindir=$$(pwd)/0pre/bin >/dev/null ;		\
-	  $(MAKE) xorlf >/dev/null ;					\
-	  mv -v $(bin_PROGRAMS) xorlf 0pre/bin ;			\
+	  mv -v $(bin_PROGRAMS) 0pre/bin ;				\
 	  cp -pf 0pre/stash/* . ;					\
 	fi
-
-xorlf:
-	@{ echo '#include <stdio.h>'               ;	\
-	   echo 'int main ()'                      ;	\
-	   echo '{'                                ;	\
-	   echo '  int c;'                         ;	\
-	   echo '  while (EOF != (c = getchar()))' ;	\
-	   echo '    putchar (c ^ 012);'           ;	\
-	   echo '  return 0;'                      ;	\
-	   echo '}'                                ;	\
-	} > $@.c
-	$(CC) -o $@ $@.c
-	rm -f $@.c
 
 FORCE:;
 

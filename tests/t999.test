@@ -37,6 +37,7 @@
 . ./common
 dontsplit
 cd $wd
+xorlf='../xorlf'
 
 : ${DIFF=diff}
 
@@ -396,13 +397,13 @@ int main() {
 }
 EOF
 {
-	co -p $q a.c | xorlf '\012' '\200' >a.24 &&
+	co -p $q a.c | $xorlf '\012' '\200' >a.24 &&
 	cp a.24 a.c &&
 	ciOut=`(ci -l -mm $q a.c 2>&1)` &&
 	case $ciOut in
 	?*) echo >&2 "$ciOut"
 	esac &&
-	co -p $q a.c | xorlf '\200' '\012' >a.c &&
+	co -p $q a.c | $xorlf '\200' '\012' >a.c &&
 	rcsdiff -r2.3 $q a.c >/dev/null &&
 
 	echo 2.5 >a.c &&
