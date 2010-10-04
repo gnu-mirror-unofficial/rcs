@@ -1,5 +1,11 @@
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Delete unused shell func.
+
+	* common (copyall): Delete func.
+
+2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Use Automake for generating top-level test driver.
 
 	* common: Rename from common.in.

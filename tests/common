@@ -33,14 +33,6 @@ split_std_out_err ()
     fi
 }
 
-copyall ()
-{
-    all="${srcdir}/${stem}.test"
-    data="${srcdir}/${stem}.data"
-    test -f "$data" && all="$all $data"
-    cp -p "$all" ${stem}.d
-}
-
 do_and_show ()
 {
     echo __________________________________________________
