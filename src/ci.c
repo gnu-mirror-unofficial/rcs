@@ -651,11 +651,6 @@ main (int argc, char **argv)
   usestatdate = false;
   BE (pe) = X_DEFAULT;
 
-  /* Workaround a x86_64-linux-gnu problem.  Removing this (deferring
-     the call to only when it's needed) results in corrupted memory,
-     ending up with a segfault.  TODO: Debug further.  */
-  getcurdate ();
-
   argc = getRCSINIT (argc, argv, &newargv);
   argv = newargv;
   while (a = *++argv, 0 < --argc && *a++ == '-')

@@ -1,5 +1,13 @@
 2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Undo bogus workaround.
+
+	Brain damage artifact introduced 2010-08-21, "Work
+	around x86_64-linux-gnu memory corruption problem".
+	* ci.c (main): Don't ‘getcurdate’ unconditionally, early on.
+
+2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: gnurcs_goodbye
 
 	* rcsutil.c (gnurcs_goodbye): New func.
