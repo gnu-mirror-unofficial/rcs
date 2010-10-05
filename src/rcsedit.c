@@ -279,6 +279,7 @@ finishedit_fast (struct editstuff *es, struct delta const *delta,
           for (p += es->gapsize, lim = l + es->lim; p < lim;)
             finisheditline (&finctx, *p++);
           fin->ptr = here;
+          FINISH_EXPCTX (&finctx.ctx);
         }
     }
 }
@@ -353,6 +354,7 @@ finishedit_slow (struct editstuff *es, struct delta const *delta,
 
           while (1 < expandline (&ctx))
             ;
+          FINISH_EXPCTX (&ctx);
         }
       else
         {
@@ -436,6 +438,7 @@ copylines (struct editstuff *es, register long upto, struct delta const *delta)
                 }
               while (++es->lcount < upto);
             }
+          FINISH_EXPCTX (&ctx);
         }
     }
 }
@@ -620,6 +623,7 @@ editstring (struct editstuff *es, struct atat const *script,
                   }
               }
             while (--i);
+            FINISH_EXPCTX (&ctx);
           }
         else
           {

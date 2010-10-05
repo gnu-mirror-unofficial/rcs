@@ -1,3 +1,15 @@
+2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Close expansion context scratch space when done.
+
+	Omission from 2010-04-30, "Move
+	‘expandline’ scratch to expansion context".
+	* b-kwxout.h (FINISH_EXPCTX): New macro.
+	* ci.c (xpandfile): Use ‘FINISH_EXPCTX’.
+	* rcsedit.c (finishedit_fast, finishedit_slow)
+	(copylines, editstring): Likewise.
+	* rcsgen.c (scandeltatext): Likewise.
+
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: Initialize notyet ‘.branches’ correctly.

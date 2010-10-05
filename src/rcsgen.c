@@ -96,6 +96,7 @@ scandeltatext (struct editstuff *es, struct wlink **ls,
           afputc (c, to);
         while (1 < expandline (&ctx))
           continue;
+        FINISH_EXPCTX (&ctx);
       }
       break;
     case edit:

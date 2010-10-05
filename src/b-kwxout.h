@@ -46,6 +46,13 @@ struct expctx
 #define EXPCTX_1OUT(TO,FROM,DELIMSTUFFED,DOLOG) \
   EXPCTX (TO, NULL, FROM, DELIMSTUFFED, DOLOG)
 
+#define FINISH_EXPCTX(ctx)  do                  \
+    {                                           \
+      if ((ctx)->lparts)                        \
+        close_space ((ctx)->lparts);            \
+    }                                           \
+  while (0)
+
 extern int expandline (struct expctx *ctx);
 
 /* b-kwxout.h ends here */

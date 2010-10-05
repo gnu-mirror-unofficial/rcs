@@ -484,6 +484,7 @@ xpandfile (struct fro *unexfile, struct delta const *delta,
           if (e <= 1)
             break;
         }
+      FINISH_EXPCTX (&ctx);
     }
   *exname = targetname;
   return r & 1;
