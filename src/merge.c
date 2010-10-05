@@ -20,6 +20,7 @@
 */
 
 #include "base.h"
+#include <stdlib.h>
 #include "merge.help"
 #include "b-complain.h"
 #include "b-feph.h"
@@ -96,7 +97,7 @@ main (int argc, char **argv)
 
         case 'V':
           display_version (&program);
-          return 0;
+          return EXIT_SUCCESS;
 
         default:
           bad_option (a - 2);

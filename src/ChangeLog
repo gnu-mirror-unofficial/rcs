@@ -1,5 +1,12 @@
 2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘EXIT_SUCCESS’ more.
+
+	* merge.c: #include <stdlib.h>.
+	(main): Use ‘EXIT_SUCCESS’.
+
+2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Close expansion context scratch space when done.
 
 	Omission from 2010-04-30, "Move
