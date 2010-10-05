@@ -67,7 +67,7 @@ main (int argc, char **argv)
   char const *rev[3];                   /*revision numbers */
   char const *edarg, *expandarg, *suffixarg, *versionarg, *zonearg;
   bool tostdout;
-  int status;
+  int status, exitstatus;
   struct fro *workptr;
   struct delta *target;
   const struct program program =
@@ -228,7 +228,9 @@ main (int argc, char **argv)
         }
     }
   tempunlink ();
-  return FLOW (erroneousp) ? DIFF_TROUBLE : status;
+  exitstatus = FLOW (erroneousp) ? DIFF_TROUBLE : status;
+  gnurcs_goodbye ();
+  return exitstatus;
 }
 
 /* rcsmerge.c ends here */

@@ -832,6 +832,7 @@ void exit_failurefully (void)
 void exit_diff_trouble (void)
   exiting;
 void gnurcs_init (struct program const *program);
+void gnurcs_goodbye (void);
 void bad_option (char const *option);
 void redefined (int c);
 struct cbuf minus_p (char const *xrev, char const *rev);

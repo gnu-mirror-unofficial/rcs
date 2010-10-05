@@ -54,7 +54,7 @@ main (int argc, char **argv)
   register char const *a;
   struct symdef three_manifestations[3];
   char const *edarg = NULL;
-  int labels;
+  int labels, exitstatus;
   bool tostdout = false;
   const struct program program =
     {
@@ -97,6 +97,7 @@ main (int argc, char **argv)
 
         case 'V':
           display_version (&program);
+          gnurcs_goodbye ();
           return EXIT_SUCCESS;
 
         default:
@@ -119,7 +120,9 @@ main (int argc, char **argv)
 
   if (FLOW (erroneousp))
     exiterr ();
-  return merge (tostdout, edarg, three_manifestations);
+  exitstatus = merge (tostdout, edarg, three_manifestations);
+  gnurcs_goodbye ();
+  return exitstatus;
 }
 
 /* merge.c ends here */

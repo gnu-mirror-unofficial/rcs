@@ -1548,6 +1548,7 @@ main (int argc, char **argv)
       }
 
   tempunlink ();
+  gnurcs_goodbye ();
   return exitstatus;
 }
 

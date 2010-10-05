@@ -782,6 +782,7 @@ main (int argc, char **argv)
 
   tempunlink ();
   Ozclose (&MANI (standard_output));
+  gnurcs_goodbye ();
   return exitstatus;
 }
 

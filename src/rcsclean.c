@@ -336,6 +336,7 @@ main (int argc, char **argv)
   tempunlink ();
   if (!BE (quiet))
     fclose (stdout);
+  gnurcs_goodbye ();
   return exitstatus;
 }
 

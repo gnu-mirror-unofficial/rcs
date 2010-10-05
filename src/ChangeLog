@@ -1,5 +1,22 @@
 2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: gnurcs_goodbye
+
+	* rcsutil.c (gnurcs_goodbye): New func.
+	* base.h (gnurcs_goodbye): New func decl.
+	* ci.c (main): Use ‘gnurcs_goodbye’.
+	* co.c (main): Likewise.
+	* ident.c (main): Likewise.
+	* merge.c (main): Likewise.
+	* rcs.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rlog.c (main): Likewise.
+	* yarrrr.c (main): Likewise.
+
+2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘EXIT_SUCCESS’ more.
 
 	* merge.c: #include <stdlib.h>.

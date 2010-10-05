@@ -168,10 +168,12 @@ main (int argc, char **argv)
 
         case 'V':
           display_version (&program);
+          gnurcs_goodbye ();
           return EXIT_SUCCESS;
 
         default:
           bad_option (a - 1);
+          gnurcs_goodbye ();
           return EXIT_FAILURE;
           break;
         }
@@ -197,6 +199,7 @@ main (int argc, char **argv)
       syserror_errno ("standard output");
       status = EXIT_FAILURE;
     }
+  gnurcs_goodbye ();
   return status;
 }
 

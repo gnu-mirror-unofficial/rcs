@@ -1025,6 +1025,7 @@ main (int argc, char **argv)
         aputs (equal_line, out);
       }
   Ozclose (&out);
+  gnurcs_goodbye ();
   return exitstatus;
 }
 

@@ -505,8 +505,12 @@ yarrrr (int argc, char *argv[argc])
 int
 main (int argc, char *argv[argc])
 {
+  int exitstatus;
+
   gnurcs_init (&program);
-  return yarrrr (argc, argv);
+  exitstatus = yarrrr (argc, argv);
+  gnurcs_goodbye ();
+  return exitstatus;
 }
 
 /* yarrrr.c ends here */

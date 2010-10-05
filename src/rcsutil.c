@@ -85,6 +85,15 @@ gnurcs_init (struct program const *program)
 }
 
 void
+gnurcs_goodbye (void)
+{
+  /* Whatever globals ‘gnurcs_init’ sets, we must reset.  */
+  top = NULL;
+  close_space (SINGLE); SINGLE = NULL;
+  close_space (PLEXUS); PLEXUS = NULL;
+}
+
+void
 bad_option (char const *option)
 {
   PERR ("unknown option: %s", option);
