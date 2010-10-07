@@ -1,5 +1,11 @@
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘EXIT_SUCCESS’ more.
+
+	* rcsutil.c (setRCSversion): Use ‘EXIT_SUCCESS’.
+
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Use ‘strtol’ instead of ‘atoi’, ‘atol’.
 
 	* rcstime.c (date2str): Use ‘strtol’, not ‘atoi’.

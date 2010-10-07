@@ -421,7 +421,7 @@ setRCSversion (char const *str)
   else
     {
       display_version (top->program);   /* TODO:ZONK */
-      exit (0);
+      exit (EXIT_SUCCESS);
     }
 }
 
