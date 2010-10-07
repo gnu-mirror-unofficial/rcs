@@ -188,7 +188,7 @@ For example, make sure that your NFS uses UDP checksums, if it uses UDP.
 Modern systems checksum by default; ask your vendor if you're not sure.
 
 bad_NFS_rename - This should be 1 in SCO Unix V.3.2.  Its NFS rename(2) is broken,
-but if configure runs in a non-NFS filesystem, it thinks rename(2) works.
+but if configure runs in a non-NFS file system, it thinks rename(2) works.
 
 HAVE_SETEUID - You have to worry about this only if you plan to run RCS setuid.
 HAVE_SETEUID should be defined only if your seteuid lets you switch back and
