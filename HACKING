@@ -25,10 +25,13 @@ It lives in the repo but is not included in the distribution.
 * coding standards
 *** indent -gnu -nut (sounds enticing, no?)
 *** no trailing whitespace
-*** untabify (but not #if... lines -- work towards removing them completely)
+*** untabify
 *** ChangeLog
 ***** format: while hacking, ttn-style; on release, scrunch to GNU
 ***** changes titled with suffix "; nfc." can be excluded
+*** bootstrap
+***** gnulib-tool must be somewhere on PATH
+***** do "sh autogen.sh"
 
 * possible future changes (see manual for the more feasible ones)
 
