@@ -1,12 +1,9 @@
 # autogen.sh
 #
-# Usage: sh autogen.sh [-f]
+# Usage: sh autogen.sh
 # Run this in the top directory to regenerate all the files.
-# Option "-f" means forcefully create symlinks for missing files
-# (by default: copies are made only if necessary).
-#
 # NB: You must have gnulib-tool on the PATH.  If you want to
-# force gnulib-tool to "--import" (rather than "--update"),
+# force gnulib-tool to "--add-import" (rather than "--update"),
 # remove either lib/ or m4/ before invocation.
 #
 # Tested with:
@@ -21,6 +18,24 @@ then act=update
 else act=add-import
 fi
 gnulib-tool --${act}
-autoreconf --install --symlink "$@"
+autoreconf --install --symlink
+
+# These override what ‘autoreconf --install’ creates.
+# Another way is to use gnulib's config/srclist-update.
+actually ()
+{
+    gnulib-tool --copy-file $1 $2
+}
+actually doc/INSTALL.UTF-8 INSTALL
+actually build-aux/config.guess
+actually build-aux/config.sub
+actually build-aux/install-sh
+actually build-aux/missing
+actually build-aux/mdate-sh
+actually build-aux/texinfo.tex
+actually build-aux/depcomp
+
+# We aren't really interested in the backup files.
+rm -f INSTALL~ build-aux/*~
 
 # autogen.sh ends here

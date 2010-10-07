@@ -1,5 +1,16 @@
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[maint] Ensure latest INSTALL, build-aux/* files.
+
+	* autogen.sh: No longer support "autoreconf --force".
+	(actually): New shell func; use it to override INSTALL,
+	and several files in build-aux/: config.guess, config.sub,
+	install-sh, missing, mdate-sh, texinfo.tex, depcomp;
+	delete resulting backup files.
+	Suggested by Karl Berry.
+
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Overhaul test suite.
 
 	* configure.ac (AC_CONFIG_FILES): Add
