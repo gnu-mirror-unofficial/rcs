@@ -26,12 +26,19 @@ check_SCRIPTS = test-prep
 PATHPREFIX = $(abs_top_builddir)/src/0pre/bin
 
 TESTS_ENVIRONMENT = PATH="$(PATHPREFIX):$$PATH" sh
-TESTS = alive.test \
-  t000.test \
-  t001.test \
-  t999.test
+TESTS = \
+ t150 \
+ t300 \
+ t310 \
+ t311 \
+ t420 \
+ t500 \
+ t501 \
+ t502 \
+ t700 \
+ t999
 
-EXTRA_DIST = $(TESTS) common
+EXTRA_DIST = $(TESTS) common fake
 
 test-prep:
 	@cd ../src ; $(MAKE) test-prep
@@ -41,5 +48,19 @@ installcheck-local: test-prep
 
 clean-local:
 	rm -rf *.d
+
+describe:
+	@for f in $(TESTS) ; do			\
+	  sed 's/^...//;s/ ---/:/;q' $$f ;	\
+	  if [ x"$(VERBOSE)" = x1 ] ; then	\
+	    echo ;				\
+	    sed -e '/^##$$/,/^##$$/!d'		\
+	        -e 's/^.//'			\
+	        -e 's/^#$$//'			\
+	        -e '/./,/^$$/!d'		\
+	        -e 's/^./    &/'		\
+	        $$f ;				\
+	  fi ;					\
+	done
 
 # Makefile.am ends here

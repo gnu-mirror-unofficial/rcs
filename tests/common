@@ -17,12 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# (shell-script-mode)
+
 # variables
 
-stem=$(basename $0 .test)
+stem=$(basename $0)
 wd=${stem}.d
 w=$wd/x
 v=$wd/x,v
+TMPDIR=$wd ; export TMPDIR
+
+result=
+
+if [ x"$VERBOSE" = x1 ]
+then hey= ; shh=':' ; KEEPD=1
+else shh= ; hey=':'
+fi
 
 # subroutines
 
@@ -35,19 +45,32 @@ split_std_out_err ()
     fi
 }
 
-do_and_show ()
+bundled_commav ()
 {
-    echo __________________________________________________
-    echo DOING: $1
-    eval "$1"
-    echo RESULT: $?
-    sed 's/^/|/' $v
+    echo $srcdir/fake/$1
 }
 
-do_rlog ()
+problem ()
 {
-    echo _________________________________________ rlog "$@"
-    rlog "$@" $w | sed 's/^/|/'
+    echo >&2 PROBLEM: "$@"
+    exit 1
+}
+
+must ()
+{
+    eval "$@" || problem command failed: "$@"
+}
+
+say_what ()
+{
+    problem unexpected output for: "$@"
+}
+
+silence_means_death ()
+{
+    # $1 -- filename
+    # $2 -- shell command
+    test -s $1 || problem "no output for: $2"
 }
 
 # load-time actions

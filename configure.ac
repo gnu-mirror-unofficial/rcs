@@ -562,6 +562,15 @@ AC_CONFIG_FILES([
 # We don't use or install rcsfreeze, so there is no point making it executable.
 AC_CONFIG_FILES([src/rcsfreeze:src/rcsfreeze.sh])
 
+# We could do this "manually" in tests/Makefile.am, specifying
+# another file for ‘check_SCRIPTS’ and writing a custom target,
+# all to save the configure script from processing a possibly
+# unused file (in the case the user does not do "make check").
+# But it's not much of a burden, and users SHOULD be doing
+# "make check" anyway.
+AC_CONFIG_FILES([tests/known-failures],
+       [chmod +x tests/known-failures])
+
 AC_OUTPUT
 
 # configure.ac ends here

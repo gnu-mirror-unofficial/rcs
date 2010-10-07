@@ -1,17 +1,14 @@
-#! /bin/sh
-# t999.test
+# t999 --- the original src/rcstest
 #
 # Copyright (C) 2010 Thien-Thi Nguyen
 # Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
 #
-# This file is part of GNU RCS.
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
 #
-# GNU RCS is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# GNU RCS is distributed in the hope that it will be useful,
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty
 # of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details.
@@ -19,25 +16,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test RCS's functions.
-# The RCS commands are searched for in the PATH as usual;
-# to test the working directory's commands, prepend . to your PATH.
-
-# Test RCS by creating files RCS/a.* and RCS/a.c.
-# If all goes well, output nothing, and remove the temporary files.
+##
+# Test RCS by creating files RCS/a.* and RCS/a.c (in $wd).
+# If all goes well, output nothing.
 # Otherwise, send a message to standard output.
-# Exit status is 0 if OK, 1 if an RCS bug is found, and 2 if scaffolding fails.
-# With the -v option, output more debugging info.
+#
+# Exit status is 0 if OK, 1 if an RCS bug is found, and 2
+# if scaffolding fails (for problems in the test itself).
+# When VERBOSE=1, output more debugging info.
+#
+# If diff outputs "No differences encountered" when comparing
+# identical files, then this test may also output these noise
+# lines; ignore them.
+##
 
-# If diff outputs `No differences encountered' when comparing identical files,
-# then t999.test may also output these noise lines; ignore them.
-
-# The current directory and ./RCS must be readable, writable, and searchable.
-
-. ./common
-split_std_out_err no
+. $srcdir/common
+split_std_out_err
 cd $wd
 xorlf='../xorlf'
+TMPDIR=`pwd` ; export TMPDIR
 
 : ${DIFF=diff}
 
@@ -49,17 +46,12 @@ RCSfile=RCS${SLASH}a.c
 RCS_alt=RCS${SLASH}a.d
 lockfile=RCS${SLASH}a._
 
-test "$DEBUG" && { set foo -v ; shift ; }
-case $1 in
--v) q=; echo "PATH: $PATH"; set -x;;
-'') q=-q;;
-*) echo >&2 "$0: usage: $0 [-v]"; exit 2
-esac
-
-if test -d RCS
-then rmdir=:
-else rmdir=rmdir; mkdir RCS || exit
+if test x"$VERBOSE" = x1
+then q= ; set -x
+else q=-q
 fi
+
+mkdir RCS
 
 rm -f a.* $RCSfile $RCS_alt $lockfile &&
 echo 1.1 >a.11 &&
@@ -198,8 +190,8 @@ co -l $q a.c &&
 sed 's/@/$/g' >a.kv <<EOF
 @Author: w @
 @Date: $date @
-@Header: $PWD$SLASH$RCSfile 2.1 $date w 42 @
-@Id: a.c 2.1 $date w 42 @
+@Header: $PWD$SLASH$RCSfile 2.1 $date w seriously-spurious @
+@Id: a.c 2.1 $date w seriously-spurious @
 @Locker:  @
  * @Log: a.c @
  * Revision 2.1  $date  w
@@ -209,17 +201,17 @@ sed 's/@/$/g' >a.kv <<EOF
 @RCSfile: a.c @
 @Revision: 2.1 @
 @Source: $PWD$SLASH$RCSfile @
-@State: 42 @
+@State: seriously-spurious @
 EOF
 test $? = 0 &&
 sed 's/:.*\$/$/' a.kv >a.k &&
-sed -e 's/w 42 [$]/w 42 '"$me"' $/' -e 's/[$]Locker: /&'"$me/" a.kv >a.kvl &&
+sed -e 's/w seriously-spurious [$]/w seriously-spurious '"$me"' $/' -e 's/[$]Locker: /&'"$me/" a.kv >a.kvl &&
 sed s/Oz//g a.kv >a.e &&
 sed s/Oz/N/g a.kv >a.N &&
 sed -e '/\$/!d' -e 's/\$$/: old $/' a.k >a.o &&
 sed -e 's/\$[^ ]*: //' -e 's/ \$//' a.kv >a.v &&
 cp a.o a.c &&
-ci -d"$date" -nOz -s42 -ww -u2.1 -mm $q a.c &&
+ci -d"$date" -nOz -sseriously-spurious -ww -u2.1 -mm $q a.c &&
 $diff a.kv a.c || { echo "#keyword expansion failed"; exit 1; }
 co -pOz -ko $q a.c >a.oo &&
 $diff a.o a.oo || { echo "#co -p -ko failed"; exit 1; }
@@ -416,29 +408,34 @@ rcs -u -o2.4: $q a.c || { echo "#rcs -u -o failed"; exit 1; }
 
 rcs -i -Aa.c -t- $q a.d || { echo "#rcs -i -A failed"; exit 1; }
 
+# The ordering of symbolic names is inverted between RCS 5.7 and 5.8.
+# That's why we sort.  Ugly but true.  Probably it would be best to
+# remove this gratuitous reordering, but that would need to be done
+# before 5.8.  Hmmm...
 rlog -r2.1 a.c >a.t &&
 grep '^checked in with -k' a.t >/dev/null &&
 sed '/^checked in with -k/d' a.t >a.u &&
-$diff - a.u <<EOF
+sort a.u >a.uu &&
+$diff - a.uu <<EOF
 
+	N: 2.1
+	Oz: 2.1
+	n: 1.8
+----------------------------
+1.1
+=============================================================================
 RCS file: $RCSfile
 Working file: a.c
-head: 2.3
-branch:
-locks: strict
 access list:
-symbolic names:
-	n: 1.8
-	Oz: 2.1
-	N: 2.1
-keyword substitution: kv
-total revisions: 13;	selected revisions: 1
+branch:
+date: $date;  author: w;  state: seriously-spurious;  lines: +14 -1
 description:
-1.1
-----------------------------
+head: 2.3
+keyword substitution: kv
+locks: strict
 revision 2.1
-date: $date;  author: w;  state: 42;  lines: +14 -1
-=============================================================================
+symbolic names:
+total revisions: 13;	selected revisions: 1
 EOF
 test $? = 0 || { echo "#rlog failed"; exit 1; }
 
@@ -449,4 +446,4 @@ test ! -f $lockfile || { echo "#lock file not removed"; exit 1; }
 
 cd ..
 
-# t999.test ends here
+# t999 ends here

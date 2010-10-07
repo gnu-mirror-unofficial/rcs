@@ -1,3 +1,38 @@
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Overhaul test suite.
+
+	* README: New file.
+	* known-failures.in: New file.
+	* fake: New directory.
+	* fake/empty: New file.
+	* fake/empty-minimal: Likewise.
+	* fake/one: Likewise.
+	* fake/two: Likewise.
+	* fake/two-with-branch: Likewise.
+	* common: Rewrite.
+	* alive.test: Delete file.
+	* t150: New file.
+	* t300: New file.
+	* t310: New file.
+	* t311: New file.
+	* t420: New file.
+	* t500: New file, factored from t001.test.
+	* t501: New file, factored from t001.test.
+	* t502: New file, factored from t001.test.
+	* t001.test: Delete file.
+	* t700: Rename from t000.test; simplify.
+	* t999: Rename from t999.test; add properly formatted
+	blurb for "make describe"; ‘cd $wd’ at beginning and ‘cd ..’
+	at end; set env var ‘TMPDIR’; don't honor env var ‘DEBUG’;
+	instead, honor ‘VERBOSE’; make RCS/ unconditionally;
+	don't delete it and the a.* files at end; don't use
+	‘42’ for state; instead, use ‘seriously-spurious’;
+	for rlog test, sort output prior to compare.
+	* Makefile.am (TESTS): Rewrite.
+	(EXTRA_DIST): Add fake.
+	(describe): New target.
+
 2010-10-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Centralize shell vars ‘w’, ‘v’.
