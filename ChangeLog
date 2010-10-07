@@ -1,5 +1,12 @@
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Make configure script test program more portable.
+
+	* configure.ac (BAD_CREAT0): Remove superfluous
+	parentheses for ‘defined foo’ cpp conditional construct.
+
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[maint] Ensure latest INSTALL, build-aux/* files.
 
 	* autogen.sh: No longer support "autoreconf --force".

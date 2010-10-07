@@ -296,7 +296,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#if defined(O_CREAT) && defined(O_WRONLY)
+#if defined O_CREAT && defined O_WRONLY
 # define creat0(f) open(f, O_CREAT|O_WRONLY, 0)
 #else
 # define creat0(f) creat(f, 0)
