@@ -34,6 +34,7 @@ actually build-aux/missing
 actually build-aux/mdate-sh
 actually build-aux/texinfo.tex
 actually build-aux/depcomp
+actually doc/fdl.texi
 
 # We aren't really interested in the backup files.
 rm -f INSTALL~ build-aux/*~

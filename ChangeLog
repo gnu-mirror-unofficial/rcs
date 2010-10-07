@@ -1,5 +1,12 @@
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[maint] Get fdl.texi from gnulib.
+
+	* autogen.sh (doc/fdl.texi): New ‘actually’.
+	* doc/fdl.texi: Delete file.
+
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Make configure script test program more portable.
 
 	* configure.ac (BAD_CREAT0): Remove superfluous
