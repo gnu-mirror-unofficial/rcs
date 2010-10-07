@@ -24,7 +24,7 @@
 #include "b-complain.h"
 
 /* Map of character types: ISO 8859/1 (Latin-1).  */
-const enum tokens const ctab[] =
+enum tokens const ctab[] =
   {
     UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,   UNKN,
     SPACE,  SPACE,  NEWLN,  SPACE,  SPACE,  SPACE,  UNKN,   UNKN,

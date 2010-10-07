@@ -59,7 +59,7 @@ xmalloc (size_t size)
 #define obstack_chunk_free free
 
 struct divvy *
-make_space (const char const name[])
+make_space (char const name[])
 {
   struct divvy *divvy = TCALLOC (struct divvy);
 

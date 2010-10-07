@@ -29,7 +29,7 @@ struct divvy
 extern struct divvy *plexus;
 extern struct divvy *single;
 
-extern struct divvy *make_space (const char const name[]);
+extern struct divvy *make_space (char const name[]);
 extern void *alloc (struct divvy *divvy, char const *what, size_t len);
 extern void *zlloc (struct divvy *divvy, char const *what, size_t len);
 extern char *intern (struct divvy *divvy, char const *s, size_t len);

@@ -21,13 +21,13 @@
 #include "base.h"
 #include <string.h>
 
-const char const ks_revno[] = "revision number";
+char const ks_revno[] = "revision number";
 
-const char const prog_diff[] = DIFF;
-const char const prog_diff3[] = DIFF3;
-const char const diff_flags[] = DIFFFLAGS;
+char const prog_diff[] = DIFF;
+char const prog_diff3[] = DIFF3;
+char const diff_flags[] = DIFFFLAGS;
 
-const char const equal_line[] =
+char const equal_line[] =
   "=============================================================================\n";
 
 #define TINY_INIT(x)  { .len = sizeof (x) - 1, .bytes = x }
@@ -136,7 +136,7 @@ str2expmode (char const *s)
   return recognize_kwsub (&x);
 }
 
-const char const *
+char const *
 kwsub_string (enum kwsub i)
 {
   size_t count = kwsub_pool[0], symlen;
@@ -150,7 +150,7 @@ kwsub_string (enum kwsub i)
     }
   return i
     ? NULL
-    : (const char const *) (p + 1);
+    : (char const *) (p + 1);
 }
 
 bool

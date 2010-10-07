@@ -182,7 +182,7 @@ undefine (struct partime *t)
    look for the first matching pattern whose values do not contradict values
    that we already know about.  See ‘parse_pattern_letter’ below for the
    meaning of the pattern codes.  */
-static const char const *const patterns[] = {
+static char const *const patterns[] = {
   /* These traditional patterns must come first,
      to prevent an ISO 8601 format from misinterpreting their prefixes.  */
   "E_n_y", "x",                                 /* RFC 822 */

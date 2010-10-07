@@ -42,7 +42,7 @@ struct compair
 
 /* This table is present only for backwards compatibility.  Normally we
    ignore this table, and use the prefix of the ‘$Log’ line instead.  */
-static const struct compair const comtable[] = {
+static struct compair const comtable[] = {
   {"a",    "-- "},              /* Ada */
   {"ada",  "-- "},
   {"adb",  "-- "},
@@ -506,7 +506,7 @@ isSLASH (int c)
 char *
 getcwd (char *buf, size_t size)
 {
-  const char const usrbinpwd[] = "/usr/bin/pwd";
+  char const usrbinpwd[] = "/usr/bin/pwd";
 #define binpwd (usrbinpwd+4)
 
   register FILE *fp;

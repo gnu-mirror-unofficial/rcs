@@ -1,5 +1,24 @@
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[C] Drop redundant ‘const’ declarations.
+
+	* Makefile.am (bother.c): Drop redundant ‘const’ decl.
+	* b-anchor.c (ks_revno, prog_diff, prog_diff3
+	(diff_flags, equal_line, kwsub_string): Likewise.
+	* b-divvy.c (make_space): Likewise.
+	* b-divvc.h (make_space): Likewise.
+	* b-isr.c (setup_catchsig, isr_do): Likewise.
+	* base.h (prog_co, prog_merge, prog_diff)
+	(prog_diff3, diff_flags, equal_line): Likewise.
+	(struct program): Likewise for members ‘name’, ‘help’.
+	(ks_revno, kwsub_string, ctab): Likewise.
+	* maketime.c (month_yday): Likewise.
+	* partime.c (patterns): Likewise.
+	* rcsfnms.c (comtable, getcwd): Likewise.
+	* rcsmap.c (ctab): Likewise.
+
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘EXIT_SUCCESS’ more.
 
 	* rcsutil.c (setRCSversion): Use ‘EXIT_SUCCESS’.

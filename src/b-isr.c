@@ -210,7 +210,7 @@ catchsig (int signo)
 #endif  /* !defined HAVE_SIGACTION */
 
 static void
-setup_catchsig (size_t count, const int const set[count])
+setup_catchsig (size_t count, int const set[count])
 {
 #if defined HAVE_SIGACTION
 
@@ -325,7 +325,7 @@ isr_do (struct isr_scratch *scratch, enum isr_actions action)
     {
     case ISR_CATCHINTS:
       {
-        const int const regular[] =
+        int const regular[] =
           {
             SIGHUP,
             SIGINT,
@@ -365,7 +365,7 @@ isr_do (struct isr_scratch *scratch, enum isr_actions action)
          This can also occur if someone truncates the file,
          even without NFS.  */
       {
-        const int const mmapsigs[] = { MMAP_SIGNAL };
+        int const mmapsigs[] = { MMAP_SIGNAL };
 
         if (MMAP_SIGNAL && !ISR (catching.memory_map))
           {

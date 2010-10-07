@@ -378,25 +378,25 @@ struct maybe
 };
 
 /* The locations of RCS programs, for internal use.  */
-extern const char const prog_co[];
-extern const char const prog_merge[];
-extern const char const prog_diff[];
-extern const char const prog_diff3[];
+extern char const prog_co[];
+extern char const prog_merge[];
+extern char const prog_diff[];
+extern char const prog_diff3[];
 
 /* Flags to make diff(1) work with RCS.  These
    should be a single argument (no internal spaces).  */
-extern const char const diff_flags[];
+extern char const diff_flags[];
 
 /* A string of 77 '=' followed by '\n'.  */
-extern const char const equal_line[];
+extern char const equal_line[];
 
 /* Every program defines this.  */
 struct program
 {
   /* The name of the program, for --help, --version, etc.  */
-  const char const *name;
+  char const *name;
   /* Text for --help.  */
-  const char const *help;
+  char const *help;
   /* Exit errorfully.  */
   void (*exiterr) (void) exiting;
 };
@@ -696,7 +696,7 @@ extern struct top *top;
 #define FLOW(member)  (top->flow. member)
 
 /* b-anchor */
-extern const char const ks_revno[];
+extern char const ks_revno[];
 extern TINY_DECL (ciklog);
 extern TINY_DECL (access);
 extern TINY_DECL (author);
@@ -721,7 +721,7 @@ extern TINY_DECL (text);
 bool looking_at (struct tinysym const *sym, char const *start);
 int recognize_kwsub (struct cbuf const *x);
 int str2expmode (char const *s);
-const char const *kwsub_string (enum kwsub i);
+char const *kwsub_string (enum kwsub i);
 bool recognize_keyword (char const *string, struct pool_found *found);
 
 /* merger */
@@ -796,7 +796,7 @@ void putdftext (struct delta const *delta, struct fro *finfile,
 bool getoldkeys (struct fro *);
 
 /* rcsmap */
-extern const enum tokens const ctab[];
+extern enum tokens const ctab[];
 char const *checkid (char const *id, int delimiter);
 char const *checksym (char const *sym, int delimiter);
 void checksid (char const *id);

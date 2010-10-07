@@ -56,8 +56,8 @@ clean-local:
 
 bother.c: FORCE
 	@( echo '/* brooked other (shared mother) */' ; \
-	   echo 'const char const prog_co[] = "$(bindir)/co";' ; \
-	   echo 'const char const prog_merge[] = "$(bindir)/merge";' ; \
+	   echo 'char const prog_co[] = "$(bindir)/co";' ; \
+	   echo 'char const prog_merge[] = "$(bindir)/merge";' ; \
 	   ) > $@T
 	@if [ -f $@ ] && cmp -s $@T $@ ; \
 	  then rm -f $@T ; \
