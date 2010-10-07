@@ -107,6 +107,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
              (int) (p - date - 1), date, p, p + 3, p + 6, p + 9, p + 12);
   else
     {
+      char *q;
       struct tm t;
       struct tm const *z;
       struct tm z_stash;
@@ -114,13 +115,24 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
       long zone;
       char c;
 
-      t.tm_year = atoi (date) - (date[2] == '.' ? 0 : 1900);
-      t.tm_mon = atoi (p) - 1;
-      t.tm_mday = atoi (p + 3);
-      t.tm_hour = atoi (p + 6);
-      t.tm_min = atoi (p + 9);
-      t.tm_sec = atoi (p + 12);
+#define MORE(field)  do                         \
+        {                                       \
+          t.field = strtol (p, &q, 10);         \
+          p = 1 + q;                            \
+        }                                       \
+      while (0)
+
+      p = date;
+      MORE (tm_year); if ('.' != date[2])
+                        t.tm_year -= 1900;
+      MORE (tm_mon); t.tm_mon--;
+      MORE (tm_mday);
+      MORE (tm_hour);
+      MORE (tm_min);
+      MORE (tm_sec);
       t.tm_wday = -1;
+#undef MORE
+
       zone = BE (zone_offset.seconds);
       if (zone == TM_LOCAL_ZONE)
         {

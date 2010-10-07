@@ -1,3 +1,11 @@
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[C] Use ‘strtol’ instead of ‘atoi’, ‘atol’.
+
+	* rcstime.c (date2str): Use ‘strtol’, not ‘atoi’.
+	* rcsutil.c (gnurcs_init): Use ‘strtol’, not ‘atol’.
+	* yarrrr.c [TEST_STR2TIME] (yarrrr): Likewise.
+
 2010-10-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Undo bogus workaround.

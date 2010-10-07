@@ -76,7 +76,7 @@ gnurcs_init (struct program const *program)
                       ? v
                       : NULL)
       /* Clamp user-specified value to [0,LONG_MAX].  */
-      ? (0 > (lim = atol (v))
+      ? (0 > (lim = strtol (v, NULL, 10))
          ? 0
          : lim)
       /* Default value.  */

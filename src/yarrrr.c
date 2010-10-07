@@ -73,7 +73,7 @@ int
 yarrrr (int argc, char *argv[argc])
 {
   time_t default_time = time (NULL);
-  long default_zone = argv[1] ? atol (argv[1]) : 0;
+  long default_zone = argv[1] ? strtol (argv[1], NULL, 10) : 0;
   char buf[1000];
 
   while (fgets (buf, 1000, stdin))
