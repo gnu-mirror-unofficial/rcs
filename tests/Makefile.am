@@ -22,10 +22,10 @@ check_PROGRAMS = xorlf
 check_SCRIPTS = test-prep
 
 # This is for the benefit of "make installcheck".
-# Note that it should NOT end in ":".
+# Note that it should NOT end in $(PATH_SEPARATOR).
 PATHPREFIX = $(abs_top_builddir)/src/0pre/bin
 
-TESTS_ENVIRONMENT = PATH="$(PATHPREFIX):$$PATH" sh
+TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$(PATH_SEPARATOR)$$PATH" sh
 TESTS = \
  t150 \
  t300 \

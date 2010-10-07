@@ -1,5 +1,11 @@
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Avoid ":" as path separator; use $(PATH_SEPARATOR).
+
+	* Makefile.am (TESTS_ENVIRONMENT): Use $(PATH_SEPARATOR).
+
+2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Overhaul test suite.
 
 	* README: New file.
