@@ -29,6 +29,9 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
+#ifdef HAVE_UCONTEXT_H
+#include <ucontext.h>
+#endif
 #include "sig2str.h"
 #include "b-complain.h"
 #include "b-divvy.h"
