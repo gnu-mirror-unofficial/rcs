@@ -1,5 +1,12 @@
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Fix bug: Take empty ‘ac_cv_prog_cc_c99’ as "C99-capable".
+
+	* configure.ac (ac_cv_prog_cc_c99):
+	If empty, skip ‘RCS_MUSTHAVE’ check.
+
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Fix bug: Look for and use <ucontext.h>.
 
 	Regression introduced 2010-04-03, "Ignore unused <ucontext.h>".

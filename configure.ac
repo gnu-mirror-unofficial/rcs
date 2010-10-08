@@ -198,7 +198,10 @@ RCS_ABSOLUTE_PROGRAM([ED],[original ed],
 AC_CHECK_PROGS(PIC, "pic -n" "gpic -n" "pic -D" "pic", pic)
 
 AC_PROG_CC_C99
-RCS_MUSTHAVE([ac_cv_prog_cc_c99],[a C99-capable compiler])
+# The var ‘ac_cv_prog_cc_c99’ records options required to place compiler
+# in "C99 mode".  It may be empty if that is the default compiler mode.
+AS_IF([test x"$ac_cv_prog_cc_c99" = x],[:],
+      [RCS_MUSTHAVE([ac_cv_prog_cc_c99],[a C99-capable compiler])])
 
 # gnulib
 gl_EARLY
