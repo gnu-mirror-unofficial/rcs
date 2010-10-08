@@ -28,7 +28,7 @@
 #include "b-feph.h"
 #include "b-fro.h"
 #include "b-merger.h"
-#include "bother.h"
+#include "b-peer.h"
 
 struct top *top;
 
@@ -209,7 +209,7 @@ main (int argc, char **argv)
                           if (run (-1,
                                    /* Don't collide with merger.c ‘maketemp’.  */
                                    FNAME (i) = maketemp (i + 2),
-                                   prog_co, quietarg, commarg.string,
+                                   PEER_CO (), quietarg, commarg.string,
                                    expandarg, suffixarg, versionarg, zonearg,
                                    repo_filename, NULL))
                             RFATAL ("co failed");

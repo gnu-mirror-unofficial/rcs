@@ -297,7 +297,9 @@ struct rcslock
   struct delta *delta;
 };
 
-/* List element for symbolic names.  Also used for label/filename (merging).  */
+/* List element for symbolic names.
+   Also used for label/filename (merging)
+   and base/full (peer program names).  */
 struct symdef
 {
   char const *meaningful;

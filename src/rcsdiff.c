@@ -28,7 +28,7 @@
 #include "b-divvy.h"
 #include "b-feph.h"
 #include "b-fro.h"
-#include "bother.h"
+#include "b-peer.h"
 
 struct top *top;
 
@@ -328,7 +328,7 @@ main (int argc, char **argv)
 #endif
   diffpend = diffp;
 
-  cov[1] = prog_co;
+  cov[1] = PEER_CO ();
   cov[2] = "-q";
 #if !DIFF_L
   cov[3] = "-M";

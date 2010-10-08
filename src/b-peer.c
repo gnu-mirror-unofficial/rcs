@@ -1,4 +1,4 @@
-/* bother.h --- brooked other (shared mother)
+/* b-peer.c --- finding the ‘execv’able name of a peer program
 
    Copyright (C) 2010 Thien-Thi Nguyen
 
@@ -18,7 +18,27 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern char const prog_co[];
-extern char const prog_merge[];
+#include "base.h"
+#include <stdlib.h>
+#include "findprog.h"
 
-/* bother.h ends here */
+struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
+
+char const *
+find_peer_prog (struct symdef *prog)
+{
+  if (! prog->underlying)
+    {
+      const char *name = find_in_path (prog->meaningful);
+
+      if (! name || prog->underlying == name)
+        abort ();
+
+      prog->underlying = str_save (name);
+      free ((void *) name);
+    }
+
+  return prog->underlying;
+}
+
+/* b-peer.c ends here */

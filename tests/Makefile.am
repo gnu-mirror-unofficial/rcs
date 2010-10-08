@@ -19,11 +19,9 @@
 
 check_PROGRAMS = xorlf
 
-check_SCRIPTS = test-prep
-
-# This is for the benefit of "make installcheck".
+# This helps certain RCS programs find their peers.
 # Note that it should NOT end in $(PATH_SEPARATOR).
-PATHPREFIX = $(abs_top_builddir)/src/0pre/bin
+PATHPREFIX = $(abs_top_builddir)/src
 
 TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$(PATH_SEPARATOR)$$PATH" sh
 TESTS = \
@@ -40,10 +38,7 @@ TESTS = \
 
 EXTRA_DIST = $(TESTS) common fake
 
-test-prep:
-	@cd ../src ; $(MAKE) test-prep
-
-installcheck-local: test-prep
+installcheck-local:
 	$(MAKE) check PATHPREFIX='$(DESTDIR)$(bindir)'
 
 clean-local:

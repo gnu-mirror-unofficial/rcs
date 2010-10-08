@@ -24,11 +24,11 @@ AM_CPPFLAGS = -I'$(top_srcdir)/lib'
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
   b-complain.h b-divvy.h b-esds.h b-excwho.h b-fb.h b-feph.h b-fro.h \
-  b-grok.h b-isr.h b-kwxout.h b-merger.h \
+  b-grok.h b-isr.h b-kwxout.h b-merger.h b-peer.h \
   base.h gnu-h-v.h maketime.h partime.h \
   b-anchor.c \
   b-complain.c b-divvy.c b-esds.c b-excwho.c b-fb.c b-feph.c b-fro.c \
-  b-grok.c b-isr.c b-kwxout.c \
+  b-grok.c b-isr.c b-kwxout.c b-peer.c \
   gnu-h-v.c \
   maketime.c merger.c partime.c rcsedit.c rcsfcmp.c rcsfnms.c \
   rcsgen.c rcskeep.c rcsmap.c rcsrev.c \
@@ -36,60 +36,20 @@ libparts_a_SOURCES = \
 
 bin_PROGRAMS = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog
 
-BUILT_SOURCES = bother.c $(bin_PROGRAMS:%=%.help)
+BUILT_SOURCES = $(bin_PROGRAMS:%=%.help)
 
 LDADD = libparts.a -L$(top_builddir)/lib -lgnu
-
-# These invoke co(1) or merge(1) via their installed filenames.
-# Those (absolute) filenames are hardcoded in bother.c (see below).
-outgoing         = co rcsdiff rcsmerge
-bothers          = bother.c bother.h
-co_SOURCES       = $(bothers) co.c
-rcsdiff_SOURCES  = $(bothers) rcsdiff.c
-rcsmerge_SOURCES = $(bothers) rcsmerge.c
 
 CLEANFILES = $(BUILT_SOURCES)
 
 EXTRA_DIST = TAGS $(TESTS) yarrrr.c
 
-dist-hook:
-	rm -f $(distdir)/bother.c
-
 .c.help:
 	$(top_srcdir)/build-aux/extract-help -o $@ $<
 
 clean-local:
-	rm -rf 0pre RCS
+	rm -rf RCS
 	rm -f a.*
-
-# FIXME: These names don't take into account configure options
-# --program-{prefix,suffix,transform}, $(EXEEXT), and so on.  Best
-# would be to make the $(outgoing) programs work fully internally.
-bother.c: FORCE
-	@( echo '/* brooked other (shared mother) */' ; \
-	   echo 'char const prog_co[] = "$(bindir)/co";' ; \
-	   echo 'char const prog_merge[] = "$(bindir)/merge";' ; \
-	   ) > $@T
-	@if [ -f $@ ] && cmp -s $@T $@ ; \
-	  then rm -f $@T ; \
-	  else mv $@T $@ ; echo Created $@ ; \
-	fi
-
-# Create programs in 0pre/bin for the sake of the $(outgoing).
-# To use, prepend ‘$(abs_top_builddir)/src/0pre/bin’ to ‘PATH’.
-test-prep: all
-	@if [ -d 0pre ] &&						\
-	    [ 0pre = $$(ls -1td 0pre $(bin_PROGRAMS) | sed 1q) ] ;	\
-        then : ; else							\
-	  rm -rf 0pre ; mkdir 0pre 0pre/bin 0pre/stash ;		\
-	  cp -p $(bin_PROGRAMS) *.o *.a bother.c 0pre/stash ;		\
-	  rm -f $(outgoing) ;						\
-	  $(MAKE) all bindir=$(abs_builddir)/0pre/bin >/dev/null ;	\
-	  mv -v $(bin_PROGRAMS) 0pre/bin ;				\
-	  cp -pf 0pre/stash/* . ;					\
-	fi
-
-FORCE:;
 
 
 # yarrrr!

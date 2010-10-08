@@ -1,3 +1,12 @@
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Search ‘PATH’ for co / merge at runtime.
+
+	* Makefile.am (check_SCRIPTS): Delete var.
+	(PATHPREFIX): Update value.
+	(test-prep): Delete target.
+	(installcheck-local): Update dependency list.
+
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Avoid ":" as path separator; use $(PATH_SEPARATOR).

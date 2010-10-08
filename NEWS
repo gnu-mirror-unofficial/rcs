@@ -59,12 +59,16 @@ See the end for copying conditions.
 
     - You can "make check" prior to "make install".
 
-	Doing "make check" automatically does a (small, partial)
-	recompile, installs programs into ${top_builddir}/src/0pre/bin,
-	and arranges for the testing scripts to prepend that directory
-	to the env var ‘PATH’.  This basically encapsulates the manual
-	preparation for "make check" required in previous releases.
-	[Question for pretesters: Is there a more idiomatic way?]
+	Doing "make check" automatically prepends to the ‘PATH’ env var
+	the value of ‘$(abs_top_builddir)/src’, so that the programs
+	co, rcsdiff, and rcsmerge can find their peers (co and merge).
+
+	Likewise, "make installcheck" prepends ‘$(DESTDIR)$(bindir)’.
+
+	Previously, you had to "make install" first and then arrange
+	for ‘$(DESTDIR)$(bindir)’ to be on ‘PATH’ "manually".
+
+	See tests/README for more info on the test suite.
 
   - Bug fixes
 

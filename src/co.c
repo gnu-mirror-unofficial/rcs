@@ -34,7 +34,7 @@
 #include "b-feph.h"
 #include "b-fro.h"
 #include "b-isr.h"
-#include "bother.h"
+#include "b-peer.h"
 
 struct top *top;
 
@@ -54,6 +54,7 @@ struct jstuff
 {
   struct divvy *jstuff;
   struct link head, *tp;
+  struct symdef *merge;
 };
 static struct jstuff jstuff;
 
@@ -244,6 +245,11 @@ preparejoin (register char *j)
   jstuff.jstuff = make_space ("jstuff");
   jstuff.head.next = NULL;
   jstuff.tp = &jstuff.head;
+  if (! jstuff.merge)
+    {
+      jstuff.merge = ZLLOC (1, struct symdef);
+      jstuff.merge->meaningful = "merge";
+    }
 
   lastjoin = -1;
   for (;;)
@@ -322,7 +328,7 @@ buildjoin (char const *initialfile)
   rev2 = maketemp (0);
   rev3 = maketemp (3);      /* ‘buildrevision’ may use 1 and 2 */
 
-  cov[1] = prog_co;
+  cov[1] = PEER_CO ();
   /* ‘cov[2]’ setup below.  */
   p = &cov[3];
   if (expandarg)
@@ -337,7 +343,7 @@ buildjoin (char const *initialfile)
   *p++ = REPO (filename);
   *p = '\0';
 
-  mergev[1] = prog_merge;
+  mergev[1] = find_peer_prog (jstuff.merge);
   mergev[2] = mergev[4] = "-L";
   /* Rest of ‘mergev’ setup below.  */
 

@@ -1,5 +1,29 @@
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Search ‘PATH’ for co / merge at runtime.
+
+	* b-peer.h: New file.
+	* b-peer.c: New file.
+	* Makefile.am (libparts_a_SOURCES): Add b-peer.h, b-peer.c.
+	(BUILT_SOURCES): Remove bother.c.
+	(outgoing, bothers): Delete vars.
+	(co_SOURCES, rcsdiff_SOURCES, rcsmerge_SOURCES): Likewise.
+	(dist-hook): Delete target.
+	(clean-local): No longer "rm -rf 0pre".
+	(bother.c, test-prep, FORCE): Delete targets.
+	* co.c: Don't #include "bother.h"; #include "b-peer.h".
+	(struct jstuff): Add member ‘merge’.
+	(preparejoin): Init ‘jstuff.merge’ once.
+	(buildjoin): Use ‘PEER_CO’, ‘find_peer_prog’
+	* rcsdiff.c: Don't #include "bother.h"; #include "b-peer.h".
+	(main): Use ‘PEER_CO’.
+	* rcsmerge.c: Don't #include "bother.h"; #include "b-peer.h".
+	(main): Usee ‘PEER_CO’.
+	* base.h: Comment munging; nfc.
+	* bother.h: Delete file.
+
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Delete abstraction: exec_RCS
 
 	* rcsutil.c (runv): Use ‘execv’ directly.
