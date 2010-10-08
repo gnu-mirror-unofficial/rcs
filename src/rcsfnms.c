@@ -31,6 +31,7 @@
 #include "b-feph.h"
 #include "b-fro.h"
 #include "b-grok.h"
+#include "b-isr.h"
 
 #define rcsdir     "RCS"
 #define rcsdirlen  (sizeof rcsdir - 1)
@@ -523,12 +524,7 @@ getcwd (char *buf, size_t size)
     }
   if (PROB (pipe (fd)))
     return NULL;
-#if BAD_WAIT_IF_SIGCHLD_IGNORED
-#ifndef SIGCHLD
-#define SIGCHLD SIGCLD
-#endif
-  signal (SIGCHLD, SIG_DFL);
-#endif  /* BAD_WAIT_IF_SIGCHLD_IGNORED */
+  maybe_reset_sigchld ();
   if (!(child = vfork ()))
     {
       if (!PROB (close (fd[0]))

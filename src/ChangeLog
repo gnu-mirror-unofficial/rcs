@@ -1,5 +1,15 @@
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: maybe_reset_sigchld
+
+	* b-isr.c (maybe_reset_sigchld): New func.
+	* b-isr.h (maybe_reset_sigchld): New func decl.
+	* rcsfnms.c: #include "b-isr.h".
+	[!HAVE_GETCWD] (getcwd): Use ‘maybe_reset_sigchld’.
+	* rcsutil.c (runv): Use ‘maybe_reset_sigchld’.
+
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Fix bug: Look for and use <ucontext.h>.
 
 	Regression introduced 2010-04-03, "Ignore unused <ucontext.h>".

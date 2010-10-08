@@ -276,16 +276,11 @@ runv (int infd, char const *outname, char const **args)
 {
   int wstatus;
 
-#if BAD_WAIT_IF_SIGCHLD_IGNORED
   if (!BE (fixed_SIGCHLD))
     {
       BE (fixed_SIGCHLD) = true;
-#ifndef SIGCHLD
-#define SIGCHLD SIGCLD
-#endif
-      signal (SIGCHLD, SIG_DFL);
+      maybe_reset_sigchld ();
     }
-#endif  /* BAD_WAIT_IF_SIGCHLD_IGNORED */
 
   oflush ();
   {

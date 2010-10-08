@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+void maybe_reset_sigchld (void);
+
 extern void complain_signal (char const *msg, int signo);
 
 struct isr_scratch;
