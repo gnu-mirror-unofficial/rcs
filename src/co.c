@@ -34,6 +34,7 @@
 #include "b-feph.h"
 #include "b-fro.h"
 #include "b-isr.h"
+#include "bother.h"
 
 struct top *top;
 

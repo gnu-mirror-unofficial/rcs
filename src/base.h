@@ -378,8 +378,6 @@ struct maybe
 };
 
 /* The locations of RCS programs, for internal use.  */
-extern char const prog_co[];
-extern char const prog_merge[];
 extern char const prog_diff[];
 extern char const prog_diff3[];
 

@@ -1,5 +1,19 @@
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Specify "outgoing" programs dependency precisely.
+
+	* bother.h: New file.
+	* Makefile.am (libparts_a_SOURCES): Remove bother.c.
+	(outgoing, bothers): New vars.
+	(co_SOURCES, rcsdiff_SOURCES, rcsmerge_SOURCES): Likewise.
+	(test-prep): Restrict forced remake to $(outgoing) programs.
+	* base.h (prog_co, prog_merge): Delete var decls.
+	* co.c: #include "bother.h".
+	* rcsdiff.c: Likewise.
+	* rcsmerge.c: Likewise.
+
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use $(abs_builddir) more.
 
 	* Makefile.am (test-prep):

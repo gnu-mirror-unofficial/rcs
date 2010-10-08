@@ -28,6 +28,7 @@
 #include "b-divvy.h"
 #include "b-feph.h"
 #include "b-fro.h"
+#include "bother.h"
 
 struct top *top;
 
