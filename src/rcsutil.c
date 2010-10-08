@@ -267,8 +267,6 @@ accumulate_arg_quoted (struct divvy *space, int c, register char const *s)
 
 #endif  /* !defined HAVE_WORKING_FORK */
 
-#define exec_RCS execv
-
 int
 runv (int infd, char const *outname, char const **args)
 /* Run a command.
@@ -315,7 +313,7 @@ runv (int infd, char const *outname, char const **args)
               complain ("%s: %s: cannot create\n", args[1], outname);
               exit_diff_trouble ();
             }
-        exec_RCS (args[1], (char **) (args + 1));
+        execv (args[1], (char **) (args + 1));
         notfound = args[1];
 #ifdef RCS_SHELL
         if (errno == ENOEXEC)

@@ -1,5 +1,11 @@
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Delete abstraction: exec_RCS
+
+	* rcsutil.c (runv): Use ‘execv’ directly.
+
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Specify "outgoing" programs dependency precisely.
 
 	* bother.h: New file.
