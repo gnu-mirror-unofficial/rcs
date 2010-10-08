@@ -64,7 +64,7 @@ bother.c: FORCE
 	  else mv $@T $@ ; echo Created $@ ; \
 	fi
 
-test-prep:
+test-prep: all
 	@if [ -d 0pre ] &&						\
 	    [ 0pre = $$(ls -1td 0pre $(bin_PROGRAMS) | sed 1q) ] ;	\
         then : ; else							\

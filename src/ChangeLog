@@ -1,3 +1,9 @@
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Make ‘test-prep’ depend on ‘all’.
+
+	* Makefile.am (test-prep): Add ‘all’ to dependency list.
+
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[C] Drop redundant ‘const’ declarations.
