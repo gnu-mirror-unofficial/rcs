@@ -211,7 +211,7 @@ gl_INIT
 AC_CHECK_HEADERS_ONCE([
   limits.h mach/mach.h net/errno.h
   pwd.h
-  sys/mman.h ucontext.h utime.h
+  siginfo.h sys/mman.h ucontext.h utime.h
 ])
 
 # types -- see also: (info "(autoconf) Particular Types")

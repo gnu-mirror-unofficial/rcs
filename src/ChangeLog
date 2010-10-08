@@ -1,5 +1,12 @@
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Fix bug: Look for and use <siginfo.h>.
+
+	Regression introduced 2010-04-03, "Ignore <siginfo.h>".
+	* b-isr.c: [HAVE_SIGINFO_H] #include <siginfo.h>.
+
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: maybe_reset_sigchld
 
 	* b-isr.c (maybe_reset_sigchld): New func.
