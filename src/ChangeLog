@@ -1,5 +1,12 @@
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use $(abs_builddir) more.
+
+	* Makefile.am (test-prep):
+	Use $(abs_builddir) instead of $$(pwd).
+
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Make ‘test-prep’ depend on ‘all’.
 
 	* Makefile.am (test-prep): Add ‘all’ to dependency list.

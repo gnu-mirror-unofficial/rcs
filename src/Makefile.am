@@ -71,7 +71,7 @@ test-prep: all
 	  rm -rf 0pre ; mkdir 0pre 0pre/bin 0pre/stash ;		\
 	  cp -p $(bin_PROGRAMS) *.o *.a bother.c 0pre/stash ;		\
 	  rm -f $(bin_PROGRAMS) ;					\
-	  $(MAKE) all bindir=$$(pwd)/0pre/bin >/dev/null ;		\
+	  $(MAKE) all bindir=$(abs_builddir)/0pre/bin >/dev/null ;	\
 	  mv -v $(bin_PROGRAMS) 0pre/bin ;				\
 	  cp -pf 0pre/stash/* . ;					\
 	fi
