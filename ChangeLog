@@ -1,3 +1,9 @@
+2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘findprog’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘findprog’.
+
 2010-10-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[maint] Get fdl.texi from gnulib.
