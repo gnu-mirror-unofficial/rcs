@@ -1,5 +1,12 @@
 2010-10-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘fd_safer’ more.
+
+	* b-feph.c: #include "unistd-safer.h".
+	(jam_sff): Use ‘fd_safer’ for ‘msktemp’ rv.
+
+2010-10-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Avoid signed/unsigned comparison.
 
 	* b-divvy.c (make_space): Use ‘size_t’ for "type width".

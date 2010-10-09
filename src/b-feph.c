@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "unistd-safer.h"
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-excwho.h"
@@ -149,7 +150,7 @@ jam_sff (struct sff *sff, const char *prefix)
         *dot = '0' + getpid () % 10;
     }
 
-  if (PROB (fd = mkstemp (fn)))
+  if (PROB (fd = fd_safer (mkstemp (fn))))
     PFATAL ("could not make temporary file name (template \"%s\")", fn);
 
   close (fd);
