@@ -364,7 +364,7 @@ string_from_atat (struct divvy *space, struct atat const *atat)
   struct cbuf cb;
   size_t i;
 
-  for (size_t i = 0; i < count; i++)
+  for (i = 0; i < count; i++)
     {
       r[i].beg = 1 + (i ? atat->holes[i - 1] : atat->beg);
       r[i].end = atat->holes[i];

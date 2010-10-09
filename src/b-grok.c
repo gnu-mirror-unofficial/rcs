@@ -735,7 +735,7 @@ full (struct divvy *to, struct fro *f)
     }
 
   CBEG ("edits");
-  for (size_t count = 0;
+  for (count = 0;
        (neck = fro_tello (g->from)) && count < repo->deltas_count;
        count++)
     {

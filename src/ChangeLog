@@ -1,3 +1,10 @@
+2010-10-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[C] Drop redundant local-var declarations.
+
+	* b-fro.c (string_from_atat): Drop redundant decl for ‘i’.
+	* b-grok.c (full): Likewise for ‘count’.
+
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Fix bug: Look for and use <siginfo.h>.
