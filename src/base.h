@@ -323,7 +323,7 @@ struct tinysym
 struct pool_found
 {
   int i;
-  struct tinysym *sym;
+  struct tinysym const *sym;
 };
 
 #define TINY(x)       (tiny_ ## x)

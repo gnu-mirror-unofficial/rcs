@@ -1,5 +1,12 @@
 2010-10-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[C] Add ‘const’ to ‘struct pool_found’ member ‘sym’.
+
+	* base.h (struct pool_found): Add ‘const’ to member ‘sym’.
+	* b-anchor.c (pool_lookup): Add ‘const’ to cast.
+
+2010-10-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Drop redundant local-var declarations.
 
 	* b-fro.c (string_from_atat): Drop redundant decl for ‘i’.

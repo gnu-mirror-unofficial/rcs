@@ -102,7 +102,7 @@ pool_lookup (const uint8_t pool[], struct cbuf const *x,
       if (x->size == symlen && !memcmp (p + 1, x->string, symlen))
         {
           found->i = i;
-          found->sym = (struct tinysym *) p;
+          found->sym = (struct tinysym const *) p;
           return true;
         }
       p += 1 + symlen + 1;
