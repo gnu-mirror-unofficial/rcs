@@ -71,7 +71,7 @@ make_space (char const name[])
   /* Set alignment to avoid segfault (on some hosts).
      The downside is wasted space on less-sensitive hosts.  */
   {
-    int widest = sizeof (off_t);
+    size_t widest = sizeof (off_t);
 
     if (widest < sizeof (void *))
       widest = sizeof (void *);
