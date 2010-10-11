@@ -40,7 +40,7 @@ sorry (bool savep, char const *msg)
       brush_off (SINGLE, partial);
     }
   if (msg)
-    MERR (msg);
+    MERR ("%s", msg);
   return NULL;
 }
 

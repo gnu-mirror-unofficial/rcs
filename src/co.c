@@ -110,9 +110,10 @@ rmworkfile (void)
                                     ? ""
                                     : ", and you do not own it")))
         {
-          PERR (!BE (quiet) && ttystdin ()
-                ? "checkout aborted"
-                : "writable %s exists; checkout aborted", mani_filename);
+          if (!BE (quiet) && ttystdin ())
+            PERR ("checkout aborted");
+          else
+            PERR ("writable %s exists; checkout aborted", mani_filename);
           return false;
         }
     }

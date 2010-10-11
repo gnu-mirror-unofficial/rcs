@@ -1,5 +1,13 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use literal string for ‘PERR’, ‘MERR’ first arg.
+
+	* co.c (rmworkfile): Rework ‘PERR (COND-EXPRESSION, ...)’ as
+	‘if (COND-EXPRESSION) PERR (STR1, ...) else PERR (STR2, ...)’.
+	* rcskeep.c (sorry): Use "%s" for ‘MERR’ first arg.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume availability of ‘mkstemp’.
 
 	* b-feph.c [!HAVE_MKSTEMP] (homegrown_mkstemp): Delete func.
