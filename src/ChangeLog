@@ -1,5 +1,15 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix typo: group ‘getusername’ cond exprs correctly.
+
+	Regression introduced 2010-04-11,
+	"Move cached username into `struct behavior'".
+	* b-excwho.c (getusername) [getlogin_is_secure]:
+	Move close-paren back one line, thus promoting
+	‘&& !JAM (getlogin ())’ to top-level of expression.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume availability of ‘getcwd’.
 
 	* rcsfnms.c: Don't #include "b-isr.h".

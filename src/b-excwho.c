@@ -169,8 +169,8 @@ getusername (bool suspicious)
 #if getlogin_is_secure
           (suspicious
            || (!JAM (cgetenv ("LOGNAME"))
-               && !JAM (cgetenv ("USER")))
-           && !JAM (getlogin ()))
+               && !JAM (cgetenv ("USER"))))
+          && !JAM (getlogin ())
 #else
           suspicious
           || (!JAM (cgetenv ("LOGNAME"))
