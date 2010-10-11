@@ -1,5 +1,12 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[C] Propagate ‘const’ in casts.
+
+	* base.h (TINYS): Add ‘const’ to cast.
+	* rcsgen.c (putadmin): Likewise.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Reduce need for casting.
 
 	* b-isr.c (access_page): Change P type to ‘char const *’;

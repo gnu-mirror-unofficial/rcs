@@ -402,7 +402,7 @@ putadmin (void)
 
   aputs (TINYKS (access), fout);
   for (struct link *ls = r ? GROK (access) : NULL; ls; ls = ls->next)
-    aprintf (fout, "\n\t%s", (char *) ls->entry);
+    aprintf (fout, "\n\t%s", (char const *) ls->entry);
   aprintf (fout, ";\n%s", TINYKS (symbols));
   format_assocs (fout, "\n\t%s:%s");
   aprintf (fout, ";\n%s", TINYKS (locks));

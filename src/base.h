@@ -876,7 +876,7 @@ int getRCSINIT (int argc, char **argv, char ***newargv);
 
 #define fully_numeric_no_k(cb,source)  fully_numeric (cb, source, NULL)
 
-#define TINYS(x)  ((char *)(x)->bytes)
+#define TINYS(x)  ((char const *)(x)->bytes)
 
 #define TINYKS(x)  TINYS (&TINY (x))
 
