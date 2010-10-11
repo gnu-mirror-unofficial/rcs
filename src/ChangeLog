@@ -1,3 +1,10 @@
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Presume availability of ‘mkstemp’.
+
+	* b-feph.c [!HAVE_MKSTEMP] (homegrown_mkstemp): Delete func.
+	[!HAVE_MKSTEMP] (mkstemp): Delete #define.
+
 2010-10-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘fd_safer’ more.

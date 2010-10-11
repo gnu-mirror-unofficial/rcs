@@ -45,45 +45,6 @@ struct ephemstuff
 
 #define EPH(x)  (BE (ephemstuff)-> x)
 
-#ifndef HAVE_MKSTEMP
-static int
-homegrown_mkstemp (char *template)
-/* Like mkstemp(2), but never return EINVAL.  That is, never check for
-   missing "XXXXXX" since we know the unique caller DTRT.  */
-{
-  int pid = getpid ();
-  char *end = template + strlen (template);
-  char const xrep[] = {"abcdefghijklmnopqrstuvwxyz"
-                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                       /* Omit '0' => ‘strlen (xrep)’ is prime.  */
-                       "123456789"};
-  struct timeval tv;
-  uint64_t n;
-  int fd = -1;
-
-  for (int patience = 42 * 42;
-       PROB (fd) && patience;
-       patience--)
-    {
-      if (PROB (gettimeofday (&tv, NULL)))
-        return -1;
-      /* Cast to ensure 64-bit shift.  */
-      n = pid | (uint64_t)(tv.tv_sec ^ tv.tv_usec) << 32;
-      for (char *w = end - 6; n && w < end; w++)
-        {
-          *w = xrep[n % 61];
-          n = n / 61;
-        }
-      fd = open (template, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-    }
-  if (PROB (fd))
-    errno = EEXIST;
-  return fd;
-}
-
-#define mkstemp  homegrown_mkstemp
-#endif  /* !defined HAVE_MKSTEMP */
-
 void
 init_ephemstuff (void)
 {
