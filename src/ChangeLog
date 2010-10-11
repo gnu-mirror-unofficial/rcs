@@ -1,5 +1,12 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume availability of ‘getcwd’.
+
+	* rcsfnms.c: Don't #include "b-isr.h".
+	[!HAVE_GETCWD] (getcwd): Delete func.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Find invocation directory only once.
 
 	* base.h (struct program): Add member ‘invoke’.
