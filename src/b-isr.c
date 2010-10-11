@@ -57,7 +57,13 @@ maybe_reset_sigchld (void)
 static void
 werr (char const *s)
 {
-  write (STDERR_FILENO, s, strlen (s));
+  ssize_t len;
+
+  if (! (len = strlen (s)))
+    return;
+
+  if (len != write (STDERR_FILENO, s, len))
+    PROGRAM (exiterr) ();
 }
 
 void

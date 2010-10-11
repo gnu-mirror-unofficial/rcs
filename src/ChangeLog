@@ -1,5 +1,12 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] If writing to stderr in ISR fails, exit failurefully.
+
+	* b-isr.c (werr): Don't bother to ‘write’ zero-len strings;
+	also, if ‘write’ rv is unexpected, call ‘PROGRAM (exiterr)’.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use literal string for ‘PERR’, ‘MERR’ first arg.
 
 	* co.c (rmworkfile): Rework ‘PERR (COND-EXPRESSION, ...)’ as
