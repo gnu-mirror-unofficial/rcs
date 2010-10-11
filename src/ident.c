@@ -150,6 +150,7 @@ main (int argc, char **argv)
   char const *a;
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "ident",
       .help = help,
       .exiterr = exiterr

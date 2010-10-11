@@ -393,6 +393,8 @@ extern char const equal_line[];
 /* Every program defines this.  */
 struct program
 {
+  /* The invocation filename, basically a copy of ‘argv[0]’.  */
+  char const *invoke;
   /* The name of the program, for --help, --version, etc.  */
   char const *name;
   /* Text for --help.  */
@@ -416,6 +418,10 @@ struct sff
    Subsystems also communicate via these settings.  */
 struct behavior
 {
+  char const *invdir;
+  /* The directory portion of ‘PROGRAM (invoke)’.
+     -- find_peer_prog  */
+
   bool unbufferedp;
   /* Although standard error should be unbuffered by default,
      don't rely on it.

@@ -145,6 +145,7 @@ main (int argc, char **argv)
   struct stat workstat;
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "rcsclean",
       .help = help,
       .exiterr = exiterr

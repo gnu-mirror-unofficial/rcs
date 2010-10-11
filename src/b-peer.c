@@ -20,7 +20,9 @@
 
 #include "base.h"
 #include <stdlib.h>
+#include <string.h>
 #include "findprog.h"
+#include "b-divvy.h"
 
 struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
 
@@ -29,13 +31,24 @@ find_peer_prog (struct symdef *prog)
 {
   if (! prog->underlying)
     {
-      const char *name = find_in_path (prog->meaningful);
+      size_t len;
 
-      if (! name || prog->underlying == name)
-        abort ();
+      /* Find the driver's invocation directory, once.  */
+      if (! BE (invdir))
+        {
+          char const *name = find_in_path (PROGRAM (invoke));
+          char const *end = strrchr (name, SLASH);
 
-      prog->underlying = str_save (name);
-      free ((void *) name);
+          if (!end)
+            abort ();
+          BE (invdir) = intern (PLEXUS, name, end + 1 - name);
+          if (name != PROGRAM (invoke))
+            free ((void *) name);
+        }
+
+      /* Concat the invocation directory with the base name.  */
+      accf (PLEXUS, "%s%s", BE (invdir), prog->meaningful);
+      prog->underlying = finish_string (PLEXUS, &len);
     }
 
   return prog->underlying;

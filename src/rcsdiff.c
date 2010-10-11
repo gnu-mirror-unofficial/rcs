@@ -161,6 +161,7 @@ main (int argc, char **argv)
   register int c;
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "rcsdiff",
       .help = help,
       .exiterr = exiterr

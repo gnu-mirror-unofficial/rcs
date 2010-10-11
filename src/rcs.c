@@ -1111,6 +1111,7 @@ main (int argc, char **argv)
   struct wlink *deltas;
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "rcs",
       .help = help,
       .exiterr = exiterr

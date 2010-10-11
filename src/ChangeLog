@@ -1,5 +1,38 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Find invocation directory only once.
+
+	* base.h (struct program): Add member ‘invoke’.
+	(struct behavior): Add member ‘invdir’.
+	* ci.c (main): Specify ‘.invoke’ in ‘program’.
+	* co.c (main): Likewise.
+	* ident.c (main): Likewise.
+	* merge.c (main): Likewise.
+	* rcs.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rlog.c (main): Likewise.
+	* yarrrr.c [!PROGRAM_EXITERR] (PROGRAM_EXITERR): New #define.
+	(main): Construct ‘struct program program’ as a local var.
+	[TEST_STR2TIME] (program): Delete var.
+	[TEST_STR2TIME] (PROGRAM_NAME): New #define.
+	[TEST_FCMP] (program): Delete var.
+	[TEST_FCMP] (PROGRAM_NAME): New #define.
+	[TEST_PAIRS] (program): Delete var.
+	[TEST_PAIRS] (PROGRAM_NAME, PROGRAM_EXITERR): New #define:s.
+	[TEST_KEEP] (program): Delete var.
+	[TEST_KEEP] (PROGRAM_NAME): New #define.
+	[TEST_GROK] (program): Delete var.
+	[TEST_GROK] (PROGRAM_NAME, PROGRAM_EXITERR): New #define:s.
+	[TEST_REV] (program): Delete var.
+	[TEST_REV] (PROGRAM_NAME): New #define.
+	* b-peer.c: #include <string.h>, "b-divvy.h".
+	(find_peer_prog): Find driver's invocation directory;
+	use it to construct the program's underlying filename.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Propagate ‘const’ in casts.
 
 	* base.h (TINYS): Add ‘const’ to cast.

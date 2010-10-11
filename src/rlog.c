@@ -783,6 +783,7 @@ main (int argc, char **argv)
   int revno;
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "rlog",
       .help = help,
       .exiterr = exiterr

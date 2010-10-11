@@ -446,8 +446,9 @@ main (int argc, char **argv)
   int stdout_mode = 0;
 #endif
   struct wlink *deltas;                 /* Deltas to be generated.  */
-  struct program program =
+  const struct program program =
     {
+      .invoke = argv[0],
       .name = "co",
       .help = help,
       .exiterr = exiterr

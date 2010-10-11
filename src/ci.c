@@ -633,6 +633,7 @@ main (int argc, char **argv)
   struct wlink *deltas;                 /* Deltas to be generated.  */
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "ci",
       .help = help,
       .exiterr = exiterr

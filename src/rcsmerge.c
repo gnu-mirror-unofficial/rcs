@@ -73,6 +73,7 @@ main (int argc, char **argv)
   struct delta *target;
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "rcsmerge",
       .help = help,
       .exiterr = exiterr

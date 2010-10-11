@@ -67,7 +67,7 @@ scram (void)
 #ifdef TEST_STR2TIME
 #include "maketime.h"
 
-static const struct program program = { .name = "y-STR2TIME" };
+#define PROGRAM_NAME  "y-STR2TIME"
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -95,7 +95,7 @@ yarrrr (int argc, char *argv[argc])
 /* The test program prints out whether two files are identical,
    except for keywords.  */
 
-static const struct program program = { .name = "y-FCMP" };
+#define PROGRAM_NAME  "y-FCMP"
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -125,11 +125,8 @@ yarrrr (int argc, char *argv[argc])
 
 #ifdef TEST_PAIRS
 
-static const struct program program =
-  {
-    .name = "y-PAIRS",
-    .exiterr = bow_out
-  };
+#define PROGRAM_NAME     "y-PAIRS"
+#define PROGRAM_EXITERR  bow_out
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -199,7 +196,7 @@ yarrrr (int argc, char *argv[argc])
 #include <string.h>
 /* Print the keyword values found.  */
 
-static const struct program program = { .name = "y-KEEP" };
+#define PROGRAM_NAME  "y-KEEP"
 
 void
 spew (char const *what, char *s)
@@ -310,7 +307,8 @@ exiterr (void)
   exit_failurefully ();
 }
 
-static const struct program program = { .name = "y-GROK", .exiterr = exiterr };
+#define PROGRAM_NAME     "y-GROK"
+#define PROGRAM_EXITERR  exiterr
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -426,11 +424,7 @@ yarrrr (int argc, char *argv[argc])
 /* Test the routines that generate a sequence of delta numbers
    needed to regenerate a given delta.  */
 
-static const struct program program =
-  {
-    .name = "y-REV",
-    .exiterr = scram
-  };
+#define PROGRAM_NAME  "y-REV"
 
 int
 yarrrr (int argc, char *argv[argc])
@@ -502,10 +496,20 @@ yarrrr (int argc, char *argv[argc])
 #endif  /* TEST_REV */
 
 
+#ifndef PROGRAM_EXITERR
+#define PROGRAM_EXITERR  scram
+#endif
+
 int
 main (int argc, char *argv[argc])
 {
   int exitstatus;
+  const struct program program =
+    {
+      .invoke = argv[0],
+      .name = PROGRAM_NAME,
+      .exiterr = PROGRAM_EXITERR
+    };
 
   gnurcs_init (&program);
   exitstatus = yarrrr (argc, argv);

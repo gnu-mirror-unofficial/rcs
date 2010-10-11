@@ -58,6 +58,7 @@ main (int argc, char **argv)
   bool tostdout = false;
   const struct program program =
     {
+      .invoke = argv[0],
       .name = "merge",
       .help = help,
       .exiterr = exiterr
