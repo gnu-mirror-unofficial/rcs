@@ -1,5 +1,13 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[C] Reduce need for casting.
+
+	* b-isr.c (access_page): Change P type to ‘char const *’;
+	change local var type to ‘char volatile’; remove cast.
+	* b-isr.h (access_page): Update func decl.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] If writing to stderr in ISR fails, exit failurefully.
 
 	* b-isr.c (werr): Don't bother to ‘write’ zero-len strings;

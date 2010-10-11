@@ -37,7 +37,7 @@ enum isr_actions
 extern struct isr_scratch *isr_init (bool *be_quiet);
 extern void access_page (struct isr_scratch *scratch,
                          char const *filename,
-                         void const *p);
+                         char const *p);
 extern void isr_do (struct isr_scratch *scratch,
                     enum isr_actions action);
 

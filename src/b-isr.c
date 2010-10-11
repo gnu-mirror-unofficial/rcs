@@ -126,12 +126,12 @@ struct isr_scratch
 
 void
 access_page (struct isr_scratch *scratch,
-             char const *filename, void const *p)
+             char const *filename, char const *p)
 {
-  unsigned char volatile t;
+  char volatile t;
 
   ISR (access_name) = filename;
-  t = *((unsigned char *) p);
+  t = *p;
   ISR (access_name) = NULL;
 }
 
