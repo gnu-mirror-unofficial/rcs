@@ -1,3 +1,17 @@
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int man] Make dependency specification more idiomatic.
+
+	* Makefile.am (dist_noinst_MANS): New var.
+	(BUILT_SOURCES): Add $(dist_noinst_MANS).
+	(EXTRA_DIST): Remove rcsfreeze.1, rcsfreeze.1in;
+	add ‘$(dist_noinst_MANS:%=%in)’.
+	(rcsfile.5): Delete target.
+	(.5in.5): New old-fashioned suffix rule.
+	(.1in.1): Clear dependency list for old-fashioned suffix rule.
+	($(dist_man_MANS), $(dist_noinst_MANS)):
+	Specify dependencies of ‘REL’ and ‘$(bits)’.
+
 2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.93

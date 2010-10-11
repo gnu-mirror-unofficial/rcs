@@ -20,7 +20,10 @@
 dist_man_MANS = ci.1 co.1 ident.1 merge.1 rcs.1 rcsclean.1 \
   rcsdiff.1 rcsfile.5 rcsintro.1 rcsmerge.1 rlog.1
 
-BUILT_SOURCES = REL
+## Is this correct?
+dist_noinst_MANS = rcsfreeze.1
+
+BUILT_SOURCES = REL $(dist_noinst_MANS)
 
 bits = b-base \
   b-environment \
@@ -28,16 +31,18 @@ bits = b-base \
   b-tichy-cite
 
 EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES) $(bits)
-EXTRA_DIST += rcsfreeze.1 rcsfreeze.1in
+EXTRA_DIST += $(dist_noinst_MANS:%=%in)
 
 soelim = soelim -I. -I'$(srcdir)'
 nolf = sed '/^\.lf /d'
 
-rcsfile.5: rcsfile.5in REL $(bits)
+.5in.5:
 	$(soelim) $< | $(PIC) $(PICFLAGS) | $(nolf) > $@
 
-.1in.1: REL $(bits)
+.1in.1:
 	$(soelim) $< | $(nolf) > $@
+
+$(dist_man_MANS) $(dist_noinst_MANS): REL $(bits)
 
 REL: $(top_srcdir)/configure
 	@{ echo '.ds Rv $(PACKAGE_VERSION)' ;		\
