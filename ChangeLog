@@ -1,5 +1,11 @@
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module ‘getcwd’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘getcwd’.
+
+2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘mkstemp’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘mkstemp’.
