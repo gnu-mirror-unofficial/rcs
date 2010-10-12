@@ -1061,28 +1061,17 @@ main (int argc, char **argv)
                 int wfd = workptr->fd;
                 struct stat checkworkstat;
                 char const *diffv[6 + !!OPEN_O_BINARY], **diffp;
-                off_t wo;
 
                 diagnose ("new revision: %s; previous revision: %s",
                           newdelta.num, targetdelta->num);
                 SAME_AFTER (from, targetdelta->text);
                 newdelta.pretty_log = getlogmsg ();
-                if (STDIO_P (workptr))
-                  {
-                    bool badness = false;
 
-                    fro_bob (workptr);
-                    if (CAN_FFLUSH_IN)
-                      badness = PROB (fflush (workptr->stream));
-                    else
-                      {
-                        wo = lseek (wfd, 0, SEEK_CUR);
-                        badness = (-1 == wo
-                                   || (wo && PROB (lseek (wfd, 0, SEEK_SET))));
-                      }
-                    if (badness)
-                      Ierror ();
-                  }
+                /* "Rewind" ‘workptr’ before feeding it to diff(1).  */
+                fro_bob (workptr);
+                if (PROB (lseek (wfd, 0, SEEK_SET)))
+                  Ierror ();
+
                 diffp = diffv;
                 *++diffp = prog_diff;
                 *++diffp = diff_flags;
@@ -1095,10 +1084,6 @@ main (int argc, char **argv)
                 *++diffp = NULL;
                 if (DIFF_TROUBLE == runv (wfd, diffname, diffv))
                   RFATAL ("diff failed");
-                if (STDIO_P (workptr)
-                    && !CAN_FFLUSH_IN
-                    && PROB (lseek (wfd, wo, SEEK_CUR)))
-                  Ierror ();
                 if (newhead)
                   {
                     fro_bob (workptr);

@@ -1,5 +1,13 @@
 2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Simplify stream/fd sync; avoid ‘fflush’ on input.
+
+	* configure.ac (CAN_FFLUSH_IN): Delete RCS_CBOOL
+	and associated var ‘rcs_cv_flush_in_ok’.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): Remove ‘rcs_cv_flush_in_ok’.
+
+2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘waitpid’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘waitpid’.

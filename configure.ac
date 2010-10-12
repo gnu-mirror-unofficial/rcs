@@ -321,26 +321,6 @@ char buf[17000];
 RCS_CBOOL([BAD_CREAT0],[no],[rcs_cv_wac_ok],
   [Does `write' after `creat (F, 0)' fail in the wrong way?])
 
-AC_CACHE_CHECK([if `fflush' works on input streams],[rcs_cv_flush_in_ok],[
-  rm -f conftest.data
-  echo nonempty > conftest.data
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
-]],[
-  FILE *fp = fopen ("conftest.data", "r");
-  return (EOF == getc (fp)
-          || 0 > fseek (fp, 0L, SEEK_SET)
-          || 0 > fflush (fp)
-          || 0 > lseek (fileno (fp), 0, SEEK_CUR));
-])
-],[res=yes],[res=no])
-  rcs_cv_flush_in_ok=$res
-])
-RCS_CBOOL([CAN_FFLUSH_IN],[yes],[rcs_cv_flush_in_ok],
-  [Does `fflush' work on input streams?])
-
 AC_CACHE_CHECK([if `unlink' works on unwritable files],[rcs_cv_unlink_mw_ok],[
   touch conftest.data
   chmod -w conftest.data
@@ -531,7 +511,6 @@ dnl Because their removal is motivated primarily by laziness,
 dnl and only secondarily by standards compliance, we should not
 dnl be surprised if there is some resistence from pretest users.
 dnl In that case, fine, just keep them (remove them from this list).
-rcs_cv_flush_in_ok
 rcs_cv_fopen_truncates
 rcs_cv_sane_mmap
 rcs_slsl_is_sl

@@ -1,5 +1,14 @@
 2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Simplify stream/fd sync; avoid ‘fflush’ on input.
+
+	* ci.c (main): For sending ‘workptr’ fd to diff(1),
+	don't save current fd position, ‘fflush’ conditionally,
+	and restore afterwards; instead, seek to beginning only.
+	Also, do all this regardless of ‘STDIO_P (workptr)’.
+
+2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume availability of ‘waitpid’.
 
 	* rcsutil.c (runv) [!defined HAVE_WAITPID]:
