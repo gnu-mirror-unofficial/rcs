@@ -105,7 +105,7 @@ checkidentifier (char const *id, int delimiter, register bool dotok)
              && c != delim)
         id++;
       PFATAL ("invalid %s `%.*s'", dotok ? "identifier" : "symbol",
-              id - temp, temp);
+              (int) (id - temp), temp);
     }
   return id;
 }

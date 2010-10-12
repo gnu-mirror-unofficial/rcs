@@ -1,5 +1,14 @@
 2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[C] Cast precision expression for ‘%.*s’ to ‘int’.
+
+	Omission from 2010-05-18,
+	"Don't mutate string in ‘checkidentifier’".
+	* rcsmap.c (checkidentifier):
+	Cast precision expression for ‘%.*s’ to ‘int’.
+
+2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Use ‘%zu’ for ‘size_t’ arg in format string.
 
 	* rcsedit.c (finisheditline): Use ‘%zu’ in
