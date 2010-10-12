@@ -1,5 +1,12 @@
 2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[C] Use ‘%zu’ for ‘size_t’ arg in format string.
+
+	* rcsedit.c (finisheditline): Use ‘%zu’ in
+	format string to output the ‘finctx->script_lno’.
+
+2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Simplify stream/fd sync; avoid ‘fflush’ on input.
 
 	* ci.c (main): For sending ‘workptr’ fd to diff(1),

@@ -246,7 +246,7 @@ finisheditline (struct finctx *finctx, char *l)
 
   ctx->from->ptr = l;
   if (expandline (ctx) < 0)
-    PFATAL ("%s:%u: error expanding keywords while applying delta %s",
+    PFATAL ("%s:%zu: error expanding keywords while applying delta %s",
             REPO (filename), finctx->script_lno, ctx->delta->num);
 }
 
