@@ -324,21 +324,8 @@ runv (int infd, char const *outname, char const **args)
       }
     if (PROB (pid))
       fatal_sys ("fork");
-#if defined HAVE_WAITPID
     if (PROB (waitpid (pid, &wstatus, 0)))
       fatal_sys ("waitpid");
-#else  /* !defined HAVE_WAITPID */
-    {
-      pid_t w;
-
-      do
-        {
-          if (PROB (w = wait (&wstatus)))
-            fatal_sys ("wait");
-        }
-      while (w != pid);
-    }
-#endif  /* !defined HAVE_WAITPID */
 #else   /* !defined HAVE_WORKING_FORK */
     size_t len;
     char *cmd;
