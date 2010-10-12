@@ -984,7 +984,7 @@ main (int argc, char **argv)
         if (!pre5 || kws != kwsub_kv)
           aprintf (out, "\nkeyword substitution: %s", kwsub_string (kws));
 
-        aprintf (out, "\ntotal revisions: %d", GROK (deltas_count));
+        aprintf (out, "\ntotal revisions: %zu", GROK (deltas_count));
 
         revno = 0;
 

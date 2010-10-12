@@ -1,5 +1,12 @@
 2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[C] Use ‘%zu’ for ‘size_t’ arg in format string.
+
+	* rlog.c (main): Use ‘%zu’ in format
+	string to output the ‘GROK (deltas_count)’.
+
+2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[C] Cast precision expression for ‘%.*s’ to ‘int’.
 
 	Omission from 2010-05-18,
