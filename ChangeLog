@@ -1,5 +1,11 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module ‘strsignal’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘strsignal’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘sigaction’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘sigaction’.
