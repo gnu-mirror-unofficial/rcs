@@ -227,20 +227,14 @@ AC_FUNC_FORK
 AC_CHECK_FUNCS_ONCE([
   fchmod
   ftruncate
-  getcwd
   getpwuid_r
   getuid
   madvise
-  mkstemp
   mmap
   psiginfo
   psignal
   seteuid
   setuid
-  sigaction
-  sigblock
-  strsignal
-  waitpid
 ])
 
 # system services
@@ -275,26 +269,6 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 ])
 RCS_CBOOL([BAD_FOPEN_WPLUS],[no],[rcs_cv_fopen_truncates],
   [Does `fopen (F, "w+")' fail to truncate?])
-
-if test yes = $ac_cv_header_signal_h &&
-   test  no = $ac_cv_func_sigaction ; then
-AC_CACHE_CHECK([if signal zaps the handler],[rcs_cv_sig_zaps],[
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-#include <signal.h>
-static void nothing (i) int i; {}
-]],[[
-  int count = 2;
-  signal (SIGINT, nothing);
-  while (--count)
-    raise (SIGINT);
-]])
-],[res=no],[res=yes])
-  rcs_cv_sig_zaps=$res
-])
-else rcs_cv_sig_zaps=no
-fi
-RCS_CBOOL([SIG_ZAPS_HANDLER],[yes],[rcs_cv_sig_zaps],
-  [Does a signal zap its handler (requiring another call to `signal')?])
 
 AC_CACHE_CHECK([if `write' after `creat (F, 0)' works],[rcs_cv_wac_ok],[
   rm -f conftest.data
@@ -490,23 +464,14 @@ AC_SUBST([ABSFILENAMEGLOB])
 
 # For pretest releases, encourage user feedback for weird systems.
 
-AS_IF([RCS_YESP([gl_cv_double_slash_root])],[rcs_cv_slsl_is_sl=no],
-  [rcs_slsl_is_sl=yes])
-
-AS_IF([RCS_YESP([ac_cv_func_psignal]) || RCS_YESP([ac_cv_func_strsignal])],
-  [rcs_have_psignal_or_strsignal=yes],[rcs_have_psignal_or_strsignal=no])
-
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 
 dnl These can probably be handled by gnulib, no sweat.
 ac_cv_header_utime_h            dnl SVr4, POSIX.1-2001
 ac_cv_header_pwd_h              dnl 4.3BSD, SVr4, POSIX.1-2001
 rcs_cv_dot2_ok                  dnl C99 (printf)
-ac_cv_func_getcwd               dnl POSIX.1-2001
 ac_cv_func_fchmod               dnl 4.4BSD, SVr4, POSIX.1-2001
 ac_cv_func_ftruncate            dnl 4.4BSD, SVr4, POSIX.1-2001
-ac_cv_func_mkstemp              dnl 4.3BSD, POSIX.1-2001
-ac_cv_func_readlink             dnl 4.4BSD, POSIX.1-2001
 ac_cv_func_getuid               dnl 4.3BSD, POSIX.1-2001
 
 dnl These are things we would like to not worry about.
@@ -517,10 +482,8 @@ dnl be surprised if there is some resistence from pretest users.
 dnl In that case, fine, just keep them (remove them from this list).
 rcs_cv_fopen_truncates
 rcs_cv_sane_mmap
-rcs_slsl_is_sl
 rcs_cv_unlink_mw_ok
 rcs_cv_wac_ok
-rcs_have_psignal_or_strsignal
 
 dnl Some things to think about
 dnl mmap_signal_is_SIGBUS -- TODO: make rcs_cv_mmap_signal have symbolic

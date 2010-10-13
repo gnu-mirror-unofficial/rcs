@@ -1,5 +1,19 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Tidy up configure.ac a bit.
+
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Remove ‘getcwd’,
+	‘mkstemp’, ‘sigaction’, ‘sigblock’, ‘strsignal’, ‘waitpid’.
+	(SIG_ZAPS_HANDLER): Delete RCS_CBOOL, associated
+	var ‘rcs_cv_sig_zaps’, and the check that sets it.
+	(rcs_slsl_is_sl, rcs_cv_slsl_is_sl): Delete unused vars.
+	(rcs_have_psignal_or_strsignal): Likewise.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): Remove ‘ac_cv_func_getcwd’,
+	‘ac_cv_func_mkstemp’, ‘ac_cv_func_readlink’, ‘rcs_slsl_is_sl’,
+	‘rcs_have_psignal_or_strsignal’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Drop gnulib module ‘sig2str’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Remove ‘sig2str’.
