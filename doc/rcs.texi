@@ -828,7 +828,7 @@ without @option{-kv}.
 @subsection Misc common options
 
 Other common options are @option{-I}, @option{-q}, @option{-s},
-@option{-T}, @option{-V}, @option{-x}.
+@option{-T}, @option{-V}, @option{-w}, @option{-x}.
 
 @table @code
 @item -I
@@ -877,6 +877,13 @@ information and exit successfully.
 @cindex RCS version emulation
 @var{n} specifies the RCS (major) version to emulate.
 Valid values for @var{n} are: 3, 4, 5.
+
+@item -w@var{login}
+@cindex specifying author
+@cindex author, specifying
+Some commands accept an option of the form @samp{-w@var{login}}
+to specify the login name of the author of a revision, i.e.,
+``who'' is responsible.
 
 @item -x@var{suff}
 @cindex specifying a suffix list
@@ -950,6 +957,14 @@ a system-dependent directory, such as @file{/tmp}.
 You can override this directory by specifying another one as the value
 of one of the environment variables @code{TMPDIR}, @code{TMP}, or
 @code{TEMP} (checked in that order).
+@end defvr
+
+@defvr {Environment Variable} LOGNAME
+@defvrx {Environment Variable} USER
+Absent @option{-w@var{login}}, or when @var{login} is omitted
+(@pxref{Misc common options}), commands check environment variables
+@code{LOGNAME} and @code{USER} (in that order).  If neither of these
+are set, RCS queries the host for, and uses, your login.
 @end defvr
 
 @node ci

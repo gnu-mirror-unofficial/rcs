@@ -1,5 +1,12 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[doc] Document author-specification option, env vars.
+
+	* doc/rcs.texi (Misc common options): Document ‘-wLOGIN’.
+	(Environment): Document env vars ‘LOGNAME’, ‘USER’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use autoconf macro to enable 64-bit file offsets.
 
 	* configure.ac (AC_SYS_LARGEFILE): New macro invocation.
