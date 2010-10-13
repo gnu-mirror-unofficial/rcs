@@ -148,22 +148,9 @@ ignore (struct isr_scratch *scratch)
 static struct isr_scratch *
 scratch_from_context (void *c)
 {
-#ifndef HAVE_SIGACTION
-
-  /* FIXME: The reference to ISR_SCRATCH prevents this module (b-isr.c)
-     from being completely reentrant, which would be a nice, but not
-     necessary, for the future libgnurcs.  The useless ‘c ? c :’
-     prevents a compiler warning about unused parameter ‘c’.  */
-
-  return c ? c : ISR_SCRATCH;
-
-#else
-
   ucontext_t *uc = c;
 
   return (struct isr_scratch *)(uc->uc_stack.ss_sp) - 1;
-
-#endif
 }
 
 static void
@@ -171,10 +158,6 @@ catchsigaction (int signo, siginfo_t *info, void *c)
 {
   struct isr_scratch *scratch = scratch_from_context (c);
   bool from_mmap = MMAP_SIGNAL && MMAP_SIGNAL == signo;
-
-  if (SIG_ZAPS_HANDLER)
-    /* If a signal arrives before we reset the handler, we lose.  */
-    signal (signo, SIG_IGN);
 
   if (ISR (level))
     {
@@ -224,19 +207,9 @@ catchsigaction (int signo, siginfo_t *info, void *c)
   PROGRAM (exiterr) ();
 }
 
-#if !defined HAVE_SIGACTION
-static void
-catchsig (int signo)
-{
-  catchsigaction (signo, NULL, NULL);
-}
-#endif  /* !defined HAVE_SIGACTION */
-
 static void
 setup_catchsig (size_t count, int const set[count])
 {
-#if defined HAVE_SIGACTION
-
   sigset_t blocked;
 
 #define MUST(x)  if (PROB (x)) goto fail
@@ -265,47 +238,9 @@ setup_catchsig (size_t count, int const set[count])
     }
 
 #undef MUST
-
-#else  /* !defined HAVE_SIGACTION */
-#if defined HAVE_SIGBLOCK
-
-  int mask = 0;
-
-  for (size_t i = 0; i < count; i++)
-    mask |= 1 << (set[i] - 1);
-  mask = sigblock (mask);
-
-  for (size_t i = 0; i < count; i++)
-    {
-      int sig = set[i];
-
-      if (SIG_IGN == signal (sig, catchsig)
-          && catchsig != signal (sig, SIG_IGN))
-        PFATAL ("signal catcher failure");
-    }
-
-  sigsetmask (mask);
-
-#else  /* !defined HAVE_SIGBLOCK */
-
-  for (size_t i = 0; i < count; i++)
-    {
-      int sig = set[i];
-
-      if (SIG_IGN != signal (sig, SIG_IGN)
-          && SIG_IGN != signal (sig, catchsig))
-        PFATAL ("signal catcher failure");
-    }
-
-#endif  /* !defined HAVE_SIGBLOCK */
-#endif  /* !defined HAVE_SIGACTION */
 }
 
-#if defined HAVE_SIGACTION
 #define ISR_STACK_SIZE  (10 * SIGSTKSZ)
-#else
-#define ISR_STACK_SIZE  0
-#endif
 
 #define SCRATCH_SIZE  sizeof (struct isr_scratch)
 

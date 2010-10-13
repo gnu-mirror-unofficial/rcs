@@ -1,5 +1,16 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume availability of ‘sigaction’.
+
+	* b-isr.c (scratch_from_context) [!HAVE_SIGACTION]: Delete code.
+	(catchsigaction): Don't reset the handler.
+	[!HAVE_SIGACTION] (catchsig): Delete func.
+	(setup_catchsig) [!HAVE_SIGACTION]: Delete code.
+	[!HAVE_SIGACTION] (ISR_STACK_SIZE): Delete code,
+	leaving unconditionally #define:d ‘ISR_STACK_SIZE’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘getlogin_r’, not ‘getlogin’.
 
 	* b-excwho.c (getusername): Use ‘getlogin_r’ instead
