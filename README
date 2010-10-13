@@ -62,30 +62,37 @@ See INSTALL for general instructions on configuring and building RCS.
 Use ‘configure --help’ to see a list of options for customizing the
 installation directories (.e.g, --prefix).
 
-Another option is ‘--enable-compat2’.  It enables reading RCS 2.x file
-formats.  Most likely you can safely ignore this (that file format became
-obsolete in 1982).  However, if you do indeed find a version 2 file around,
-you can migrate the file to a recent format as follows:
+* Another option is ‘--enable-compat2’.  It enables reading RCS 2.x file
+  formats.  Most likely you can safely ignore this (that file format became
+  obsolete in 1982).  However, if you do indeed find a version 2 file around,
+  you can migrate the file to a recent format as follows:
 
-   Suppose the working file was ‘f.c’; rename the RCS file ‘f.c.v’ to
-   ‘f.c,v’, and the RCS file ‘f.v’ to ‘f.c,v’.  Thus suffixes are no
-   longer dropped and RCS files end in ‘,v’ rather than ‘.v’.  After
-   all version 2 RCS files have been updated with new versions of ci
-   or rcs, you can remake RCS with --enable-compat2=no.
+     Suppose the working file was ‘f.c’; rename the RCS file ‘f.c.v’ to
+     ‘f.c,v’, and the RCS file ‘f.v’ to ‘f.c,v’.  Thus suffixes are no
+     longer dropped and RCS files end in ‘,v’ rather than ‘.v’.  After
+     all version 2 RCS files have been updated with new versions of ci
+     or rcs, you can remake RCS with --enable-compat2=no.
 
-!!! NB: This option (and 2.x compatability) will be removed in GNU RCS 6.x.
+  !!! NB: This option (and 2.x compatability) will be removed in GNU RCS 6.x.
 
-Another option is ‘--with-mailer=PROG’.  This specifies that PROG (an
-absolute filename if not findable on PATH) should be used to send mail to
-the original locker when a lock is broken.  PROG will be called with one
-argument, the recipient, and its standard input will be:
+* Another option is ‘--with-mailer=PROG’.  This specifies that PROG (an
+  absolute filename if not findable on PATH) should be used to send mail to
+  the original locker when a lock is broken.  PROG will be called with one
+  argument, the recipient, and its standard input will be:
 
-  Subject: Broken lock on <FILENAME>
+    Subject: Broken lock on <FILENAME>
 
-  <REASON>
+    <REASON>
 
-That is, the first line is the subject, followed by an empty line, followed
-by the message body.  Omitting this option disables sending mail.
+  That is, the first line is the subject, followed by an empty line, followed
+  by the message body.  Omitting this option disables sending mail.
+
+* For speed, RCS uses the ‘mmap’ system call if available.  Unfortunately,
+  many mmap implementations are broken.  For instance, mmap does not work
+  properly in HP-UX 8 or 9, or in Solaris 2.4, without kernel patches.  We
+  don't know details about the bugs, so we can't test for them automatically.
+  You can build RCS without mmap by specifying ‘--disable-mmap’ to the
+  configure script.
 
 If your system type is in the following list, look for the
 corresponding strings in the notes below before configuring.
@@ -164,17 +171,6 @@ Set bad_NFS_rename to nonzero to work around the problem.
 Warning: the workaround introduces a rare race condition
 that can falsely report I/O errors;
 this is why the workaround is disabled unless you specify otherwise.
-
-MMAP_SIGNAL - For speed, RCS uses the ‘mmap’ system call if available.
-Unfortunately, many mmap implementations are broken.  For instance, mmap
-does not work properly in HP-UX 8 or 9, or in Solaris 2.4, without
-kernel patches.  We don't know details about the bugs, so we can't test
-for them automatically.  To manually disable mmap, insert
-
-  #undef MMAP_SIGNAL
-  #define MMAP_SIGNAL 0
-
-early on in src/base.h (TODO: Add a configure script option).
 
 has_NFS - Set this if the target host might use NFS.
 NFS's ``stateless server'' protocol has well-known problems with

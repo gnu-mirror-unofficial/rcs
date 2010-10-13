@@ -91,6 +91,11 @@ RCS_ABSOLUTE_PROGRAM([SENDMAIL],[mailer],
   [Program used to send mail when a lock is broken.])
 ])
 
+AC_ARG_ENABLE([mmap],
+ [AS_HELP_STRING([--disable-mmap],[don't use mmap(2), ever
+   (default: use mmap(2) if it seems sane enough)])],
+ [use_mmap=$enableval],[use_mmap=yes])
+
 # Set up simple `diff' test.
 echo 0 >conftest0
 echo 0 >conftest0c
@@ -211,8 +216,9 @@ gl_INIT
 AC_CHECK_HEADERS_ONCE([
   limits.h mach/mach.h net/errno.h
   pwd.h
-  siginfo.h sys/mman.h ucontext.h utime.h
+  siginfo.h ucontext.h utime.h
 ])
+AS_IF([RCS_YESP([use_mmap])],[AC_CHECK_HEADERS([sys/mman.h])])
 
 # types -- see also: (info "(autoconf) Particular Types")
 AC_TYPE_MODE_T
@@ -229,13 +235,12 @@ AC_CHECK_FUNCS_ONCE([
   ftruncate
   getpwuid_r
   getuid
-  madvise
-  mmap
   psiginfo
   psignal
   seteuid
   setuid
 ])
+AS_IF([RCS_YESP([use_mmap])],[AC_CHECK_FUNCS([mmap madvise])])
 
 # system services
 
@@ -374,8 +379,11 @@ AC_DEFUN([SIMPLE_MMAP_PROGRAM],[AC_LANG_PROGRAM([[
 $1
 ])])dnl
 
-if test yes = $ac_cv_func_mmap &&
-   test yes = $ac_cv_header_sys_mman_h ; then
+AS_IF([RCS_ALL([RCS_YESP],[
+  use_mmap
+  ac_cv_func_mmap
+  ac_cv_header_sys_mman_h
+])],[
 AC_CACHE_CHECK([that `mmap' is sane],[rcs_cv_sane_mmap],[
   rcs_cv_sane_mmap=yes
   # AIX 3.2.0 read-only mmap updates last-modified time of file!
@@ -388,7 +396,7 @@ AC_CACHE_CHECK([that `mmap' is sane],[rcs_cv_sane_mmap],[
     test "$bef" = "$aft" || rcs_cv_sane_mmap=no
   fi
 ])
-  if test yes = "$rcs_cv_sane_mmap" ; then
+AS_IF([RCS_YESP([rcs_cv_sane_mmap])],[
 AC_CACHE_CHECK([signal received if referencing nonexistent part of mmapped file],
                [rcs_cv_mmap_signal],[
     res=SIGBUS
@@ -405,10 +413,9 @@ AC_CACHE_CHECK([signal received if referencing nonexistent part of mmapped file]
           [AS_VAR_ARITH([res],[$res - 128])])
     rcs_cv_mmap_signal=$res
 ])
-AC_DEFINE_UNQUOTED([MMAP_SIGNAL],[$rcs_cv_mmap_signal],
+])])
+AC_DEFINE_UNQUOTED([MMAP_SIGNAL],[${rcs_cv_mmap_signal-0}],
   [Signal received if referencing nonexistent part of mmapped file.])
-  fi
-fi
 
 AC_CACHE_CHECK([if `wait' can handle ignored SIGCHLD],[rcs_cv_tolerant_wait],[
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
@@ -464,6 +471,9 @@ AC_SUBST([ABSFILENAMEGLOB])
 
 # For pretest releases, encourage user feedback for weird systems.
 
+AS_IF([test no = $use_mmap || RCS_YESP([rcs_cv_sane_mmap])],
+  [rcs_mmap_ok=yes],[rcs_mmap_ok=no])
+
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 
 dnl These can probably be handled by gnulib, no sweat.
@@ -481,9 +491,9 @@ dnl and only secondarily by standards compliance, we should not
 dnl be surprised if there is some resistence from pretest users.
 dnl In that case, fine, just keep them (remove them from this list).
 rcs_cv_fopen_truncates
-rcs_cv_sane_mmap
 rcs_cv_unlink_mw_ok
 rcs_cv_wac_ok
+rcs_mmap_ok
 
 dnl Some things to think about
 dnl mmap_signal_is_SIGBUS -- TODO: make rcs_cv_mmap_signal have symbolic

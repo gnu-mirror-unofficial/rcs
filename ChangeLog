@@ -1,5 +1,22 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Add configure option ‘--disable-mmap’.
+
+	* configure.ac (mmap): New AC_ARG_ENABLE to
+	set shell var ‘use_mmap’, defaulting to ‘yes’.
+	(AC_CHECK_HEADERS_ONCE): Move sys/mman.h from here
+	to ‘AC_CHECK_HEADERS’, conditionalized on ‘use_mmap’.
+	(AC_CHECK_FUNCS_ONCE): Move ‘madvise’, ‘mmap’ from here
+	to ‘AC_CHECK_FUNCS’, conditionalized on ‘use_mmap’.
+	(rcs_cv_sane_mmap, rcs_cv_mmap_signal): Add ‘use_mmap’
+	to surrounding condition; use ‘AS_IF’ there and internally.
+	(MMAP_SIGNAL): If ‘rcs_cv_mmap_signal’ is not set, use ‘0’.
+	(rcs_mmap_ok): New shell var.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW):
+	Remove ‘rcs_cv_sane_mmap’; add ‘rcs_mmap_ok’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Tidy up configure.ac a bit.
 
 	* configure.ac (AC_CHECK_FUNCS_ONCE): Remove ‘getcwd’,

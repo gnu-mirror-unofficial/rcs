@@ -46,6 +46,10 @@ See the end for copying conditions.
 
 	Most of the portability duties are now handled by gnulib.
 
+    - New configure option: --disable-mmap
+
+	This builds RCS without mmap(2), even if available.  See README.
+
     - New configure option: --enable-mailer=PROG
 
 	The feature whereby ci(1) sends mail when breaking a lock is now
