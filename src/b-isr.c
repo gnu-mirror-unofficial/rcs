@@ -35,7 +35,6 @@
 #ifdef HAVE_SIGINFO_H
 #include <siginfo.h>
 #endif
-#include "sig2str.h"
 #include "b-complain.h"
 #include "b-divvy.h"
 #include "b-excwho.h"
@@ -72,35 +71,7 @@ complain_signal (char const *msg, int signo)
 #ifndef HAVE_PSIGNAL
   werr (msg);
   werr (": ");
-#ifndef HAVE_STRSIGNAL
-  {
-    char buf[SIG2STR_MAX + 1];
-
-    if (PROB (sig2str (signo, buf)))
-      {
-        char *w = buf + SIG2STR_MAX;
-
-        werr ("Unknown signal ");
-        *w-- = '\0';
-        if (!signo)
-          *w-- = '0';
-        else
-          while (signo)
-            {
-              *w-- = (signo % 10) + '0';
-              signo /= 10;
-            }
-        werr (1 + w);
-      }
-    else
-      {
-        werr ("SIG");
-        werr (buf);
-      }
-  }
-#else  /* HAVE_STRSIGNAL */
   werr (strsignal (signo));
-#endif  /* HAVE_STRSIGNAL */
   werr ("\n");
 
 #else  /* HAVE_PSIGNAL */

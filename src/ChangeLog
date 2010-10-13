@@ -1,5 +1,13 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Presume availability of ‘strsignal’.
+
+	* b-isr.c: Don't #include "sig2str.h".
+	(complain_signal) [!HAVE_STRSIGNAL]: Delete
+	code and surrounding preprocessor conditional.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Presume availability of ‘sigaction’.
 
 	* b-isr.c (scratch_from_context) [!HAVE_SIGACTION]: Delete code.
