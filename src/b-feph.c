@@ -39,7 +39,7 @@
 
 struct ephemstuff
 {
-  char *tmpdir;
+  char const *standard;
   struct sff *tpnames;
 };
 
@@ -61,32 +61,33 @@ jam_sff (struct sff *sff, const char *prefix)
    string for cwd.)  If no name is possible, signal a fatal
    error.  Also, set ‘sff->disposition’ to ‘real’.  */
 {
-#define tmpdir  EPH (tmpdir)
   char *fn;
   size_t len;
   int fd;
 
   if (!prefix)
     {
-      if (! tmpdir)
+      if (! EPH (standard))
         {
+          char const *dir = NULL;
           char slash[2] = { SLASH, '\0' };
 
 #define TRY(envvarname)                         \
-          if (! tmpdir)                         \
-            tmpdir = getenv (#envvarname)
+          if (! dir)                            \
+            dir = getenv (#envvarname)
           TRY (TMPDIR);                 /* Unix tradition */
           TRY (TMP);                    /* DOS tradition */
           TRY (TEMP);                   /* another DOS tradition */
 #undef TRY
-          if (! tmpdir)
-            tmpdir = P_tmpdir;
+          if (! dir)
+            dir = P_tmpdir;
 
-          accf (PLEXUS, "%s%s", tmpdir,
-                SLASH != tmpdir[strlen (tmpdir) - 1] ? slash : "");
-          tmpdir = finish_string (PLEXUS, &len);
+          accf (PLEXUS, "%s%s%s", dir,
+                SLASH != dir[strlen (dir) - 1] ? slash : "",
+                PROGRAM (name));
+          EPH (standard) = finish_string (PLEXUS, &len);
         }
-      prefix = tmpdir;
+      prefix = EPH (standard);
     }
   accf (PLEXUS, "%sXXXXXX", prefix);
   fn = finish_string (PLEXUS, &len);
@@ -117,7 +118,6 @@ jam_sff (struct sff *sff, const char *prefix)
   close (fd);
   sff->filename = fn;
   sff->disposition = real;
-#undef tmpdir
 }
 
 #define JAM_SFF(sff,prefix)  jam_sff (&sff, prefix)
