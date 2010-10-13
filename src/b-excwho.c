@@ -165,20 +165,14 @@ getusername (bool suspicious)
   if (!BE (username))
     {
 #define JAM(x)  (BE (username) = x)
-      if (
-          /* Prefer ‘getenv’ unless ‘suspicious’; it's much faster.  */
-#if getlogin_is_secure
-          (suspicious
-           || (!JAM (cgetenv ("LOGNAME"))
-               && !JAM (cgetenv ("USER"))))
-          && !JAM (getlogin ())
-#else
-          suspicious
+      char buf[BUFSIZ];
+
+      /* Prefer ‘getenv’ unless ‘suspicious’; it's much faster.  */
+      if (suspicious
           || (!JAM (cgetenv ("LOGNAME"))
-              && !JAM (getenv ("USER"))
-              && !JAM (getlogin ()))
-#endif
-          )
+              && !JAM (cgetenv ("USER"))
+              && !(0 == getlogin_r (buf, BUFSIZ)
+                   && JAM (str_save (buf)))))
         {
 #if !defined HAVE_GETPWUID_R
 #if defined HAVE_SETUID
@@ -187,7 +181,6 @@ getusername (bool suspicious)
           PFATAL ("Who are you?  Please setenv LOGNAME.");
 #endif
 #else  /* defined HAVE_GETPWUID_R */
-          char buf[BUFSIZ];
           struct passwd pwbuf, *pw = NULL;
 
           if (getpwuid_r (ruid (), &pwbuf, buf, BUFSIZ, &pw)

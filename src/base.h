@@ -94,9 +94,6 @@ enum kwsub
 /* Main open flag for creating a lock file.  */
 #define OPEN_O_WRONLY O_WRONLY
 
-/* Is getlogin() secure?  Usually it's not.  */
-#define getlogin_is_secure 0
-
 /* Can ‘rename (A, B)’ falsely report success?  */
 #define bad_NFS_rename 0
 

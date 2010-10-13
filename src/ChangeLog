@@ -1,5 +1,13 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘getlogin_r’, not ‘getlogin’.
+
+	* b-excwho.c (getusername): Use ‘getlogin_r’ instead
+	of ‘getlogin’; share local ‘buf’ with ‘getpwuid_r’.
+	* base.h (getlogin_is_secure): Delete #define.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘getpwuid_r’, not ‘getpwuid’.
 
 	* b-excwho.c (getusername) [HAVE_GETUID && HAVE_GETPWUID]:
