@@ -1,4 +1,4 @@
-/* b-excwho.c --- exclusivity / identity
+/* b-excwho.h --- exclusivity / identity
 
    Copyright (C) 2010 Thien-Thi Nguyen
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
@@ -38,4 +38,4 @@ extern int addlock (struct delta *delta, bool verbose);
 #define lock_login_memq(ls,login)  lock_memq (ls,  true, login)
 #define lock_delta_memq(ls,delta)  lock_memq (ls, false, delta)
 
-/* b-excwho.c ends here */
+/* b-excwho.h ends here */
