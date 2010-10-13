@@ -1,5 +1,11 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Drop gnulib module ‘sig2str’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Remove ‘sig2str’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘strsignal’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘strsignal’.
