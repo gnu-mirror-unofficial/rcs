@@ -1,5 +1,12 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘getpwuid_r’, not ‘getpwuid’.
+
+	* configure.ac (AC_CHECK_FUNCS_ONCE):
+	Remove ‘getpwuid’; add ‘getpwuid_r’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Document author-specification option, env vars.
 
 	* doc/rcs.texi (Misc common options): Document ‘-wLOGIN’.

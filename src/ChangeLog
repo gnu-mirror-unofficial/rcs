@@ -1,5 +1,14 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘getpwuid_r’, not ‘getpwuid’.
+
+	* b-excwho.c (getusername) [HAVE_GETUID && HAVE_GETPWUID]:
+	Delete code; move #else code to...
+	[!HAVE_GETPWUID_R]: ...here.
+	[HAVE_GETPWUID_R]: Use ‘getpwuid_r’ to find user name.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use autoconf macro to enable 64-bit file offsets.
 
 	* base.h (_FILE_OFFSET_BITS): Remove #define.

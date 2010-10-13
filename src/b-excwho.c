@@ -159,7 +159,8 @@ setrid (void)
 
 char const *
 getusername (bool suspicious)
-/* Get the caller's login name.  Trust only ‘getwpuid’ if ‘suspicious’.  */
+/* Get and return the caller's login name.
+   Trust only ‘getwpuid_r’ if ‘suspicious’.  */
 {
   if (!BE (username))
     {
@@ -179,20 +180,23 @@ getusername (bool suspicious)
 #endif
           )
         {
-#if defined HAVE_GETUID && defined HAVE_GETPWUID
-          struct passwd const *pw = getpwuid (ruid ());
-
-          if (!pw)
-            PFATAL ("no password entry for userid %lu",
-                    (unsigned long) ruid ());
-          JAM (pw->pw_name);
-#else  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
+#if !defined HAVE_GETPWUID_R
 #if defined HAVE_SETUID
           PFATAL ("setuid not supported");
 #else
           PFATAL ("Who are you?  Please setenv LOGNAME.");
 #endif
-#endif  /* !(defined HAVE_GETUID && defined HAVE_GETPWUID) */
+#else  /* defined HAVE_GETPWUID_R */
+          char buf[BUFSIZ];
+          struct passwd pwbuf, *pw = NULL;
+
+          if (getpwuid_r (ruid (), &pwbuf, buf, BUFSIZ, &pw)
+              || &pwbuf != pw
+              || !pw->pw_name)
+            PFATAL ("no password entry for userid %d", ruid ());
+
+          JAM (str_save (pw->pw_name));
+#endif  /* defined HAVE_GETPWUID_R */
         }
       checksid (BE (username));
 #undef JAM

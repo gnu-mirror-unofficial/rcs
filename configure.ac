@@ -228,7 +228,7 @@ AC_CHECK_FUNCS_ONCE([
   fchmod
   ftruncate
   getcwd
-  getpwuid
+  getpwuid_r
   getuid
   madvise
   mkstemp
