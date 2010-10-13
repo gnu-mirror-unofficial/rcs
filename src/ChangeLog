@@ -1,3 +1,9 @@
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use autoconf macro to enable 64-bit file offsets.
+
+	* base.h (_FILE_OFFSET_BITS): Remove #define.
+
 2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[C] Use ‘%zu’ for ‘size_t’ arg in format string.

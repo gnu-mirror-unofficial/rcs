@@ -243,6 +243,10 @@ AC_CHECK_FUNCS_ONCE([
   waitpid
 ])
 
+# system services
+
+AC_SYS_LARGEFILE
+
 # specific behaviors (that unfortunately require running a program to check)
 
 AC_CACHE_CHECK([if printf "%.2d" produces a leading "0"],[rcs_cv_dot2_ok],[

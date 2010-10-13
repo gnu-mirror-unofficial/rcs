@@ -1,3 +1,9 @@
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use autoconf macro to enable 64-bit file offsets.
+
+	* configure.ac (AC_SYS_LARGEFILE): New macro invocation.
+
 2010-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Simplify stream/fd sync; avoid ‘fflush’ on input.

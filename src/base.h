@@ -21,8 +21,6 @@
 */
 
 #include "config.h"
-#define _FILE_OFFSET_BITS 64
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
