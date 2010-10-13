@@ -1,5 +1,11 @@
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module ‘getlogin_r’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘getlogin_r’.
+
+2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘getpwuid_r’, not ‘getpwuid’.
 
 	* configure.ac (AC_CHECK_FUNCS_ONCE):
