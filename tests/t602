@@ -1,4 +1,4 @@
-# t502 --- both ‘BRNUM’ and ‘BRNUM.’ resolve to branch tip
+# t602 --- both ‘BRNUM’ and ‘BRNUM.’ resolve to branch tip
 #
 # Copyright (C) 2010 Thien-Thi Nguyen
 #
@@ -32,4 +32,4 @@ test '' = $(diff $wd/DOT-0 $wd/DOT-1) \
 
 exit 0
 
-# t502 ends here
+# t602 ends here

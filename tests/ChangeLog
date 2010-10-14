@@ -1,3 +1,16 @@
+2010-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Reorganize tiers.
+
+	* t600: Rename from t500.
+	* t601: Rename from t501.
+	* t602: Rename from t502.
+	* t800: Rename from t700.
+	* Makefile.am (XFAIL_TESTS): New var.
+	(TESTS): Update.
+	* known-failures.in (5.7): Update.
+	* README: Update.
+
 2010-10-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Search ‘PATH’ for co / merge at runtime.

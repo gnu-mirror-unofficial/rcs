@@ -24,16 +24,19 @@ check_PROGRAMS = xorlf
 PATHPREFIX = $(abs_top_builddir)/src
 
 TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$(PATH_SEPARATOR)$$PATH" sh
+
+XFAIL_TESTS =
+
 TESTS = \
  t150 \
  t300 \
  t310 \
  t311 \
  t420 \
- t500 \
- t501 \
- t502 \
- t700 \
+ t600 \
+ t601 \
+ t602 \
+ t800 \
  t999
 
 EXTRA_DIST = $(TESTS) common fake

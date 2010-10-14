@@ -1,4 +1,4 @@
-# t501 --- rcs -a, rcs -e update RCS file
+# t601 --- rcs -a, rcs -e update RCS file
 #
 # Copyright (C) 2010 Thien-Thi Nguyen
 #
@@ -58,4 +58,4 @@ test 'bar baz' = "$(getaccesslist)" \
 
 exit 0
 
-# t501 ends here
+# t601 ends here

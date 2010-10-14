@@ -1,4 +1,4 @@
-# t700 --- outdating everything leaves "empty" RCS file
+# t600 --- rcs -n updates RCS file
 #
 # Copyright (C) 2010 Thien-Thi Nguyen
 #
@@ -20,17 +20,32 @@ split_std_out_err no
 $hey set -x
 
 ##
-# Check that outdating all revisions leaves a properly
-# "empty" RCS file.  This was a bug with RCS 5.7 and earlier.
+# Check that "rcs -nNAME:" updates the RCS file correctly,
+# adding the assocation ‘NAME’.  Likewise "rcs -nNAME"
+# should remove that association.  This test derives from
+# a pre-5.8-release regression (and bugfix).
 ##
 
-cmd='rcs -q -o1.1'
+rout=$wd/rlog.out
+
+named ()
+{
+    must 'rlog $w > $rout'
+    grep '	WONDERFUL: 1.1' $rout
+    #     ^ TAB
+}
 
 must 'cp $(bundled_commav one) $v'
-must '$cmd $v'
-# Avoid diff against $(bundled_commav empty), which might
-# flag some legitimate differences in whitespace, etc.
-grep '^1\.1$' $v && problem "non-empty RCS file after: $cmd"
+must 'co -u $w'
+
+# Name it (via rcs, not via ci).
+must 'rcs -nWONDERFUL: $w'
+named || problem 'rcs -nNAME: failed to update RCS file'
+
+# Remove the name.
+must 'rcs -nWONDERFUL $w'
+named && problem 'rcs -nNAME failed to update RCS file'
+
 exit 0
 
-# t700 ends here
+# t600 ends here

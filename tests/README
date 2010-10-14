@@ -39,8 +39,9 @@ of the following "tiers":
   150 - 299 -- shared functionality
   300 - 399 -- rlog
   400 - 499 -- other "read-only" commands (co -p, merge -p)
-  500 - 699 -- individual commands (all others)
-  700 - 899 -- regressions / bugfixes
+  500 - 599 -- commands that create an RCS file (ci -i, rcs -i, implicit)
+  600 - 799 -- all other commands
+  800 - 899 -- regressions / bugfixes
   900 - 999 -- complex scenarios
 
 The idea is that simple tests should (numerically) precede complex ones;
