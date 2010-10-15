@@ -26,6 +26,8 @@ PATHPREFIX = $(abs_top_builddir)/src
 TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$(PATH_SEPARATOR)$$PATH" sh
 
 XFAIL_TESTS =
+XFAIL_TESTS += t510
+XFAIL_TESTS += t511
 
 TESTS = \
  t150 \
@@ -33,13 +35,17 @@ TESTS = \
  t310 \
  t311 \
  t420 \
+ t510 \
+ t511 \
  t600 \
  t601 \
  t602 \
  t800 \
  t999
 
-EXTRA_DIST = $(TESTS) common fake
+EXTRA_DIST = $(TESTS) \
+ common common-i \
+ fake
 
 installcheck-local:
 	$(MAKE) check PATHPREFIX='$(DESTDIR)$(bindir)'

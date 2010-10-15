@@ -66,11 +66,24 @@ say_what ()
     problem unexpected output for: "$@"
 }
 
+noiselessness_rules ()
+{
+    # $1 -- filename
+    # $2 -- shell command
+    test -s $1 && say_what "$2"
+}
+
 silence_means_death ()
 {
     # $1 -- filename
     # $2 -- shell command
     test -s $1 || problem "no output for: $2"
+}
+
+bad_RCSfile ()
+{
+    # $1 -- description in the form of ADJECTIVE-PHRASE
+    problem "$v $1"
 }
 
 # load-time actions

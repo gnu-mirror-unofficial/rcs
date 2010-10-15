@@ -1,3 +1,15 @@
+2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add some ‘ci -i’ tests; mark them xfail.
+
+	* common (noiselessness_rules, bad_RCSfile): New funcs.
+	* common-i: New file.
+	* t510: New file.
+	* t511: New file.
+	* Makefile.am (XFAIL_TESTS): Add t510, t511.
+	(TESTS): Add t510, t511.
+	(EXTRA_DIST): Add common-i.
+
 2010-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Reorganize tiers.
