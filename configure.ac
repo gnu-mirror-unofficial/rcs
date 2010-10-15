@@ -236,7 +236,6 @@ AC_CHECK_FUNCS_ONCE([
   getpwuid_r
   getuid
   psiginfo
-  psignal
   seteuid
   setuid
 ])

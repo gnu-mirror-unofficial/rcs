@@ -68,15 +68,10 @@ werr (char const *s)
 void
 complain_signal (char const *msg, int signo)
 {
-#ifndef HAVE_PSIGNAL
   werr (msg);
   werr (": ");
   werr (strsignal (signo));
   werr ("\n");
-
-#else  /* HAVE_PSIGNAL */
-  psignal (signo, msg);
-#endif  /* HAVE_PSIGNAL */
 }
 
 struct isr_scratch

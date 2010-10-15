@@ -1,3 +1,9 @@
+2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Don't bother with ‘psignal’.
+
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Remove ‘psignal’.
+
 2010-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add configure option ‘--disable-mmap’.

@@ -1,5 +1,12 @@
 2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Don't bother with ‘psignal’.
+
+	* b-isr.c (complain_signal) [HAVE_PSIGNAL]:
+	Delete code and surrounding preprocessor conditional.
+
+2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: change_mode
 
 	* b-fb.c (change_mode): New func.
