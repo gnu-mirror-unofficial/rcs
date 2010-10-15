@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+extern struct repo *empty_repo (struct divvy *to);
 extern struct repo *grok_all (struct divvy *to, struct fro *f);
 extern void grok_resynch (struct repo *repo);
 

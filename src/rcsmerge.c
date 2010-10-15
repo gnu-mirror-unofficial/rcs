@@ -164,7 +164,7 @@ main (int argc, char **argv)
           struct cbuf numericrev;
           char const *repo_filename = REPO (filename);
           char const *mani_filename = MANI (filename);
-          char const *defbr = REPO (r) ? GROK (branch) : NULL;
+          char const *defbr = GROK (branch);
           struct delta *tip = REPO (tip);
 
           if (argc > 2 || (argc == 2 && argv[1]))

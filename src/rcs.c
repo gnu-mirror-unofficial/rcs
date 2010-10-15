@@ -1390,7 +1390,7 @@ main (int argc, char **argv)
            for the RCS file.  The admin node is initialized.  */
         repo_stat = &REPO (stat);
         tip = REPO (tip);
-        defbr = REPO (r) ? GROK (branch) : NULL;
+        defbr = GROK (branch);
         diagnose ("RCS file: %s", REPO (filename));
 
         changed = initflag | textflag;
@@ -1520,7 +1520,7 @@ main (int argc, char **argv)
                 unmake_editstuff (es);
                 IGNORE_REST (from);
               }
-            else if (REPO (r))
+            else if (GROK (desc))
               SAME_AFTER (FLOW (from), GROK (desc));
           }
 

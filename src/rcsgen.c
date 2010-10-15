@@ -348,8 +348,6 @@ getsstdin (char const *option, char const *name, char const *note)
 void
 format_assocs (FILE *out, char const *fmt)
 {
-  if (! REPO (r))
-    return;
   for (struct link *ls = GROK (symbols); ls; ls = ls->next)
     {
       struct symdef const *d = ls->entry;

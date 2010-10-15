@@ -92,7 +92,7 @@ InitAdmin (void)
 
   REPO (tip) = NULL;
   BE (strictly_locking) = STRICT_LOCKING;
-  REPO (r) = NULL;
+  REPO (r) = empty_repo (SINGLE);
 
   /* Guess the comment leader from the suffix.  */
   ext = (ext = strrchr (MANI (filename), '.'))

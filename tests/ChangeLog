@@ -1,5 +1,12 @@
 2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Allocate ‘REPO (r)’ also for new repo.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* Makefile.am (XFAIL_TESTS): Remove t510, t511.
+
+2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add some ‘ci -i’ tests; mark them xfail.
 
 	* common (noiselessness_rules, bad_RCSfile): New funcs.

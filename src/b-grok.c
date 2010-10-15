@@ -504,6 +504,17 @@ gethash (char const *revno, struct hash *ht)
 }
 
 
+struct repo *
+empty_repo (struct divvy *to)
+{
+  struct repo *repo = zlloc (to, "repo", sizeof (struct repo));
+
+  repo->strict = STRICT_LOCKING;
+  repo->expand = -1;
+  repo->neck = -1;
+  return repo;
+}
+
 /* A nice prime of monolithic proportions.  */
 #define NSLOTS  149
 
@@ -518,7 +529,7 @@ full (struct divvy *to, struct fro *f)
   size_t count;
   struct link box, *tp;
   struct grok *g = FZLLOC (struct grok);
-  struct repo *repo = zlloc (to, "repo", sizeof (struct repo));
+  struct repo *repo = empty_repo (to);
 
   repo->ht = make_hash_table (to, NSLOTS);
 

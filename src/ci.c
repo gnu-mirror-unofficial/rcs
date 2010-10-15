@@ -276,7 +276,7 @@ addelta (struct wlink **tp_deltas)
   int removedlock;
   int newdnumlength;            /* actual length of new rev. num. */
   struct delta *tip = REPO (tip);
-  char const *defbr = REPO (r) ? GROK (branch) : NULL;
+  char const *defbr = GROK (branch);
 
   newdnumlength = countnumflds (newdelnum.string);
 
