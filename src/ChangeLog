@@ -1,5 +1,14 @@
 2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: change_mode
+
+	* b-fb.c (change_mode): New func.
+	* b-fb.h (change_mode): New func decl.
+	* ci.c (fixwork): Use ‘change_mode’.
+	* rcsedit.c (chnamemod): Likewise.
+
+2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Allocate ‘REPO (r)’ also for new repo.
 
 	Omission from 2010-05-24, "Rewrite parsing".

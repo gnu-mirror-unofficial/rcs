@@ -26,6 +26,16 @@
 #include "unistd-safer.h"
 #include "b-complain.h"
 
+int
+change_mode (int fd, mode_t mode)
+{
+#ifndef HAVE_FCHMOD
+  return -1;
+#else
+  return fchmod (fd, mode);
+#endif
+}
+
 void
 Ierror (void)
 {

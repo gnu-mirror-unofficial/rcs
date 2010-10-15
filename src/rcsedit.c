@@ -935,10 +935,10 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
     set_mode = 1;
 #endif  /* BAD_A_RENAME */
 
-#ifdef HAVE_FCHMOD
-  if (0 < set_mode && !PROB (fchmod (fileno (*fromp), mode_while_renaming)))
+  if (0 < set_mode
+      && !PROB (change_mode (fileno (*fromp), mode_while_renaming)))
     fchmod_set_mode = set_mode;
-#endif
+
   /* On some systems, we must close before chmod.  */
   Ozclose (fromp);
   if (fchmod_set_mode < set_mode && PROB (chmod (from, mode_while_renaming)))

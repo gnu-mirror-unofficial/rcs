@@ -443,9 +443,7 @@ fixwork (mode_t newworkmode, time_t mtime)
     || (newworkmode & S_IWUSR && !stat_mine_p (&workstat))
     || PROB (setmtime (mani_filename, mtime))
     ? -1 : workstat.st_mode == newworkmode ? 0
-#ifdef HAVE_FCHMOD
-    : !PROB (fchmod (workptr->fd, newworkmode)) ? 0
-#endif
+    : !PROB (change_mode (workptr->fd, newworkmode)) ? 0
     : chmod (mani_filename, newworkmode)
     ;
 }
