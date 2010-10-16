@@ -103,20 +103,34 @@ echo 1 >conftest1
 { echo d1 1 ; echo a1 1 ; echo 1 ; } >conftestok
 
 # Set DIFF to the name of the `diff' program to be run.
+AC_DEFUN([RCS_CHECK_DIFF],[dnl
+dnl $1 -- shell variable name
+dnl $2 -- program
+AS_IF([RCS_YESP([sane_diff])],[:],[
+AC_CACHE_CHECK([if $2 works like GNU diff],[$1],[
+  $1=no
+  sh -c "exec $2 -n conftest0 conftest1" >conftestout 2>/dev/null
+  test 1 = $? && cmp -s conftestok conftestout
+  RCS_SET_VN([$1],[yes])
+])
+AS_IF([RCS_YESP([$1])],[
+  sane_diff=yes
+  DIFF=$2
+])])])dnl
+AC_DEFUN([DIFF_CLASS],[line-by-line differences])dnl
 AC_DEFUN([DIFF_MAYBE],[gdiff rdiff diff])
 AC_ARG_VAR([DIFF],[the name of a program that works like diff(1)
   from GNU diffutils, used to compare files line by line
   (default is to search the PATH for: ]DIFF_MAYBE[)])
-AC_CHECK_PROGS([DIFF],[DIFF_MAYBE])
-RCS_MUSTHAVE([ac_cv_prog_DIFF],[a diff program (tried: DIFF_MAYBE)])
-AC_CACHE_CHECK([if diff works like GNU diff],[rcs_cv_sane_diff],[
-  rcs_cv_sane_diff=no
-  sh -c "exec $DIFF -n conftest0 conftest1" >conftestout 2>/dev/null
-  test 1 = $? && cmp -s conftestok conftestout
-  RCS_SET_VN([rcs_cv_sane_diff],[yes])
+
+sane_diff=no
+AS_IF([test "$DIFF"],[RCS_CHECK_DIFF([rcs_cv_sane_DIFF],[$DIFF])])
+m4_foreach([prog],m4_split(m4_normalize(DIFF_MAYBE)),[
+RCS_CHECK_DIFF([rcs_cv_sane_]prog,prog)
 ])
-RCS_MUSTHAVE([rcs_cv_sane_diff],[a sane diff program ($DIFF unsuitable)])
-RCS_ABSOLUTE_PROGRAM([DIFF],[diff],
+
+RCS_MUSTHAVE([sane_diff],[a sane DIFF_CLASS program (tried: DIFF_MAYBE)])
+RCS_ABSOLUTE_PROGRAM([DIFF],[DIFF_CLASS],
   [The diff program from GNU diffutils, or workalike.])
 
 # Set DIFF_SUCCESS, DIFF_FAILURE, DIFF_TROUBLE to diff's exit status

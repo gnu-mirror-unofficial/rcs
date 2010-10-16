@@ -1,3 +1,15 @@
+2010-10-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Do "sane diff" configure check for all candidates.
+
+	Omission from 2010-03-07, "Move all DIFF*
+	config to configure.in; assume diffutils".
+	* configure.ac (sane_diff): New shell var.
+	(RCS_CHECK_DIFF, DIFF_CLASS): New AC_DEFUNs.
+	Use ‘RCS_CHECK_DIFF’ for both user-supplied program via env
+	var ‘DIFF’ as well as candidates from ‘DIFF_MAYBE’ in a loop,
+	stopping when a sane diff program is found.
+
 2010-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Don't bother with ‘psignal’.
