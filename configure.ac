@@ -28,8 +28,10 @@ AS_CASE([$PACKAGE_VERSION],[*.*.*],[pretest_p=yes],[pretest_p=no])
 
 AC_DEFUN([RCS_YESP],[test yes = "$[]$1"])dnl $1 -- shell variable name
 
+AC_DEFUN([RCS_NORM],[m4_split(m4_normalize($1))])dnl
+
 AC_DEFUN([RCS_ALL],[m4_map_sep([$1],[ &&
-     ],m4_split(m4_normalize($2)))])dnl
+     ],RCS_NORM($2))])dnl
 
 AC_DEFUN([RCS_CBOOL],[dnl
 dnl $1 -- C variable (actually #define) name
@@ -125,7 +127,7 @@ AC_ARG_VAR([DIFF],[the name of a program that works like diff(1)
 
 sane_diff=no
 AS_IF([test "$DIFF"],[RCS_CHECK_DIFF([rcs_cv_sane_DIFF],[$DIFF])])
-m4_foreach([prog],m4_split(m4_normalize(DIFF_MAYBE)),[
+m4_foreach([prog],RCS_NORM([DIFF_MAYBE]),[
 RCS_CHECK_DIFF([rcs_cv_sane_]prog,prog)
 ])
 
@@ -516,7 +518,7 @@ dnl                          value, not just numeric (like old src/conf.h)
 AS_IF([RCS_YESP([pretest_p])],[
   AS_IF([RCS_ALL([RCS_YESP],[PRESUMABLY_STANDARD_ENOUGH_BY_NOW])],[:],
    [AC_MSG_WARN([Your platform might be desupported in the future:
-m4_foreach([V],m4_split(m4_normalize(PRESUMABLY_STANDARD_ENOUGH_BY_NOW)),[dnl
+m4_foreach([V],RCS_NORM([PRESUMABLY_STANDARD_ENOUGH_BY_NOW]),[dnl
 	${V-(unset)}	V
 ])])])])
 

@@ -1,5 +1,14 @@
 2010-10-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build int] New abstraction: RCS_NORM
+
+	* configure.ac (RCS_NORM): New AC_DEFUN.
+	(RCS_ALL): Use ‘RCS_NORM’.
+	[DIFF_MAYBE loop expansion]: Likewise.
+	[might be unsupported var expansion]: Likewise.
+
+2010-10-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Do "sane diff" configure check for all candidates.
 
 	Omission from 2010-03-07, "Move all DIFF*
