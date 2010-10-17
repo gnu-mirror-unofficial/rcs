@@ -94,12 +94,44 @@ installation directories (.e.g, --prefix).
   You can build RCS without mmap by specifying ‘--disable-mmap’ to the
   configure script.
 
+* By default, RCS supports running its commands setuid, using ‘seteuid’.
+
+  If your ‘seteuid’ (typically on older BSDs, e.g., SunOS 3.5) does not let
+  you switch back and forth between any pair of users as specified in POSIX
+  1003.1a Draft 5, you should specify ‘--enable-suid=setreuid’, instead.
+  (One must be root to test this reliably, so the configure script just
+  checks availability.)
+
+  To build RCS without setuid support, specify ‘--disable-suid’.
+
+  !!! NB: Support for setuid operation will be removed in GNU RCS 6.x.
+
+  !!! NB: Don't run RCS setuid under AIX 3.2 if you use NFS, since it's badly
+  broken.  To see the AIX 3.2 bug, run the following program setuid X where
+  the NFS file "abc" already exists, owned by X, permission -rw-r--r--, and
+  where the invoker is not X.
+
+    #include <stdio.h>
+
+    int
+    main ()
+    {
+      FILE *f = fopen ("abc", "w");
+
+      setuid (getuid ());
+      fputc ('\n', f);
+      if (fclose (f) != 0)
+        perror ("fclose");
+    }
+
+  The program fails with "fclose: Permission denied".
+
 If your system type is in the following list, look for the
 corresponding strings in the notes below before configuring.
 
   system type         - identifiers
-  ------------------------------------------------
-  AIX 3.2             - --prefix=/usr HAVE_SETEUID
+  ------------------------------------
+  AIX 3.2             - --prefix=/usr
   GCC 2.5.8 Intel x86 - CFLAGS
   HP-UX 8.07 and 9.*  - MMAP_SIGNAL
   Solaris 2.4         - MMAP_SIGNAL
@@ -185,40 +217,6 @@ Modern systems checksum by default; ask your vendor if you're not sure.
 
 bad_NFS_rename - This should be 1 in SCO Unix V.3.2.  Its NFS rename(2) is broken,
 but if configure runs in a non-NFS file system, it thinks rename(2) works.
-
-HAVE_SETEUID - You have to worry about this only if you plan to run RCS setuid.
-HAVE_SETEUID should be defined only if your seteuid lets you switch back and
-forth between any pair of users as specified in POSIX 1003.1a Draft 5.
-On some older systems (e.g. SunOS 3.5) seteuid doesn't allow this.  One must
-be root to test this reliably, so the configure script just checks availability.
-If !defined (HAVE_SETEUID), perhaps you can use setreuid instead (see below).
-Otherwise, the next best thing is saved setuid semantics
-(a POSIX 1003.1-1990 option), because this fails only if you run as root.
-You may need to compile with ‘cc -systype sysv’ (some Mips OS variants)
-or ‘cc -YPOSIX’ (some Ultrix variants) for best results here.
-Don't run RCS setuid under AIX 3.2 if you use NFS, since it's badly broken.
-To see the AIX 3.2 bug, run the following program setuid X where the NFS file
-"abc" already exists, owned by X, permission -rw-r--r--, and where
-the invoker is not X.  The program fails with "fclose: Permission denied".
-
-  #include <stdio.h>
-
-  int
-  main ()
-  {
-    FILE *f = fopen ("abc", "w");
-
-    setuid (getuid ());
-    fputc ('\n', f);
-    if (fclose (f) != 0)
-      perror ("fclose");
-  }
-
-has_setreuid - You have to worry about this only if you plan to run RCS setuid
-and HAVE_SETEUID is undefined.  On some older BSDish systems, the setreuid system
-call lets you swap real and effective users even if one of them is root.
-One must be root to test this reliably, so we always assume it doesn't work.
-Set it to 1 by hand if you know that it works.
 
 TZ_must_be_set - set this to 1 on hosts where gmtime(3) yields bogus
 values unless the TZ environment variable is set.

@@ -110,13 +110,13 @@ set_uid_to (uid_t u)
   if (! currently_setuid_p ())
     return;
 #if defined HAVE_WORKING_FORK
-#if has_setreuid
+#if defined HAVE_SETREUID
   if (PROB (setreuid (u == euid () ? ruid () : euid (), u)))
     fatal_sys ("setuid");
-#else  /* !has_setreuid */
+#else  /* !defined HAVE_SETREUID */
   if (PROB (seteuid (u)))
     fatal_sys ("setuid");
-#endif  /* !has_setreuid */
+#endif  /* !defined HAVE_SETREUID */
 #endif  /* defined HAVE_WORKING_FORK */
   if (geteuid () != u)
     {

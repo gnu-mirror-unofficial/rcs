@@ -1,3 +1,13 @@
+2010-10-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Add configure option: --enable-suid[=setreuid]
+
+	* configure.ac (suid): New AC_ARG_ENABLE.
+	(AC_CHECK_FUNCS_ONCE): Move ‘getuid’, ‘seteuid’, ‘setuid’
+	from here to AC_CHECK_FUNCS, conditionalized on ‘enable_suid’;
+	also, if ‘enable_suid’ is ‘setreuid’, check for ‘setreuid’.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): Remove ‘ac_cv_func_getuid’.
+
 2010-10-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build int] New abstraction: RCS_NORM

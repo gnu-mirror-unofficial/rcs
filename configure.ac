@@ -98,6 +98,12 @@ AC_ARG_ENABLE([mmap],
    (default: use mmap(2) if it seems sane enough)])],
  [use_mmap=$enableval],[use_mmap=yes])
 
+AC_ARG_ENABLE([suid],
+ [AS_HELP_STRING([--enable-suid[[=setreuid]]],[enable setuid
+   operation, preferring setreuid(2) if available over seteuid(2)
+   if optional arg `setreuid' is specified (default: enable
+   setuid operation using seteuid(2))])],[:],[enable_suid=yes])
+
 # Set up simple `diff' test.
 echo 0 >conftest0
 echo 0 >conftest0c
@@ -250,12 +256,12 @@ AC_CHECK_FUNCS_ONCE([
   fchmod
   ftruncate
   getpwuid_r
-  getuid
   psiginfo
-  seteuid
-  setuid
 ])
 AS_IF([RCS_YESP([use_mmap])],[AC_CHECK_FUNCS([mmap madvise])])
+AS_IF([test xsetreuid = x"$enable_suid"],[enable_suid=yes
+  AC_CHECK_FUNCS([setreuid])])
+AS_IF([RCS_YESP([enable_suid])],[AC_CHECK_FUNCS([getuid seteuid setuid])])
 
 # system services
 
@@ -497,7 +503,6 @@ ac_cv_header_pwd_h              dnl 4.3BSD, SVr4, POSIX.1-2001
 rcs_cv_dot2_ok                  dnl C99 (printf)
 ac_cv_func_fchmod               dnl 4.4BSD, SVr4, POSIX.1-2001
 ac_cv_func_ftruncate            dnl 4.4BSD, SVr4, POSIX.1-2001
-ac_cv_func_getuid               dnl 4.3BSD, POSIX.1-2001
 
 dnl These are things we would like to not worry about.
 dnl Removing checks for them (assuming yes) eases maintenance.
