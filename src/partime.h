@@ -48,7 +48,7 @@ struct partime
   long zone;
 };
 
-char const *partime (char const *, struct partime *);
-char const *parzone (char const *, long *);
+char const *partime (char const *s, struct partime *t);
+char const *parzone (char const *s, long *zone);
 
 /* partime.h ends here */

@@ -24,7 +24,7 @@ extern int change_mode (int fd, mode_t mode);
 extern void Ierror (void) exiting;
 extern void testIerror (FILE *f);
 extern void Oerror (void) exiting;
-extern void testOerror (FILE *);
+extern void testOerror (FILE *o);
 extern FILE *fopen_safer (char const *filename, char const *type);
 extern void Ozclose (FILE **p);
 extern void Orewind (FILE *f);

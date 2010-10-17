@@ -343,7 +343,7 @@ enum markers
 struct maybe;
 
 /* The function ‘pairnames’ takes to open the RCS file.  */
-typedef struct fro * (open_rcsfile_fn) (struct maybe *);
+typedef struct fro * (open_rcsfile_fn) (struct maybe *m);
 
 /* A combination of probe parameters and results for ‘pairnames’ through
    ‘fin2open’ through ‘finopen’ through {‘rcsreadopen’, ‘rcswriteopen’}
@@ -791,7 +791,7 @@ void putdftext (struct delta const *delta, struct fro *finfile,
                 FILE *foutfile, bool diffmt);
 
 /* rcskeep */
-bool getoldkeys (struct fro *);
+bool getoldkeys (struct fro *fp);
 
 /* rcsmap */
 extern enum tokens const ctab[];

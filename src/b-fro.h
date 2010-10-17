@@ -39,7 +39,7 @@ struct fro
   off_t end;
   enum readmethod rm;
   char *ptr, *lim, *base;
-  void (*deallocate) (struct fro *);
+  void (*deallocate) (struct fro *f);
   FILE *stream;
   off_t verbatim;
 };

@@ -241,7 +241,7 @@ putrunk (void)
     putadelta (ptr, ptr->ilk, true);
 }
 
-static void putforest (struct wlink const *);
+static void putforest (struct wlink const *branchroot);
 
 static void
 putree (struct delta const *root)

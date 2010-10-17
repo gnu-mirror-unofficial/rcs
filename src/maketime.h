@@ -37,10 +37,10 @@ struct maketimestuff
      -- tm2time  */
 };
 
-struct tm *time2tm (time_t, bool);
-time_t difftm (struct tm const *, struct tm const *);
-time_t str2time (char const *, time_t, long);
-time_t tm2time (struct tm *, bool);
-void adjzone (struct tm *, long);
+struct tm *time2tm (time_t unixtime, bool localzone);
+time_t difftm (struct tm const *a, struct tm const *b);
+time_t str2time (char const *source, time_t default_time, long default_zone);
+time_t tm2time (struct tm *tm, bool localzone);
+void adjzone (struct tm *t, long seconds);
 
 /* maketime.h ends here */
