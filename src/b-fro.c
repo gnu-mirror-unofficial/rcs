@@ -117,7 +117,9 @@ fro_open (char const *name, char const *type, struct stat *status)
       /* Read it into main memory all at once; this is
          the simplest substitute for memory mapping.  */
       if (!s)
-        f->base = (char *) &equal_line; /* Any nonzero address will do.  */
+        /* We used to set this to some non-‘NULL’ value.
+           What's wrong with using ‘NULL’?  */
+        f->base = NULL;
       else
         {
           ssize_t r;
