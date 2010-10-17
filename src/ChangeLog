@@ -1,5 +1,14 @@
 2010-10-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int C] Cast less.
+
+	* b-fro.c (fro_spew_partial): Remove unnecessary cast.
+	* ci.c (BHDELTA): Delete macro.
+	(addbranch): Use local var for temp ‘struct delta *’.
+	* rcs.c (dolocks): Use local var for temp ‘const char *’.
+
+2010-10-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘NULL’ more.
 
 	* b-fro.c (fro_open): In the case of ‘RM_MEM’

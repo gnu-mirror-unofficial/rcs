@@ -313,7 +313,7 @@ fro_spew_partial (FILE *to, struct fro *f, struct range *r)
     case RM_MMAP:
     case RM_MEM:
       /* TODO: Handle range larger than ‘size_t’.  */
-      awrite ((char const *) f->base + r->beg, r->end - r->beg, to);
+      awrite (f->base + r->beg, r->end - r->beg, to);
       if (f->end == r->end)
         f->ptr = f->lim;
       break;

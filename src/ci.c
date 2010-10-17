@@ -165,8 +165,6 @@ removelock (struct delta *delta)
 
 static struct wlink newbranch;          /* new branch to be inserted */
 
-#define BHDELTA(x)  ((struct delta *)(x)->entry)
-
 static int
 addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
 /* Add a new branch and branch delta at ‘branchpoint’.
@@ -178,6 +176,7 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
    If ‘removedlock’, a lock was already removed.  */
 {
   struct wlink **btrail;
+  struct delta *d;
   int result;
   int field, numlength;
 
@@ -205,7 +204,8 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
       while (bhead->next)
         bhead = bhead->next;
       bhead->next = &newbranch;
-      incnum (BRANCHNO (BHDELTA (bhead)->num), num);
+      d = bhead->entry;
+      incnum (BRANCHNO (d->num), num);
       ADD (num, ".1");
       newbranch.next = NULL;
     }
@@ -215,8 +215,8 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
       field = numlength - ((numlength & 1) ^ 1);
       /* Field of branch number.  */
       btrail = &branchpoint->branches;
-      while (0 < (result = cmpnumfld (num->string, BHDELTA (*btrail)->num,
-                                      field)))
+      while (d = (*btrail)->entry,
+             0 < (result = cmpnumfld (num->string, d->num, field)))
         {
           btrail = &(*btrail)->next;
           if (!*btrail)

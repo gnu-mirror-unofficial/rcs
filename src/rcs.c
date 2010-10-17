@@ -820,6 +820,7 @@ dolocks (void)
   struct link const *lockpt;
   struct delta *target, *tip = REPO (tip);
   bool changed = false;
+  const char *bye;
 
   if (unlockcaller)
     {
@@ -859,15 +860,14 @@ dolocks (void)
 
   /* Remove locks which are stored in rmvlocklst.  */
   for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->next)
-    if (fully_numeric_no_k (&numrev, lockpt->entry))
+    if (fully_numeric_no_k (&numrev, (bye = lockpt->entry)))
       {
         target = delta_from_ref (numrev.string);
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
                 && !NUM_EQ (target->num, numrev.string))
-              RERR ("can't unlock nonexisting revision %s",
-                    (char const *) lockpt->entry);
+              RERR ("can't unlock nonexisting revision %s", bye);
             else
               changed |= breaklock (target);
           }
