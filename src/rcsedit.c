@@ -120,6 +120,12 @@ testrealloc (void *ptr, size_t size)
   return okalloc (realloc (ptr, size));
 }
 
+static bool
+nfs_NOENT_p (void)
+{
+  return has_NFS && ENOENT == errno;
+}
+
 int
 un_link (char const *s)
 /* Remove ‘s’, even if it is unwritable.
@@ -145,7 +151,7 @@ un_link (char const *s)
               rv = -1;
             }
         }
-      if (has_NFS && ENOENT == errno)
+      if (nfs_NOENT_p ())
         rv = 0;
     }
   return rv;
@@ -954,7 +960,7 @@ chnamemod (FILE ** fromp, char const *from, char const *to,
     return -1;
 #endif  /* BAD_B_RENAME */
 
-  if (PROB (rename (from, to)) && !(has_NFS && errno == ENOENT))
+  if (PROB (rename (from, to)) && !nfs_NOENT_p ())
     return -1;
 
 #if bad_NFS_rename

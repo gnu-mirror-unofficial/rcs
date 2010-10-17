@@ -1,5 +1,12 @@
 2010-10-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: nfs_NOENT_p
+
+	* rcsedit.c (nfs_NOENT_p): New static func.
+	(un_link, chnamemod): Use ‘nfs_NOENT_p’.
+
+2010-10-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Add configure option: --enable-suid[=setreuid]
 
 	* b-excwho.c (set_uid_to): Use ‘HAVE_SETREUID’.
