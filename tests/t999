@@ -33,6 +33,10 @@
 . $srcdir/common
 split_std_out_err
 cd $wd
+# Avoid tr(1) if possible; it's not portable, and it can't handle
+# null bytes.  Our substitute exclusive-ORs with '\n'; this ensures
+# null bytes on output, which is even better than `tr', since some
+# diffs think a file is binary only if it contains null bytes.
 xorlf='../xorlf'
 TMPDIR=`pwd` ; export TMPDIR
 
@@ -375,10 +379,6 @@ case $? in
 	echo "#rcsmerge bad status"; exit 1
 esac
 
-# Avoid `tr' if possible; it's not portable, and it can't handle null bytes.
-# Our substitute exclusive-ORs with '\n';
-# this ensures null bytes on output, which is even better than `tr',
-# since some diffs think a file is binary only if it contains null bytes.
 cat >a.c <<'EOF'
 #include <stdio.h>
 int main() {
@@ -389,13 +389,13 @@ int main() {
 }
 EOF
 {
-	co -p $q a.c | $xorlf '\012' '\200' >a.24 &&
+	co -p $q a.c | $xorlf >a.24 &&
 	cp a.24 a.c &&
 	ciOut=`(ci -l -mm $q a.c 2>&1)` &&
 	case $ciOut in
 	?*) echo >&2 "$ciOut"
 	esac &&
-	co -p $q a.c | $xorlf '\200' '\012' >a.c &&
+	co -p $q a.c | $xorlf >a.c &&
 	rcsdiff -r2.3 $q a.c >/dev/null &&
 
 	echo 2.5 >a.c &&
