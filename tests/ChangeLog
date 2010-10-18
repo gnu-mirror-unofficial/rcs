@@ -1,5 +1,20 @@
 2010-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add infrastructure for component testing.
+
+	* common: Prepend ‘PATHPREFIX’ to ‘PATH’ here.
+	* btdt.c: New file.
+	* compgate: New file.
+	* t010: New file.
+	* Makefile.am (check_PROGRAMS): Add btdt.
+	(AM_CPPFLAGS, btdt_LDADD): New vars.
+	(TESTS_ENVIRONMENT): Don't set ‘PATH’; set ‘PATHPREFIX’.
+	(TESTS): Add t010.
+	(EXTRA_DIST): Add compgate.
+	* README: Mention option ‘COMPONENTS=1’.
+
+2010-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v int] Run xorlf without args.
 
 	* t999: Run xorlf without args.

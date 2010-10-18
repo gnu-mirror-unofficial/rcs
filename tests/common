@@ -21,6 +21,7 @@
 
 # variables
 
+PATH="${PATHPREFIX}:$PATH"
 stem=$(basename $0)
 wd=${stem}.d
 w=$wd/x

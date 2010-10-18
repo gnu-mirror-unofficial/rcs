@@ -17,17 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-check_PROGRAMS = xorlf
+check_PROGRAMS = xorlf btdt
+
+# If we use ‘btdt_CPPFLAGS’ here instead of ‘AM_CPPFLAGS’,
+# Automake creates btdt-btdt.o instead of simply btdt.o.
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/lib
+btdt_LDADD = ../src/libparts.a ../lib/libgnu.a
 
 # This helps certain RCS programs find their peers.
-# Note that it should NOT end in $(PATH_SEPARATOR).
 PATHPREFIX = $(abs_top_builddir)/src
 
-TESTS_ENVIRONMENT = PATH="$(PATHPREFIX)$(PATH_SEPARATOR)$$PATH" sh
+TESTS_ENVIRONMENT = PATHPREFIX="$(PATHPREFIX)" sh
 
 XFAIL_TESTS =
 
 TESTS = \
+ t010 \
  t150 \
  t300 \
  t310 \
@@ -43,6 +48,7 @@ TESTS = \
 
 EXTRA_DIST = $(TESTS) \
  common common-i \
+ compgate \
  fake
 
 installcheck-local:

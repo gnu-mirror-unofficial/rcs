@@ -24,6 +24,9 @@ the "make check" is 0 if all tests behaved as expected.
 To test another set of RCS commands, use ‘PATHPREFIX=DIR’, where DIR is
 the absolute directory name of the commands.  You might need to add one
 or more tests to ‘XFAIL_TESTS’ (hint: try "./known-failures --help").
+Normally, the component tests do not run (thus reported as "SKIP") when
+‘PATHPREFIX’ points out of the build tree because it makes no sense to
+do so, but you can override that with option ‘COMPONENTS=1’.
 
 To describe a test, use "make describe [options]", which honors options
 ‘TESTS’ and ‘VERBOSE’ as described above.
