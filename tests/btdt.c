@@ -23,8 +23,9 @@
 #include <stdlib.h>
 #include "b-feph.h"
 
-/* This file is a collection of tests for various components
-   of the RCS library.  */
+/* This program serves as a collection of test-support commands
+   (to be invoked from the t??? files) for various components of
+   the RCS library.  */
 
 struct top *top;
 
@@ -55,7 +56,7 @@ struct yeah
   bool scramp;
 };
 
-#define YEAH(comp,out)  { #comp, comp ## _usage, comp ## _test, out }
+#define YEAH(comp,out)  { #comp, comp ## _usage, comp ## _do_it, out }
 
 struct yeah yeah[] =
   {
