@@ -1,3 +1,9 @@
+2010-10-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘tzset’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘tzset’.
+
 2010-10-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add configure option: --enable-suid[=setreuid]
