@@ -33,7 +33,7 @@ struct maketimestuff
   time_t t_cache[2];
   struct tm tm_cache[2];
   /* Cache the most recent ‘t’,‘tm’ pairs;
-     One for ‘gmtime_r’, one for ‘localtime_r’.
+     [0] for UTC, [1] for local time.
      -- tm2time  */
 };
 

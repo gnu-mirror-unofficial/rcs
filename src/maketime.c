@@ -56,7 +56,7 @@ month_days (struct tm const *tm)
 struct tm *
 time2tm (time_t unixtime, bool localzone)
 /* Convert ‘unixtime’ to ‘struct tm’ form.
-   Use ‘gmtime_r’ if available and if ‘!localzone’, ‘localtime_r’ otherwise.  */
+   Use UTC if available and if ‘!localzone’, local time otherwise.  */
 {
   struct tm *tm;
 
@@ -149,13 +149,12 @@ adjzone (register struct tm *t, long seconds)
 
 time_t
 tm2time (struct tm *tm, bool localzone)
-/* Convert ‘tm’ to ‘time_t’, using ‘localtime_r’ if ‘localzone’ and ‘gmtime_r’
+/* Convert ‘tm’ to ‘time_t’, using local time if ‘localzone’ and UTC
    otherwise.  From ‘tm’, use only ‘year’, ‘mon’, ‘mday’, ‘hour’, ‘min’,
    and ‘sec’ members.  Ignore old members ‘tm_yday’ and ‘tm_wday’, but
    fill in their correct values.  Return -1 on failure (e.g. a member out
    of range).  POSIX 1003.1-1990 doesn't allow leap seconds, but some
-   implementations have them anyway, so allow them if ‘localtime_r’/‘gmtime_r’
-   does.  */
+   implementations have them anyway, so allow them if the host does.  */
 {
   time_t d, gt;
   struct tm const *gtm;
@@ -203,7 +202,7 @@ tm2time (struct tm *tm, bool localzone)
 static time_t
 maketime (struct partime const *pt, time_t default_time)
 /* Check ‘*pt’ and convert it to ‘time_t’.  If it is incompletely specified,
-   use ‘default_time’ to fill it out.  Use ‘localtime_r’ if ‘pt->zone’ is the
+   use ‘default_time’ to fill it out.  Use local time if ‘pt->zone’ is the
    special value ‘TM_LOCAL_ZONE’.  Return -1 on failure.  ISO 8601 day-of-year
    and week numbers are not yet supported.  */
 {
