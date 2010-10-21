@@ -138,7 +138,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
         {
           time_t u = tm2time (&t, false), d;
 
-          z = localtime_r (&u, &z_stash);
+          z = local_tm (&u, &z_stash);
           d = difftm (z, &t);
           zone = (time_t) - 1 < 0 || d < -d ? d : -(long) -d;
         }

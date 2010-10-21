@@ -1,3 +1,14 @@
+2010-10-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Add abstraction: local_tm
+
+	Omission from 2010-06-12, "Use ‘gmtime_r’, ‘localtime_r’".
+	* maketime.c (local_tm): New func.
+	(time2tm): Use ‘local_tm’.
+	* maketime.h (struct maketimestuff): Add member ‘tzset_called_p’.
+	(local_tm): New func decl.
+	* rcstime.c (date2str): Use ‘local_tm’.
+
 2010-10-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int C] Cast less.

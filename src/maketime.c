@@ -26,6 +26,17 @@
 
 #define MAKETIMESTUFF(x)  (BE (maketimestuff)-> x)
 
+struct tm *
+local_tm (const time_t *timep, struct tm *result)
+{
+  if (! MAKETIMESTUFF (tzset_called_p))
+    {
+      tzset ();
+      MAKETIMESTUFF (tzset_called_p) = true;
+    }
+  return localtime_r (timep, result);
+}
+
 /* Make no assumptions about the ‘time_t’ epoch or the range of ‘time_t’ values.
    Avoid ‘mktime’ because it's not universal and because there's no easy,
    portable way for ‘mktime’ to return the inverse of ‘gmtime_r’.  */
@@ -66,7 +77,7 @@ time2tm (time_t unixtime, bool localzone)
       ("The TZ environment variable is not set; please set it to your timezone");
 #endif
   if (localzone || !(tm = gmtime_r (&unixtime, &MAKETIMESTUFF (time2tm_stash))))
-    tm = localtime_r (&unixtime, &MAKETIMESTUFF (time2tm_stash));
+    tm = local_tm (&unixtime, &MAKETIMESTUFF (time2tm_stash));
   return tm;
 }
 

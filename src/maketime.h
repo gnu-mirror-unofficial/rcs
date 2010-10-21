@@ -21,6 +21,10 @@
 
 struct maketimestuff
 {
+  bool tzset_called_p;
+  /* True if we have already called ‘tzset’.
+     -- local_tm  */
+
   char const *TZ;
   /* The value of env var ‘TZ’.
      Only valid/used if ‘TZ_must_be_set’.
@@ -37,6 +41,7 @@ struct maketimestuff
      -- tm2time  */
 };
 
+struct tm *local_tm (const time_t *timep, struct tm *result);
 struct tm *time2tm (time_t unixtime, bool localzone);
 time_t difftm (struct tm const *a, struct tm const *b);
 time_t str2time (char const *source, time_t default_time, long default_zone);
