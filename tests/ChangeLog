@@ -1,3 +1,9 @@
+2010-10-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Clear env var ‘RCSINIT’.
+
+	* common (RCSINIT): Set var to have no value.
+
 2010-10-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v int] Say "commands" instead of "tests" in btdt.c.

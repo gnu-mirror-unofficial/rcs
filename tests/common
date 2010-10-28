@@ -22,6 +22,7 @@
 # variables
 
 PATH="${PATHPREFIX}:$PATH"
+RCSINIT=
 stem=$(basename $0)
 wd=${stem}.d
 w=$wd/x
