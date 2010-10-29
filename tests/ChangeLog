@@ -1,5 +1,14 @@
 2010-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: For stdio operation, prep ‘finishedit’ properly.
+
+	Regressions introduced 2010-04-17 and 2010-05-31, in
+	"Overhaul read-only file handling" and "Mark verbatim
+	region; reduce transitional tell/seek", respectively.
+	* Makefile.am (XFAIL_TESTS): Remove t400.
+
+2010-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a "stdio trailing context sync" test; mark it xfail.
 
 	* fake/stdio-sync.GNUmakefile: New file.

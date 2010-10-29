@@ -30,7 +30,6 @@ PATHPREFIX = $(abs_top_builddir)/src
 TESTS_ENVIRONMENT = PATHPREFIX="$(PATHPREFIX)" sh
 
 XFAIL_TESTS =
-XFAIL_TESTS += t400
 
 TESTS = \
  t010 \

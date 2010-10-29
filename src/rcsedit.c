@@ -330,6 +330,7 @@ swapeditfiles (struct editstuff *es, FILE *outfile)
 
   es->lcount = 0;
   es->corr = 0;
+  newrile->end = ftello (FLOW (res));
   Orewind (FLOW (res));
   newrile->rm = RM_STDIO;
   newrile->stream = FLOW (res);
@@ -364,6 +365,7 @@ finishedit_slow (struct editstuff *es, struct delta const *delta,
         }
       else
         {
+          VERBATIM (fe, ftello (fe->stream));
           fro_spew (fe, fc);
         }
       fro_close (fe);

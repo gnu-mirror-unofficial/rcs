@@ -1,3 +1,13 @@
+2010-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: For stdio operation, prep ‘finishedit’ properly.
+
+	Regressions introduced 2010-04-17 and 2010-05-31, in
+	"Overhaul read-only file handling" and "Mark verbatim
+	region; reduce transitional tell/seek", respectively.
+	* rcsedit.c (swapeditfiles): Set the fro ‘.end’ as well.
+	(finishedit_slow): Prior to spewing, set start point.
+
 2010-10-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstraction: local_tm
