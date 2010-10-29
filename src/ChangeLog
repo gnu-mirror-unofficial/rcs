@@ -1,5 +1,12 @@
 2010-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Reuse backing store in ‘swapeditfiles’.
+
+	* rcsedit.c (swapeditfiles): Allocate and
+	do basic initialization for ‘es->fedit’ once only.
+
+2010-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: For stdio operation, prep ‘finishedit’ properly.
 
 	Regressions introduced 2010-04-17 and 2010-05-31, in

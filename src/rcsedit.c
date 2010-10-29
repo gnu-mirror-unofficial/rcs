@@ -319,22 +319,26 @@ openfcopy (FILE *f)
 static void
 swapeditfiles (struct editstuff *es, FILE *outfile)
 /* Swap ‘FLOW (result)’ and ‘es->filename’,
-   assign ‘es->fedit = FLOW (res)’,
+   set ‘es->fedit’ to manage ‘FLOW (res)’,
    and rewind ‘es->fedit’ for reading.
    Set ‘FLOW (res)’ to ‘outfile’ if non-NULL;
    otherwise, set ‘FLOW (res)’ to be ‘FLOW (result)’
    opened for reading and writing.  */
 {
   char const *tmpptr;
-  struct fro *newrile = FZLLOC (struct fro);
+  FILE *stream = FLOW (res);
+  struct fro *f = es->fedit;
 
   es->lcount = 0;
   es->corr = 0;
-  newrile->end = ftello (FLOW (res));
-  Orewind (FLOW (res));
-  newrile->rm = RM_STDIO;
-  newrile->stream = FLOW (res);
-  es->fedit = newrile;
+  if (! f)
+    {
+      f = es->fedit = FZLLOC (struct fro);
+      f->rm = RM_STDIO;
+    }
+  f->stream = stream;
+  f->end = ftello (stream);
+  Orewind (stream);
   tmpptr = es->filename;
   es->filename = FLOW (result);
   FLOW (result) = tmpptr;
