@@ -32,6 +32,20 @@ To describe a test, use "make describe [options]", which honors options
 ‘TESTS’ and ‘VERBOSE’ as described above.
 
 
+Environment
+-----------
+
+The test suite sets these environment variables; if you specify them,
+your values will be silently overriden (or extended in the case of ‘PATH’):
+
+  PATH      -- prepend value of ‘PATHPREFIX’
+  RCSINIT   -- cleared (set to no value)
+  TMPDIR    -- test's working directory (e.g., t149.d for test t149)
+
+Individual tests may set other environment variables, as well.
+You can use "make describe VERBOSE=1" for more information.
+
+
 Test Numbers
 ------------
 
