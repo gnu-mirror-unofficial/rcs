@@ -1,3 +1,12 @@
+2010-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add a "stdio trailing context sync" test; mark it xfail.
+
+	* fake/stdio-sync.GNUmakefile: New file.
+	* fake/stdio-sync: New file.
+	* t400: New file.
+	* Makefile.am (XFAIL_TESTS, TESTS): Add t400.
+
 2010-10-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Clear env var ‘RCSINIT’.
