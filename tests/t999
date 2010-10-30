@@ -415,29 +415,33 @@ rcs -i -Aa.c -t- $q a.d || { echo "#rcs -i -A failed"; exit 1; }
 rlog -r2.1 a.c >a.t &&
 grep '^checked in with -k' a.t >/dev/null &&
 sed '/^checked in with -k/d' a.t >a.u &&
-sort a.u >a.uu &&
+grep '^	' a.u | LANG=C sort >a.usym &&
+sed '/^	/d' a.u >a.uu &&
 $diff - a.uu <<EOF
 
+RCS file: RCS/a.c
+Working file: a.c
+head: 2.3
+branch:
+locks: strict
+access list:
+symbolic names:
+keyword substitution: kv
+total revisions: 13;	selected revisions: 1
+description:
+1.1
+----------------------------
+revision 2.1
+date: $date;  author: w;  state: seriously-spurious;  lines: +14 -1
+=============================================================================
+EOF
+test $? = 0 || { echo "#rlog failed"; exit 1; }
+$diff - a.usym <<EOF
 	N: 2.1
 	Oz: 2.1
 	n: 1.8
-----------------------------
-1.1
-=============================================================================
-RCS file: $RCSfile
-Working file: a.c
-access list:
-branch:
-date: $date;  author: w;  state: seriously-spurious;  lines: +14 -1
-description:
-head: 2.3
-keyword substitution: kv
-locks: strict
-revision 2.1
-symbolic names:
-total revisions: 13;	selected revisions: 1
 EOF
-test $? = 0 || { echo "#rlog failed"; exit 1; }
+test $? = 0 || { echo "#rlog (symbolic names) failed"; exit 1; }
 
 rlog a.c a.c >/dev/null
 test $? = 0 || { echo "#rlog with working file repeated failed"; exit 1; }

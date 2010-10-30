@@ -1,5 +1,12 @@
 2010-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] For t999 rlog testing, sort only the symbolic names.
+
+	* t999: Sort only the symbolic names; specify ‘LANG=C’;
+	revert to direct comparison for other rlog output lines.
+
+2010-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add some more fake files.
 
 	* fake/b: New file.
