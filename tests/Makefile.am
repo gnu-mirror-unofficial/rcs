@@ -33,6 +33,7 @@ XFAIL_TESTS =
 
 TESTS = \
  t010 \
+ t030 \
  t150 \
  t300 \
  t310 \

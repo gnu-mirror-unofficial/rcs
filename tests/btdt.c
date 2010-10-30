@@ -46,6 +46,38 @@ bad_args (char const *argv0)
 }
 
 
+/* ‘getoldkeys’ */
+
+/* Print the keyword values found.  */
+
+char const getoldkeys_usage[] =
+  "WORKING-FILE";
+
+void
+getoldkeys_spew (char const *what, char *s)
+{
+  if (s)
+    printf ("%s: %d \"%s\"\n", what, strlen (s), s);
+}
+
+int
+getoldkeys_do_it (int argc, char *argv[argc])
+{
+  if (2 > argc)
+    bad_args (argv[0]);
+
+  MANI (filename) = argv[1];
+  getoldkeys (NULL);
+  printf ("valid: %s\n", PREV (valid) ? "true" : "false");
+  getoldkeys_spew ("revno", PREV (rev));
+  getoldkeys_spew ("date", PREV (date));
+  getoldkeys_spew ("author", PREV (author));
+  getoldkeys_spew ("name", PREV (name));
+  getoldkeys_spew ("state", PREV (state));
+  return EXIT_SUCCESS;
+}
+
+
 typedef int (main_t) (int argc, char *argv[argc]);
 
 struct yeah
@@ -60,6 +92,7 @@ struct yeah
 
 struct yeah yeah[] =
   {
+    YEAH (getoldkeys,   true),
   };
 
 #define NYEAH  (sizeof (yeah) / sizeof (struct yeah))

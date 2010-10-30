@@ -1,3 +1,13 @@
+2010-10-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test to check C function ‘getoldkeys’.
+
+	* btdt.c (getoldkeys_usage): New string.
+	(getoldkeys_spew, getoldkeys_do_it): New funcs.
+	(yeah): Add entry ‘getoldkeys’.
+	* t030: New file.
+	* Makefile.am (TESTS): Add t030.
+
 2010-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add tests for ‘co -p’ and ‘co -p -k’.
