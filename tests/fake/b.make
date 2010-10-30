@@ -29,11 +29,21 @@ checkin ()
     # $1 -- filename stem
     # $2 -- utc time, of the form "MM/DD HH:MM:SS"
     # $3 -- log message
-    # $4 -- (optional) other options
+    # $4 -- (optional) symbolic name
+    # $5 -- (optional) more args
     f=b.d/$1
+    if [ x"$4" = x ]
+    then named=
+    else named="-n$4"
+    fi
     cp b   $f.ci
-    ci -f -u -d"2010/$2" -m"$3" $4 b
-    cp b   $f.cou
+    ci -f -u -d"2010/$2" -m"$3" $named $5 b
+    if [ x"$named" = x ] ; then
+        cp b $f.cou
+    else
+        cp b b.d/$4.cou
+        co -p b > $f.cou
+    fi
     cp b,v $f,vu
     co -l b
     cp b   $f.col
@@ -96,7 +106,7 @@ checkin 18 '04/12 13:23:04' 'Add even more keyword weirdness.'
 
 # 1.9
 bop '2s/.*/z/'
-checkin 19 '04/18 09:39:02' 'Minor change, plus set state.' '-sQQQ'
+checkin 19 '04/18 09:39:02' 'Minor change, plus set state.' '' '-sQQQ'
 
 # Start branch: 1.1.1
 changebranch 1.1 1
@@ -118,7 +128,7 @@ checkin 1114 '03/18 06:12:32' 'Replace first line with RCS keyword.'
 # 1.1.1.5
 ls=$(for k in $ls ; do echo $k ; done | sort)
 for k in $ls ; do echo '$'$k'$' ; echo ; done > b
-checkin 1115 '03/18 06:21:03' 'WOW is 1.1.1.5! (+ sorted kw)' -nWOW
+checkin 1115 '03/18 06:21:03' 'WOW is 1.1.1.5! (+ sorted kw)' WOW
 
 # 1.1.1.6
 bop '/^.Log/{
@@ -146,7 +156,7 @@ checkin 1611 '05/05 12:18:30' 'This should in theory go to 1.6.1.1.'
 
 # 1.6.1.2
 bop '1s/$/ THIS SHOULD BE NAMED "ZOW"!/'
-checkin 1612 '10/21 22:48:48' 'Add a name.' -nZOW
+checkin 1612 '10/21 22:48:48' 'Add a name.' ZOW
 
 # Finish up.
 rcs -u b,v

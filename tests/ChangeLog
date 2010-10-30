@@ -1,5 +1,17 @@
 2010-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add some more fake files.
+
+	* fake/b.make (checkin): Take $4 as optional
+	symbolic name; take $5 as optional other args.
+	(1.9, 1.1.1.5, 1.6.1.2): Update call to ‘checkin’.
+	* fake/b.d/WOW.cou: New file.
+	* fake/b.d/ZOW.cou: New file.
+	* fake/b.d/1115.cou: Regenerate.
+	* fake/b.d/1612.cou: Regenerate.
+
+2010-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] For t999 rlog testing, sort only the symbolic names.
 
 	* t999: Sort only the symbolic names; specify ‘LANG=C’;
