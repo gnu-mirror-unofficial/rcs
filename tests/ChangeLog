@@ -1,5 +1,15 @@
 2010-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add tests for ‘co -p’ and ‘co -p -k’.
+
+	* common-kn: New file.
+	* t410: New file.
+	* t430: New file.
+	* Makefile.am (TESTS): Add t410, t430.
+	(EXTRA_DIST): Add common-kn.
+
+2010-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add some more fake files.
 
 	* fake/b.make (checkin): Take $4 as optional

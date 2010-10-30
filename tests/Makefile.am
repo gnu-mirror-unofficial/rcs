@@ -38,7 +38,9 @@ TESTS = \
  t310 \
  t311 \
  t400 \
+ t410 \
  t420 \
+ t430 \
  t510 \
  t511 \
  t600 \
@@ -48,7 +50,7 @@ TESTS = \
  t999
 
 EXTRA_DIST = $(TESTS) \
- common common-i \
+ common common-i common-kn \
  compgate \
  fake
 
