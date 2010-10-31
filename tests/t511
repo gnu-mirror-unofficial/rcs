@@ -19,6 +19,10 @@
 split_std_out_err no
 . $srcdir/common-i
 
+##
+# Like t510, for ‘ci -iREV -mm’.
+##
+
 $hey echo '                                      -*- org -*-'
 
 wdisp=removed
