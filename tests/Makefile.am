@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-check_PROGRAMS = xorlf btdt
+check_PROGRAMS = btdt
 
 # If we use ‘btdt_CPPFLAGS’ here instead of ‘AM_CPPFLAGS’,
 # Automake creates btdt-btdt.o instead of simply btdt.o.

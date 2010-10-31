@@ -78,6 +78,24 @@ getoldkeys_do_it (int argc, char *argv[argc])
 }
 
 
+/* xorlf */
+
+/* XOR stdin with LF (aka '\n', 012, 0xA) to stdout.  */
+
+char const xorlf_usage[] =
+  "";
+
+int
+xorlf_do_it (int argc, char *argv[argc])
+{
+  int c;
+
+  while (EOF != (c = getchar ()))
+    putchar (c ^ 012);
+  return EXIT_SUCCESS;
+}
+
+
 typedef int (main_t) (int argc, char *argv[argc]);
 
 struct yeah
@@ -93,6 +111,7 @@ struct yeah
 struct yeah yeah[] =
   {
     YEAH (getoldkeys,   true),
+    YEAH (xorlf,        true),
   };
 
 #define NYEAH  (sizeof (yeah) / sizeof (struct yeah))

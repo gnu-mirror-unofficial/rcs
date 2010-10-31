@@ -1,3 +1,14 @@
+2010-10-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v int] Incorporate xorlf into "btdt xorlf".
+
+	* btdt.c (xorlf_usage): New string.
+	(xorlf_do_it): New func.
+	(yeah): Add entry ‘xorlf’.
+	* t999 (xorlf): Update.
+	* Makefile.am (check_PROGRAMS): Remove xorlf.
+	* xorlf.c: Delete file.
+
 2010-10-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add test to check C function ‘getoldkeys’.
