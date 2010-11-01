@@ -65,7 +65,13 @@ exit 0
   Along with the test name, add some commentary explaining why
   that test is known to fail for that release.
 
-  Use "make known-failures" to regenerate it from this file.
+  Use "make known-failures" to regenerate it from the .in file.
+
+  The next-up release should have an empty entry during development;
+  test failures should be maintained in Makefile.am, like so:
+    XFAIL_TESTS += tNNN
+  On release, any remaining failures should be moved to the .in file.
+  (Obviously, the ideal is to eliminate them prior to release.)
 
 * 5.7
   t150 ; no ‘--version’ / ‘--help’
@@ -74,6 +80,7 @@ exit 0
   t800 ; outdate everything leaves non-empty RCS file (fixed in 5.8)
 
 * 5.8
+  ;; None (yet?).
 
 * end matter
 *** Local variables:
