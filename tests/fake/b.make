@@ -82,11 +82,11 @@ checkin 12 '03/30 09:45:02' 'Add empty headers.'
 
 # 1.3
 bop '$s/$/\ngreetings/'
-checkin 13 '03/30 09:45:42' 'Add "greetings".'
+checkin 13 '03/30 09:45:42' 'Add "greetings".' '' '-wzurg'
 
 # 1.4
 bop '$s/$/\nearthlings/'
-checkin 14 '03/30 09:46:24' 'Add "earthlings".'
+checkin 14 '03/30 09:46:24' 'Add "earthlings".' '' '-wzurg'
 
 # 1.5
 bop '/^greetings/s/^/;; Here is some trailing text\n/'

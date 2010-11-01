@@ -1,3 +1,68 @@
+2010-11-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Make ‘zurg’ author of b edits "greetings", "earthlings".
+
+	* fake/b.make (1.3, 1.4): Specify ‘-wzurg’.
+	* fake/b.d/1111,v: Regenerate.
+	* fake/b.d/1111,vu: Regenerate.
+	* fake/b.d/1112,v: Regenerate.
+	* fake/b.d/1112,vu: Regenerate.
+	* fake/b.d/1113,v: Regenerate.
+	* fake/b.d/1113,vu: Regenerate.
+	* fake/b.d/1114,v: Regenerate.
+	* fake/b.d/1114,vu: Regenerate.
+	* fake/b.d/1115,v: Regenerate.
+	* fake/b.d/1115,vu: Regenerate.
+	* fake/b.d/1116,v: Regenerate.
+	* fake/b.d/1116,vu: Regenerate.
+	* fake/b.d/1117,v: Regenerate.
+	* fake/b.d/1117,vu: Regenerate.
+	* fake/b.d/13,v: Regenerate.
+	* fake/b.d/13,vu: Regenerate.
+	* fake/b.d/13.col: Regenerate.
+	* fake/b.d/13.cou: Regenerate.
+	* fake/b.d/14,v: Regenerate.
+	* fake/b.d/14,vu: Regenerate.
+	* fake/b.d/14.ci: Regenerate.
+	* fake/b.d/14.col: Regenerate.
+	* fake/b.d/14.cou: Regenerate.
+	* fake/b.d/15,v: Regenerate.
+	* fake/b.d/15,vu: Regenerate.
+	* fake/b.d/15.ci: Regenerate.
+	* fake/b.d/15.col: Regenerate.
+	* fake/b.d/15.cou: Regenerate.
+	* fake/b.d/16,v: Regenerate.
+	* fake/b.d/16,vu: Regenerate.
+	* fake/b.d/16.ci: Regenerate.
+	* fake/b.d/16.col: Regenerate.
+	* fake/b.d/16.cou: Regenerate.
+	* fake/b.d/1611,v: Regenerate.
+	* fake/b.d/1611,vu: Regenerate.
+	* fake/b.d/1611.ci: Regenerate.
+	* fake/b.d/1611.col: Regenerate.
+	* fake/b.d/1611.cou: Regenerate.
+	* fake/b.d/1612,v: Regenerate.
+	* fake/b.d/1612,vu: Regenerate.
+	* fake/b.d/1612.ci: Regenerate.
+	* fake/b.d/1612.col: Regenerate.
+	* fake/b.d/1612.cou: Regenerate.
+	* fake/b.d/17,v: Regenerate.
+	* fake/b.d/17,vu: Regenerate.
+	* fake/b.d/17.ci: Regenerate.
+	* fake/b.d/17.col: Regenerate.
+	* fake/b.d/17.cou: Regenerate.
+	* fake/b.d/18,v: Regenerate.
+	* fake/b.d/18,vu: Regenerate.
+	* fake/b.d/18.ci: Regenerate.
+	* fake/b.d/18.col: Regenerate.
+	* fake/b.d/18.cou: Regenerate.
+	* fake/b.d/19,v: Regenerate.
+	* fake/b.d/19,vu: Regenerate.
+	* fake/b.d/19.ci: Regenerate.
+	* fake/b.d/19.col: Regenerate.
+	* fake/b.d/19.cou: Regenerate.
+	* fake/b.d/ZOW.cou: Regenerate.
+
 2010-10-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v int] Incorporate xorlf into "btdt xorlf".
