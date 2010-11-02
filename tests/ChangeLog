@@ -1,5 +1,12 @@
 2010-11-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add a ‘co -p -d’ test.
+
+	* t460: New file.
+	* Makefile.am (TESTS): Add t460.
+
+2010-11-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v int] Fix bug: Propagate ‘title’ var properly.
 
 	Omission from 2010-10-30, "Add tests for ‘co -p’ and ‘co -p -k’".
