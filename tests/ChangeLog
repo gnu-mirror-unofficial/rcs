@@ -1,5 +1,12 @@
 2010-11-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add a ‘co -p -s’ test.
+
+	* t450: New file.
+	* Makefile.am (TESTS): Add t450.
+
+2010-11-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a ‘co -p -w’ test.
 
 	* t440: New file.
