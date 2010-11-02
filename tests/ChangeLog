@@ -1,5 +1,12 @@
 2010-11-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v int] Fix bug: Propagate ‘title’ var properly.
+
+	Omission from 2010-10-30, "Add tests for ‘co -p’ and ‘co -p -k’".
+	* common-kn (normalize_b_and_diff): Set var ‘title’; use it.
+
+2010-11-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a ‘co -p -s’ test.
 
 	* t450: New file.

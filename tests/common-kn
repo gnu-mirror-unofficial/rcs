@@ -41,6 +41,7 @@ EOF
 normalize_b_and_diff ()
 {
     # $1 -- title
+    title="$1"
     must "sed -f $wd/x-normal $actual > $normal"
     diff -u $expected $normal 1> $doubt 2>&1
     if test -s $expected ; then
@@ -48,7 +49,7 @@ normalize_b_and_diff ()
     else
         noiselessness_rules $actual "$title"
     fi
-    noiselessness_rules $doubt "$1"
+    noiselessness_rules $doubt "$title"
 }
 
 # common-kn ends here
