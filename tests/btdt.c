@@ -21,7 +21,12 @@
 #include "base.h"
 #include <string.h>
 #include <stdlib.h>
+#include "b-complain.h"
+#include "b-divvy.h"
+#include "b-esds.h"
 #include "b-feph.h"
+#include "b-fro.h"
+#include "b-grok.h"
 
 /* This program serves as a collection of test-support commands
    (to be invoked from the t??? files) for various components of
@@ -44,6 +49,8 @@ bad_args (char const *argv0)
            argv0, PROGRAM (invoke));
   exit_failurefully ();
 }
+
+#define MORE "\n\t\t"
 
 
 /* ‘getoldkeys’ */
@@ -74,6 +81,47 @@ getoldkeys_do_it (int argc, char *argv[argc])
   getoldkeys_spew ("author", PREV (author));
   getoldkeys_spew ("name", PREV (name));
   getoldkeys_spew ("state", PREV (state));
+  return EXIT_SUCCESS;
+}
+
+
+/* ‘grok_all’ */
+
+/* Parse an RCS file and display different aspects of the result.  */
+
+char const grok_usage[] =
+  "RCS-FILE [ASPECT...]"
+  MORE "where ASPECT is one of:"
+  MORE "  edits-order";
+
+int
+grok_do_it (int argc, char *argv[argc])
+{
+  int i;
+  struct fro *f;
+
+  REPO (filename) = argv[1];            /* FIXME: for ‘RERR’ */
+  if (! (f = fro_open (argv[1], "r", NULL)))
+    RERR ("cannot open %s", argv[1]);
+  if (! (REPO (r) = grok_all (SINGLE, f)))
+    RERR ("grok_all failed for %s", argv[1]);
+
+  for (i = 2; i < argc; i++)
+    {
+      struct delta *d;
+      char const *aspect = argv[i];
+
+      printf ("%s:\n", aspect);
+      if (STR_SAME ("edits-order", aspect))
+        for (struct wlink *ls = GROK (deltas); ls; ls = ls->next)
+          {
+            d = ls->entry;
+            printf ("%s\n", d->num);
+          }
+      else
+        bad_args (argv[0]);
+    }
+
   return EXIT_SUCCESS;
 }
 
@@ -111,6 +159,7 @@ struct yeah
 struct yeah yeah[] =
   {
     YEAH (getoldkeys,   true),
+    YEAH (grok,         true),
     YEAH (xorlf,        true),
   };
 

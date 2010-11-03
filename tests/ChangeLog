@@ -1,3 +1,17 @@
+2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add a "grok edits-order" test; mark it xfail.
+
+	* btdt.c: #include "b-complain.h",
+	"b-divvy.h", "b-esds.h", "b-fro.h", "b-grok.h".
+	(MORE): New #define.
+	(grok_usage): New string.
+	(grok_do_it): New func.
+	(yeah): Add entry ‘grok’.
+	* t050: New file.
+	* Makefile.am (XFAIL_TESTS): Add t050.
+	(TESTS): Add t050.
+
 2010-11-02  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add a ‘co -p -d’ test.
