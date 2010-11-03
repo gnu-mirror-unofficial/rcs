@@ -1,5 +1,12 @@
 2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Maintain ‘GROK (deltas)’ in proper order.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* Makefile.am (XFAIL_TESTS): Remove t050.
+
+2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a "grok edits-order" test; mark it xfail.
 
 	* btdt.c: #include "b-complain.h",

@@ -528,6 +528,7 @@ full (struct divvy *to, struct fro *f)
   off_t neck;
   size_t count;
   struct link box, *tp;
+  struct wlink *follow;
   struct grok *g = FZLLOC (struct grok);
   struct repo *repo = empty_repo (to);
 
@@ -746,7 +747,7 @@ full (struct divvy *to, struct fro *f)
     }
 
   CBEG ("edits");
-  for (count = 0;
+  for (count = 0, follow = repo->deltas;
        (neck = fro_tello (g->from)) && count < repo->deltas_count;
        count++)
     {
@@ -759,6 +760,10 @@ full (struct divvy *to, struct fro *f)
       CBEG (revno);
       if (!(ny = FIND_NY (revno)))
         BUMMER ("found edits for %s `%s'", ks_ner, revno);
+      /* TODO: Instead of this (accumulate then reorder),
+         delay accumulation then accumulate in order.  */
+      follow->entry = ny;
+      follow = follow->next;
       d = ny->d;
       d->neck = neck;
       SYNCH (g, log);

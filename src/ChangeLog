@@ -1,3 +1,11 @@
+2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Maintain ‘GROK (deltas)’ in proper order.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* b-grok.c (full): Reorder ‘repo->deltas’
+	to reflect edits order, not index order.
+
 2010-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Reuse backing store in ‘swapeditfiles’.
