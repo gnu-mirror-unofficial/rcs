@@ -1,5 +1,11 @@
 2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v int] If b.make is given an arg, cd there first.
+
+	* fake/b.make: If $1 is specified, do ‘cd $1’.
+
+2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Maintain ‘GROK (deltas)’ in proper order.
 
 	Omission from 2010-05-24, "Rewrite parsing".

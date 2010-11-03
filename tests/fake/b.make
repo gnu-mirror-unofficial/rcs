@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+test x"$1" = x || cd "$1"
+
 RCSINIT='-q' ; export RCSINIT
 set -e
 rm -rf b b,v b.d
