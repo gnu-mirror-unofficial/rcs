@@ -1,5 +1,12 @@
 2010-11-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add a test to recreate fake/b, fake/b.d/*.
+
+	* t900: New file.
+	* Makefile.am (TESTS): Add t900.
+
+2010-11-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] For t999 rlog testing, don't sort; diff directly.
 
 	* t999: For rlog output, don't sort symbolic names;

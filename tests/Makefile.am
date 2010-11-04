@@ -52,6 +52,7 @@ TESTS = \
  t601 \
  t602 \
  t800 \
+ t900 \
  t999
 
 EXTRA_DIST = $(TESTS) \
