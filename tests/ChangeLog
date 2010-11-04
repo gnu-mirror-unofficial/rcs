@@ -1,3 +1,10 @@
+2010-11-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] For t999 rlog testing, don't sort; diff directly.
+
+	* t999: For rlog output, don't sort symbolic names;
+	diff the entire output, including symbolic names, directly.
+
 2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v int] If b.make is given an arg, cd there first.
