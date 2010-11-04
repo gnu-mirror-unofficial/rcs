@@ -418,6 +418,7 @@ putadmin (void)
   if (kws != kwsub_kv)
     aprintf (fout, "%s\t%c%s%c;\n",
              TINYKS (expand), SDELIM, kwsub_string (kws), SDELIM);
+  aprintf (fout, "\n");
 }
 
 static void
