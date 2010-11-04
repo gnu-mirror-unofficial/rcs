@@ -1072,7 +1072,7 @@ addsymbol (char const *num, char const *name, bool rebind)
         }
     }
   MAKEDEF ();
-  extend (tp, d, SINGLE);
+  box.next = prepend (d, box.next, SINGLE);
  ok:
   GROK (symbols) = box.next;
   return 1;

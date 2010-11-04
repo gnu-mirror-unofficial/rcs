@@ -1,5 +1,14 @@
 2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Revert symbolic names ordering to be compatible with RCS 5.7.
+
+	Translation oversight from 2010-04-28, "Replace
+	‘struct assoc’ with ‘struct wlink’ + ‘struct symdef’".
+	* rcsedit.c (addsymbol): For new symbolic
+	names, add to front of list instead of end.
+
+2010-11-03  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Maintain ‘GROK (deltas)’ in proper order.
 
 	Omission from 2010-05-24, "Rewrite parsing".
