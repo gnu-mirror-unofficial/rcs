@@ -1,5 +1,12 @@
 2010-11-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add a "merge -p" test.
+
+	* t180: New file.
+	* Makefile.am (TESTS): Add t180.
+
+2010-11-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a rcsdiff test.
 
 	* t160: New file.
