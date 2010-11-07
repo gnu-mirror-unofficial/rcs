@@ -1,3 +1,10 @@
+2010-11-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add a rcsdiff test.
+
+	* t160: New file.
+	* Makefile.am (TESTS): Add t160.
+
 2010-11-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add a test to recreate fake/b, fake/b.d/*.
