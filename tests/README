@@ -50,12 +50,12 @@ Test Numbers
 ------------
 
 Each test is named tXXX, where XXX is a decimal number belonging to one
-of the following "tiers":
+of the following "tiers", from "lower" to "upper":
 
   000 - 149 -- library
-  150 - 299 -- shared functionality
-  300 - 399 -- rlog
-  400 - 499 -- other "read-only" commands (co -p, merge -p)
+  150 - 299 -- shared functionality / rcsdiff / merge -p
+  300 - 399 -- rlog, ident
+  400 - 499 -- other "read-only" commands (co -p, rcsmerge -p)
   500 - 599 -- commands that create an RCS file (ci -i, rcs -i, implicit)
   600 - 799 -- all other commands
   800 - 899 -- regressions / bugfixes
