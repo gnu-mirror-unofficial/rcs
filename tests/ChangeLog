@@ -1,5 +1,9 @@
 2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.94
+
+2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a "rcsmerge -p -kk" test.
 
 	* t470: New file.

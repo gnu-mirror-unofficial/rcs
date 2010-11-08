@@ -1,5 +1,11 @@
 2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.94
+
+	* configure.ac (AC_INIT): Bump version to "5.7.94" for release.
+
+2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Exclude mmap from "presumably standard" check.
 
 	Omission from 2010-10-13, "Add configure option ‘--disable-mmap’".
