@@ -492,9 +492,6 @@ AC_SUBST([ABSFILENAMEGLOB])
 
 # For pretest releases, encourage user feedback for weird systems.
 
-AS_IF([test no = $use_mmap || RCS_YESP([rcs_cv_sane_mmap])],
-  [rcs_mmap_ok=yes],[rcs_mmap_ok=no])
-
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 
 dnl These can probably be handled by gnulib, no sweat.
@@ -513,7 +510,6 @@ dnl In that case, fine, just keep them (remove them from this list).
 rcs_cv_fopen_truncates
 rcs_cv_unlink_mw_ok
 rcs_cv_wac_ok
-rcs_mmap_ok
 
 dnl Some things to think about
 dnl mmap_signal_is_SIGBUS -- TODO: make rcs_cv_mmap_signal have symbolic

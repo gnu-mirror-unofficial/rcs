@@ -1,3 +1,11 @@
+2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Exclude mmap from "presumably standard" check.
+
+	Omission from 2010-10-13, "Add configure option ‘--disable-mmap’".
+	* configure.ac (rcs_mmap_ok): Delete var.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): Remove ‘rcs_mmap_ok’.
+
 2010-10-21  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use gnulib module ‘tzset’.
