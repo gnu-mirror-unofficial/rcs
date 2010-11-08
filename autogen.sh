@@ -9,7 +9,7 @@
 # Tested with:
 # autoconf (GNU Autoconf) 2.68
 # automake (GNU automake) 1.11.1
-# gnulib-tool (GNU gnulib 2010-10-07 14:06:44) 0.0.4351-97f1d
+# gnulib-tool (GNU gnulib 2010-11-05 13:19:13) 0.0.4410-e3c61
 
 set -ex
 if [ -d lib ] && [ -d m4 ]
