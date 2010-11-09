@@ -133,7 +133,7 @@ revision on the default branch.
 
 Additionally, the following options (and their argument, if any) are
 passed to the underlying diff(1) command:
-  -0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -B, -B, -C, -D, -F, -H, -I,
+  -0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -B, -C, -D, -F, -H, -I,
   -L, -U, -W, -a, -b, -c, -d, -e, -f, -h, -i, -n, -p, -t, -u, -w, -y,
   [long options (that start with "--")].
 (Not all of these options are meaningful.)
