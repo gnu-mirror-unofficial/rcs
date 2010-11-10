@@ -1,3 +1,11 @@
+2010-11-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘oom’ more.
+
+	* b-divvy.c (oom): Make func not static.
+	* b-divvy.h (oom): New func decl.
+	* rcsedit.c (okalloc): Use ‘oom’.
+
 2010-11-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Fix typo: Mention rcsdiff ‘-B’ once only.

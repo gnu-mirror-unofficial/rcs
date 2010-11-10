@@ -28,7 +28,7 @@
 struct divvy *plexus;
 struct divvy *single;
 
-static void
+void
 oom (void)
 {
   PFATAL ("out of memory");

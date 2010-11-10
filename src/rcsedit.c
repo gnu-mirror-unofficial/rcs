@@ -102,7 +102,7 @@ static void *
 okalloc (void * p)
 {
   if (!p)
-    PFATAL ("out of memory");
+    oom ();
   return p;
 }
 
