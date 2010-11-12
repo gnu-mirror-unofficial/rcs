@@ -1029,6 +1029,11 @@ use the working file modification time.
 
 @item -m@var{msg}
 Use @var{msg} as the log message.
+Note that @var{msg} is required; specifying an empty @var{msg}
+results in a ``missing message for -m option'' error.
+(If an empty log message were to be accepted, you would have to
+run @command{rcsdiff} later just to figure out what changed for
+a particular revision.)
 
 @item -n@var{name}
 @itemx -N@var{name}
