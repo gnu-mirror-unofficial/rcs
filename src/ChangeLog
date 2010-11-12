@@ -1,3 +1,11 @@
+2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Output leading '@' for "rcs -m" log in RCS file.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* rcs.c (scanlogtext): When replacing
+	log text from "rcs -m", output leading '@'.
+
 2010-11-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘oom’ more.

@@ -326,6 +326,7 @@ scanlogtext (struct editstuff *es, struct wlink **ls,
         }
       else if (nextdelta->pretty_log.string && nextdelta->selector)
         {
+          afputc (SDELIM, to);
           putstring (to, false, nextdelta->pretty_log, true);
           afputc ('\n', to);
         }

@@ -1,5 +1,12 @@
 2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Output leading '@' for "rcs -m" log in RCS file.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* Makefile.am (XFAIL_TESTS): Remove t603.
+
+2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a "rcs -m" test; mark it xfail.
 
 	* t603: New file.
