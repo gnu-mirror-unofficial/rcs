@@ -32,6 +32,14 @@ It lives in the repo but is not included in the distribution.
 *** bootstrap
 ***** gnulib-tool must be somewhere on PATH
 ***** do "sh autogen.sh"
+*** public non-‘master’ branches in the repo
+***** ‘a’ -- "anchor", "asis", "already", "argh-just-leave-me-alone"
+This branch is for what was already released.  It will never be rebased.
+Its tip will always have a commit title starting with "Release".
+***** q/TOPIC -- "questionably", "querulously"
+These are experimental, exploring the particular TOPIC.  They are intended
+to be ephemeral, undergoing rebase, amendment, and ultimately removal.
+
 
 * possible future changes (see manual for the more feasible ones)
 
