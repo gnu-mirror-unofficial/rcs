@@ -55,9 +55,12 @@ TESTS = \
  t600 \
  t601 \
  t602 \
+ t603 \
  t800 \
  t900 \
  t999
+
+XFAIL_TESTS += t603
 
 EXTRA_DIST = $(TESTS) \
  common common-i common-kn \

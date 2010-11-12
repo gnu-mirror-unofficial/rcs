@@ -1,3 +1,11 @@
+2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add a "rcs -m" test; mark it xfail.
+
+	* t603: New file.
+	* Makefile.am (TESTS): Add t603.
+	(XFAIL_TESTS): Add t603.
+
 2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.94
