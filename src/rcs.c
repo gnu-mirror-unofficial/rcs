@@ -196,10 +196,7 @@ getmessage (struct link **tp, char *option)
   *m++ = '\0';
   cb = cleanlogmsg (m, strlen (m));
   if (!cb.size)
-    {
-      PERR ("-m option lacks log message");
-      return;
-    }
+    set_empty_log_message (&cb);
   um = ZLLOC (1, struct u_log);
   um->revno = option;
   um->message = cb;

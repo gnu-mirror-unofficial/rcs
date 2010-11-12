@@ -1,3 +1,12 @@
+2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	ci, rcs: Make MSG in ‘-m...MSG’ optional.
+
+	* b-emptylogmessage: New file.
+	* Makefile.am (bits): Add b-emptylogmessage.
+	* ci.1in: Update ‘-m’; use b-emptylogmessage.
+	* rcs.1in: Likewise.
+
 2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.94

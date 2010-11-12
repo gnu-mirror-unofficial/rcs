@@ -1,5 +1,14 @@
 2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	ci, rcs: Make MSG in ‘-m...MSG’ optional.
+
+	* rcsutil.c (set_empty_log_message): New func.
+	* base.h (set_empty_log_message): New func decl.
+	* ci.c (getlogmsg, main): Use ‘set_empty_log_message’.
+	* rcs.c (getmessage): Likewise.
+
+2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Output leading '@' for "rcs -m" log in RCS file.
 
 	Omission from 2010-05-24, "Rewrite parsing".

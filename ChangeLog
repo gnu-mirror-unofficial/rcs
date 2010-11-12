@@ -1,5 +1,12 @@
 2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	ci, rcs: Make MSG in ‘-m...MSG’ optional.
+
+	* doc/rcs.texi (ci, rcs): Update ‘-m’ description.
+	Suggested by Keith Thompson.
+
+2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Expand on required MSG in ‘ci -mMSG’.
 
 	* doc/rcs.texi (ci): Explain that MSG is required;

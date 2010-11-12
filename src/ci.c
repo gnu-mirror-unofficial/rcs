@@ -542,10 +542,7 @@ getlogmsg (void)
 
   /* Now check whether the log message is not empty.  */
   if (!logmsg.size)
-    {
-      logmsg.string = EMPTYLOG;
-      logmsg.size = sizeof (EMPTYLOG) - 1;
-    }
+    set_empty_log_message (&logmsg);
   return logmsg;
 }
 
@@ -708,7 +705,7 @@ main (int argc, char **argv)
             redefined ('m');
           msg = cleanlogmsg (a, strlen (a));
           if (!msg.size)
-            PERR ("missing message for -m option");
+            set_empty_log_message (&msg);
           break;
 
         case 'n':

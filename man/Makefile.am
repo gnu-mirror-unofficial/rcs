@@ -26,6 +26,7 @@ dist_noinst_MANS = rcsfreeze.1
 BUILT_SOURCES = REL $(dist_noinst_MANS)
 
 bits = b-base \
+  b-emptylogmessage \
   b-environment \
   b-identification \
   b-tichy-cite

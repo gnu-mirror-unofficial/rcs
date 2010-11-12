@@ -160,6 +160,18 @@ See the end for copying conditions.
 	garbage was not detected (see bugfix above).  Now, a top-level
 	validation is done on each access.
 
+    - Possible to specify an empty log message with ci -m, rcs -m.
+
+	The commands "ci -m" and "rcs -m" no longer error on an
+	empty log message.  Their non-interactive behavior is now
+	consistent with the interactive invocation.
+
+	was: ci -m file < /dev/null   # use stdin to avoid error
+	now: ci -m file               # works fine, like so
+
+	Note that these commands actually store as the log message
+	the string: "*** empty log message ***".
+
     - Changes to rcsdiff
 
       - New handling for option: -U N

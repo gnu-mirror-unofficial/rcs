@@ -188,6 +188,13 @@ parse_revpairs (char option, char *arg,
 }
 
 void
+set_empty_log_message (struct cbuf *cb)
+{
+  cb->string = EMPTYLOG;
+  cb->size = sizeof (EMPTYLOG) - 1;
+}
+
+void
 ffree (void)
 /* Free all blocks in the ‘SINGLE’ space.  */
 {

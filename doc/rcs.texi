@@ -1027,13 +1027,10 @@ If there is no lock, use @code{@var{defbr}.(L+1)}.
 @xref{Date option}.  If no @var{date} specified,
 use the working file modification time.
 
-@item -m@var{msg}
+@item -m[@var{msg}]
 Use @var{msg} as the log message.
-Note that @var{msg} is required; specifying an empty @var{msg}
-results in a ``missing message for -m option'' error.
-(If an empty log message were to be accepted, you would have to
-run @command{rcsdiff} later just to figure out what changed for
-a particular revision.)
+If unspecified, use the strangely non-paradoxical
+@samp{*** empty log message ***} as default.
 
 @item -n@var{name}
 @itemx -N@var{name}
@@ -1238,8 +1235,10 @@ Set comment leader to @var{string}.
 @item -k@var{subst}
 @xref{Substitution mode option}.
 
-@item -m@var{rev}:@var{msg}
+@item -m@var{rev}:[@var{msg}]
 Replace log message with @var{msg}.
+If @var{msg} is omitted, use the strangely non-paradoxical
+@samp{*** empty log message ***} as default.
 
 @item -n@var{name}[:[@var{rev}]]
 If @var{:rev} is omitted, delete symbolic @var{name}.

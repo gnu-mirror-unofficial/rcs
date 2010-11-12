@@ -319,10 +319,11 @@ contents change due to keyword substitution.
 Use this option with care; it can confuse
 .BR make (1).
 .TP
-.BI \-m "msg"
+.BR \-m [\fP\f2msg\fP]
 uses the string
 .I msg
 as the log message for all revisions checked in.
+.so b-emptylogmessage
 By convention, log messages that start with
 .B #
 are comments and are ignored by programs like GNU Emacs's
