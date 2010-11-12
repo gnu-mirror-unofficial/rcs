@@ -25,6 +25,7 @@ Thien-Thi Nguyen wrote the changes for RCS 5.8.  A big thanks go to
 the following people for reporting problems (and suggesting solutions)
 with the pretest releases:
   Karl Berry
+  Keith Thompson
   Ludovic Courtès
   Mike Mestnik
   Nelson H. F. Beebe
