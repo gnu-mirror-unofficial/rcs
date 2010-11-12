@@ -1,5 +1,12 @@
 2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Incorporate ‘DELNUMFORM’ into unique use.
+
+	* rcsgen.c (rcsgen.c): Use string directly for revno, "log".
+	* base.h (DELNUMFORM): Delete #define.
+
+2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	ci, rcs: Make MSG in ‘-m...MSG’ optional.
 
 	* rcsutil.c (set_empty_log_message): New func.

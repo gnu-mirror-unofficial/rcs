@@ -515,7 +515,7 @@ putdftext (struct delta const *delta, struct fro *finfile,
   struct diffcmd dc;
 
   fout = foutfile;
-  aprintf (fout, DELNUMFORM, delta->num, TINYKS (log));
+  aprintf (fout, "\n\n%s\n%s\n", delta->num, TINYKS (log));
 
   /* Put log.  */
   putstring (fout, true, delta->pretty_log, true);

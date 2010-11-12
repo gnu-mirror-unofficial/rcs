@@ -331,9 +331,6 @@ enum markers
   Locker, Log, Name, RCSfile, Revision, Source, State
 };
 
-/* This is used by ‘putdtext’ and ‘scanlogtext’.  */
-#define DELNUMFORM      "\n\n%s\n%s\n"
-
 /* This is used by ci and rlog.  */
 #define EMPTYLOG "*** empty log message ***"
 
