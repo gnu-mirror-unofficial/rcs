@@ -1,3 +1,11 @@
+2010-11-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add a "ci on branch with non-strict locking" test; mark xfail.
+
+	* t604: New file.
+	* Makefile.am (TESTS, XFAIL_TESTS): Add t604.
+	Suggested by Klaus T. Aehlig.
+
 2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: Output leading '@' for "rcs -m" log in RCS file.
