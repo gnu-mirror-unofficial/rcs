@@ -1,5 +1,14 @@
 2010-11-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Define ‘program_name’ for gnulib.
+
+	* b-complain.c (program_name): New var.
+	* b-complain.h (program_name): New var decl.
+	* rcsutil.c (gnurcs_init): Set ‘program_name’.
+	Reported by Klaus T. Aehlig.
+
+2010-11-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Fix bug: Use ‘gr_revno’ more.
 
 	Regression introduced 2010-05-08,

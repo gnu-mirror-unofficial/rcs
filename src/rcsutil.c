@@ -54,6 +54,9 @@ exit_diff_trouble (void)
 void
 gnurcs_init (struct program const *program)
 {
+  /* Apparently gnulib needs this, sigh.  */
+  program_name = (char *) program->name;
+
   PLEXUS = make_space ("plexus");
   SINGLE = make_space ("single");
   top = ZLLOC (1, struct top);

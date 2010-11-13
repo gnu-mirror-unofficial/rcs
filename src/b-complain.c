@@ -22,6 +22,9 @@
 #include <stdarg.h>
 #include <errno.h>
 
+/* Apparently gnulib needs this, sigh.  */
+char *program_name;
+
 void
 unbuffer_standard_error (void)
 {

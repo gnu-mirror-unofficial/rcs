@@ -18,6 +18,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/* Apparently gnulib needs this, sigh.  */
+extern char *program_name;
+
 extern void unbuffer_standard_error (void);
 extern void vcomplain (char const *fmt, va_list args);
 extern void complain (char const *fmt, ...)
