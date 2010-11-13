@@ -166,7 +166,8 @@ removelock (struct delta *delta)
 static struct wlink newbranch;          /* new branch to be inserted */
 
 static int
-addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
+addbranch (struct delta *branchpoint, struct cbuf *num,
+           bool removedlock, struct wlink **tp_deltas)
 /* Add a new branch and branch delta at ‘branchpoint’.
    If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
@@ -236,7 +237,7 @@ addbranch (struct delta *branchpoint, struct cbuf *num, bool removedlock)
       else
         {
           /* Branch exists; append to end.  */
-          targetdelta = delta_from_ref (BRANCHNO (num->string));
+          targetdelta = gr_revno (BRANCHNO (num->string), tp_deltas);
           if (!targetdelta)
             return -1;
           if (!NUM_GT (num->string, targetdelta->num))
@@ -334,7 +335,7 @@ addelta (struct wlink **tp_deltas)
             {
               /* Middle revision; start a new branch.  */
               JAM (&newdelnum, "");
-              return addbranch (targetdelta, &newdelnum, true);
+              return addbranch (targetdelta, &newdelnum, true, tp_deltas);
             }
           incnum (targetdelta->num, &newdelnum);
           /* Successful use of existing lock.  */
@@ -402,7 +403,7 @@ addelta (struct wlink **tp_deltas)
           RERR ("can't find branch point %s", old.string);
           return -1;
         }
-      return addbranch (targetdelta, &newdelnum, false);
+      return addbranch (targetdelta, &newdelnum, false, tp_deltas);
     }
 }
 
@@ -1031,7 +1032,7 @@ main (int argc, char **argv)
                     Orewind (frew);
                     bad_truncate = PROB (ftruncate (fileno (frew), (off_t) 0));
                     grok_resynch (REPO (r));
-                    if (! (workdelta = delta_from_ref (targetdelta->num)))
+                    if (! (workdelta = gr_revno (targetdelta->num, &deltas)))
                       continue;
                     workdelta->pretty_log = targetdelta->pretty_log;
                     if (newdelta.state != default_state)

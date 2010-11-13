@@ -777,7 +777,7 @@ doassoc (void)
 }
 
 static bool
-setlock (char const *rev)
+setlock (char const *rev, struct wlink **tp_deltas)
 /* Given a revision or branch number, find the corresponding
    delta and lock it for caller.  */
 {
@@ -786,7 +786,7 @@ setlock (char const *rev)
 
   if (fully_numeric_no_k (&numrev, rev))
     {
-      target = delta_from_ref (numrev.string);
+      target = gr_revno (numrev.string, tp_deltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -809,7 +809,7 @@ setlock (char const *rev)
 }
 
 static bool
-dolocks (void)
+dolocks (struct wlink **tp_deltas)
 /* Remove lock for caller or first lock if ‘unlockcaller’ is set;
    remove locks which are stored in ‘rmvlocklst’,
    add new locks which are stored in ‘newlocklst’,
@@ -860,7 +860,7 @@ dolocks (void)
   for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->next)
     if (fully_numeric_no_k (&numrev, (bye = lockpt->entry)))
       {
-        target = delta_from_ref (numrev.string);
+        target = gr_revno (numrev.string, tp_deltas);
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
@@ -874,7 +874,7 @@ dolocks (void)
 
   /* Add new locks which stored in newlocklst.  */
   for (lockpt = newlocklst; lockpt; lockpt = lockpt->next)
-    changed |= setlock (lockpt->entry);
+    changed |= setlock (lockpt->entry, tp_deltas);
 
   if (lockhead)
     {
@@ -882,9 +882,9 @@ dolocks (void)
 
       /* Lock default branch or head.  */
       if (defbr)
-        changed |= setlock (defbr);
+        changed |= setlock (defbr, tp_deltas);
       else if (tip)
-        changed |= setlock (tip->num);
+        changed |= setlock (tip->num, tp_deltas);
       else
         RWARN ("can't lock an empty tree");
     }
@@ -892,7 +892,7 @@ dolocks (void)
 }
 
 static bool
-domessages (void)
+domessages (struct wlink **tp_deltas)
 {
   struct delta *target;
   bool changed = false;
@@ -902,7 +902,7 @@ domessages (void)
       struct u_log const *um = ls->entry;
 
       if (fully_numeric_no_k (&numrev, um->revno)
-          && (target = delta_from_ref (numrev.string)))
+          && (target = gr_revno (numrev.string, tp_deltas)))
         {
           /* We can't check the old log -- it's much later in the file.
              We pessimistically assume that it changed.  */
@@ -914,7 +914,8 @@ domessages (void)
 }
 
 static bool
-rcs_setstate (char const *rev, char const *status)
+rcs_setstate (char const *rev, char const *status,
+              struct wlink **tp_deltas)
 /* Given a revision or branch number, find the corresponding delta
    and sets its state to ‘status’.  */
 {
@@ -922,7 +923,7 @@ rcs_setstate (char const *rev, char const *status)
 
   if (fully_numeric_no_k (&numrev, rev))
     {
-      target = delta_from_ref (numrev.string);
+      target = gr_revno (numrev.string, tp_deltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -1444,10 +1445,10 @@ main (int argc, char **argv)
         changed |= doassoc ();
 
         /* Update locks.  */
-        changed |= dolocks ();
+        changed |= dolocks (&deltas);
 
         /* Update log messages.  */
-        changed |= domessages ();
+        changed |= domessages (&deltas);
 
         /* Update state attribution.  */
         if (chgheadstate)
@@ -1464,13 +1465,13 @@ main (int argc, char **argv)
                   }
               }
             else
-              changed |= rcs_setstate (defbr, headstate);
+              changed |= rcs_setstate (defbr, headstate, &deltas);
           }
         for (struct link *ls = statelst.next; ls; ls = ls->next)
           {
             struct u_state const *us = ls->entry;
 
-            changed |= rcs_setstate (us->revno, us->status);
+            changed |= rcs_setstate (us->revno, us->status, &deltas);
           }
 
         cuthead = cuttail = NULL;

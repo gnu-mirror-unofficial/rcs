@@ -1,3 +1,17 @@
+2010-11-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Use ‘gr_revno’ more.
+
+	Regression introduced 2010-05-08,
+	"Add abstraction: delta_from_ref".
+	* ci.c (addbranch): Take 4th arg TP_DELTAS; use ‘gr_revno’.
+	(addelta): Update calls to ‘addbranch’.
+	(main): Use ‘gr_revno’ instead of ‘delta_from_ref’.
+	* rcs.c (setlock): Take arg TP_DELTAS; use ‘gr_revno’.
+	(dolocks): Likewise; update calls to ‘setlock’.
+	(domessages, rcs_setstate): Likewise.
+	(main): Update calls to ‘dolocks’, ‘domessages’, ‘rcs_setstate’.
+
 2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Incorporate ‘DELNUMFORM’ into unique use.

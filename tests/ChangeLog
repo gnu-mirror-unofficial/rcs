@@ -1,5 +1,13 @@
 2010-11-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: Use ‘gr_revno’ more.
+
+	Regression introduced 2010-05-08,
+	"Add abstraction: delta_from_ref".
+	* Makefile.am (XFAIL_TESTS): Remove t604.
+
+2010-11-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add a "ci on branch with non-strict locking" test; mark xfail.
 
 	* t604: New file.
