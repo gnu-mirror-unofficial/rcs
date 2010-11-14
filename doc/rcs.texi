@@ -49,7 +49,7 @@ Texts.  A copy of the license is included in the appendix entitled
 @end quotation
 @end copying
 
-@dircategory General Commands
+@dircategory Version control
 @direntry
 * RCS: (rcs).                   GNU Revision Control System.
 @end direntry
