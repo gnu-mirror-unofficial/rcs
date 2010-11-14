@@ -1032,6 +1032,13 @@ main (int argc, char **argv)
                     Orewind (frew);
                     bad_truncate = PROB (ftruncate (fileno (frew), (off_t) 0));
                     grok_resynch (REPO (r));
+
+                    /* The ‘newdelta’ is still linked in the tree, so
+                       invalidate it now.  (Unfortunately, ‘grok_resynch’
+                       did not restore the tree completely, as its name
+                       might imply.)  */
+                    newdelta.selector = false;
+
                     if (! (workdelta = gr_revno (targetdelta->num, &deltas)))
                       continue;
                     workdelta->pretty_log = targetdelta->pretty_log;

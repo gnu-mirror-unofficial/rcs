@@ -1,5 +1,12 @@
 2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Fix bug: For unchanged checkin, invalidate ‘newdelta’.
+
+	Regression introduced 2010-05-24, "Rewrite parsing".
+	* Makefile.am (XFAIL_TESTS): Remove t605.
+
+2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add an "unchanged ci on branch" test; mark xfail.
 
 	* t605: New file.

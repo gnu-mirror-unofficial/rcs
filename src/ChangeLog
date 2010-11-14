@@ -1,3 +1,11 @@
+2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: For unchanged checkin, invalidate ‘newdelta’.
+
+	Regression introduced 2010-05-24, "Rewrite parsing".
+	* ci.c (main): On unchanged checkin, where we have started
+	to build the wrong new RCS file, invalidate ‘newdelta’.
+
 2010-11-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Define ‘program_name’ for gnulib.
