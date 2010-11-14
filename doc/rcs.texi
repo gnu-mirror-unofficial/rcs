@@ -659,6 +659,7 @@ if it exists, to find the associated @repo{}.
 * Date option::
 * Description option::
 * Substitution mode option::
+* Log message option::
 * Misc common options::
 * Environment::
 @end menu
@@ -823,6 +824,18 @@ cannot be combined with @option{-l}, and the owner write permission of the
 working file is turned off; to edit the file later, check it out again
 without @option{-kv}.
 @end table
+
+@node Log message option
+@subsection Log message option
+
+Both @command{ci} and @command{rcs} allow a log message
+to be specified with the @option{-m} option.
+@cindex empty log message
+@cindex log message, empty
+If the @var{msg} argument to this option is empty,
+RCS uses the default @samp{*** empty log message ***}.
+This particular message is handled specially
+(i.e., filtered out) by @command{rlog}.
 
 @node Misc common options
 @subsection Misc common options
@@ -1028,9 +1041,7 @@ If there is no lock, use @code{@var{defbr}.(L+1)}.
 use the working file modification time.
 
 @item -m[@var{msg}]
-Use @var{msg} as the log message.
-If unspecified, use the strangely non-paradoxical
-@samp{*** empty log message ***} as default.
+Use @var{msg} as the log message.  @xref{Log message option}.
 
 @item -n@var{name}
 @itemx -N@var{name}
@@ -1236,9 +1247,7 @@ Set comment leader to @var{string}.
 @xref{Substitution mode option}.
 
 @item -m@var{rev}:[@var{msg}]
-Replace log message with @var{msg}.
-If @var{msg} is omitted, use the strangely non-paradoxical
-@samp{*** empty log message ***} as default.
+Replace log message with @var{msg}.  @xref{Log message option}.
 
 @item -n@var{name}[:[@var{rev}]]
 If @var{:rev} is omitted, delete symbolic @var{name}.

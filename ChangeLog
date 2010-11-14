@@ -1,5 +1,14 @@
 2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[doc] Factor ‘-m’ description.
+
+	* doc/rcs.texi (Common elements):
+	Add "Log message option" to menu.
+	(Log message option): New node/subsection.
+	(ci, rcs): Add xref to "Log message option".
+
+2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Place rcs.texi in dir category "Version control".
 
 	* doc/rcs.texi (@dircategory): Use "Version control".
