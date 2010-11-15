@@ -62,6 +62,8 @@ TESTS = \
  t900 \
  t999
 
+XFAIL_TESTS += t605
+
 EXTRA_DIST = $(TESTS) \
  common common-i common-kn \
  compgate \

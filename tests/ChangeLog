@@ -1,3 +1,10 @@
+2010-11-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Make "unchanged ci on branch" test more strict; mark xfail.
+
+	* t605: Also check that "branches 1.1.1.1;" is purged from $v.
+	* Makefile.am (XFAIL_TESTS): Add t605.
+
 2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: For unchanged checkin, invalidate ‘newdelta’.

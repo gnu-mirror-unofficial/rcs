@@ -28,6 +28,7 @@ must 'ci -t-t -l $w'
 must 'ci -r1.1.1.1 $w'
 
 test 2 = $(grep -c '^1\.1' $v) \
+    && test 0 = $(grep -c -F '1.1.1.1;' $v) \
     || problem 'corrupted RCS file from unchanged checkin on branch'
 
 exit 0
