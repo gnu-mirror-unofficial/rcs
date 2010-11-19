@@ -265,6 +265,50 @@ addbranch (struct delta *branchpoint, struct cbuf *num,
   return removedlock;
 }
 
+static void
+prune (struct delta *wrong, struct delta *bp)
+/* Remove reference to ‘wrong’ from the tree, starting the
+   search at ‘bp’.  As a side effect, clear ‘wrong->selector’.  */
+{
+  struct wlink box, *tp;
+  struct delta *d;
+  int same = countnumflds (wrong->num) - 2;
+
+  /* Unselecting ‘wrong’ is not strictly necessary,
+     but doing so is cleaner.  */
+  wrong->selector = false;
+
+  /* On the trunk, no one points to ‘wrong’, so we are finished.  */
+  if (0 >= same)
+    return;
+
+  /* If ‘wrong’ is the only revision on a branch, delete that branch.  */
+  box.next = bp->branches;
+  for (tp = &box; tp->next; tp = tp->next)
+    if (wrong == (d = tp->next->entry))
+      {
+        tp->next = tp->next->next;
+        bp->branches = box.next;
+        return;
+      }
+
+  /* Otherwise, it must be on normal chain.  */
+  for (tp = bp->branches; tp; tp = tp->next)
+    {
+      d = tp->entry;
+      if (0 == compartial (wrong->num, d->num, same))
+        {
+          while (d->ilk != wrong)
+            d = d->ilk;
+          d->ilk = NULL;
+          return;
+        }
+    }
+
+  /* Should never get here.  */
+  abort ();
+}
+
 static int
 addelta (struct wlink **tp_deltas)
 /* Append a delta to the delta tree, whose number is given by
@@ -1033,11 +1077,11 @@ main (int argc, char **argv)
                     bad_truncate = PROB (ftruncate (fileno (frew), (off_t) 0));
                     grok_resynch (REPO (r));
 
-                    /* The ‘newdelta’ is still linked in the tree, so
-                       invalidate it now.  (Unfortunately, ‘grok_resynch’
+                    /* The ‘newdelta’ might still be linked in the tree,
+                       so prune it now.  (Unfortunately, ‘grok_resynch’
                        did not restore the tree completely, as its name
                        might imply.)  */
-                    newdelta.selector = false;
+                    prune (&newdelta, targetdelta);
 
                     if (! (workdelta = gr_revno (targetdelta->num, &deltas)))
                       continue;

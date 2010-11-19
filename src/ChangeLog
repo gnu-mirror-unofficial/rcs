@@ -1,3 +1,13 @@
+2010-11-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: For unchanged checkin on branch, prune ‘newdelta’.
+
+	Expansion of 2010-11-14, "Fix bug: For
+	unchanged checkin, invalidate ‘newdelta’".
+	* ci.c (prune): New static func.
+	(main): On unchanged checkin, use ‘prune’;
+	incorporate ‘newdelta’ invalidation into ‘prune’.
+
 2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: For unchanged checkin, invalidate ‘newdelta’.

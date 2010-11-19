@@ -1,3 +1,11 @@
+2010-11-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: For unchanged checkin on branch, prune ‘newdelta’.
+
+	Expansion of 2010-11-14, "Fix bug: For
+	unchanged checkin, invalidate ‘newdelta’".
+	* Makefile.am (XFAIL_TESTS): Remove t605.
+
 2010-11-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Make "unchanged ci on branch" test more strict; mark xfail.
