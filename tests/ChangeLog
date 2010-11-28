@@ -1,3 +1,9 @@
+2010-11-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] For "invalid RCS file" test, also check rlog return value.
+
+	* t300 (barf): Also check return value.
+
 2010-11-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: For unchanged checkin on branch, prune ‘newdelta’.

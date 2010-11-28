@@ -38,10 +38,14 @@ barf ()
 {
     # $1 -- title, in the form of ADJECTIVE-PHRASE
     # $2 -- shell command to create $v
+    blurb="on invalid ($1) RCS file"
     echo "$barfstars (barf) $1"
     must "$2"
     $hey sed 's/^/|/' $v
-    rlog $v && problem "rlog did not barf on invalid ($1) RCS file"
+    rlog $v
+    res=$?
+    test 0 = $res && problem "rlog did not barf $blurb"
+    test 1 = $res || problem "bad rlog exit value ($res) $blurb"
 }
 
 barf 'zero size' \
