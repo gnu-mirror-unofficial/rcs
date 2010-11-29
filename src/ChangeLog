@@ -1,5 +1,13 @@
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[grok] Fix bug: Check all branch forward references for match.
+
+	* b-grok.c (fwref): New struct.
+	(full): Keep track of line number of branch references, too;
+	after reading tree, check that all refs were indeed matched.
+
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[grok] Fix bug: Check that new branch was forward referenced.
 
 	* b-grok.c (full): Keep track of branch references;

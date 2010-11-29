@@ -504,6 +504,12 @@ gethash (char const *revno, struct hash *ht)
 }
 
 
+struct fwref
+{
+  char const *revno;
+  size_t lno;                           /* zeroed on match */
+};
+
 struct repo *
 empty_repo (struct divvy *to)
 {
@@ -529,7 +535,7 @@ full (struct divvy *to, struct fro *f)
   size_t count;
   struct link box, *tp;
   struct wlink *follow;
-  struct link *all_br = NULL;
+  struct wlink *all_br = NULL;
   struct grok *g = FZLLOC (struct grok);
   struct repo *repo = empty_repo (to);
 
@@ -650,6 +656,7 @@ full (struct divvy *to, struct fro *f)
   {
     struct wlink wbox, *wtp;
     struct notyet *prev = NULL;
+    struct fwref *fw;
 
     for (count = 0, wbox.next = repo->deltas, wtp = &wbox;
          MAYBE_REVNO (g);
@@ -664,12 +671,15 @@ full (struct divvy *to, struct fro *f)
         if (prev && !prev->next
             && 2 <= countnumflds (d->num))
           {
-            struct link *ls;
-            char const *revno;
+            struct wlink *ls;
 
             for (ls = all_br; ls; ls = ls->next)
-              if (STR_SAME (d->num, (revno = ls->entry)))
-                break;
+              if ((fw = ls->entry)->lno
+                  && STR_SAME (d->num, fw->revno))
+                {
+                  fw->lno = 0;
+                  break;
+                }
             if (!ls)
               BUMMER ("unexpected new branch %s: %s", ks_revno, d->num);
           }
@@ -710,7 +720,10 @@ full (struct divvy *to, struct fro *f)
                 || 2 != countnumflds (XREP (g).string + numlen + 1))
               BUMMER ("invalid branch `%s' at branchpoint `%s'",
                       XREP (g).string, d->num);
-            all_br = prepend (XREP (g).string, all_br, g->tranquil);
+            fw = STRUCTALLOC (g->tranquil, struct fwref);
+            fw->revno = XREP (g).string;
+            fw->lno = g->lno;
+            all_br = wprepend (fw, all_br, g->tranquil);
             HANG (XREP (g).string);
           }
         ny->branches = box.next;
@@ -738,6 +751,14 @@ full (struct divvy *to, struct fro *f)
         puthash (to, ny, repo->ht);
         prev = ny;
       }
+    /* Check that all forward references were matched.  */
+    for (; all_br; all_br = all_br->next)
+      if ((fw = all_br->entry)->lno)
+        {
+          /* Jam line number for error message. */
+          g->lno = fw->lno;
+          BUMMER ("branch refers to %s `%s'", ks_ner, fw->revno);
+        }
     repo->deltas = wbox.next;
     repo->deltas_count = count;
   }
