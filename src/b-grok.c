@@ -655,6 +655,7 @@ full (struct divvy *to, struct fro *f)
       {
         struct notyet *ny = STRUCTALLOC (to, struct notyet);
         struct delta *d = ny->d = STRUCTALLOC (to, struct delta);
+        size_t numlen = XREP (g).size;
 
         STASH (d->num);
         d->branches = NULL;             /* see ‘grok_all’ */
@@ -685,7 +686,16 @@ full (struct divvy *to, struct fro *f)
         SYNCH (g, branches);
         box.next = NULL, tp = &box;
         while (MAYBE_REVNO (g))
-          HANG (XREP (g).string);
+          {
+            /* Branches must begin with the branch point revision.  */
+            if (numlen >= XREP (g).size
+                || strncmp (d->num, XREP (g).string, numlen)
+                || '.' != XREP (g).string[numlen]
+                || 2 != countnumflds (XREP (g).string + numlen + 1))
+              BUMMER ("invalid branch `%s' at branchpoint `%s'",
+                      XREP (g).string, d->num);
+            HANG (XREP (g).string);
+          }
         ny->branches = box.next;
         SEMI (g, branches);
 
