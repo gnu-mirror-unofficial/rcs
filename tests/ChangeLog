@@ -1,5 +1,11 @@
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add more branch pointer weirdness to "invalid RCS file" test.
+
+	* t300 (<branch pointer weirdness>): Add two more testcases.
+
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[grok] Fix bug: Check that branches begin w/ branch point.
 
 	* Makefile.am (XFAIL): Remove t300.

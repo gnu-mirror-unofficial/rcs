@@ -128,6 +128,12 @@ barfstars='**'
 zot 'is branch point itself' \
     '/4.20.1.1;/s//4.20;/'
 
+zot 'not a revision' \
+    '/4.20.1.1;/s//4.20.1;/'
+
+zot 'not based on branch point' \
+    '/4.20.1.1;/s//1.1.1.1;/'
+
 exit 0
 
 # t300 ends here
