@@ -1,5 +1,13 @@
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add testcase to "invalid RCS file" test; mark xfail.
+
+	* t300 (<log weirdness>): New section.
+	(<log weirdness> <repeated revno>): New test.
+	* Makefile.am (XFAIL_TESTS): Add t300.
+
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[grok] Fix bug: Check all branch forward references for match.
 
 	* Makefile.am (XFAIL_TESTS): Remove t300.

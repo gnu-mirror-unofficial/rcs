@@ -140,6 +140,11 @@ zot 'missing' \
 zot 'beyond branch point' \
     '/^branches$/s/$/ 4.20.1.42/'
 
+echo '* log weirdness'
+
+zot 'repeated revno' \
+    '48s/.1.1$//'
+
 exit 0
 
 # t300 ends here
