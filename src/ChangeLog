@@ -1,5 +1,9 @@
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.95
+
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[grok] Recognize duplicate delta log; throw error.
 
 	Omission from 2010-05-24, "Rewrite parsing".
