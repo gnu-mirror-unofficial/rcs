@@ -115,6 +115,19 @@ jaws $(bundled_commav empty-minimal)
 jaws $(bundled_commav empty)
 jaws $(bundled_commav one)
 
+zot ()
+{
+    # $1 -- title
+    # $2 -- sed script to munge two-with-branch
+    barf "$1" 'sed -e "'"$2"'" $(bundled_commav two-with-branch) > $v'
+}
+
+echo '* branch pointer weirdness'
+barfstars='**'
+
+zot 'is branch point itself' \
+    '/4.20.1.1;/s//4.20;/'
+
 exit 0
 
 # t300 ends here

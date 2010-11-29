@@ -1,3 +1,11 @@
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add testcase to "invalid RCS file" test; mark xfail.
+
+	* t300 (zot): New func.
+	(is branch point itself): New test case.
+	* Makefile.am (XFAIL_TESTS): Add t300.
+
 2010-11-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] For "invalid RCS file" test, also check rlog return value.
