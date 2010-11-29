@@ -529,6 +529,7 @@ full (struct divvy *to, struct fro *f)
   size_t count;
   struct link box, *tp;
   struct wlink *follow;
+  struct link *all_br = NULL;
   struct grok *g = FZLLOC (struct grok);
   struct repo *repo = empty_repo (to);
 
@@ -648,6 +649,7 @@ full (struct divvy *to, struct fro *f)
   CBEG ("revisions");
   {
     struct wlink wbox, *wtp;
+    struct notyet *prev = NULL;
 
     for (count = 0, wbox.next = repo->deltas, wtp = &wbox;
          MAYBE_REVNO (g);
@@ -658,6 +660,20 @@ full (struct divvy *to, struct fro *f)
         size_t numlen = XREP (g).size;
 
         STASH (d->num);
+        /* Check that a new branch is properly forward-referenced.  */
+        if (prev && !prev->next
+            && 2 <= countnumflds (d->num))
+          {
+            struct link *ls;
+            char const *revno;
+
+            for (ls = all_br; ls; ls = ls->next)
+              if (STR_SAME (d->num, (revno = ls->entry)))
+                break;
+            if (!ls)
+              BUMMER ("unexpected new branch %s: %s", ks_revno, d->num);
+          }
+
         d->branches = NULL;             /* see ‘grok_all’ */
         d->ilk = NULL;                  /* see ‘grok_all’ */
         d->lockedby = NULL;             /* see ‘grok_resynch’ */
@@ -694,6 +710,7 @@ full (struct divvy *to, struct fro *f)
                 || 2 != countnumflds (XREP (g).string + numlen + 1))
               BUMMER ("invalid branch `%s' at branchpoint `%s'",
                       XREP (g).string, d->num);
+            all_br = prepend (XREP (g).string, all_br, g->tranquil);
             HANG (XREP (g).string);
           }
         ny->branches = box.next;
@@ -719,6 +736,7 @@ full (struct divvy *to, struct fro *f)
         CEND ();
         wtp = wextend (wtp, ny, to);
         puthash (to, ny, repo->ht);
+        prev = ny;
       }
     repo->deltas = wbox.next;
     repo->deltas_count = count;
