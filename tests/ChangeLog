@@ -1,5 +1,12 @@
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add testcase to "invalid RCS file" test; mark xfail.
+
+	* t300 (<branch pointer weirdness> <beyond branch point>): New.
+	* Makefile.am (XFAIL_TESTS): Add t300.
+
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[grok] Fix bug: Check that new branch was forward referenced.
 
 	* Makefile.am (XFAIL_TESTS): Remove t300.

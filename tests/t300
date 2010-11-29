@@ -137,6 +137,9 @@ zot 'not based on branch point' \
 zot 'missing' \
     '/4.20.1.1;/s//;/'
 
+zot 'beyond branch point' \
+    '/^branches$/s/$/ 4.20.1.42/'
+
 exit 0
 
 # t300 ends here
