@@ -690,6 +690,7 @@ full (struct divvy *to, struct fro *f)
         d->pretty_log.string = NULL;
         d->pretty_log.size = 0;
         d->selector = true;
+        d->log = NULL;
 
         STASH (ny->revno);
         CBEG (ny->revno);
@@ -814,6 +815,8 @@ full (struct divvy *to, struct fro *f)
       follow->entry = ny;
       follow = follow->next;
       d = ny->d;
+      if (d->log)
+        BUMMER ("duplicate delta log for %s `%s'", ks_revno, d->num);
       d->neck = neck;
       SYNCH (g, log);
       MUST_ATAT (g, &d->log, log);

@@ -1,5 +1,13 @@
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[grok] Recognize duplicate delta log; throw error.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* b-grok.c (full <edits>): Signal "duplicate delta log"
+	error if a log already exists for a particular delta.
+
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[grok] Fix bug: Check all branch forward references for match.
 
 	* b-grok.c (fwref): New struct.

@@ -1,5 +1,12 @@
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[grok] Recognize duplicate delta log; throw error.
+
+	Omission from 2010-05-24, "Rewrite parsing".
+	* Makefile.am (XFAIL_TESTS): Remove t300.
+
+2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add testcase to "invalid RCS file" test; mark xfail.
 
 	* t300 (<log weirdness>): New section.
