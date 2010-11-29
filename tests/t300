@@ -134,6 +134,9 @@ zot 'not a revision' \
 zot 'not based on branch point' \
     '/4.20.1.1;/s//1.1.1.1;/'
 
+zot 'missing' \
+    '/4.20.1.1;/s//;/'
+
 exit 0
 
 # t300 ends here
