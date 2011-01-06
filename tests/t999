@@ -173,8 +173,7 @@ case $LOGNAME in
 	case $USER in
 	?*) me=$USER;;
 	*)
-		me=`who am i` || exit 2
-		me=`echo "$me" | sed -e 's/ .*//' -e 's/.*!//'`
+		me=`logname` || exit 2
 		case $me in
 		'') echo >&2 "$0: cannot deduce user name"; exit 2
 		esac
