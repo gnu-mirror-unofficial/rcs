@@ -173,7 +173,7 @@ case $LOGNAME in
 	case $USER in
 	?*) me=$USER;;
 	*)
-		me=`logname` || exit 2
+		me=`id -un` || exit 2
 		case $me in
 		'') echo >&2 "$0: cannot deduce user name"; exit 2
 		esac
