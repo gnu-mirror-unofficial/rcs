@@ -36,7 +36,7 @@ libparts_a_SOURCES = \
 
 bin_PROGRAMS = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog
 
-BUILT_SOURCES = $(bin_PROGRAMS:%=%.help)
+BUILT_SOURCES = $(bin_PROGRAMS:%$(EXEEXT)=%.help)
 
 LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 

@@ -1,3 +1,12 @@
+2011-01-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Fix bug: Account for $(EXEEXT) in .help filenames.
+
+	Omission from 2010-03-19, "Use GNU Automake".
+
+	* Makefile.am (BUILT_SOURCES): Include $(EXEEXT)
+	in source part of ‘$(VAR:SOURCE=TARGET)’ reference.
+
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.95
