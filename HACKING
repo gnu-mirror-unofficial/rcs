@@ -39,7 +39,9 @@ Its tip will always have a commit title starting with "Release".
 ***** q/TOPIC -- "questionably", "querulously"
 These are experimental, exploring the particular TOPIC.  They are intended
 to be ephemeral, undergoing rebase, amendment, and ultimately removal.
-
+*** copyright policy
+***** update every year, unconditionally
+***** (if (< 2 (- END BEGIN)) RANGE INDIVIDUAL)
 
 * possible future changes (see manual for the more feasible ones)
 
