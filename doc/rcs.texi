@@ -37,7 +37,7 @@ Note that @option{-V@var{n}} is @emph{not} a valid option for
 @copying
 This manual is for GNU RCS (version @value{VERSION}, @value{UPDATED}).
 
-Copyright @copyright{} 2010 Thien-Thi Nguyen
+Copyright @copyright{} 2010, 2011 Thien-Thi Nguyen
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document

@@ -1,6 +1,6 @@
 /* b-fb.h --- basic file operations
 
-   Copyright (C) 2010 Thien-Thi Nguyen
+   Copyright (C) 2010, 2011 Thien-Thi Nguyen
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Paul Eggert
    Copyright (C) 1982, 1988, 1989 Walter Tichy
 

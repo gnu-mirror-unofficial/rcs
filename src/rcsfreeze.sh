@@ -1,7 +1,7 @@
 #! /bin/sh
 # rcsfreeze - assign a symbolic revision number to a configuration of RCS files
 #
-# Copyright (C) 2010 Thien-Thi Nguyen
+# Copyright (C) 2010, 2011 Thien-Thi Nguyen
 #
 # This file is part of GNU RCS.
 #
@@ -42,7 +42,7 @@
 #       {RCS/}.rscfreeze.log	log messages, most recent first
 ##
 version='rcsfreeze (GNU RCS) @PACKAGE_VERSION@
-Copyright (C) 2010 Thien-Thi Nguyen
+Copyright (C) 2010, 2011 Thien-Thi Nguyen
 Copyright (C) 1990-1995 Paul Eggert
 License GPLv3+; GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.

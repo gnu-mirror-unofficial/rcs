@@ -1,6 +1,6 @@
 /* b-anchor.c --- constant data and their lookup funcs
 
-   Copyright (C) 2010 Thien-Thi Nguyen
+   Copyright (C) 2010, 2011 Thien-Thi Nguyen
 
    This file is part of GNU RCS.
 
