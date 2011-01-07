@@ -219,6 +219,12 @@ ED=ed
 RCS_ABSOLUTE_PROGRAM([ED],[original ed],
   [The singular ed(1), necessary only if diff3 is not completely sane.])
 
+# This is only for maintainers.
+AC_ARG_VAR([SOELIM], [the name of the soelim(1) program, typically
+  from groff, used to process .so directives in manpage source;
+  useful only if you edit man/*.[15]in or make `maintainer-clean'])
+AS_IF([test x"$SOELIM" = x],[AC_CHECK_PROGS([SOELIM], [soelim])])
+
 # Use the GNU pic -n option if available; it avoids GNU extensions,
 # which is need for proper operation to generate a portable man page.
 # Similarly, if using traditional pic, use its -D option.

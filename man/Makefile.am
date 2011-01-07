@@ -34,7 +34,7 @@ bits = b-base \
 EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES) $(bits)
 EXTRA_DIST += $(dist_noinst_MANS:%=%in)
 
-soelim = soelim -I. -I'$(srcdir)'
+soelim = $(SOELIM) -I. -I'$(srcdir)'
 nolf = sed '/^\.lf /d'
 
 .5in.5:

@@ -184,6 +184,10 @@ INSTALL is the command that installs commands, e.g. ‘../install-sh’.
 INSTALL_DATA installs data, and
 INSTALL_PROGRAM installs programs.
 
+SOELIM is the name of your soelim program.
+This is typically the standard one from groff.
+It is used only if you edit man/*.[15]in or make ‘maintainer-clean’.
+
 PIC is the name of your pic program, configured to avoid extensions
 so that a portable man page is generated.
 This is typically GNU pic with the ‘-n’ option,

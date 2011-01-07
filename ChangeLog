@@ -1,3 +1,10 @@
+2011-01-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Make soelim(1) user-configurable.
+
+	* configure.ac (SOELIM): New AC_ARG_VAR.
+	(SOELIM): New AC_CHECK_PROGS, conditionalized on the AC_ARG_VAR.
+
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.95
