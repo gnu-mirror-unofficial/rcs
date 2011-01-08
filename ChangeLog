@@ -1,3 +1,9 @@
+2011-01-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘git-version-gen’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘git-version-gen’.
+
 2011-01-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Make soelim(1) user-configurable.
