@@ -141,14 +141,16 @@ checkin 1115 '03/18 06:21:03' 'WOW is 1.1.1.5! (+ sorted kw)' WOW
 
 # 1.1.1.6
 bop '/^.Log/{
-s|^|/*\n * |
+s|^|/*\
+ * |
 n
 s/^/ * /
 n
 s/^/ * /
 n
 s/^/ * /
-s|$|\n */|
+s|$|\
+ */|
 }'
 checkin 1116 '03/18 06:22:00' 'Surround Log kw with C-style comment.'
 
