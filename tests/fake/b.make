@@ -56,6 +56,8 @@ bop ()
 {
     # $1 -- sed script
     # We don't use "sed -i" because that's a GNU extension.
+    # Other restrictions, for the sake of portability:
+    # - Avoid \n in the replacement portion of the ‘s’ command.
     sed -e "$1" b > b.NEW
     mv b.NEW b
 }
@@ -83,19 +85,24 @@ for k in $ls ; do echo ';; $'$k'$' ; done > b
 checkin 12 '03/30 09:45:02' 'Add empty headers.'
 
 # 1.3
-bop '$s/$/\ngreetings/'
+bop '$s/$/\
+greetings/'
 checkin 13 '03/30 09:45:42' 'Add "greetings".' '' '-wzurg'
 
 # 1.4
-bop '$s/$/\nearthlings/'
+bop '$s/$/\
+earthlings/'
 checkin 14 '03/30 09:46:24' 'Add "earthlings".' '' '-wzurg'
 
 # 1.5
-bop '/^greetings/s/^/;; Here is some trailing text\n/'
+bop '/^greetings/s/^/;; Here is some trailing text\
+/'
 checkin 15 '03/30 09:46:50' 'Add text after Log block.'
 
 # 1.6
-bop '1s/^/wow, rcs!$Revision$YES!\n\n/'
+bop '1s/^/wow, rcs!$Revision$YES!\
+\
+/'
 checkin 16 '04/12 12:16:58' 'Add $Revision with pre and suffix.'
 
 # 1.7
