@@ -37,11 +37,16 @@ EXTRA_DIST += $(dist_noinst_MANS:%=%in)
 soelim = $(SOELIM) -I. -I'$(srcdir)'
 nolf = sed '/^\.lf /d'
 
+# We do the sanity (test -s) check at generation time since
+# it is a maintainer concern not a user (make check) concern.
+
 .5in.5:
 	$(soelim) $< | $(PIC) $(PICFLAGS) | $(nolf) > $@
+	test -s $@
 
 .1in.1:
 	$(soelim) $< | $(nolf) > $@
+	test -s $@
 
 $(dist_man_MANS) $(dist_noinst_MANS): REL $(bits)
 
