@@ -42,7 +42,8 @@ try ()
 }
 
 try 'co -l'
-try 'co -u -f'
+must 'echo more >> $w'
+try 'ci -u -mmore'
 
 exit 0
 

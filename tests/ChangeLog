@@ -1,5 +1,12 @@
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v int] Use ‘ci -u’ for t606.
+
+	* t606: Don't just ‘co -u’; instead,
+	modify the working file and do ‘ci -u’.
+
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Pass through ‘integrity’ field in RCS file.
 
 	* t310 (wint): New func; use it to also test reading
