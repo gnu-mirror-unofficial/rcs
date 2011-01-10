@@ -367,6 +367,9 @@ format_locks (FILE *out, char const *fmt)
     }
 }
 
+static char const *semi_lf = ";\n";
+#define SEMI_LF()  aprintf (fout, "%s", semi_lf)
+
 void
 putadmin (void)
 /* Output the admin node.  */
@@ -393,37 +396,35 @@ putadmin (void)
         fatal_sys (REPO (filename));
     }
 
-  aprintf (fout, "%s\t%s;\n", TINYKS (head),
-           tip ? tip->num : "");
+  aprintf (fout, "%s\t%s%s", TINYKS (head), tip ? tip->num : "", semi_lf);
   if (defbr && VERSION (4) <= BE (version))
-    aprintf (fout, "%s\t%s;\n", TINYKS (branch), defbr);
-
+    aprintf (fout, "%s\t%s%s", TINYKS (branch), defbr, semi_lf);
   aputs (TINYKS (access), fout);
   for (struct link *ls = r ? GROK (access) : NULL; ls; ls = ls->next)
     aprintf (fout, "\n\t%s", (char const *) ls->entry);
-  aprintf (fout, ";\n%s", TINYKS (symbols));
-  format_assocs (fout, "\n\t%s:%s");
-  aprintf (fout, ";\n%s", TINYKS (locks));
+  SEMI_LF ();
+  aprintf (fout, "%s", TINYKS (symbols));
+  format_assocs (fout, "\n\t%s:%s"); SEMI_LF ();
+  aprintf (fout, "%s", TINYKS (locks));
   if (r)
     format_locks (fout, "\n\t%s:%s");
   if (BE (strictly_locking))
     aprintf (fout, "; %s", TINYKS (strict));
-  aprintf (fout, ";\n");
+  SEMI_LF ();
   if (GROK (integrity))
     {
       aprintf (fout, "%s\n", TINYKS (integrity));
-      atat_put (fout, GROK (integrity));
-      aprintf (fout, ";\n");
+      atat_put (fout, GROK (integrity)); SEMI_LF ();
     }
   if (REPO (log_lead).size)
     {
       aprintf (fout, "%s\t", TINYKS (comment));
-      putstring (fout, true, REPO (log_lead), false);
-      aprintf (fout, ";\n");
+      putstring (fout, true, REPO (log_lead), false); SEMI_LF ();
     }
   if (kws != kwsub_kv)
-    aprintf (fout, "%s\t%c%s%c;\n",
-             TINYKS (expand), SDELIM, kwsub_string (kws), SDELIM);
+    aprintf (fout, "%s\t%c%s%c%s",
+             TINYKS (expand), SDELIM, kwsub_string (kws),
+             SDELIM, semi_lf);
   aprintf (fout, "\n");
 }
 
@@ -434,19 +435,22 @@ putdelta (register struct delta const *node, register FILE *fout)
   if (!node)
     return;
 
-  aprintf (fout, "\n%s\n%s\t%s;\t%s %s;\t%s %s;\nbranches",
+  aprintf (fout, "\n%s\n%s\t%s;\t%s %s;\t%s %s%s%s",
            node->num, TINYKS (date), node->date, TINYKS (author), node->author,
-           TINYKS (state), node->state ? node->state : "");
+           TINYKS (state), node->state ? node->state : "",
+           semi_lf, TINYKS (branches));
   for (struct wlink *ls = node->branches; ls; ls = ls->next)
     {
       struct delta *delta = ls->entry;
 
       aprintf (fout, "\n\t%s", delta->num);
     }
+  SEMI_LF ();
 
-  aprintf (fout, ";\n%s\t%s;\n", TINYKS (next), node->ilk ? node->ilk->num : "");
+  aprintf (fout, "%s\t%s", TINYKS (next), node->ilk ? node->ilk->num : "");
+  SEMI_LF ();
   if (node->commitid)
-    aprintf (fout, "%s\t%s;\n", TINYKS (commitid), node->commitid);
+    aprintf (fout, "%s\t%s%s", TINYKS (commitid), node->commitid, semi_lf);
 }
 
 void
