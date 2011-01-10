@@ -1,5 +1,13 @@
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Make pic(1) configurable via configure arg var.
+
+	* configure.ac (PIC): New AC_ARG_VAR.
+	(PIC): Conditionalize this AC_CHECK_PROGS on
+	empty arg var ‘PIC’; add proper m4-quoting.
+
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Decruft: Don't generate unused .version file.
 
 	* Makefile.am (BUILT_SOURCES): Delete var.

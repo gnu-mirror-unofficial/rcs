@@ -227,10 +227,14 @@ AC_ARG_VAR([SOELIM], [the name of the soelim(1) program, typically
   useful only if you edit man/*.[15]in or make `maintainer-clean'])
 AS_IF([test x"$SOELIM" = x],[AC_CHECK_PROGS([SOELIM], [soelim])])
 
-# Use the GNU pic -n option if available; it avoids GNU extensions,
-# which is need for proper operation to generate a portable man page.
-# Similarly, if using traditional pic, use its -D option.
-AC_CHECK_PROGS(PIC, "pic -n" "gpic -n" "pic -D" "pic", pic)
+AC_ARG_VAR([PIC], [the pic(1) command; if unspecified, configure
+  tries (GNU groff) "pic -n", which avoids GNU extensions (needed
+  for proper operation to generate a portable man page); otherwise,
+  these are tried in order: "gpic -n", "pic -D" (traditional), "pic"])
+AS_IF([test x"$PIC" = x],
+      [AC_CHECK_PROGS([PIC],
+                      ["pic -n" "gpic -n" "pic -D" "pic"],
+                      [pic])])
 
 AC_PROG_CC_C99
 # The var ‘ac_cv_prog_cc_c99’ records options required to place compiler
