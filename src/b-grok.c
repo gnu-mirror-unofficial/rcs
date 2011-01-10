@@ -631,6 +631,12 @@ full (struct divvy *to, struct fro *f)
   if ((repo->strict = probe_keyword (g, &TINY (strict))))
     SEMI (g, strict);
 
+  if (probe_keyword (g, &TINY (integrity)))
+    {
+      maybe_read_atat (g, &repo->integrity);
+      SEMI (g, integrity);
+    }
+
   if (probe_keyword (g, &TINY (comment)))
     {
       maybe_read_atat (g, &repo->comment);

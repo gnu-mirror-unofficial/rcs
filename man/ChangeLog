@@ -1,3 +1,9 @@
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Pass through ‘integrity’ field in RCS file.
+
+	* rcsfile.5in (admin): Add ‘integrity’.
+
 2011-01-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add sanity check for manpage creation.

@@ -45,6 +45,7 @@ TINYK (date);
 TINYK (desc);
 TINYK (expand);
 TINYK (head);
+TINYK (integrity);
 TINYK (locks);
 TINYK (log);
 TINYK (next);

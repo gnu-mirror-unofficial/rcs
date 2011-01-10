@@ -409,6 +409,12 @@ putadmin (void)
   if (BE (strictly_locking))
     aprintf (fout, "; %s", TINYKS (strict));
   aprintf (fout, ";\n");
+  if (GROK (integrity))
+    {
+      aprintf (fout, "%s\n", TINYKS (integrity));
+      atat_put (fout, GROK (integrity));
+      aprintf (fout, ";\n");
+    }
   if (REPO (log_lead).size)
     {
       aprintf (fout, "%s\t", TINYKS (comment));

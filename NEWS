@@ -149,10 +149,20 @@ See the end for copying conditions.
 	RCS commands now automatically support pass-through handling of
 	‘commitid SYMBOL’ (so ‘-q’ is no longer necessary).
 
-    - RCS file grammar frozen.
+    - RCS file top-level grammar frozen.
 
-	The RCS file grammar is now frozen; RCS no longer supports
-	pass-through operation of "newphrases" (rcsfile(5)).
+	The RCS file top-level grammar is now frozen; RCS no longer
+	supports pass-through operation of unrecognized key/data pairs
+	(called "newphrases" in the RCS 5.7 rcsfile(5) manpage).
+
+	To avoid painting ourselves into a corner, the grammar now
+	includes a new key ‘integrity’ with @-string value, whose
+	sub-grammar is not yet specified.  (We intend to keep checksums
+	and other compacted redundancies in this field, for manipulation
+	by the commands in a future RCS 5.x release.)  For upward
+	compatability, the commands in this release do not change this
+	field, although they silently read and write it (pass-through),
+	if present.
 
     - RCS file syntax-validated earlier, completely.
 

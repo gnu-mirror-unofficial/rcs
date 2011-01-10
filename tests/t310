@@ -40,6 +40,35 @@ norm 'single-entry'          $(bundled_commav one)
 norm 'two-entry'             $(bundled_commav two)
 norm '2-entry with branches' $(bundled_commav two)
 
+##
+# Also check that header key ‘integrity’
+# does not cause problems for those files.
+##
+
+cat > $wd/insert <<EOF
+integrity
+@@
+;
+EOF
+
+v_wint=$wd/with-integrity
+
+wint ()
+{
+    # $1 -- title, in the form of ADJECTIVE-PHRASE
+    # $2 -- RCS file
+    sed -e "/^locks/r $wd/insert" "$2" > $v_wint
+    silence_means_death $v_wint \
+        "sed-effected addition of integrity to $1 RCS file"
+    norm "$1, with integrity" $v_wint
+}
+
+wint 'minimally-empty'       $(bundled_commav empty-minimal)
+wint 'empty'                 $(bundled_commav empty)
+wint 'single-entry'          $(bundled_commav one)
+wint 'two-entry'             $(bundled_commav two)
+wint '2-entry with branches' $(bundled_commav two)
+
 exit 0
 
 # t310 ends here

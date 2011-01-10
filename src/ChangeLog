@@ -1,3 +1,13 @@
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Pass through ‘integrity’ field in RCS file.
+
+	* base.h (struct repo): Add member ‘integrity’.
+	(tiny_integrity): New var decl, via ‘TINY_DECL’.
+	* b-anchor.c (tiny_integrity): New var, via ‘TINYK’.
+	* b-grok.c (full): Recognize ‘integrity’ prior to ‘comment’.
+	* rcsgen.c (putadmin): Output integrity info, if available.
+
 2011-01-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Fix bug: Account for $(EXEEXT) in .help filenames.

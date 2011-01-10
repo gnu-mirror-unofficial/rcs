@@ -584,6 +584,9 @@ struct repo
   bool strict;
   /* True if strict locking is to be done.  */
 
+  struct atat *integrity;
+  /* Checksums and other compacted redundancies.  */
+
   struct atat *comment;
   /* The pre-v5 "comment leader", or NULL.  */
 
@@ -703,6 +706,7 @@ extern TINY_DECL (date);
 extern TINY_DECL (desc);
 extern TINY_DECL (expand);
 extern TINY_DECL (head);
+extern TINY_DECL (integrity);
 extern TINY_DECL (locks);
 extern TINY_DECL (log);
 extern TINY_DECL (next);

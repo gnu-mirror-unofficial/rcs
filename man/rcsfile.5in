@@ -53,6 +53,7 @@ nonterminal symbols are in
 		\f3access\fP	{\f2id\fP}*\f3;\fP
 		\f3symbols\fP	{\f2sym\fP \f3:\fP \f2num\fP}*\f3;\fP
 		\f3locks\fP	{\f2id\fP \f3:\fP \f2num\fP}*\f3;\fP  {\f3strict  ;\fP}
+		{ \f3integrity\fP	{\f2string\fP}\f3;\fP }
 		{ \f3comment\fP	{\f2string\fP}\f3;\fP }
 		{ \f3expand\fP	{\f2string\fP}\f3;\fP }
 .LP

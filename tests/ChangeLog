@@ -1,3 +1,12 @@
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Pass through ‘integrity’ field in RCS file.
+
+	* t310 (wint): New func; use it to also test reading
+	of bundled RCS files with ‘integrity’ field inserted.
+	* t606: New file.
+	* Makefile.am (TESTS): Add t606.
+
 2011-01-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v fake] Use literal newline b.make sed scripts.
