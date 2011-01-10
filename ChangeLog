@@ -1,5 +1,9 @@
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.96
+
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Make pic(1) configurable via configure arg var.
 
 	* configure.ac (PIC): New AC_ARG_VAR.

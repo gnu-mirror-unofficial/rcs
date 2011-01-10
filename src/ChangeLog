@@ -1,5 +1,9 @@
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.96
+
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstractions: semi_lf, SEMI_LF
 
 	* rcsgen.c (semi_lf): New const string.

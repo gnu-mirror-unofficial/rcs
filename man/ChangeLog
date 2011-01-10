@@ -1,5 +1,9 @@
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.96
+
+2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Pass through ‘integrity’ field in RCS file.
 
 	* rcsfile.5in (admin): Add ‘integrity’.
