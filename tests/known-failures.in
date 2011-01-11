@@ -77,6 +77,7 @@ exit 0
   t150 ; no ‘--version’ / ‘--help’
   t300 ; trailing junk incorrectly ignored
   t311 ; cannot handle [0-9]+ for state, author
+  t313 ; rlog omits trailing newline for midline description
   t800 ; outdate everything leaves non-empty RCS file (fixed in 5.8)
 
 * 5.8

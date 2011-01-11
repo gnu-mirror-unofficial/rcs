@@ -1016,7 +1016,7 @@ main (int argc, char **argv)
             struct atat *desc = GROK (desc);
 
             aputs ("description:\n", out);
-            atat_display (out, desc, false);
+            atat_display (out, desc, true);
           }
         if (revno)
           {

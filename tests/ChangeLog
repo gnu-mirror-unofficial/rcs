@@ -1,5 +1,13 @@
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	rlog: Output trailing newline for midline description.
+
+	* t313: New file.
+	* Makefile.am (TESTS): Add t313.
+	* known-failures.in (5.7): Add t313.
+
+2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	rlog: Fix bug: Output trailing newline for midline log messages.
 
 	Regression introduced 2010-05-24, "Rewrite parsing".
