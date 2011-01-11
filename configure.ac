@@ -494,6 +494,9 @@ RCS_CBOOL([BAD_WAIT_IF_SIGCHLD_IGNORED],[no],[rcs_cv_tolerant_wait],
 
 # miscellaneous
 
+RCS_CBOOL([NEED_WOE_UCONTEXT_H],[cygwin],[host_os],
+  [Do we need to include "woe/ucontext.h"?])
+
 AS_IF([test 1 = `expr "$ac_pwd" : '/*'`],[woe=no],[woe=yes])
 RCS_CBOOL([WOE],[yes],[woe],[Are we trying to "support" MS-DOS?])
 

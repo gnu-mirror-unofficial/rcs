@@ -1,3 +1,10 @@
+2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use bundled woe/ucontext.h for cygwin.
+
+	* configure.ac (NEED_WOE_UCONTEXT_H): New ‘RCS_CBOOL’.
+	* AUTHORS: Add Panagiotis E. Hadjidoukas.
+
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.96

@@ -34,15 +34,18 @@ libparts_a_SOURCES = \
   rcsgen.c rcskeep.c rcsmap.c rcsrev.c \
   rcstime.c rcsutil.c
 
-bin_PROGRAMS = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog
+executables = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog
 
-BUILT_SOURCES = $(bin_PROGRAMS:%$(EXEEXT)=%.help)
+bin_PROGRAMS = $(executables)
+
+BUILT_SOURCES = $(executables:%=%.help)
 
 LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
 CLEANFILES = $(BUILT_SOURCES)
 
 EXTRA_DIST = TAGS $(TESTS) yarrrr.c
+EXTRA_DIST += woe
 
 .c.help:
 	$(top_srcdir)/build-aux/extract-help -o $@ $<

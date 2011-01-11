@@ -1,5 +1,23 @@
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use bundled woe/ucontext.h for cygwin.
+
+	* Makefile.am (executables): New var.
+	(bin_PROGRAMS, BUILT_SOURCES): Use $(executables).
+	(EXTRA_DIST): Add woe.
+	* b-isr.c [!HAVE_UCONTEXT_H && NEED_WOE_UCONTEXT_H]:
+	#include woe/ucontext.h.
+	(SA_ONSTACK): #define, if not already.
+	(ISR_STACK_SIZE): Conditionalize on
+	‘defined HAVE_SIGALTSTACK && define SIGSTKSZ’; if
+	these elements are not found, default to 0 (zero).
+	* woe: New directory.
+	* woe/COPYING.LIB: New file.
+	* woe/ucontext.c: New file.
+	* woe/ucontext.h: New file.
+
+2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	rlog: Output trailing newline for midline description.
 
 	* rlog.c (main <description>): Ensure trailing newline.
@@ -7,7 +25,7 @@
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	rlog: Fix bug: Output trailing newline for midline log messages.
-
+	Ch
 	Regression introduced 2010-05-24, "Rewrite parsing".
 
 	* b-fro.c (atat_display): Take third arg ENSURE_NEWLINE_P;

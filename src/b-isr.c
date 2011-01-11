@@ -31,6 +31,10 @@
 #include <string.h>
 #ifdef HAVE_UCONTEXT_H
 #include <ucontext.h>
+#else
+#if NEED_WOE_UCONTEXT_H
+#include "woe/ucontext.h"
+#endif
 #endif
 #ifdef HAVE_SIGINFO_H
 #include <siginfo.h>
@@ -173,6 +177,10 @@ catchsigaction (int signo, siginfo_t *info, void *c)
   PROGRAM (exiterr) ();
 }
 
+#ifndef SA_ONSTACK
+#define SA_ONSTACK  0
+#endif
+
 static void
 setup_catchsig (size_t count, int const set[count])
 {
@@ -206,7 +214,11 @@ setup_catchsig (size_t count, int const set[count])
 #undef MUST
 }
 
+#if defined HAVE_SIGALTSTACK && defined SIGSTKSZ
 #define ISR_STACK_SIZE  (10 * SIGSTKSZ)
+#else
+#define ISR_STACK_SIZE  0
+#endif
 
 #define SCRATCH_SIZE  sizeof (struct isr_scratch)
 
