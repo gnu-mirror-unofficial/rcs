@@ -134,7 +134,7 @@ char const xorlf_usage[] =
   "";
 
 int
-xorlf_do_it (int argc, char *argv[argc])
+xorlf_do_it (int argc, char *argv[argc] RCS_UNUSED)
 {
   int c;
 

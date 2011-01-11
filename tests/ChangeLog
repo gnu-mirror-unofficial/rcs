@@ -1,5 +1,11 @@
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v int] Use ‘RCS_UNUSED’ more.
+
+	* btdt.c (xorlf_do_it): Mark second arg ‘RCS_UNUSED’.
+
+2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v int] Use sed ‘s’ instead of ‘i’ command, for portability.
 
 	* t312: Rework sed script to use ‘s’ instead of ‘i’.
