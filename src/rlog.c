@@ -226,7 +226,7 @@ putadelta (register struct delta const *node,
   afputc ('\n', out);
   if ((log = node->log)
       && log->beg + 1 < ATAT_END (log))
-    atat_display (out, log);
+    atat_display (out, log, true);
   else
     awrite (EMPTYLOG "\n", sizeof (EMPTYLOG), out);
 }
@@ -1016,7 +1016,7 @@ main (int argc, char **argv)
             struct atat *desc = GROK (desc);
 
             aputs ("description:\n", out);
-            atat_display (out, desc);
+            atat_display (out, desc, false);
           }
         if (revno)
           {

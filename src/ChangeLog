@@ -1,3 +1,18 @@
+2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	rlog: Fix bug: Output trailing newline for midline log messages.
+
+	Regression introduced 2010-05-24, "Rewrite parsing".
+
+	* b-fro.c (atat_display): Take third arg ENSURE_NEWLINE_P;
+	if ‘true’ and an atat is non-empty and ends without a newline,
+	output a trailing newline.
+	* b-fro.h (atat_display): Update func decl.
+	* rcsedit.c (copystring): Update call to ‘atat_display’.
+	* rlog.c (putadelta): Update call to ‘atat_display’,
+	specifying ENSURE_NEWLINE_P ‘true’.
+	(main <description>): Update call to ‘atat_display’.
+
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.96

@@ -423,7 +423,7 @@ atat_put (FILE *to, struct atat const *atat)
 }
 
 void
-atat_display (FILE *to, struct atat const *atat)
+atat_display (FILE *to, struct atat const *atat, bool ensure_newline_p)
 {
   for (size_t i = 0; i < atat->count; i++)
     {
@@ -435,6 +435,40 @@ atat_display (FILE *to, struct atat const *atat)
 
       fro_spew_partial (to, atat->from, &range);
     }
+
+  /* Don't bother with trailing '\n' output if not requested,
+     or if the atat is empty.  */
+  if (! ensure_newline_p
+      || (1 == atat->count
+          && atat->beg + 1 == atat->holes[0]))
+    return;
+
+  {
+    struct fro *f = atat->from;
+    off_t pos = atat->holes[atat->count - 1] - 1;
+    char lc = '\0';
+
+    switch (f->rm)
+      {
+      case RM_MMAP:
+      case RM_MEM:
+        lc = f->base[pos];
+        break;
+      case RM_STDIO:
+        {
+          FILE *stream = f->stream;
+          off_t was = ftello (stream);
+
+          fseeko (stream, pos, SEEK_SET);
+          lc = fgetc (stream);
+          fseeko (stream, was, SEEK_SET);
+        }
+        break;
+      }
+
+    if ('\n' != lc)
+      aputc ('\n', to);
+  }
 }
 
 /* b-fro.c ends here */

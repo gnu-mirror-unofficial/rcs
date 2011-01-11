@@ -1,5 +1,13 @@
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	rlog: Fix bug: Output trailing newline for midline log messages.
+
+	Regression introduced 2010-05-24, "Rewrite parsing".
+
+	* Makefile.am (XFAIL_TESTS): Remove t312.
+
+2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test for "rlog w/ midline log message"; mark xfail.
 
 	* t312: New file.

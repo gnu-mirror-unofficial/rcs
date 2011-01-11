@@ -463,7 +463,7 @@ copystring (struct editstuff *es, struct atat *atat)
    ‘es->lcount’ is incremented by the number of lines copied.  Assumption:
    next character read is first string character.  */
 {
-  atat_display (FLOW (res), atat);
+  atat_display (FLOW (res), atat, false);
   if (FLOW (to))
     atat_put (FLOW (to), atat);
   es->lcount += atat->line_count;

@@ -79,7 +79,8 @@ extern void fro_spew_partial (FILE *to, struct fro *f, struct range *r);
 extern void fro_spew (struct fro *f, FILE *to);
 extern struct cbuf string_from_atat (struct divvy *space, struct atat const *atat);
 extern void atat_put (FILE *to, struct atat const *atat);
-extern void atat_display (FILE *to, struct atat const *atat);
+extern void atat_display (FILE *to, struct atat const *atat,
+                          bool ensure_newline_p);
 
 /* Idioms.  */
 
