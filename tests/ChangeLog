@@ -1,5 +1,11 @@
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v int] Use sed ‘s’ instead of ‘i’ command, for portability.
+
+	* t312: Rework sed script to use ‘s’ instead of ‘i’.
+
+2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	rlog: Output trailing newline for midline description.
 
 	* t313: New file.

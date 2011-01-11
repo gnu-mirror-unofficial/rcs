@@ -28,7 +28,7 @@ split_std_out_err no
 rout=$wd/rlog.out
 
 # Substitute the log message with one that does not end in newline.
-must 'sed "19,20d;21i @midline@" $(bundled_commav one) > $v'
+must 'sed "19d;20s/^/@midline/" $(bundled_commav one) > $v'
 must 'rlog $v > $rout'
 
 grep 'midline===' $rout && problem \
