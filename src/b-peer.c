@@ -33,8 +33,31 @@ struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
 static char const *
 invocation_full_name (void)
 {
-  char const *name = find_in_path (PROGRAM (invoke));
+  char const *name;
 
+#ifndef EXEEXT
+
+  name = PROGRAM (invoke);
+
+#else  /* EXEEXT */
+
+  char const *inv = PROGRAM (invoke);
+  size_t ilen = strlen (inv);
+  size_t elen = sizeof (EXEEXT) - 1;
+
+  if (ilen > elen && STR_SAME (EXEEXT, inv + ilen - elen))
+    /* Maybe ‘PROGRAM (invoke)’ already includes ‘EXEEXT’?  */
+    name = inv;
+  else
+    /* No such luck; append it.  */
+    {
+      accf (PLEXUS, "%s%s", inv, EXEEXT);
+      name = SHSTR (&ilen);
+    }
+
+#endif /* EXEEXT */
+
+  name = find_in_path (name);
   if (! name)
     LOSE ("cannot find `%s' in PATH");
 

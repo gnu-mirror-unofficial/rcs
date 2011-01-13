@@ -1,5 +1,12 @@
 2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Consider ‘EXEEXT’ when searching for peer programs.
+
+	* b-peer.c (invocation_full_name) [EXEEXT]: Construct a
+	filename, appending ‘PROGRAM (invoke)’ and ‘EXEEXT’ if necessary.
+
+2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Handle failure to find peer programs more gracefully.
 
 	* b-peer.c: Include "b-complain.h".

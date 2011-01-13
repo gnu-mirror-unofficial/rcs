@@ -241,6 +241,9 @@ AC_PROG_CC_C99
 # in "C99 mode".  It may be empty if that is the default compiler mode.
 AS_IF([test x"$ac_cv_prog_cc_c99" = x],[:],
       [RCS_MUSTHAVE([ac_cv_prog_cc_c99],[a C99-capable compiler])])
+AS_IF([test x"$EXEEXT" = x],[:],
+  [AC_DEFINE_UNQUOTED([EXEEXT],["$EXEEXT"],
+     [The extension (including leading dot) of executable files.])])
 
 # gnulib
 gl_EARLY

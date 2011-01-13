@@ -1,3 +1,10 @@
+2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Consider ‘EXEEXT’ when searching for peer programs.
+
+	* configure.ac: If shell var ‘EXEEXT’ is non-empty,
+	‘AC_DEFINE_UNQUOTED’ C #define ‘EXEEXT’, with its string value.
+
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use bundled woe/ucontext.h for cygwin.
