@@ -1,3 +1,11 @@
+2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test for "ci -dYYYY-DOW" handling; mark xfail.
+
+	* t801: New file.
+	* Makefile.am (TESTS, XFAIL_TESTS): Add t801.
+	* known-failures.in (5.7): Add t801.
+
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v int] Use ‘RCS_UNUSED’ more.
