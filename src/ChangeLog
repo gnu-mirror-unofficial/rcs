@@ -1,5 +1,12 @@
 2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[dtp] Fix bug: Don't clobber ‘yday’ unconditionally.
+
+	* maketime.c (tm2time): If ‘yday’ is valid, compute ‘mon’
+	and ‘mday’ from it; otherwise, compute it from ‘mon’ and ‘mday’.
+
+2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Fix bug: Don't confuse day of {week,year} in date parsing.
 
 	* partime.c (merge_partime): For both conflict detection

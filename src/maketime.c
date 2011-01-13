@@ -162,11 +162,15 @@ time_t
 tm2time (struct tm *tm, bool localzone)
 /* Convert ‘tm’ to ‘time_t’, using local time if ‘localzone’ and UTC
    otherwise.  From ‘tm’, use only ‘year’, ‘mon’, ‘mday’, ‘hour’, ‘min’,
-   and ‘sec’ members.  Ignore old members ‘tm_yday’ and ‘tm_wday’, but
-   fill in their correct values.  Return -1 on failure (e.g. a member out
-   of range).  POSIX 1003.1-1990 doesn't allow leap seconds, but some
-   implementations have them anyway, so allow them if the host does.  */
+   ‘sec’ and ‘yday’ members.  (If ‘yday’ is set, compute ‘mon’ and ‘mday’
+   from it, otherwise compute it from ‘mon’ and ‘mday’.)  Ignore ‘tm_wday’,
+   but fill in its correct value.
+
+   Return -1 on failure (e.g. a member out of range).  POSIX 1003.1-1990
+   doesn't allow leap seconds, but some implementations have them anyway,
+   so allow them if the host does.  */
 {
+  bool leap;
   time_t d, gt;
   struct tm const *gtm;
   /* The maximum number of iterations should be enough to handle any
@@ -178,8 +182,25 @@ tm2time (struct tm *tm, bool localzone)
   if (12 <= (unsigned) tm->tm_mon)
     return -1;
 
-  tm->tm_yday = month_yday[tm->tm_mon] + tm->tm_mday
-    - (tm->tm_mon < 2 || !isleap (tm->tm_year + TM_YEAR_ORIGIN));
+  leap = isleap (tm->tm_year + TM_YEAR_ORIGIN);
+
+#define ADJUST(month)  (leap && (1 < (month)))
+  if (PROB (tm->tm_yday) || 365 < tm->tm_yday)
+    tm->tm_yday = month_yday[tm->tm_mon]
+      + tm->tm_mday
+      - !ADJUST (tm->tm_mon);
+  else
+    {
+      int mon = 1, day = 1 + tm->tm_yday;
+
+      while (day > month_yday[mon] + ADJUST (mon))
+        mon++;
+      mon--;
+      day -= month_yday[mon] + ADJUST (mon);
+      tm->tm_mon = mon;
+      tm->tm_mday = day;
+    }
+#undef ADJUST
 
   /* Make a first guess.  */
   gt = MAKETIMESTUFF (t_cache)[localzone];

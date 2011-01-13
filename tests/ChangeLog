@@ -1,5 +1,11 @@
 2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[dtp] Fix bug: Don't clobber ‘yday’ unconditionally.
+
+	* Makefile.am (XFAIL_TESTS): Remove t801.
+
+2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test for "ci -dYYYY-DOW" handling; mark xfail.
 
 	* t801: New file.
