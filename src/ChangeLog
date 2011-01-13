@@ -1,5 +1,11 @@
 2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Make error message for peer-finding failure more informative.
+
+	* b-peer.c (LOSE): Use "free var" ‘name’.
+
+2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Consider ‘EXEEXT’ when searching for peer programs.
 
 	* b-peer.c (invocation_full_name) [EXEEXT]: Construct a

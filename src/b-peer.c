@@ -27,8 +27,8 @@
 
 struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
 
-#define LOSE(blurb)                                             \
-  PFATAL ("installation problem: " blurb, PROGRAM (invoke))
+#define LOSE(blurb)                                     \
+  PFATAL ("%s" blurb, "installation problem: ", name)
 
 static char const *
 invocation_full_name (void)
