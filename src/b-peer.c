@@ -22,9 +22,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include "findprog.h"
+#include "b-complain.h"
 #include "b-divvy.h"
 
 struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
+
+#define LOSE(blurb)                                             \
+  PFATAL ("installation problem: " blurb, PROGRAM (invoke))
+
+static char const *
+invocation_full_name (void)
+{
+  char const *name = find_in_path (PROGRAM (invoke));
+
+  if (! name)
+    LOSE ("cannot find `%s' in PATH");
+
+  return name;
+}
 
 char const *
 find_peer_prog (struct symdef *prog)
@@ -36,11 +51,11 @@ find_peer_prog (struct symdef *prog)
       /* Find the driver's invocation directory, once.  */
       if (! BE (invdir))
         {
-          char const *name = find_in_path (PROGRAM (invoke));
+          char const *name = invocation_full_name ();
           char const *end = strrchr (name, SLASH);
 
           if (!end)
-            abort ();
+            LOSE ("cannot find last slash in `%s'");
           BE (invdir) = intern (PLEXUS, name, end + 1 - name);
           if (name != PROGRAM (invoke))
             free ((void *) name);
