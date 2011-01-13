@@ -1,3 +1,10 @@
+2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Fix bug: Don't confuse day of {week,year} in date parsing.
+
+	* partime.c (merge_partime): For both conflict detection
+	and actual merging, don't conflate ‘.tm_wday’ and ‘.tm_yday’.
+
 2011-01-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use bundled woe/ucontext.h for cygwin.

@@ -631,7 +631,8 @@ merge_partime (struct partime *t, struct partime const *u)
       || conflict (t->tm.tm_mday, u->tm.tm_mday)
       || conflict (t->tm.tm_mon, u->tm.tm_mon)
       || conflict (t->tm.tm_year, u->tm.tm_year)
-      || conflict (t->tm.tm_wday, u->tm.tm_yday)
+      || conflict (t->tm.tm_wday, u->tm.tm_wday)
+      || conflict (t->tm.tm_yday, u->tm.tm_yday)
       || conflict (t->ymodulus, u->ymodulus)
       || conflict (t->yweek, u->yweek)
       || (t->zone != u->zone
@@ -646,7 +647,8 @@ merge_partime (struct partime *t, struct partime const *u)
   merge_ (t->tm.tm_mday, u->tm.tm_mday);
   merge_ (t->tm.tm_mon, u->tm.tm_mon);
   merge_ (t->tm.tm_year, u->tm.tm_year);
-  merge_ (t->tm.tm_wday, u->tm.tm_yday);
+  merge_ (t->tm.tm_wday, u->tm.tm_wday);
+  merge_ (t->tm.tm_yday, u->tm.tm_yday);
   merge_ (t->ymodulus, u->ymodulus);
   merge_ (t->yweek, u->yweek);
 #undef merge_
