@@ -1,3 +1,11 @@
+2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Inhibit file read-only checks under Cygwin.
+
+	* common-i (dont_check_readonly): New var.
+	(check_w_readonly, check_initialization_command):
+	Use ‘dont_check_readonly’ to inhibit read-only checks.
+
 2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[dtp] Fix bug: Don't clobber ‘yday’ unconditionally.

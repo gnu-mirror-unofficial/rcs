@@ -29,6 +29,11 @@ log_rx=
 cmd=
 wdisp=
 
+case $(uname -s | tr A-Z a-z) in
+    (cygwin*) dont_check_readonly=true ;;
+    (*)       dont_check_readonly=false ;;
+esac
+
 # functions
 
 badv ()
@@ -45,7 +50,7 @@ check_w_removed ()
 check_w_readonly ()
 {
     test -f $w || problem "$w does not exist"
-    test ! -w $w || problem "$w writable"
+    $dont_check_readonly || test ! -w $w || problem "$w writable"
 }
 
 check_initialization_command ()
@@ -62,8 +67,8 @@ check_initialization_command ()
     silence_means_death $spewe "$cmd ($spewe)" ; $hey sed 's/^/e|/' $spewe
     # Check RCS file.
     test   -r $v || badv 'not written' ; $hey sed 's/^/v|/' $v
-    test ! -w $v || badv 'writable'
     test   -s $v || badv 'exists but is zero bytes long'
+    $dont_check_readonly || test ! -w $v || badv 'writable'
     test 2 = $(grep -c "$rev_rx" $v) || badv 'missing tree and/or log'
     test 1 = $(grep -c "$log_rx" $v) || badv 'missing log message'
     # Check working file disposition.
