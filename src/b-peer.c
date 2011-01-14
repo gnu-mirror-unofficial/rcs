@@ -27,43 +27,6 @@
 
 struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
 
-#define LOSE(blurb)                                     \
-  PFATAL ("%s" blurb, "installation problem: ", name)
-
-static char const *
-invocation_full_name (void)
-{
-  char const *name;
-
-#ifndef EXEEXT
-
-  name = PROGRAM (invoke);
-
-#else  /* EXEEXT */
-
-  char const *inv = PROGRAM (invoke);
-  size_t ilen = strlen (inv);
-  size_t elen = sizeof (EXEEXT) - 1;
-
-  if (ilen > elen && STR_SAME (EXEEXT, inv + ilen - elen))
-    /* Maybe ‘PROGRAM (invoke)’ already includes ‘EXEEXT’?  */
-    name = inv;
-  else
-    /* No such luck; append it.  */
-    {
-      accf (PLEXUS, "%s%s", inv, EXEEXT);
-      name = SHSTR (&ilen);
-    }
-
-#endif /* EXEEXT */
-
-  name = find_in_path (name);
-  if (! name)
-    LOSE ("cannot find `%s' in PATH");
-
-  return name;
-}
-
 char const *
 find_peer_prog (struct symdef *prog)
 {
@@ -71,14 +34,16 @@ find_peer_prog (struct symdef *prog)
     {
       size_t len;
 
+#ifndef EXEEXT
+
       /* Find the driver's invocation directory, once.  */
       if (! BE (invdir))
         {
-          char const *name = invocation_full_name ();
+          char const *name = find_in_path (PROGRAM (invoke));
           char const *end = strrchr (name, SLASH);
 
           if (!end)
-            LOSE ("cannot find last slash in `%s'");
+            PFATAL ("cannot determine directory (in PATH) of `%s'", name);
           BE (invdir) = intern (PLEXUS, name, end + 1 - name);
           if (name != PROGRAM (invoke))
             free ((void *) name);
@@ -86,6 +51,13 @@ find_peer_prog (struct symdef *prog)
 
       /* Concat the invocation directory with the base name.  */
       accf (PLEXUS, "%s%s", BE (invdir), prog->meaningful);
+
+#else  /* EXEEXT */
+
+      accf (PLEXUS, "%s" EXEEXT, prog->meaningful);
+
+#endif /* EXEEXT */
+
       prog->underlying = finish_string (PLEXUS, &len);
     }
 

@@ -1,3 +1,14 @@
+2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] With ‘EXEEXT’, don't absolutize; instead, simply suffix.
+
+	* b-peer.c (LOSE): Delete macro.
+	(invocation_full_name): Delete func.
+	(find_peer_prog) [!EXEEXT]: Call ‘find_in_path’, ‘PFATAL’
+	directly; mention directory and env var ‘PATH’ in error message.
+	(find_peer_prog) [EXEEXT]: Compute the underlying filename
+	as simply the concatenation of the meaningful and ‘EXEEXT’.
+
 2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Make error message for peer-finding failure more informative.
