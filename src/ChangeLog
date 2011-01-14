@@ -1,5 +1,12 @@
 2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] With ‘EXEEXT’, use ‘execvp’ instead of ‘execv’.
+
+	* rcsutil.c (EXECV): New #define.
+	(runv): Use ‘EXECV’.
+
+2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] With ‘EXEEXT’, don't absolutize; instead, simply suffix.
 
 	* b-peer.c (LOSE): Delete macro.
