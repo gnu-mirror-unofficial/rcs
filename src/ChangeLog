@@ -1,5 +1,15 @@
 2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Decruft: Remove "yet another redolently redundant RCS rap".
+
+	* Makefile.am (EXTRA_DIST): Remove yarrrr.c.
+	(YALL, YPROGS): Delete vars.
+	($(YPROGS)): Delete target.
+	(y-all, y-clean): Likewise.
+	* yarrrr.c: Delete file.
+
+2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] With ‘EXEEXT’, use ‘execvp’ instead of ‘execv’.
 
 	* rcsutil.c (EXECV): New #define.

@@ -44,7 +44,7 @@ LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
 CLEANFILES = $(BUILT_SOURCES)
 
-EXTRA_DIST = TAGS $(TESTS) yarrrr.c
+EXTRA_DIST = TAGS $(TESTS)
 EXTRA_DIST += woe
 
 .c.help:
@@ -53,19 +53,5 @@ EXTRA_DIST += woe
 clean-local:
 	rm -rf RCS
 	rm -f a.*
-
-
-# yarrrr!
-YALL = STR2TIME FCMP PAIRS KEEP GROK REV
-YPROGS = $(YALL:%=y-%)
-
-$(YPROGS): yarrrr.c libparts.a
-	$(COMPILE) $$(echo $@ | sed s/^../-DTEST_/) \
-	  -o $@ $< $(LDADD)
-
-y-all: $(YPROGS)
-
-y-clean:
-	rm -f $(YPROGS)
 
 # Makefile.am ends here
