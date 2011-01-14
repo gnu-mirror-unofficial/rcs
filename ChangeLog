@@ -1,3 +1,12 @@
+2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Fix bug: Mention Panagiotis E. Hadjidoukas.
+
+	Omission from 2011-01-11, "Use bundled woe/ucontext.h for cygwin."
+
+	* doc/rcs.texi (Credits): Mention embedded
+	library written by Panagiotis E. Hadjidoukas.
+
 2011-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Consider ‘EXEEXT’ when searching for peer programs.
