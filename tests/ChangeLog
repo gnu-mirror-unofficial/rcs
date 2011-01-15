@@ -1,3 +1,10 @@
+2011-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v int] Move common date-testing elements to its own library.
+
+	* common-d: New file.
+	* t801: Use common-d.
+
 2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Inhibit file read-only checks under Cygwin.

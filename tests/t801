@@ -17,31 +17,12 @@
 
 . $srcdir/common
 split_std_out_err no
-rout=$wd/rlog.out
-
-$hey echo '                                      -*- org -*-'
+. $srcdir/common-d
 
 ##
 # Check that ‘ci -dYYYY-DOY’ (day of year) is properly parsed.
 # This was a bug with RCS 5.7 and earlier.
 ##
-
-$hey echo '* prep'
-must 'cp $(bundled_commav two) $v'
-must 'co -l $w $v'
-
-try ()
-{
-    # $1 -- date spec
-    # $2 -- grep pattern (regexp)
-    date=$1
-    rx=$2
-    $hey echo "* ${date}"
-    must 'ci -q -l -f -d${date} -mm $w $v'
-    must 'rlog -r $v > $rout'
-    grep "date: $rx" $rout \
-        || problem "date spec '${date}' did not yield '${rx}'"
-}
 
 ##
 # * A non leap year.
