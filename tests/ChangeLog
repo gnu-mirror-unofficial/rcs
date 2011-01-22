@@ -1,5 +1,14 @@
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v int] Fix bug: Distribute tests/common-d, as well!
+
+	Omission from 2011-01-15, "Move common
+	date-testing elements to its own library".
+
+	* Makefile.am (EXTRA_DIST): Add common-d.
+
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[dtp] Fix bug: Handle ISO week+day dates.
 
 	* Makefile.am (XFAIL_TESTS): Remove t802.

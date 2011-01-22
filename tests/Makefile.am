@@ -68,7 +68,7 @@ TESTS = \
  t999
 
 EXTRA_DIST = $(TESTS) \
- common common-i common-kn \
+ common common-d common-i common-kn \
  compgate \
  fake
 
