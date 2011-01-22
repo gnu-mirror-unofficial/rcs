@@ -755,6 +755,19 @@ values are assumed.  For example, without @option{-z}, the date
 time zone's current month and year.  Note that for the shell, the
 date/time must be quoted if it contains spaces.
 
+RCS also accepts some other formats which specify only the date portion
+(omitting the time portion):
+
+@table @code
+@item @var{YYYY}-@var{DDD}
+@var{DDD} is the day of year, 1-366.
+
+@item @var{YYYY}-w@var{WW}-@var{D}
+@var{WW} is the ISO week number, 0-53 (actually, ISO
+week numbers are 1-53; week 0 is a GNU RCS extension);
+and @var{D} is the ISO day number, 1-7 (Monday through Sunday).
+@end table
+
 @node Description option
 @subsection Description option
 

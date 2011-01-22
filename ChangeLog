@@ -1,3 +1,10 @@
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Document ‘YYYY-DDD’ and ‘YYYY-wWW-D’.
+
+	* doc/rcs.texi (Date option): Document support
+	for ‘YYYY-DDD’ and ‘YYYY-wWW-D’ date-only formats.
+
 2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Fix bug: Mention Panagiotis E. Hadjidoukas.
