@@ -182,6 +182,13 @@ See the end for copying conditions.
 	Note that these commands actually store as the log message
 	the string: "*** empty log message ***".
 
+    - Date option accepts some more date-only formats
+
+	Date format ‘YYYY-DDD’ specifies a year and a day (1-366),
+	while format ‘YYYY-wWW-D’ specifies a year, an ISO week number
+	(0-53, 0 is a GNU RCS extension), and a day number (1-7, for
+	Monday through Sunday).
+
     - Changes to rcsdiff
 
       - New handling for option: -U N
