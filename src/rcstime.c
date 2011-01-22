@@ -136,7 +136,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
       zone = BE (zone_offset.seconds);
       if (zone == TM_LOCAL_ZONE)
         {
-          time_t u = tm2time (&t, false), d;
+          time_t u = tm2time (&t, false, TM_UNDEFINED), d;
 
           z = local_tm (&u, &z_stash);
           d = difftm (z, &t);

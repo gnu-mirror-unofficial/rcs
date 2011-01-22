@@ -158,13 +158,38 @@ adjzone (register struct tm *t, long seconds)
   t->tm_sec = (int) (sec % 60) + leap_second;
 }
 
+static int
+ISO_day_of_week (int zy, int mij)
+/* Return the day of week for ‘zy’ (zero-indexed year), and
+   ‘mij’ (mday in January).  The value is 1 (monday) through
+   7 (sunday).  */
+{
+  /* This expression is a composition of the relevant
+     bits from the Emacs calendar package, specifically:
+     calendar.el ‘calendar-absolute-from-gregorian’,
+     cal-iso.el ‘calendar-iso-date-string’.  */
+  int zd = (mij
+            + (365 * zy)                /* days in prior years */
+            + (zy / 4)                  /* Julian leap years */
+            - (zy / 100)                /* century years */
+            + (zy / 400))
+    % 7;
+
+  return zd
+    ? zd
+    : 7;
+}
+
 time_t
-tm2time (struct tm *tm, bool localzone)
+tm2time (struct tm *tm, bool localzone, int yweek)
 /* Convert ‘tm’ to ‘time_t’, using local time if ‘localzone’ and UTC
    otherwise.  From ‘tm’, use only ‘year’, ‘mon’, ‘mday’, ‘hour’, ‘min’,
    ‘sec’ and ‘yday’ members.  (If ‘yday’ is set, compute ‘mon’ and ‘mday’
    from it, otherwise compute it from ‘mon’ and ‘mday’.)  Ignore ‘tm_wday’,
    but fill in its correct value.
+
+   If ‘yweek’ is not ‘TM_UNDEFINED’, compute ‘yday’ from it, adjusting
+   ‘tm_year’ as necessary, and fall through to the above ‘yday’ processing.
 
    Return -1 on failure (e.g. a member out of range).  POSIX 1003.1-1990
    doesn't allow leap seconds, but some implementations have them anyway,
@@ -183,6 +208,52 @@ tm2time (struct tm *tm, bool localzone)
     return -1;
 
   leap = isleap (tm->tm_year + TM_YEAR_ORIGIN);
+
+  if (TM_UNDEFINED != yweek)
+    {
+      int nyd;                          /* dow: 1-jan (new year's day) */
+      int doy;                          /* day of year (1-366) */
+      const int wday = tm->tm_wday ? tm->tm_wday : 7;
+      int zy = tm->tm_year + TM_YEAR_ORIGIN - 1;
+
+#define BUMP_YEAR(op)  do                       \
+        {                                       \
+          op (zy);                              \
+          leap = isleap (1 + zy);               \
+        }                                       \
+      while (0)
+
+      /* ISO week numbers are [1,53], but we accept [0,53].  For week 0,
+         adjust the year downward and set the week to 52 or 53.  */
+      if (!yweek)
+        BUMP_YEAR (--);
+      nyd = ISO_day_of_week (zy, 1);
+      if (!yweek)
+        /* Add another week if the year starts on Thursday,
+           or if a leap year starts on Wednesday.  */
+        yweek = 52 + ((4 == nyd) || (leap && 3 == nyd));
+
+      /* Algorithm from <http://en.wikipedia.org/wiki/ISO_week_date>.  */
+      doy = yweek * 7 + wday - 3 - ISO_day_of_week (zy, 4);
+
+      /* On overflow into the next year, readjust.  */
+      if (365 + leap < doy)
+        {
+          doy -= 365 + leap;
+          BUMP_YEAR (++);
+        }
+      /* On underflow into the previous year, readjust.  */
+      if (1 > doy)
+        {
+          BUMP_YEAR (--);
+          doy += 365 + leap;
+        }
+
+      tm->tm_year = zy + 1 - TM_YEAR_ORIGIN;
+      tm->tm_yday = doy - 1;
+
+#undef BUMP_YEAR
+    }
 
 #define ADJUST(month)  (leap && (1 < (month)))
   if (PROB (tm->tm_yday) || 365 < tm->tm_yday)
@@ -291,7 +362,7 @@ maketime (struct partime const *pt, time_t default_time)
   wday = tm.tm_wday;
 
   /* Convert and fill in the rest of the ‘tm’.  */
-  r = tm2time (&tm, localzone);
+  r = tm2time (&tm, localzone, pt->yweek);
 
   /* Check weekday.  */
   if (r != -1 && TM_DEFINED (wday) && wday != tm.tm_wday)

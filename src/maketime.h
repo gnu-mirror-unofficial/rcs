@@ -45,7 +45,7 @@ struct tm *local_tm (const time_t *timep, struct tm *result);
 struct tm *time2tm (time_t unixtime, bool localzone);
 time_t difftm (struct tm const *a, struct tm const *b);
 time_t str2time (char const *source, time_t default_time, long default_zone);
-time_t tm2time (struct tm *tm, bool localzone);
+time_t tm2time (struct tm *tm, bool localzone, int yweek);
 void adjzone (struct tm *t, long seconds);
 
 /* maketime.h ends here */

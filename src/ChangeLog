@@ -1,5 +1,16 @@
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[dtp] Fix bug: Handle ISO week+day dates.
+
+	* maketime.c (ISO_day_of_week): New static func.
+	(tm2time): Take additional arg YWEEK; if specified,
+	compute yday, and maybe year, for later ‘yday’ processing.
+	(maketime): Update call to ‘tm2time’.
+	* maketime.h (tm2time): Update func decl.
+	* rcstime.c (date2str): Update call to ‘tm2time’.
+
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[dtp] Fix bug: Encode weekday number (letter ‘X’) with modulo.
 
 	* partime.c (parse_pattern_letter <X>): Use modulo to encode value.

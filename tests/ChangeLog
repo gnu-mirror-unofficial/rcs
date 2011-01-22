@@ -1,5 +1,11 @@
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[dtp] Fix bug: Handle ISO week+day dates.
+
+	* Makefile.am (XFAIL_TESTS): Remove t802.
+
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test for "ci -dYYYY-wWW-D" handling; mark xfail.
 
 	* t802: New file.
