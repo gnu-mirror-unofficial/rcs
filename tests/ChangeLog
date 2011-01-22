@@ -1,5 +1,9 @@
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.97
+
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v int] Fix bug: Distribute tests/common-d, as well!
 
 	Omission from 2011-01-15, "Move common

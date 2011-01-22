@@ -1,5 +1,10 @@
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.97
+
+
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Document ‘YYYY-DDD’ and ‘YYYY-wWW-D’.
 
 	* doc/rcs.texi (Date option): Document support

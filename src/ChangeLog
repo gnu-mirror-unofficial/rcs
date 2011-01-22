@@ -1,5 +1,9 @@
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.97
+
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[dtp] Fix bug: Handle ISO week+day dates.
 
 	* maketime.c (ISO_day_of_week): New static func.
