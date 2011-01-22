@@ -528,7 +528,14 @@ parse_pattern_letter (char const *s, int c, struct partime *t)
 
     case 'X':                  /* weekday (1=Mon ... 7=Sun) [1-7] */
       s = parse_ranged (s, 1, 1, 7, &t->tm.tm_wday);
+#if 0 /* Apparently *ix convention is to encode this field as 0 (sunday)
+         through 6 (saturday), which relates to the external encoding of
+         1 (monday) through 7 (sunday) not as a constant offset (-1),
+         but as a simple modulo (ext 7 => int 0, else ext => int).  */
       t->tm.tm_wday--;
+#else
+      t->tm.tm_wday %= 7;
+#endif
       break;
 
     case 'x':                  /* weekday name [e.g. "Sun"] */

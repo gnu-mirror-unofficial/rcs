@@ -1,3 +1,9 @@
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[dtp] Fix bug: Encode weekday number (letter ‘X’) with modulo.
+
+	* partime.c (parse_pattern_letter <X>): Use modulo to encode value.
+
 2011-01-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Decruft: Remove "yet another redolently redundant RCS rap".
