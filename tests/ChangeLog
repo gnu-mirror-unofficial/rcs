@@ -1,3 +1,11 @@
+2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test for "ci -dYYYY-wWW-D" handling; mark xfail.
+
+	* t802: New file.
+	* Makefile.am (TESTS, XFAIL_TESTS): Add t802.
+	* known-failures.in (5.7): Add t802.
+
 2011-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v int] Move common date-testing elements to its own library.
