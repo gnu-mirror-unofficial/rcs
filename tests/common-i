@@ -30,8 +30,8 @@ cmd=
 wdisp=
 
 case $(uname -s | tr A-Z a-z) in
-    (cygwin*) dont_check_readonly=true ;;
-    (*)       dont_check_readonly=false ;;
+    cygwin*) dont_check_readonly=true ;;
+    *)       dont_check_readonly=false ;;
 esac
 
 # functions

@@ -1,3 +1,13 @@
+2011-01-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Use more portable syntax for ‘case’ shell-statement.
+
+	Reported by Nelson H. F. Beebe.
+
+	* common-i <top-level>: In ‘case’ statement, drop open paren.
+	* common <top-level>: Likewise.
+	* t300 (zinvasion): Likewise.
+
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.97

@@ -71,8 +71,8 @@ zinvasion ()
 
         test "$atatlist" &&
         case "$atatlist" in
-            (*" $line "*) z='z@z' ;;
-            (*) z=z ;;
+            *" $line "*) z='z@z' ;;
+            *) z=z ;;
         esac
 
         barf 'typo at beginning of line '$line \
