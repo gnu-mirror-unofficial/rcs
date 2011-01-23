@@ -95,7 +95,7 @@ merge (bool tostdout, char const *edarg, struct symdef three_manifestations[3])
   t = maketemp (2);
   s = run (-1, t,
            prog_diff3, edarg, d[0], d[1], a[0], a[1], a[2],
-           label[0], label[2], NULL);
+           LABEL (0), LABEL (2), NULL);
   if (s != DIFF_SUCCESS)
     {
       s = DIFF_FAILURE;

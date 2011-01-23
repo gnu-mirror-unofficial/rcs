@@ -1,3 +1,13 @@
+2011-01-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Use "three manifestations" for ‘!DIFF3_BIN’.
+
+	Reported by Nelson H. F. Beebe.
+	Regression introduced 2010-09-30, "Use ‘struct symdef’
+	array as "three manifestations" ‘merge’ arg".
+
+	* merger.c (merge) [!DIFF3_BIN]: Use ‘LABEL’, not ‘label’.
+
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.7.97
