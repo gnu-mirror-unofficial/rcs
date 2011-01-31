@@ -32,6 +32,9 @@ split_std_out_err no
 
 echo '                                       -*-org-*-'
 
+# No file specified is a degenerate form of "invalid file".
+rlog && problem 'rlog with no args did not barf'
+
 barfstars='*'
 
 barf ()
