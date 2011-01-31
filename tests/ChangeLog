@@ -1,3 +1,11 @@
+2011-01-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test for "rlog reporting of -kb".
+
+	* fake/zblob: New file.
+	* t380: New file.
+	* Makefile.am (TESTS): Add t380.
+
 2011-01-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Use more portable syntax for ‘case’ shell-statement.
