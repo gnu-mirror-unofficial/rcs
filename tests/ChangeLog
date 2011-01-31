@@ -1,5 +1,12 @@
 2011-01-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add test for "argless invocation".
+
+	* t620: New file.
+	* Makefile.am (TESTS): Add t620.
+
+2011-01-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test case for "rlog with no args barfs".
 
 	* t300: Add test case: Invoke rlog with no args.
