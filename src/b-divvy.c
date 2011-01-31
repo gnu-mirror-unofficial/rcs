@@ -19,6 +19,7 @@
 */
 
 #include "base.h"
+#include <stdarg.h>
 #include <stdbool.h>
 #include <obstack.h>
 #include <stdlib.h>

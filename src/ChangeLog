@@ -1,3 +1,10 @@
+2011-01-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Include <stdarg.h> for ‘va_start’ et al.
+
+	* b-divvy.c: #include <stdarg.h>.
+	* b-fb.c: Likewise.
+
 2011-01-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Fix bug: Use "three manifestations" for ‘!DIFF3_BIN’.
