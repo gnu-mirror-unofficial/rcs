@@ -19,6 +19,7 @@
 */
 
 #include "base.h"
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -95,28 +96,33 @@ pop_context (struct grok *g)
 #endif
 
 static void
-ignoble (struct grok *g)
+ignoble (struct grok *g, char const *fmt, ...)
 {
+  va_list args;
   struct cbuf msg;
+  struct divvy *scratch = g->systolic;
+  struct obstack *o = scratch->space;
+
+  /* First, discard work-in-progress cruft.  */
+  obstack_free (o, obstack_finish (o));
+
+  va_start (args, fmt);
+  obstack_vprintf (o, fmt, args);
+  va_end (args);
 
 #if CONTEXTUAL
   while (g->context)
     {
-      accf (g->systolic, "\n from \"%s\"", g->context->entry);
+      accf (scratch, "\n from \"%s\"", g->context->entry);
       g->context = g->context->next;
     }
 #endif  /* CONTEXTUAL */
-  msg.string = finish_string (g->systolic, &msg.size);
+  msg.string = finish_string (scratch, &msg.size);
   complain ("\n");
   fatal_syntax (g->lno, "%s", msg.string);
 }
 
-#define BUMMER(...)  do                         \
-    {                                           \
-      accf (g->systolic, __VA_ARGS__);          \
-      ignoble (g);                              \
-    }                                           \
-  while (0)
+#define BUMMER(...)  ignoble (g, __VA_ARGS__)
 
 static void
 eof_too_soon (struct grok *g)
