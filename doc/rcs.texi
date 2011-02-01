@@ -1310,12 +1310,14 @@ No effect; included for compatibility with other commands.
 @node rcsclean
 @section @rcscommand{rcsclean}
 
-@usage {rcsclean, file ...}
+@usage {rcsclean, [file ...]}
 
 @noindent
 The @rcscommand{rcsclean} command removes working files that are not being
 worked on.  If given @option{-u}, it also unlocks and removes working files
 that are being worked on but have not changed.
+If no @var{file} is specified, operate on all the working files in the
+current directory.
 
 @table @code
 @item -r[@var{rev}]
