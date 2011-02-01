@@ -1,3 +1,16 @@
+2011-02-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Generalize "argless invocation" to "invoked strangely".
+
+	* t620: On VERBOSE, do ‘set -x’.
+	(invoke, full): New funcs.
+	(arg, blurb): New vars.
+	(argless): Delete func.
+	<w/o args>: Rework to use new funcs, new vars.
+	<on /dev/null>: New section.
+	<on a system directory>: Likewise.
+	<on $wd>: Likewise.
+
 2011-01-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add test for "argless invocation".

@@ -1,4 +1,4 @@
-# t620 --- argless invocation: ci, co, merge, rcs, rcsdiff, rcsmerge
+# t620 --- strange invocation: ci, co, merge, rcs, rcsdiff, rcsmerge, rlog
 #
 # Copyright (C) 2011 Thien-Thi Nguyen
 #
@@ -19,23 +19,58 @@
 split_std_out_err no
 
 ##
-# Check that these programs fail when invoked w/o args:
-# ci, co, merge, rcs, rcsdiff, rcsmerge.
+# Check that these programs:
+#   ci, co, merge, rcs, rcsdiff, rcsmerge, rlog
+# fail when invoked "strangely".
 ##
 
-argless ()
+$hey set -x
+
+invoke ()
 {
     # $1 -- program
     program=$1
-    $program && problem "$program invoked w/o args did not fail"
+    $program $arg && problem "$program invoked $blurb did not fail"
 }
 
-argless ci
-argless co
-argless merge
-argless rcs
-argless rcsdiff
-argless rcsmerge
+full ()
+{
+    invoke ci
+    invoke co
+    invoke merge
+    invoke rcs
+    invoke rcsdiff
+    invoke rcsmerge
+    invoke rlog
+}
+
+##
+# * without args
+##
+arg=
+blurb='w/o args'
+full
+
+##
+# * on /dev/null
+##
+arg='/dev/null'
+blurb="on $arg"
+full
+
+##
+# * on a system directory
+##
+arg='/tmp'
+blurb="on $arg (not user-owned)"
+full
+
+##
+# * on $wd (user-owned)
+##
+arg=$wd
+blurb="on $arg (user-owned)"
+full
 
 exit 0
 
