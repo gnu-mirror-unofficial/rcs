@@ -1,5 +1,11 @@
 2011-02-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add testcase for rcsdiff "long options passthrough".
+
+	* t160 <long options passthrough>: New section.
+
+2011-02-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Generalize "argless invocation" to "invoked strangely".
 
 	* t620: On VERBOSE, do ‘set -x’.
