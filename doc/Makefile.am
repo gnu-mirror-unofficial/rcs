@@ -18,5 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 info_TEXINFOS = rcs.texi
+rcs_TEXINFOS = fdl.texi
 
 # Makefile.am ends here
