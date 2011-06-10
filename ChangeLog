@@ -1,3 +1,10 @@
+2011-06-10  Thien-Thi Nguyen  <ttn@ambire>
+
+	[build int] Don't look for ed(1) if diff3(1) is sane enough.
+
+	* configure.ac (ED): Conditionalize: Set shell var and do
+	‘RCS_ABSOLUTE_PROGRAM’ only if diff3 is not sane enough.
+
 2011-02-23  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Fix bug: Distribute doc/fdl.texi, too!

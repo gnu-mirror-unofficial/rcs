@@ -217,9 +217,11 @@ EOF
 ])
 RCS_CBOOL([DIFF3_BIN],[yes],[rcs_cv_sane_diff3],
   [Does diff3 work like GNU binutils diff3?])
+AS_IF([RCS_YESP([rcs_cv_sane_diff3])],,[
 ED=ed
 RCS_ABSOLUTE_PROGRAM([ED],[original ed],
   [The singular ed(1), necessary only if diff3 is not completely sane.])
+])
 
 # This is only for maintainers.
 AC_ARG_VAR([SOELIM], [the name of the soelim(1) program, typically
