@@ -81,7 +81,7 @@ fro_open (char const *name, char const *type, struct stat *status)
   f->end = s;
 
   /* Determine the read method.  */
-  f->rm = status->st_size < (off_t)1024 * BE (mem_limit)
+  f->rm = status->st_size < 1024 * BE (mem_limit)
     ? (MMAP_SIGNAL && status->st_size
        ? RM_MMAP
        : RM_MEM)

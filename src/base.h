@@ -515,7 +515,7 @@ struct behavior
   /* The current working directory.
      -- getfullRCSname  */
 
-  size_t mem_limit;
+  off_t mem_limit;
   /* If a fro is smaller than ‘mem_limit’ kilobytes, try to mmap(2) it
      (if mmap(2)), or operate on a copy of it in core (if no mmap(2)).
      Otherwise, use standard i/o routines as the fallback.

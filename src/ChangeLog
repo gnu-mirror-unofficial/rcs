@@ -1,3 +1,13 @@
+2011-06-10  Thien-Thi Nguyen  <ttn@ambire>
+
+	[int] Use ‘off_t’ for ‘behavior.mem_limit’.
+
+	Incidentally, this eliminates a "comparison between signed
+	and unsigned integer expressions" warning from GCC 4.4.
+
+	* base.h (struct behavior): Change type of ‘mem_limit’ to ‘off_t’.
+	* b-fro.c (fro_open): Delete cast to ‘off_t’.
+
 2011-02-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[grok] Fix bug: Make sure error message accumulates cleanly.
