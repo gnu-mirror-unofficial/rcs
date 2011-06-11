@@ -16,7 +16,7 @@ if [ -d lib ] && [ -d m4 ]
 then act=update
 else act=add-import
 fi
-gnulib-tool --${act}
+gnulib-tool --conditional-dependencies --${act}
 autoreconf --install --symlink
 
 # These override what ‘autoreconf --install’ creates.

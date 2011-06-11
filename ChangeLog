@@ -1,3 +1,11 @@
+2011-06-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build int] Enable conditional dependencies for gnulib.
+
+	* autogen.sh: Specify ‘--conditional-dependencies’ to gnulib-tool.
+	* m4/gnulib-cache.m4 (gl_CONDITIONAL_DEPENDENCIES): New macro call.
+	(gl_WITNESS_C_DOMAIN): Likewise.
+
 2011-06-10  Thien-Thi Nguyen  <ttn@ambire>
 
 	[build int] Don't look for ed(1) if diff3(1) is sane enough.
