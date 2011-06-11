@@ -1,3 +1,11 @@
+2011-06-11  Thien-Thi Nguyen  <ttn@ambire>
+
+	[int] Avoid more signed/unsigned comparison warnings from GCC 4.4.
+
+	* b-fro.c (fro_spew_partial): Locally #define and #undef
+	‘MEMBUFSIZ’; use it instead of ‘(off_t) sizeof (buf)’.
+	(string_from_atat): Use ‘SSIZE_MAX’.
+
 2011-06-10  Thien-Thi Nguyen  <ttn@ambire>
 
 	[int] Use ‘off_t’ for ‘behavior.mem_limit’.

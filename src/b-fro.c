@@ -319,7 +319,8 @@ fro_spew_partial (FILE *to, struct fro *f, struct range *r)
       break;
     case RM_STDIO:
       {
-        char buf[BUFSIZ * 8];
+#define MEMBUFSIZ  (8 * BUFSIZ)
+        char buf[MEMBUFSIZ];
         size_t count;
         off_t pos = r->beg;
 
@@ -327,8 +328,8 @@ fro_spew_partial (FILE *to, struct fro *f, struct range *r)
         while (pos < r->end)
           {
             if (!(count = fread (buf, sizeof (*buf),
-                                 (pos < r->end - (off_t) sizeof (buf)
-                                  ? sizeof (buf)
+                                 (pos < r->end - MEMBUFSIZ
+                                  ? MEMBUFSIZ
                                   : r->end - pos),
                                  f->stream)))
               {
@@ -338,6 +339,7 @@ fro_spew_partial (FILE *to, struct fro *f, struct range *r)
             awrite (buf, count, to);
             pos += count;
           }
+#undef MEMBUFSIZ
       }
       break;
     }
@@ -380,11 +382,11 @@ string_from_atat (struct divvy *space, struct atat const *atat)
           char const *beg = f->base + r[i].beg;
           off_t len = r[i].end - r[i].beg;
 
-          while (SIZE_MAX < len)
+          while (SSIZE_MAX < len)
             {
-              accumulate_range (space, beg, beg + SIZE_MAX);
-              len -= SIZE_MAX;
-              beg += SIZE_MAX;
+              accumulate_range (space, beg, beg + SSIZE_MAX);
+              len -= SSIZE_MAX;
+              beg += SSIZE_MAX;
             }
           accumulate_range (space, beg, beg + len);
         }
