@@ -64,7 +64,7 @@ void
 getoldkeys_spew (char const *what, char *s)
 {
   if (s)
-    printf ("%s: %d \"%s\"\n", what, strlen (s), s);
+    printf ("%s: %zu \"%s\"\n", what, strlen (s), s);
 }
 
 int

@@ -1,3 +1,10 @@
+2011-06-12  Thien-Thi Nguyen  <ttn@ambire>
+
+	[C] Use ‘%zu’ for ‘size_t’ arg in format string.
+
+	* btdt.c (getoldkeys_spew): Use ‘%zu’ in
+	format string to output the string length of S.
+
 2011-02-01  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add testcase for rcsdiff "long options passthrough".
