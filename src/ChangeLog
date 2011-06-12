@@ -1,3 +1,10 @@
+2011-06-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Decruft: Don't bother with ‘SSIZE_MAX’ check/#define.
+
+	* rcsutil.c (SSIZE_MAX): Delete #define
+	and surrounding preprocessor conditional.
+
 2011-06-11  Thien-Thi Nguyen  <ttn@ambire>
 
 	[int] Avoid more signed/unsigned comparison warnings from GCC 4.4.

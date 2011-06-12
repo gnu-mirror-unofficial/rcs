@@ -220,12 +220,6 @@ cgetenv (char const *name)
   return (p = getenv (name)) ? str_save (p) : p;
 }
 
-#ifndef SSIZE_MAX
-/* This does not work in #ifs, but it's good enough for us.
-   Underestimating SSIZE_MAX may slow us down, but it won't break us.  */
-#define SSIZE_MAX ((unsigned)-1 >> 1)
-#endif
-
 void
 awrite (char const *buf, size_t chars, FILE *f)
 {
