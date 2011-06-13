@@ -1073,7 +1073,7 @@ main (int argc, char **argv)
                     off_t hwm = ftello (frew);
                     bool bad_truncate;
 
-                    Orewind (frew);
+                    rewind (frew);
                     bad_truncate = PROB (ftruncate (fileno (frew), (off_t) 0));
                     grok_resynch (REPO (r));
 

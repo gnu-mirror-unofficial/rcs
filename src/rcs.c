@@ -463,7 +463,7 @@ sendmail (char const *Delta, char const *who)
             complain (">> ");
         }
     }
-  Orewind (mailmess);
+  rewind (mailmess);
   aflush (mailmess);
   status = run (fileno (mailmess), NULL, SENDMAIL, who, NULL);
   Ozclose (&mailmess);
@@ -964,7 +964,7 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
         }
 
       snapshotedit (es, fcut);
-      Orewind (fcut);
+      rewind (fcut);
       aflush (fcut);
     }
 

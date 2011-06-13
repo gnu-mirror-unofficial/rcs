@@ -27,7 +27,6 @@ extern void Oerror (void) exiting;
 extern void testOerror (FILE *o);
 extern FILE *fopen_safer (char const *filename, char const *type);
 extern void Ozclose (FILE **p);
-extern void Orewind (FILE *f);
 extern void aflush (FILE *f);
 extern void oflush (void);
 extern void afputc (int c, FILE *f);

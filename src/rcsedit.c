@@ -338,7 +338,7 @@ swapeditfiles (struct editstuff *es, FILE *outfile)
     }
   f->stream = stream;
   f->end = ftello (stream);
-  Orewind (stream);
+  rewind (stream);
   tmpptr = es->filename;
   es->filename = FLOW (result);
   FLOW (result) = tmpptr;

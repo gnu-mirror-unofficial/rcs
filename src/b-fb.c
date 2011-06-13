@@ -111,13 +111,6 @@ Ozclose (FILE **p)
 }
 
 void
-Orewind (FILE *f)
-{
-  if (PROB (fseeko (f, 0L, SEEK_SET)))
-    Oerror ();
-}
-
-void
 aflush (FILE *f)
 {
   if (PROB (fflush (f)))

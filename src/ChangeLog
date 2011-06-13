@@ -1,3 +1,19 @@
+2011-06-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use ‘rewind’ directly; drop homegrown replacement.
+
+	Incidentally, t400, which had started--triggered by changes in
+	gnulib--to fail towards the beginning of 2011-05, now passes.
+	Probably some more investigation is indicated.  See bleating at:
+	http://lists.gnu.org/archive/html/bug-gnulib/2011-06/msg00122.html
+
+	* ci.c (main): Use ‘rewind’ directly.
+	* merger.c (merge): Likewise.
+	* rcs.c (sendmail, buildeltatext): Likewise.
+	* rcsedit.c (swapeditfiles): Likewise.
+	* b-fb.h (Orewind): Delete func decl.
+	* b-fb.c (Orewind): Delete func.
+
 2011-06-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Decruft: Don't bother with ‘SSIZE_MAX’ check/#define.

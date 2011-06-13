@@ -104,7 +104,7 @@ merge (bool tostdout, char const *edarg, struct symdef three_manifestations[3])
   if (!(f = fopen_safer (t, "a+")))
     fatal_sys (t);
   aputs (tostdout ? "1,$p\n" : "w\n", f);
-  Orewind (f);
+  rewind (f);
   aflush (f);
   if (run (fileno (f), NULL, ED, "-", a[0], NULL))
     exiterr ();
