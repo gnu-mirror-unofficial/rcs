@@ -13,4 +13,3 @@ Paul Eggert wrote most of the changes for RCS 5.7 (1995).
 K. Richard Pixley of Cygnus Support contributed several bug fixes.
 
 Thien-Thi Nguyen wrote the changes for RCS version 5.8.
-Panagiotis E. Hadjidoukas wrote src/woe/ucontext.[hc].

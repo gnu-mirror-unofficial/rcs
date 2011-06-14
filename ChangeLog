@@ -1,3 +1,10 @@
+2011-06-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Separate ISR scratch and alt sig stack allocations.
+
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove ucontext.h.
+	(NEED_WOE_UCONTEXT_H): Delete RCS_CBOOL.
+
 2011-06-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build int] Enable conditional dependencies for gnulib.

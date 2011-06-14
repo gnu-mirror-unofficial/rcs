@@ -1,5 +1,20 @@
 2011-06-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Separate ISR scratch and alt sig stack allocations.
+
+	* b-isr.c: Don't #include <ucontext.h> or "woe/ucontext.h".
+	(scratch_from_context): Delete func.
+	(catchsigaction): Mark 3rd arg ‘RCS_UNUSED’; use ‘ISR_SCRATCH’.
+	(SCRATCH_SIZE): Delete #define.
+	(isr_init): Use ‘ZLLOC’ for ISR scratch; use
+	separate ‘alloc’ in ‘PLEXUS’ for alternate signal stack.
+	* Makefile.am (EXTRA_DIST): Remove woe.
+	* woe/COPYING.LIB: Delete file.
+	* woe/ucontext.h: Delete file.
+	* woe/ucontext.c: Delete file.
+
+2011-06-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Avoid "discards qualifiers" warning from GCC 3.4.
 
 	* b-isr.c (catchsigaction): Drop ‘const’ from local var.

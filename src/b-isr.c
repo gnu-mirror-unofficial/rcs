@@ -29,13 +29,6 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
-#ifdef HAVE_UCONTEXT_H
-#include <ucontext.h>
-#else
-#if NEED_WOE_UCONTEXT_H
-#include "woe/ucontext.h"
-#endif
-#endif
 #ifdef HAVE_SIGINFO_H
 #include <siginfo.h>
 #endif
@@ -115,18 +108,10 @@ ignore (struct isr_scratch *scratch)
 #define psiginfo(info, msg)  complain_signal (msg, info->si_signo)
 #endif
 
-static struct isr_scratch *
-scratch_from_context (void *c)
-{
-  ucontext_t *uc = c;
-
-  return (struct isr_scratch *)(uc->uc_stack.ss_sp) - 1;
-}
-
 static void
-catchsigaction (int signo, siginfo_t *info, void *c)
+catchsigaction (int signo, siginfo_t *info, RCS_UNUSED void *uc)
 {
-  struct isr_scratch *scratch = scratch_from_context (c);
+  struct isr_scratch *scratch = ISR_SCRATCH;
   bool from_mmap = MMAP_SIGNAL && MMAP_SIGNAL == signo;
 
   if (ISR (level))
@@ -220,21 +205,15 @@ setup_catchsig (size_t count, int const set[count])
 #define ISR_STACK_SIZE  0
 #endif
 
-#define SCRATCH_SIZE  sizeof (struct isr_scratch)
-
 struct isr_scratch *
 isr_init (bool *be_quiet)
 {
-  /* Allocate a contiguous range for the scratch space,
-     plus (possibly) space for the alternate sig stack.  */
-  struct isr_scratch *scratch = alloc (PLEXUS, "isr scratch",
-                                       SCRATCH_SIZE + ISR_STACK_SIZE);
+  struct isr_scratch *scratch = ZLLOC (1, struct isr_scratch);
 
 #if ISR_STACK_SIZE
   stack_t ss =
     {
-      /* The stack base starts after the scratch space.  */
-      .ss_sp = scratch + 1,
+      .ss_sp = alloc (PLEXUS, "sigaltstack", ISR_STACK_SIZE),
       .ss_size = ISR_STACK_SIZE,
       .ss_flags = 0
     };
@@ -242,10 +221,6 @@ isr_init (bool *be_quiet)
   if (PROB (sigaltstack (&ss, NULL)))
     fatal_sys ("sigaltstack");
 #endif
-
-  /* Clear out the initial part, i.e., the scratch space.
-     (The stack space is under system manglement.)  */
-  memset (scratch, 0, SCRATCH_SIZE);
 
   /* Make peer-subsystem connection.  */
   ISR (be_quiet) = be_quiet;
