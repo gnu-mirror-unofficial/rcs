@@ -1,3 +1,9 @@
+2011-06-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Avoid "discards qualifiers" warning from GCC 3.4.
+
+	* b-isr.c (catchsigaction): Drop ‘const’ from local var.
+
 2011-06-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘rewind’ directly; drop homegrown replacement.
