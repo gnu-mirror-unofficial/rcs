@@ -286,6 +286,38 @@ AC_SYS_LARGEFILE
 
 # specific behaviors (that unfortunately require running a program to check)
 
+AC_CACHE_CHECK([if tinysym init includes NUL],[rcs_cv_tinyinit_ok],[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <stdint.h>
+
+struct tinysym
+{
+  uint8_t len;
+  uint8_t bytes[];
+};
+
+#define TINY(x)       (tiny_ ## x)
+#define TINY_DECL(x)  const struct tinysym (TINY (x))
+#define TINY_INIT(x)  { .len = sizeof (x) - 1, .bytes = x }
+#define TINYK(x)      TINY_DECL (x) = TINY_INIT (#x)
+
+/* Apparently, SunOS 5.11 compilers cc and c99 omit the '\0'
+   from these data initialization forms.  */
+TINYK (access);
+TINYK (integrity);
+]],[[
+  const struct tinysym *one = &TINY (access);
+  const struct tinysym *two = &TINY (integrity);
+
+  if (6 != one->len || '\0' != one->bytes[6])
+    return 1;
+  if (9 != two->len || '\0' != two->bytes[9])
+    return 2;
+]])],[rcs_cv_tinyinit_ok=yes],[rcs_cv_tinyinit_ok=no])
+])
+RCS_CBOOL([TINY_INIT_NEEDS_EXPLICIT_NUL],[no],[rcs_cv_tinyinit_ok],
+  [Does the compiler forget to include '\0' for tinysym init?])
+
 AC_CACHE_CHECK([if printf "%.2d" produces a leading "0"],[rcs_cv_dot2_ok],[
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <stdio.h>

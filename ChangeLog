@@ -1,3 +1,10 @@
+2011-07-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Work around compilers that omit '\0' from tinysym init.
+
+	* configure.ac (rcs_cv_tinyinit_ok): New AC_CACHE_CHECK.
+	(TINY_INIT_NEEDS_EXPLICIT_NUL): New RCS_BOOL.
+
 2011-06-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Separate ISR scratch and alt sig stack allocations.

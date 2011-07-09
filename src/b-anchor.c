@@ -30,7 +30,13 @@ char const diff_flags[] = DIFFFLAGS;
 char const equal_line[] =
   "=============================================================================\n";
 
-#define TINY_INIT(x)  { .len = sizeof (x) - 1, .bytes = x }
+#if TINY_INIT_NEEDS_EXPLICIT_NUL
+#define EXPLICIT_NUL "\0"
+#else
+#define EXPLICIT_NUL
+#endif
+
+#define TINY_INIT(x)  { .len = sizeof (x) - 1, .bytes = x EXPLICIT_NUL }
 #define TINYK(x)      TINY_DECL (x) = TINY_INIT (#x)
 
 /* For libgnurcs.so, these should be coalesced into a pool.  */

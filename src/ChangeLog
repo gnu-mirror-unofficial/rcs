@@ -1,3 +1,12 @@
+2011-07-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Work around compilers that omit '\0' from tinysym init.
+
+	Reported by Nelson H. F. Beebe, for SunOS 5.11 cc, c99.
+
+	* b-anchor.c (EXPLICIT_NUL): New #define.
+	(TINY_INIT): Use ‘EXPLICIT_NUL’.
+
 2011-06-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Separate ISR scratch and alt sig stack allocations.
