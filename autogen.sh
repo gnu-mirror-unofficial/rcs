@@ -12,11 +12,8 @@
 # gnulib-tool (GNU gnulib 2010-11-05 13:19:13) 0.0.4410-e3c61
 
 set -ex
-if [ -d lib ] && [ -d m4 ]
-then act=update
-else act=add-import
-fi
-gnulib-tool --conditional-dependencies --${act}
+
+gnulib-tool --conditional-dependencies --update
 autoreconf --install --symlink
 
 # These override what ‘autoreconf --install’ creates.
