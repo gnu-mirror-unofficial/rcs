@@ -28,7 +28,7 @@
    "Copyright (C) 2010, 2011 Thien-Thi Nguyen\n"                      \
    "Copyright (C) 1990-1995 Paul Eggert\n"                      \
    "Copyright (C) 1982,1988,1989 Walter F. Tichy, Purdue CS\n"  \
-   "License GPLv3+; GNU GPL version 3 or later"                 \
+   "License GPLv3+: GNU GPL version 3 or later"                 \
    " <http://gnu.org/licenses/gpl.html>\n"                      \
    "This is free software: you are free"                        \
    " to change and redistribute it.\n"                          \

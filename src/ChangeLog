@@ -1,3 +1,11 @@
+2011-08-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Use colon in ‘--version’ output instead of semicolon.
+
+	Reported by Karl Berry.
+
+	* gnu-h-v.c (COMMAND_VERSION): Use ‘:’ not ‘;’.
+
 2011-07-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Work around compilers that omit '\0' from tinysym init.
