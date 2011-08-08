@@ -1,5 +1,9 @@
 2011-08-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Release: 5.7.98
+
+2011-08-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	Use colon in ‘--version’ output instead of semicolon.
 
 	Reported by Karl Berry.
