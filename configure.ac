@@ -68,13 +68,6 @@ RCS_MUSTHAVE([$1],[absolute name of $2 program: $save_$1])
 AC_DEFINE_UNQUOTED([$1],["$[]$1"],[$3])
 ])dnl
 
-# For pretest releases, discourage user ignorance.
-
-AC_ARG_VAR([RCS_PRETEST],[if incorrectly set, for pretest releases, the
-  configure script tells you to see README-alpha and then exits failurefully])
-AS_IF([RCS_YESP([pretest_p]) && test ! acknowledged = "$RCS_PRETEST"],
-  [AC_MSG_ERROR([user too eager, see README-alpha])])
-
 # --enable, --with
 
 AC_ARG_ENABLE([compat2],
