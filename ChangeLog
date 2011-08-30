@@ -1,13 +1,12 @@
+2011-08-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Release: 5.8
+
 2011-08-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] No longer require ‘RCS_PRETEST’ for configure.
 
 	* configure.ac (RCS_PRETEST): Delete AC_ARG_VAR and related check.
-
-2011-08-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.98
-
 
 2011-07-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -62,11 +61,6 @@
 
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	Release: 5.7.97
-
-
-2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
 	[doc] Document ‘YYYY-DDD’ and ‘YYYY-wWW-D’.
 
 	* doc/rcs.texi (Date option): Document support
@@ -94,10 +88,6 @@
 
 	* configure.ac (NEED_WOE_UCONTEXT_H): New ‘RCS_CBOOL’.
 	* AUTHORS: Add Panagiotis E. Hadjidoukas.
-
-2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.96
 
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -139,12 +129,6 @@
 	* configure.ac (SOELIM): New AC_ARG_VAR.
 	(SOELIM): New AC_CHECK_PROGS, conditionalized on the AC_ARG_VAR.
 
-2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.95
-
-	* configure.ac (AC_INIT): Bump version to "5.7.95" for release.
-
 2010-11-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Factor ‘-m’ description.
@@ -181,12 +165,6 @@
 
 	* doc/rcs.texi (rcsdiff): Mention ‘-B’ once only.
 	Reported by Keith Thompson.
-
-2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.94
-
-	* configure.ac (AC_INIT): Bump version to "5.7.94" for release.
 
 2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -435,12 +413,6 @@
 	* configure.ac (AC_CONFIG_FILES): Delete v/Makefile,
 	v/common; add tests/Makefile, tests/common.
 
-2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.93
-
-	* configure.ac (AC_INIT): Bump version to "5.7.93" for release.
-
 2010-08-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Don't avoid any gnulib modules.
@@ -456,21 +428,9 @@
 
 2010-07-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	Release: 5.7.92 (pretest for 5.8)
-
-	* configure.ac (AC_INIT): Bump version to "5.7.92".
-
-2010-07-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
 	[build] Use gnulib module ‘_Exit’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘_Exit’.
-
-2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.91 (pretest for 5.8)
-
-	* configure.ac (AC_INIT): Bump version to "5.7.91".
 
 2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -495,12 +455,6 @@
 	Say "repository file", not "repository".
 
 	* doc/rcs.texi (repo): New macro; throughout, use ‘@repo’, ‘@repo{}’.
-
-2010-06-17  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.90 (pretest for 5.8)
-
-	* configure.ac (AC_INIT): Bump version to "5.7.90".
 
 2010-06-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 

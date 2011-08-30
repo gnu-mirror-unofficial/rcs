@@ -1,6 +1,6 @@
-2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
+2011-08-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	Release: 5.7.96
+	Release: 5.8
 
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -21,10 +21,6 @@
 
 	* Makefile.am (soelim): Use $(SOELIM).
 
-2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.95
-
 2010-11-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	ci, rcs: Make MSG in ‘-m...MSG’ optional.
@@ -33,10 +29,6 @@
 	* Makefile.am (bits): Add b-emptylogmessage.
 	* ci.1in: Update ‘-m’; use b-emptylogmessage.
 	* rcs.1in: Likewise.
-
-2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.94
 
 2010-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -51,10 +43,6 @@
 	(.1in.1): Clear dependency list for old-fashioned suffix rule.
 	($(dist_man_MANS), $(dist_noinst_MANS)):
 	Specify dependencies of ‘REL’ and ‘$(bits)’.
-
-2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.93
 
 2010-08-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 

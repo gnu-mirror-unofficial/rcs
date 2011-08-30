@@ -1,6 +1,6 @@
-2011-08-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+2011-08-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	Release: 5.7.98
+	Release: 5.8
 
 2011-08-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -108,10 +108,6 @@
 	array as "three manifestations" ‘merge’ arg".
 
 	* merger.c (merge) [!DIFF3_BIN]: Use ‘LABEL’, not ‘label’.
-
-2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.97
 
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -237,10 +233,6 @@
 
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	Release: 5.7.96
-
-2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
 	[int] Add abstractions: semi_lf, SEMI_LF
 
 	* rcsgen.c (semi_lf): New const string.
@@ -265,10 +257,6 @@
 
 	* Makefile.am (BUILT_SOURCES): Include $(EXEEXT)
 	in source part of ‘$(VAR:SOURCE=TARGET)’ reference.
-
-2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.95
 
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -379,10 +367,6 @@
 
 	* rcsdiff.c: Mention ‘-B’ once only in help text.
 	Reported by Keith Thompson.
-
-2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.94
 
 2010-11-04  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -977,10 +961,6 @@
 
 	* b-divvy.h (struct divvy): Declare ‘space’ to be ‘struct obstack *’.
 	* b-divvy.c (make_space): Remove now-redundant cast to ‘struct obstack *’.
-
-2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.93
 
 2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 

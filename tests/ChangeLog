@@ -1,6 +1,6 @@
-2011-08-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+2011-08-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	Release: 5.7.98
+	Release: 5.8
 
 2011-06-12  Thien-Thi Nguyen  <ttn@ambire>
 
@@ -58,10 +58,6 @@
 	* common-i <top-level>: In ‘case’ statement, drop open paren.
 	* common <top-level>: Likewise.
 	* t300 (zinvasion): Likewise.
-
-2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.97
 
 2011-01-22  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -152,10 +148,6 @@
 
 2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
-	Release: 5.7.96
-
-2011-01-10  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
 	[v int] Use ‘ci -u’ for t606.
 
 	* t606: Don't just ‘co -u’; instead,
@@ -191,10 +183,6 @@
 
 	* t999: In case env vars ‘LOGNAME’ and ‘USER’ are not set,
 	use logname(1) instead of who(1) + sed(1) to deduce login.
-
-2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.95
 
 2010-11-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -323,10 +311,6 @@
 	* t603: New file.
 	* Makefile.am (TESTS): Add t603.
 	(XFAIL_TESTS): Add t603.
-
-2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.94
 
 2010-11-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
@@ -858,10 +842,6 @@
 	* t000.test: Likewise.
 	* t001.test: Likewise.
 	Reported by Ludovic Courtès.
-
-2010-09-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
-
-	Release: 5.7.93
 
 2010-06-24  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
