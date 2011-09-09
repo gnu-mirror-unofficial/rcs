@@ -189,9 +189,6 @@ written by Panagiotis E. Hadjidoukas.
 @node Concepts
 @section Concepts
 
-[Question for pretesters: Perhaps the following subsections should be given
-their own nodes so that they can be xref'ed more precisely?]
-
 @subsection Interaction model
 @cindex interaction model
 

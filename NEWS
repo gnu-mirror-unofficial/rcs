@@ -42,7 +42,6 @@ See the end for copying conditions.
 	Here, "absolute" means "specified as an absolute filename".
 	On the flip side, configuration no longer checks for some
 	situations such as ‘sigaction’ yes, but ‘SA_SIGINFO’ no.
-	[Question for pretesters: Is this OK?]
 
 	Most of the portability duties are now handled by gnulib.
 
