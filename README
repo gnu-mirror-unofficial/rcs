@@ -138,6 +138,16 @@ corresponding strings in the notes below before configuring.
   SCO Unix V.3.2      - bad_NFS_rename
   Ultrix              - HAVE_SETEUID
 
+If the configure script tells you that your platform might be desupported in
+the future, then consider yourself very lucky!  As a courageous builder of
+free software you are now empowered to clue in the RCS maintainer on the
+desirability of continued support for your platform, thereby quietening your
+fears and increasing the connectedness of the RCS-using community.
+
+You do this by mailing the warning text output by the configure script
+to bug-rcs@gnu.org, with a suitably detailed (i.e., optional) explanation
+of your platform, including why it should (or shouldn't) be supported.
+
 If building succeeds, do "make check" (optional) and "make install".
 To check the installation, do "make installcheck".
 

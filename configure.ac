@@ -532,7 +532,8 @@ AC_DEFUN([WOEMUX],[AS_IF([test yes = $woe],[$2],[$1])])
 WOEMUX([ABSFILENAMEGLOB='/*'],[ABSFILENAMEGLOB='?:*'])
 AC_SUBST([ABSFILENAMEGLOB])
 
-# For pretest releases, encourage user feedback for weird systems.
+# Encourage user feedback for weird systems.
+warn_weird_p=yes
 
 AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 
@@ -558,7 +559,7 @@ dnl mmap_signal_is_SIGBUS -- TODO: make rcs_cv_mmap_signal have symbolic
 dnl                          value, not just numeric (like old src/conf.h)
 ])
 
-AS_IF([RCS_YESP([pretest_p])],[
+AS_IF([RCS_YESP([warn_weird_p])],[
   AS_IF([RCS_ALL([RCS_YESP],[PRESUMABLY_STANDARD_ENOUGH_BY_NOW])],[:],
    [AC_MSG_WARN([Your platform might be desupported in the future:
 m4_foreach([V],RCS_NORM([PRESUMABLY_STANDARD_ENOUGH_BY_NOW]),[dnl
