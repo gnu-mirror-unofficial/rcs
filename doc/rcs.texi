@@ -1168,6 +1168,24 @@ emits a warning.  This option suppresses the warning.
 @xref{Misc common options}.  @noVN{ident}.
 @end table
 
+In addition to the normal keyword pattern, for Subversion 1.2
+(and later) compatability@footnote{The @dfn{fixed-length keyword syntax}
+is described in detail in
+@uref{http://svnbook.red-bean.com/en/1.5/svn-book.html#svn.advanced.props.special.keywords,
+,Version Control with Subversion}, chapter ``Advanced Topics'', section
+``Keyword Substitution''.},
+@rcscommand{ident} also recognizes patterns having one of the forms:
+
+@example
+$@var{keyword}:: @var{text} $
+;; two colons and space after keyword
+;; space before ending $
+
+$@var{keyword}:: @var{text}#$
+;; two colons and space after keyword
+;; hash before ending $
+@end example
+
 @node merge
 @section @rcscommand{merge}
 

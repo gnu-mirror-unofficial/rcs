@@ -1,3 +1,10 @@
+2011-09-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	ident: Recognize Subversion "fixed-width keyword syntax".
+
+	* doc/rcs.texi (ident): Add blurb, footnote and link to
+	describe support for Subversion "fixed-width keyword syntax".
+
 2011-09-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Do weird system check/warning unconditionally.

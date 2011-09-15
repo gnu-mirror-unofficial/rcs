@@ -1,3 +1,10 @@
+2011-09-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	ident: Recognize Subversion "fixed-width keyword syntax".
+
+	* ident.c (match): Accept additional colon after the first
+	is found; in that case, also allow hash before final ‘KDELIM’.
+
 2011-08-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Release: 5.8

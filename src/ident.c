@@ -41,6 +41,12 @@ match (register FILE *fp)
   char line[BUFSIZ];
   register int c;
   register char *tp;
+  bool svn_p = false;
+
+  /* For Subversion-style fixed-width keyword format accept the extra
+     colon and allow for a hash immediately before the end ‘KDELIM’
+     in that case (e.g., "$KEYWORD:: TEXT#$").
+     ------------------------------^     ^----- (maybe)  */
 
   tp = line;
   while ((c = getc (fp)) != VDELIM)
@@ -63,7 +69,13 @@ match (register FILE *fp)
   if (tp == line)
     return c;
   *tp++ = c;
-  if ((c = getc (fp)) != ' ')
+  if (':' == (c = getc (fp)))
+    {
+      svn_p = true;
+      *tp++ = c;
+      c = getc (fp);
+    }
+  if (c != ' ')
     return c ? c : '\n';
   *tp++ = c;
   while ((c = getc (fp)) != KDELIM)
@@ -82,7 +94,9 @@ match (register FILE *fp)
           return c ? c : '\n';
         }
     }
-  if (tp[-1] != ' ')
+  /* Sanity check: The end is ' ' (or possibly '#' for svn)?  */
+  if (! (' ' == tp[-1]
+         || (svn_p && '#' == tp[-1])))
     return c;
   /* Append trailing KDELIM.  */
   *tp++ = c;

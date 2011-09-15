@@ -84,6 +84,20 @@ pattern, even if
 is not actually an \*r-supported keyword.
 This gives you information about nonstandard keywords like
 .BR $\&XConsortium$ .
+.PP
+The pattern normally requires a colon and a space immediately
+after the keyword and a space immediately before the terminating
+.BR $ ,
+but for Subversion 1.2 (and later) compatability,
+.B ident
+will also recognize the pattern
+.BI $ keyword :: "\ text\ " $
+(i.e., two colons and a space)
+and the pattern
+.BI $ keyword :: "\ text\ " # $
+(likewise, with a hash before the terminating
+.BR $ ).
+These are the fixed-width keyword syntax.
 .SH KEYWORDS
 Here is the list of keywords currently maintained by
 .BR co (1).
