@@ -3,25 +3,18 @@ HACKING RCS                                             -*- org -*-
 This file is both a guide for newcomers and a todo list for oldstayers.
 It lives in the repo but is not included in the distribution.
 
-* 5.8
-*** build/packaging
-***** better autoconf usage
-******* DONE no-fuss "make check"
-******* DONE precious env vars
-******* general spiffing
-***** DONE automake
-*** bugfixes
-***** DONE --help, --version
-***** DONE avoid mktemp (debian #291542)
-***** DONE add documentation in texinfo format
-***** DONE rcsdiff longopt handling (debian #334004)
-***** DONE document rlog -q (debian #69257)
-***** DONE temp file security hole in rcsfreeze (debian #27845)
-***** DONE don't say "path" when referring to file names
-*** features
-***** DONE recognize keyword ‘commitid’ (debian #352527)
-***** DONE ident accept numbers as well as letters (debian #157891)
-
+* next
+*** TODO more tests
+*** TODO features
+***** TODO single top-level command (what is a good name?)
+***** TODO long options
+***** TODO extend ident(1) to recognize svn "fixed-width keyword syntax"
+      based on https://bugzilla.redhat.com/show_bug.cgi?id=247998
+      see also https://lists.gnu.org/archive/html/bug-rcs/2011-09/msg00000.html
+      see also http://svnbook.red-bean.com/en/1.5/svn-book.html#svn.advanced.props.special.keywords
+***** TODO add "same user" (super-strict) locks
+      based on https://bugzilla.redhat.com/show_bug.cgi?id=107947
+      see also https://lists.gnu.org/archive/html/bug-rcs/2011-09/msg00000.html
 * coding standards
 *** indent -gnu -nut (sounds enticing, no?)
 *** no trailing whitespace
