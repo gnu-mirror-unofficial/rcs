@@ -132,7 +132,7 @@ catchsigaction (int signo, siginfo_t *info, RCS_UNUSED void *uc)
       /* If this signal was planned, don't complain about it.  */
       if (!(from_mmap && ISR (access_name)))
         {
-          char *nRCS = "\nRCS";
+          const char *nRCS = "\nRCS";
 
           if (from_mmap && info && info->si_errno)
             {
