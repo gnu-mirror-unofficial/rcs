@@ -1,5 +1,14 @@
 2011-09-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use ‘set_program_name’ from gnulib.
+
+	* rcsutil.c: #include "progname.h".
+	(gnurcs_init): Use ‘set_program_name’ and ‘program->invoke’.
+	* b-complain.c (program_name): Delete var.
+	* b-complain.h (program_name): Delete var decl.
+
+2011-09-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Avoid "discards qualifiers" warning from GCC 4.4.
 
 	This correctly finishes the incomplete lameness of 2011-06-14,
