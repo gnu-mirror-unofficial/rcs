@@ -993,7 +993,7 @@ are set, RCS queries the host for, and uses, your login.
 @end defvr
 
 @node ci
-@section @rcscommand{ci}
+@section Invoking @rcscommand{ci}
 
 @usage {ci, file ...}
 
@@ -1083,7 +1083,7 @@ Use @var{who} as the author.
 @end table
 
 @node co
-@section @rcscommand{co}
+@section Invoking @rcscommand{co}
 
 @usage {co, file ...}
 
@@ -1150,7 +1150,7 @@ Select matching login @var{who}.
 @end table
 
 @node ident
-@section @rcscommand{ident}
+@section Invoking @rcscommand{ident}
 
 @usage {ident, [file ...]}
 
@@ -1187,7 +1187,7 @@ $@var{keyword}:: @var{text}#$
 @end example
 
 @node merge
-@section @rcscommand{merge}
+@section Invoking @rcscommand{merge}
 
 @usage {merge, receiving-sibling parent other-sibling}
 
@@ -1220,7 +1220,7 @@ respectively.
 @end table
 
 @node rcs
-@section @rcscommand{rcs}
+@section Invoking @rcscommand{rcs}
 
 @usage {rcs, file ...}
 
@@ -1323,7 +1323,7 @@ No effect; included for compatibility with other commands.
 @end table
 
 @node rcsclean
-@section @rcscommand{rcsclean}
+@section Invoking @rcscommand{rcsclean}
 
 @usage {rcsclean, [file ...]}
 
@@ -1364,7 +1364,7 @@ it changes because a lock is removed.
 @end table
 
 @node rcsdiff
-@section @rcscommand{rcsdiff}
+@section Invoking @rcscommand{rcsdiff}
 
 @usage {rcsdiff, file ...}
 
@@ -1412,7 +1412,7 @@ long options (that start with "--")
 (Not all of these options are meaningful.)
 
 @node rcsmerge
-@section @rcscommand{rcsmerge}
+@section Invoking @rcscommand{rcsmerge}
 
 @usage {rcsmerge, file}
 
@@ -1451,7 +1451,7 @@ to the latest revision on the default branch.
 @end table
 
 @node rlog
-@section @rcscommand{rlog}
+@section Invoking @rcscommand{rlog}
 
 @usage {rlog, file ...}
 
