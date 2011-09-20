@@ -1,5 +1,14 @@
 2011-09-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[doc] Make sure all macro calls use {}.
+
+	Apparently, in PDF output, unlike Info output, the macro
+	expansion abuts the following text unless there is {}.
+
+	* rcs.texi: Throughout, say ‘@repo{}’, not ‘@repo’.
+
+2011-09-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Rename sections for command FOO to "Invoking FOO".
 
 	Per GNU Coding Standards (info "(standards) Manual Structure Details").

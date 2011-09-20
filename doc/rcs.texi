@@ -195,11 +195,11 @@ written by Panagiotis E. Hadjidoukas.
 @cindex interaction model
 @cindex model, interaction
 The interaction model is straightforward.  For each working file, you
-initialize its @repo once, then enter a cycle of
+initialize its @repo{} once, then enter a cycle of
 checkout, modification, and checkin operations.  Along the
 way, you can tweak some of the @repo{}'s metadata, as well.
 All of this is done through RCS commands; you need not modify the
-@repo directly (and in fact you should probably avoid doing so lest
+@repo{} directly (and in fact you should probably avoid doing so lest
 RCS become confused).
 This model is somewhat analogous to using a library (of books).
 With a library, you sign up for a library card (initialize),
@@ -207,7 +207,7 @@ then enter a cycle of taking a book home (checkout),
 enjoying it (NB: @strong{without} modification, one hopes),
 and returning it to the library (checkin).
 
-Furthermore, you can compare revisions in the @repo
+Furthermore, you can compare revisions in the @repo{}
 against each other, examine the user- (hopefully high) quality
 descriptions of the changes each revision embodies, merge
 selected revisions, and so forth.
@@ -220,7 +220,7 @@ RCS commands operate on one pair of files at a time.  The
 @dfn{working file} is what you normally view and edit (e.g., a
 file of C programming language source code named @file{a.c}).
 Because the working file's contents can be extracted from
-the @repo (called @dfn{instantiating a working file}),
+the @repo{} (called @dfn{instantiating a working file}),
 it can be safely deleted to regain some disk space.
 
 @subsection RCS file
@@ -235,7 +235,7 @@ revision a unique revision number along with the remembered particulars
 of the checkin that produced it.  It also contains a @dfn{description}
 of the working file and various other metadata, described below.
 
-The @repo is also known (colloquially) as the ``comma-v file'',
+The @repo{} is also known (colloquially) as the ``comma-v file'',
 due to its name often ending in @file{,v} (e.g., @file{a.c,v}).
 
 @cindex revision number
@@ -285,16 +285,16 @@ integer.  The highest-numbered revision on a branch is called the
 @cindex revisions, tree of
 @cindex symbolic names
 @cindex names, symbolic
-In addition to this ``tree'' of thus-linked revisions, the @repo
+In addition to this ``tree'' of thus-linked revisions, the @repo{}
 keeps track of the @dfn{default branch}, i.e., the branch whose tip
 corresponds to the most recent checkin; as well as the @dfn{symbolic
 names}, a list of associations between a user-supplied (and presumably
 meaningful) symbol and an underlying branch or revision number.
 
 @cindex access control policy
-The @repo contains two pieces of information used to implement its
+The @repo{} contains two pieces of information used to implement its
 @dfn{access control policy}.  The first is a list of usernames.  If
-non-empty, only those users listed can modify the @repo (via RCS
+non-empty, only those users listed can modify the @repo{} (via RCS
 commands).  The second is a list of @dfn{locks}, i.e., association
 between a username and a revision number.  If a lock
 @code{@var{username}:@var{revno}} exists, that means only @var{username}
@@ -326,7 +326,7 @@ to be able to recreate the contents of the previous tip.
 
 @cindex checkout
 The @dfn{checkout} operation identifies a specific revision from the
-@repo and either displays the content to standard output or
+@repo{} and either displays the content to standard output or
 instantiates a working file, overwriting any current instantiation
 with the selected revision.  In either case, the content may
 undergo @dfn{keyword expansion}, which replaces text of the
@@ -438,7 +438,7 @@ ci f.c
 @end example
 
 @noindent
-This command creates an @repo in directory @file{RCS}, stores
+This command creates an @repo{} in directory @file{RCS}, stores
 @file{f.c} into it as revision 1.1, and deletes @file{f.c}.  It
 also asks you for a description.  The description should be a
 synopsis of the contents of the file.  All later checkin
@@ -453,7 +453,7 @@ co f.c
 @end example
 
 @noindent
-This command extracts the latest revision from the @repo
+This command extracts the latest revision from the @repo{}
 and writes it into @file{f.c}.  If you want to edit @file{f.c},
 you must lock it as you check it out, with the command:
 
@@ -507,10 +507,10 @@ same file.  Even if a revision is locked, it can still be
 checked out for reading, compiling, etc.  All that locking
 prevents is a checkin by anybody but the locker.
 
-If your @repo is private, i.e., if you are the only person
+If your @repo{} is private, i.e., if you are the only person
 who is going to deposit revisions into it, strict locking is
 not needed and you can turn it off.  If strict locking is
-turned off, the owner of the @repo need not have a lock
+turned off, the owner of the @repo{} need not have a lock
 for checkin; all others still do.  Turning strict locking off
 and on is done with the commands:
 
@@ -647,7 +647,7 @@ ident -q foo    # ok
 @cindex file names on the command-line
 Lastly, pairs of RCS and working files can be specified
 in three ways: (a) both are given, (b) only the working file is
-given, (c) only the @repo is given.  For (a), both
+given, (c) only the @repo{} is given.  For (a), both
 RCS and working files may have arbitrary directory
 components; RCS commands pair them up intelligently.  For (b),
 RCS commands will look first into the directory @file{./RCS},
@@ -773,7 +773,7 @@ and @var{D} is the ISO day number, 1-7 (Monday through Sunday).
 
 Some commands accept an option of the form @samp{-t-@var{text}}
 or @samp{-t@var{file-name}}.  This option is to set or update the
-@repo description text.  In the first form, @var{text} is used
+@repo{} description text.  In the first form, @var{text} is used
 directly, excluding the leading hyphen (@samp{-}) that distinguishes the
 two forms.  In the second form, the description text is taken from the
 contents of @var{file-name}.
@@ -823,7 +823,7 @@ of keyword strings.
 @cindex binary-old-keyword-value substitution mode
 Like @option{-ko}, but do all file i/o in binary mode.  This makes
 little difference on POSIX and Unix hosts, but on DOS-like hosts one
-should use @command{rcs -i -kb} to initialize an @repo intended to be
+should use @command{rcs -i -kb} to initialize an @repo{} intended to be
 used for binary files.  Also, on all hosts, @rcscommand{rcsmerge} normally
 refuses to merge files when @option{-kb} is in effect.
 
@@ -887,11 +887,11 @@ With @option{-T}, on the other hand, the commands either preserve
 the timestamp (for standalone lock/unlock operations), or use the
 timestamp of the working file (for @rcscommand{ci}).
 
-This can be useful if the @repo is found in a makefile target's
+This can be useful if the @repo{} is found in a makefile target's
 list of prerequisites (@pxref{Rule Syntax,,,make,The GNU Make Manual}),
-that is, if some target should be rebuilt if the @repo is newer
+that is, if some target should be rebuilt if the @repo{} is newer
 than it.  In that case, you can do @samp{rcs -u -T}, for example, to
-unlock a revision in the @repo without triggering a recompilation.
+unlock a revision in the @repo{} without triggering a recompilation.
 
 @item -V
 Behave like @option{--version}, i.e., display command version
@@ -965,7 +965,7 @@ the rest of the command-line.  The effective command-line that
 @defvr {Environment Variable} RCS_MEM_LIMIT
 @cindex memory limit
 Normally, for speed, commands either memory map or copy into memory
-the @repo if its size is less than the @dfn{memory limit}, currently
+the @repo{} if its size is less than the @dfn{memory limit}, currently
 defaulting to 256 kilobytes.  Otherwise the commands fall back to using
 standard i/o routines.
 
@@ -998,7 +998,7 @@ are set, RCS queries the host for, and uses, your login.
 @usage {ci, file ...}
 
 @noindent
-The @rcscommand{ci} command adds a revision to the @repo reflecting
+The @rcscommand{ci} command adds a revision to the @repo{} reflecting
 the current state of the working file.  This operation is also known as
 ``checkin''.
 
@@ -1011,10 +1011,10 @@ Force new entry, even if no content changed.
 @xref{Misc common options}.
 
 @item -i[@var{rev}]
-Initial checkin; error if the @repo already exists.
+Initial checkin; error if the @repo{} already exists.
 
 @item -j[@var{rev}]
-Just checkin, don't initialize; error if the @repo does not exist.
+Just checkin, don't initialize; error if the @repo{} does not exist.
 
 @item -k[@var{rev}]
 Compute revision from working file keywords.
@@ -1137,7 +1137,7 @@ Merge using @var{joins}, a list of @code{@var{rev}:@var{rev}} pairs.
 @xref{Misc common options}.  Select matching state.
 
 @item -T
-Preserve the modification time on the @repo even if
+Preserve the modification time on the @repo{} even if
 it changes because a lock is added or removed.
 
 @item -w@var{who}
@@ -1242,7 +1242,7 @@ Set non-strict locking.
 Don't send mail when breaking someone else's lock.
 
 @item -T
-Preserve the modification time on the @repo
+Preserve the modification time on the @repo{}
 unless a revision is removed.
 
 @item -I
@@ -1351,7 +1351,7 @@ Dry run (no act, don't operate).
 @xref{Substitution mode option}.
 
 @item -T
-Preserve the modification time on the @repo even
+Preserve the modification time on the @repo{} even
 it changes because a lock is removed.
 
 @item -V
@@ -1418,7 +1418,7 @@ long options (that start with "--")
 
 @noindent
 The @rcscommand{rcsmerge} command incorporates the changes between two
-revisions of an @repo into the corresponding working file.
+revisions of an @repo{} into the corresponding working file.
 
 @table @code
 @item -p[@var{rev}]
