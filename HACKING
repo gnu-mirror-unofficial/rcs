@@ -15,6 +15,7 @@ It lives in the repo but is not included in the distribution.
 ***** TODO add "same user" (super-strict) locks
       based on [[rh:107947][redhat #107947]]
       see also [[bug-rcs:2011-09/msg00000.html][bug-rcs thread (2011-09-08)]]
+* entropy: [[http://hydra.nixos.org/jobset/gnu/rcs-master][hydra]] ([[http://hydra.nixos.org/project/gnu][gnu]])
 * coding standards
 *** indent -gnu -nut (sounds enticing, no?)
 *** no trailing whitespace
