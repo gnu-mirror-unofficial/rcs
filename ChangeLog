@@ -1,3 +1,9 @@
+2011-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	co: Add option ‘-S’ to enable "self-same" mode.
+
+	* doc/rcs.texi (co): Add entry for ‘-S’ in table of options.
+
 2011-09-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Make sure all macro calls use {}.

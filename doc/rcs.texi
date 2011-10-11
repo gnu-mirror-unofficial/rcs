@@ -1136,6 +1136,25 @@ Merge using @var{joins}, a list of @code{@var{rev}:@var{rev}} pairs.
 @item -s@var{state}
 @xref{Misc common options}.  Select matching state.
 
+@item -S
+Enable "self-same" mode.
+In this mode, the owner of a lock is unimportant, just that it exists.
+Effectively, this prevents you from checking out the same revision twice.
+
+@example
+$ whoami
+ttn
+
+$ co -l -f z
+RCS/z,v  -->  z
+revision 1.1 (locked)
+done
+
+$ co -S -l -f z
+RCS/z,v  -->  z
+co: RCS/z,v: Revision 1.1 is already locked by ttn.
+@end example
+
 @item -T
 Preserve the modification time on the @repo{} even if
 it changes because a lock is added or removed.

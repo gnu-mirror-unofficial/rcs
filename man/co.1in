@@ -318,6 +318,11 @@ Use this option with care; it can confuse
 retrieves the latest revision on the selected branch whose state is set to
 .IR state .
 .TP
+.BI \-S
+Enables "self-same" mode.
+When this is enabled, the owner of a lock is unimportant, just that it exists.
+Effectively, this means the user cannot check out the same revision twice.
+.TP
 .B \-T
 Preserve the modification time on the \*o
 even if the \*o changes because a lock is added or removed.

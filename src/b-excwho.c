@@ -255,10 +255,11 @@ lock_drop (struct link *box, struct link *tp)
 }
 
 int
-addlock (struct delta *delta, bool verbose)
+addlock_maybe (struct delta *delta, bool selfsame, bool verbose)
 /* Add a lock held by caller to ‘delta’ and return 1 if successful.
    Print an error message if ‘verbose’ and return -1 if no lock is
    added because ‘delta’ is locked by somebody other than caller.
+   (If ‘selfsame’, do this regardless of the caller.)
    Return 0 if the caller already holds the lock.   */
 {
   register struct rcslock *rl;
@@ -266,7 +267,7 @@ addlock (struct delta *delta, bool verbose)
 
   if (was)
     {
-      if (caller_login_p (was->login))
+      if (!selfsame && caller_login_p (was->login))
         return 0;
       if (verbose)
         RERR ("Revision %s is already locked by %s.", delta->num, was->login);

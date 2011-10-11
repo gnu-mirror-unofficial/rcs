@@ -31,11 +31,12 @@ extern bool caller_login_p (char const *login);
 extern struct link *lock_memq (struct link *ls, bool loginp, void const *x);
 extern struct rcslock const *lock_on (struct delta const *delta);
 extern void lock_drop (struct link *box, struct link *tp);
-extern int addlock (struct delta *delta, bool verbose);
+extern int addlock_maybe (struct delta *delta, bool selfsame, bool verbose);
 
 /* Idioms.  */
 
 #define lock_login_memq(ls,login)  lock_memq (ls,  true, login)
 #define lock_delta_memq(ls,delta)  lock_memq (ls, false, delta)
+#define addlock(delta,verbose)  addlock_maybe (delta, false, verbose)
 
 /* b-excwho.h ends here */

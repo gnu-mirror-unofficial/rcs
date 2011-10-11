@@ -1,3 +1,13 @@
+2011-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	co: Add option ‘-S’ to enable "self-same" mode.
+
+	* b-excwho.c (addlock_maybe): Rename from ‘addlock’; take additional
+	arg ‘bool selfsame’; if true, don't distinguish who holds a lock.
+	* b-excwho.h (addlock_maybe): Update func decl.
+	(addlock): New macro.
+	* co.c (main): Add handling for ‘-S’; use ‘addlock_maybe’.
+
 2011-09-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Use ‘set_program_name’ from gnulib.

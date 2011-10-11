@@ -440,7 +440,7 @@ main (int argc, char **argv)
   /* 1 if a lock has been changed, -1 if error.  */
   int changelock;
   int expmode, r, workstatstat;
-  bool tostdout, Ttimeflag;
+  bool tostdout, Ttimeflag, selfsame;
   char finaldate[datesize];
 #if OPEN_O_BINARY
   int stdout_mode = 0;
@@ -464,6 +464,7 @@ main (int argc, char **argv)
   BE (pe) = X_DEFAULT;
   tostdout = false;
   Ttimeflag = false;
+  selfsame = false;
 
   argc = getRCSINIT (argc, argv, &newargv);
   argv = newargv;
@@ -541,6 +542,10 @@ main (int argc, char **argv)
                 redefined ('s');
               state = a;
             }
+          break;
+
+        case 'S':
+          selfsame = true;
           break;
 
         case 'T':
@@ -699,7 +704,7 @@ main (int argc, char **argv)
             /* Check reservations.  */
             changelock = lockflag < 0
               ? rmlock (targetdelta)
-              : lockflag == 0 ? 0 : addlock (targetdelta, true);
+              : lockflag == 0 ? 0 : addlock_maybe (targetdelta, selfsame, true);
 
             if (changelock < 0
                 || (changelock && !checkaccesslist ())
