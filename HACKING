@@ -9,12 +9,12 @@ It lives in the repo but is not included in the distribution.
 ***** TODO single top-level command (what is a good name?)
 ***** TODO long options
 ***** TODO extend ident(1) to recognize svn "fixed-width keyword syntax"
-      based on https://bugzilla.redhat.com/show_bug.cgi?id=247998
-      see also https://lists.gnu.org/archive/html/bug-rcs/2011-09/msg00000.html
-      see also http://svnbook.red-bean.com/en/1.5/svn-book.html#svn.advanced.props.special.keywords
+      based on [[rh:247998][redhat #247998]]
+      see also [[bug-rcs:2011-09/msg00000.html][bug-rcs thread (2011-09-08)]]
+      see also [[http://svnbook.red-bean.com/en/1.5/svn-book.html#svn.advanced.props.special.keywords][svn book -- special keywords]]
 ***** TODO add "same user" (super-strict) locks
-      based on https://bugzilla.redhat.com/show_bug.cgi?id=107947
-      see also https://lists.gnu.org/archive/html/bug-rcs/2011-09/msg00000.html
+      based on [[rh:107947][redhat #107947]]
+      see also [[bug-rcs:2011-09/msg00000.html][bug-rcs thread (2011-09-08)]]
 * coding standards
 *** indent -gnu -nut (sounds enticing, no?)
 *** no trailing whitespace
@@ -135,6 +135,12 @@ to be ephemeral, undergoing rebase, amendment, and ultimately removal.
     message’ and ‘checked in with -k’ hacks inside RCS files.
 
 * etc
+#+LINK: bug-rcs  https://lists.gnu.org/archive/html/bug-rcs/
+#+LINK: repo  	 http://git.savannah.gnu.org/cgit/rcs.git/commit/?id=
+#+LINK: lcov  	 http://hydra.nixos.org/build/%s/download/1/coverage/rcs-UNKNOWN/src/index.html
+#+LINK: rh    	 https://bugzilla.redhat.com/show_bug.cgi?id=
+
+
 Copyright (C) 2010, 2011 Thien-Thi Nguyen
 
 Copying and distribution of this file, with or without modification,
