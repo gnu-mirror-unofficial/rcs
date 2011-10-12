@@ -1,5 +1,17 @@
 2011-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘assoclst’ from global state of ci(1).
+
+	* ci.c (assoclst): Delete var.
+	(addsyms): Take 2nd arg LS; walk it directly.
+	(first_meaningful_symbolic_name): Take arg LS;
+	find its last link and use its entry as user symdef.
+	(main): Rename auto var ‘tp_assoc’ to ‘symbolic_names’;
+	push onto that list instead of extending it; update calls
+	to ‘addsyms’ and ‘first_meaningful_symbolic_name’.
+
+2011-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘msg’ from global state of ci(1).
 
 	* ci.c (msg): Delete var.
