@@ -56,7 +56,6 @@ static struct fro *workptr;
 /* New revision number.  */
 static struct cbuf newdelnum;
 static struct cbuf msg;
-static int exitstatus;
 /* Forces check-in.  */
 static bool forceciflag;
 static bool keepflag, keepworkingfile, rcsinitflag;
@@ -68,10 +67,10 @@ static struct stat workstat;
 static struct link assoclst;
 
 static void
-cleanup (void)
+cleanup (int *exitstatus)
 {
   if (FLOW (erroneousp))
-    exitstatus = EXIT_FAILURE;
+    *exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
   fro_zclose (&workptr);
   Ozclose (&exfile);
@@ -650,6 +649,7 @@ static char const default_state[] = DEFAULTSTATE;
 int
 main (int argc, char **argv)
 {
+  int exitstatus = EXIT_SUCCESS;
   char altdate[datesize];
   char olddate[datesize];
   char newdatebuf[datesize + zonelenmax];
@@ -844,11 +844,11 @@ main (int argc, char **argv)
 
   /* Handle all filenames.  */
   if (FLOW (erroneousp))
-    cleanup ();
+    cleanup (&exitstatus);
   else if (argc < 1)
     PFATAL ("no input file");
   else
-    for (; 0 < argc; cleanup (), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
       {
         char const *mani_filename, *pv;
         struct fro *from;

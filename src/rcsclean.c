@@ -37,13 +37,12 @@
 struct top *top;
 
 static struct fro *workptr;
-static int exitstatus;
 
 static void
-cleanup (void)
+cleanup (int *exitstatus)
 {
   if (FLOW (erroneousp))
-    exitstatus = EXIT_FAILURE;
+    *exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
   fro_zclose (&workptr);
   Ozclose (&FLOW (res));
@@ -136,6 +135,7 @@ REV defaults to the latest revision on the default branch.
 int
 main (int argc, char **argv)
 {
+  int exitstatus = EXIT_SUCCESS;
   char *a, **newargv;
   char const *rev, *p;
   bool dounlock, perform, unlocked, unlockflag, waslocked, Ttimeflag;
@@ -233,9 +233,9 @@ main (int argc, char **argv)
   dounlock = perform & unlockflag;
 
   if (FLOW (erroneousp))
-    cleanup ();
+    cleanup (&exitstatus);
   else
-    for (; 0 < argc; cleanup (), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
       {
         struct stat *repo_stat;
         char const *mani_filename;

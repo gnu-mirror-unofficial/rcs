@@ -65,7 +65,6 @@ static const s_unique const minus_D =
     .full = "--ifdef"
   };
 
-static int exitstatus;
 static struct fro *workptr;
 static struct stat workstat;
 
@@ -84,10 +83,10 @@ longopt_maybe_p (const char *arg, const s_unique const *u)
 }
 
 static void
-cleanup (void)
+cleanup (int *exitstatus)
 {
   if (FLOW (erroneousp))
-    exitstatus = DIFF_TROUBLE;
+    *exitstatus = DIFF_TROUBLE;
   fro_zclose (&FLOW (from));
   fro_zclose (&workptr);
 }
@@ -142,6 +141,7 @@ passed to the underlying diff(1) command:
 int
 main (int argc, char **argv)
 {
+  int exitstatus = DIFF_SUCCESS;
   int revnums;                  /* counter for revision numbers given */
   char const *rev1, *rev2;      /* revision numbers from command line */
   char const *xrev1, *xrev2;    /* expanded revision numbers */
@@ -337,11 +337,11 @@ main (int argc, char **argv)
 
   /* Now handle all filenames.  */
   if (FLOW (erroneousp))
-    cleanup ();
+    cleanup (&exitstatus);
   else if (argc < 1)
     PFATAL ("no input file");
   else
-    for (; 0 < argc; cleanup (), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
       {
         struct cbuf numericrev;
         struct delta *tip;

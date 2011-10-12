@@ -73,13 +73,11 @@ static struct link *lockerlist;
 /* States in ‘-s’ option.  */
 static struct link *statelist;
 
-static int exitstatus;
-
 static void
-cleanup (void)
+cleanup (int *exitstatus)
 {
   if (FLOW (erroneousp))
-    exitstatus = EXIT_FAILURE;
+    *exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
 }
 
@@ -771,6 +769,7 @@ Options:
 int
 main (int argc, char **argv)
 {
+  int exitstatus = EXIT_SUCCESS;
   FILE *out;
   char *a, **newargv;
   char const *accessListString, *accessFormat;
@@ -907,11 +906,11 @@ main (int argc, char **argv)
 
   /* Now handle all filenames.  */
   if (FLOW (erroneousp))
-    cleanup ();
+    cleanup (&exitstatus);
   else if (argc < 1)
     PFATAL ("no input file");
   else
-    for (; 0 < argc; cleanup (), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
       {
         char const *repo_filename;
         struct delta *tip;

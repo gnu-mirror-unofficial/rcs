@@ -44,7 +44,6 @@ static char const *expandarg, *suffixarg, *versionarg, *zonearg;
 /* Revisions to be joined.  */
 static char const **joinlist;
 static FILE *neworkptr;
-static int exitstatus;
 static bool forceflag;
 /* Index of last element in `joinlist'.  */
 static int lastjoin;
@@ -66,12 +65,12 @@ static struct delta *targetdelta;
 static struct stat workstat;
 
 static void
-cleanup (void)
+cleanup (int *exitstatus)
 {
   FILE *mstdout = MANI (standard_output);
 
   if (FLOW (erroneousp))
-    exitstatus = EXIT_FAILURE;
+    *exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
   ORCSclose ();
   if (FLOW (from)
@@ -434,6 +433,7 @@ If REV is omitted, take it to be the latest on the default branch.
 int
 main (int argc, char **argv)
 {
+  int exitstatus = EXIT_SUCCESS;
   char *a, *joinflag, **newargv;
   char const *author, *date, *rev, *state;
   char const *joinname, *newdate, *neworkname;
@@ -596,11 +596,11 @@ main (int argc, char **argv)
 
   /* Now handle all filenames.  */
   if (FLOW (erroneousp))
-    cleanup ();
+    cleanup (&exitstatus);
   else if (argc < 1)
     PFATAL ("no input file");
   else
-    for (; 0 < argc; cleanup (), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
       {
         struct stat *repo_stat;
         char const *mani_filename;

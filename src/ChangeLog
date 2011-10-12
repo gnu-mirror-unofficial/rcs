@@ -1,3 +1,15 @@
+2011-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Remove ‘exitstatus’ from global state in programs.
+
+	* ci.c (exitstatus): Delete var.
+	(cleanup): Take pointer to ‘exitstatus’.
+	(main): Add auto var ‘exitstatus’; update call to ‘cleanup’.
+	* co.c: Likewise.
+	* rcs.c: Likewise.
+	* rcsclean.c: Likewise.
+	* rcsdiff.c: Likewise.
+
 2011-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	co: Add option ‘-S’ to enable "self-same" mode.
