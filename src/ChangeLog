@@ -1,5 +1,13 @@
 2011-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘msg’ from global state of ci(1).
+
+	* ci.c (msg): Delete var.
+	(getlogmsg): Take pointer to ‘msg’.
+	(main): Add auto var ‘msg’; update calls to ‘getlogmsg’.
+
+2011-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘exitstatus’ from global state in programs.
 
 	* ci.c (exitstatus): Delete var.
