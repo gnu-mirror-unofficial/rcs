@@ -1,5 +1,15 @@
 2011-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘workptr’, ‘workstat’ from global state of ci(1).
+
+	* ci.c (workptr, workstat): Delete vars.
+	(struct work): New.
+	(cleanup): Take 2nd arg WORK; use it instead of ‘workptr’.
+	(fixwork): Take 3rd arg WORK; use it instead of ‘workptr’, ‘workstat’.
+	(main): Add auto var ‘work’; update calls to ‘cleanup’, ‘fixwork’.
+
+2011-10-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘assoclst’ from global state of ci(1).
 
 	* ci.c (assoclst): Delete var.

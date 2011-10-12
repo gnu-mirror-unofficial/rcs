@@ -51,8 +51,6 @@
 struct top *top;
 
 static FILE *exfile;
-/* Working file pointer.  */
-static struct fro *workptr;
 /* New revision number.  */
 static struct cbuf newdelnum;
 /* Forces check-in.  */
@@ -62,15 +60,20 @@ static bool keepflag, keepworkingfile, rcsinitflag;
 static struct delta *targetdelta;
 /* New delta to be inserted.  */
 static struct delta newdelta;
-static struct stat workstat;
+
+struct work
+{
+  struct stat st;
+  struct fro *fro;
+};
 
 static void
-cleanup (int *exitstatus)
+cleanup (int *exitstatus, struct work *work)
 {
   if (FLOW (erroneousp))
     *exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
-  fro_zclose (&workptr);
+  fro_zclose (&work->fro);
   Ozclose (&exfile);
   Ozclose (&FLOW (res));
   ORCSclose ();
@@ -475,16 +478,17 @@ getcurdate (void)
 }
 
 static int
-fixwork (mode_t newworkmode, time_t mtime)
+fixwork (mode_t newworkmode, time_t mtime, struct work *work)
 {
   char const *mani_filename = MANI (filename);
+  struct stat *st = &work->st;
 
   return
-    1 < workstat.st_nlink
-    || (newworkmode & S_IWUSR && !stat_mine_p (&workstat))
+    1 < st->st_nlink
+    || (newworkmode & S_IWUSR && !stat_mine_p (st))
     || PROB (setmtime (mani_filename, mtime))
-    ? -1 : workstat.st_mode == newworkmode ? 0
-    : !PROB (change_mode (workptr->fd, newworkmode)) ? 0
+    ? -1 : st->st_mode == newworkmode ? 0
+    : !PROB (change_mode (work->fro->fd, newworkmode)) ? 0
     : chmod (mani_filename, newworkmode)
     ;
 }
@@ -662,6 +666,7 @@ main (int argc, char **argv)
   char const *author, *krev, *rev, *state;
   char const *diffname, *expname;
   char const *newworkname;
+  struct work work;
   bool initflag, mustread;
   bool lockflag, lockthis, mtimeflag;
   int removedlock;
@@ -848,11 +853,11 @@ main (int argc, char **argv)
 
   /* Handle all filenames.  */
   if (FLOW (erroneousp))
-    cleanup (&exitstatus);
+    cleanup (&exitstatus, &work);
   else if (argc < 1)
     PFATAL ("no input file");
   else
-    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus, &work), ++argv, --argc)
       {
         char const *mani_filename, *pv;
         struct fro *from;
@@ -909,7 +914,7 @@ main (int argc, char **argv)
 
         diagnose ("%s  <--  %s", REPO (filename), mani_filename);
 
-        if (!(workptr = fro_open (mani_filename, FOPEN_R_WORK, &workstat)))
+        if (!(work.fro = fro_open (mani_filename, FOPEN_R_WORK, &work.st)))
           {
             syserror_errno (mani_filename);
             continue;
@@ -917,7 +922,7 @@ main (int argc, char **argv)
 
         if (from)
           {
-            if (SAME_INODE (REPO (stat), workstat))
+            if (SAME_INODE (REPO (stat), work.st))
               {
                 RERR ("RCS file is the same as working file %s.",
                       mani_filename);
@@ -931,7 +936,7 @@ main (int argc, char **argv)
         if (keepflag)
           {
             /* Get keyword values from working file.  */
-            if (!getoldkeys (workptr))
+            if (!getoldkeys (work.fro))
               continue;
             if (!rev && !(krev = PREV (rev)))
               {
@@ -948,7 +953,7 @@ main (int argc, char **argv)
         /* (End processing keepflag.)  */
 
         /* Expand symbolic revision number.  */
-        if (!fully_numeric (&newdelnum, krev, workptr))
+        if (!fully_numeric (&newdelnum, krev, work.fro))
           continue;
 
         /* Splice new delta into tree.  */
@@ -986,7 +991,7 @@ main (int argc, char **argv)
         /* Compute date.  */
         if (usestatdate)
           {
-            time2date (workstat.st_mtime, altdate);
+            time2date (work.st.st_mtime, altdate);
           }
         if (*altdate != '\0')
           /* Given by ‘-d’.  */
@@ -1035,8 +1040,8 @@ main (int argc, char **argv)
             diagnose ("initial revision: %s", newdelta.num);
             /* Get logmessage.  */
             newdelta.pretty_log = getlogmsg (&msg);
-            putdftext (&newdelta, workptr, frew, false);
-            repo_stat->st_mode = workstat.st_mode;
+            putdftext (&newdelta, work.fro, frew, false);
+            repo_stat->st_mode = work.st.st_mode;
             repo_stat->st_nlink = 0;
             changedRCS = true;
             if (from)
@@ -1051,7 +1056,7 @@ main (int argc, char **argv)
             expname = buildrevision (deltas, targetdelta, NULL, false);
             if (!forceciflag
                 && STR_SAME (newdelta.state, targetdelta->state)
-                && ((changework = rcsfcmp (workptr, &workstat, expname,
+                && ((changework = rcsfcmp (work.fro, &work.st, expname,
                                           targetdelta))
                     <= 0))
               {
@@ -1109,7 +1114,7 @@ main (int argc, char **argv)
               }
             else
               {
-                int wfd = workptr->fd;
+                int wfd = work.fro->fd;
                 struct stat checkworkstat;
                 char const *diffv[6 + !!OPEN_O_BINARY], **diffp;
 
@@ -1118,8 +1123,8 @@ main (int argc, char **argv)
                 SAME_AFTER (from, targetdelta->text);
                 newdelta.pretty_log = getlogmsg (&msg);
 
-                /* "Rewind" ‘workptr’ before feeding it to diff(1).  */
-                fro_bob (workptr);
+                /* "Rewind" ‘work.fro’ before feeding it to diff(1).  */
+                fro_bob (work.fro);
                 if (PROB (lseek (wfd, 0, SEEK_SET)))
                   Ierror ();
 
@@ -1137,8 +1142,8 @@ main (int argc, char **argv)
                   RFATAL ("diff failed");
                 if (newhead)
                   {
-                    fro_bob (workptr);
-                    putdftext (&newdelta, workptr, frew, false);
+                    fro_bob (work.fro);
+                    putdftext (&newdelta, work.fro, frew, false);
                     if (!putdtext (targetdelta, diffname, frew, true))
                       continue;
                   }
@@ -1148,8 +1153,8 @@ main (int argc, char **argv)
                 /* Check whether the working file changed during checkin,
                    to avoid producing an inconsistent RCS file.  */
                 if (PROB (fstat (wfd, &checkworkstat))
-                    || workstat.st_mtime != checkworkstat.st_mtime
-                    || workstat.st_size != checkworkstat.st_size)
+                    || work.st.st_mtime != checkworkstat.st_mtime
+                    || work.st.st_size != checkworkstat.st_size)
                   {
                     MERR ("file changed during checkin");
                     continue;
@@ -1173,7 +1178,7 @@ main (int argc, char **argv)
 
         if (!keepworkingfile)
           {
-            fro_zclose (&workptr);
+            fro_zclose (&work.fro);
             /* Get rid of old file.  */
             r = un_link (mani_filename);
           }
@@ -1185,9 +1190,9 @@ main (int argc, char **argv)
             mtime = mtimeflag ? wtime : (time_t) - 1;
 
             /* Expand if it might change or if we can't fix mode, time.  */
-            if (changework || PROB (r = fixwork (newworkmode, mtime)))
+            if (changework || PROB (r = fixwork (newworkmode, mtime, &work)))
               {
-                fro_bob (workptr);
+                fro_bob (work.fro);
                 /* Expand keywords in file.  */
                 BE (inclusive_of_Locker_in_Id_val) = lockthis;
                 workdelta->name =
@@ -1197,7 +1202,7 @@ main (int argc, char **argv)
                                ? pv
                                : rev),
                             workdelta);
-                switch (xpandfile (workptr, workdelta, &newworkname, dolog))
+                switch (xpandfile (work.fro, workdelta, &newworkname, dolog))
                   {
                   default:
                     continue;
@@ -1206,11 +1211,11 @@ main (int argc, char **argv)
                     /* No expansion occurred; try to reuse working file
                        unless we already tried and failed.  */
                     if (changework)
-                      if ((r = fixwork (newworkmode, mtime)) == 0)
+                      if ((r = fixwork (newworkmode, mtime, &work)) == 0)
                         break;
                     /* fall into */
                   case 1:
-                    fro_zclose (&workptr);
+                    fro_zclose (&work.fro);
                     aflush (exfile);
                     IGNOREINTS ();
                     r = chnamemod (&exfile, newworkname, mani_filename,
