@@ -36,15 +36,13 @@
 
 struct top *top;
 
-static struct fro *workptr;
-
 static void
-cleanup (int *exitstatus)
+cleanup (int *exitstatus, struct fro **workptr)
 {
   if (FLOW (erroneousp))
     *exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
-  fro_zclose (&workptr);
+  fro_zclose (workptr);
   Ozclose (&FLOW (res));
   ORCSclose ();
   dirtempunlink ();
@@ -136,6 +134,7 @@ int
 main (int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
+  struct fro *workptr;
   char *a, **newargv;
   char const *rev, *p;
   bool dounlock, perform, unlocked, unlockflag, waslocked, Ttimeflag;
@@ -233,9 +232,9 @@ main (int argc, char **argv)
   dounlock = perform & unlockflag;
 
   if (FLOW (erroneousp))
-    cleanup (&exitstatus);
+    cleanup (&exitstatus, &workptr);
   else
-    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus, &workptr), ++argv, --argc)
       {
         struct stat *repo_stat;
         char const *mani_filename;

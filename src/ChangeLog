@@ -1,5 +1,13 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘workptr’ from global state of rcsclean(1).
+
+	* rcsclean.c (workptr): Delete var.
+	(cleanup): Take 2nd arg WORKPTR.
+	(main): Add auto var ‘workptr’; update calls to ‘cleanup’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘getcurdate_buffer’ from global state of ci(1).
 
 	* ci.c (struct bud): Add member ‘getcurdate_buffer’.
