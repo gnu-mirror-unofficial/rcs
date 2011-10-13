@@ -1112,7 +1112,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "rcs",
-      .help = help,
+      .help = rcs_help,
       .exiterr = exiterr
     };
 

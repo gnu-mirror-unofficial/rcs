@@ -1,3 +1,10 @@
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Use program-specific variable name for extracted help.
+
+	* build-aux/extract-help: If an input file is specified,
+	use its stem to construct a C variable name "STEM_help".
+
 2011-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	co: Add option ‘-S’ to enable "self-same" mode.

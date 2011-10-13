@@ -60,7 +60,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "merge",
-      .help = help,
+      .help = merge_help,
       .exiterr = exiterr
     };
 

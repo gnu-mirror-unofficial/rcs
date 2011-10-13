@@ -163,7 +163,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "rcsdiff",
-      .help = help,
+      .help = rcsdiff_help,
       .exiterr = exiterr
     };
 

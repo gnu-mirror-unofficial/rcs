@@ -1,5 +1,19 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Use program-specific variable name for extracted help.
+
+	* ci.c (main): Update ‘program’ initialization form.
+	* co.c (main): Likewise.
+	* ident.c (main): Likewise.
+	* merge.c (main): Likewise.
+	* rcs.c (main): Likewise.
+	* rcsclean.c (main): Likewise.
+	* rcsdiff.c (main): Likewise.
+	* rcsmerge.c (main): Likewise.
+	* rlog.c (main): Likewise.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘default_state’ from global state of ci(1).
 
 	* ci.c (default_state): Delete var.

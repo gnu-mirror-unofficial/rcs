@@ -62,12 +62,13 @@ if [ x"$1" = x ] ; then : ; else
         echo >&2 "ERROR: Cannot read input file: $in"
         exit 1
     fi
+    vprefix=`echo $in | sed 's/\.c$/_/;s|.*/||'`
 fi
 
 test -z "$in" || exec 0<"$in"
 test -z "$out" || exec 1>"$out"
 echo '#include "gnu-h-v.h"'
-echo 'static char const help[] = ""'
+echo 'static char const' $vprefix'help[] = ""'
 sed -e '/^..:help$/,/^*./!d' | sed '1d;$d;s/"/\\"/g;s/^/"/;s/$/\\n"/'
 echo ';'
 

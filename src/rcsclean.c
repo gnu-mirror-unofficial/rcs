@@ -147,7 +147,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "rcsclean",
-      .help = help,
+      .help = rcsclean_help,
       .exiterr = exiterr
     };
 

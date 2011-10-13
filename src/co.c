@@ -450,7 +450,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "co",
-      .help = help,
+      .help = co_help,
       .exiterr = exiterr
     };
 

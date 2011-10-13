@@ -75,7 +75,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "rcsmerge",
-      .help = help,
+      .help = rcsmerge_help,
       .exiterr = exiterr
     };
 

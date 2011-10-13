@@ -688,7 +688,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "ci",
-      .help = help,
+      .help = ci_help,
       .exiterr = exiterr
     };
 

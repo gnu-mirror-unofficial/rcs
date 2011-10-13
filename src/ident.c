@@ -166,7 +166,7 @@ main (int argc, char **argv)
     {
       .invoke = argv[0],
       .name = "ident",
-      .help = help,
+      .help = ident_help,
       .exiterr = exiterr
     };
 
