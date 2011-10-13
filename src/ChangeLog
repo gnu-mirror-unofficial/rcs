@@ -1,5 +1,15 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘getcurdate_buffer’ from global state of ci(1).
+
+	* ci.c (struct bud): Add member ‘getcurdate_buffer’.
+	(getcurdate_buffer): Delete var.
+	(getcurdate): Take BUD; use ‘bud->getcurdate_buffer’.
+	(getlogmsg): Drop ‘const’ from arg ‘bud’; update call to ‘getcurdate’.
+	(main): Update call to ‘getcurdate’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘logmsg’ from global state of ci(1).
 
 	* ci.c (struct reason): New.

@@ -70,6 +70,7 @@ struct bud                              /* new growth */
   struct wlink br;                      /* branch to be inserted */
   bool keep;
   struct delta *target;
+  char getcurdate_buffer[datesize];
 };
 
 static void
@@ -468,15 +469,13 @@ addsyms (char const *num, struct link *ls)
   return true;
 }
 
-static char getcurdate_buffer[datesize];
-
 static char const *
-getcurdate (void)
+getcurdate (struct bud *bud)
 /* Return a pointer to the current date.  */
 {
-  if (!getcurdate_buffer[0])
-    time2date (BE (now), getcurdate_buffer);
-  return getcurdate_buffer;
+  if (!bud->getcurdate_buffer[0])
+    time2date (BE (now), bud->getcurdate_buffer);
+  return bud->getcurdate_buffer;
 }
 
 static int
@@ -540,7 +539,7 @@ xpandfile (struct work *work, struct delta const *delta,
 #define FIRST  "Initial revision"
 
 static struct cbuf
-getlogmsg (struct reason *reason, const struct bud *bud)
+getlogmsg (struct reason *reason, struct bud *bud)
 /* Obtain and return a log message.
    If a log message is given with ‘-m’, return that message.
    If this is the initial revision, return a standard log message.
@@ -559,7 +558,7 @@ getlogmsg (struct reason *reason, const struct bud *bud)
       char datebuf[datesize + zonelenmax];
 
       /* Generate standard log message.  */
-      date2str (getcurdate (), datebuf);
+      date2str (getcurdate (bud), datebuf);
       ACCF ("%s%s at %s", TINYKS (ciklog), getcaller (), datebuf);
       OK (&reason->delayed);
       return reason->delayed;
@@ -1021,7 +1020,7 @@ main (int argc, char **argv)
           }
         else
           /* Use current date.  */
-          bud.d.date = getcurdate ();
+          bud.d.date = getcurdate (&bud);
         /* Now check validity of date -- needed because of ‘-d’ and ‘-k’.  */
         if (bud.target && DATE_LT (bud.d.date, bud.target->date))
           {
