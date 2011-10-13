@@ -1,5 +1,14 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘targetdelta’ from global state of ci(1).
+
+	* ci.c (targetdelta): Delete var.
+	(struct bud): Add member ‘target’.
+	(addbranch, addelta, getlogmsg): Use ‘bud->target’.
+	(main): Use ‘bud.target’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘keepflag’ from global state of ci(1).
 
 	* ci.c (keepflag): Delete var.

@@ -50,9 +50,6 @@
 
 struct top *top;
 
-/* Old delta to be generated.  */
-static struct delta *targetdelta;
-
 struct work
 {
   struct stat st;
@@ -66,6 +63,7 @@ struct bud                              /* new growth */
   struct delta d;                       /* to be inserted */
   struct wlink br;                      /* branch to be inserted */
   bool keep;
+  struct delta *target;
 };
 
 static void
@@ -236,20 +234,20 @@ addbranch (struct delta *branchpoint, struct bud *bud,
       else
         {
           /* Branch exists; append to end.  */
-          targetdelta = gr_revno (BRANCHNO (num->string), tp_deltas);
-          if (!targetdelta)
+          bud->target = gr_revno (BRANCHNO (num->string), tp_deltas);
+          if (!bud->target)
             return -1;
-          if (!NUM_GT (num->string, targetdelta->num))
+          if (!NUM_GT (num->string, bud->target->num))
             {
               RERR ("revision %s too low; must be higher than %s",
-                    num->string, targetdelta->num);
+                    num->string, bud->target->num);
               return -1;
             }
-          if (!removedlock && 0 <= (removedlock = removelock (targetdelta)))
+          if (!removedlock && 0 <= (removedlock = removelock (bud->target)))
             {
               if (numlength & 1)
-                incnum (targetdelta->num, num);
-              targetdelta->ilk = &bud->d;
+                incnum (bud->target->num, num);
+              bud->target->ilk = &bud->d;
               bud->d.ilk = NULL;
             }
           return removedlock;
@@ -350,7 +348,7 @@ addelta (struct wlink **tp_deltas, struct bud *bud, bool rcsinitflag)
   if (newdnumlength == 0)
     {
       /* Derive new revision number from locks.  */
-      switch (findlock (true, &targetdelta))
+      switch (findlock (true, &bud->target))
         {
 
         default:
@@ -359,27 +357,27 @@ addelta (struct wlink **tp_deltas, struct bud *bud, bool rcsinitflag)
 
         case 1:
           /* Found an old lock.  Check whether locked revision exists.  */
-          if (!gr_revno (targetdelta->num, tp_deltas))
+          if (!gr_revno (bud->target->num, tp_deltas))
             return -1;
-          if (targetdelta == tip)
+          if (bud->target == tip)
             {
               /* Make new head.  */
               bud->d.ilk = tip;
               tip = REPO (tip) = &bud->d;
             }
-          else if (!targetdelta->ilk && countnumflds (targetdelta->num) > 2)
+          else if (!bud->target->ilk && countnumflds (bud->target->num) > 2)
             {
               /* New tip revision on side branch.  */
-              targetdelta->ilk = &bud->d;
+              bud->target->ilk = &bud->d;
               bud->d.ilk = NULL;
             }
           else
             {
               /* Middle revision; start a new branch.  */
               JAM (&bud->num, "");
-              return addbranch (targetdelta, bud, true, tp_deltas);
+              return addbranch (bud->target, bud, true, tp_deltas);
             }
-          incnum (targetdelta->num, &bud->num);
+          incnum (bud->target->num, &bud->num);
           /* Successful use of existing lock.  */
           return 1;
 
@@ -417,7 +415,7 @@ addelta (struct wlink **tp_deltas, struct bud *bud, bool rcsinitflag)
                 bud->num.string, tip->num);
           return -1;
         }
-      targetdelta = tip;
+      bud->target = tip;
       if (0 <= (removedlock = removelock (tip)))
         {
           if (!gr_revno (tip->num, tp_deltas))
@@ -438,14 +436,14 @@ addelta (struct wlink **tp_deltas, struct bud *bud, bool rcsinitflag)
           continue;
       /* Ignore rest to get old delta.  */
       old.string = SHSNIP (&old.size, old.string, tp - 1);
-      if (! (targetdelta = gr_revno (old.string, tp_deltas)))
+      if (! (bud->target = gr_revno (old.string, tp_deltas)))
         return -1;
-      if (!NUM_EQ (targetdelta->num, old.string))
+      if (!NUM_EQ (bud->target->num, old.string))
         {
           RERR ("can't find branch point %s", old.string);
           return -1;
         }
-      return addbranch (targetdelta, bud, false, tp_deltas);
+      return addbranch (bud->target, bud, false, tp_deltas);
     }
 }
 
@@ -563,7 +561,7 @@ getlogmsg (struct cbuf *msg, const struct bud *bud)
       return logmsg;
     }
 
-  if (!targetdelta
+  if (!bud->target
       && bud->num.size
       && (num = bud->num.string)
       && (NUM_EQ (num, "1.1")
@@ -885,7 +883,7 @@ main (int argc, char **argv)
             .size = 0
           };
 
-        targetdelta = NULL;
+        bud.target = NULL;
         ffree ();
 
         switch (pairnames (argc, argv, rcswriteopen, mustread, false))
@@ -1019,12 +1017,12 @@ main (int argc, char **argv)
           /* Use current date.  */
           bud.d.date = getcurdate ();
         /* Now check validity of date -- needed because of ‘-d’ and ‘-k’.  */
-        if (targetdelta && DATE_LT (bud.d.date, targetdelta->date))
+        if (bud.target && DATE_LT (bud.d.date, bud.target->date))
           {
             RERR ("Date %s precedes %s in revision %s.",
                   date2str (bud.d.date, newdatebuf),
-                  date2str (targetdelta->date, targetdatebuf),
-                  targetdelta->num);
+                  date2str (bud.target->date, targetdatebuf),
+                  bud.target->num);
             continue;
           }
 
@@ -1066,16 +1064,16 @@ main (int argc, char **argv)
             newhead = tip == &bud.d;
             if (!newhead)
               FLOW (to) = frew;
-            expname = buildrevision (deltas, targetdelta, NULL, false);
+            expname = buildrevision (deltas, bud.target, NULL, false);
             if (!forceciflag
-                && STR_SAME (bud.d.state, targetdelta->state)
+                && STR_SAME (bud.d.state, bud.target->state)
                 && ((changework = rcsfcmp (work.fro, &work.st, expname,
-                                          targetdelta))
+                                           bud.target))
                     <= 0))
               {
                 diagnose
                   ("file is unchanged; reverting to previous revision %s",
-                   targetdelta->num);
+                   bud.target->num);
                 if (removedlock < lockflag)
                   {
                     diagnose
@@ -1085,8 +1083,8 @@ main (int argc, char **argv)
                 dolog = false;
                 if (!(changedRCS = lockflag < removedlock || symbolic_names))
                   {
-                    workdelta = targetdelta;
-                    SAME_AFTER (from, targetdelta->text);
+                    workdelta = bud.target;
+                    SAME_AFTER (from, bud.target->text);
                   }
                 else
                   /* We have started to build the wrong new RCS file.
@@ -1103,11 +1101,11 @@ main (int argc, char **argv)
                        so prune it now.  (Unfortunately, ‘grok_resynch’
                        did not restore the tree completely, as its name
                        might imply.)  */
-                    prune (&bud.d, targetdelta);
+                    prune (&bud.d, bud.target);
 
-                    if (! (workdelta = gr_revno (targetdelta->num, &deltas)))
+                    if (! (workdelta = gr_revno (bud.target->num, &deltas)))
                       continue;
-                    workdelta->pretty_log = targetdelta->pretty_log;
+                    workdelta->pretty_log = bud.target->pretty_log;
                     if (bud.d.state != default_state)
                       workdelta->state = bud.d.state;
                     if (lockthis < removedlock && removelock (workdelta) < 0)
@@ -1132,8 +1130,8 @@ main (int argc, char **argv)
                 char const *diffv[6 + !!OPEN_O_BINARY], **diffp;
 
                 diagnose ("new revision: %s; previous revision: %s",
-                          bud.d.num, targetdelta->num);
-                SAME_AFTER (from, targetdelta->text);
+                          bud.d.num, bud.target->num);
+                SAME_AFTER (from, bud.target->text);
                 bud.d.pretty_log = getlogmsg (&msg, &bud);
 
                 /* "Rewind" ‘work.fro’ before feeding it to diff(1).  */
@@ -1157,7 +1155,7 @@ main (int argc, char **argv)
                   {
                     fro_bob (work.fro);
                     putdftext (&bud.d, work.fro, frew, false);
-                    if (!putdtext (targetdelta, diffname, frew, true))
+                    if (!putdtext (bud.target, diffname, frew, true))
                       continue;
                   }
                 else if (!putdtext (&bud.d, diffname, frew, true))
