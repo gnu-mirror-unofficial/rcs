@@ -53,9 +53,7 @@ struct top *top;
 static FILE *exfile;
 /* New revision number.  */
 static struct cbuf newdelnum;
-/* Forces check-in.  */
-static bool forceciflag;
-static bool keepflag, keepworkingfile, rcsinitflag;
+static bool keepflag, rcsinitflag;
 /* Old delta to be generated.  */
 static struct delta *targetdelta;
 /* New delta to be inserted.  */
@@ -667,6 +665,8 @@ main (int argc, char **argv)
   char const *diffname, *expname;
   char const *newworkname;
   struct work work;
+  bool forceciflag = false;
+  bool keepworkingfile = false;
   bool initflag, mustread;
   bool lockflag, lockthis, mtimeflag;
   int removedlock;
