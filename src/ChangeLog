@@ -1,5 +1,12 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘default_state’ from global state of ci(1).
+
+	* ci.c (default_state): Delete var.
+	(main): Add auto var ‘default_state’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove new{delnum,delta,branch} from global state of ci(1).
 
 	* ci.c (newdelnum, newdelta): Delete vars.
