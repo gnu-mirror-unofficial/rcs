@@ -1,5 +1,13 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘rcsinitflag’ from global state of ci(1).
+
+	* ci.c (rcsinitflag): Delete var.
+	(addelta): Take 2nd arg RCSINITFLAG.
+	(main): Add auto var ‘rcsinitflag’; update call to ‘addelta’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘forceciflag’, ‘keepworkingfile’ from global state of ci(1).
 
 	* ci.c (forceciflag, keepworkingfile): Delete var.

@@ -53,7 +53,7 @@ struct top *top;
 static FILE *exfile;
 /* New revision number.  */
 static struct cbuf newdelnum;
-static bool keepflag, rcsinitflag;
+static bool keepflag;
 /* Old delta to be generated.  */
 static struct delta *targetdelta;
 /* New delta to be inserted.  */
@@ -308,7 +308,7 @@ prune (struct delta *wrong, struct delta *bp)
 }
 
 static int
-addelta (struct wlink **tp_deltas)
+addelta (struct wlink **tp_deltas, bool rcsinitflag)
 /* Append a delta to the delta tree, whose number is given by
    ‘newdelnum’.  Update ‘REPO (tip)’, ‘newdelnum’, ‘newdelnumlength’,
    and the links in newdelta.
@@ -667,6 +667,7 @@ main (int argc, char **argv)
   struct work work;
   bool forceciflag = false;
   bool keepworkingfile = false;
+  bool rcsinitflag = false;
   bool initflag, mustread;
   bool lockflag, lockthis, mtimeflag;
   int removedlock;
@@ -957,7 +958,7 @@ main (int argc, char **argv)
           continue;
 
         /* Splice new delta into tree.  */
-        if (PROB (removedlock = addelta (&deltas)))
+        if (PROB (removedlock = addelta (&deltas, rcsinitflag)))
           continue;
         tip = REPO (tip);
 
