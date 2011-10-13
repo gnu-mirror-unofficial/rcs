@@ -1,5 +1,15 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘logmsg’ from global state of ci(1).
+
+	* ci.c (struct reason): New.
+	(logmsg): Delete var.
+	(getlogmsg): Dno't take MSG; take REASON; use ‘reason->delayed’.
+	(main): Delete auto var ‘msg’; add auto var ‘reason’;
+	use ‘reason.upfront’; update calls to ‘getlogmsg’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘targetdelta’ from global state of ci(1).
 
 	* ci.c (targetdelta): Delete var.

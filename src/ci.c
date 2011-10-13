@@ -50,6 +50,12 @@
 
 struct top *top;
 
+struct reason
+{
+  struct cbuf upfront;                  /* from -mMSG */
+  struct cbuf delayed;                  /* when the user is lazy */
+};
+
 struct work
 {
   struct stat st;
@@ -533,10 +539,8 @@ xpandfile (struct work *work, struct delta const *delta,
 
 #define FIRST  "Initial revision"
 
-static struct cbuf logmsg;
-
 static struct cbuf
-getlogmsg (struct cbuf *msg, const struct bud *bud)
+getlogmsg (struct reason *reason, const struct bud *bud)
 /* Obtain and return a log message.
    If a log message is given with ‘-m’, return that message.
    If this is the initial revision, return a standard log message.
@@ -547,8 +551,8 @@ getlogmsg (struct cbuf *msg, const struct bud *bud)
 {
   const char *num;
 
-  if (msg->size)
-    return *msg;
+  if (reason->upfront.size)
+    return reason->upfront;
 
   if (bud->keep)
     {
@@ -557,8 +561,8 @@ getlogmsg (struct cbuf *msg, const struct bud *bud)
       /* Generate standard log message.  */
       date2str (getcurdate (), datebuf);
       ACCF ("%s%s at %s", TINYKS (ciklog), getcaller (), datebuf);
-      OK (&logmsg);
-      return logmsg;
+      OK (&reason->delayed);
+      return reason->delayed;
     }
 
   if (!bud->target
@@ -576,20 +580,20 @@ getlogmsg (struct cbuf *msg, const struct bud *bud)
       return initiallog;
     }
 
-  if (logmsg.size)
+  if (reason->delayed.size)
     {
       /*Previous log available.  */
       if (yesorno (true, "reuse log message of previous file? [yn](y): "))
-        return logmsg;
+        return reason->delayed;
     }
 
   /* Now read string from stdin.  */
-  logmsg = getsstdin ("m", "log message", "");
+  reason->delayed = getsstdin ("m", "log message", "");
 
   /* Now check whether the log message is not empty.  */
-  if (!logmsg.size)
-    set_empty_log_message (&logmsg);
-  return logmsg;
+  if (!reason->delayed.size)
+    set_empty_log_message (&reason->delayed);
+  return reason->delayed;
 }
 
 static char const *
@@ -655,7 +659,7 @@ int
 main (int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
-  struct cbuf msg = { .size = 0 };
+  struct reason reason;
   char altdate[datesize];
   char olddate[datesize];
   char newdatebuf[datesize + zonelenmax];
@@ -700,6 +704,8 @@ main (int argc, char **argv)
      be changed to be heap-allocated (probably in ‘PLEXUS’), and this is the
      place to do that.  */
   memset (&bud, 0, sizeof (struct bud));
+  /* Likewise.  */
+  memset (&reason, 0, sizeof (reason));
 
   setrid ();
 
@@ -765,11 +771,11 @@ main (int argc, char **argv)
           goto revno;
 
         case 'm':
-          if (msg.size)
+          if (reason.upfront.size)
             redefined ('m');
-          msg = cleanlogmsg (a, strlen (a));
-          if (!msg.size)
-            set_empty_log_message (&msg);
+          reason.upfront = cleanlogmsg (a, strlen (a));
+          if (!reason.upfront.size)
+            set_empty_log_message (&reason.upfront);
           break;
 
         case 'n':
@@ -1050,7 +1056,7 @@ main (int argc, char **argv)
           {
             diagnose ("initial revision: %s", bud.d.num);
             /* Get logmessage.  */
-            bud.d.pretty_log = getlogmsg (&msg, &bud);
+            bud.d.pretty_log = getlogmsg (&reason, &bud);
             putdftext (&bud.d, work.fro, frew, false);
             repo_stat->st_mode = work.st.st_mode;
             repo_stat->st_nlink = 0;
@@ -1132,7 +1138,7 @@ main (int argc, char **argv)
                 diagnose ("new revision: %s; previous revision: %s",
                           bud.d.num, bud.target->num);
                 SAME_AFTER (from, bud.target->text);
-                bud.d.pretty_log = getlogmsg (&msg, &bud);
+                bud.d.pretty_log = getlogmsg (&reason, &bud);
 
                 /* "Rewind" ‘work.fro’ before feeding it to diff(1).  */
                 fro_bob (work.fro);
