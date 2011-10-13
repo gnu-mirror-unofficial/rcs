@@ -50,7 +50,6 @@
 
 struct top *top;
 
-static FILE *exfile;
 static bool keepflag;
 /* Old delta to be generated.  */
 static struct delta *targetdelta;
@@ -59,6 +58,7 @@ struct work
 {
   struct stat st;
   struct fro *fro;
+  FILE *ex;                             /* expansion */
 };
 
 struct bud                              /* new growth */
@@ -75,7 +75,7 @@ cleanup (int *exitstatus, struct work *work)
     *exitstatus = EXIT_FAILURE;
   fro_zclose (&FLOW (from));
   fro_zclose (&work->fro);
-  Ozclose (&exfile);
+  Ozclose (&work->ex);
   Ozclose (&FLOW (res));
   ORCSclose ();
   dirtempunlink ();
@@ -492,9 +492,9 @@ fixwork (mode_t newworkmode, time_t mtime, struct work *work)
 }
 
 static int
-xpandfile (struct fro *unexfile, struct delta const *delta,
+xpandfile (struct work *work, struct delta const *delta,
            char const **exname, bool dolog)
-/* Read ‘unexfile’ and copy it to a file, performing keyword
+/* Read ‘work->fro’ and copy it to a file, performing keyword
    substitution with data from ‘delta’.
    Return -1 if unsuccessful, 1 if expansion occurred, 0 otherwise.
    If successful, store the name into ‘*exname’.  */
@@ -503,7 +503,7 @@ xpandfile (struct fro *unexfile, struct delta const *delta,
   int e, r;
 
   targetname = makedirtemp (true);
-  if (!(exfile = fopen_safer (targetname, FOPEN_W_WORK)))
+  if (!(work->ex = fopen_safer (targetname, FOPEN_W_WORK)))
     {
       syserror_errno (targetname);
       MERR ("can't build working file");
@@ -511,10 +511,10 @@ xpandfile (struct fro *unexfile, struct delta const *delta,
     }
   r = 0;
   if (MIN_UNEXPAND <= BE (kws))
-    fro_spew (unexfile, exfile);
+    fro_spew (work->fro, work->ex);
   else
     {
-      struct expctx ctx = EXPCTX_1OUT (exfile, unexfile, false, dolog);
+      struct expctx ctx = EXPCTX_1OUT (work->ex, work->fro, false, dolog);
 
       for (;;)
         {
@@ -666,7 +666,7 @@ main (int argc, char **argv)
   char const *author, *krev, *rev, *state;
   char const *diffname, *expname;
   char const *newworkname;
-  struct work work;
+  struct work work = { .ex = NULL };
   bool forceciflag = false;
   bool keepworkingfile = false;
   bool rcsinitflag = false;
@@ -1216,7 +1216,7 @@ main (int argc, char **argv)
                                ? pv
                                : rev),
                             workdelta);
-                switch (xpandfile (work.fro, workdelta, &newworkname, dolog))
+                switch (xpandfile (&work, workdelta, &newworkname, dolog))
                   {
                   default:
                     continue;
@@ -1230,9 +1230,9 @@ main (int argc, char **argv)
                     /* fall into */
                   case 1:
                     fro_zclose (&work.fro);
-                    aflush (exfile);
+                    aflush (work.ex);
                     IGNOREINTS ();
-                    r = chnamemod (&exfile, newworkname, mani_filename,
+                    r = chnamemod (&work.ex, newworkname, mani_filename,
                                    1, newworkmode, mtime);
                     keepdirtemp (newworkname);
                     RESTOREINTS ();

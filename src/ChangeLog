@@ -1,5 +1,16 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘exfile’ from global state of ci(1).
+
+	* ci.c (exfile): Delete var.
+	(struct work): Add member ‘ex’.
+	(cleanup): Use ‘work->ex’.
+	(xpandfile): Don't take UNEXFILE; instead, take WORK.
+	(main): Init ‘work.ex’ to NULL;
+	update call to ‘xpandfile’; use ‘work.ex’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use program-specific variable name for extracted help.
 
 	* ci.c (main): Update ‘program’ initialization form.
