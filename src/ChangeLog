@@ -1,5 +1,14 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘keepflag’ from global state of ci(1).
+
+	* ci.c (keepflag): Delete var.
+	(struct bud): Add member ‘keep’.
+	(getlogmsg): Use ‘bud->keep’.
+	(main): Use ‘bud.keep’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘exfile’ from global state of ci(1).
 
 	* ci.c (exfile): Delete var.
