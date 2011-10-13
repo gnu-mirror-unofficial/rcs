@@ -51,18 +51,21 @@
 struct top *top;
 
 static FILE *exfile;
-/* New revision number.  */
-static struct cbuf newdelnum;
 static bool keepflag;
 /* Old delta to be generated.  */
 static struct delta *targetdelta;
-/* New delta to be inserted.  */
-static struct delta newdelta;
 
 struct work
 {
   struct stat st;
   struct fro *fro;
+};
+
+struct bud                              /* new growth */
+{
+  struct cbuf num;                      /* wip revision number */
+  struct delta d;                       /* to be inserted */
+  struct wlink br;                      /* branch to be inserted */
 };
 
 static void
@@ -161,19 +164,18 @@ removelock (struct delta *delta)
   return 1;
 }
 
-static struct wlink newbranch;          /* new branch to be inserted */
-
 static int
-addbranch (struct delta *branchpoint, struct cbuf *num,
+addbranch (struct delta *branchpoint, struct bud *bud,
            bool removedlock, struct wlink **tp_deltas)
 /* Add a new branch and branch delta at ‘branchpoint’.
    If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
-   The new delta and branchhead are in globals ‘newdelta’ and ‘newbranch’, resp.
+   The new delta and branchhead are in ‘bud->d’ and ‘bud->br’, respectively.
    The new number is placed into a ‘PLEXUS’ string with ‘num’ pointing to it.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
    If ‘removedlock’, a lock was already removed.  */
 {
+  struct cbuf *num = &bud->num;
   struct wlink **btrail;
   struct delta *d;
   int result;
@@ -184,7 +186,7 @@ addbranch (struct delta *branchpoint, struct cbuf *num,
   if (!branchpoint->branches)
     {
       /* Start first branch.  */
-      branchpoint->branches = &newbranch;
+      branchpoint->branches = &bud->br;
       if (numlength == 0)
         {
           JAM (num, branchpoint->num);
@@ -192,8 +194,7 @@ addbranch (struct delta *branchpoint, struct cbuf *num,
         }
       else if (numlength & 1)
         ADD (num, ".1");
-      newbranch.next = NULL;
-
+      bud->br.next = NULL;
     }
   else if (numlength == 0)
     {
@@ -202,11 +203,11 @@ addbranch (struct delta *branchpoint, struct cbuf *num,
       /* Append new branch to the end.  */
       while (bhead->next)
         bhead = bhead->next;
-      bhead->next = &newbranch;
+      bhead->next = &bud->br;
       d = bhead->entry;
       incnum (BRANCHNO (d->num), num);
       ADD (num, ".1");
-      newbranch.next = NULL;
+      bud->br.next = NULL;
     }
   else
     {
@@ -227,8 +228,8 @@ addbranch (struct delta *branchpoint, struct cbuf *num,
       if (result < 0)
         {
           /* Insert/append new branchhead.  */
-          newbranch.next = *btrail;
-          *btrail = &newbranch;
+          bud->br.next = *btrail;
+          *btrail = &bud->br;
           if (numlength & 1)
             ADD (num, ".1");
         }
@@ -248,15 +249,15 @@ addbranch (struct delta *branchpoint, struct cbuf *num,
             {
               if (numlength & 1)
                 incnum (targetdelta->num, num);
-              targetdelta->ilk = &newdelta;
-              newdelta.ilk = NULL;
+              targetdelta->ilk = &bud->d;
+              bud->d.ilk = NULL;
             }
           return removedlock;
-          /* Don't do anything to newbranch.  */
+          /* Don't do anything to ‘bud->br’.  */
         }
     }
-  newbranch.entry = &newdelta;
-  newdelta.ilk = NULL;
+  bud->br.entry = &bud->d;
+  bud->d.ilk = NULL;
   if (branchpoint->lockedby)
     if (caller_login_p (branchpoint->lockedby))
       return removelock (branchpoint);  /* This returns 1.  */
@@ -308,10 +309,9 @@ prune (struct delta *wrong, struct delta *bp)
 }
 
 static int
-addelta (struct wlink **tp_deltas, bool rcsinitflag)
-/* Append a delta to the delta tree, whose number is given by
-   ‘newdelnum’.  Update ‘REPO (tip)’, ‘newdelnum’, ‘newdelnumlength’,
-   and the links in newdelta.
+addelta (struct wlink **tp_deltas, struct bud *bud, bool rcsinitflag)
+/* Append a delta to the delta tree, whose number is given by ‘bud->num’.
+   Update ‘REPO (tip)’, ‘bud->num’ and the links in ‘bud->d’.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.  */
 {
   register char const *tp;
@@ -321,7 +321,7 @@ addelta (struct wlink **tp_deltas, bool rcsinitflag)
   struct delta *tip = REPO (tip);
   char const *defbr = GROK (branch);
 
-  newdnumlength = countnumflds (newdelnum.string);
+  newdnumlength = countnumflds (bud->num.string);
 
   if (rcsinitflag)
     {
@@ -329,22 +329,22 @@ addelta (struct wlink **tp_deltas, bool rcsinitflag)
          and a file initialized with ‘rcs -i’.  */
       if (newdnumlength == 0 && defbr)
         {
-          JAM (&newdelnum, defbr);
+          JAM (&bud->num, defbr);
           newdnumlength = countnumflds (defbr);
         }
       if (newdnumlength == 0)
-        JAM (&newdelnum, "1.1");
+        JAM (&bud->num, "1.1");
       else if (newdnumlength == 1)
-        ADD (&newdelnum, ".1");
+        ADD (&bud->num, ".1");
       else if (newdnumlength > 2)
         {
           RERR ("Branch point doesn't exist for revision %s.",
-                newdelnum.string);
+                bud->num.string);
           return -1;
         }
       /* (‘newdnumlength’ == 2 is OK.)  */
-      tip = REPO (tip) = &newdelta;
-      newdelta.ilk = NULL;
+      tip = REPO (tip) = &bud->d;
+      bud->d.ilk = NULL;
       return 0;
     }
   if (newdnumlength == 0)
@@ -364,39 +364,39 @@ addelta (struct wlink **tp_deltas, bool rcsinitflag)
           if (targetdelta == tip)
             {
               /* Make new head.  */
-              newdelta.ilk = tip;
-              tip = REPO (tip) = &newdelta;
+              bud->d.ilk = tip;
+              tip = REPO (tip) = &bud->d;
             }
           else if (!targetdelta->ilk && countnumflds (targetdelta->num) > 2)
             {
               /* New tip revision on side branch.  */
-              targetdelta->ilk = &newdelta;
-              newdelta.ilk = NULL;
+              targetdelta->ilk = &bud->d;
+              bud->d.ilk = NULL;
             }
           else
             {
               /* Middle revision; start a new branch.  */
-              JAM (&newdelnum, "");
-              return addbranch (targetdelta, &newdelnum, true, tp_deltas);
+              JAM (&bud->num, "");
+              return addbranch (targetdelta, bud, true, tp_deltas);
             }
-          incnum (targetdelta->num, &newdelnum);
+          incnum (targetdelta->num, &bud->num);
           /* Successful use of existing lock.  */
           return 1;
 
         case 0:
-          /* No existing lock; try ‘defbr’.  Update ‘newdelnum’.  */
+          /* No existing lock; try ‘defbr’.  Update ‘bud->num’.  */
           if (BE (strictly_locking) || !stat_mine_p (&REPO (stat)))
             {
               RERR ("no lock set by %s", getcaller ());
               return -1;
             }
           if (defbr)
-            JAM (&newdelnum, defbr);
+            JAM (&bud->num, defbr);
           else
             {
-              incnum (tip->num, &newdelnum);
+              incnum (tip->num, &bud->num);
             }
-          newdnumlength = countnumflds (newdelnum.string);
+          newdnumlength = countnumflds (bud->num.string);
           /* Now fall into next statement.  */
         }
     }
@@ -406,15 +406,15 @@ addelta (struct wlink **tp_deltas, bool rcsinitflag)
       if (newdnumlength == 1)
         {
           /* Make a two-field number out of it.  */
-          if (NUMF_EQ (1, newdelnum.string, tip->num))
-            incnum (tip->num, &newdelnum);
+          if (NUMF_EQ (1, bud->num.string, tip->num))
+            incnum (tip->num, &bud->num);
           else
-            ADD (&newdelnum, ".1");
+            ADD (&bud->num, ".1");
         }
-      if (!NUM_GT (newdelnum.string, tip->num))
+      if (!NUM_GT (bud->num.string, tip->num))
         {
           RERR ("revision %s too low; must be higher than %s",
-                newdelnum.string, tip->num);
+                bud->num.string, tip->num);
           return -1;
         }
       targetdelta = tip;
@@ -422,14 +422,14 @@ addelta (struct wlink **tp_deltas, bool rcsinitflag)
         {
           if (!gr_revno (tip->num, tp_deltas))
             return -1;
-          newdelta.ilk = tip;
-          tip = REPO (tip) = &newdelta;
+          bud->d.ilk = tip;
+          tip = REPO (tip) = &bud->d;
         }
       return removedlock;
     }
   else
     {
-      struct cbuf old = newdelnum;      /* sigh */
+      struct cbuf old = bud->num;       /* sigh */
 
       /* Put new revision on side branch.  First, get branch point.  */
       tp = old.string;
@@ -445,7 +445,7 @@ addelta (struct wlink **tp_deltas, bool rcsinitflag)
           RERR ("can't find branch point %s", old.string);
           return -1;
         }
-      return addbranch (targetdelta, &newdelnum, false, tp_deltas);
+      return addbranch (targetdelta, bud, false, tp_deltas);
     }
 }
 
@@ -538,7 +538,7 @@ xpandfile (struct fro *unexfile, struct delta const *delta,
 static struct cbuf logmsg;
 
 static struct cbuf
-getlogmsg (struct cbuf *msg)
+getlogmsg (struct cbuf *msg, const struct bud *bud)
 /* Obtain and return a log message.
    If a log message is given with ‘-m’, return that message.
    If this is the initial revision, return a standard log message.
@@ -547,6 +547,8 @@ getlogmsg (struct cbuf *msg)
    Prompt the first time called for the log message; during all
    later calls ask whether the previous log message can be reused.  */
 {
+  const char *num;
+
   if (msg->size)
     return *msg;
 
@@ -561,8 +563,11 @@ getlogmsg (struct cbuf *msg)
       return logmsg;
     }
 
-  if (!targetdelta && (NUM_EQ (newdelnum.string, "1.1")
-                       || NUM_EQ (newdelnum.string, "1.0")))
+  if (!targetdelta
+      && bud->num.size
+      && (num = bud->num.string)
+      && (NUM_EQ (num, "1.1")
+          || NUM_EQ (num, "1.0")))
     {
       struct cbuf const initiallog =
         {
@@ -678,6 +683,7 @@ main (int argc, char **argv)
   bool usestatdate;             /* Use mod time of file for -d.  */
   mode_t newworkmode;           /* mode for working file */
   time_t mtime, wtime;
+  struct bud bud;
   struct delta *workdelta;
   struct link *symbolic_names = NULL;
   struct wlink *deltas;                 /* Deltas to be generated.  */
@@ -691,6 +697,14 @@ main (int argc, char **argv)
 
   CHECK_HV ();
   gnurcs_init (&program);
+
+  /* This lameness is because constructing a proper initialization form for
+     ‘struct bud’ is too much hassle.  We do it here, after the ‘gnurcs_init’
+     instead of before, closer to the declaration (as would be more indicative
+     of its role) because perhaps Real Soon Now But Not Quite Yet ‘bud’ will
+     be changed to be heap-allocated (probably in ‘PLEXUS’), and this is the
+     place to do that.  */
+  memset (&bud, 0, sizeof (struct bud));
 
   setrid ();
 
@@ -954,40 +968,40 @@ main (int argc, char **argv)
         /* (End processing keepflag.)  */
 
         /* Expand symbolic revision number.  */
-        if (!fully_numeric (&newdelnum, krev, work.fro))
+        if (!fully_numeric (&bud.num, krev, work.fro))
           continue;
 
         /* Splice new delta into tree.  */
-        if (PROB (removedlock = addelta (&deltas, rcsinitflag)))
+        if (PROB (removedlock = addelta (&deltas, &bud, rcsinitflag)))
           continue;
         tip = REPO (tip);
 
-        newdelta.num = newdelnum.string;
-        newdelta.branches = NULL;
+        bud.d.num = bud.num.string;
+        bud.d.branches = NULL;
         /* This might be changed by ‘addlock’.  */
-        newdelta.lockedby = NULL;
-        newdelta.selector = true;
-        newdelta.name = NULL;
+        bud.d.lockedby = NULL;
+        bud.d.selector = true;
+        bud.d.name = NULL;
 
         /* Set author.  */
         if (author)
           /* Given by ‘-w’.  */
-          newdelta.author = author;
+          bud.d.author = author;
         else if (keepflag && (pv = PREV (author)))
             /* Preserve old author if possible.  */
-          newdelta.author = pv;
+          bud.d.author = pv;
         else
           /* Otherwise use caller's id.  */
-          newdelta.author = getcaller ();
+          bud.d.author = getcaller ();
 
         /* Set state.  */
-        newdelta.state = default_state;
+        bud.d.state = default_state;
         if (state)
           /* Given by ‘-s’.  */
-          newdelta.state = state;
+          bud.d.state = state;
         else if (keepflag && (pv = PREV (state)))
           /* Preserve old state if possible.  */
-          newdelta.state = pv;
+          bud.d.state = pv;
 
         /* Compute date.  */
         if (usestatdate)
@@ -996,33 +1010,33 @@ main (int argc, char **argv)
           }
         if (*altdate != '\0')
           /* Given by ‘-d’.  */
-          newdelta.date = altdate;
+          bud.d.date = altdate;
         else if (keepflag && (pv = PREV (date)))
           {
             /* Preserve old date if possible.  */
             str2date (pv, olddate);
-            newdelta.date = olddate;
+            bud.d.date = olddate;
           }
         else
           /* Use current date.  */
-          newdelta.date = getcurdate ();
+          bud.d.date = getcurdate ();
         /* Now check validity of date -- needed because of ‘-d’ and ‘-k’.  */
-        if (targetdelta && DATE_LT (newdelta.date, targetdelta->date))
+        if (targetdelta && DATE_LT (bud.d.date, targetdelta->date))
           {
             RERR ("Date %s precedes %s in revision %s.",
-                  date2str (newdelta.date, newdatebuf),
+                  date2str (bud.d.date, newdatebuf),
                   date2str (targetdelta->date, targetdatebuf),
                   targetdelta->num);
             continue;
           }
 
-        if (lockflag && addlock (&newdelta, true) < 0)
+        if (lockflag && addlock (&bud.d, true) < 0)
           continue;
 
         if (keepflag && (pv = PREV (name)))
-          if (addsymbol (newdelta.num, pv, false) < 0)
+          if (addsymbol (bud.d.num, pv, false) < 0)
             continue;
-        if (!addsyms (newdelta.num, symbolic_names))
+        if (!addsyms (bud.d.num, symbolic_names))
           continue;
 
         putadmin ();
@@ -1033,15 +1047,15 @@ main (int argc, char **argv)
         changework = kws < MIN_UNCHANGED_EXPAND;
         dolog = true;
         lockthis = lockflag;
-        workdelta = &newdelta;
+        workdelta = &bud.d;
 
         /* Build rest of file.  */
         if (rcsinitflag)
           {
-            diagnose ("initial revision: %s", newdelta.num);
+            diagnose ("initial revision: %s", bud.d.num);
             /* Get logmessage.  */
-            newdelta.pretty_log = getlogmsg (&msg);
-            putdftext (&newdelta, work.fro, frew, false);
+            bud.d.pretty_log = getlogmsg (&msg, &bud);
+            putdftext (&bud.d, work.fro, frew, false);
             repo_stat->st_mode = work.st.st_mode;
             repo_stat->st_nlink = 0;
             changedRCS = true;
@@ -1051,12 +1065,12 @@ main (int argc, char **argv)
         else
           {
             diffname = maketemp (0);
-            newhead = tip == &newdelta;
+            newhead = tip == &bud.d;
             if (!newhead)
               FLOW (to) = frew;
             expname = buildrevision (deltas, targetdelta, NULL, false);
             if (!forceciflag
-                && STR_SAME (newdelta.state, targetdelta->state)
+                && STR_SAME (bud.d.state, targetdelta->state)
                 && ((changework = rcsfcmp (work.fro, &work.st, expname,
                                           targetdelta))
                     <= 0))
@@ -1087,17 +1101,17 @@ main (int argc, char **argv)
                     bad_truncate = PROB (ftruncate (fileno (frew), (off_t) 0));
                     grok_resynch (REPO (r));
 
-                    /* The ‘newdelta’ might still be linked in the tree,
+                    /* The ‘bud.d’ might still be linked in the tree,
                        so prune it now.  (Unfortunately, ‘grok_resynch’
                        did not restore the tree completely, as its name
                        might imply.)  */
-                    prune (&newdelta, targetdelta);
+                    prune (&bud.d, targetdelta);
 
                     if (! (workdelta = gr_revno (targetdelta->num, &deltas)))
                       continue;
                     workdelta->pretty_log = targetdelta->pretty_log;
-                    if (newdelta.state != default_state)
-                      workdelta->state = newdelta.state;
+                    if (bud.d.state != default_state)
+                      workdelta->state = bud.d.state;
                     if (lockthis < removedlock && removelock (workdelta) < 0)
                       continue;
                     if (!addsyms (workdelta->num, symbolic_names))
@@ -1120,9 +1134,9 @@ main (int argc, char **argv)
                 char const *diffv[6 + !!OPEN_O_BINARY], **diffp;
 
                 diagnose ("new revision: %s; previous revision: %s",
-                          newdelta.num, targetdelta->num);
+                          bud.d.num, targetdelta->num);
                 SAME_AFTER (from, targetdelta->text);
-                newdelta.pretty_log = getlogmsg (&msg);
+                bud.d.pretty_log = getlogmsg (&msg, &bud);
 
                 /* "Rewind" ‘work.fro’ before feeding it to diff(1).  */
                 fro_bob (work.fro);
@@ -1144,11 +1158,11 @@ main (int argc, char **argv)
                 if (newhead)
                   {
                     fro_bob (work.fro);
-                    putdftext (&newdelta, work.fro, frew, false);
+                    putdftext (&bud.d, work.fro, frew, false);
                     if (!putdtext (targetdelta, diffname, frew, true))
                       continue;
                   }
-                else if (!putdtext (&newdelta, diffname, frew, true))
+                else if (!putdtext (&bud.d, diffname, frew, true))
                   continue;
 
                 /* Check whether the working file changed during checkin,

@@ -1,5 +1,19 @@
 2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove new{delnum,delta,branch} from global state of ci(1).
+
+	* ci.c (newdelnum, newdelta): Delete vars.
+	(struct bud): New.
+	(newbranch): Delete var.
+	(addbranch): Don't take NUM; take BUD,
+	instead; compute ‘num’ internally.
+	(addelta): Move 2nd arg to 3rd position;
+	take 2nd arg BUD; update calls to ‘addbranch’.
+	(getlogmsg): Take 2nd arg BUD.
+	(main): Add auto var ‘bud’; update calls to ‘addelta’, ‘getlogmsg’.
+
+2011-10-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘rcsinitflag’ from global state of ci(1).
 
 	* ci.c (rcsinitflag): Delete var.
