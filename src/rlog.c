@@ -59,6 +59,7 @@ struct criteria
 {
   struct link *revs;
   struct link *authors;
+  struct link *lockers;
 };
 
 /* A version-specific format string.  */
@@ -68,9 +69,6 @@ static char const *insDelFormat;
    On the first pass (option processing), push onto ‘criteria->revs’.
    After grokking, walk ‘criteria->revs’ and push onto ‘Revlst’.  */
 static struct link *Revlst;
-
-/* Lockers in locker option.  */
-static struct link *lockerlist;
 
 /* States in ‘-s’ option.  */
 static struct link *statelist;
@@ -90,9 +88,9 @@ exiterr (void)
 }
 
 static void
-getlocker (char *argv)
+getlocker (char *argv, struct criteria *criteria)
 /* Get the login names of lockers from command line
-   and store in ‘lockerlist’.  */
+   and store in ‘criteria->lockers’.  */
 {
   register char c;
   struct link box, *tp;
@@ -103,11 +101,11 @@ getlocker (char *argv)
     continue;
   if (c == '\0')
     {
-      lockerlist = NULL;
+      criteria->lockers = NULL;
       return;
     }
 
-  box.next = lockerlist;
+  box.next = criteria->lockers;
   tp = &box;
   while (c != '\0')
     {
@@ -118,7 +116,7 @@ getlocker (char *argv)
       *argv = '\0';
       if (c == '\0')
         {
-          lockerlist = box.next;
+          criteria->lockers = box.next;
           return;
         }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -406,22 +404,22 @@ getstate (char *argv)
 }
 
 static void
-trunclocks (void)
-/* Truncate the list of locks to those that are held by the
-   id's on ‘lockerlist’.  Do not truncate if ‘lockerlist’ empty.  */
+trunclocks (struct criteria *criteria)
+/* Truncate the list of locks to those that are held by the id's on
+   ‘criteria->lockers’.  Do not truncate if ‘criteria->lockers’ empty.  */
 {
   struct link const *plocker;
   struct link box, *tp;
 
-  if (!lockerlist)
+  if (!criteria->lockers)
     return;
 
-  /* Shorten locks to those contained in ‘lockerlist’.  */
+  /* Shorten locks to those contained in ‘criteria->lockers’.  */
   for (box.next = GROK (locks), tp = &box; tp->next;)
     {
       struct rcslock const *rl = tp->next->entry;
 
-      for (plocker = lockerlist;;)
+      for (plocker = criteria->lockers;;)
         if (STR_SAME (plocker->entry, rl->login))
           {
             tp = tp->next;
@@ -784,7 +782,12 @@ main (int argc, char **argv)
   bool branchflag = false;
   bool lockflag = false;
   struct date_selection datesel = { .in = NULL, .by = NULL };
-  struct criteria criteria = { .revs = NULL, .authors = NULL };
+  struct criteria criteria =
+    {
+      .revs = NULL,
+      .authors = NULL,
+      .lockers = NULL
+    };
   FILE *out;
   char *a, **newargv;
   char const *accessListString, *accessFormat;
@@ -832,7 +835,7 @@ main (int argc, char **argv)
 
         case 'l':
           lockflag = true;
-          getlocker (a);
+          getlocker (a, &criteria);
           break;
 
         case 'b':
@@ -951,7 +954,7 @@ main (int argc, char **argv)
 
         /* Keep only those locks given by ‘-l’.  */
         if (lockflag)
-          trunclocks ();
+          trunclocks (&criteria);
 
         /* Do nothing if ‘-L’ is given and there are no locks.  */
         if (onlylockflag && !locks)
