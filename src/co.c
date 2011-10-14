@@ -46,12 +46,8 @@ struct work
 static char const quietarg[] = "-q";
 
 static char const *expandarg, *suffixarg, *versionarg, *zonearg;
-/* Revisions to be joined.  */
-static char const **joinlist;
 static FILE *neworkptr;
 static bool forceflag;
-/* Index of last element in `joinlist'.  */
-static int lastjoin;
 
 /* State for -j.  */
 struct jstuff
@@ -59,6 +55,12 @@ struct jstuff
   struct divvy *jstuff;
   struct link head, *tp;
   struct symdef *merge;
+
+  char const **ls;
+  /* Revisions to be joined.  */
+
+  int lastidx;
+  /* Index of last element in `ls'.  */
 };
 
 /* -1 -> unlock, 0 -> do nothing, 1 -> lock.  */
@@ -153,12 +155,12 @@ static void
 jpush (char const *rev, struct jstuff *js)
 {
   js->tp = extend (js->tp, rev, js->jstuff);
-  lastjoin++;
+  js->lastidx++;
 }
 
 static char *
 addjoin (char *joinrev, struct jstuff *js)
-/* Add the number of ‘joinrev’ to ‘joinlist’; return address
+/* Add the number of ‘joinrev’ to ‘js->ls’; return address
    of char past ‘joinrev’, or NULL if no such revision exists.  */
 {
   register char *j;
@@ -240,8 +242,8 @@ getancestor (char const *r1, char const *r2)
 static bool
 preparejoin (register char *j, struct jstuff *js)
 /* Parse join list ‘j’ and place pointers to the
-   revision numbers into ‘joinlist’.
-   Set ‘lastjoin’ to the last index of the list.  */
+   revision numbers into ‘js->ls’.
+   Set ‘js->lastidx’ to the last index of the list.  */
 {
   bool rv = true;
 
@@ -254,7 +256,7 @@ preparejoin (register char *j, struct jstuff *js)
       js->merge->meaningful = "merge";
     }
 
-  lastjoin = -1;
+  js->lastidx = -1;
   for (;;)
     {
       while ((*j == ' ') || (*j == '\t') || (*j == ','))
@@ -282,7 +284,7 @@ preparejoin (register char *j, struct jstuff *js)
         }
       else
         {
-          if (lastjoin == 0)            /* first pair */
+          if (js->lastidx == 0)         /* first pair */
             {
               char const *two = js->tp->entry;
 
@@ -301,14 +303,14 @@ preparejoin (register char *j, struct jstuff *js)
             }
         }
     }
-  if (lastjoin < 1)
+  if (js->lastidx < 1)
     RFATAL ("empty join");
  done:
 
-  joinlist = pointer_array (PLEXUS, 1 + lastjoin);
+  js->ls = pointer_array (PLEXUS, 1 + js->lastidx);
   js->tp = js->head.next;
-  for (int i = 0; i <= lastjoin; i++, js->tp = js->tp->next)
-    joinlist[i] = js->tp->entry;
+  for (int i = 0; i <= js->lastidx; i++, js->tp = js->tp->next)
+    js->ls[i] = js->tp->entry;
   close_space (js->jstuff);
   js->jstuff = NULL;
   return rv;
@@ -316,7 +318,7 @@ preparejoin (register char *j, struct jstuff *js)
 
 static bool
 buildjoin (char const *initialfile, struct jstuff *js)
-/* Merge pairs of elements in ‘joinlist’ into ‘initialfile’.
+/* Merge pairs of elements in ‘js->ls’ into ‘initialfile’.
    If ‘MANI (standard_output)’ is set, copy result to stdout.
    All unlinking of ‘initialfile’, ‘rev2’, and ‘rev3’
    should be done by ‘tempunlink’.  */
@@ -351,7 +353,7 @@ buildjoin (char const *initialfile, struct jstuff *js)
   /* Rest of ‘mergev’ setup below.  */
 
   i = 0;
-  while (i < lastjoin)
+  while (i < js->lastidx)
     {
 #define ACCF(...)  accf (SINGLE, __VA_ARGS__)
       /* Prepare marker for merge.  */
@@ -359,26 +361,26 @@ buildjoin (char const *initialfile, struct jstuff *js)
         subs = targetdelta->num;
       else
         {
-          ACCF ("%s,%s:%s", subs, joinlist[i - 2], joinlist[i - 1]);
+          ACCF ("%s,%s:%s", subs, js->ls[i - 2], js->ls[i - 1]);
           subs = finish_string (SINGLE, &len);
         }
-      diagnose ("revision %s", joinlist[i]);
-      ACCF ("-p%s", joinlist[i]);
+      diagnose ("revision %s", js->ls[i]);
+      ACCF ("-p%s", js->ls[i]);
       cov[2] = finish_string (SINGLE, &len);
       if (runv (-1, rev2, cov))
         goto badmerge;
-      diagnose ("revision %s", joinlist[i + 1]);
-      ACCF ("-p%s", joinlist[i + 1]);
+      diagnose ("revision %s", js->ls[i + 1]);
+      ACCF ("-p%s", js->ls[i + 1]);
       cov[2] = finish_string (SINGLE, &len);
       if (runv (-1, rev3, cov))
         goto badmerge;
       diagnose ("merging...");
       mergev[3] = subs;
-      mergev[5] = joinlist[i + 1];
+      mergev[5] = js->ls[i + 1];
       p = &mergev[6];
       if (BE (quiet))
         *p++ = quietarg;
-      if (lastjoin <= i + 2 && MANI (standard_output))
+      if (js->lastidx <= i + 2 && MANI (standard_output))
         *p++ = "-p";
       *p++ = initialfile;
       *p++ = rev2;

@@ -1,5 +1,15 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘joinlist’, ‘lastjoin’ from global state of co(1).
+
+	* co.c (joinlist, lastjoin): Delete vars.
+	(struct jstuff): Add members ‘ls’, ‘lastidx’.
+	(jpush): Use ‘js->lastidx’.
+	(preparejoin): Likewise; use ‘js->ls’.
+	(buildjoin): Use ‘js->lastidx’, ‘js->ls’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘jstuff’ from global state of co(1).
 
 	* co.c (jstuff): Delete var.
