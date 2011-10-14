@@ -1,5 +1,15 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘workstat’ from global state of co(1).
+
+	* co.c (struct work): New.
+	(workstat): Delete var.
+	(rmworkfile): Take arg ‘work’; use ‘work->st’.
+	(main): Add auto var work; use ‘work.st’;
+	update calls to ‘rmworkfile’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘insDelFormat’ from global state of rlog(1).
 
 	* rlog.c (insDelFormat): Delete var.

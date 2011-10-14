@@ -38,6 +38,11 @@
 
 struct top *top;
 
+struct work
+{
+  struct stat st;
+};
+
 static char const quietarg[] = "-q";
 
 static char const *expandarg, *suffixarg, *versionarg, *zonearg;
@@ -62,7 +67,6 @@ static int lockflag;
 static bool mtimeflag;
 /* Final delta to be generated.  */
 static struct delta *targetdelta;
-static struct stat workstat;
 
 static void
 cleanup (int *exitstatus)
@@ -93,19 +97,19 @@ exiterr (void)
 }
 
 static bool
-rmworkfile (void)
+rmworkfile (struct work *work)
 /* Prepare to remove ‘MANI (filename)’, if it exists, and if it is read-only.
    Otherwise (file writable), if !quietmode, ask the user whether to
    really delete it (default: fail); otherwise fail.
    Return true if permission is gotten.  */
 {
-  if (workstat.st_mode & (S_IWUSR | S_IWGRP | S_IWOTH) && !forceflag)
+  if (work->st.st_mode & (S_IWUSR | S_IWGRP | S_IWOTH) && !forceflag)
     {
       char const *mani_filename = MANI (filename);
 
       /* File is writable.  */
       if (!yesorno (false, "writable %s exists%s; remove it? [ny](n): ",
-                    mani_filename, (stat_mine_p (&workstat)
+                    mani_filename, (stat_mine_p (&work->st)
                                     ? ""
                                     : ", and you do not own it")))
         {
@@ -434,6 +438,7 @@ int
 main (int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
+  struct work work;
   char *a, *joinflag, **newargv;
   char const *author, *date, *rev, *state;
   char const *joinname, *newdate, *neworkname;
@@ -639,8 +644,8 @@ main (int argc, char **argv)
           }
         else
           {
-            workstatstat = stat (mani_filename, &workstat);
-            if (!PROB (workstatstat) && SAME_INODE (REPO (stat), workstat))
+            workstatstat = stat (mani_filename, &work.st);
+            if (!PROB (workstatstat) && SAME_INODE (REPO (stat), work.st))
               {
                 RERR ("RCS file is the same as working file %s.",
                       mani_filename);
@@ -666,7 +671,7 @@ main (int argc, char **argv)
                      lockflag < 0 ? "un" : "");
             Ozclose (&FLOW (res));
             if (!PROB (workstatstat))
-              if (!rmworkfile ())
+              if (!rmworkfile (&work))
                 continue;
             changelock = 0;
             newdate = NULL;
@@ -729,7 +734,7 @@ main (int argc, char **argv)
 
             /* Prepare to remove old working file if necessary.  */
             if (!PROB (workstatstat))
-              if (!rmworkfile ())
+              if (!rmworkfile (&work))
                 continue;
 
             /* Skip description (don't echo).  */
