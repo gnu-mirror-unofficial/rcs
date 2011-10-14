@@ -51,8 +51,6 @@ struct daterange
 
 /* A version-specific format string.  */
 static char const *insDelFormat;
-/* The ‘-l’ option.  */
-static bool lockflag;
 
 /* Date range in ‘-d’ option.  */
 static struct link *datelist, *duelst;
@@ -272,7 +270,7 @@ putforest (struct wlink const *branchroot)
 }
 
 static char
-extractdelta (struct delta const *pdelta)
+extractdelta (struct delta const *pdelta, bool lockflag)
 /* Return true if ‘pdelta’ matches the selection critera.  */
 {
   struct link const *pstate;
@@ -309,18 +307,18 @@ extractdelta (struct delta const *pdelta)
 }
 
 static void
-exttree (struct delta *root)
+exttree (struct delta *root, bool lockflag)
 /* Select revisions, starting with ‘root’.  */
 {
   if (!root)
     return;
 
-  root->selector = extractdelta (root);
+  root->selector = extractdelta (root, lockflag);
   root->pretty_log.string = NULL;
-  exttree (root->ilk);
+  exttree (root->ilk, lockflag);
 
   for (struct wlink *ls = root->branches; ls; ls = ls->next)
-    exttree (ls->entry);
+    exttree (ls->entry, lockflag);
 }
 
 static void
@@ -769,6 +767,7 @@ main (int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
   bool branchflag = false;
+  bool lockflag = false;
   FILE *out;
   char *a, **newargv;
   char const *accessListString, *accessFormat;
@@ -988,7 +987,7 @@ main (int argc, char **argv)
 
         if (tip && selectflag & descflag)
           {
-            exttree (tip);
+            exttree (tip, lockflag);
 
             /* Get most recently date of the dates pointed by ‘duelst’.  */
             for (struct link *ls = duelst; ls; ls = ls->next)
