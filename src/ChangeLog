@@ -1,5 +1,15 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove {force,lock,mtime}flag from global state of co(1).
+
+	* co.c (struct work): Add member ‘force’.
+	(forceflag, lockflag, mtimeflag): Delete vars.
+	(rmworkfile): Use ‘work->force’.
+	(main): Update initialization form for auto var ‘work’;
+	add auto vars ‘lockflag’, ‘mtimeflag’; use ‘work.force’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘targetdelta’ from global state of co(1).
 
 	* co.c (struct jstuff): Add member ‘d’.
