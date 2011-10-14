@@ -60,6 +60,7 @@ struct criteria
   struct link *revs;
   struct link *authors;
   struct link *lockers;
+  struct link *states;
 };
 
 /* A version-specific format string.  */
@@ -69,9 +70,6 @@ static char const *insDelFormat;
    On the first pass (option processing), push onto ‘criteria->revs’.
    After grokking, walk ‘criteria->revs’ and push onto ‘Revlst’.  */
 static struct link *Revlst;
-
-/* States in ‘-s’ option.  */
-static struct link *statelist;
 
 static void
 cleanup (int *exitstatus)
@@ -288,7 +286,7 @@ extractdelta (struct delta const *pdelta, bool lockflag,
       if (!(pauthor = pauthor->next))
         return false;
   /* Only certain states wanted.  */
-  if ((pstate = statelist))
+  if ((pstate = criteria->states))
     while (STR_DIFF (pstate->entry, pdelta->state))
       if (!(pstate = pstate->next))
         return false;
@@ -367,8 +365,9 @@ getauthor (char *argv, struct criteria *criteria)
 }
 
 static void
-getstate (char *argv)
-/* Get the states of revisions from command line and store in ‘statelist’.  */
+getstate (char *argv, struct criteria *criteria)
+/* Get the states of revisions from command line
+   and store in ‘criteria->states’.  */
 {
   register char c;
   struct link box, *tp;
@@ -383,7 +382,7 @@ getstate (char *argv)
       return;
     }
 
-  box.next = statelist;
+  box.next = criteria->states;
   tp = &box;
   while (c != '\0')
     {
@@ -394,7 +393,7 @@ getstate (char *argv)
       *argv = '\0';
       if (c == '\0')
         {
-          statelist = box.next;
+          criteria->states = box.next;
           return;
         }
       while ((c = *++argv) == ',' || c == ' ' || c == '\t' || c == '\n'
@@ -786,7 +785,8 @@ main (int argc, char **argv)
     {
       .revs = NULL,
       .authors = NULL,
-      .lockers = NULL
+      .lockers = NULL,
+      .states = NULL
     };
   FILE *out;
   char *a, **newargv;
@@ -851,7 +851,7 @@ main (int argc, char **argv)
           break;
 
         case 's':
-          getstate (a);
+          getstate (a, &criteria);
           break;
 
         case 'w':

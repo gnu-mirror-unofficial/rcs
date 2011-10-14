@@ -1,5 +1,16 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘statelist’ from global state of rlog(1).
+
+	* rlog.c (struct criteria): Add member ‘states’.
+	(statelist): Delete var.
+	(extractdelta): Use ‘criteria->states’.
+	(getstate): Take 2nd arg ‘criteria’; use ‘criteria->states’.
+	(main): Update initialization form of auto var ‘criteria’;
+	update call to ‘getstate’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘lockerlist’ from global state of rlog(1).
 
 	* rlog.c (struct criteria): Add member ‘lockers’.
