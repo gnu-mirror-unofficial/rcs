@@ -55,6 +55,9 @@ struct jstuff
   struct symdef *merge;
   char const *expand, *suffix, *version, *zone;
 
+  struct delta *d;
+  /* Final delta to be generated.  */
+
   char const **ls;
   /* Revisions to be joined.  */
 
@@ -65,8 +68,6 @@ struct jstuff
 /* -1 -> unlock, 0 -> do nothing, 1 -> lock.  */
 static int lockflag;
 static bool mtimeflag;
-/* Final delta to be generated.  */
-static struct delta *targetdelta;
 
 static void
 cleanup (int *exitstatus, FILE **neworkptr)
@@ -288,7 +289,7 @@ preparejoin (register char *j, struct jstuff *js)
               char const *two = js->tp->entry;
 
               /* Derive common ancestor.  */
-              if (! (js->tp->entry = getancestor (targetdelta->num, two)))
+              if (! (js->tp->entry = getancestor (js->d->num, two)))
                 {
                   rv = false;
                   goto done;
@@ -357,7 +358,7 @@ buildjoin (char const *initialfile, struct jstuff *js)
 #define ACCF(...)  accf (SINGLE, __VA_ARGS__)
       /* Prepare marker for merge.  */
       if (i == 0)
-        subs = targetdelta->num;
+        subs = js->d->num;
       else
         {
           ACCF ("%s,%s:%s", subs, js->ls[i - 2], js->ls[i - 1]);
@@ -682,7 +683,7 @@ main (int argc, char **argv)
         else
           {
             struct cbuf numericrev;
-            int locks = lockflag ? findlock (false, &targetdelta) : 0;
+            int locks = lockflag ? findlock (false, &jstuff.d) : 0;
             struct fro *from = FLOW (from);
 
             if (rev)
@@ -701,18 +702,18 @@ main (int argc, char **argv)
                     numericrev.string = GROK (branch) ? GROK (branch) : "";
                     break;
                   case 1:
-                    numericrev.string = str_save (targetdelta->num);
+                    numericrev.string = str_save (jstuff.d->num);
                     break;
                   }
               }
             /* Get numbers of deltas to be generated.  */
-            if (! (targetdelta = genrevs (numericrev.string, date, author,
+            if (! (jstuff.d = genrevs (numericrev.string, date, author,
                                           state, &deltas)))
               continue;
             /* Check reservations.  */
             changelock = lockflag < 0
-              ? rmlock (targetdelta)
-              : lockflag == 0 ? 0 : addlock_maybe (targetdelta, selfsame, true);
+              ? rmlock (jstuff.d)
+              : lockflag == 0 ? 0 : addlock_maybe (jstuff.d, selfsame, true);
 
             if (changelock < 0
                 || (changelock && !checkaccesslist ())
@@ -730,10 +731,10 @@ main (int argc, char **argv)
             if (joinflag && !preparejoin (joinflag, &jstuff))
               continue;
 
-            diagnose ("revision %s%s", targetdelta->num,
+            diagnose ("revision %s%s", jstuff.d->num,
                       0 < lockflag ? " (locked)" :
                       lockflag < 0 ? " (unlocked)" : "");
-            SAME_AFTER (from, targetdelta->text);
+            SAME_AFTER (from, jstuff.d->text);
 
             /* Prepare to remove old working file if necessary.  */
             if (!PROB (workstatstat))
@@ -744,13 +745,13 @@ main (int argc, char **argv)
             write_desc_maybe (FLOW (to));
 
             BE (inclusive_of_Locker_in_Id_val) = 0 < lockflag;
-            targetdelta->name = namedrev (rev, targetdelta);
-            joinname = buildrevision (deltas, targetdelta,
+            jstuff.d->name = namedrev (rev, jstuff.d);
+            joinname = buildrevision (deltas, jstuff.d,
                                       joinflag && tostdout ? NULL : neworkptr,
                                       kws < MIN_UNEXPAND);
             if (FLOW (res) == neworkptr)
               FLOW (res) = NULL;             /* Don't close it twice.  */
-            if (changelock && deltas->entry != targetdelta)
+            if (changelock && deltas->entry != jstuff.d)
               fro_trundling (true, from);
 
             if (PROB (donerewrite (changelock, Ttimeflag
@@ -765,7 +766,7 @@ main (int argc, char **argv)
                   RWARN ("You now have %d locks.", locks);
               }
 
-            newdate = targetdelta->date;
+            newdate = jstuff.d->date;
             if (joinflag)
               {
                 newdate = NULL;
