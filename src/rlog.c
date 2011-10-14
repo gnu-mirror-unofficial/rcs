@@ -66,9 +66,6 @@ struct criteria
   struct link *states;
 };
 
-/* A version-specific format string.  */
-static char const *insDelFormat;
-
 static void
 cleanup (int *exitstatus)
 {
@@ -171,7 +168,7 @@ count_a_d (long *a, long *d, struct atat *edits)
 static void
 putadelta (register struct delta const *node,
            register struct delta const *editscript,
-           bool trunk)
+           bool trunk, const char *insDelFormat)
 /* Print delta ‘node’ if ‘node->selector’ is set.
    ‘editscript’ indicates where the editscript is stored;
    ‘trunk’ !false indicates this node is in trunk.  */
@@ -226,47 +223,47 @@ putadelta (register struct delta const *node,
 }
 
 static void
-putrunk (void)
+putrunk (const char *insDelFormat)
 /* Print revisions chosen, which are in trunk.  */
 {
   register struct delta const *ptr;
 
   for (ptr = REPO (tip); ptr; ptr = ptr->ilk)
-    putadelta (ptr, ptr->ilk, true);
+    putadelta (ptr, ptr->ilk, true, insDelFormat);
 }
 
-static void putforest (struct wlink const *branchroot);
+static void putforest (struct wlink const *branchroot, const char *insDelFormat);
 
 static void
-putree (struct delta const *root)
+putree (struct delta const *root, const char *insDelFormat)
 /* Print delta tree from ‘root’ (not including trunk)
    in reverse order on each branch.  */
 {
   if (!root)
     return;
-  putree (root->ilk);
-  putforest (root->branches);
+  putree (root->ilk, insDelFormat);
+  putforest (root->branches, insDelFormat);
 }
 
 static void
-putabranch (struct delta const *root)
+putabranch (struct delta const *root, const char *insDelFormat)
 /* Print one branch from ‘root’.  */
 {
   if (!root)
     return;
-  putabranch (root->ilk);
-  putadelta (root, root, false);
+  putabranch (root->ilk, insDelFormat);
+  putadelta (root, root, false, insDelFormat);
 }
 
 static void
-putforest (struct wlink const *branchroot)
+putforest (struct wlink const *branchroot, const char *insDelFormat)
 /* Print branches that have the same direct ancestor ‘branchroot’.  */
 {
   if (!branchroot)
     return;
-  putforest (branchroot->next);
-  putabranch (branchroot->entry);
-  putree (branchroot->entry);
+  putforest (branchroot->next, insDelFormat);
+  putabranch (branchroot->entry, insDelFormat);
+  putree (branchroot->entry, insDelFormat);
 }
 
 static char
@@ -786,6 +783,7 @@ main (int argc, char **argv)
       .lockers = NULL,
       .states = NULL
     };
+  char const *insDelFormat;
   FILE *out;
   char *a, **newargv;
   char const *accessListString, *accessFormat;
@@ -1035,8 +1033,8 @@ main (int argc, char **argv)
           }
         if (revno)
           {
-            putrunk ();
-            putree (tip);
+            putrunk (insDelFormat);
+            putree (tip, insDelFormat);
           }
         aputs (equal_line, out);
       }

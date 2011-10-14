@@ -1,5 +1,21 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘insDelFormat’ from global state of rlog(1).
+
+	* rlog.c (insDelFormat): Delete var.
+	(putadelta): Take 4th arg ‘insDelFormat’.
+	(putrunk): Take arg ‘insDelFormat’; update call to ‘putadelta’.
+	(putforest): Update forward func decl.
+	(putree): Take 2nd arg ‘insDelFormat’;
+	update calls to self, ‘putforest’.
+	(putabranch): Take 2nd arg ‘insDelFormat’;
+	update calls to self, ‘putadelta’.
+	(putforest): Take 2nd arg ‘insDelFormat’;
+	update calls to self, ‘putabranch’, ‘putree’.
+	(main): Add auto var ‘insDelFormat’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘Revlst’ from global state of rlog(1).
 
 	* rlog.c (struct criteria): Add member ‘actual’.
