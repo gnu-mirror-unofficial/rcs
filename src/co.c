@@ -45,7 +45,6 @@ struct work
 
 static char const quietarg[] = "-q";
 
-static char const *expandarg, *suffixarg, *versionarg, *zonearg;
 static FILE *neworkptr;
 static bool forceflag;
 
@@ -55,6 +54,7 @@ struct jstuff
   struct divvy *jstuff;
   struct link head, *tp;
   struct symdef *merge;
+  char const *expand, *suffix, *version, *zone;
 
   char const **ls;
   /* Revisions to be joined.  */
@@ -336,14 +336,14 @@ buildjoin (char const *initialfile, struct jstuff *js)
   cov[1] = PEER_CO ();
   /* ‘cov[2]’ setup below.  */
   p = &cov[3];
-  if (expandarg)
-    *p++ = expandarg;
-  if (suffixarg)
-    *p++ = suffixarg;
-  if (versionarg)
-    *p++ = versionarg;
-  if (zonearg)
-    *p++ = zonearg;
+  if (js->expand)
+    *p++ = js->expand;
+  if (js->suffix)
+    *p++ = js->suffix;
+  if (js->version)
+    *p++ = js->version;
+  if (js->zone)
+    *p++ = js->zone;
   *p++ = quietarg;
   *p++ = REPO (filename);
   *p = '\0';
@@ -572,23 +572,23 @@ main (int argc, char **argv)
           break;
 
         case 'x':
-          suffixarg = *argv;
+          jstuff.suffix = *argv;
           BE (pe) = a;
           break;
 
         case 'V':
-          versionarg = *argv;
-          setRCSversion (versionarg);
+          jstuff.version = *argv;
+          setRCSversion (jstuff.version);
           break;
 
         case 'z':
-          zonearg = *argv;
+          jstuff.zone = *argv;
           zone_set (a);
           break;
 
         case 'k':
           /* Set keyword expand mode.  */
-          expandarg = *argv;
+          jstuff.expand = *argv;
           if (0 <= expmode)
             redefined ('k');
           if (0 <= (expmode = str2expmode (a)))
