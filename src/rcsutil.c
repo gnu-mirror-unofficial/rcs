@@ -122,13 +122,14 @@ minus_p (char const *xrev, char const *rev)
 }
 
 void
-parse_revpairs (char option, char *arg,
-                void (*put) (char const *b, char const *e, bool sawsep))
+parse_revpairs (char option, char *arg, void *data,
+                void (*put) (char const *b, char const *e,
+                             bool sawsep, void *data))
 /* Destructively tokenize string ‘arg’ for ‘option’ (either 'r' or 'o')
    into comma- or semicolon-separated chunks.  For each chunk, tokenize
    a "range": either REV, REV1:, :REV1, or REV1:REV2, where ':' can also
    be '-' (old ambiguous syntax that will go away with RCS 6.x).
-   Call ‘put’ for each pair thus found.  */
+   Call ‘put’ for each pair thus found, passing ‘data’ opaquely.  */
 {
   register char c;
   int separator = strchr (arg, ':') ? ':' : '-';
@@ -174,11 +175,11 @@ parse_revpairs (char option, char *arg,
             continue;
           e = arg;
           TRUNDLE ();
-          put (b, e, true);
+          put (b, e, true, data);
           SKIPWS ();
         }
       else
-        put (b, e, false);
+        put (b, e, false, data);
       if (!c)
         break;
       else if (c == ',' || c == ';')

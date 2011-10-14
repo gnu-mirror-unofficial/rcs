@@ -720,7 +720,7 @@ freebufs:
 }
 
 static void
-putrevpairs (char const *b, char const *e, bool sawsep)
+putrevpairs (char const *b, char const *e, bool sawsep, RCS_UNUSED void *data)
 /* Store a revision or branch range into ‘revlist’.  */
 {
   struct revrange *rr = ZLLOC (1, struct revrange);
@@ -831,7 +831,7 @@ main (int argc, char **argv)
           break;
 
         case 'r':
-          parse_revpairs ('r', a, putrevpairs);
+          parse_revpairs ('r', a, NULL, putrevpairs);
           break;
 
         case 'd':

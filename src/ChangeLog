@@ -1,5 +1,16 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Make ‘parse_revpairs’ accept/pass-through opaque data.
+
+	* rcsutil.c (parse_revpairs): Take arg ‘data’; call ‘put’ with it.
+	* base.h (parse_revpairs): Update func decl.
+	* rcs.c (putdelrev): Take 4th arg ‘data’; mark it ‘RCS_UNUSED’.
+	(main): Update call to ‘parse_revpairs’.
+	* rlog.c (putrevpairs): Take 4th arg ‘data’; mark it ‘RCS_UNUSED’.
+	(main): Update call to ‘parse_revpairs’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘datelist’, ‘duelst’ from global state of rlog(1).
 
 	* rlog.c (struct date_selection): New.

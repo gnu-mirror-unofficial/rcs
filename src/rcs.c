@@ -243,7 +243,7 @@ getstates (struct link **tp, char *sp)
 }
 
 static void
-putdelrev (char const *b, char const *e, bool sawsep)
+putdelrev (char const *b, char const *e, bool sawsep, RCS_UNUSED void *data)
 {
   if (delrev.strt || delrev.end)
     {
@@ -1271,7 +1271,7 @@ main (int argc, char **argv)
               PERR ("missing revision range after -o");
               break;
             }
-          parse_revpairs ('o', (*argv) + 2, putdelrev);
+          parse_revpairs ('o', (*argv) + 2, NULL, putdelrev);
           break;
 
         case 's':

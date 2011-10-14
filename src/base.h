@@ -835,8 +835,9 @@ void gnurcs_goodbye (void);
 void bad_option (char const *option);
 void redefined (int c);
 struct cbuf minus_p (char const *xrev, char const *rev);
-void parse_revpairs (char option, char *arg,
-                     void (*put) (char const *b, char const *e, bool sawsep));
+void parse_revpairs (char option, char *arg, void *data,
+                     void (*put) (char const *b, char const *e,
+                                  bool sawsep, void *data));
 void set_empty_log_message (struct cbuf *cb);
 void ffree (void);
 char *str_save (char const *s);
