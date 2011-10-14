@@ -57,7 +57,10 @@ struct date_selection
 
 struct criteria
 {
-  struct link *revs;
+  struct link *revs, *actual;
+  /* On the first pass (option processing), push onto ‘.revs’.
+     After grokking, walk ‘.revs’ and push onto ‘.actual’.  */
+
   struct link *authors;
   struct link *lockers;
   struct link *states;
@@ -65,11 +68,6 @@ struct criteria
 
 /* A version-specific format string.  */
 static char const *insDelFormat;
-
-/* Revision or branch range in ‘-r’ option.
-   On the first pass (option processing), push onto ‘criteria->revs’.
-   After grokking, walk ‘criteria->revs’ and push onto ‘Revlst’.  */
-static struct link *Revlst;
 
 static void
 cleanup (int *exitstatus)
@@ -294,7 +292,7 @@ extractdelta (struct delta const *pdelta, bool lockflag,
   if (lockflag && !lock_on (pdelta))
     return false;
   /* Only certain revs or branches wanted.  */
-  for (struct link *ls = Revlst; ls;)
+  for (struct link *ls = criteria->actual; ls;)
     {
       struct revrange const *rr = ls->entry;
 
@@ -627,7 +625,7 @@ checkrevpair (char const *num1, char const *num2)
 static bool
 getnumericrev (bool branchflag, struct criteria *criteria)
 /* Get the numeric name of revisions stored in ‘criteria->revs’; store
-   them in ‘Revlst’.  If ‘branchflag’, also add default branch.  */
+   them in ‘criteria->actual’.  If ‘branchflag’, also add default branch.  */
 {
   struct link *ls;
   struct revrange *rr;
@@ -638,7 +636,7 @@ getnumericrev (bool branchflag, struct criteria *criteria)
   struct delta *tip = REPO (tip);
   char const *defbr = GROK (branch);
 
-  Revlst = NULL;
+  criteria->actual = NULL;
   for (ls = criteria->revs; ls; ls = ls->next)
     {
       struct revrange const *from = ls->entry;
@@ -705,7 +703,7 @@ getnumericrev (bool branchflag, struct criteria *criteria)
           rr->nfield = n;
           rr->beg = rstart->string;
           rr->end = rend->string;
-          PUSH (rr, Revlst);
+          PUSH (rr, criteria->actual);
         }
     }
   /* Now take care of ‘branchflag’.  */
@@ -716,7 +714,7 @@ getnumericrev (bool branchflag, struct criteria *criteria)
         ? defbr
         : TAKE (1, tip->num);
       rr->nfield = countnumflds (rr->beg);
-      PUSH (rr, Revlst);
+      PUSH (rr, criteria->actual);
     }
 
 freebufs:
