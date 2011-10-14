@@ -1,3 +1,11 @@
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Remove ‘branchflag’ from global state of rlog(1).
+
+	* rlog.c (branchflag): Delete var.
+	(getnumericrev): Take arg BRANCHFLAG.
+	(main): Add auto var ‘branchflag’; update call to ‘getnumericrev’.
+
 2011-10-13  Ian Delaney  <della5@iinet.com.au>  (tiny change)
 
 	Fix bug: Make sure rcsgen.c sees ‘makedirtemp’ decl.
