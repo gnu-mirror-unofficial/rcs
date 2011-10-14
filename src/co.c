@@ -45,7 +45,6 @@ struct work
 
 static char const quietarg[] = "-q";
 
-static FILE *neworkptr;
 static bool forceflag;
 
 /* State for -j.  */
@@ -70,7 +69,7 @@ static bool mtimeflag;
 static struct delta *targetdelta;
 
 static void
-cleanup (int *exitstatus)
+cleanup (int *exitstatus, FILE **neworkptr)
 {
   FILE *mstdout = MANI (standard_output);
 
@@ -83,8 +82,8 @@ cleanup (int *exitstatus)
       && FLOW (res)
       && FLOW (res) != mstdout)
     Ozclose (&FLOW (res));
-  if (neworkptr != mstdout)
-    Ozclose (&neworkptr);
+  if (*neworkptr != mstdout)
+    Ozclose (neworkptr);
   dirtempunlink ();
 }
 
@@ -441,6 +440,7 @@ main (int argc, char **argv)
   int exitstatus = EXIT_SUCCESS;
   struct work work;
   struct jstuff jstuff;
+  FILE *neworkptr;
   char *a, *joinflag, **newargv;
   char const *author, *date, *rev, *state;
   char const *joinname, *newdate, *neworkname;
@@ -604,11 +604,11 @@ main (int argc, char **argv)
 
   /* Now handle all filenames.  */
   if (FLOW (erroneousp))
-    cleanup (&exitstatus);
+    cleanup (&exitstatus, &neworkptr);
   else if (argc < 1)
     PFATAL ("no input file");
   else
-    for (; 0 < argc; cleanup (&exitstatus), ++argv, --argc)
+    for (; 0 < argc; cleanup (&exitstatus, &neworkptr), ++argv, --argc)
       {
         struct stat *repo_stat;
         char const *mani_filename;

@@ -1,5 +1,13 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘neworkptr’ from global state of co(1).
+
+	* co.c (neworkptr): Delete var.
+	(cleanup): Take 2nd var ‘neworkptr’.
+	(main): Add auto var ‘neworkptr’; update calls to ‘cleanup’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove {expand,suffix,version,zone}arg from global state of co(1).
 
 	* co.c (expandarg, suffixarg, versionarg, zonearg): Delete vars.
