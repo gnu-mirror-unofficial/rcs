@@ -60,7 +60,6 @@ struct jstuff
   struct link head, *tp;
   struct symdef *merge;
 };
-static struct jstuff jstuff;
 
 /* -1 -> unlock, 0 -> do nothing, 1 -> lock.  */
 static int lockflag;
@@ -151,14 +150,14 @@ rmlock (struct delta const *delta)
 }
 
 static void
-jpush (char const *rev)
+jpush (char const *rev, struct jstuff *js)
 {
-  jstuff.tp = extend (jstuff.tp, rev, jstuff.jstuff);
+  js->tp = extend (js->tp, rev, js->jstuff);
   lastjoin++;
 }
 
 static char *
-addjoin (char *joinrev)
+addjoin (char *joinrev, struct jstuff *js)
 /* Add the number of ‘joinrev’ to ‘joinlist’; return address
    of char past ‘joinrev’, or NULL if no such revision exists.  */
 {
@@ -193,7 +192,7 @@ addjoin (char *joinrev)
   *j = terminator;
   if (d)
     {
-      jpush (d->num);
+      jpush (d->num, js);
       return j;
     }
   return NULL;
@@ -239,20 +238,20 @@ getancestor (char const *r1, char const *r2)
 }
 
 static bool
-preparejoin (register char *j)
+preparejoin (register char *j, struct jstuff *js)
 /* Parse join list ‘j’ and place pointers to the
    revision numbers into ‘joinlist’.
    Set ‘lastjoin’ to the last index of the list.  */
 {
   bool rv = true;
 
-  jstuff.jstuff = make_space ("jstuff");
-  jstuff.head.next = NULL;
-  jstuff.tp = &jstuff.head;
-  if (! jstuff.merge)
+  js->jstuff = make_space ("jstuff");
+  js->head.next = NULL;
+  js->tp = &js->head;
+  if (! js->merge)
     {
-      jstuff.merge = ZLLOC (1, struct symdef);
-      jstuff.merge->meaningful = "merge";
+      js->merge = ZLLOC (1, struct symdef);
+      js->merge->meaningful = "merge";
     }
 
   lastjoin = -1;
@@ -262,7 +261,7 @@ preparejoin (register char *j)
         j++;
       if (*j == '\0')
         break;
-      if (!(j = addjoin (j)))
+      if (!(j = addjoin (j, js)))
         return false;
       while ((*j == ' ') || (*j == '\t'))
         j++;
@@ -273,7 +272,7 @@ preparejoin (register char *j)
             j++;
           if (*j != '\0')
             {
-              if (!(j = addjoin (j)))
+              if (!(j = addjoin (j, js)))
                 return false;
             }
           else
@@ -285,16 +284,16 @@ preparejoin (register char *j)
         {
           if (lastjoin == 0)            /* first pair */
             {
-              char const *two = jstuff.tp->entry;
+              char const *two = js->tp->entry;
 
               /* Derive common ancestor.  */
-              if (! (jstuff.tp->entry = getancestor (targetdelta->num, two)))
+              if (! (js->tp->entry = getancestor (targetdelta->num, two)))
                 {
                   rv = false;
                   goto done;
                 }
               /* Common ancestor missing.  */
-              jpush (two);
+              jpush (two, js);
             }
           else
             {
@@ -307,16 +306,16 @@ preparejoin (register char *j)
  done:
 
   joinlist = pointer_array (PLEXUS, 1 + lastjoin);
-  jstuff.tp = jstuff.head.next;
-  for (int i = 0; i <= lastjoin; i++, jstuff.tp = jstuff.tp->next)
-    joinlist[i] = jstuff.tp->entry;
-  close_space (jstuff.jstuff);
-  jstuff.jstuff = NULL;
+  js->tp = js->head.next;
+  for (int i = 0; i <= lastjoin; i++, js->tp = js->tp->next)
+    joinlist[i] = js->tp->entry;
+  close_space (js->jstuff);
+  js->jstuff = NULL;
   return rv;
 }
 
 static bool
-buildjoin (char const *initialfile)
+buildjoin (char const *initialfile, struct jstuff *js)
 /* Merge pairs of elements in ‘joinlist’ into ‘initialfile’.
    If ‘MANI (standard_output)’ is set, copy result to stdout.
    All unlinking of ‘initialfile’, ‘rev2’, and ‘rev3’
@@ -347,7 +346,7 @@ buildjoin (char const *initialfile)
   *p++ = REPO (filename);
   *p = '\0';
 
-  mergev[1] = find_peer_prog (jstuff.merge);
+  mergev[1] = find_peer_prog (js->merge);
   mergev[2] = mergev[4] = "-L";
   /* Rest of ‘mergev’ setup below.  */
 
@@ -439,6 +438,7 @@ main (int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
   struct work work;
+  struct jstuff jstuff;
   char *a, *joinflag, **newargv;
   char const *author, *date, *rev, *state;
   char const *joinname, *newdate, *neworkname;
@@ -461,6 +461,7 @@ main (int argc, char **argv)
 
   CHECK_HV ();
   gnurcs_init (&program);
+  memset (&jstuff, 0, sizeof (struct jstuff));
 
   setrid ();
   author = date = rev = state = NULL;
@@ -724,7 +725,7 @@ main (int argc, char **argv)
                 continue;
               }
 
-            if (joinflag && !preparejoin (joinflag))
+            if (joinflag && !preparejoin (joinflag, &jstuff))
               continue;
 
             diagnose ("revision %s%s", targetdelta->num,
@@ -773,7 +774,7 @@ main (int argc, char **argv)
                   }
                 if (kws == kwsub_b)
                   MERR ("merging binary files");
-                if (!buildjoin (joinname))
+                if (!buildjoin (joinname, &jstuff))
                   continue;
               }
           }

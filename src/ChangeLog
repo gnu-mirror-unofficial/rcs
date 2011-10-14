@@ -1,5 +1,18 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘jstuff’ from global state of co(1).
+
+	* co.c (jstuff): Delete var.
+	(jpush): Take 2nd arg ‘js’; use ‘js->’.
+	(addjoin): Take 2nd arg ‘js’; update call to ‘jpush’.
+	(preparejoin): Take 2nd arg ‘js’; use ‘js->’;
+	update call to ‘addjoin’, ‘jpush’.
+	(buildjoin): Take 2nd arg ‘js’; use ‘js->’.
+	(main): Add auto var ‘jstuff’;
+	update calls to ‘preparejoin’, ‘buildjoin’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘workstat’ from global state of co(1).
 
 	* co.c (struct work): New.
