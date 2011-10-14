@@ -55,13 +55,18 @@ struct date_selection
   struct link *by;                      /* end only */
 };
 
+struct criteria
+{
+  struct link *revs;
+};
+
 /* A version-specific format string.  */
 static char const *insDelFormat;
 
 /* Revision or branch range in ‘-r’ option.
-   On the first pass (option processing), push onto ‘revlist’.
-   After grokking, walk ‘revlist’ and push onto ‘Revlst’.  */
-static struct link *revlist, *Revlst;
+   On the first pass (option processing), push onto ‘criteria->revs’.
+   After grokking, walk ‘criteria->revs’ and push onto ‘Revlst’.  */
+static struct link *Revlst;
 
 /* Login names in author option.  */
 static struct link *authorlist;
@@ -621,8 +626,8 @@ checkrevpair (char const *num1, char const *num2)
 #define KSTRCPY(to,kstr)  strncpy (to, kstr, sizeof kstr)
 
 static bool
-getnumericrev (bool branchflag)
-/* Get the numeric name of revisions stored in ‘revlist’; store
+getnumericrev (bool branchflag, struct criteria *criteria)
+/* Get the numeric name of revisions stored in ‘criteria->revs’; store
    them in ‘Revlst’.  If ‘branchflag’, also add default branch.  */
 {
   struct link *ls;
@@ -635,7 +640,7 @@ getnumericrev (bool branchflag)
   char const *defbr = GROK (branch);
 
   Revlst = NULL;
-  for (ls = revlist; ls; ls = ls->next)
+  for (ls = criteria->revs; ls; ls = ls->next)
     {
       struct revrange const *from = ls->entry;
 
@@ -720,9 +725,10 @@ freebufs:
 }
 
 static void
-putrevpairs (char const *b, char const *e, bool sawsep, RCS_UNUSED void *data)
-/* Store a revision or branch range into ‘revlist’.  */
+putrevpairs (char const *b, char const *e, bool sawsep, void *data)
+/* Store a revision or branch range into ‘creteria->revs’.  */
 {
+  struct criteria *criteria = data;
   struct revrange *rr = ZLLOC (1, struct revrange);
 
   rr->beg = b;
@@ -734,7 +740,7 @@ putrevpairs (char const *b, char const *e, bool sawsep, RCS_UNUSED void *data)
                    : (!b[0]
                       ? 3               /* -r:REV */
                       : 4)));           /* -rREV1:REV2 */
-  PUSH (rr, revlist);
+  PUSH (rr, criteria->revs);
 }
 
 /*:help
@@ -776,6 +782,7 @@ main (int argc, char **argv)
   bool branchflag = false;
   bool lockflag = false;
   struct date_selection datesel = { .in = NULL, .by = NULL };
+  struct criteria criteria = { 0 };
   FILE *out;
   char *a, **newargv;
   char const *accessListString, *accessFormat;
@@ -831,7 +838,7 @@ main (int argc, char **argv)
           break;
 
         case 'r':
-          parse_revpairs ('r', a, NULL, putrevpairs);
+          parse_revpairs ('r', a, &criteria, putrevpairs);
           break;
 
         case 'd':
@@ -954,7 +961,7 @@ main (int argc, char **argv)
             continue;
           }
 
-        if (!getnumericrev (branchflag))
+        if (!getnumericrev (branchflag, &criteria))
           continue;
 
         /* Print RCS filename, working filename and optional

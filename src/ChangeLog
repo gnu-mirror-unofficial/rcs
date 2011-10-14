@@ -1,5 +1,17 @@
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘revlist’ from global state of rlog(1).
+
+	* rlog.c (struct criteria): New.
+	(revlist): Delete var.
+	(getnumericrev): Take 2nd arg ‘criteria’; use ‘criteria->revs’.
+	(putrevpairs): Unmark ‘data’ as ‘RCS_UNUSED’;
+	interpret ‘data’ as ‘criteria’; use ‘criteria->revs’.
+	(main): Add auto var ‘criteria’; update
+	calls to ‘parse_revpairs’, ‘getnumericrev’.
+
+2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Make ‘parse_revpairs’ accept/pass-through opaque data.
 
 	* rcsutil.c (parse_revpairs): Take arg ‘data’; call ‘put’ with it.
