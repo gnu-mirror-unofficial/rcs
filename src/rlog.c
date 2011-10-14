@@ -49,11 +49,14 @@ struct daterange
   bool oep;                             /* open end? */
 };
 
+struct date_selection
+{
+  struct link *in;                      /* start - end */
+  struct link *by;                      /* end only */
+};
+
 /* A version-specific format string.  */
 static char const *insDelFormat;
-
-/* Date range in ‘-d’ option.  */
-static struct link *datelist, *duelst;
 
 /* Revision or branch range in ‘-r’ option.
    On the first pass (option processing), push onto ‘revlist’.
@@ -451,9 +454,9 @@ recentdate (struct delta const *root, struct daterange *r)
 }
 
 static int
-extdate (struct delta *root)
-/* Select revisions which are in the date range specified in ‘duelst’
-   and ‘datelist’, starting at ‘root’.  Return number of revisions
+extdate (struct delta *root, struct date_selection *datesel)
+/* Select revisions which are in the date range specified in ‘datesel->by’
+   and ‘datesel->in’, starting at ‘root’.  Return number of revisions
    selected, including those already selected.  */
 {
   int revno;
@@ -461,12 +464,12 @@ extdate (struct delta *root)
   if (!root)
     return 0;
 
-  if (datelist || duelst)
+  if (datesel->in || datesel->by)
     {
       struct daterange const *r;
       bool oep, sel = false;
 
-      for (struct link *ls = datelist; ls; ls = ls->next)
+      for (struct link *ls = datesel->in; ls; ls = ls->next)
         {
           r = ls->entry;
           oep = r->oep;
@@ -488,7 +491,7 @@ extdate (struct delta *root)
         }
       if (!sel)
         {
-          for (struct link *ls = duelst; ls; ls = ls->next)
+          for (struct link *ls = datesel->by; ls; ls = ls->next)
             {
               r = ls->entry;
               if ((sel = DATE_EQ (root->date, r->beg)))
@@ -498,19 +501,23 @@ extdate (struct delta *root)
             root->selector = false;
         }
     }
-  revno = root->selector + extdate (root->ilk);
+
+#define RECURSE(x)  extdate (x, datesel)
+  revno = root->selector + RECURSE (root->ilk);
 
   for (struct wlink *ls = root->branches; ls; ls = ls->next)
-    revno += extdate (ls->entry);
+    revno += RECURSE (ls->entry);
+#undef RECURSE
+
   return revno;
 }
 
 #define PUSH(x,ls)  ls = prepend (x, ls, PLEXUS)
 
 static void
-getdatepair (char *argv)
-/* Get time range from command line and store in ‘datelist’ if
- a time range specified or in ‘duelst’ if a time spot specified.  */
+getdatepair (char *argv, struct date_selection *datesel)
+/* Get time range from command line and store in ‘datesel->in’ if
+   a time range specified or in ‘datesel->by’ if a time spot specified.  */
 {
   register char c;
   struct daterange *r;
@@ -558,7 +565,7 @@ getdatepair (char *argv)
           if (c == ';' || c == '\0')    /* DATE */
             {
               strncpy (r->end, r->beg, datesize);
-              PUSH (r, duelst);
+              PUSH (r, datesel->by);
               goto end;
             }
           else                   /* DATE< or DATE> (see ‘switchflag’) */
@@ -573,7 +580,7 @@ getdatepair (char *argv)
                 {
                   /* Second date missing.  */
                   (switchflag ? r->beg : r->end)[0] = '\0';
-                  PUSH (r, datelist);
+                  PUSH (r, datesel->in);
                   goto end;
                 }
             }
@@ -583,7 +590,7 @@ getdatepair (char *argv)
         c = *++argv;
       *argv = '\0';
       str2date (rawdate, switchflag ? r->beg : r->end);
-      PUSH (r, datelist);
+      PUSH (r, datesel->in);
     end:
       if (BE (version) < VERSION (5))
         r->oep = false;
@@ -768,6 +775,7 @@ main (int argc, char **argv)
   int exitstatus = EXIT_SUCCESS;
   bool branchflag = false;
   bool lockflag = false;
+  struct date_selection datesel = { .in = NULL, .by = NULL };
   FILE *out;
   char *a, **newargv;
   char const *accessListString, *accessFormat;
@@ -827,7 +835,7 @@ main (int argc, char **argv)
           break;
 
         case 'd':
-          getdatepair (a);
+          getdatepair (a, &datesel);
           break;
 
         case 's':
@@ -990,7 +998,7 @@ main (int argc, char **argv)
             exttree (tip, lockflag);
 
             /* Get most recently date of the dates pointed by ‘duelst’.  */
-            for (struct link *ls = duelst; ls; ls = ls->next)
+            for (struct link *ls = datesel.by; ls; ls = ls->next)
               {
                 struct daterange const *incomplete = ls->entry;
                 struct daterange *r = ZLLOC (1, struct daterange);
@@ -1002,7 +1010,7 @@ main (int argc, char **argv)
                 recentdate (tip, r);
               }
 
-            revno = extdate (tip);
+            revno = extdate (tip, &datesel);
 
             aprintf (out, ";\tselected revisions: %d", revno);
           }
