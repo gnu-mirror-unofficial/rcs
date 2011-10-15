@@ -1,5 +1,18 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Move rcs.c ‘main’ auto var ‘deltas’ into the admin closure.
+
+	U ≡ "Take ‘dc’, not ‘tp_deltas’";
+	V ≡ "U; use ‘&dc->deltas’".
+	* rcs.c (struct admin_closure): Add member ‘deltas’.
+	(setlock): V.
+	(dolocks): Likewise; update calls to ‘setlock’.
+	(domessages, rcs_setstate): V.
+	(main): Delete auto var ‘deltas’; update calls to ‘dolocks’,
+	‘domessages’, ‘rcs_setstate’; use ‘dc.deltas’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Move a rcs.c ‘main’ auto var into a structure.
 
 	* rcs.c (struct admin_closure): New.

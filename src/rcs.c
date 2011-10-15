@@ -64,6 +64,7 @@ struct delrevpair
 struct admin_closure
 {
   int rv;
+  struct wlink *deltas;
 };
 
 static struct cbuf numrev;
@@ -781,7 +782,7 @@ doassoc (void)
 }
 
 static bool
-setlock (char const *rev, struct wlink **tp_deltas)
+setlock (struct admin_closure *dc, char const *rev)
 /* Given a revision or branch number, find the corresponding
    delta and lock it for caller.  */
 {
@@ -790,7 +791,7 @@ setlock (char const *rev, struct wlink **tp_deltas)
 
   if (fully_numeric_no_k (&numrev, rev))
     {
-      target = gr_revno (numrev.string, tp_deltas);
+      target = gr_revno (numrev.string, &dc->deltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -813,7 +814,7 @@ setlock (char const *rev, struct wlink **tp_deltas)
 }
 
 static bool
-dolocks (struct wlink **tp_deltas)
+dolocks (struct admin_closure *dc)
 /* Remove lock for caller or first lock if ‘unlockcaller’ is set;
    remove locks which are stored in ‘rmvlocklst’,
    add new locks which are stored in ‘newlocklst’,
@@ -864,7 +865,7 @@ dolocks (struct wlink **tp_deltas)
   for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->next)
     if (fully_numeric_no_k (&numrev, (bye = lockpt->entry)))
       {
-        target = gr_revno (numrev.string, tp_deltas);
+        target = gr_revno (numrev.string, &dc->deltas);
         if (target)
           {
             if (!(countnumflds (numrev.string) & 1)
@@ -878,7 +879,7 @@ dolocks (struct wlink **tp_deltas)
 
   /* Add new locks which stored in newlocklst.  */
   for (lockpt = newlocklst; lockpt; lockpt = lockpt->next)
-    changed |= setlock (lockpt->entry, tp_deltas);
+    changed |= setlock (dc, lockpt->entry);
 
   if (lockhead)
     {
@@ -886,9 +887,9 @@ dolocks (struct wlink **tp_deltas)
 
       /* Lock default branch or head.  */
       if (defbr)
-        changed |= setlock (defbr, tp_deltas);
+        changed |= setlock (dc, defbr);
       else if (tip)
-        changed |= setlock (tip->num, tp_deltas);
+        changed |= setlock (dc, tip->num);
       else
         RWARN ("can't lock an empty tree");
     }
@@ -896,7 +897,7 @@ dolocks (struct wlink **tp_deltas)
 }
 
 static bool
-domessages (struct wlink **tp_deltas)
+domessages (struct admin_closure *dc)
 {
   struct delta *target;
   bool changed = false;
@@ -906,7 +907,7 @@ domessages (struct wlink **tp_deltas)
       struct u_log const *um = ls->entry;
 
       if (fully_numeric_no_k (&numrev, um->revno)
-          && (target = gr_revno (numrev.string, tp_deltas)))
+          && (target = gr_revno (numrev.string, &dc->deltas)))
         {
           /* We can't check the old log -- it's much later in the file.
              We pessimistically assume that it changed.  */
@@ -918,8 +919,8 @@ domessages (struct wlink **tp_deltas)
 }
 
 static bool
-rcs_setstate (char const *rev, char const *status,
-              struct wlink **tp_deltas)
+rcs_setstate (struct admin_closure *dc,
+              char const *rev, char const *status)
 /* Given a revision or branch number, find the corresponding delta
    and sets its state to ‘status’.  */
 {
@@ -927,7 +928,7 @@ rcs_setstate (char const *rev, char const *status,
 
   if (fully_numeric_no_k (&numrev, rev))
     {
-      target = gr_revno (numrev.string, tp_deltas);
+      target = gr_revno (numrev.string, &dc->deltas);
       if (target)
         {
           if (!(countnumflds (numrev.string) & 1)
@@ -1112,7 +1113,6 @@ main (int argc, char **argv)
   struct link boxlock, *tplock;
   struct link boxrm, *tprm;
   struct link *tp_assoc, *tp_chacc, *tp_log, *tp_state;
-  struct wlink *deltas;
   const struct program program =
     {
       .invoke = argv[0],
@@ -1452,10 +1452,10 @@ main (int argc, char **argv)
         changed |= doassoc ();
 
         /* Update locks.  */
-        changed |= dolocks (&deltas);
+        changed |= dolocks (&dc);
 
         /* Update log messages.  */
-        changed |= domessages (&deltas);
+        changed |= domessages (&dc);
 
         /* Update state attribution.  */
         if (chgheadstate)
@@ -1472,13 +1472,13 @@ main (int argc, char **argv)
                   }
               }
             else
-              changed |= rcs_setstate (defbr, headstate, &deltas);
+              changed |= rcs_setstate (&dc, defbr, headstate);
           }
         for (struct link *ls = statelst.next; ls; ls = ls->next)
           {
             struct u_state const *us = ls->entry;
 
-            changed |= rcs_setstate (us->revno, us->status, &deltas);
+            changed |= rcs_setstate (&dc, us->revno, us->status);
           }
 
         cuthead = cuttail = NULL;
@@ -1486,7 +1486,7 @@ main (int argc, char **argv)
           {
             /* Rebuild delta tree if some deltas are deleted.  */
             if (cuttail)
-              gr_revno (cuttail->num, &deltas);
+              gr_revno (cuttail->num, &dc.deltas);
             buildtree ();
             tip = REPO (tip);
             changed = true;
@@ -1514,7 +1514,7 @@ main (int argc, char **argv)
                 struct editstuff *es = make_editstuff ();
                 struct wlink *ls = GROK (deltas);
 
-                if (!cuttail || buildeltatext (es, &ls, deltas))
+                if (!cuttail || buildeltatext (es, &ls, dc.deltas))
                   {
                     fro_trundling (true, from);
                     if (cuttail)
