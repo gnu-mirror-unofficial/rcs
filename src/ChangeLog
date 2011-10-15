@@ -1,5 +1,16 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘messagelst’ from global state of rcs(1).
+
+	* rcs.c (struct admin_closure): Add members ‘logs’, ‘tp_log’.
+	(messagelst): Delete var.
+	(getmessage): Take ‘dc’, not ‘tp’; use ‘dc->tp_log’.
+	(domessages): Use ‘dc->logs’.
+	(main): Delete auto var ‘tp_log’;
+	update call to ‘getmessage’; use ‘dc.logs’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘assoclst’ from global state of rcs(1).
 
 	* rcs.c (struct admin_closure): Add members ‘assocs’, ‘tp_assoc’.
