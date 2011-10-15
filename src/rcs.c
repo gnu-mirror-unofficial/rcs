@@ -71,13 +71,16 @@ struct admin_closure
   bool headstate_changed_p;
   struct link states;
   struct link *tp_state;
+
+  /* For ‘-a’, ‘-A’, ‘-e’ handling.  */
+  struct link accesses;
+  struct link *tp_access;
 };
 
 static bool lockhead, unlockcaller, suppress_mail;
 static struct link *newlocklst, *rmvlocklst;
 static struct link messagelst;
 static struct link assoclst;
-static struct link chaccess;
 static struct delrevpair delrev;
 static struct delta *cuthead, *cuttail, *delstrt;
 
@@ -146,9 +149,14 @@ getassoclst (struct link **tp, char *sp)
 }
 
 static void
-getchaccess (struct link **tp, char const *login, enum changeaccess command)
+getchaccess (struct admin_closure *dc,
+             char const *login, enum changeaccess command)
 {
   register struct chaccess *ch;
+  struct link **tp = &dc->tp_access;
+
+  if (! *tp)
+    *tp = &dc->accesses;
 
   ch = ZLLOC (1, struct chaccess);
   ch->login = login;
@@ -157,7 +165,7 @@ getchaccess (struct link **tp, char const *login, enum changeaccess command)
 }
 
 static void
-getaccessor (struct link **tp, char *opt, enum changeaccess command)
+getaccessor (struct admin_closure *dc, char *opt, enum changeaccess command)
 /* Get the accessor list of options ‘-e’ and ‘-a’; store in ‘chaccess’.  */
 {
   register int c;
@@ -170,7 +178,7 @@ getaccessor (struct link **tp, char *opt, enum changeaccess command)
     {
       if (command == erase && sp - opt == 1)
         {
-          getchaccess (tp, NULL, command);
+          getchaccess (dc, NULL, command);
           return;
         }
       PERR ("missing login name after option -a or -e");
@@ -181,7 +189,7 @@ getaccessor (struct link **tp, char *opt, enum changeaccess command)
     {
       size_t len;
 
-      getchaccess (tp, SHSNIP (&len, sp, checkid (sp, ',')), command);
+      getchaccess (dc, SHSNIP (&len, sp, checkid (sp, ',')), command);
       sp += len;
       c = *sp;
       while (c == ' ' || c == '\n' || c == '\t' || c == ',')
@@ -376,12 +384,12 @@ rmnewlocklst (char const *which)
 }
 
 static bool
-doaccess (void)
+doaccess (struct admin_closure *dc)
 {
   register bool changed = false;
   struct link *ls, box, *tp;
 
-  for (ls = chaccess.next; ls; ls = ls->next)
+  for (ls = dc->accesses.next; ls; ls = ls->next)
     {
       struct chaccess const *ch = ls->entry;
       char const *login = ch->login;
@@ -1126,7 +1134,7 @@ main (int argc, char **argv)
   struct cbuf branchnum;
   struct link boxlock, *tplock;
   struct link boxrm, *tprm;
-  struct link *tp_assoc, *tp_chacc, *tp_log;
+  struct link *tp_assoc, *tp_log;
   const struct program program =
     {
       .invoke = argv[0],
@@ -1143,7 +1151,6 @@ main (int argc, char **argv)
   nosetid ();
 
   tp_assoc = &assoclst;
-  tp_chacc = &chaccess;
   tp_log = &messagelst;
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
@@ -1192,7 +1199,7 @@ main (int argc, char **argv)
 
         case 'a':
           /* Add new accessor.  */
-          getaccessor (&tp_chacc, *argv + 1, append);
+          getaccessor (&dc, *argv + 1, append);
           break;
 
         case 'A':
@@ -1206,14 +1213,14 @@ main (int argc, char **argv)
           if (0 < pairnames (1, argv, rcsreadopen, true, false))
             {
               for (struct link *ls = GROK (access); ls; ls = ls->next)
-                getchaccess (&tp_chacc, str_save (ls->entry), append);
+                getchaccess (&dc, str_save (ls->entry), append);
               fro_zclose (&FLOW (from));
             }
           break;
 
         case 'e':
           /* Remove accessors.  */
-          getaccessor (&tp_chacc, *argv + 1, erase);
+          getaccessor (&dc, *argv + 1, erase);
           break;
 
         case 'l':
@@ -1459,7 +1466,7 @@ main (int argc, char **argv)
           }
 
         /* Update access list.  */
-        changed |= doaccess ();
+        changed |= doaccess (&dc);
 
         /* Update association list.  */
         changed |= doassoc ();

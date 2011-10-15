@@ -1,5 +1,17 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘chaccess’ from global state of rcs(1).
+
+	* rcs.c (struct admin_closure): Add members ‘accesses’, ‘tp_access’.
+	(chaccess): Delete var.
+	(getchaccess): Take ‘dc’, not ‘tp’; use ‘dc->tp_access’.
+	(getaccessor): Take ‘dc’, not ‘tp’; update calls to ‘getchaccess’.
+	(doaccess): Take arg ‘dc’; use ‘dc->accesses’.
+	(main): Delete auto var ‘tp_chacc’; update
+	calls to ‘getaccessor’, ‘getchaccess’, ‘doaccess’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove repo-state-change vars from global state of rcs(1).
 
 	* rcs.c (struct admin_closure): Add members
