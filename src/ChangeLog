@@ -1,5 +1,15 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘delrev’ from global state of rcs(1).
+
+	* rcs.c (struct admin_closure): Add member ‘delrev’.
+	(putdelrev): Interpret arg ‘data’ to be ‘admin_closure *dc’;
+	use ‘dc->delrev’.
+	(removerevs): Use ‘dc->delrev’.
+	(main): Use ‘dc.delrev’; update call to ‘parse_revpairs’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘lockhead’, ‘unlockcaller’ from global state of rcs(1).
 
 	* rcs.c (struct admin_closure):

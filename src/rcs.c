@@ -89,10 +89,10 @@ struct admin_closure
 
   /* For ‘-o’ handling.  */
   struct delta *cuthead, *cuttail, *delstrt;
+  struct delrevpair delrev;
 };
 
 static struct link *newlocklst, *rmvlocklst;
-static struct delrevpair delrev;
 
 static void
 cleanup (int *exitstatus)
@@ -283,9 +283,11 @@ getstates (struct admin_closure *dc, char *sp)
 }
 
 static void
-putdelrev (char const *b, char const *e, bool sawsep, RCS_UNUSED void *data)
+putdelrev (char const *b, char const *e, bool sawsep, void *data)
 {
-  if (delrev.strt || delrev.end)
+  struct admin_closure *dc = data;
+
+  if (dc->delrev.strt || dc->delrev.end)
     {
       PWARN ("ignoring spurious `-o' range `%s:%s'",
              b ? b : "(unspecified)",
@@ -296,27 +298,27 @@ putdelrev (char const *b, char const *e, bool sawsep, RCS_UNUSED void *data)
   if (!sawsep)
     /* -o rev or branch */
     {
-      delrev.strt = b;
-      delrev.code = 0;
+      dc->delrev.strt = b;
+      dc->delrev.code = 0;
     }
   else if (!b || !b[0])
     /* -o:rev */
     {
-      delrev.strt = e;                  /* FIXME: weird */
-      delrev.code = 1;
+      dc->delrev.strt = e;              /* FIXME: weird */
+      dc->delrev.code = 1;
     }
   else if (!e[0])
     /* -orev: */
     {
-      delrev.strt = b;
-      delrev.code = 2;
+      dc->delrev.strt = b;
+      dc->delrev.code = 2;
     }
   else
     /* -orev1:rev2 */
     {
-      delrev.strt = b;
-      delrev.end = e;
-      delrev.code = 3;
+      dc->delrev.strt = b;
+      dc->delrev.end = e;
+      dc->delrev.code = 3;
     }
 }
 
@@ -609,7 +611,7 @@ removerevs (struct admin_closure *dc)
 #define GENREV(x)    gr_revno (x, &ls)
 #define SEARCH(x,l)  searchcutpt (dc, x, l, ls)
 
-  if (!fully_numeric_no_k (&numrev, delrev.strt))
+  if (!fully_numeric_no_k (&numrev, dc->delrev.strt))
     return false;
   target = GENREV (numrev.string);
   if (!target)
@@ -617,7 +619,7 @@ removerevs (struct admin_closure *dc)
   cmp = cmpnum (target->num, numrev.string);
   length = countnumflds (numrev.string);
 
-  if (delrev.code == 0)
+  if (dc->delrev.code == 0)
     {                           /* -o rev or -o branch */
       if (length & 1)
         temp = SEARCH (target->num, length + 1);
@@ -644,7 +646,7 @@ removerevs (struct admin_closure *dc)
       return false;
     }
 
-  if (delrev.code == 1)
+  if (dc->delrev.code == 1)
     {                           /* -o -rev */
       if (length > 2)
         {
@@ -667,7 +669,7 @@ removerevs (struct admin_closure *dc)
       return true;
     }
 
-  if (delrev.code == 2)
+  if (dc->delrev.code == 2)
     {                           /* -o rev- */
       if (length == 2)
         {
@@ -699,7 +701,7 @@ removerevs (struct admin_closure *dc)
     }
 
   /* -o rev1-rev2 */
-  if (!fully_numeric_no_k (&numrev, delrev.end))
+  if (!fully_numeric_no_k (&numrev, dc->delrev.end))
     return false;
   if (length != countnumflds (numrev.string)
       || (length > 2 && compartial (numrev.string, target->num, length - 1)))
@@ -725,7 +727,8 @@ removerevs (struct admin_closure *dc)
         {
           if (NUM_EQ (target->num, target2->num))
             {
-              RERR ("Revisions %s-%s don't exist.", delrev.strt, delrev.end);
+              RERR ("Revisions %s-%s don't exist.",
+                    dc->delrev.strt, dc->delrev.end);
               return false;
             }
           dc->cuthead = target;
@@ -749,7 +752,8 @@ removerevs (struct admin_closure *dc)
         {
           if (NUM_EQ (target->num, target2->num))
             {
-              RERR ("Revisions %s-%s don't exist.", delrev.strt, delrev.end);
+              RERR ("Revisions %s-%s don't exist.",
+                    dc->delrev.strt, dc->delrev.end);
               return false;
             }
           dc->cuttail = target2;
@@ -1312,14 +1316,14 @@ main (int argc, char **argv)
 
         case 'o':
           /* Delete revisions.  */
-          if (delrev.strt)
+          if (dc.delrev.strt)
             redefined ('o');
           if (!*a)
             {
               PERR ("missing revision range after -o");
               break;
             }
-          parse_revpairs ('o', (*argv) + 2, NULL, putdelrev);
+          parse_revpairs ('o', (*argv) + 2, &dc, putdelrev);
           break;
 
         case 's':
@@ -1523,7 +1527,7 @@ main (int argc, char **argv)
           }
 
         dc.cuttail = NULL;
-        if (delrev.strt && removerevs (&dc))
+        if (dc.delrev.strt && removerevs (&dc))
           {
             /* Rebuild delta tree if some deltas are deleted.  */
             if (dc.cuttail)
@@ -1549,7 +1553,7 @@ main (int argc, char **argv)
            <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=69193>.  */
         if (1)
           {
-            if (delrev.strt || dc.logs.next)
+            if (dc.delrev.strt || dc.logs.next)
               {
                 struct fro *from = FLOW (from);
                 struct editstuff *es = make_editstuff ();
