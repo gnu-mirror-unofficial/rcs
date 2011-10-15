@@ -1,5 +1,16 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘suppress_mail’ from global state of rcs(1).
+
+	* rcs.c (struct admin_closure): Add member ‘suppress_mail’.
+	(suppress_mail): Delete var.
+	(sendmail): Take 3rd arg ‘suppress_mail’.
+	(breaklock): Take 2nd arg ‘suppress_mail’; update call to ‘sendmail’.
+	(setlock, dolocks): Update calls to ‘breaklock’.
+	(main): Use ‘dc.suppress_mail’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove outdate vars from global state of rcs(1).
 
 	U (X...) ≡ "Take arg ‘dc’; use ‘dc->X’, ...";
