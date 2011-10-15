@@ -1,5 +1,15 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘lockhead’, ‘unlockcaller’ from global state of rcs(1).
+
+	* rcs.c (struct admin_closure):
+	Add members ‘lockhead’, ‘unlockcaller’.
+	(lockhead, unlockcaller): Delete vars.
+	(dolocks): Use ‘dc->unlockcaller’, ‘dc->lockhead’.
+	(main): Use ‘dc.lockhead’, ‘dc.unlockcaller’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘suppress_mail’ from global state of rcs(1).
 
 	* rcs.c (struct admin_closure): Add member ‘suppress_mail’.

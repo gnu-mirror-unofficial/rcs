@@ -66,6 +66,8 @@ struct admin_closure
   int rv;
   struct wlink *deltas;
   bool suppress_mail;
+  bool lockhead;
+  bool unlockcaller;
 
   /* For ‘-sSTATE’ handling.  */
   char const *headstate;
@@ -89,7 +91,6 @@ struct admin_closure
   struct delta *cuthead, *cuttail, *delstrt;
 };
 
-static bool lockhead, unlockcaller;
 static struct link *newlocklst, *rmvlocklst;
 static struct delrevpair delrev;
 
@@ -856,10 +857,10 @@ setlock (struct admin_closure *dc, char const *rev)
 
 static bool
 dolocks (struct admin_closure *dc)
-/* Remove lock for caller or first lock if ‘unlockcaller’ is set;
+/* Remove lock for caller or first lock if ‘dc->unlockcaller’ is set;
    remove locks which are stored in ‘rmvlocklst’,
    add new locks which are stored in ‘newlocklst’,
-   add lock for ‘GROK (branch)’ or ‘REPO (tip)’ if ‘lockhead’ is set.  */
+   add lock for ‘GROK (branch)’ or ‘REPO (tip)’ if ‘dc->lockhead’ is set.  */
 {
   struct cbuf numrev;
   struct link const *lockpt;
@@ -867,7 +868,7 @@ dolocks (struct admin_closure *dc)
   bool changed = false;
   const char *bye;
 
-  if (unlockcaller)
+  if (dc->unlockcaller)
     {
       /* Find lock for caller.  */
       if (tip)
@@ -923,7 +924,7 @@ dolocks (struct admin_closure *dc)
   for (lockpt = newlocklst; lockpt; lockpt = lockpt->next)
     changed |= setlock (dc, lockpt->entry);
 
-  if (lockhead)
+  if (dc->lockhead)
     {
       char const *defbr = GROK (branch);
 
@@ -1248,7 +1249,7 @@ main (int argc, char **argv)
           if (!*a)
             {
               /* Lock head or default branch.  */
-              lockhead = true;
+              dc.lockhead = true;
               break;
             }
           tplock = extend (tplock, a, PLEXUS);
@@ -1258,7 +1259,7 @@ main (int argc, char **argv)
           /* Release lock of a locked revision.  */
           if (!*a)
             {
-              unlockcaller = true;
+              dc.unlockcaller = true;
               break;
             }
           tprm = extend (tprm, a, PLEXUS);
