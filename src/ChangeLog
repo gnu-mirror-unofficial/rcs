@@ -1,3 +1,11 @@
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Move a rcs.c ‘main’ auto var into a structure.
+
+	* rcs.c (struct admin_closure): New.
+	(main): Replace auto var ‘exitstatus’ with ‘dc’;
+	update calls to ‘cleanup’; use ‘dc.rv’.
+
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Remove {force,lock,mtime}flag from global state of co(1).
