@@ -65,13 +65,17 @@ struct admin_closure
 {
   int rv;
   struct wlink *deltas;
+
+  /* For ‘-sSTATE’ handling.  */
+  char const *headstate;
+  bool headstate_changed_p;
+  struct link states;
+  struct link *tp_state;
 };
 
-static char const *headstate;
-static bool chgheadstate, lockhead, unlockcaller, suppress_mail;
+static bool lockhead, unlockcaller, suppress_mail;
 static struct link *newlocklst, *rmvlocklst;
 static struct link messagelst;
-static struct link statelst;
 static struct link assoclst;
 static struct link chaccess;
 static struct delrevpair delrev;
@@ -208,13 +212,18 @@ getmessage (struct link **tp, char *option)
 }
 
 static void
-getstates (struct link **tp, char *sp)
-/* Get one state attribute and the corresponding rev; store in ‘statelst’.  */
+getstates (struct admin_closure *dc, char *sp)
+/* Get one state attribute and the corresponding rev;
+   store in ‘dc->states’.  */
 {
   char const *temp;
   struct u_state *us;
   register int c;
   size_t len;
+  struct link **tp = &dc->tp_state;
+
+  if (! *tp)
+    *tp = &dc->states;
 
   while ((c = *++sp) == ' ' || c == '\t' || c == '\n')
     continue;
@@ -229,8 +238,8 @@ getstates (struct link **tp, char *sp)
   if (c == '\0')
     {
       /* Change state of default branch or ‘REPO (tip)’.  */
-      chgheadstate = true;
-      headstate = temp;
+      dc->headstate_changed_p = true;
+      dc->headstate = temp;
       return;
     }
   else if (c != ':')
@@ -1117,7 +1126,7 @@ main (int argc, char **argv)
   struct cbuf branchnum;
   struct link boxlock, *tplock;
   struct link boxrm, *tprm;
-  struct link *tp_assoc, *tp_chacc, *tp_log, *tp_state;
+  struct link *tp_assoc, *tp_chacc, *tp_log;
   const struct program program =
     {
       .invoke = argv[0],
@@ -1136,7 +1145,6 @@ main (int argc, char **argv)
   tp_assoc = &assoclst;
   tp_chacc = &chaccess;
   tp_log = &messagelst;
-  tp_state = &statelst;
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
   commsymlen = 0;
@@ -1293,7 +1301,7 @@ main (int argc, char **argv)
               PERR ("state missing after -s");
               break;
             }
-          getstates (&tp_state, (*argv) + 1);
+          getstates (&dc, (*argv) + 1);
           break;
 
         case 't':
@@ -1463,23 +1471,23 @@ main (int argc, char **argv)
         changed |= domessages (&dc);
 
         /* Update state attribution.  */
-        if (chgheadstate)
+        if (dc.headstate_changed_p)
           {
             /* Change state of default branch or head.  */
             if (!defbr)
               {
                 if (!tip)
                   RWARN ("can't change states in an empty tree");
-                else if (STR_DIFF (tip->state, headstate))
+                else if (STR_DIFF (tip->state, dc.headstate))
                   {
-                    tip->state = headstate;
+                    tip->state = dc.headstate;
                     changed = true;
                   }
               }
             else
-              changed |= rcs_setstate (&dc, defbr, headstate);
+              changed |= rcs_setstate (&dc, defbr, dc.headstate);
           }
-        for (struct link *ls = statelst.next; ls; ls = ls->next)
+        for (struct link *ls = dc.states.next; ls; ls = ls->next)
           {
             struct u_state const *us = ls->entry;
 

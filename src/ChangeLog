@@ -1,5 +1,17 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove repo-state-change vars from global state of rcs(1).
+
+	* rcs.c (struct admin_closure): Add members
+	‘headstate’, ‘headstate_changed_p’, ‘states’, ‘tp_state’.
+	(headstate, chgheadstate, statelst): Delete vars.
+	(getstates): Take ‘dc’, not ‘tp’; use ‘dc->tp_state’,
+	‘dc->headstate_changed_p’, ‘dc->headstate’.
+	(main): Delete auto var ‘tp_state’; update call to ‘getstates’;
+	use ‘dc.headstate_changed_p’, ‘dc.headstate’, ‘dc.states’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘revnum’ from global state of rcs(1).
 
 	* rcs.c (revnum): Delete var.
