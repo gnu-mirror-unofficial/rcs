@@ -1,5 +1,15 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘newlocklst’ from global state of rcs(1).
+
+	* rcs.c (struct admin_closure): Add member ‘newlocks’.
+	(newlocklst): Delete var.
+	(rmnewlocklst): Take arg ‘dc’; use ‘dc->newlocks’.
+	(dolocks): Use ‘dc->newlocks’.
+	(main): Use ‘dc.newlocks’; update call to ‘rmnewlocklst’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘delrev’ from global state of rcs(1).
 
 	* rcs.c (struct admin_closure): Add member ‘delrev’.
