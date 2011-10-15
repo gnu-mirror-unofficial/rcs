@@ -83,12 +83,14 @@ struct admin_closure
   /* For ‘-m’ handling.  */
   struct link logs;
   struct link *tp_log;
+
+  /* For ‘-o’ handling.  */
+  struct delta *cuthead, *cuttail, *delstrt;
 };
 
 static bool lockhead, unlockcaller, suppress_mail;
 static struct link *newlocklst, *rmvlocklst;
 static struct delrevpair delrev;
-static struct delta *cuthead, *cuttail, *delstrt;
 
 static void
 cleanup (int *exitstatus)
@@ -317,12 +319,13 @@ putdelrev (char const *b, char const *e, bool sawsep, RCS_UNUSED void *data)
 }
 
 static void
-scanlogtext (struct editstuff *es, struct wlink **ls,
+scanlogtext (struct admin_closure *dc,
+             struct editstuff *es, struct wlink **ls,
              struct delta *delta, bool edit)
 /* Scan delta text nodes up to and including the one given by ‘delta’,
    or up to last one present, if ‘!delta’.  For the one given by
    ‘delta’ (if ‘delta’), the log message is saved into ‘delta->pretty_log’ if
-   ‘delta == cuttail’; the text is edited if ‘edit’ is set, else copied.
+   ‘delta == dc->cuttail’; the text is edited if ‘edit’ is set, else copied.
    Do not advance input after finished, except if ‘!delta’.  */
 {
   struct delta const *nextdelta;
@@ -347,7 +350,7 @@ scanlogtext (struct editstuff *es, struct wlink **ls,
           range.end = log->beg;
           fro_spew_partial (to, from, &range);
         }
-      if (nextdelta == cuttail)
+      if (nextdelta == dc->cuttail)
         {
           if (!delta->pretty_log.string)
             {
@@ -542,18 +545,19 @@ breaklock (struct delta const *delta)
 }
 
 static struct delta *
-searchcutpt (char const *object, int length, struct wlink *store)
+searchcutpt (struct admin_closure *dc,
+             char const *object, int length, struct wlink *store)
 /* Search store and return entry with number being ‘object’.
-   ‘cuttail’ is 0, if the entry is ‘REPO (tip)’; otherwise, it
+   ‘dc->cuttail’ is 0, if the entry is ‘REPO (tip)’; otherwise, it
    is the entry point to the one with number being ‘object’.  */
 {
   struct delta *delta;
 
-  cuthead = NULL;
+  dc->cuthead = NULL;
   while (delta = store->entry,
          compartial (delta->num, object, length))
     {
-      cuthead = delta;
+      dc->cuthead = delta;
       store = store->next;
     }
   return delta;
@@ -587,11 +591,12 @@ branchpoint (struct delta *strt, struct delta *tail)
 }
 
 static bool
-removerevs (void)
+removerevs (struct admin_closure *dc)
 /* Get the revision range to be removed, and place the first revision
-   removed in ‘delstrt’, the revision before ‘delstrt’ in ‘cuthead’
-   (0, if ‘delstrt’ is head), and the revision after the last removed
-   revision in ‘cuttail’ (0 if the last is a leaf).  */
+   removed in ‘dc->delstrt’, the revision before ‘dc->delstrt’ in
+   ‘dc->cuthead’ (NULL, if ‘dc->delstrt’ is head), and the revision
+   after the last removed revision in ‘dc->cuttail’ (NULL if the last
+   is a leaf).  */
 {
   struct cbuf numrev;
   struct delta *target, *target2, *temp;
@@ -600,7 +605,7 @@ removerevs (void)
   int cmp;
 
 #define GENREV(x)    gr_revno (x, &ls)
-#define SEARCH(x,l)  searchcutpt (x, l, ls)
+#define SEARCH(x,l)  searchcutpt (dc, x, l, ls)
 
   if (!fully_numeric_no_k (&numrev, delrev.strt))
     return false;
@@ -621,13 +626,13 @@ removerevs (void)
         }
       else
         temp = SEARCH (numrev.string, length);
-      cuttail = target->ilk;
-      if (branchpoint (temp, cuttail))
+      dc->cuttail = target->ilk;
+      if (branchpoint (temp, dc->cuttail))
         {
-          cuttail = NULL;
+          dc->cuttail = NULL;
           return false;
         }
-      delstrt = temp;           /* first revision to be removed */
+      dc->delstrt = temp;           /* first revision to be removed */
       return true;
     }
 
@@ -642,21 +647,21 @@ removerevs (void)
       if (length > 2)
         {
           temp = SEARCH (target->num, length - 1);
-          cuttail = target->ilk;
+          dc->cuttail = target->ilk;
         }
       else
         {
           temp = SEARCH (target->num, length);
-          cuttail = target;
-          while (cuttail && NUMF_EQ (1, target->num, cuttail->num))
-            cuttail = cuttail->ilk;
+          dc->cuttail = target;
+          while (dc->cuttail && NUMF_EQ (1, target->num, dc->cuttail->num))
+            dc->cuttail = dc->cuttail->ilk;
         }
-      if (branchpoint (temp, cuttail))
+      if (branchpoint (temp, dc->cuttail))
         {
-          cuttail = NULL;
+          dc->cuttail = NULL;
           return false;
         }
-      delstrt = temp;
+      dc->delstrt = temp;
       return true;
     }
 
@@ -666,15 +671,15 @@ removerevs (void)
         {
           temp = SEARCH (target->num, 1);
           if (cmp)
-            cuttail = target;
+            dc->cuttail = target;
           else
-            cuttail = target->ilk;
+            dc->cuttail = target->ilk;
         }
       else
         {
           if (cmp)
             {
-              cuthead = target;
+              dc->cuthead = target;
               if (!(temp = target->ilk))
                 return false;
             }
@@ -682,12 +687,12 @@ removerevs (void)
             temp = SEARCH (target->num, length);
           GENREV (BRANCHNO (temp->num));
         }
-      if (branchpoint (temp, cuttail))
+      if (branchpoint (temp, dc->cuttail))
         {
-          cuttail = NULL;
+          dc->cuttail = NULL;
           return false;
         }
-      delstrt = temp;
+      dc->delstrt = temp;
       return true;
     }
 
@@ -721,12 +726,12 @@ removerevs (void)
               RERR ("Revisions %s-%s don't exist.", delrev.strt, delrev.end);
               return false;
             }
-          cuthead = target;
+          dc->cuthead = target;
           temp = target->ilk;
         }
       else
         temp = SEARCH (target->num, length);
-      cuttail = target2->ilk;
+      dc->cuttail = target2->ilk;
     }
   else
     {                           /* delete revisions on trunk */
@@ -745,18 +750,18 @@ removerevs (void)
               RERR ("Revisions %s-%s don't exist.", delrev.strt, delrev.end);
               return false;
             }
-          cuttail = target2;
+          dc->cuttail = target2;
         }
       else
-        cuttail = target2->ilk;
+        dc->cuttail = target2->ilk;
       temp = SEARCH (target->num, length);
     }
-  if (branchpoint (temp, cuttail))
+  if (branchpoint (temp, dc->cuttail))
     {
-      cuttail = NULL;
+      dc->cuttail = NULL;
       return false;
     }
-  delstrt = temp;
+  dc->delstrt = temp;
   return true;
 
 #undef SEARCH
@@ -982,7 +987,8 @@ rcs_setstate (struct admin_closure *dc,
 }
 
 static bool
-buildeltatext (struct editstuff *es, struct wlink **ls,
+buildeltatext (struct admin_closure *dc,
+               struct editstuff *es, struct wlink **ls,
                struct wlink const *deltas)
 /* Put the delta text on ‘FLOW (rewr)’ and make necessary
    change to delta text.  */
@@ -991,18 +997,18 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
   FILE *frew = FLOW (rewr);
 
   fcut = NULL;
-  cuttail->selector = false;
-  scanlogtext (es, ls, deltas->entry, false);
-  if (cuthead)
+  dc->cuttail->selector = false;
+  scanlogtext (dc, es, ls, deltas->entry, false);
+  if (dc->cuthead)
     {
       if (! (fcut = tmpfile ()))
         fatal_sys ("tmpfile");
 
-      while (deltas->entry != cuthead)
+      while (deltas->entry != dc->cuthead)
         {
           *ls = (*ls)->next;
           deltas = deltas->next;
-          scanlogtext (es, ls, deltas->entry, true);
+          scanlogtext (dc, es, ls, deltas->entry, true);
         }
 
       snapshotedit (es, fcut);
@@ -1010,11 +1016,11 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
       aflush (fcut);
     }
 
-  while (deltas->entry != cuttail)
+  while (deltas->entry != dc->cuttail)
     {
       *ls = (*ls)->next;
       deltas = deltas->next;
-      scanlogtext (es, ls, deltas->entry, true);
+      scanlogtext (dc, es, ls, deltas->entry, true);
     }
   finishedit (es, NULL, NULL, true);
   Ozclose (&FLOW (res));
@@ -1037,49 +1043,49 @@ buildeltatext (struct editstuff *es, struct wlink **ls,
       if (DIFF_TROUBLE == runv (fileno (fcut), diffname, diffv))
         RFATAL ("diff failed");
       Ozclose (&fcut);
-      return putdtext (cuttail, diffname, frew, true);
+      return putdtext (dc->cuttail, diffname, frew, true);
     }
   else
-    return putdtext (cuttail, FLOW (result), frew, false);
+    return putdtext (dc->cuttail, FLOW (result), frew, false);
 }
 
 static void
-buildtree (void)
+buildtree (struct admin_closure *dc)
 /* Actually remove revisions whose selector field
    is false, and rebuild the linkage of deltas.
    Ask for reconfirmation if deleting last revision.  */
 {
   struct delta *Delta;
 
-  if (cuthead)
-    if (cuthead->ilk == delstrt)
-      cuthead->ilk = cuttail;
+  if (dc->cuthead)
+    if (dc->cuthead->ilk == dc->delstrt)
+      dc->cuthead->ilk = dc->cuttail;
     else
       {
-        struct wlink *pt = cuthead->branches, *pre = pt;
+        struct wlink *pt = dc->cuthead->branches, *pre = pt;
 
-        while (pt && pt->entry != delstrt)
+        while (pt && pt->entry != dc->delstrt)
           {
             pre = pt;
             pt = pt->next;
           }
-        if (cuttail)
-          pt->entry = cuttail;
+        if (dc->cuttail)
+          pt->entry = dc->cuttail;
         else if (pt == pre)
-          cuthead->branches = pt->next;
+          dc->cuthead->branches = pt->next;
         else
           pre->next = pt->next;
       }
   else
     {
-      if (!cuttail && !BE (quiet))
+      if (!dc->cuttail && !BE (quiet))
         {
           if (!yesorno
               (false,
                "Do you really want to delete all revisions? [ny](n): "))
             {
               RERR ("No revision deleted");
-              Delta = delstrt;
+              Delta = dc->delstrt;
               while (Delta)
                 {
                   Delta->selector = true;
@@ -1088,7 +1094,7 @@ buildtree (void)
               return;
             }
         }
-      REPO (tip) = cuttail;
+      REPO (tip) = dc->cuttail;
     }
   return;
 }
@@ -1513,13 +1519,13 @@ main (int argc, char **argv)
             changed |= rcs_setstate (&dc, us->revno, us->status);
           }
 
-        cuthead = cuttail = NULL;
-        if (delrev.strt && removerevs ())
+        dc.cuttail = NULL;
+        if (delrev.strt && removerevs (&dc))
           {
             /* Rebuild delta tree if some deltas are deleted.  */
-            if (cuttail)
-              gr_revno (cuttail->num, &dc.deltas);
-            buildtree ();
+            if (dc.cuttail)
+              gr_revno (dc.cuttail->num, &dc.deltas);
+            buildtree (&dc);
             tip = REPO (tip);
             changed = true;
             keepRCStime = false;
@@ -1546,12 +1552,12 @@ main (int argc, char **argv)
                 struct editstuff *es = make_editstuff ();
                 struct wlink *ls = GROK (deltas);
 
-                if (!cuttail || buildeltatext (es, &ls, dc.deltas))
+                if (!dc.cuttail || buildeltatext (&dc, es, &ls, dc.deltas))
                   {
                     fro_trundling (true, from);
-                    if (cuttail)
+                    if (dc.cuttail)
                       ls = ls->next;
-                    scanlogtext (es, &ls, NULL, false);
+                    scanlogtext (&dc, es, &ls, NULL, false);
                     /* Copy rest of delta text nodes that are not deleted.  */
                     changed = true;
                   }

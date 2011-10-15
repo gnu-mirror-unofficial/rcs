@@ -1,5 +1,22 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove outdate vars from global state of rcs(1).
+
+	U (X...) ≡ "Take arg ‘dc’; use ‘dc->X’, ...";
+	U (*) ≡ U (cuthead, cuttail, delstrt).
+	* rcs.c (struct admin_closure):
+	Add members ‘cuthead’, ‘cuttail’, ‘delstrt’.
+	(cuthead, cuttail, delstrt): Delete vars.
+	(scanlogtext): U (cuttail).
+	(searchcutpt): U (cuthead).
+	(removerevs): U (*); update call to ‘searchcutpt’.
+	(buildeltatext): U (cuttail, cuthead); update call to ‘scanlogtext’.
+	(buildtree): U (*).
+	(main): Use ‘dc.cuthead’, ‘dc.cuttail’; update calls to
+	‘removerevs’, ‘buildtree’, ‘buildeltatext’, ‘scanlogtext’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘messagelst’ from global state of rcs(1).
 
 	* rcs.c (struct admin_closure): Add members ‘logs’, ‘tp_log’.
