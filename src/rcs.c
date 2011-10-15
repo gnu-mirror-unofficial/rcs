@@ -69,6 +69,7 @@ struct admin_closure
   bool lockhead;
   bool unlockcaller;
   struct link *newlocks;
+  struct link *byelocks;
 
   /* For ‘-sSTATE’ handling.  */
   char const *headstate;
@@ -92,8 +93,6 @@ struct admin_closure
   struct delta *cuthead, *cuttail, *delstrt;
   struct delrevpair delrev;
 };
-
-static struct link *rmvlocklst;
 
 static void
 cleanup (int *exitstatus)
@@ -863,7 +862,7 @@ setlock (struct admin_closure *dc, char const *rev)
 static bool
 dolocks (struct admin_closure *dc)
 /* Remove lock for caller or first lock if ‘dc->unlockcaller’ is set;
-   remove locks which are stored in ‘rmvlocklst’,
+   remove locks which are stored in ‘dc->byelocks’,
    add new locks which are stored in ‘dc->newlocks’,
    add lock for ‘GROK (branch)’ or ‘REPO (tip)’ if ‘dc->lockhead’ is set.  */
 {
@@ -909,8 +908,8 @@ dolocks (struct admin_closure *dc)
         }
     }
 
-  /* Remove locks which are stored in rmvlocklst.  */
-  for (lockpt = rmvlocklst; lockpt; lockpt = lockpt->next)
+  /* Remove locks which are stored in ‘dc->byelocks’.  */
+  for (lockpt = dc->byelocks; lockpt; lockpt = lockpt->next)
     if (fully_numeric_no_k (&numrev, (bye = lockpt->entry)))
       {
         target = gr_revno (numrev.string, &dc->deltas);
@@ -1183,7 +1182,7 @@ main (int argc, char **argv)
   commsymlen = 0;
   boxlock.next = dc.newlocks;
   tplock = &boxlock;
-  boxrm.next = rmvlocklst;
+  boxrm.next = dc.byelocks;
   tprm = &boxrm;
   expmode = -1;
   BE (pe) = X_DEFAULT;
@@ -1388,7 +1387,7 @@ main (int argc, char **argv)
         };
     }
   dc.newlocks = boxlock.next;
-  rmvlocklst = boxrm.next;
+  dc.byelocks = boxrm.next;
   /* (End processing of options.)  */
 
   /* Now handle all filenames.  */
