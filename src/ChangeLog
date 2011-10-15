@@ -1,5 +1,16 @@
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Remove ‘assoclst’ from global state of rcs(1).
+
+	* rcs.c (struct admin_closure): Add members ‘assocs’, ‘tp_assoc’.
+	(assoclst): Delete var.
+	(getassoclst): Take ‘dc’, not ‘tp’; use ‘dc->tp_assoc’.
+	(doassoc): Take arg ‘dc’; use ‘dc->assocs’.
+	(main): Delete auto var ‘tp_assoc’;
+	update calls to ‘getassoclst’, ‘doassoc’.
+
+2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Remove ‘chaccess’ from global state of rcs(1).
 
 	* rcs.c (struct admin_closure): Add members ‘accesses’, ‘tp_access’.

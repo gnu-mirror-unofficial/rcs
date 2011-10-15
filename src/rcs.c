@@ -75,12 +75,15 @@ struct admin_closure
   /* For ‘-a’, ‘-A’, ‘-e’ handling.  */
   struct link accesses;
   struct link *tp_access;
+
+  /* For ‘-n’, ‘-N’ handling.  */
+  struct link assocs;
+  struct link *tp_assoc;
 };
 
 static bool lockhead, unlockcaller, suppress_mail;
 static struct link *newlocklst, *rmvlocklst;
 static struct link messagelst;
-static struct link assoclst;
 static struct delrevpair delrev;
 static struct delta *cuthead, *cuttail, *delstrt;
 
@@ -105,15 +108,19 @@ exiterr (void)
 }
 
 static void
-getassoclst (struct link **tp, char *sp)
+getassoclst (struct admin_closure *dc, char *sp)
 /* Associate a symbolic name to a revision or branch,
-   and store in ‘assoclst’.  */
+   and store in ‘dc->assocs’.  */
 {
   char option = *sp++;
   struct u_symdef *ud;
   char const *name;
   size_t len;
   int c = *sp;
+  struct link **tp = &dc->tp_assoc;
+
+  if (! *tp)
+    *tp = &dc->assocs;
 
 #define SKIPWS()  while (c == ' ' || c == '\t' || c == '\n') c = *++sp
 
@@ -750,14 +757,15 @@ removerevs (void)
 }
 
 static bool
-doassoc (void)
-/* Add or delete (if !underlying) association that is stored in ‘assoclst’.  */
+doassoc (struct admin_closure *dc)
+/* Add or delete (if !underlying) association
+   that is stored in ‘dc->assocs’.  */
 {
   struct cbuf numrev;
   char const *p;
   bool changed = false;
 
-  for (struct link *cur = assoclst.next; cur; cur = cur->next)
+  for (struct link *cur = dc->assocs.next; cur; cur = cur->next)
     {
       struct u_symdef const *u = cur->entry;
       char const *ssymbol = u->u.meaningful;
@@ -1134,7 +1142,7 @@ main (int argc, char **argv)
   struct cbuf branchnum;
   struct link boxlock, *tplock;
   struct link boxrm, *tprm;
-  struct link *tp_assoc, *tp_log;
+  struct link *tp_log;
   const struct program program =
     {
       .invoke = argv[0],
@@ -1150,7 +1158,6 @@ main (int argc, char **argv)
 
   nosetid ();
 
-  tp_assoc = &assoclst;
   tp_log = &messagelst;
   branchsym = commsyml = textfile = NULL;
   branchflag = strictlock = false;
@@ -1276,7 +1283,7 @@ main (int argc, char **argv)
               PERR ("missing symbolic name after -%c", (*argv)[1]);
               break;
             }
-          getassoclst (&tp_assoc, (*argv) + 1);
+          getassoclst (&dc, (*argv) + 1);
           break;
 
         case 'm':
@@ -1469,7 +1476,7 @@ main (int argc, char **argv)
         changed |= doaccess (&dc);
 
         /* Update association list.  */
-        changed |= doassoc ();
+        changed |= doassoc (&dc);
 
         /* Update locks.  */
         changed |= dolocks (&dc);
