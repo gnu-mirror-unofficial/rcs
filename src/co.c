@@ -785,6 +785,7 @@ Options:
   -jJOINS       Merge using JOINS, a list of REV:REV pairs;
                 this option is obsolete -- see rcsmerge(1).
   -sSTATE       Select matching state STATE.
+  -S            Enable "self-same" mode.
   -T            Preserve the modification time on the RCS file
                 even if it changes because a lock is added or removed.
   -wWHO         Select matching login WHO.

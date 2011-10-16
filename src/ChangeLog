@@ -1,3 +1,12 @@
+2011-10-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	co: Mention ‘-S’ in help text.
+
+	Omission from 2011-10-11, "Add
+	option ‘-S’ to enable "self-same" mode".
+
+	* co.c: Mention ‘-S’ in help text.
+
 2011-10-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Remove ‘rmvlocklst’ from global state of rcs(1).
