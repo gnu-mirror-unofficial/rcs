@@ -147,15 +147,6 @@ scanfile (register FILE *file, char const *name)
   return 0;
 }
 
-/*:help
-[options] [file ...]
-Options:
-  -q            Suppress warnings if no patterns are found.
-  -V            Like --version.
-
-If no FILE is specified, scan standard input.
-*/
-
 int
 main (int argc, char **argv)
 {
@@ -217,5 +208,14 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return status;
 }
+
+/*:help
+[options] [file ...]
+Options:
+  -q            Suppress warnings if no patterns are found.
+  -V            Like --version.
+
+If no FILE is specified, scan standard input.
+*/
 
 /* ident.c ends here */

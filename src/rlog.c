@@ -737,38 +737,6 @@ putrevpairs (char const *b, char const *e, bool sawsep, void *data)
   PUSH (rr, criteria->revs);
 }
 
-/*:help
-[options] file ...
-Options:
-  -L            Ignore RCS files with no locks set.
-  -R            Print the RCS file name only.
-  -h            Print only the "header" information.
-  -t            Like -h, but also include the description.
-  -N            Omit symbolic names.
-  -b            Select the default branch.
-  -dDATES       Select revisions in the range DATES, with spec:
-                  D      -- single revision D or earlier
-                  D1<D2  -- between D1 and D2, exclusive
-                  D2>D1  -- likewise
-                  <D, D> -- before D
-                  >D, D< -- after D
-                Use <= or >= to make ranges inclusive; DATES
-                may also be a list of semicolon-separated specs.
-  -l[WHO]       Select revisions locked by WHO (comma-separated list)
-                only, or by anyone if WHO is omitted.
-  -r[REVS]      Select revisions in REVS, a comma-separated list of
-                range specs, one of: REV, REV:, :REV, REV1:REV2
-  -sSTATES      Select revisions with state in STATES (comma-separated list).
-  -w[WHO]       Select revisions commited by WHO (comma-separated list),
-                or by the user if WHO is omitted.
-  -V            Like --version.
-  -VN           Emulate RCS version N.
-  -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
-  -zZONE        Specify date output format in keyword-substitution.
-  -q            No effect, included for consistency with other commands.
-*/
-
 int
 main (int argc, char **argv)
 {
@@ -1042,5 +1010,37 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+/*:help
+[options] file ...
+Options:
+  -L            Ignore RCS files with no locks set.
+  -R            Print the RCS file name only.
+  -h            Print only the "header" information.
+  -t            Like -h, but also include the description.
+  -N            Omit symbolic names.
+  -b            Select the default branch.
+  -dDATES       Select revisions in the range DATES, with spec:
+                  D      -- single revision D or earlier
+                  D1<D2  -- between D1 and D2, exclusive
+                  D2>D1  -- likewise
+                  <D, D> -- before D
+                  >D, D< -- after D
+                Use <= or >= to make ranges inclusive; DATES
+                may also be a list of semicolon-separated specs.
+  -l[WHO]       Select revisions locked by WHO (comma-separated list)
+                only, or by anyone if WHO is omitted.
+  -r[REVS]      Select revisions in REVS, a comma-separated list of
+                range specs, one of: REV, REV:, :REV, REV1:REV2
+  -sSTATES      Select revisions with state in STATES (comma-separated list).
+  -w[WHO]       Select revisions commited by WHO (comma-separated list),
+                or by the user if WHO is omitted.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
+  -q            No effect, included for consistency with other commands.
+*/
 
 /* rlog.c ends here */

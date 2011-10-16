@@ -111,25 +111,6 @@ get_directory (char const *dirname, char ***aargv)
   return entries;
 }
 
-/*:help
-[options] file ...
-Options:
-  -r[REV]       Specify revision.
-  -u[REV]       Unlock if is locked and no differences found.
-  -n[REV]       Dry run (no act, don't operate).
-  -q[REV]       Quiet mode.
-  -kSUBST       Substitute using mode SUBST (see co(1)).
-  -T            Preserve the modification time on the RCS file
-                even if it changes because a lock is removed.
-  -V            Like --version.
-  -VN           Emulate RCS version N.
-  -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
-  -zZONE        Specify date output format in keyword-substitution.
-
-REV defaults to the latest revision on the default branch.
-*/
-
 int
 main (int argc, char **argv)
 {
@@ -339,5 +320,24 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+/*:help
+[options] file ...
+Options:
+  -r[REV]       Specify revision.
+  -u[REV]       Unlock if is locked and no differences found.
+  -n[REV]       Dry run (no act, don't operate).
+  -q[REV]       Quiet mode.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -T            Preserve the modification time on the RCS file
+                even if it changes because a lock is removed.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
+
+REV defaults to the latest revision on the default branch.
+*/
 
 /* rcsclean.c ends here */

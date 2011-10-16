@@ -35,19 +35,6 @@ exiterr (void)
   exit_diff_trouble ();
 }
 
-/*:help
-[options] receiving-sibling parent other-sibling
-Options:
-  -A            Use `diff3 -A' style.
-  -E            Use `diff3 -E' style (default).
-  -e            Use `diff3 -e' style.
-  -p            Write to stdout instead of overwriting RECEIVING-SIBLING.
-  -q            Quiet mode; suppress conflict warnings.
-  -LLABEL       (up to three times) Specify the conflict labels for
-                RECEIVING-SIBLING, PARENT and OTHER-SIBLING, respectively.
-  -V            Like --version.
-*/
-
 int
 main (int argc, char **argv)
 {
@@ -125,5 +112,18 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+/*:help
+[options] receiving-sibling parent other-sibling
+Options:
+  -A            Use `diff3 -A' style.
+  -E            Use `diff3 -E' style (default).
+  -e            Use `diff3 -e' style.
+  -p            Write to stdout instead of overwriting RECEIVING-SIBLING.
+  -q            Quiet mode; suppress conflict warnings.
+  -LLABEL       (up to three times) Specify the conflict labels for
+                RECEIVING-SIBLING, PARENT and OTHER-SIBLING, respectively.
+  -V            Like --version.
+*/
 
 /* merge.c ends here */

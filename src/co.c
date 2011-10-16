@@ -393,43 +393,6 @@ badmerge:
   return false;
 }
 
-/*:help
-[options] file ...
-Options:
-  -f[REV]       Force overwrite of working file.
-  -I[REV]       Interactive.
-  -p[REV]       Write to stdout instead of the working file.
-  -q[REV]       Quiet mode.
-  -r[REV]       Normal checkout.
-  -l[REV]       Like -r, but also lock.
-  -u[REV]       Like -l, but unlock.
-  -M[REV]       Reset working file mtime (relevant for -l, -u).
-  -kSUBST       Use SUBST substitution, one of: kv, kvl, k, o, b, v.
-  -dDATE        Select latest before or on DATE.
-  -jJOINS       Merge using JOINS, a list of REV:REV pairs;
-                this option is obsolete -- see rcsmerge(1).
-  -sSTATE       Select matching state STATE.
-  -T            Preserve the modification time on the RCS file
-                even if it changes because a lock is added or removed.
-  -wWHO         Select matching login WHO.
-  -V            Like --version.
-  -VN           Emulate RCS version N.
-  -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
-  -zZONE        Specify date output format in keyword-substitution
-                and also the default timezone for -dDATE.
-
-Multiple flags in {fIlMpqru} may be used, except for -r, -l, -u, which are
-mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
-  symbolic -- must have been defined previously (see ci(1))
-  $        -- determine the revision number from keyword values
-              in the working file
-  .N       -- prepend default branch => DEFBR.N
-  BR.N     -- use this
-  BR       -- latest revision on branch BR
-If REV is omitted, take it to be the latest on the default branch.
-*/
-
 int
 main (int argc, char **argv)
 {
@@ -805,5 +768,42 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+/*:help
+[options] file ...
+Options:
+  -f[REV]       Force overwrite of working file.
+  -I[REV]       Interactive.
+  -p[REV]       Write to stdout instead of the working file.
+  -q[REV]       Quiet mode.
+  -r[REV]       Normal checkout.
+  -l[REV]       Like -r, but also lock.
+  -u[REV]       Like -l, but unlock.
+  -M[REV]       Reset working file mtime (relevant for -l, -u).
+  -kSUBST       Use SUBST substitution, one of: kv, kvl, k, o, b, v.
+  -dDATE        Select latest before or on DATE.
+  -jJOINS       Merge using JOINS, a list of REV:REV pairs;
+                this option is obsolete -- see rcsmerge(1).
+  -sSTATE       Select matching state STATE.
+  -T            Preserve the modification time on the RCS file
+                even if it changes because a lock is added or removed.
+  -wWHO         Select matching login WHO.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution
+                and also the default timezone for -dDATE.
+
+Multiple flags in {fIlMpqru} may be used, except for -r, -l, -u, which are
+mutually exclusive.  If specified, REV can be symbolic, numeric, or mixed:
+  symbolic -- must have been defined previously (see ci(1))
+  $        -- determine the revision number from keyword values
+              in the working file
+  .N       -- prepend default branch => DEFBR.N
+  BR.N     -- use this
+  BR       -- latest revision on branch BR
+If REV is omitted, take it to be the latest on the default branch.
+*/
 
 /* co.c ends here */

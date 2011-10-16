@@ -116,31 +116,6 @@ setup_label (char const *num, char const date[datesize])
 }
 #endif
 
-/*:help
-[options] file ...
-Options:
-  -rREV         (zero, one, or two times) Name a revision.
-  -kSUBST       Substitute using mode SUBST (see co(1)).
-  -q            Quiet mode.
-  -V            Like --version.
-  -VN           Emulate RCS version N.
-  -xSUFF        Specify SUFF as a slash-separated list of suffixes
-                used to identify RCS file names.
-  -zZONE        Specify date output format in keyword-substitution.
-
-If given two revisions (-rREV1 -rREV2), compare those revisions.
-If given only one revision (-rREV), compare the working file with it.
-If given no revisions, compare the working file with the latest
-revision on the default branch.
-
-Additionally, the following options (and their argument, if any) are
-passed to the underlying diff(1) command:
-  -0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -B, -C, -D, -F, -H, -I,
-  -L, -U, -W, -a, -b, -c, -d, -e, -f, -h, -i, -n, -p, -t, -u, -w, -y,
-  [long options (that start with "--")].
-(Not all of these options are meaningful.)
-*/
-
 int
 main (int argc, char **argv)
 {
@@ -490,5 +465,30 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+/*:help
+[options] file ...
+Options:
+  -rREV         (zero, one, or two times) Name a revision.
+  -kSUBST       Substitute using mode SUBST (see co(1)).
+  -q            Quiet mode.
+  -V            Like --version.
+  -VN           Emulate RCS version N.
+  -xSUFF        Specify SUFF as a slash-separated list of suffixes
+                used to identify RCS file names.
+  -zZONE        Specify date output format in keyword-substitution.
+
+If given two revisions (-rREV1 -rREV2), compare those revisions.
+If given only one revision (-rREV), compare the working file with it.
+If given no revisions, compare the working file with the latest
+revision on the default branch.
+
+Additionally, the following options (and their argument, if any) are
+passed to the underlying diff(1) command:
+  -0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -B, -C, -D, -F, -H, -I,
+  -L, -U, -W, -a, -b, -c, -d, -e, -f, -h, -i, -n, -p, -t, -u, -w, -y,
+  [long options (that start with "--")].
+(Not all of these options are meaningful.)
+*/
 
 /* rcsdiff.c ends here */

@@ -1106,48 +1106,6 @@ buildtree (struct admin_closure *dc)
   return;
 }
 
-/*:help
-[options] file ...
-Options:
-  -i              Create and initialize a new RCS file.
-  -L              Set strict locking.
-  -U              Set non-strict locking.
-  -M              Don't send mail when breaking someone else's lock.
-  -T              Preserve the modification time on the
-                  RCS file unless a revision is removed.
-  -I              Interactive.
-  -q              Quiet mode.
-  -aLOGINS        Append LOGINS (comma-separated) to access-list.
-  -e[LOGINS]      Erase LOGINS (all if unspecified) from access-list.
-  -AFILENAME      Append access-list of FILENAME to current access-list.
-  -b[REV]         Set default branch to that of REV or
-                  highest branch on trunk if REV is omitted.
-  -l[REV]         Lock revision REV.
-  -u[REV]         Unlock revision REV.
-  -cSTRING        Set comment leader to STRING; don't use: obsolete.
-  -kSUBST         Set default keyword substitution to SUBST (see co(1)).
-  -mREV:MSG       Replace REV's log message with MSG.
-  -nNAME[:[REV]]  If :REV is omitted, delete symbolic NAME.
-                  Otherwise, associate NAME with REV; NAME must be new.
-  -NNAME[:[REV]]  Like -n, but overwrite any previous assignment.
-  -oRANGE         Outdate revisions in RANGE:
-                    REV       -- single revision
-                    BR        -- latest revision on branch BR
-                    REV1:REV2 -- REV1 to REV2 on same branch
-                    :REV      -- beginning of branch to REV
-                    REV:      -- REV to end of branch
-  -sSTATE[:REV]   Set state of REV to STATE.
-  -t-TEXT         Set description in RCS file to TEXT.
-  -tFILENAME      Set description in RCS file to contents of FILENAME.
-  -V              Like --version.
-  -VN             Emulate RCS version N.
-  -xSUFF          Specify SUFF as a slash-separated list of suffixes
-                  used to identify RCS file names.
-  -zZONE          No effect; included for compatibility with other commands.
-
-REV defaults to the latest revision on the default branch.
-*/
-
 int
 main (int argc, char **argv)
 {
@@ -1603,5 +1561,47 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return dc.rv;
 }
+
+/*:help
+[options] file ...
+Options:
+  -i              Create and initialize a new RCS file.
+  -L              Set strict locking.
+  -U              Set non-strict locking.
+  -M              Don't send mail when breaking someone else's lock.
+  -T              Preserve the modification time on the
+                  RCS file unless a revision is removed.
+  -I              Interactive.
+  -q              Quiet mode.
+  -aLOGINS        Append LOGINS (comma-separated) to access-list.
+  -e[LOGINS]      Erase LOGINS (all if unspecified) from access-list.
+  -AFILENAME      Append access-list of FILENAME to current access-list.
+  -b[REV]         Set default branch to that of REV or
+                  highest branch on trunk if REV is omitted.
+  -l[REV]         Lock revision REV.
+  -u[REV]         Unlock revision REV.
+  -cSTRING        Set comment leader to STRING; don't use: obsolete.
+  -kSUBST         Set default keyword substitution to SUBST (see co(1)).
+  -mREV:MSG       Replace REV's log message with MSG.
+  -nNAME[:[REV]]  If :REV is omitted, delete symbolic NAME.
+                  Otherwise, associate NAME with REV; NAME must be new.
+  -NNAME[:[REV]]  Like -n, but overwrite any previous assignment.
+  -oRANGE         Outdate revisions in RANGE:
+                    REV       -- single revision
+                    BR        -- latest revision on branch BR
+                    REV1:REV2 -- REV1 to REV2 on same branch
+                    :REV      -- beginning of branch to REV
+                    REV:      -- REV to end of branch
+  -sSTATE[:REV]   Set state of REV to STATE.
+  -t-TEXT         Set description in RCS file to TEXT.
+  -tFILENAME      Set description in RCS file to contents of FILENAME.
+  -V              Like --version.
+  -VN             Emulate RCS version N.
+  -xSUFF          Specify SUFF as a slash-separated list of suffixes
+                  used to identify RCS file names.
+  -zZONE          No effect; included for compatibility with other commands.
+
+REV defaults to the latest revision on the default branch.
+*/
 
 /* rcs.c ends here */
