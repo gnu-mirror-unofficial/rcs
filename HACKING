@@ -6,8 +6,11 @@ It lives in the repo but is not included in the distribution.
 * next
 *** TODO more tests
 *** TODO features
-***** TODO single top-level command (what is a good name?)
+***** TODO single top-level command (working name: "grcs")
 ***** TODO long options
+***** TODO (r)log formatted output
+******* --format FORMAT-STRING
+******* --limit N
 ***** DONE extend ident(1) to recognize svn "fixed-width keyword syntax"
       based on [[rh:247998][redhat #247998]]
       see also [[bug-rcs:2011-09/msg00000.html][bug-rcs thread (2011-09-08)]]
