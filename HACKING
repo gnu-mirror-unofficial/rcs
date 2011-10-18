@@ -40,7 +40,7 @@ to be ephemeral, undergoing rebase, amendment, and ultimately removal.
 ***** update every year, unconditionally
 ***** (if (< 2 (- END BEGIN)) RANGE INDIVIDUAL)
 
-* possible future changes (see manual for the more feasible ones)
+* possible future changes (see [[file:doc/rcs.texi::@node.*missing][manual]] for the more feasible ones)
 
 *** Bring back sccstorcs.
 
