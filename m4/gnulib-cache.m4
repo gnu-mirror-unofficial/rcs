@@ -27,7 +27,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files _Exit closedir dirent double-slash-root errno extensions fcntl findprog fstat getcwd getlogin_r git-version-gen hash-pjw inline largefile mkstemp obstack obstack-printf progname readlink same-inode sigaction signal snippet/unused-parameter stdarg stdbool stdint stdio stdlib string strsignal sys_stat sys_wait time time_r tzset unistd unistd-safer waitpid
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files _Exit closedir dirent double-slash-root errno extensions fcntl findprog fstat getcwd getlogin_r git-version-gen hash-pjw inline largefile mkstemp obstack obstack-printf opendir progname readlink same-inode sigaction signal snippet/unused-parameter stdarg stdbool stdint stdio stdlib string strsignal sys_stat sys_wait time time_r tzset unistd unistd-safer waitpid
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -50,6 +50,7 @@ gl_MODULES([
   mkstemp
   obstack
   obstack-printf
+  opendir
   progname
   readlink
   same-inode

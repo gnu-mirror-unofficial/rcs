@@ -1,5 +1,11 @@
 2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module ‘opendir’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘opendir’.
+
+2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘fstat’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘fstat’.
