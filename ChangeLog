@@ -1,5 +1,11 @@
 2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Use gnulib module ‘snprintf’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘snprintf’.
+
+2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build int] Decruft: Remove obsolete handling for broken ‘printf %.2d’.
 
 	* configure.ac (rcs_cv_dot2_ok): Delete AC_CACHE_CHECK.
