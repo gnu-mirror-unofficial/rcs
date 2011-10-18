@@ -1,5 +1,11 @@
 2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build int] Use gnulib to implement ‘exiting’ func attribute.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘snippet/_Noreturn’.
+
+2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘snprintf’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘snprintf’.

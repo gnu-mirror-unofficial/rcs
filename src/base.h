@@ -40,15 +40,15 @@
 #include <vfork.h>
 #endif
 
+#define exiting  _Noreturn
+
 /* GCC attributes  */
 
 #define RCS_UNUSED  _GL_UNUSED
 
 #if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
-#define exiting              __attribute__ ((__noreturn__))
 #define printf_string(m, n)  __attribute__ ((__format__ (printf, m, n)))
 #else
-#define exiting
 #define printf_string(m, n)
 #endif
 
