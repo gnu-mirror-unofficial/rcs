@@ -1,3 +1,10 @@
+2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib for large file support.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘largefile’.
+	* configure.ac (AC_SYS_LARGEFILE): Delete macro call.
+
 2011-10-14  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Make extract-help fail noisily.

@@ -275,8 +275,6 @@ AS_IF([RCS_YESP([enable_suid])],[AC_CHECK_FUNCS([getuid seteuid setuid])])
 
 # system services
 
-AC_SYS_LARGEFILE
-
 # specific behaviors (that unfortunately require running a program to check)
 
 AC_CACHE_CHECK([if tinysym init includes NUL],[rcs_cv_tinyinit_ok],[
