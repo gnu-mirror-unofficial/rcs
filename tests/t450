@@ -19,7 +19,7 @@
 . $srcdir/common-kn
 split_std_out_err no
 $hey echo '                                    -*- org -*-'
-$hey type co
+$hey which co
 
 ##
 # Do "co -p -sSTATE" for various values of STATE,

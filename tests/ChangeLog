@@ -1,3 +1,15 @@
+2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Use which(1) instead of ‘type’.
+
+	* t150: Use ‘which COMMAND’ instead of ‘type COMMAND’.
+	* t410: Likewise.
+	* t420: Likewise.
+	* t430: Likewise.
+	* t440: Likewise.
+	* t450: Likewise.
+	* t460: Likewise.
+
 2011-10-11  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	co: Add option ‘-S’ to enable "self-same" mode.

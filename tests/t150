@@ -33,12 +33,12 @@ rlog
 
 ##
 # Check that each program can be found by the shell
-# (via the ‘type’ command), and that each program displays
+# (via the which(1) command), and that each program displays
 # reasonable output when invoked with ‘--version’ and ‘--help’.
 ##
 
 for p in $programs ; do
-    must 'type $p'
+    must 'which $p'
 
     vcmd="$p --version"
     vout=$wd/version-$p
