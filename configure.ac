@@ -309,19 +309,6 @@ TINYK (integrity);
 RCS_CBOOL([TINY_INIT_NEEDS_EXPLICIT_NUL],[no],[rcs_cv_tinyinit_ok],
   [Does the compiler forget to include '\0' for tinysym init?])
 
-AC_CACHE_CHECK([if printf "%.2d" produces a leading "0"],[rcs_cv_dot2_ok],[
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-#include <stdio.h>
-]],[[
-  char buf[4] = "xxx";
-  sprintf (buf, "%.2d", 1);
-  return ('0' != buf[0]);
-]])
-],[rcs_cv_dot2_ok=yes],[rcs_cv_dot2_ok=no])
-])
-RCS_CBOOL([PRINTF_DOT2_OK],[yes],[rcs_cv_dot2_ok],
-  [Does `printf "%.2d"' properly produce a leading "0"?])
-
 AC_CACHE_CHECK([if `fopen (F, "w+")' truncates],[rcs_cv_fopen_truncates],[
   echo nonempty > conftest.data
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
@@ -538,7 +525,6 @@ AC_DEFUN([PRESUMABLY_STANDARD_ENOUGH_BY_NOW],[dnl
 dnl These can probably be handled by gnulib, no sweat.
 ac_cv_header_utime_h            dnl SVr4, POSIX.1-2001
 ac_cv_header_pwd_h              dnl 4.3BSD, SVr4, POSIX.1-2001
-rcs_cv_dot2_ok                  dnl C99 (printf)
 ac_cv_func_fchmod               dnl 4.4BSD, SVr4, POSIX.1-2001
 ac_cv_func_ftruncate            dnl 4.4BSD, SVr4, POSIX.1-2001
 

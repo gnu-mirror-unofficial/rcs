@@ -1,5 +1,13 @@
 2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build int] Decruft: Remove obsolete handling for broken ‘printf %.2d’.
+
+	* configure.ac (rcs_cv_dot2_ok): Delete AC_CACHE_CHECK.
+	(PRINTF_DOT2_OK): Delete AC_DEFINE_UNQUOTED.
+	(PRESUMABLY_STANDARD_ENOUGH_BY_NOW): Remove ‘rcs_cv_dot2_ok’.
+
+2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use gnulib module ‘sprintf-posix’.
 
 	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘sprintf-posix’.

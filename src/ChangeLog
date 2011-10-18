@@ -1,3 +1,10 @@
+2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build int] Decruft: Remove obsolete handling for broken ‘printf %.2d’.
+
+	* rcstime.c (proper_dot_2): Delete macro.
+	(time2date, date2str): Use format string with ".2d" directly.
+
 2011-10-16  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	co: Mention ‘-S’ in help text.

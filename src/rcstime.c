@@ -27,16 +27,13 @@
 #include "partime.h"
 #include "maketime.h"
 
-#define proper_dot_2(a,b)  (PRINTF_DOT2_OK ? (a) : (b))
-
 void
 time2date (time_t unixtime, char date[datesize])
 /* Convert Unix time to RCS format.  For compatibility with older versions of
    RCS, dates from 1900 through 1999 are stored without the leading "19".  */
 {
   register struct tm const *tm = time2tm (unixtime, BE (version) < VERSION (5));
-  sprintf (date, proper_dot_2 ("%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",
-                               "%02d.%02d.%02d.%02d.%02d.%02d"),
+  sprintf (date, "%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",
            tm->tm_year + ((unsigned) tm->tm_year < 100 ? 0 : 1900),
            tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
@@ -153,15 +150,13 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
           zone = -zone;
           c = '-';
         }
-      w = sprintf (datebuf, proper_dot_2 ("%.2d-%.2d-%.2d %.2d:%.2d:%.2d%c%.2d",
-                                          "%02d-%02d-%02d %02d:%02d:%02d%c%02d"),
+      w = sprintf (datebuf, "%.2d-%.2d-%.2d %.2d:%.2d:%.2d%c%.2d",
                    z->tm_year + 1900,
                    z->tm_mon + 1, z->tm_mday, z->tm_hour, z->tm_min, z->tm_sec,
                    c, (int) (zone / (60 * 60)));
       if ((non_hour = zone % (60 * 60)))
         {
-          const char *fmt = proper_dot_2 (":%.2d",
-                                          ":%02d");
+          const char *fmt = ":%.2d";
 
           w += sprintf (datebuf + w, fmt, non_hour / 60);
           if ((non_hour %= 60))
