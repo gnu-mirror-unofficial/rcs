@@ -1,3 +1,9 @@
+2011-10-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘fcntl-h’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘fcntl-h’.
+
 2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use gnulib module ‘stat’.
