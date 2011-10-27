@@ -18,7 +18,7 @@
 . $srcdir/common
 split_std_out_err no
 $hey echo '                                    -*- org -*-'
-$hey which co
+$hey type co
 
 ##
 # Check "co -p -jJOINLIST" for various values of JOINLIST,

@@ -1,3 +1,18 @@
+2011-10-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Revert: "Use which(1) instead of ‘type’".
+
+	Apparently, ‘type’ is standardized by POSIX.
+	http://pubs.opengroup.org/onlinepubs/9699919799/utilities/type.html
+
+	* t150: Use ‘type COMMAND’ instead of ‘which COMMAND’.
+	* t410: Likewise.
+	* t420: Likewise.
+	* t430: Likewise.
+	* t440: Likewise.
+	* t450: Likewise.
+	* t460: Likewise.
+
 2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Use which(1) instead of ‘type’.

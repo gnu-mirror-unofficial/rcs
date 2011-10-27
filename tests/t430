@@ -19,7 +19,7 @@
 . $srcdir/common-kn
 split_std_out_err no
 $hey echo '                                    -*- org -*-'
-$hey which co
+$hey type co
 
 ##
 # Check "co -p -kSUBST" works for various values of SUBST,
