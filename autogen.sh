@@ -13,7 +13,21 @@
 
 set -ex
 
-gnulib-tool --conditional-dependencies --update
+# Update the gnulib modules.
+#
+# The sed script "tee"s the list of (requested and supporting)
+# modules to the file .gnulib-utility, slightly formatted for
+# inclusion in HACKING, q.v.
+gnulib-tool --conditional-dependencies --update \
+    | sed '
+/^Module list/,/^[A-Z]/!b
+/^ /!b
+h
+s/^/;/
+w .gnulib-utility
+x
+'
+
 autoreconf --install --symlink
 
 # These override what ‘autoreconf --install’ creates.

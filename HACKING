@@ -40,6 +40,165 @@ to be ephemeral, undergoing rebase, amendment, and ultimately removal.
 ***** update every year, unconditionally
 ***** (if (< 2 (- END BEGIN)) RANGE INDIVIDUAL)
 
+* gnulib utility
+*** why
+    We like gnulib, even though it is frightening at first.
+
+    Part of the fear is from ceding precise control to a system that
+    mutates w/o clear signals of stability.  Often, too, the mutation
+    involves growth, both in individual modules and in the connections
+    between them.  It is difficult to predict if an update will pull in
+    half (or more) of "libc".  (Excepting the last, all these points
+    could be said of RCS source itself, of course. ;-)
+
+    To assuage these fears, we monitor the gnulib "utility", i.e., the
+    ratio of explicitly requested modules to the currently-installed
+    set.  The higher this ratio, the more control we (imagine we) have.
+
+*** how
+    Unfortunately, gnulib-tool has no ‘--print-installation’ command.
+    Thus, we create (informational, not distributed) file [[file:.gnulib-utility][.gnulib-utility]]
+    as a side-effect of running [[file:autogen.sh][autogen.sh]].
+    :ELISP:
+    (defun org-dblock-write:insert-file (plist)
+      (insert-file-contents (plist-get plist :filename)))
+    :END:
+
+*** what (updated every so often and on release)
+    #+BEGIN: insert-file :filename ".gnulib-utility"
+    ;  _Exit
+    ;    alloca-opt
+    ;    chdir
+    ;    chdir-long
+    ;    chown
+    ;    cloexec
+    ;    close
+    ;  closedir
+    ;    concat-filename
+    ;    d-ino
+    ;  dirent
+    ;    dirfd
+    ;    dirname-lgpl
+    ;    dosname
+    ;  double-slash-root
+    ;    dup
+    ;    dup2
+    ;  errno
+    ;    error
+    ;    exitfail
+    ;  extensions
+    ;    fchdir
+    ;  fcntl
+    ;  fcntl-h
+    ;    fd-hook
+    ;    fdopendir
+    ;    filename
+    ;    filenamecat-lgpl
+    ;  findprog
+    ;    float
+    ;    fpieee
+    ;    fpucw
+    ;    frexp-nolibm
+    ;    frexpl-nolibm
+    ;  fstat
+    ;  getcwd
+    ;    getcwd-lgpl
+    ;    getdtablesize
+    ;  getlogin_r
+    ;    gettext-h
+    ;    gettimeofday
+    ;  git-version-gen
+    ;  hash-pjw
+    ;    havelib
+    ;    include_next
+    ;  inline
+    ;    intprops
+    ;    isnand-nolibm
+    ;    isnanf-nolibm
+    ;    isnanl-nolibm
+    ;  largefile
+    ;    lchown
+    ;    lock
+    ;    lstat
+    ;    malloc-posix
+    ;    math
+    ;    memchr
+    ;    mempcpy
+    ;    memrchr
+    ;    mkdir
+    ;  mkstemp
+    ;    msvc-inval
+    ;    msvc-nothrow
+    ;    multiarch
+    ;    nocrash
+    ;  obstack
+    ;  obstack-printf
+    ;  open
+    ;    openat
+    ;    openat-die
+    ;  opendir
+    ;    pathmax
+    ;    printf-frexp
+    ;    printf-frexpl
+    ;    printf-safe
+    ;  progname
+    ;    raise
+    ;  readlink
+    ;    realloc-posix
+    ;    rmdir
+    ;  same-inode
+    ;    save-cwd
+    ;  sigaction
+    ;  signal
+    ;    signal-h
+    ;    signbit
+    ;    sigprocmask
+    ;    size_max
+    ;  snippet/_Noreturn
+    ;    snippet/arg-nonnull
+    ;    snippet/c++defs
+    ;  snippet/unused-parameter
+    ;    snippet/warn-on-use
+    ;  snprintf
+    ;  sprintf-posix
+    ;  ssize_t
+    ;  stat
+    ;  stdarg
+    ;  stdbool
+    ;    stddef
+    ;  stdint
+    ;  stdio
+    ;  stdlib
+    ;    stpcpy
+    ;    strdup-posix
+    ;    strerror
+    ;    strerror-override
+    ;  string
+    ;  strsignal
+    ;  sys_stat
+    ;    sys_time
+    ;  sys_wait
+    ;    tempname
+    ;    threadlib
+    ;  time
+    ;  time_r
+    ;    tls
+    ;  tzset
+    ;  unistd
+    ;  unistd-safer
+    ;    unlink
+    ;    vasnprintf
+    ;    verify
+    ;  waitpid
+    ;    wchar
+    ;    xalloc
+    ;    xalloc-die
+    ;    xalloc-oversized
+    ;    xconcat-filename
+    ;    xsize
+
+    #+END:
+
 * possible future changes (see [[file:doc/rcs.texi::@node.*missing][manual]] for the more feasible ones)
 
 *** Bring back sccstorcs.

@@ -1,3 +1,10 @@
+2011-10-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[boot int] Tee "gnulib utility" from gnulib-tool output.
+
+	* autogen.sh: Pipe gnulib-tool output through a sed script
+	that "tee"s the module list to file .gnulib-utility.
+
 2011-10-19  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use gnulib module ‘fcntl-h’.
