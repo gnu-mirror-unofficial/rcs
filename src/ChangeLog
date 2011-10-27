@@ -1,3 +1,12 @@
+2011-10-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Fix bug: Init rcsdiff(1) auto var.
+
+	Omission from 2011-10-13, "Remove ‘workptr’,
+	‘workstat’ from global state of rcsdiff(1)".
+
+	* rcsdiff.c (main): Clear out ‘work’.
+
 2011-10-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build int] Use gnulib to implement ‘exiting’ func attribute.

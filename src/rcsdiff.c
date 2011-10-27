@@ -148,6 +148,7 @@ main (int argc, char **argv)
 
   CHECK_HV ();
   gnurcs_init (&program);
+  memset (&work, 0, sizeof (work));
 
   exitstatus = DIFF_SUCCESS;
 
