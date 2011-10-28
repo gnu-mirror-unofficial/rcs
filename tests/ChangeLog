@@ -1,3 +1,15 @@
+2011-10-28  Paul Eggert  <eggert@CS.UCLA.EDU>
+
+	[v] Fix bug: Refine criteria for avoiding read-only checks.
+
+	Previously, tests using ‘dont_check_readonly’
+	failed if the "make check" user was root.
+	Reported by Ian Delaney, Aaron W. Swenson.
+
+	* common-i (dont_check_readonly): Don't compute based on
+	a ‘uname -s’ output; instead, check to see if the user can
+	write a purportedly read-only file, and inhibit based on that.
+
 2011-10-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Revert: "Use which(1) instead of ‘type’".
