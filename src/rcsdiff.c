@@ -116,6 +116,10 @@ setup_label (char const *num, char const date[datesize])
 }
 #endif
 
+/* Elements in the constructed command line prior to this index are
+   boilerplate.  From this index on, things are data-dependent.  */
+#define COMMAND_LINE_VARYING  (3 + !DIFF_L)
+
 int
 main (int argc, char **argv)
 {
@@ -130,7 +134,7 @@ main (int argc, char **argv)
   char const **diff_label1, **diff_label2;
   char date2[datesize];
 #endif
-  char const *cov[10 + !DIFF_L];
+  char const *cov[7 + COMMAND_LINE_VARYING];
   char const **diffv, **diffp, **diffpend;      /* argv for subsidiary diff */
   char const **pp, *diffvstr = NULL;
   struct cbuf commarg;
@@ -401,7 +405,7 @@ main (int argc, char **argv)
 
         commarg = minus_p (xrev1, rev1);
 
-        pp = &cov[3 + !DIFF_L];
+        pp = &cov[COMMAND_LINE_VARYING];
         *pp++ = commarg.string;
         if (lexpandarg)
           *pp++ = lexpandarg;
@@ -437,7 +441,7 @@ main (int argc, char **argv)
         else
           {
             commarg = minus_p (xrev2, rev2);
-            cov[3 + !DIFF_L] = commarg.string;
+            cov[COMMAND_LINE_VARYING] = commarg.string;
             diffp[1] = maketemp (1);
             if (runv (-1, diffp[1], cov))
               {
