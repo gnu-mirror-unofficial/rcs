@@ -31,8 +31,8 @@ bits = b-base \
   b-identification \
   b-tichy-cite
 
-EXTRA_DIST = $(dist_man_MANS:%=%in) $(BUILT_SOURCES) $(bits)
-EXTRA_DIST += $(dist_noinst_MANS:%=%in)
+EXTRA_DIST = $(dist_man_MANS:=in) $(BUILT_SOURCES) $(bits)
+EXTRA_DIST += $(dist_noinst_MANS:=in)
 
 soelim = $(SOELIM) -I. -I'$(srcdir)'
 nolf = sed '/^\.lf /d'

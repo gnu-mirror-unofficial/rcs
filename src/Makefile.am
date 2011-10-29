@@ -38,7 +38,7 @@ executables = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog
 
 bin_PROGRAMS = $(executables)
 
-BUILT_SOURCES = $(executables:%=%.help)
+BUILT_SOURCES = $(executables:=.help)
 
 LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 

@@ -1,3 +1,11 @@
+2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use portable Makefile subst-ref variable syntax.
+
+	The syntax $(VAR:%=%SUFFIX) is a GNU Make extension.
+
+	* Makefile.am (BUILT_SOURCES): Use $(VAR:=SUFFIX).
+
 2011-10-28  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Add abstraction: COMMAND_LINE_VARYING
