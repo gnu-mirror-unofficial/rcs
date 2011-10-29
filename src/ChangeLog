@@ -1,5 +1,12 @@
 2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: VX
+
+	* co.c (VX): New #define.
+	(buildjoin): Use ‘VX’.
+
+2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[build] Use portable Makefile subst-ref variable syntax.
 
 	The syntax $(VAR:%=%SUFFIX) is a GNU Make extension.

@@ -311,6 +311,10 @@ preparejoin (register char *j, struct jstuff *js)
   return rv;
 }
 
+/* Elements in the constructed command line prior to this index are
+   boilerplate.  From this index on, things are data-dependent.  */
+#define VX  2
+
 static bool
 buildjoin (char const *initialfile, struct jstuff *js)
 /* Merge pairs of elements in ‘js->ls’ into ‘initialfile’.
@@ -320,7 +324,7 @@ buildjoin (char const *initialfile, struct jstuff *js)
 {
   char const *rev2, *rev3;
   int i;
-  char const *cov[10], *mergev[11];
+  char const *cov[8 + VX], *mergev[11];
   char const **p;
   size_t len;
   char const *subs = NULL;
@@ -329,8 +333,8 @@ buildjoin (char const *initialfile, struct jstuff *js)
   rev3 = maketemp (3);      /* ‘buildrevision’ may use 1 and 2 */
 
   cov[1] = PEER_CO ();
-  /* ‘cov[2]’ setup below.  */
-  p = &cov[3];
+  /* ‘cov[VX]’ setup below.  */
+  p = &cov[1 + VX];
   if (js->expand)
     *p++ = js->expand;
   if (js->suffix)
@@ -361,12 +365,12 @@ buildjoin (char const *initialfile, struct jstuff *js)
         }
       diagnose ("revision %s", js->ls[i]);
       ACCF ("-p%s", js->ls[i]);
-      cov[2] = finish_string (SINGLE, &len);
+      cov[VX] = finish_string (SINGLE, &len);
       if (runv (-1, rev2, cov))
         goto badmerge;
       diagnose ("revision %s", js->ls[i + 1]);
       ACCF ("-p%s", js->ls[i + 1]);
-      cov[2] = finish_string (SINGLE, &len);
+      cov[VX] = finish_string (SINGLE, &len);
       if (runv (-1, rev3, cov))
         goto badmerge;
       diagnose ("merging...");
