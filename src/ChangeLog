@@ -1,5 +1,13 @@
 2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: one_beyond_last_dir_sep
+
+	* b-beer.h (one_beyond_last_dir_sep): New func decl.
+	* b-peer.c (one_beyond_last_dir_sep): New func.
+	(find_peer_prog): Use ‘one_beyond_last_dir_sep’.
+
+2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: VX
 
 	* co.c (VX): New #define.

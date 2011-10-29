@@ -27,6 +27,16 @@
 
 struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
 
+const char *
+one_beyond_last_dir_sep (const char *name)
+{
+  const char *end = strrchr (name, SLASH);
+
+  return end
+    ? 1 + end
+    : NULL;
+}
+
 char const *
 find_peer_prog (struct symdef *prog)
 {
@@ -40,11 +50,11 @@ find_peer_prog (struct symdef *prog)
       if (! BE (invdir))
         {
           char const *name = find_in_path (PROGRAM (invoke));
-          char const *end = strrchr (name, SLASH);
+          char const *end = one_beyond_last_dir_sep (name);
 
           if (!end)
             PFATAL ("cannot determine directory (in PATH) of `%s'", name);
-          BE (invdir) = intern (PLEXUS, name, end + 1 - name);
+          BE (invdir) = intern (PLEXUS, name, end - name);
           if (name != PROGRAM (invoke))
             free ((void *) name);
         }

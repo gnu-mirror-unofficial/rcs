@@ -20,6 +20,7 @@
 
 extern struct symdef peer_co;
 
+const char *one_beyond_last_dir_sep (const char *name);
 char const *find_peer_prog (struct symdef *prog);
 
 /* Idioms.  */
