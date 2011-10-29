@@ -18,9 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
-# Usage: extract-help [-o OUTFILE] [INFILE]
+# Usage: extract-help [-o OUTFILE] INFILE
 #
-# Look for a C comment in INFILE (or stdin if not specified) of the form:
+# Look for a C comment in INFILE of the form:
 #  /*:help
 #  TEXT
 #  */
@@ -58,7 +58,10 @@ if [ x"$1" = x-o ] ; then
     shift
 fi
 
-if [ x"$1" = x ] ; then : ; else
+if [ x"$1" = x ] ; then
+    echo >&2 "ERROR: Missing arg: INFILE (try --help)"
+    exit 1
+else
     in="$1"
     if [ -r "$in" ] ; then : ; else
         echo >&2 "ERROR: Cannot read input file: $in"
@@ -67,11 +70,12 @@ if [ x"$1" = x ] ; then : ; else
     vprefix=`echo $in | sed 's/\.c$/_/;s|.*/||'`
 fi
 
-test -z "$in" || exec 0<"$in"
 test -z "$out" || exec 1>"$out"
 echo '#include "gnu-h-v.h"'
 echo 'static char const' $vprefix'help[] = ""'
-sed -e '/^..:help$/,/^*./!d' | sed '1d;$d;s/"/\\"/g;s/^/"/;s/$/\\n"/'
+<"$in" \
+    sed '/^..:help$/,/^*./!d' \
+    | sed '1d;$d;s/"/\\"/g;s/^/"/;s/$/\\n"/'
 echo ';'
 
 # extract-help

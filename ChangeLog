@@ -1,3 +1,10 @@
+2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[boot int] Require INFILE for extract-help.
+
+	* build-aux/extract-help: Fail if INFILE
+	not specified; don't bother with ‘exec 0<"$in"’.
+
 2011-10-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[boot int] Tee "gnulib utility" from gnulib-tool output.
