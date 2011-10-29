@@ -316,7 +316,7 @@ main (int argc, char **argv)
   cov[1] = PEER_CO ();
   cov[2] = "-q";
 #if !DIFF_L
-  cov[3] = "-M";
+  cov[COMMAND_LINE_VARYING - 1] = "-M";
 #endif
 
   /* Now handle all filenames.  */
