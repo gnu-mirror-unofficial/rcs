@@ -165,10 +165,7 @@ accumulate_byte (struct divvy *divvy, int c)
 void
 accumulate_range (struct divvy *divvy, char const *beg, char const *end)
 {
-  struct obstack *o = divvy->space;
-
-  while (beg < end)
-    obstack_1grow (o, *beg++);
+  obstack_grow (divvy->space, beg, end - beg);
 }
 
 char *

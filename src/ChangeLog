@@ -1,5 +1,11 @@
 2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Make ‘accumulate_range’ faster.
+
+	* b-divvy.c (accumulate_range): Use ‘obstack_grow’.
+
+2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use ‘COMMAND_LINE_VARYING’ more.
 
 	Omission from 2011-10-28, "Add
