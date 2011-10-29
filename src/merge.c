@@ -1,4 +1,4 @@
-/* merge - three-way file merge
+/* Three-way file merge.
 
    Copyright (C) 2010, 2011 Thien-Thi Nguyen
    Copyright (C) 1991, 1992, 1993, 1994, 1995 Paul Eggert
