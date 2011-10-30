@@ -1,5 +1,15 @@
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	grcs: Fix bug: Handle argv[0] w/o directory component.
+
+	Omission from 2011-10-30, "New program: grcs".
+
+	* super.c (recognize): Return a ‘submain_t *’.
+	(main): Update call to ‘recognize’; for ‘argv[1]’, if there is
+	a dir sep, use ‘argv[0]’ directly, otherwise ‘PEER_SUPER ()’.
+
+2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[dist] Decruft: Don't distribute TAGS.
 
 	* Makefile.am (EXTRA_DIST): Remove TAGS, $(TESTS).

@@ -105,7 +105,7 @@ struct aliases aliases[] =
 
 static const size_t n_aliases = sizeof (aliases) / sizeof (aliases[0]);
 
-static struct aliases *
+static submain_t *
 recognize (const char *maybe)
 {
   size_t mlen = strlen (maybe);
@@ -123,7 +123,7 @@ recognize (const char *maybe)
 
           if (mlen == sym->len
               && looking_at (sym, maybe))
-            return a;
+            return a->func;
           aka += sym->len + 1;
         }
     }
@@ -196,7 +196,7 @@ main (int argc, char **argv)
   else
     {
       const char *cmd;
-      struct aliases *a;
+      submain_t *sub;
 
       /* Option processing.  */
       if ('-' == argv[1][0])
@@ -210,27 +210,20 @@ main (int argc, char **argv)
         }
 
       /* Try dispatch.  */
-      if (! (a = recognize (cmd = argv[1])))
+      if (! (sub = recognize (cmd = argv[1])))
         HUH ("command");
       else
         {
-          const char *prefix = one_beyond_last_dir_sep (argv[0]);
-          struct cbuf inv =
-            {
-              .string = (char *) a->aka + 1,
-              .size = *(a->aka)
-            };
-          size_t len;
           struct dynamic_root super;
 
           /* Construct a simulated invocation.  */
-          if (prefix)
-            SHACCR (argv[0], prefix);
-          argv[1] = SHSNIP (&len, inv.string, inv.string + inv.size);
+          argv[1] = one_beyond_last_dir_sep (argv[0])
+            ? argv[0]
+            : str_save (PEER_SUPER ());
 
           /* Dispatch, surrounded by dynamic-root push/pop.  */
           droot_global_to_stack (&super);
-          exitval = a->func (cmd, argc - 1, argv + 1);
+          exitval = sub (cmd, argc - 1, argv + 1);
           droot_stack_to_global (&super);
         }
     }
