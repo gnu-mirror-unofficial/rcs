@@ -11,6 +11,7 @@
 	(BUILT_SOURCES): Add $(subs:=.help), super.help.
 	(grcs_SOURCES): New var.
 	(CLEANFILES): Add $(subs).
+	(EXTRADIST): Add sub.TEMPLATE.
 	* b-peer.c (peer_co): Delete.
 	(peer_super): New ‘struct symdef’.
 	* b-peer.h (peer_co): Delete var decl.
