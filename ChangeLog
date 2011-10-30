@@ -1,5 +1,14 @@
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[doc] Describe grcs in the manual.
+
+	* doc (SUPER): New @set.
+	(super): New macro.
+	(Usage): Add ‘@value{SUPER}’ to the menu.
+	(@value{SUPER}): New node.
+
+2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Decruft: Don't mention ucontext.h author.
 
 	Omission from 2011-06-14, "Separate ISR

@@ -15,6 +15,11 @@ Walter F.@tie{}Tichy
 RCS file
 @end macro
 
+@set SUPER grcs
+@macro super
+@rcscommand{@value{SUPER}}
+@end macro
+
 @macro TODO
 @*@strong{TODO:}@w{ }
 @end macro
@@ -594,8 +599,11 @@ For more information about branches, @xref{Concepts}.
 
 This chapter describes how to invoke RCS commands, including common
 command-line elements, as well options specific to each command.
+Starting with RCS 5.9, the special command @super{} is the preferred
+@dfn{dispatch program} for some of the other commands.
 
 @menu
+* @value{SUPER}::
 * Common elements::
 * ci::
 * co::
@@ -607,6 +615,54 @@ command-line elements, as well options specific to each command.
 * rcsmerge::
 * rlog::
 @end menu
+
+@node @value{SUPER}
+@section Invoking @rcscommand{@value{SUPER}}
+
+@usage {@value{SUPER}, command [command-arg...]}
+
+@noindent
+The @super{} command is a @dfn{dispatch program} for some of the other
+commands.  Practically, that means that rather than invoking some
+command directly from the shell as @var{command}, you would instead
+invoke @super{}, specifying @var{command} as the first arg, followed
+by @var{command}-specific args.
+
+@example
+# standalone
+$ rlog @var{filename}
+
+# with the dispatch program
+$ @value{SUPER} rlog @var{filename}
+@end example
+
+Although the extra typing is a drawback, using @super{} confers
+some advantages:
+
+@table @asis
+@item aliases
+In the example above, we could have written
+@example
+$ @value{SUPER} log @var{filename}
+@end example
+@noindent
+where @samp{log} is an @dfn{alias} for @samp{rlog}.
+See @option{--commands} below.
+
+@item congruence with conteporary VCSes
+These days, version control systems almost universally use a dispatch
+program of some sort.  Combined with aliases, this can help you slide
+from RCS to another VCS (and back) more easily.
+@end table
+
+@noindent
+For these reasons, @super{} is here to stay.  Perhaps more importantly,
+commands as standalone programs will be withdrawn in a future RCS
+release.  The sooner you adapt scripts to use @super{} the better.
+
+Aside from @option{--help} and @option{--version}, @super{} also takes
+@option{--commands}, which displays the available commands (and their
+aliases) and exits.
 
 @node Common elements
 @section Common elements
