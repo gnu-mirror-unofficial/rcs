@@ -1,5 +1,14 @@
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Add configure option ‘--disable-standalone-compat’.
+
+	* Makefile.am (bin_SCRIPTS): Move inside ‘if BINBLOAT’.
+	[!BINBLOAT] (noinst_DATA): New var.
+	(CLEANFILES): Add sub.sh.
+	(sub.sh): New target.
+
+2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	grcs: Fix bug: Handle argv[0] w/o directory component.
 
 	Omission from 2011-10-30, "New program: grcs".

@@ -27,7 +27,9 @@ btdt_LDADD = ../src/libparts.a ../lib/libgnu.a
 # This helps certain RCS programs find their peers.
 PATHPREFIX = $(abs_top_builddir)/src
 
-TESTS_ENVIRONMENT = PATHPREFIX="$(PATHPREFIX)" sh
+TESTS_ENVIRONMENT = 				\
+  DEFSHELLFUNCS=$(DEFSHELLFUNCS)		\
+  PATHPREFIX="$(PATHPREFIX)" sh
 
 XFAIL_TESTS =
 

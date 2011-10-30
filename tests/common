@@ -38,6 +38,8 @@ fi
 
 # subroutines
 
+${DEFSHELLFUNCS-false} && . ../src/sub.sh
+
 split_std_out_err ()
 {
     exec 1>${wd}/out

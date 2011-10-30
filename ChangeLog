@@ -1,5 +1,13 @@
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Add configure option ‘--disable-standalone-compat’.
+
+	* configure.ac (standalone-compat): New AC_ARG_ENABLE.
+	(BINBLOAT): New AM_CONDITIONAL.
+	(DEFSHELLFUNCS): New AC_SUBST.
+
+2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Describe grcs in the manual.
 
 	* doc (SUPER): New @set.

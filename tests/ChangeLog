@@ -1,5 +1,14 @@
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[build] Add configure option ‘--disable-standalone-compat’.
+
+	* Makefile.am (TESTS_ENVIRONMENT): Pass in ‘DEFSHELLFUNCS’.
+	* common <subroutines>: Depending on the value of
+	‘DEFSHELLFUNCS’, source a shell-script fragment
+	from ../src to define some command aliases.
+
+2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	New program: grcs
 
 	* t150 (dispatch, subs, independent, norecurse): New vars.

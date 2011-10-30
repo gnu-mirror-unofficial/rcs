@@ -70,6 +70,14 @@ AC_DEFINE_UNQUOTED([$1],["$[]$1"],[$3])
 
 # --enable, --with
 
+AC_ARG_ENABLE([standalone-compat],
+ [AS_HELP_STRING([--disable-standalone-compat],[do not install
+   some commands as standalone executables in $(bindir);
+   see README.])],,[enable_standalone_compat=yes])
+AM_CONDITIONAL([BINBLOAT],[RCS_YESP([enable_standalone_compat])])
+AM_COND_IF([BINBLOAT],[DEFSHELLFUNCS=false],[DEFSHELLFUNCS=true])
+AC_SUBST([DEFSHELLFUNCS])
+
 AC_ARG_ENABLE([compat2],
  [AS_HELP_STRING([--enable-compat2],[enable reading of RCS 2.x
    files (really ancient, prior to GNU RCS).  If you enable this,
