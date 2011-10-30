@@ -72,6 +72,11 @@ fi
 
 test -z "$out" || exec 1>"$out"
 echo '#include "gnu-h-v.h"'
+<"$in" sed '
+  s/^.../char const '$vprefix'blurb[] = "/
+  s/$/";/
+  q
+'
 echo 'static char const' $vprefix'help[] = ""'
 <"$in" \
     sed '/^..:help$/,/^*./!d' \

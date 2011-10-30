@@ -25,7 +25,7 @@
 #include "b-complain.h"
 #include "b-divvy.h"
 
-struct symdef peer_co = { .meaningful = "co", .underlying = NULL };
+struct symdef peer_super = { .meaningful = "grcs", .underlying = NULL };
 
 const char *
 one_beyond_last_dir_sep (const char *name)

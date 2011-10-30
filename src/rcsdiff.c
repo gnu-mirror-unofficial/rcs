@@ -30,8 +30,6 @@
 #include "b-fro.h"
 #include "b-peer.h"
 
-struct top *top;
-
 /* Normally, if the two revisions specified are the same, we avoid calling
    the underlying diff on the theory that it will produce no output.  This
    does not hold for -y (--side-by-side) and -D (--ifdef), however, such
@@ -118,10 +116,10 @@ setup_label (char const *num, char const date[datesize])
 
 /* Elements in the constructed command line prior to this index are
    boilerplate.  From this index on, things are data-dependent.  */
-#define COMMAND_LINE_VARYING  (3 + !DIFF_L)
+#define COMMAND_LINE_VARYING  (4 + !DIFF_L)
 
 int
-main (int argc, char **argv)
+rcsdiff_main (const char *cmd, int argc, char **argv)
 {
   int exitstatus = DIFF_SUCCESS;
   struct work work;
@@ -145,7 +143,7 @@ main (int argc, char **argv)
   const struct program program =
     {
       .invoke = argv[0],
-      .name = "rcsdiff",
+      .name = cmd,
       .help = rcsdiff_help,
       .exiterr = exiterr
     };
@@ -313,8 +311,9 @@ main (int argc, char **argv)
 #endif
   diffpend = diffp;
 
-  cov[1] = PEER_CO ();
-  cov[2] = "-q";
+  cov[1] = PEER_SUPER ();
+  cov[2] = "co";
+  cov[3] = "-q";
 #if !DIFF_L
   cov[COMMAND_LINE_VARYING - 1] = "-M";
 #endif
@@ -470,6 +469,13 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+const uint8_t rcsdiff_aka[14] =
+{
+  2 /* count */,
+  4,'d','i','f','f',
+  7,'r','c','s','d','i','f','f'
+};
 
 /*:help
 [options] file ...

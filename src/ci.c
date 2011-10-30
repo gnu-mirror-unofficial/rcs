@@ -48,8 +48,6 @@
 #define ftruncate(fd,length) (-1)
 #endif
 
-struct top *top;
-
 struct reason
 {
   struct cbuf upfront;                  /* from -mMSG */
@@ -610,7 +608,7 @@ first_meaningful_symbolic_name (struct link *ls)
 }
 
 int
-main (int argc, char **argv)
+ci_main (const char *cmd, int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
   struct reason reason;
@@ -643,7 +641,7 @@ main (int argc, char **argv)
   const struct program program =
     {
       .invoke = argv[0],
-      .name = "ci",
+      .name = cmd,
       .help = ci_help,
       .exiterr = exiterr
     };
@@ -1209,6 +1207,14 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+const uint8_t ci_aka[19] =
+{
+  3 /* count */,
+  2,'c','i',
+  7,'c','h','e','c','k','i','n',
+  6,'c','o','m','m','i','t'
+};
 
 /*:help
 [options] file...

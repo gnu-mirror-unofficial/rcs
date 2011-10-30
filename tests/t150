@@ -19,7 +19,12 @@
 split_std_out_err no
 set -e
 
-programs='
+dispatch=grcs
+
+# TODO: The lists ‘subs’ and ‘independent’
+# should be mined from ../src/Makefile.
+
+subs='
 ci
 co
 ident
@@ -30,11 +35,19 @@ rcsdiff
 rcsmerge
 rlog
 '
+independent='
+ident
+merge
+'
+norecurse="$dispatch $independent"
+programs="$norecurse $subs"
+avoid=`echo $norecurse | tr ' ' '|'`
 
 ##
 # Check that each program can be found by the shell
 # (via the ‘type’ command), and that each program displays
 # reasonable output when invoked with ‘--version’ and ‘--help’.
+# Check output via dispatch for subs, too.
 ##
 
 for p in $programs ; do
@@ -49,6 +62,19 @@ for p in $programs ; do
     hout=$wd/help-$p
     must '$hcmd > $hout'
     grep -F 'Report bugs to' $hout || say_what $hcmd
+
+    eval "case $p in $avoid) continue ;; esac"
+
+    dvcmd="$dispatch $p --version"
+    dvout=$wd/d-version-$p
+    must '$dvcmd > $dvout'
+    grep -F "$p (GNU RCS)" $dvout || say_what $dvcmd
+
+    dhcmd="$dispatch $p --help"
+    dhout=$wd/d-help-$p
+    must '$dhcmd > $dhout'
+    grep -F "Usage: $p" $dhout || say_what $dhcmd
+    grep -F 'Report bugs to' $dhout || say_what $dhcmd
 done
 
 # t150 ends here

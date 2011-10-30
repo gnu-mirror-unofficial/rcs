@@ -32,8 +32,6 @@
 #include "b-feph.h"
 #include "b-fro.h"
 
-struct top *top;
-
 struct u_log
 {
   char const *revno;
@@ -1107,7 +1105,7 @@ buildtree (struct admin_closure *dc)
 }
 
 int
-main (int argc, char **argv)
+rcs_main (const char *cmd, int argc, char **argv)
 {
   struct admin_closure dc;              /* dynamic context */
   char *a, **newargv, *textfile;
@@ -1123,7 +1121,7 @@ main (int argc, char **argv)
   const struct program program =
     {
       .invoke = argv[0],
-      .name = "rcs",
+      .name = cmd,
       .help = rcs_help,
       .exiterr = exiterr
     };
@@ -1561,6 +1559,14 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return dc.rv;
 }
+
+const uint8_t rcs_aka[16] =
+{
+  3 /* count */,
+  4,'f','r','o','b',
+  3,'r','c','s',
+  5,'a','d','m','i','n'
+};
 
 /*:help
 [options] file ...

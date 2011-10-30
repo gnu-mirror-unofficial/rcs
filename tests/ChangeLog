@@ -1,3 +1,12 @@
+2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	New program: grcs
+
+	* t150 (dispatch, subs, independent, norecurse): New vars.
+	(programs): Use ‘norecurse’, ‘subs’.
+	(avoid): New var.
+	<main>: Also check ‘--help’ and ‘--verbose’ for ‘subs’.
+
 2011-10-28  Paul Eggert  <eggert@CS.UCLA.EDU>
 
 	[v] Fix bug: Refine criteria for avoiding read-only checks.

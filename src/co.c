@@ -36,8 +36,6 @@
 #include "b-isr.h"
 #include "b-peer.h"
 
-struct top *top;
-
 struct work
 {
   struct stat st;
@@ -313,7 +311,7 @@ preparejoin (register char *j, struct jstuff *js)
 
 /* Elements in the constructed command line prior to this index are
    boilerplate.  From this index on, things are data-dependent.  */
-#define VX  2
+#define VX  3
 
 static bool
 buildjoin (char const *initialfile, struct jstuff *js)
@@ -332,7 +330,8 @@ buildjoin (char const *initialfile, struct jstuff *js)
   rev2 = maketemp (0);
   rev3 = maketemp (3);      /* ‘buildrevision’ may use 1 and 2 */
 
-  cov[1] = PEER_CO ();
+  cov[1] = PEER_SUPER ();
+  cov[2] = "co";
   /* ‘cov[VX]’ setup below.  */
   p = &cov[1 + VX];
   if (js->expand)
@@ -398,7 +397,7 @@ badmerge:
 }
 
 int
-main (int argc, char **argv)
+co_main (const char *cmd, int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
   struct work work = { .force = false };
@@ -421,7 +420,7 @@ main (int argc, char **argv)
   const struct program program =
     {
       .invoke = argv[0],
-      .name = "co",
+      .name = cmd,
       .help = co_help,
       .exiterr = exiterr
     };
@@ -772,6 +771,13 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+const uint8_t co_aka[13] =
+{
+  2 /* count */,
+  2,'c','o',
+  8,'c','h','e','c','k','o','u','t'
+};
 
 /*:help
 [options] file ...

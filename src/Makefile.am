@@ -21,6 +21,13 @@
 # Hmmm, shouldn't gnulib or automake handle this automagically?
 AM_CPPFLAGS = -I'$(top_srcdir)/lib'
 
+subs = ci co rcs rcsclean rcsdiff rcsmerge rlog
+bin_SCRIPTS = $(subs)
+
+$(subs): sub.TEMPLATE
+	sed 's/SUB/$@/;s/VERSION/$(VERSION)/' $< > $@
+	chmod +x $@
+
 noinst_LIBRARIES = libparts.a
 libparts_a_SOURCES = \
   b-complain.h b-divvy.h b-esds.h b-excwho.h b-fb.h b-feph.h b-fro.h \
@@ -34,15 +41,17 @@ libparts_a_SOURCES = \
   rcsgen.c rcskeep.c rcsmap.c rcsrev.c \
   rcstime.c rcsutil.c
 
-executables = ci co ident merge rcs rcsclean rcsdiff rcsmerge rlog
+executables = ident merge
 
-bin_PROGRAMS = $(executables)
+bin_PROGRAMS = $(executables) grcs
 
-BUILT_SOURCES = $(executables:=.help)
+BUILT_SOURCES = $(subs:=.help) $(executables:=.help) super.help
+
+grcs_SOURCES = $(subs:=.c) super.c
 
 LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) $(subs)
 
 EXTRA_DIST = TAGS $(TESTS)
 

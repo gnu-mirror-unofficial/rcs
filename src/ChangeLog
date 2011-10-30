@@ -1,3 +1,49 @@
+2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	New program: grcs
+
+	* super.c: New file.
+	* sub.TEMPLATE: New file.
+	* Makefile.am (subs, bin_SCRIPTS): New vars.
+	($(subs)): New target.
+	(executables): Remove ci, co, rcs, rcsclean, rcsdiff, rcsmerge, rlog.
+	(bin_PROGRAMS): Add grcs.
+	(BUILT_SOURCES): Add $(subs:=.help), super.help.
+	(grcs_SOURCES): New var.
+	(CLEANFILES): Add $(subs).
+	* b-peer.c (peer_co): Delete.
+	(peer_super): New ‘struct symdef’.
+	* b-peer.h (peer_co): Delete var decl.
+	(peer_super): New var decl.
+	(PEER_CO): Delete macro.
+	(PEER_SUPER): New macro.
+	* ci.c (top): Delete var.
+	(ci_main): Rename from ‘main’; take arg ‘cmd’.
+	(ci_aka): New var.
+	* co.c (top): Delete var.
+	(VX): Bump to 3.
+	(buildjoin): Use ‘PEER_SUPER’ and "co".
+	(co_main): Rename from ‘main’; take arg ‘cmd’.
+	(co_aka): New var.
+	* rcs.c (top): Delete var.
+	(rcs_main): Rename from ‘main’; take arg ‘cmd’.
+	(rcs_aka): New var.
+	* rcsclean.c (top): Delete var.
+	(rcsclean_main): Rename from ‘main’; take arg ‘cmd’.
+	(rcsclean_aka): New var.
+	* rcsdiff.c (top): Delete var.
+	(COMMAND_LINE_VARYING): Bump constant to 4.
+	(rcsdiff_main): Rename from ‘main’; take arg ‘cmd’;
+	use ‘PEER_SUPER’ and "co".
+	(rcsdiff_aka): New var.
+	* rcsmerge.c (top): Delete var.
+	(rcsmerge_main): Rename from ‘main’; take arg ‘cmd’;
+	use ‘PEER_SUPER’ and "co".
+	(rcsmerge_aka): New var.
+	* rlog.c (top): Delete var.
+	(rlog_main): Rename from ‘main’; take arg ‘cmd’.
+	(rlog_aka): New var.
+
 2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Make ‘accumulate_range’ faster.

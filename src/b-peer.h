@@ -18,12 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern struct symdef peer_co;
+extern struct symdef peer_super;
 
 const char *one_beyond_last_dir_sep (const char *name);
 char const *find_peer_prog (struct symdef *prog);
 
 /* Idioms.  */
-#define PEER_CO()  find_peer_prog (&peer_co)
+#define PEER_SUPER()  find_peer_prog (&peer_super)
 
 /* b-peer.h ends here */

@@ -33,8 +33,6 @@
 #include "b-fb.h"
 #include "b-fro.h"
 
-struct top *top;
-
 struct revrange
 {
   char const *beg;
@@ -738,7 +736,7 @@ putrevpairs (char const *b, char const *e, bool sawsep, void *data)
 }
 
 int
-main (int argc, char **argv)
+rlog_main (const char *cmd, int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
   bool branchflag = false;
@@ -765,7 +763,7 @@ main (int argc, char **argv)
   const struct program program =
     {
       .invoke = argv[0],
-      .name = "rlog",
+      .name = cmd,
       .help = rlog_help,
       .exiterr = exiterr
     };
@@ -1010,6 +1008,13 @@ main (int argc, char **argv)
   gnurcs_goodbye ();
   return exitstatus;
 }
+
+const uint8_t rlog_aka[10] =
+{
+  2 /* count */,
+  3,'l','o','g',
+  4,'r','l','o','g'
+};
 
 /*:help
 [options] file ...
