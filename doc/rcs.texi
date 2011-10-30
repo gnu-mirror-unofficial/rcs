@@ -183,8 +183,6 @@ the documentation you are reading (gladly taking inspiration from the
 paper@footnote{Source (troff) and several output formats are available
 from the @url{http://www.gnu.org/software/rcs/, RCS homepage}.} and
 manpages originally written by @WFT{}).
-To support Cygwin, RCS 5.8 embeds a small LGPL library
-written by Panagiotis E. Hadjidoukas.
 
 @node Concepts
 @section Concepts
