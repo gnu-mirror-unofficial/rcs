@@ -26,6 +26,12 @@ It lives in the repo but is not included in the distribution.
 *** ChangeLog
 ***** format: while hacking, ttn-style; on release, scrunch to GNU
 ***** changes titled with suffix "; nfc." can be excluded
+*** tests/t???
+    :ELISP:
+    (pushnew '("rcs[^/]*/tests/t[0-9][0-9][0-9]$" . shell-script-mode)
+             auto-mode-alist
+             :test 'equal)
+    :END:
 *** bootstrap
 ***** gnulib-tool must be somewhere on PATH
 ***** do "sh autogen.sh"
