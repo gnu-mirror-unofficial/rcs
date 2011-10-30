@@ -53,7 +53,7 @@ LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
 CLEANFILES = $(BUILT_SOURCES) $(subs)
 
-EXTRA_DIST = TAGS $(TESTS) sub.TEMPLATE
+EXTRA_DIST = sub.TEMPLATE
 
 .c.help:
 	$(top_srcdir)/build-aux/extract-help -o $@ $<
