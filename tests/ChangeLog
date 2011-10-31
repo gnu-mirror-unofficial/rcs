@@ -1,3 +1,12 @@
+2011-10-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v int] Mine ‘subs’ and ‘executables’ from ../src/Makefile.
+
+	* t150 (subs, independent): Delete vars;
+	replace with commands to extract Makefile vars
+	‘subs’ and ‘executables’ from ../src/Makefile.
+	(norecurse): Use ‘$executables’.
+
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add configure option ‘--disable-standalone-compat’.

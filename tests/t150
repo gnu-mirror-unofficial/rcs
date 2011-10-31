@@ -21,25 +21,13 @@ set -e
 
 dispatch=grcs
 
-# TODO: The lists ‘subs’ and ‘independent’
-# should be mined from ../src/Makefile.
+# Mine ‘subs’ and ‘executables’ from ../src/Makefile.
+grep -E '(subs|executables) = ' ../src/Makefile \
+    | sed 's/^[^:]*://;s/ = /="/;s/$/"/' \
+    > $wd/vars
+. $wd/vars
 
-subs='
-ci
-co
-ident
-merge
-rcs
-rcsclean
-rcsdiff
-rcsmerge
-rlog
-'
-independent='
-ident
-merge
-'
-norecurse="$dispatch $independent"
+norecurse="$dispatch $executables"
 programs="$norecurse $subs"
 avoid=`echo $norecurse | tr ' ' '|'`
 
