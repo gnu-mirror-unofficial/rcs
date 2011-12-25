@@ -470,7 +470,6 @@ extdate (struct delta *root, struct date_selection *datesel)
         {
           r = ls->entry;
           oep = r->oep;
-          complain ("HEY: %d [%s] [%s] [%s] => ", oep, r->beg, root->date, r->end);
           if ((sel = ((!r->beg[0]
                        || (oep
                            ? DATE_LT (r->beg, root->date)
@@ -480,11 +479,7 @@ extdate (struct delta *root, struct date_selection *datesel)
                        || (oep
                            ? DATE_LT (root->date, r->end)
                            : !DATE_GT (root->date, r->end))))))
-            {
-              complain ("yes!\n");
-              break;
-            }
-          complain ("no\n");
+            break;
         }
       if (!sel)
         {

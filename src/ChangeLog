@@ -1,3 +1,14 @@
+2011-12-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	rlog: Fix bug: Remove debugging instrumentation.
+
+	Code introduced 2010-06-01, "Add abstractions:
+	{NUM,DATE}_{LT,EQ,GT}, NUMF_{LT,EQ}".
+	This is a bug fix and not merely "decruft" because
+	in the meantime, RCS 5.8 was released.  :-(
+
+	* rlog.c (extdate): Remove calls to ‘complain’.
+
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add configure option ‘--disable-standalone-compat’.
