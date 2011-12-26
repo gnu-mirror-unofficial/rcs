@@ -1,3 +1,17 @@
+2011-12-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test for 5.8 ‘rlog -zLT’ regression.
+
+	Normally for a regression test, we add it before the fix,
+	marked xfail, then in a separate commit apply the fix and
+	unmark it xfail.  In this case, however, failure only happens
+	on certain configurations (see ../src/ChangeLog 2011-12-26),
+	and we can't be bothered to add "conditional xfail" support.
+	Instead, we apply the fix and add the test separately, only.
+
+	* t320: New file.
+	* Makefile.am (TESTS): Add t320.
+
 2011-10-31  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v int] Mine ‘subs’ and ‘executables’ from ../src/Makefile.
