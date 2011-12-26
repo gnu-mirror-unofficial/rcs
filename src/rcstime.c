@@ -128,6 +128,7 @@ date2str (char const date[datesize], char datebuf[datesize + zonelenmax])
       MORE (tm_min);
       MORE (tm_sec);
       t.tm_wday = -1;
+      t.tm_yday = -1;
 #undef MORE
 
       zone = BE (zone_offset.seconds);

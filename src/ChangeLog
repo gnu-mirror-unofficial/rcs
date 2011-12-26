@@ -1,3 +1,21 @@
+2011-12-26  Oliver Billmann  <gnubug@billmann-edv.net>  (tiny change)
+
+	Fix bug: Fully init ‘struct tm t’ used for ‘-zLT’ handling.
+
+	On the i686 machine it was "initialized" with some large negative
+	number which will than lead to tm_yday being initialized in tm2time.
+	But on the x86_64 machine it contained the valid value 0 which than
+	always leads to YYYY-01-01.
+
+	ttn sez: Regression introduced 2011-01-13,
+	"Fix bug: Don't clobber ‘yday’ unconditionally".
+	To avoid this class of bug in the future, when converting
+	an assignment from unconditional to conditional, be sure
+	to initialize "upstream" of the conversion location,
+	in effect, moving the unconditional assignment earlier.
+
+	* rcstime.c (date2str): Init also ‘t.tm_yday’.
+
 2011-12-25  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	rlog: Fix bug: Remove debugging instrumentation.
