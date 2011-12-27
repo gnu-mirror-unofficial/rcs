@@ -1,3 +1,9 @@
+2011-12-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Explicitly declare UTF-8.
+
+	* doc/rcs.texi <header>: Add ‘@documentencoding utf-8’.
+
 2011-10-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add configure option ‘--disable-standalone-compat’.
