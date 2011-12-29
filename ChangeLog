@@ -1,3 +1,9 @@
+2011-12-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Use gnulib module ‘getopt-gnu’.
+
+	* m4/gnulib-cache.m4 (gl_MODULES): Add ‘getopt-gnu’.
+
 2011-12-27  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[doc] Explicitly declare UTF-8.
