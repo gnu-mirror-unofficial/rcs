@@ -1,3 +1,11 @@
+2012-01-01  Karl Berry  <karl@freefriends.org>  (tiny change)
+
+	[doc] Expand "related projects" blurb; correct misunderstanding.
+
+	* doc/rcs.texi (Overview): Replace CVS plug with paragraph
+	mentioning Bazaar, CVS, Subversion and Git; include URL
+	for Bazaar; don't say "GNU CVS" since CVS is not GNU.
+
 2011-12-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use gnulib module ‘getopt-gnu’.

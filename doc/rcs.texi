@@ -142,9 +142,11 @@ distribution also includes the script @rcscommand{rcsfreeze} showing
 some of the possibilities.
 
 @cindex projects, related
-
-If you use RCS heavily, you may also be interested in
-GNU @uref{http://www.gnu.org/software/cvs/, CVS}.
+RCS works with versions stored on a single filesystem or machine,
+edited by one person at a time.  Other version control systems, such
+as Bazaar (@url{http:///www.gnu.org/software/bazaar}), CVS,
+Subversion, and Git, support distributed access in various ways.
+Which is more appropriate depends on the task at hand.
 
 @menu
 * Credits::             Who did what, and when.
