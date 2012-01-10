@@ -1,6 +1,6 @@
 # Configure template for RCS
 
-# Copyright (C) 2010, 2011 Thien-Thi Nguyen
+# Copyright (C) 2010-2012 Thien-Thi Nguyen
 # Copyright (C) 1995 Paul Eggert
 #
 # This file is part of GNU RCS.

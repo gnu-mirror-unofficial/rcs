@@ -1,6 +1,6 @@
 /* b-grok.h --- comma-v parsing
 
-   Copyright (C) 2010, 2011 Thien-Thi Nguyen
+   Copyright (C) 2010-2012 Thien-Thi Nguyen
 
    This file is part of GNU RCS.
 

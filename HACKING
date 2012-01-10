@@ -310,7 +310,7 @@ to be ephemeral, undergoing rebase, amendment, and ultimately removal.
 #+LINK: rh    	 https://bugzilla.redhat.com/show_bug.cgi?id=
 
 
-Copyright (C) 2010, 2011 Thien-Thi Nguyen
+Copyright (C) 2010-2012 Thien-Thi Nguyen
 
 Copying and distribution of this file, with or without modification,
 are permitted provided the copyright notice and this notice are preserved.
