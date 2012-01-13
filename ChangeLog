@@ -1,5 +1,15 @@
 2012-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	Invoke diff(1) with ‘--label’ instead of ‘-L’.
+
+	GNU diff(1) support for ‘-L’ is transient.  Reported by Paul Eggert:
+	<http://lists.gnu.org/archive/html/bug-rcs/2012-01/msg00007.html>.
+
+	* configure.ac (rcs_cv_options_diff_l):
+	Check ‘diff --label’ instead of ‘diff -L’.
+
+2012-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[doc] Explicitly declare UTF-8 correctly.
 
 	This is what 2011-12-27, "Explicitly declare UTF-8" failed to do.

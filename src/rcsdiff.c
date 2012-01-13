@@ -107,7 +107,7 @@ setup_label (char const *num, char const date[datesize])
   char datestr[datesize + zonelenmax];
 
   date2str (date, datestr);
-  accf (PLEXUS, "-L%s\t%s", MANI (filename), datestr);
+  accf (PLEXUS, "--label=%s\t%s", MANI (filename), datestr);
   if (num)
     accf (PLEXUS, "\t%s", num);
   return finish_string (PLEXUS, &len);

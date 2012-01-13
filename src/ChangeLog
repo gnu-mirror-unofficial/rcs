@@ -1,3 +1,9 @@
+2012-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	Invoke diff(1) with ‘--label’ instead of ‘-L’.
+
+	* rcsdiff.c (setup_label): Use "--label", not "-L".
+
 2011-12-26  Oliver Billmann  <gnubug@billmann-edv.net>  (tiny change)
 
 	Fix bug: Fully init ‘struct tm t’ used for ‘-zLT’ handling.

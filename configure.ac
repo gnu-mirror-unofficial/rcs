@@ -178,9 +178,9 @@ AS_IF([test 1 = $? &&
 AC_DEFINE_UNQUOTED([DIFFFLAGS],["$rcs_cv_options_diff"],
   [Options of the `diff' program to be run.])
 
-# Set DIFF_L to 1 if diff understands the L option, 0 otherwise.
-AC_CACHE_CHECK([if diff understands option -L],[rcs_cv_options_diff_l],[
-  $DIFF -c -L 0 -L 1 conftest0 conftest1 >conftestout 2>/dev/null
+# Set DIFF_L to 1 if diff understands the ‘--label’ option, 0 otherwise.
+AC_CACHE_CHECK([if diff understands --label],[rcs_cv_options_diff_l],[
+  $DIFF -c --label 0 --label 1 conftest0 conftest1 >conftestout 2>/dev/null
   test 1 = $? && cmp -s - conftestout <<'EOF'
 *** 0
 --- 1
@@ -193,7 +193,7 @@ EOF
   RCS_SET_VN([rcs_cv_options_diff_l],[yes])
 ])
 RCS_CBOOL([DIFF_L],[yes],[rcs_cv_options_diff_l],
-  [Does diff(1) understand -L?])
+  [Does diff(1) understand `--label'?])
 
 # Set DIFF3 to the name of the diff3 program.
 AC_DEFUN([DIFF3_MAYBE],[gdiff3 diff3])
