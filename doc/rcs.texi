@@ -1,7 +1,7 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
-@documentencoding utf-8
 @setfilename rcs.info
+@documentencoding UTF-8
 @include version.texi
 @settitle GNU RCS @value{VERSION}
 @syncodeindex vr cp

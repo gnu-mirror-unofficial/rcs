@@ -1,3 +1,12 @@
+2012-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Explicitly declare UTF-8 correctly.
+
+	This is what 2011-12-27, "Explicitly declare UTF-8" failed to do.
+
+	* doc/rcs.texi <header>: Move ‘@documentencoding’
+	after ‘@setfilename’; say ‘UTF-8’ instead of ‘utf-8’.
+
 2012-01-01  Karl Berry  <karl@freefriends.org>  (tiny change)
 
 	[doc] Expand "related projects" blurb; correct misunderstanding.
