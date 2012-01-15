@@ -1,5 +1,11 @@
 2012-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	ci: Fix bug: Don't discard working file mtime with ‘-T’.
+
+	* Makefile.am (XFAIL_TESTS): Remove t810.
+
+2012-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test for 5.8 ‘ci -d -T’ regression; mark xfail.
 
 	* t810: New file.

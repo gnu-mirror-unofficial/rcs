@@ -1140,9 +1140,9 @@ ci_main (const char *cmd, int argc, char **argv)
 
         if (PROB (donerewrite (changedRCS, !Ttimeflag
                                ? (time_t) - 1
-                               : from && wtime < (repo_stat->st_mtime
-                                                  ? repo_stat->st_mtime
-                                                  : wtime))))
+                               : ((from && wtime < repo_stat->st_mtime)
+                                  ? repo_stat->st_mtime
+                                  : wtime))))
           continue;
 
         if (!keepworkingfile)

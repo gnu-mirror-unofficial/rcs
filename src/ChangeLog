@@ -1,3 +1,14 @@
+2012-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	ci: Fix bug: Don't discard working file mtime with ‘-T’.
+
+	Regression introduced 2010-03-13, "Topo-sort top-level;
+	eliminate redundant forward func decls".
+
+	* ci.c (ci_main): Move incorrectly-placed parens in
+	sub-conditional-expression from "partial condition" to
+	condition; add additional pair of parens around sub-cond-expr.
+
 2012-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Invoke diff(1) with ‘--label’ instead of ‘-L’.
