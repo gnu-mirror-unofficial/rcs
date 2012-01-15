@@ -83,7 +83,7 @@ exit 0
   t802 ; ‘ci -dYYYY-wWW-D’ => "invalid date/time format" (fixed in 5.8)
 
 * 5.8
-  ;; None (yet?).
+  t810 ; ‘ci -l -d -T’ => RCS file mtime set to epoch (fixed in 5.9)
 
 * end matter
 *** Local variables:

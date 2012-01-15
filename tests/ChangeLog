@@ -1,3 +1,11 @@
+2012-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test for 5.8 ‘ci -d -T’ regression; mark xfail.
+
+	* t810: New file.
+	* Makefile.am (TESTS, XFAIL_TESTS): Add t810.
+	* known-failures.in (5.8): Add t810.
+
 2011-12-26  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add test for 5.8 ‘rlog -zLT’ regression.
