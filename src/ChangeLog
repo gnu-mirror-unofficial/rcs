@@ -1,3 +1,12 @@
+2012-01-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Remove configure option ‘--disable-standalone-compat’.
+
+	* Makefile.am (bin_SCRIPTS): Move outside ‘if BINBLOAT’.
+	[!BINBLOAT] (noinst_DATA): Delete var.
+	(CLEANFILES): Remove sub.sh.
+	(sub.sh): Delete target.
+
 2012-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	ci: Fix bug: Don't discard working file mtime with ‘-T’.

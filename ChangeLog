@@ -1,3 +1,14 @@
+2012-01-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Remove configure option ‘--disable-standalone-compat’.
+
+	This reverts the misfeature introduced 2011-10-30,
+	"Add configure option ‘--disable-standalone-compat’".
+
+	* configure.ac (standalone-compat): Delete AC_ARG_ENABLE.
+	(BINBLOAT): Delete AM_CONDITIONAL.
+	(DEFSHELLFUNCS): Delete AC_SUBST.
+
 2012-01-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	Invoke diff(1) with ‘--label’ instead of ‘-L’.

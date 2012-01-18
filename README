@@ -62,14 +62,6 @@ See INSTALL for general instructions on configuring and building RCS.
 Use ‘configure --help’ to see a list of options for customizing the
 installation directories (.e.g, --prefix).
 
-* Another option is ‘--disable-standalone-compat’.  With the introduction
-  of grcs, some commands (use ‘grcs --commands’ to list them) are now
-  redundant as standalone executables in $(bindir) and only installed for
-  backward compatability.  If you specify ‘--disable-standalone-compat’
-  to the configure script, these will not be installed, saving some space.
-
-  !!! NB: Standalone commands will be removed in GNU RCS 6.x.
-
 * Another option is ‘--enable-compat2’.  It enables reading RCS 2.x file
   formats.  Most likely you can safely ignore this (that file format became
   obsolete in 1982).  However, if you do indeed find a version 2 file around,

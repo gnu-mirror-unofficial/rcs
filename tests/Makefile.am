@@ -28,7 +28,6 @@ btdt_LDADD = ../src/libparts.a ../lib/libgnu.a
 PATHPREFIX = $(abs_top_builddir)/src
 
 TESTS_ENVIRONMENT = 				\
-  DEFSHELLFUNCS=$(DEFSHELLFUNCS)		\
   PATHPREFIX="$(PATHPREFIX)" sh
 
 XFAIL_TESTS =

@@ -22,11 +22,7 @@
 AM_CPPFLAGS = -I'$(top_srcdir)/lib'
 
 subs = ci co rcs rcsclean rcsdiff rcsmerge rlog
-if BINBLOAT
 bin_SCRIPTS = $(subs)
-else !BINBLOAT
-noinst_DATA = sub.sh
-endif !BINBLOAT
 
 $(subs): sub.TEMPLATE
 	sed 's/SUB/$@/;s/VERSION/$(VERSION)/' $< > $@
@@ -55,7 +51,7 @@ grcs_SOURCES = $(subs:=.c) super.c
 
 LDADD = libparts.a -L$(top_builddir)/lib -lgnu
 
-CLEANFILES = $(BUILT_SOURCES) $(subs) sub.sh
+CLEANFILES = $(BUILT_SOURCES) $(subs)
 
 EXTRA_DIST = sub.TEMPLATE
 
@@ -65,10 +61,5 @@ EXTRA_DIST = sub.TEMPLATE
 clean-local:
 	rm -rf RCS
 	rm -f a.*
-
-sub.sh:
-	for p in $(subs) ; do			\
-	  echo "alias $$p='grcs $$p'" ;		\
-	done > $@
 
 # Makefile.am ends here

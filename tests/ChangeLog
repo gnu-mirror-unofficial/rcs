@@ -1,3 +1,10 @@
+2012-01-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Remove configure option ‘--disable-standalone-compat’.
+
+	* Makefile.am (TESTS_ENVIRONMENT): Remove ‘DEFSHELLFUNCS’.
+	* common <subroutines>: Don't source ../src/sub.sh.
+
 2012-01-15  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	ci: Fix bug: Don't discard working file mtime with ‘-T’.
