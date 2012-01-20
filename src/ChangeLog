@@ -1,3 +1,9 @@
+2012-01-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Add configure option ‘--enable-coverage’.
+
+	* rcsutil.c [USE_NORMAL_EXIT] (_Exit): New #define.
+
 2012-01-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Remove configure option ‘--disable-standalone-compat’.

@@ -1,3 +1,12 @@
+2012-01-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[build] Add configure option ‘--enable-coverage’.
+
+	* configure.ac (coverage): New AC_ARG_ENABLE.
+	(enable_coverage): Disable if GCC not detected.
+	(CFLAGS) [enable_coverage]: Add ‘--coverage’.
+	(USE_NORMAL_EXIT): New RCS_CBOOL.
+
 2012-01-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Remove configure option ‘--disable-standalone-compat’.

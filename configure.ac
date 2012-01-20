@@ -70,6 +70,11 @@ AC_DEFINE_UNQUOTED([$1],["$[]$1"],[$3])
 
 # --enable, --with
 
+AC_ARG_ENABLE([coverage],
+ [AS_HELP_STRING([--enable-coverage],[if the compiler is GCC, arrange
+   to include --coverage in CFLAGS and to use exit(3) instead of _Exit(3);
+   this option is intended for maintainers])],,[enable_coverage=no])
+
 AC_ARG_ENABLE([compat2],
  [AS_HELP_STRING([--enable-compat2],[enable reading of RCS 2.x
    files (really ancient, prior to GNU RCS).  If you enable this,
@@ -508,6 +513,11 @@ RCS_CBOOL([BAD_WAIT_IF_SIGCHLD_IGNORED],[no],[rcs_cv_tolerant_wait],
   [Does ignoring SIGCHLD break `wait'?])
 
 # miscellaneous
+
+AS_IF([RCS_YESP([GCC])],,[enable_coverage=no])
+AS_IF([RCS_YESP([enable_coverage])],[CFLAGS="$CFLAGS --coverage"])
+RCS_CBOOL([USE_NORMAL_EXIT],[yes],[enable_coverage],
+ [Use exit(3) instead of _Exit(3).])
 
 AS_IF([test 1 = `expr "$ac_pwd" : '/*'`],[woe=no],[woe=yes])
 RCS_CBOOL([WOE],[yes],[woe],[Are we trying to "support" MS-DOS?])

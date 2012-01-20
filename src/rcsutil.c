@@ -40,6 +40,17 @@
 #include "maketime.h"
 #include "progname.h"
 
+/* Unfortunately, using ‘_Exit’ makes coverage analysis
+   (via ‘gcc --coverage’) difficult since the coverage
+   machinery writes the .gcda files only on ‘exit’.
+   Hence this hair.  */
+#ifdef USE_NORMAL_EXIT
+#ifdef _Exit
+#undef _Exit
+#endif
+#define _Exit(x)  exit (x)
+#endif  /* defined USE_NORMAL_EXIT */
+
 void
 exit_failurefully (void)
 {
