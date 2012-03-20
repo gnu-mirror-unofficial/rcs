@@ -22,7 +22,7 @@ split_std_out_err no
 # Check that rlog properly reports "keyword substitutation: b".
 ##
 
-must 'cp $(bundled_commav zblob) $v'
+must 'cp `bundled_commav zblob` $v'
 must 'rlog $v > $wd/rlog.out'
 grep 'keyword substitution: b' $wd/rlog.out \
     || problem 'rlog did not report "keyword substitutation: b"'

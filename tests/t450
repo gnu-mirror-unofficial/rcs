@@ -69,7 +69,7 @@ xfail_revno ()
     # $2 -- revision number
     state=$1
     revno=$2
-    tip_varname=$(echo tip$revno | sed 's/\.//g')
+    tip_varname=`echo tip$revno | sed 's/\.//g'`
     eval tip='$'$tip_varname
     eval tipstate='$s'$tip_varname
     xfail $state $revno "Revision $tip has state $tipstate."
@@ -80,7 +80,7 @@ xpass ()
     # $1 -- STEM in fake/b.d/STEM.cou
     # $2 -- state
     # $3 -- source (valid branch or revision number)
-    expected=$(bundled_commav b.d/$1.cou)
+    expected=`bundled_commav b.d/$1.cou`
     state=$2
     source=$3
     cmd="co -p$source -s$state"

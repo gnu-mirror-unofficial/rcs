@@ -1,3 +1,45 @@
+2012-03-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v port] Use `COMMAND` instead of $(COMMAND).
+
+	The former is Bourne-shell compatible; the latter is a bashism.
+	Reported by Nelson H. F. Beebe.
+
+	* common: Throughout, use `COMMAND` instead of $(COMMAND).
+	* common-d: Likewise.
+	* common-i: Likewise.
+	* common-kn: Likewise.
+	* compgate: Likewise.
+	* fake/b.make: Likewise.
+	* known-failures.in: Likewise.
+	* t030: Likewise.
+	* t050: Likewise.
+	* t160: Likewise.
+	* t300: Likewise.
+	* t310: Likewise.
+	* t311: Likewise.
+	* t312: Likewise.
+	* t313: Likewise.
+	* t320: Likewise.
+	* t380: Likewise.
+	* t390: Likewise.
+	* t400: Likewise.
+	* t410: Likewise.
+	* t420: Likewise.
+	* t440: Likewise.
+	* t450: Likewise.
+	* t460: Likewise.
+	* t470: Likewise.
+	* t600: Likewise.
+	* t601: Likewise.
+	* t602: Likewise.
+	* t605: Likewise.
+	* t606: Likewise.
+	* t630: Likewise.
+	* t800: Likewise.
+	* t802: Likewise.
+	* t900: Likewise.
+
 2012-01-18  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Remove configure option ‘--disable-standalone-compat’.

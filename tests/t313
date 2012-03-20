@@ -26,7 +26,7 @@ split_std_out_err no
 rout=$wd/rlog.out
 
 # Substitute the description with one that does not end in newline.
-must 'sed "14s/@@/@midline@/" $(bundled_commav one) > $v'
+must 'sed "14s/@@/@midline@/" `bundled_commav one` > $v'
 must 'rlog $v > $rout'
 
 grep 'midline---' $rout && problem \

@@ -59,8 +59,8 @@ ok ()
     # $2 -- (optional) normalized name
     rev=$1
     title="co -p$rev"
-    fn=$(echo $rev | tr -d '.')
-    expected="$(bundled_commav b.d/${fn}.cou)"
+    fn=`echo $rev | tr -d '.'`
+    expected="`bundled_commav b.d/${fn}.cou`"
 
     $hey echo "* $rev"
     must "co -p$rev $v > $actual"

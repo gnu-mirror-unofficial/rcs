@@ -24,10 +24,10 @@ $hey set -x
 # This test derives from a pre-5.8-release regression (and bugfix).
 ##
 
-must 'cp $(bundled_commav two) $v'
+must 'cp `bundled_commav two` $v'
 must 'co -p4  $v >$wd/DOT-0'
 must 'co -p4. $v >$wd/DOT-1'
-test '' = $(diff $wd/DOT-0 $wd/DOT-1) \
+test '' = `diff $wd/DOT-0 $wd/DOT-1` \
     && 'co -pX, where X:{BRNUM, BRNUM.}, does not resolve to branch tip'
 
 exit 0

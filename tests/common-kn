@@ -30,8 +30,8 @@ doubt=$wd/diff.out
 
 prep_b_comparison ()
 {
-    must 'cp $(bundled_commav b) $v'
-    wdabs="$(cd $wd ; pwd)"
+    must 'cp `bundled_commav b` $v'
+    wdabs="`cd $wd ; pwd`"
     cat > $wd/x-normal <<EOF
 s|${wdabs}|/home/ttn/build/GNU/rcs/tests/fake|g
 s|x,v|b,v|g

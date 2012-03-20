@@ -65,12 +65,12 @@ zinvasion ()
     echo "* (zinvasion) $1"
     commav=$1
     atatlist="$2"
-    lines=$(wc -l "$commav" | sed 's/ .*//')
+    lines=`wc -l "$commav" | sed 's/ .*//'`
     line=0
     z=z
 
     test "$atatlist" && atatlist=" $atatlist "
-    while test ! $line = $lines && line=$(expr 1 + $line) ; do
+    while test ! $line = $lines && line=`expr 1 + $line` ; do
 
         test "$atatlist" &&
         case "$atatlist" in
@@ -82,7 +82,7 @@ zinvasion ()
             'sed '$line's/^/'$z'/ '$commav' > $v'
 
         # Only do substutition (and testing) for non-empty lines.
-        if [ "$(sed -n ${line}p $commav)" ] ; then
+        if [ "`sed -n ${line}p $commav`" ] ; then
 
             barf 'typo at first char of line '$line \
                 'sed '$line's/^./'$z'/ '$commav' > $v'
@@ -97,32 +97,32 @@ zinvasion ()
 }
 
 barfstars='**'
-zinvasion $(bundled_commav empty-minimal)
-zinvasion $(bundled_commav empty)
-zinvasion $(bundled_commav one) '19 20 22 23'
+zinvasion `bundled_commav empty-minimal`
+zinvasion `bundled_commav empty`
+zinvasion `bundled_commav one` '19 20 22 23'
 
 jaws ()
 {
     # $1 -- RCS file
-    eval $(wc -l "$1" | sed 's/^/lines=/;s/ / commav=/')
+    eval `wc -l "$1" | sed 's/^/lines=/;s/ / commav=/'`
     line=1
 
     echo "* (jaws) $commav"
-    while test ! $line = $lines && line=$(expr 1 + $line) ; do
+    while test ! $line = $lines && line=`expr 1 + $line` ; do
         barf 'truncated at line '$line \
             'sed '$line',\$d '$commav' > $v'
     done
 }
 
-jaws $(bundled_commav empty-minimal)
-jaws $(bundled_commav empty)
-jaws $(bundled_commav one)
+jaws `bundled_commav empty-minimal`
+jaws `bundled_commav empty`
+jaws `bundled_commav one`
 
 zot ()
 {
     # $1 -- title
     # $2 -- sed script to munge two-with-branch
-    barf "$1" 'sed -e "'"$2"'" $(bundled_commav two-with-branch) > $v'
+    barf "$1" 'sed -e "'"$2"'" `bundled_commav two-with-branch` > $v'
 }
 
 echo '* branch pointer weirdness'

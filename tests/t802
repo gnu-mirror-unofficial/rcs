@@ -54,7 +54,7 @@ try 2017-w00-7 2017/01/01
 ##
 # * Misc, from http://en.wikipedia.org/wiki/ISO_week_date
 ##
-must 'rm -f $v && cp $(bundled_commav empty) $v'
+must 'rm -f $v && cp `bundled_commav empty` $v'
 
 try 2004-w53-6 2005/01/01
 try 2004-w53-7 2005/01/02

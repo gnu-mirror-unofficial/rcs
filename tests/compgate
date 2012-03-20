@@ -20,7 +20,7 @@
 case x"$COMPONENTS" in
     x0) exit 77 ;;
     x1) ;;
-    *) test x"$PATHPREFIX" = x"$(cd ../src ; pwd)" || exit 77 ;;
+    *) test x"$PATHPREFIX" = x"`cd ../src ; pwd`" || exit 77 ;;
 esac
 
 # compgate ends here

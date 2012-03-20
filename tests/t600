@@ -35,7 +35,7 @@ named ()
     #     ^ TAB
 }
 
-must 'cp $(bundled_commav one) $v'
+must 'cp `bundled_commav one` $v'
 must 'co -u $w'
 
 # Name it (via rcs, not via ci).

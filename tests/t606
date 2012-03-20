@@ -28,7 +28,7 @@ integrity
 ;
 EOF
 
-must 'sed -e "/^locks/r $wd/insert" $(bundled_commav one) > $v'
+must 'sed -e "/^locks/r $wd/insert" `bundled_commav one` > $v'
 
 try ()
 {

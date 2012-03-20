@@ -26,9 +26,9 @@ $hey set -x
 
 cmd='rcs -q -o1.1'
 
-must 'cp $(bundled_commav one) $v'
+must 'cp `bundled_commav one` $v'
 must '$cmd $v'
-# Avoid diff against $(bundled_commav empty), which might
+# Avoid diff against `bundled_commav empty`, which might
 # flag some legitimate differences in whitespace, etc.
 grep '^1\.1$' $v && problem "non-empty RCS file after: $cmd"
 exit 0

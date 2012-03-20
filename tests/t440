@@ -69,7 +69,7 @@ xfail_revno ()
     # $2 -- revision number
     who=$1
     revno=$2
-    tip_varname=$(echo tip$revno | sed 's/\.//g')
+    tip_varname=`echo tip$revno | sed 's/\.//g'`
     eval tip='$'$tip_varname
     xfail $who $revno "Revision $tip has author ttn."
 }
@@ -79,7 +79,7 @@ xpass ()
     # $1 -- STEM in fake/b.d/STEM.cou
     # $2 -- author login
     # $3 -- source (valid branch or revision number)
-    expected=$(bundled_commav b.d/$1.cou)
+    expected=`bundled_commav b.d/$1.cou`
     who=$2
     source=$3
     cmd="co -p$source -w$who"

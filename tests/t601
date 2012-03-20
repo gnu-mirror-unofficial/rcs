@@ -29,31 +29,31 @@ rout=$wd/rlog.out
 
 getaccesslist ()
 {
-    echo $(rlog $w | sed -e '/^access/,/^symbolic/!d;/^[as]/d')
+    echo `rlog $w | sed -e '/^access/,/^symbolic/!d;/^[as]/d'`
 }
 
-must 'cp $(bundled_commav one) $v'
+must 'cp `bundled_commav one` $v'
 must 'co -u $w'
 
 # Add some logins to the access list.
 must 'rcs -afoo,bar -abaz $w'
 
 # We expect the logins to appear in the RCS file.
-test 'foo bar baz' = "$(getaccesslist)" \
+test 'foo bar baz' = "`getaccesslist`" \
     || problem 'rcs -a does not update the RCS file'
 
 # Try to add some previously added logins.
 must 'rcs -abaz,bar $w'
 
 # We expect there to be no change.
-test 'foo bar baz' = "$(getaccesslist)" \
+test 'foo bar baz' = "`getaccesslist`" \
     || problem 'rcs -a with previously-added logins updated the RCS file'
 
 # Zonk one.
 must 'rcs -efoo $w'
 
 # We expect it to NOT appear in the RCS file.
-test 'bar baz' = "$(getaccesslist)" \
+test 'bar baz' = "`getaccesslist`" \
     || problem 'rcs -e does not update the RCS file'
 
 exit 0

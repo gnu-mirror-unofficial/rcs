@@ -135,7 +135,7 @@ bop '1s/.*/$Id$/'
 checkin 1114 '03/18 06:12:32' 'Replace first line with RCS keyword.'
 
 # 1.1.1.5
-ls=$(for k in $ls ; do echo $k ; done | sort)
+ls=`for k in $ls ; do echo $k ; done | sort`
 for k in $ls ; do echo '$'$k'$' ; echo ; done > b
 checkin 1115 '03/18 06:21:03' 'WOW is 1.1.1.5! (+ sorted kw)' WOW
 

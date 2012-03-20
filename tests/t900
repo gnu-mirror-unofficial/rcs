@@ -31,12 +31,12 @@ LOGNAME=ttn ; export LOGNAME
 prep_b_comparison
 TMPDIR="$wdabs"
 $hey echo '* b.make'
-must 'sh $(bundled_commav b.make) $wd'
+must 'sh `bundled_commav b.make` $wd'
 
 try ()
 {
     # $1 -- relative filename
-    expected="$(bundled_commav $1)"
+    expected="`bundled_commav $1`"
     actual="$wd/$1"
     normalize_b_and_diff "$actual post 'desc'"
 }

@@ -34,7 +34,7 @@ try ()
 {
     # $1 -- filename
     # $2 -- expected output
-    filename="$(bundled_commav b.d/$1.cou)"
+    filename=`bundled_commav b.d/$1.cou`
     echo "$2" > $expected
     $hey echo "* $filename"
     ./btdt getoldkeys "$filename" 1> $gout 2> $gerr

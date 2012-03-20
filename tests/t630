@@ -29,7 +29,7 @@ lcount ()
 
 $hey set -x
 
-cp $(bundled_commav two) $v
+cp `bundled_commav two` $v
 
 ##
 # * HEAD

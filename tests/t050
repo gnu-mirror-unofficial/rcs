@@ -23,7 +23,7 @@ split_std_out_err no
 # Check that function ‘grok_all’ maintains the edits in "file order".
 ##
 
-must './btdt grok $(bundled_commav b) edits-order > $wd/ls'
+must './btdt grok `bundled_commav b` edits-order > $wd/ls'
 diff -u $wd/ls - > $wd/diff.out <<EOF
 edits-order:
 1.9

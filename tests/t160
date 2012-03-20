@@ -28,7 +28,7 @@ minusk=
 cou ()
 {
     # $1 -- STEM in fake/b.d/STEM.cou
-    cp -f $(bundled_commav b.d/$1.cou) $w
+    cp -f `bundled_commav b.d/$1.cou` $w
 }
 
 ev ()
@@ -235,7 +235,7 @@ xdiff '' '1.9' '
 ##
 $hey echo '* long options passthrough'
 if diff --help | grep -e '--unified' ; then
-    must 'cp $(bundled_commav two) $wd/two,v'
+    must 'cp `bundled_commav two` $wd/two,v'
     rcsdiff --unified -r4.20 -r4.21 $wd/two > $wd/rcsdiff.out \
         && problem 'rcsdiff did not exit w/ non-zero status'
     cat > $wd/expected <<EOF

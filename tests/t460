@@ -21,7 +21,7 @@ split_std_out_err no
 $hey echo '                                    -*- org -*-'
 $hey type co
 
-now=$(date -u '+%Y/%m/%d')
+now=`date -u '+%Y/%m/%d'`
 
 ##
 # Do "co -p -dDATE" for various valid values of DATE,
@@ -72,7 +72,7 @@ xfail_revno ()
     # $2 -- revision number
     date=$1
     revno=$2
-    tip_varname=$(echo tip$revno | sed 's/\.//g')
+    tip_varname=`echo tip$revno | sed 's/\.//g'`
     eval tip='$'$tip_varname
     eval tipdate='$d'$tip_varname
     xfail $date $revno "Revision $tip has date $tipdate."
@@ -82,9 +82,9 @@ xpass ()
 {
     # $1 -- STEM in fake/b.d/STEM.cou
     # $2 -- date
-    expected=$(bundled_commav b.d/$1.cou)
+    expected=`bundled_commav b.d/$1.cou`
     date=$2
-    source=$(echo $1 | sed 's/./&./g;s/...$//')
+    source=`echo $1 | sed 's/./&./g;s/...$//'`
     cmd="co -p$source -d$date"
     $hey echo "* xpass: $date $source"
 

@@ -23,7 +23,7 @@
 
 PATH="${PATHPREFIX}:$PATH"
 RCSINIT=
-stem=$(basename $0)
+stem=`basename $0`
 wd=${stem}.d
 w=$wd/x
 v=$wd/x,v

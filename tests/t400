@@ -41,7 +41,7 @@ cmd="co -q -p1.1 $v"
 
 printf '%s\n%s\n' one two > $ideal
 
-cp $(bundled_commav stdio-sync) $v
+cp `bundled_commav stdio-sync` $v
 must "$cmd 1> $tout 2> $terr"
 noiselessness_rules $terr "stderr for $cmd"
 diff $ideal $tout > $doubt

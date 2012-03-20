@@ -34,7 +34,7 @@ try ()
     munged="with numeric $1"
     sedscript=$2
 
-    must 'sed -e "$sedscript" $(bundled_commav one) > $v'
+    must 'sed -e "$sedscript" `bundled_commav one` > $v'
     rlog $v > $rout || problem "rlog barfed on RCS file $munged"
     silence_means_death $rout "rlog $v ($munged)"
 }

@@ -30,7 +30,7 @@ normal=$actual.normal
 expected=$wd/expected
 doubt=$wd/diff.out
 
-cp $(bundled_commav two-with-branch) $v
+cp `bundled_commav two-with-branch` $v
 
 ##
 # * First, do invalid joinlist specs cause error?

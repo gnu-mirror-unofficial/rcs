@@ -25,7 +25,7 @@ split_std_out_err no
 ##
 
 opts='-zLT -d>2010-04-04'
-must 'cp $(bundled_commav b.d/19,v) $v && chmod -w $v'
+must 'cp `bundled_commav b.d/19,v` $v && chmod -w $v'
 must 'rlog $opts $v 1>$wd/rlog.out 2>$wd/rlog.err'
 silence_means_death $wd/rlog.out "rlog $opts"
 noiselessness_rules $wd/rlog.err "rlog $opts"

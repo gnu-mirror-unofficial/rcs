@@ -34,11 +34,11 @@ norm ()
     silence_means_death $rout "rlog $v (copied from $2)"
 }
 
-norm 'minimally-empty'       $(bundled_commav empty-minimal)
-norm 'empty'                 $(bundled_commav empty)
-norm 'single-entry'          $(bundled_commav one)
-norm 'two-entry'             $(bundled_commav two)
-norm '2-entry with branches' $(bundled_commav two)
+norm 'minimally-empty'       `bundled_commav empty-minimal`
+norm 'empty'                 `bundled_commav empty`
+norm 'single-entry'          `bundled_commav one`
+norm 'two-entry'             `bundled_commav two`
+norm '2-entry with branches' `bundled_commav two`
 
 ##
 # Also check that header key ‘integrity’
@@ -63,11 +63,11 @@ wint ()
     norm "$1, with integrity" $v_wint
 }
 
-wint 'minimally-empty'       $(bundled_commav empty-minimal)
-wint 'empty'                 $(bundled_commav empty)
-wint 'single-entry'          $(bundled_commav one)
-wint 'two-entry'             $(bundled_commav two)
-wint '2-entry with branches' $(bundled_commav two)
+wint 'minimally-empty'       `bundled_commav empty-minimal`
+wint 'empty'                 `bundled_commav empty`
+wint 'single-entry'          `bundled_commav one`
+wint 'two-entry'             `bundled_commav two`
+wint '2-entry with branches' `bundled_commav two`
 
 exit 0
 

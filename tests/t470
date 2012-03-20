@@ -21,7 +21,7 @@ split_std_out_err no
 $hey echo '                                    -*- org -*-'
 
 prep_b_comparison
-must 'cp $(bundled_commav b.d/1612.cou) $w'
+must 'cp `bundled_commav b.d/1612.cou` $w'
 
 ##
 # Check "rcsmerge -p -kk".
@@ -59,7 +59,7 @@ conflicted ()
     cmd="$muck -r$1 -r$2"
     echo "$4" | sed '1d;s/^|//;s/|$//' > $expected
 
-    must "cp -f $(bundled_commav b.d/$3.cou) $w"
+    must "cp -f `bundled_commav b.d/$3.cou` $w"
     $cmd $w $v > $actual
     test 1 = $? || problem "no conflicts detected: $cmd"
     normalize_b_and_diff "$cmd"

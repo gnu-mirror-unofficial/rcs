@@ -73,8 +73,8 @@ check_initialization_command ()
     test   -r $v || badv 'not written' ; $hey sed 's/^/v|/' $v
     test   -s $v || badv 'exists but is zero bytes long'
     $dont_check_readonly || test ! -w $v || badv 'writable'
-    test 2 = $(grep -c "$rev_rx" $v) || badv 'missing tree and/or log'
-    test 1 = $(grep -c "$log_rx" $v) || badv 'missing log message'
+    test 2 = `grep -c "$rev_rx" $v` || badv 'missing tree and/or log'
+    test 1 = `grep -c "$log_rx" $v` || badv 'missing log message'
     # Check working file disposition.
     check_w_$wdisp
 }

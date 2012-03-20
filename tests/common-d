@@ -43,7 +43,7 @@ try ()
 $hey echo '                                      -*- org -*-'
 
 $hey echo '* prep'
-must 'cp $(bundled_commav two) $v'
+must 'cp `bundled_commav two` $v'
 must 'co -l $w $v'
 
 # common-d ends here
