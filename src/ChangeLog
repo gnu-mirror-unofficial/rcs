@@ -1,3 +1,15 @@
+2012-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[C] Fix bug: Avoid ‘bool’ for temporary ‘int’ values.
+
+	Regression introduced 2010-03-16, "Use `bool' (and `true'
+	and `false') more".  When assigning to a bool from an int,
+	if the int is negative, the bool will be true, losing
+	information when that value is later compared against zero.
+	Reported by Paul Ackersviller.
+
+	* ci.c (addbranch): Change type of ‘removedlock’ back to ‘int’.
+
 2012-01-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add configure option ‘--enable-coverage’.

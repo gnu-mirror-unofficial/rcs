@@ -169,14 +169,14 @@ removelock (struct delta *delta)
 
 static int
 addbranch (struct delta *branchpoint, struct bud *bud,
-           bool removedlock, struct wlink **tp_deltas)
+           int removedlock, struct wlink **tp_deltas)
 /* Add a new branch and branch delta at ‘branchpoint’.
    If ‘num’ is the null string, append the new branch, incrementing
    the highest branch number (initially 1), and setting the level number to 1.
    The new delta and branchhead are in ‘bud->d’ and ‘bud->br’, respectively.
    The new number is placed into a ‘PLEXUS’ string with ‘num’ pointing to it.
    Return -1 on error, 1 if a lock is removed, 0 otherwise.
-   If ‘removedlock’, a lock was already removed.  */
+   If ‘removedlock’ is 1, a lock was already removed.  */
 {
   struct cbuf *num = &bud->num;
   struct wlink **btrail;
