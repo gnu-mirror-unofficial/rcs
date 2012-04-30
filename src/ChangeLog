@@ -1,3 +1,12 @@
+2012-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Init auto var ‘neworkptr’.
+
+	Omission from 2011-10-14, "Remove
+	‘neworkptr’ from global state of co(1)".
+
+	* co.c (co_main): Init ‘neworkptr’.
+
 2012-04-06  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[C] Fix bug: Avoid ‘bool’ for temporary ‘int’ values.

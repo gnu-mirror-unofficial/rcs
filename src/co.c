@@ -402,7 +402,7 @@ co_main (const char *cmd, int argc, char **argv)
   int exitstatus = EXIT_SUCCESS;
   struct work work = { .force = false };
   struct jstuff jstuff;
-  FILE *neworkptr;
+  FILE *neworkptr = NULL;
   int lockflag = 0;                 /* -1: unlock, 0: do nothing, 1: lock.  */
   bool mtimeflag = false;
   char *a, *joinflag, **newargv;
