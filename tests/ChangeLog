@@ -1,5 +1,12 @@
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add test for rcsclean.
+
+	* t790: New file.
+	* Makefile.am (TESTS): Add t790.
+
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test for rlog w/ various filters.
 
 	* t370: New file.
