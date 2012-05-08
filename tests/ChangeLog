@@ -1,5 +1,13 @@
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add test for rlog w/ various filters.
+
+	* t370: New file.
+	* known-failures.in (5.8): Add t370.
+	* Makefile.am (TESTS): Add t370.
+
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Expand super test.
 
 	* t151: Also check no command given.

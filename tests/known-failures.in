@@ -83,6 +83,7 @@ exit 0
   t802 ; ‘ci -dYYYY-wWW-D’ => "invalid date/time format" (fixed in 5.8)
 
 * 5.8
+  t370 ; ‘rlog -dD1<D2’ => debugging output to stderr (fixed in 5.9)
   t810 ; ‘ci -l -d -T’ => RCS file mtime set to epoch (fixed in 5.9)
 
 * end matter
