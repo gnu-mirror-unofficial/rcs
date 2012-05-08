@@ -39,7 +39,7 @@ bad_args (char const *argv0)
 {
   fprintf (stderr, "%s: bad args (try %s --help)\n",
            argv0, PROGRAM (invoke));
-  exit_failurefully ();
+  _Exit (EXIT_FAILURE);
 }
 
 #define MORE "\n\t\t"

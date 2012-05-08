@@ -51,12 +51,6 @@
 #define _Exit(x)  exit (x)
 #endif  /* defined USE_NORMAL_EXIT */
 
-void
-exit_failurefully (void)
-{
-  _Exit (EXIT_FAILURE);
-}
-
 static void
 exit_diff_trouble (void)
 {

@@ -826,8 +826,6 @@ char const *date2str (char const date[datesize],
                       char datebuf[datesize + zonelenmax]);
 
 /* rcsutil */
-void exit_failurefully (void)
-  exiting;
 void thank_you_and_goodnight (int const how)
   exiting;
 /* These are for ‘thank_you_and_goodnight’.  */

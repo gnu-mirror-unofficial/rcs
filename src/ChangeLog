@@ -1,5 +1,12 @@
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Incorporate ‘exit_failurefully’ into unique caller.
+
+	* base.h (exit_failurefully): Delete func decl.
+	* rcsutil.c (exit_failurefully): Delete func.
+
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Make ‘exit_diff_trouble’ static.
 
 	* base.h (exit_diff_trouble): Delete func decl.
