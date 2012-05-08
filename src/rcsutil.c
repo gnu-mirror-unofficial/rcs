@@ -57,7 +57,7 @@ exit_failurefully (void)
   _Exit (EXIT_FAILURE);
 }
 
-void
+static void
 exit_diff_trouble (void)
 {
   _Exit (DIFF_TROUBLE);

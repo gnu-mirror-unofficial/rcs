@@ -828,8 +828,6 @@ char const *date2str (char const date[datesize],
 /* rcsutil */
 void exit_failurefully (void)
   exiting;
-void exit_diff_trouble (void)
-  exiting;
 void thank_you_and_goodnight (int const how)
   exiting;
 /* These are for ‘thank_you_and_goodnight’.  */
