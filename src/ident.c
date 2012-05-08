@@ -28,12 +28,6 @@
 
 struct top *top;
 
-static exiting void
-exiterr (void)
-{
-  exit_failurefully ();
-}
-
 static int
 match (register FILE *fp)
 /* Group substring between two KDELIM's; then do pattern match.  */
@@ -158,7 +152,7 @@ main (int argc, char **argv)
       .invoke = argv[0],
       .name = "ident",
       .help = ident_help,
-      .exiterr = exiterr
+      .tyag = TYAG_IMMEDIATE
     };
 
   CHECK_HV ();

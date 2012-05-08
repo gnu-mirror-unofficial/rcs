@@ -46,15 +46,6 @@ cleanup (int *exitstatus, struct fro **workptr)
   dirtempunlink ();
 }
 
-static exiting void
-exiterr (void)
-{
-  ORCSerror ();
-  dirtempunlink ();
-  tempunlink ();
-  exit_failurefully ();
-}
-
 static bool
 unlock (struct delta *delta)
 {
@@ -126,7 +117,7 @@ rcsclean_main (const char *cmd, int argc, char **argv)
       .invoke = argv[0],
       .name = cmd,
       .help = rcsclean_help,
-      .exiterr = exiterr
+      .tyag = BOG_FULL
     };
 
   CHECK_HV ();

@@ -28,13 +28,6 @@
 
 struct top *top;
 
-static exiting void
-exiterr (void)
-{
-  tempunlink ();
-  exit_diff_trouble ();
-}
-
 int
 main (int argc, char **argv)
 {
@@ -48,7 +41,7 @@ main (int argc, char **argv)
       .invoke = argv[0],
       .name = "merge",
       .help = merge_help,
-      .exiterr = exiterr
+      .tyag = BOG_DIFF
     };
 
   CHECK_HV ();

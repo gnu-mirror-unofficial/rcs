@@ -92,13 +92,6 @@ cleanup (int *exitstatus, struct work *work)
   fro_zclose (&work->fro);
 }
 
-static exiting void
-exiterr (void)
-{
-  tempunlink ();
-  exit_diff_trouble ();
-}
-
 #if DIFF_L
 static char const *
 setup_label (char const *num, char const date[datesize])
@@ -145,7 +138,7 @@ rcsdiff_main (const char *cmd, int argc, char **argv)
       .invoke = argv[0],
       .name = cmd,
       .help = rcsdiff_help,
-      .exiterr = exiterr
+      .tyag = BOG_DIFF
     };
 
   CHECK_HV ();

@@ -72,12 +72,6 @@ cleanup (int *exitstatus)
   fro_zclose (&FLOW (from));
 }
 
-static exiting void
-exiterr (void)
-{
-  exit_failurefully ();
-}
-
 static void
 getlocker (char *argv, struct criteria *criteria)
 /* Get the login names of lockers from command line
@@ -760,7 +754,7 @@ rlog_main (const char *cmd, int argc, char **argv)
       .invoke = argv[0],
       .name = cmd,
       .help = rlog_help,
-      .exiterr = exiterr
+      .tyag = TYAG_IMMEDIATE
     };
 
   CHECK_HV ();

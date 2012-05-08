@@ -84,15 +84,6 @@ cleanup (int *exitstatus, struct work *work)
   dirtempunlink ();
 }
 
-static exiting void
-exiterr (void)
-{
-  ORCSerror ();
-  dirtempunlink ();
-  tempunlink ();
-  exit_failurefully ();
-}
-
 #define ACCF(...)  accf (PLEXUS, __VA_ARGS__)
 
 #define OK(x)     (x)->string = finish_string (PLEXUS, &((x)->size))
@@ -643,7 +634,7 @@ ci_main (const char *cmd, int argc, char **argv)
       .invoke = argv[0],
       .name = cmd,
       .help = ci_help,
-      .exiterr = exiterr
+      .tyag = BOG_FULL
     };
 
   CHECK_HV ();

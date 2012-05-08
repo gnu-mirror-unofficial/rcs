@@ -30,13 +30,6 @@
 #include "b-merger.h"
 #include "b-peer.h"
 
-static exiting void
-exiterr (void)
-{
-  tempunlink ();
-  exit_diff_trouble ();
-}
-
 #define quietarg  "-q"
 
 int
@@ -56,7 +49,7 @@ rcsmerge_main (const char *cmd, int argc, char **argv)
       .invoke = argv[0],
       .name = cmd,
       .help = rcsmerge_help,
-      .exiterr = exiterr
+      .tyag = BOG_DIFF
     };
 
   CHECK_HV ();

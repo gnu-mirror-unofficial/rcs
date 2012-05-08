@@ -1,5 +1,27 @@
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Redo "exit errorfully" specialization/implementation.
+
+	* rcsutil.c (thank_you_and_goodnight): New func.
+	* base.h (struct program): Add member ‘tyag’; delete member ‘exiterr’.
+	(thank_you_and_goodnight): New func decl.
+	(TYAG_ORCSERROR, TYAG_DIRTMPUNLINK, TYAG_TEMPUNLINK, TYAG_DIFF)
+	(TYAG_IMMEDIATE, BOG_DIFF, BOG_ZONK, BOG_FULL): New #define:s.
+	(BOW_OUT): Rewrite.
+	* ci.c (exiterr): Delete func.
+	(ci_main): Update ‘program’ init form.
+	* co.c (exiterr, co_main): Likewise.
+	* ident.c (exiterr, main): Likewise.
+	* merge.c (exiterr, main): Likewise.
+	* rcs.c (exiterr, rcs_main): Likewise.
+	* rcsclean.c (exiterr, rcsclean_main): Likewise.
+	* rcsdiff.c (exiterr, rcsdiff_main): Likewise.
+	* rcsmerge.c (exiterr, rcsmerge_main): Likewise.
+	* rlog.c (exiterr, rlog_main): Likewise.
+	* super.c (main): Update ‘program’ init form.
+
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Add abstraction: BOW_OUT
 
 	* base.h (BOW_OUT): New macro.

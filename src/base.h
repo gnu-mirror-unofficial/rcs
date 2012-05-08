@@ -388,8 +388,8 @@ struct program
   char const *name;
   /* Text for --help.  */
   char const *help;
-  /* Exit errorfully.  */
-  void (*exiterr) (void) exiting;
+  /* What to do when exiting errorfully (see TYAG_* below).  */
+  int const tyag;
 };
 
 /* (Somewhat) fleeting files.  */
@@ -830,6 +830,15 @@ void exit_failurefully (void)
   exiting;
 void exit_diff_trouble (void)
   exiting;
+void thank_you_and_goodnight (int const how)
+  exiting;
+/* These are for ‘thank_you_and_goodnight’.  */
+#define TYAG_ORCSERROR     (1 << 3)
+#define TYAG_DIRTMPUNLINK  (1 << 2)
+#define TYAG_TEMPUNLINK    (1 << 1)
+#define TYAG_DIFF          (1 << 0)
+#define TYAG_IMMEDIATE           0
+
 void gnurcs_init (struct program const *program);
 void gnurcs_goodbye (void);
 void bad_option (char const *option);
@@ -854,7 +863,11 @@ int getRCSINIT (int argc, char **argv, char ***newargv);
 
 /* Idioms.  */
 
-#define BOW_OUT()  PROGRAM (exiterr) ()
+#define BOG_DIFF   (TYAG_TEMPUNLINK | TYAG_DIFF)
+#define BOG_ZONK   (TYAG_DIRTMPUNLINK | TYAG_TEMPUNLINK)
+#define BOG_FULL   (TYAG_ORCSERROR | BOG_ZONK)
+
+#define BOW_OUT()  thank_you_and_goodnight (PROGRAM (tyag))
 
 /* Murphy was an optimist...  */
 #define PROB(x)  (0 > (x))

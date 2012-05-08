@@ -185,7 +185,7 @@ main (int argc, char **argv)
       .invoke = argv[0],
       .name = peer_super.meaningful,
       .help = super_help,
-      .exiterr = exit_failurefully
+      .tyag = TYAG_IMMEDIATE
     };
 
   CHECK_HV ();

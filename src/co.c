@@ -81,15 +81,6 @@ cleanup (int *exitstatus, FILE **neworkptr)
   dirtempunlink ();
 }
 
-static exiting void
-exiterr (void)
-{
-  ORCSerror ();
-  dirtempunlink ();
-  tempunlink ();
-  exit_failurefully ();
-}
-
 static bool
 rmworkfile (struct work *work)
 /* Prepare to remove ‘MANI (filename)’, if it exists, and if it is read-only.
@@ -422,7 +413,7 @@ co_main (const char *cmd, int argc, char **argv)
       .invoke = argv[0],
       .name = cmd,
       .help = co_help,
-      .exiterr = exiterr
+      .tyag = BOG_FULL
     };
 
   CHECK_HV ();

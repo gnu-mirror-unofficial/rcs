@@ -35,14 +35,6 @@
 struct top *top;
 
 exiting void
-bow_out (void)
-{
-  dirtempunlink ();
-  tempunlink ();
-  exit_failurefully ();
-}
-
-exiting void
 bad_args (char const *argv0)
 {
   fprintf (stderr, "%s: bad args (try %s --help)\n",
@@ -197,7 +189,9 @@ main (int argc, char *argv[argc])
           {
             .invoke = me,
             .name  = argv[1],
-            .exiterr = yeah[i].scramp ? exit_failurefully : bow_out
+            .tyag = (yeah[i].scramp
+                     ? TYAG_IMMEDIATE
+                     : BOG_ZONK)
           };
 
         gnurcs_init (&program);

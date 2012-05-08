@@ -63,6 +63,20 @@ exit_diff_trouble (void)
   _Exit (DIFF_TROUBLE);
 }
 
+exiting void
+thank_you_and_goodnight (int const how)
+{
+  if (how & TYAG_ORCSERROR)
+    ORCSerror ();
+  if (how & TYAG_DIRTMPUNLINK)
+    dirtempunlink ();
+  if (how & TYAG_TEMPUNLINK)
+    tempunlink ();
+  _Exit ((how & TYAG_DIFF)
+         ? DIFF_FAILURE
+         : EXIT_FAILURE);
+}
+
 void
 gnurcs_init (struct program const *program)
 {

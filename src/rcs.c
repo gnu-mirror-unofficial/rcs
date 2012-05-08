@@ -103,15 +103,6 @@ cleanup (int *exitstatus)
   dirtempunlink ();
 }
 
-static exiting void
-exiterr (void)
-{
-  ORCSerror ();
-  dirtempunlink ();
-  tempunlink ();
-  exit_failurefully ();
-}
-
 static void
 getassoclst (struct admin_closure *dc, char *sp)
 /* Associate a symbolic name to a revision or branch,
@@ -1123,7 +1114,7 @@ rcs_main (const char *cmd, int argc, char **argv)
       .invoke = argv[0],
       .name = cmd,
       .help = rcs_help,
-      .exiterr = exiterr
+      .tyag = BOG_FULL
     };
 
   CHECK_HV ();
