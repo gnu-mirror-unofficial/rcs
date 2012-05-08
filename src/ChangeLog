@@ -1,5 +1,12 @@
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Incorporate test{re,}alloc into unique caller.
+
+	* rcsedit.c (testalloc, testrealloc): Delete funcs.
+	(insertline): Use ‘okalloc’, ‘malloc’, ‘realloc’ directly.
+
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Incorporate ‘exit_failurefully’ into unique caller.
 
 	* base.h (exit_failurefully): Delete func decl.

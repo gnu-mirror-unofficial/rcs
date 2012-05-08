@@ -98,20 +98,6 @@ unmake_editstuff (struct editstuff *es)
   memset (es, 0, sizeof (struct editstuff));
 }
 
-static void *
-testalloc (size_t size)
-/* Allocate a block, testing that the allocation succeeded.  */
-{
-  return okalloc (malloc (size));
-}
-
-static void *
-testrealloc (void *ptr, size_t size)
-/* Reallocate a block, testing that the allocation succeeded.  */
-{
-  return okalloc (realloc (ptr, size));
-}
-
 static bool
 nfs_NOENT_p (void)
 {
@@ -167,10 +153,11 @@ insertline (struct editstuff *es, unsigned long n, char *l)
   if (es->lim - es->gapsize < n)
     EDIT_SCRIPT_OVERFLOW ();
   if (!es->gapsize)
-    es->line = !es->lim
-      ? testalloc (sizeof (char *) * (es->lim = es->gapsize = 1024))
-      : (es->gap = es->gapsize = es->lim,
-         testrealloc (es->line, sizeof (char *) * (es->lim <<= 1)));
+    es->line = okalloc
+      (!es->lim
+       ? malloc (sizeof (char *) * (es->lim = es->gapsize = 1024))
+       : (es->gap = es->gapsize = es->lim,
+          realloc (es->line, sizeof (char *) * (es->lim <<= 1))));
   if (n < es->gap)
     movelines (es->line + n + es->gapsize,
                es->line + n,
