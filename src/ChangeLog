@@ -1,5 +1,12 @@
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: SIZEOF_NLINES
+
+	* rcsedit.c (SIZEOF_NLINES): New macro.
+	(movelines, insertline): Use ‘SIZEOF_NLINES’.
+
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Incorporate test{re,}alloc into unique caller.
 
 	* rcsedit.c (testalloc, testrealloc): Delete funcs.

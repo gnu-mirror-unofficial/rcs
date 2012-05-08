@@ -144,7 +144,12 @@ un_link (char const *s)
 #define EDIT_SCRIPT_OVERFLOW()  \
   SYNTAX_ERROR ("edit script refers to line past end of file")
 
-#define movelines(s1, s2, n)  memmove (s1, s2, (n) * sizeof (char *))
+/* At present, a line is a simple buffer.  In the future, to support
+   "annotate" functionality, a line will be a struct that additionally
+   contains origin information.  */
+#define SIZEOF_NLINES(n)  ((n) * sizeof (char *))
+
+#define movelines(s1, s2, n)  memmove (s1, s2, SIZEOF_NLINES (n))
 
 static void
 insertline (struct editstuff *es, unsigned long n, char *l)
@@ -155,9 +160,9 @@ insertline (struct editstuff *es, unsigned long n, char *l)
   if (!es->gapsize)
     es->line = okalloc
       (!es->lim
-       ? malloc (sizeof (char *) * (es->lim = es->gapsize = 1024))
+       ? malloc (SIZEOF_NLINES (es->lim = es->gapsize = 1024))
        : (es->gap = es->gapsize = es->lim,
-          realloc (es->line, sizeof (char *) * (es->lim <<= 1))));
+          realloc (es->line, SIZEOF_NLINES (es->lim <<= 1))));
   if (n < es->gap)
     movelines (es->line + n + es->gapsize,
                es->line + n,
