@@ -113,7 +113,7 @@ static void
 die (void)
 {
   complain ("%s aborted\n", PROGRAM (name));
-  PROGRAM (exiterr) ();
+  BOW_OUT ();
 }
 
 void

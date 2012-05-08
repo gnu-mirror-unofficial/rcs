@@ -107,7 +107,7 @@ main (int argc, char **argv)
     }
 
   if (FLOW (erroneousp))
-    exiterr ();
+    BOW_OUT ();
   exitstatus = merge (tostdout, edarg, three_manifestations);
   gnurcs_goodbye ();
   return exitstatus;

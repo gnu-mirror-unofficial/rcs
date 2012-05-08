@@ -59,7 +59,7 @@ werr (char const *s)
     return;
 
   if (len != write (STDERR_FILENO, s, len))
-    PROGRAM (exiterr) ();
+    BOW_OUT ();
 }
 
 void
@@ -159,7 +159,7 @@ catchsigaction (int signo, siginfo_t *info, RCS_UNUSED void *uc)
         }
       werr ("Cleaning up.\n");
     }
-  PROGRAM (exiterr) ();
+  BOW_OUT ();
 }
 
 #ifndef SA_ONSTACK

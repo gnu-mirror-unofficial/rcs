@@ -58,7 +58,6 @@ merge (bool tostdout, char const *edarg, struct symdef three_manifestations[3])
 #if !DIFF3_BIN
   char const *d[2];
 #endif
-  void (*exiterr) (void) = PROGRAM (exiterr);
 
   for (i = 3; 0 <= --i;)
     a[i] = normalize_arg (FNAME (i));
@@ -74,7 +73,7 @@ merge (bool tostdout, char const *edarg, struct symdef three_manifestations[3])
            "-L", LABEL (0), "-L", LABEL (1), "-L", LABEL (2),
            a[0], a[1], a[2], NULL);
   if (DIFF_TROUBLE == s)
-    exiterr ();
+    BOW_OUT ();
   if (DIFF_FAILURE == s)
     PWARN ("conflicts during merge");
   if (t)
@@ -107,7 +106,7 @@ merge (bool tostdout, char const *edarg, struct symdef three_manifestations[3])
   rewind (f);
   aflush (f);
   if (run (fileno (f), NULL, ED, "-", a[0], NULL))
-    exiterr ();
+    BOW_OUT ();
   Ozclose (&f);
 #endif  /* !DIFF3_BIN */
 

@@ -1,5 +1,17 @@
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstraction: BOW_OUT
+
+	* base.h (BOW_OUT): New macro.
+	* b-complain.c (die): Use ‘BOW_OUT’.
+	* b-fb.c (Oerror): Likewise.
+	* b-isr.c (werr, catchsigaction): Likewise.
+	* ident.c (scanfile): Likewise.
+	* merge.c (main): Likewise.
+	* merger.c (merge): Likewise.
+
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Expose ‘okalloc’ instead of ‘oom’.
 
 	* rcsedit.c (okalloc): Move func from here...

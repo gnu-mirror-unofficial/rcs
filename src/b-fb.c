@@ -54,7 +54,7 @@ void
 Oerror (void)
 {
   if (BE (Oerrloop))
-    PROGRAM (exiterr) ();
+    BOW_OUT ();
   BE (Oerrloop) = true;
   fatal_sys ("output error");
 }

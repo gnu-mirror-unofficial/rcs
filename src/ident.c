@@ -137,10 +137,10 @@ scanfile (register FILE *file, char const *name)
     {
       syserror_errno (name);
       /* The following is equivalent to ‘exit (EXIT_FAILURE)’, but we
-         invoke ‘exiterr’ to keep lint happy.  The DOS and OS/2 ports
-         need ‘exiterr’.  */
+         invoke ‘BOW_OUT’ to keep lint, as well as the DOS and OS/2 ports
+         happy.  [Is this still relevant? --ttn]  */
       fflush (stdout);
-      exiterr ();
+      BOW_OUT ();
     }
   if (!BE (quiet))
     complain ("%s warning: no id keywords in %s\n", PROGRAM (name), name);

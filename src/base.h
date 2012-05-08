@@ -854,6 +854,8 @@ int getRCSINIT (int argc, char **argv, char ***newargv);
 
 /* Idioms.  */
 
+#define BOW_OUT()  PROGRAM (exiterr) ()
+
 /* Murphy was an optimist...  */
 #define PROB(x)  (0 > (x))
 
