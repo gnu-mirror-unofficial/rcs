@@ -1,3 +1,12 @@
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[int] Init auto var ‘workptr’.
+
+	Omission from 2011-10-13, "Remove
+	‘workptr’ from global state of rcsclean(1)".
+
+	* rcsclean.c (rcsclean_main): Init ‘workptr’.
+
 2012-04-30  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Init auto var ‘neworkptr’.

@@ -113,7 +113,7 @@ int
 rcsclean_main (const char *cmd, int argc, char **argv)
 {
   int exitstatus = EXIT_SUCCESS;
-  struct fro *workptr;
+  struct fro *workptr = NULL;
   char *a, **newargv;
   char const *rev, *p;
   bool dounlock, perform, unlocked, unlockflag, waslocked, Ttimeflag;
