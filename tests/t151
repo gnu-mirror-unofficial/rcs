@@ -1,4 +1,4 @@
-# t151 --- super handles ‘--commands’, invalid command
+# t151 --- ‘super’ficial option / command handling
 #
 # Copyright (C) 2012 Thien-Thi Nguyen
 #
@@ -23,10 +23,16 @@ super=grcs
 $super --version | grep 'GNU RCS' || exit 77
 
 must '$super --commands'
+must '$super'
 
-bad="$super no-such-command"
+xfail ()
+{
+    cmd="$1"
+    $cmd && problem "‘$cmd’ did not fail"
+}
 
-$bad && problem "‘$bad’ did not fail"
+xfail "$super --no-such-option"
+xfail "$super no-such-command"
 
 exit 0
 

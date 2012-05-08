@@ -1,3 +1,11 @@
+2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Expand super test.
+
+	* t151: Also check no command given.
+	(xfail): New func; use it to check invalid command;
+	add check for invalid option.
+
 2012-05-07  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add test for super ‘--commands’ / no-such-command.
