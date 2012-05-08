@@ -29,10 +29,18 @@
 struct divvy *plexus;
 struct divvy *single;
 
-void
+static void
 oom (void)
 {
   PFATAL ("out of memory");
+}
+
+void *
+okalloc (void * p)
+{
+  if (!p)
+    oom ();
+  return p;
 }
 
 static void *

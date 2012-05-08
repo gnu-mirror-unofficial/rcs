@@ -99,14 +99,6 @@ unmake_editstuff (struct editstuff *es)
 }
 
 static void *
-okalloc (void * p)
-{
-  if (!p)
-    oom ();
-  return p;
-}
-
-static void *
 testalloc (size_t size)
 /* Allocate a block, testing that the allocation succeeded.  */
 {
