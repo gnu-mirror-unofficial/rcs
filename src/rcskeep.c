@@ -195,7 +195,7 @@ keeprev (struct fro *fp)
           switch (*sp)
             {
             case 0:
-              if (dotcount & 1)
+              if (ODDP (dotcount))
                 goto done;
               else
                 break;

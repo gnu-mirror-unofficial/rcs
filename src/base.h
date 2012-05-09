@@ -911,4 +911,7 @@ int getRCSINIT (int argc, char **argv, char ***newargv);
 #define MEM_SAME(n,a,b)  (0 == memcmp ((a), (b), (n)))
 #define MEM_DIFF(n,a,b)  (0 != memcmp ((a), (b), (n)))
 
+#define ODDP(n)   ((n) & 1)
+#define EVENP(n)  (! ODDP (n))
+
 /* base.h ends here */

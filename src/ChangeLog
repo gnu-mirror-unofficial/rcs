@@ -1,5 +1,20 @@
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[int] Add abstractions: ODDP, EVENP
+
+	* base.h (ODDP, EVENP): New macros.
+	* b-grok.c (maybe_read_num): Use ‘EVENP’.
+	* ci.c (addbranch): Use ‘ODDP’, ‘EVENP’.
+	(addelta): Use ‘EVENP’.
+	(xpandfile): Use ‘ODDP’.
+	* rcs.c (removerevs): Use ‘ODDP’.
+	(setlock, dolocks, rcs_setstate): Use ‘EVENP’.
+	* rcskeep.c (keeprev): Use ‘ODDP’.
+	* rcsrev.c (accumulate_branchno, absent, fully_numeric): Likewise.
+	* rlog.c (extractdelta): Likewise.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[int] Use a less pretentious name for rcs.c state struct.
 
 	* rcs.c: Do ‘s/struct admin_closure/struct adminstuff/g’.

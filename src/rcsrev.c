@@ -77,7 +77,7 @@ accumulate_branchno (struct divvy *space, char const *revno)
   char const *end;
   int nfields = split (revno, &end);
 
-  if (nfields & 1)
+  if (ODDP (nfields))
     accs (space, revno);
   else
     accumulate_range (space, revno, end);
@@ -243,7 +243,7 @@ cantfindbranch (char const *revno, char const date[datesize],
 static void
 absent (char const *revno, int field)
 {
-  RERR ("%s %s absent", field & 1 ? "revision" : "branch",
+  RERR ("%s %s absent", ODDP (field) ? "revision" : "branch",
         TAKE (field, revno));
 }
 
@@ -749,7 +749,7 @@ fully_numeric (struct cbuf *ans, char const *source, struct fro *fp)
         case '.':
           if (!*sp)
             {
-              if (dots & 1)
+              if (ODDP (dots))
                 break;
               OK ();
               if (!(bp = branchtip (ans->string)))

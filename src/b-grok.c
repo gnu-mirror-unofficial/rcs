@@ -232,7 +232,7 @@ maybe_read_num (struct grok *g, bool must_be_delta_p)
         }
       if (trailing_garbage
           || (must_be_delta_p
-              && !(1 & dots)))
+              && EVENP (dots)))
         BUMMER ("invalid %s: %s", ks_revno, p);
       XREP (g).string = p;
       return true;

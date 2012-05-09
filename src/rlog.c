@@ -286,7 +286,7 @@ extractdelta (struct delta const *pdelta, bool lockflag,
       struct revrange const *rr = ls->entry;
 
       length = rr->nfield;
-      if (countnumflds (pdelta->num) == length + (length & 1)
+      if (countnumflds (pdelta->num) == length + ODDP (length)
           && 0 <= compartial (pdelta->num, rr->beg, length)
           && 0 <= compartial (rr->end, pdelta->num, length))
         break;
