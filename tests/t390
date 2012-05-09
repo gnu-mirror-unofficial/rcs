@@ -105,6 +105,24 @@ try WOW.cou '
 |     $Source: /home/ttn/build/GNU/rcs/tests/fake/b,v $|
 |     $State: Exp $|'
 
+##
+# * Misc. command-line handling.
+##
+
+$hey echo '* misc. command-line handling'
+
+iout=$wd/i.out
+ierr=$wd/i.err
+
+must 'ident -V 1>$iout 2>$ierr'
+silence_means_death $iout 'ident -V'
+noiselessness_rules $ierr 'ident -V'
+
+ident -Z 1>$iout 2>$ierr \
+    && problem 'ident did not fail on invalid command-line option'
+noiselessness_rules $iout 'ident -Z'
+silence_means_death $ierr 'ident -Z'
+
 exit 0
 
 # t390 ends here
