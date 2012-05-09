@@ -1,5 +1,12 @@
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add test for ‘rcs -m:’.
+
+	* t608: New file.
+	* Makefile.am (TESTS): Add t608.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add case for rcsclean test.
 
 	* t790: Also invoke w/ ‘-V4’.
