@@ -1,3 +1,10 @@
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test for ‘rcs -s’.
+
+	* t607: New file.
+	* Makefile.am (TESTS): Add t607.
+
 2012-05-08  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[int] Incorporate ‘exit_failurefully’ into unique caller.
