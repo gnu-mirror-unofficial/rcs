@@ -59,7 +59,7 @@ struct delrevpair
   int code;
 };
 
-struct admin_closure
+struct adminstuff
 {
   int rv;
   struct wlink *deltas;
@@ -104,7 +104,7 @@ cleanup (int *exitstatus)
 }
 
 static void
-getassoclst (struct admin_closure *dc, char *sp)
+getassoclst (struct adminstuff *dc, char *sp)
 /* Associate a symbolic name to a revision or branch,
    and store in ‘dc->assocs’.  */
 {
@@ -152,7 +152,7 @@ getassoclst (struct admin_closure *dc, char *sp)
 }
 
 static void
-getchaccess (struct admin_closure *dc,
+getchaccess (struct adminstuff *dc,
              char const *login, enum changeaccess command)
 {
   register struct chaccess *ch;
@@ -168,7 +168,7 @@ getchaccess (struct admin_closure *dc,
 }
 
 static void
-getaccessor (struct admin_closure *dc, char *opt, enum changeaccess command)
+getaccessor (struct adminstuff *dc, char *opt, enum changeaccess command)
 /* Get the accessor list of options ‘-e’ and ‘-a’; store in ‘chaccess’.  */
 {
   register int c;
@@ -201,7 +201,7 @@ getaccessor (struct admin_closure *dc, char *opt, enum changeaccess command)
 }
 
 static void
-getmessage (struct admin_closure *dc, char *option)
+getmessage (struct adminstuff *dc, char *option)
 {
   struct u_log *um;
   struct cbuf cb;
@@ -227,7 +227,7 @@ getmessage (struct admin_closure *dc, char *option)
 }
 
 static void
-getstates (struct admin_closure *dc, char *sp)
+getstates (struct adminstuff *dc, char *sp)
 /* Get one state attribute and the corresponding rev;
    store in ‘dc->states’.  */
 {
@@ -274,7 +274,7 @@ getstates (struct admin_closure *dc, char *sp)
 static void
 putdelrev (char const *b, char const *e, bool sawsep, void *data)
 {
-  struct admin_closure *dc = data;
+  struct adminstuff *dc = data;
 
   if (dc->delrev.strt || dc->delrev.end)
     {
@@ -312,7 +312,7 @@ putdelrev (char const *b, char const *e, bool sawsep, void *data)
 }
 
 static void
-scanlogtext (struct admin_closure *dc,
+scanlogtext (struct adminstuff *dc,
              struct editstuff *es, struct wlink **ls,
              struct delta *delta, bool edit)
 /* Scan delta text nodes up to and including the one given by ‘delta’,
@@ -379,7 +379,7 @@ scanlogtext (struct admin_closure *dc,
 }
 
 static struct link *
-rmnewlocklst (struct admin_closure *dc, char const *which)
+rmnewlocklst (struct adminstuff *dc, char const *which)
 /* Remove lock to revision ‘which’ from ‘dc->newlocks’.  */
 {
   struct link *pt, **pre;
@@ -394,7 +394,7 @@ rmnewlocklst (struct admin_closure *dc, char const *which)
 }
 
 static bool
-doaccess (struct admin_closure *dc)
+doaccess (struct adminstuff *dc)
 {
   register bool changed = false;
   struct link *ls, box, *tp;
@@ -538,7 +538,7 @@ breaklock (struct delta const *delta, bool suppress_mail)
 }
 
 static struct delta *
-searchcutpt (struct admin_closure *dc,
+searchcutpt (struct adminstuff *dc,
              char const *object, int length, struct wlink *store)
 /* Search store and return entry with number being ‘object’.
    ‘dc->cuttail’ is 0, if the entry is ‘REPO (tip)’; otherwise, it
@@ -584,7 +584,7 @@ branchpoint (struct delta *strt, struct delta *tail)
 }
 
 static bool
-removerevs (struct admin_closure *dc)
+removerevs (struct adminstuff *dc)
 /* Get the revision range to be removed, and place the first revision
    removed in ‘dc->delstrt’, the revision before ‘dc->delstrt’ in
    ‘dc->cuthead’ (NULL, if ‘dc->delstrt’ is head), and the revision
@@ -764,7 +764,7 @@ removerevs (struct admin_closure *dc)
 }
 
 static bool
-doassoc (struct admin_closure *dc)
+doassoc (struct adminstuff *dc)
 /* Add or delete (if !underlying) association
    that is stored in ‘dc->assocs’.  */
 {
@@ -815,7 +815,7 @@ doassoc (struct admin_closure *dc)
 }
 
 static bool
-setlock (struct admin_closure *dc, char const *rev)
+setlock (struct adminstuff *dc, char const *rev)
 /* Given a revision or branch number, find the corresponding
    delta and lock it for caller.  */
 {
@@ -849,7 +849,7 @@ setlock (struct admin_closure *dc, char const *rev)
 }
 
 static bool
-dolocks (struct admin_closure *dc)
+dolocks (struct adminstuff *dc)
 /* Remove lock for caller or first lock if ‘dc->unlockcaller’ is set;
    remove locks which are stored in ‘dc->byelocks’,
    add new locks which are stored in ‘dc->newlocks’,
@@ -933,7 +933,7 @@ dolocks (struct admin_closure *dc)
 }
 
 static bool
-domessages (struct admin_closure *dc)
+domessages (struct adminstuff *dc)
 {
   struct delta *target;
   bool changed = false;
@@ -956,7 +956,7 @@ domessages (struct admin_closure *dc)
 }
 
 static bool
-rcs_setstate (struct admin_closure *dc,
+rcs_setstate (struct adminstuff *dc,
               char const *rev, char const *status)
 /* Given a revision or branch number, find the corresponding delta
    and sets its state to ‘status’.  */
@@ -983,7 +983,7 @@ rcs_setstate (struct admin_closure *dc,
 }
 
 static bool
-buildeltatext (struct admin_closure *dc,
+buildeltatext (struct adminstuff *dc,
                struct editstuff *es, struct wlink **ls,
                struct wlink const *deltas)
 /* Put the delta text on ‘FLOW (rewr)’ and make necessary
@@ -1046,7 +1046,7 @@ buildeltatext (struct admin_closure *dc,
 }
 
 static void
-buildtree (struct admin_closure *dc)
+buildtree (struct adminstuff *dc)
 /* Actually remove revisions whose selector field
    is false, and rebuild the linkage of deltas.
    Ask for reconfirmation if deleting last revision.  */
@@ -1098,7 +1098,7 @@ buildtree (struct admin_closure *dc)
 int
 rcs_main (const char *cmd, int argc, char **argv)
 {
-  struct admin_closure dc;              /* dynamic context */
+  struct adminstuff dc;                 /* dynamic context */
   char *a, **newargv, *textfile;
   char const *branchsym, *commsyml;
   bool branchflag, initflag, textflag;
