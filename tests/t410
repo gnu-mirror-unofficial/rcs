@@ -103,6 +103,12 @@ mv -f $w.corrupt $w
 co -p'$' $w > $actual \
     && problem '‘co -p$’ did not fail on corrupt working file'
 
+$hey echo '* likewise, w/ "badly terminated keyword value" corruption'
+sed '1s/.$//' $w > $w.corrupt
+mv -f $w.corrupt $w
+co -p'$' $w > $actual \
+    && problem '‘co -p$’ did not fail on corrupt working file'
+
 ##
 # * Also, check behavior for an unreadable comma-v.
 ##

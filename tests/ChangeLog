@@ -2,6 +2,12 @@
 
 	[v] Add another ‘$’ test case to ‘co -p’ test.
 
+	* t410 <spec. rev. ‘$’ w/ "badly terminated" corruption>: New test case.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add another ‘$’ test case to ‘co -p’ test.
+
 	* t410 <special revision ‘$’ w/ corrupt working file>: New test case.
 
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
