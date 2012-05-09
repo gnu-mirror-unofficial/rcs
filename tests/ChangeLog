@@ -1,5 +1,12 @@
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add test for inaccessible TMPDIR.
+
+	* t153: New file.
+	* Makefile.am (TESTS): Add t153.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add unreadable comma-v case to ‘co -p’ test.
 
 	* t410: Add case wherein comma-v is ‘chmod ugo-r’.
