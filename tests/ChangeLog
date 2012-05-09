@@ -1,5 +1,11 @@
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add ‘$’ test case to ‘co -p’ test.
+
+	* t410 <special revision ‘$’>: New test case.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add some cases to ident test.
 
 	* t390 <misc. command-line handling>: New test cases.

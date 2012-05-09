@@ -88,6 +88,16 @@ ok WOW
 ok ZOW
 
 ##
+# * Now test special revision ‘$’.
+##
+
+$hey echo '* special revision ‘$’'
+must 'co -u $w'
+must "co -p'$' $w > $actual"
+diff -u $w $actual \
+    || problem "mismatch between ‘co -u’ and ‘co -p$’"
+
+##
 # * Also, check behavior for an unreadable comma-v.
 ##
 
