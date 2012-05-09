@@ -1,5 +1,12 @@
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add CVS-compat case to "rlog on valid RCS file" test.
+
+	* fake/rcsinfo: New file.
+	* t310 <CVS-created (w/ commitid) keyword>: New test case.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add cases to "rlog on invalid RCS file" test.
 
 	* t300: Include which rlog in output.

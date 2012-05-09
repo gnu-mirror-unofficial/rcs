@@ -41,6 +41,12 @@ norm 'two-entry'             `bundled_commav two`
 norm '2-entry with branches' `bundled_commav two`
 
 ##
+# Check rlog on a CVS-created ,v (with ‘commitid’ keywords).
+##
+
+norm 'CVS-created (w/ commitid) keyword'  `bundled_commav rcsinfo`
+
+##
 # Also check that header key ‘integrity’
 # does not cause problems for those files.
 ##
