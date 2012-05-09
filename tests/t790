@@ -27,6 +27,7 @@ must 'rcsclean'
 must 'rcsclean -q'
 must 'rcsclean -kk'
 must 'rcsclean -kk -kk'
+must 'rcsclean -V4'
 
 cd ..
 exit 0
