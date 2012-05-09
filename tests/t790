@@ -25,6 +25,8 @@ cd $wd
 ##
 must 'rcsclean'
 must 'rcsclean -q'
+must 'rcsclean -kk'
+must 'rcsclean -kk -kk'
 
 cd ..
 exit 0

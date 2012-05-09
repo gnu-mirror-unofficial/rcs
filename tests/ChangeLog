@@ -1,5 +1,11 @@
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add some cases for rcsclean test.
+
+	* t790: Also invoke w/ ‘-kk’ and ‘-kk -kk’.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add another ‘$’ test case to ‘co -p’ test.
 
 	* t410 <spec. rev. ‘$’ w/ "badly terminated" corruption>: New test case.
