@@ -1,5 +1,13 @@
 2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add cases to "rlog on invalid RCS file" test.
+
+	* t300: Include which rlog in output.
+	<bad keyword in header>: New test case.
+	<missing author value in header>: Likewise.
+
+2012-05-09  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test for ‘rcs -s’.
 
 	* t607: New file.

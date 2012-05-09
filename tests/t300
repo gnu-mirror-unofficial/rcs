@@ -31,6 +31,7 @@
 split_std_out_err no
 
 echo '                                       -*-org-*-'
+echo '* rlog:' `which rlog`
 
 # No file specified is a degenerate form of "invalid file".
 rlog && problem 'rlog with no args did not barf'
@@ -56,6 +57,12 @@ barf 'zero size' \
 
 barf 'blatant syntax error' \
     'echo random junk > $v'
+
+barf 'bad keyword in header' \
+    'sed 10s/author/bother/ `bundled_commav zblob` > $v'
+
+barf 'missing author value in header' \
+    'sed 10s/.ttn// `bundled_commav zblob` > $v'
 
 zinvasion ()
 {
