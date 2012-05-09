@@ -97,6 +97,12 @@ must "co -p'$' $w > $actual"
 diff -u $w $actual \
     || problem "mismatch between ‘co -u’ and ‘co -p$’"
 
+$hey echo '* likewise, w/ corrupt working file'
+sed '1s/.YES.*//' $w > $w.corrupt
+mv -f $w.corrupt $w
+co -p'$' $w > $actual \
+    && problem '‘co -p$’ did not fail on corrupt working file'
+
 ##
 # * Also, check behavior for an unreadable comma-v.
 ##
