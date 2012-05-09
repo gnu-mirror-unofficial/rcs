@@ -87,6 +87,16 @@ ok 1.9
 ok WOW
 ok ZOW
 
+##
+# * Also, check behavior for an unreadable comma-v.
+##
+
+chmod ugo-r $v
+$hey echo '*' `ls -l $v` '(unreadable)'
+co -p $v > /dev/null \
+    && problem 'co -p does not barf on unreadable comma-v'
+chmod ugo+r $v
+
 exit 0
 
 # t410 ends here
