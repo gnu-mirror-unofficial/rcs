@@ -113,10 +113,11 @@ co -p'$' $w > $actual \
 # * Also, check behavior for an unreadable comma-v.
 ##
 
-chmod ugo-r $v
-$hey echo '*' `ls -l $v` '(unreadable)'
-co -p $v > /dev/null \
-    && problem 'co -p does not barf on unreadable comma-v'
+if chmod ugo-r $v && [ ! -r $v ] ; then
+    $hey echo '*' `ls -l $v` '(unreadable)'
+    co -p $v > /dev/null \
+        && problem 'co -p does not barf on unreadable comma-v'
+fi
 chmod ugo+r $v
 
 exit 0
