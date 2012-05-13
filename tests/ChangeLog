@@ -1,3 +1,10 @@
+2012-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Add test for interactive lock breaking.
+
+	* t609: New file.
+	* Makefile.am (TESTS): Add t609.
+
 2012-05-12  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Refine unreadable comma-v case for ‘co -p’ test.
