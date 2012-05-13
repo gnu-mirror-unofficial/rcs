@@ -1,5 +1,12 @@
 2012-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
+	[v] Add test for ‘rcs -o’.
+
+	* t780: New file.
+	* Makefile.am (TESTS): Add t780.
+
+2012-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
 	[v] Add test for interactive lock breaking.
 
 	* t609: New file.
