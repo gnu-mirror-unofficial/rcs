@@ -1,3 +1,13 @@
+2012-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[doc] Say "checked in" instead of "commited" (sic).
+
+	The former is more consistent with RCS terminology.
+	The latter is a spelling error, anyway.
+	Reported by Romain Francoise.
+
+	* doc/rcs.texi (rlog): Say "checked in" in ‘-w’ description.
+
 2012-01-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Add configure option ‘--enable-coverage’.

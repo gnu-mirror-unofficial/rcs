@@ -1593,7 +1593,7 @@ range specs, one of: @var{rev}, @code{@var{rev}:},
 Select revisions with specified state(s).
 
 @item -w[@var{who}]
-Select revisions commited by @var{who} (comma-separated list of usernames),
+Select revisions checked in by @var{who} (comma-separated list of usernames),
 or by the user if @var{who} is omitted.
 
 @item -V

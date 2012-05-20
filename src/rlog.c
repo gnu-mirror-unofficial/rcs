@@ -1027,7 +1027,7 @@ Options:
   -r[REVS]      Select revisions in REVS, a comma-separated list of
                 range specs, one of: REV, REV:, :REV, REV1:REV2
   -sSTATES      Select revisions with state in STATES (comma-separated list).
-  -w[WHO]       Select revisions commited by WHO (comma-separated list),
+  -w[WHO]       Select revisions checked in by WHO (comma-separated list),
                 or by the user if WHO is omitted.
   -V            Like --version.
   -VN           Emulate RCS version N.
