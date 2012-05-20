@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dist_man_MANS = ci.1 co.1 ident.1 merge.1 rcs.1 rcsclean.1 \
-  rcsdiff.1 rcsfile.5 rcsintro.1 rcsmerge.1 rlog.1
+  rcsdiff.1 rcsfile.5 rcsmerge.1 rlog.1
 
 ## Is this correct?
 dist_noinst_MANS = rcsfreeze.1

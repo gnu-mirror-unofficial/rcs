@@ -1,3 +1,19 @@
+2012-05-20  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[man] Drop manpage rcsintro(1).
+
+	* ci.1in: Don't mention rcsintro(1).
+	* co.1in: Likewise.
+	* ident.1in: Likewise.
+	* rcs.1in: Likewise.
+	* rcsclean.1in: Likewise.
+	* rcsdiff.1in: Likewise.
+	* rcsfile.5in: Likewise.
+	* rcsmerge.1in: Likewise.
+	* rlog.1in: Likewise.
+	* Makefile.am (dist_man_MANS): Remove rcsintro.1.
+	* rcsintro.1in: Delete file.
+
 2011-10-29  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[build] Use portable Makefile subst-ref variable syntax.
