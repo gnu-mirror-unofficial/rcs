@@ -1,3 +1,10 @@
+2012-06-05  Thien-Thi Nguyen  <ttn@gnuvola.org>
+
+	[v] Update known-failures for 5.8.
+
+	* known-failures.in (5.8): Update comments
+	for t370, t810; add t150, t320, t391, t630.
+
 2012-05-13  Thien-Thi Nguyen  <ttn@gnuvola.org>
 
 	[v] Add test for ‘rcs -o’.
